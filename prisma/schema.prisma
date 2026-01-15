@@ -478,7 +478,7 @@ model TrackingEvent {
 }
 
 model User {
-  id                   String            @id
+  id                   String            @id @default(cuid())
   email                String            @unique
   name                 String?
   password             String?
@@ -494,7 +494,7 @@ model User {
   stripeCustomerId     String?
   stripeSubscriptionId String?
   createdAt            DateTime          @default(now())
-  updatedAt            DateTime
+  updatedAt            DateTime          @updatedAt
   image                String?
   AIInsight            AIInsight[]
   AIPrediction         AIPrediction[]

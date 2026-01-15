@@ -1,0 +1,628 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AIInsight {
+  id         String   @id
+  userId     String
+  leadId     String?
+  type       String
+  message    String
+  confidence Float    @default(0.5)
+  action     String?
+  priority   String   @default("MEDIUM")
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  Lead       Lead?    @relation(fields: [leadId], references: [id])
+  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([leadId])
+  @@index([priority])
+  @@index([read])
+  @@index([type])
+  @@index([userId])
+}
+
+model AIPrediction {
+  id            String   @id
+  userId        String
+  date          DateTime
+  expectedSales Int
+  scenario      String
+  confidence    Float    @default(0.5)
+  metadata      Json?
+  createdAt     DateTime @default(now())
+  User          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([date])
+  @@index([scenario])
+  @@index([userId])
+}
+
+model Account {
+  id                String  @id
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  User              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model AiLog {
+  id          String   @id
+  leadId      String?
+  userId      String
+  prompt      String
+  response    Json
+  model       String   @default("gpt-4o-mini")
+  tokens      Int?
+  score       Int?
+  segment     String?
+  probability Float?
+  createdAt   DateTime @default(now())
+  Lead        Lead?    @relation(fields: [leadId], references: [id])
+  User        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([leadId])
+  @@index([model])
+  @@index([userId])
+}
+
+model Alert {
+  id        String   @id
+  userId    String
+  leadId    String?
+  type      String
+  title     String
+  message   String
+  priority  String   @default("MEDIUM")
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  Lead      Lead?    @relation(fields: [leadId], references: [id])
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([leadId])
+  @@index([priority])
+  @@index([read])
+  @@index([type])
+  @@index([userId])
+}
+
+model ApiKey {
+  id        String    @id
+  userId    String
+  key       String    @unique
+  name      String?
+  active    Boolean   @default(true)
+  lastUsed  DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime
+  User      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([active])
+  @@index([key])
+  @@index([userId])
+}
+
+model BusinessProfile {
+  id        String   @id
+  userId    String   @unique
+  type      String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([type])
+  @@index([userId])
+}
+
+model CalendarEvent {
+  id            String        @id
+  userId        String
+  clientId      String?
+  title         String
+  type          EventType
+  status        EventStatus   @default(PENDING)
+  start         DateTime
+  end           DateTime
+  priority      EventPriority @default(MEDIUM)
+  source        EventSource   @default(MANUAL)
+  notes         String?
+  assignedTo    String?
+  reminders     Int[]         @default([])
+  color         String?       @default("bg-blue-500")
+  clientName    String?
+  clientEmail   String?
+  clientPhone   String?
+  googleEventId String?       @unique
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime
+  Client        Client?       @relation(fields: [clientId], references: [id])
+  User          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([googleEventId])
+  @@index([start])
+  @@index([status])
+  @@index([type])
+  @@index([userId])
+}
+
+model Client {
+  id                  String          @id
+  userId              String
+  name                String?
+  email               String?
+  phone               String?
+  notes               String?
+  totalSpent          Float           @default(0)
+  currency            String          @default("EUR")
+  source              String?
+  page                String?
+  conversionSource    String?
+  conversionProduct   String?
+  convertedFromLeadId String?
+  firstScore          Int             @default(0)
+  initialScore        Int             @default(0)
+  finalScore          Int             @default(0)
+  conversionTime      Int?
+  timeToConvert       Int?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime
+  CalendarEvent       CalendarEvent[]
+  User                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Lead                Lead[]
+  Sale                Sale[]
+
+  @@index([convertedFromLeadId])
+  @@index([createdAt])
+  @@index([email])
+  @@index([page])
+  @@index([source])
+  @@index([userId])
+}
+
+model Event {
+  id        String   @id
+  leadId    String?
+  userId    String
+  type      String
+  url       String
+  element   Json?
+  data      Json
+  sessionId String?
+  visitorId String?
+  createdAt DateTime @default(now())
+  Lead      Lead?    @relation(fields: [leadId], references: [id])
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([leadId])
+  @@index([sessionId])
+  @@index([type])
+  @@index([userId])
+  @@index([visitorId])
+}
+
+model FinancialRecord {
+  id            String   @id
+  userId        String
+  type          String
+  amount        Float
+  category      String
+  paymentMethod String
+  date          DateTime @default(now())
+  note          String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime
+  User          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([category])
+  @@index([date])
+  @@index([type])
+  @@index([userId])
+}
+
+model Lead {
+  id                    String          @id
+  userId                String
+  websiteId             String?
+  email                 String?
+  name                  String?
+  phone                 String?
+  message               String?
+  source                String          @default("WEB")
+  formId                String?
+  status                String          @default("NEW")
+  leadStatus            LeadStatus      @default(NEW)
+  temperature           LeadTemp?
+  page                  String?
+  lastAction            String?
+  lastActionAt          DateTime?
+  actions               Json?
+  aiPrediction          Float?
+  aiReasoning           String?
+  aiSegment             String?
+  converted             Boolean         @default(false)
+  validationStatus      String          @default("PENDING")
+  category              String?
+  priority              String          @default("MEDIUM")
+  tags                  String[]        @default([])
+  notes                 String?
+  ip                    String?
+  country               String?
+  device                String?
+  userAgent             String?
+  spamScore             Float           @default(0)
+  score                 Int             @default(0)
+  interactions          Json?
+  conversionProbability Float?
+  aiUrgency             String?
+  aiLastCheck           DateTime?
+  finalScore            Int?
+  conversionTime        Int?
+  metadata              Json?
+  clientId              String?
+  convertedAt           DateTime?
+  conversionSource      String?
+  conversionProduct     String?
+  allowedDomain         String?
+  aiReason              String?
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime
+  AIInsight             AIInsight[]
+  AiLog                 AiLog[]
+  Alert                 Alert[]
+  Event                 Event[]
+  Client                Client?         @relation(fields: [clientId], references: [id])
+  User                  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Website               Website?        @relation(fields: [websiteId], references: [id])
+  LeadAIInsight         LeadAIInsight?
+  LeadAlert             LeadAlert[]
+  LeadEvent             LeadEvent[]
+  TrackingEvent         TrackingEvent[]
+
+  @@index([category])
+  @@index([clientId])
+  @@index([converted])
+  @@index([createdAt])
+  @@index([email])
+  @@index([formId])
+  @@index([ip])
+  @@index([lastActionAt])
+  @@index([leadStatus])
+  @@index([page])
+  @@index([priority])
+  @@index([score])
+  @@index([source])
+  @@index([status])
+  @@index([temperature])
+  @@index([userId])
+  @@index([validationStatus])
+  @@index([websiteId])
+}
+
+model LeadAIInsight {
+  id            String   @id
+  leadId        String   @unique
+  userId        String
+  probability   Float
+  urgency       String
+  explanation   String
+  actions       Json
+  estimatedTime Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime
+  Lead          Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  User          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([leadId])
+  @@index([probability])
+  @@index([urgency])
+  @@index([userId])
+}
+
+model LeadAlert {
+  id          String    @id
+  leadId      String
+  userId      String
+  type        AlertType
+  message     String
+  reason      String?
+  triggeredAt DateTime  @default(now())
+  seen        Boolean   @default(false)
+  Lead        Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  User        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([leadId])
+  @@index([seen])
+  @@index([triggeredAt])
+  @@index([type])
+  @@index([userId])
+}
+
+model LeadEvent {
+  id        String   @id
+  leadId    String
+  userId    String
+  type      String
+  data      Json
+  timestamp DateTime @default(now())
+  Lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([leadId])
+  @@index([timestamp])
+  @@index([type])
+  @@index([userId])
+}
+
+model Notification {
+  id        String   @id
+  userId    String
+  title     String
+  message   String
+  type      String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([read])
+  @@index([userId])
+}
+
+model Post {
+  id          String    @id
+  title       String
+  slug        String    @unique
+  content     String
+  excerpt     String?
+  category    String    @default("updates")
+  published   Boolean   @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime
+
+  @@index([category])
+  @@index([publishedAt])
+  @@index([published])
+  @@index([slug])
+}
+
+model Sale {
+  id               String   @id
+  userId           String
+  clientId         String?
+  clientName       String
+  clientEmail      String?
+  product          String
+  category         String?
+  price            Float
+  discount         Float    @default(0)
+  tax              Float    @default(0)
+  total            Float
+  amount           Float?
+  currency         String   @default("EUR")
+  provider         String   @default("STRIPE")
+  paymentMethod    String
+  status           String   @default("PAGADO")
+  stripePaymentId  String?
+  stripeCustomerId String?
+  metadata         Json?
+  notes            String?
+  saleDate         DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime
+  Client           Client?  @relation(fields: [clientId], references: [id])
+  User             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([category])
+  @@index([paymentMethod])
+  @@index([saleDate])
+  @@index([status])
+  @@index([stripeCustomerId])
+  @@index([stripePaymentId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  User         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model TrackingEvent {
+  id        String   @id
+  userId    String
+  leadId    String?
+  sessionId String
+  type      String
+  page      String
+  element   String?
+  value     Int?
+  metadata  Json?
+  createdAt DateTime @default(now())
+  Lead      Lead?    @relation(fields: [leadId], references: [id])
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([leadId])
+  @@index([page])
+  @@index([sessionId])
+  @@index([type])
+  @@index([userId])
+}
+
+model User {
+  id                   String            @id
+  email                String            @unique
+  name                 String?
+  password             String?
+  phone                String?
+  googleId             String?           @unique
+  provider             String            @default("credentials")
+  emailVerified        Boolean?
+  plan                 Plan              @default(TRIAL)
+  isTrial              Boolean           @default(true)
+  planStartedAt        DateTime          @default(now())
+  planExpiresAt        DateTime?
+  billingCycle         BillingCycle?
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime
+  image                String?
+  AIInsight            AIInsight[]
+  AIPrediction         AIPrediction[]
+  Account              Account[]
+  AiLog                AiLog[]
+  Alert                Alert[]
+  ApiKey               ApiKey[]
+  BusinessProfile      BusinessProfile?
+  CalendarEvent        CalendarEvent[]
+  Client               Client[]
+  Event                Event[]
+  FinancialRecord      FinancialRecord[]
+  Lead                 Lead[]
+  LeadAIInsight        LeadAIInsight[]
+  LeadAlert            LeadAlert[]
+  LeadEvent            LeadEvent[]
+  Notification         Notification[]
+  Sale                 Sale[]
+  Session              Session[]
+  TrackingEvent        TrackingEvent[]
+  Website              Website[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Website {
+  id            String        @id
+  userId        String
+  name          String
+  template      String        @default("default")
+  business_type String        @default("default")
+  city          String        @default("")
+  phone         String?
+  whatsapp      String?
+  email         String?
+  services      String[]      @default([])
+  description   String?
+  status        String        @default("draft")
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime
+  palette       Json?
+  Lead          Lead[]
+  User          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  WebsitePage   WebsitePage[]
+
+  @@index([business_type])
+  @@index([status])
+  @@index([template])
+  @@index([userId])
+}
+
+model WebsitePage {
+  id        String   @id
+  websiteId String
+  slug      String
+  title     String
+  content   Json
+  createdAt DateTime @default(now())
+  Website   Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+}
+
+enum AlertType {
+  HOT_LEAD
+  SCORE_DROP
+  HIGH_INTENT
+  CONVERSION_RISK
+}
+
+enum BillingCycle {
+  MONTHLY
+  YEARLY
+}
+
+enum EventPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum EventSource {
+  LEAD
+  SALE
+  MANUAL
+  AUTOMATION
+  BOOKING
+}
+
+enum EventStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum EventType {
+  RESERVA
+  LLAMADA
+  REUNION
+  TAREA
+  SEGUIMIENTO
+  PAGO
+  ENTREGA
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  INTERESTED
+  QUALIFIED
+  LOST
+  CONVERTED
+}
+
+enum LeadTemp {
+  HOT
+  WARM
+  COLD
+}
+
+enum Plan {
+  TRIAL
+  STARTER
+  GROWTH
+  PRO
+}

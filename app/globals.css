@@ -119,8 +119,18 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html, body {
+    overflow-x: hidden;
+    background: transparent;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none; /* Chrome, Safari */
+  }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
   }
 }
 
@@ -144,5 +154,87 @@
   
   .animate-marquee {
     animation: marquee 30s linear infinite;
+  }
+
+  /* Scroll snap - SOLO en desktop (>=1024px) */
+  @media (min-width: 1024px) {
+    main {
+      scroll-snap-type: y mandatory;
+    }
+    
+    section.panel {
+      scroll-snap-align: start;
+    }
+  }
+  
+  /* Mobile: scroll natural, sin snap */
+  @media (max-width: 1023px) {
+    main {
+      scroll-snap-type: none;
+    }
+  }
+
+  /* Scroll progress bar */
+  .scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(to right, #7C3AED, #3B82F6);
+    transform-origin: left;
+    z-index: 100;
+    pointer-events: none;
+  }
+
+  /* Última sección con footer */
+  .last-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 100vh;
+  }
+
+  .last-section .content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Performance: will-change para elementos animados */
+  .motion-element,
+  [data-framer-component],
+  .animate-marquee {
+    will-change: transform, opacity;
+  }
+
+  /* Optimización: reduce motion para elementos hover/transition pesados */
+  @media (prefers-reduced-motion: no-preference) {
+    .hover-lift {
+      will-change: transform;
+    }
+    
+    .hover-lift:hover {
+      transform: translateY(-2px);
+    }
+  }
+
+  /* Respetar prefers-reduced-motion */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+    
+    /* Quitar will-change en reduced motion */
+    .motion-element,
+    [data-framer-component],
+    .animate-marquee,
+    .hover-lift {
+      will-change: auto;
+    }
   }
 }

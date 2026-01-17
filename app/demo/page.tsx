@@ -1,9 +1,8 @@
-import { BackgroundGlow, Navbar } from "../ui/chrome"
+import { Navbar } from "../ui/chrome"
 
 export default function DemoPage() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#04050a] via-[#050814] to-[#040812] text-white">
-      <BackgroundGlow />
+    <main className="relative min-h-screen overflow-hidden text-white">
       <Navbar />
 
       <section className="mx-auto flex max-w-5xl flex-col items-center px-6 pt-28 pb-14 text-center md:pt-32">
@@ -14,7 +13,7 @@ export default function DemoPage() {
         </p>
         <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row">
           <a
-            href="/register"
+            href="/contacto"
             className="rounded-full bg-white px-8 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
           >
             Probar demo guiada
@@ -43,4 +42,5 @@ export default function DemoPage() {
     </main>
   )
 }
+
 

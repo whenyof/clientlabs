@@ -1,18 +1,19 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { motion, useMotionValue, useSpring, useTransform, Variants } from "framer-motion"
+import { motion, Variants } from "framer-motion"
 import dynamic from "next/dynamic"
 import Image from "next/image"
 
-// Lazy load heavy components that don't need SSR (mejora initial bundle)
-const BackgroundGlow = dynamic(() => import("./ui/chrome").then(mod => ({ default: mod.BackgroundGlow })), { 
-  ssr: false,
-  loading: () => null // No loading placeholder for background
-})
+// Lazy load heavy visual section (Architecture)
+const ArchitectureDiagram = dynamic(
+  () => import("./components/ArchitectureDiagram").then((mod) => mod.ArchitectureDiagram),
+  { ssr: false }
+)
 
 // Import regular components (necesarios para SSR)
 import { Navbar, LogoMark } from "./ui/chrome"
+import { PrimaryButton } from "./ui/buttons"
 
 // Animación ligera: sólo opacity/translate. Sin animar layouts completos.
 // Constante fuera del componente para evitar recreaciones
@@ -21,30 +22,9 @@ const fadeUp: Variants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
 }
 
-// Throttle helper para scroll performance (16ms ≈ 60fps)
-function throttle<T extends (...args: any[]) => void>(
-  func: T,
-  limit: number
-): (...args: Parameters<T>) => void {
-  let inThrottle: boolean
-  let lastFunc: ReturnType<typeof setTimeout>
-  let lastRan: number
-  return function (this: any, ...args: Parameters<T>) {
-    if (!inThrottle) {
-      func.apply(this, args)
-      lastRan = Date.now()
-      inThrottle = true
-    } else {
-      clearTimeout(lastFunc)
-      lastFunc = setTimeout(() => {
-        if (Date.now() - lastRan >= limit) {
-          func.apply(this, args)
-          lastRan = Date.now()
-        }
-      }, limit - (Date.now() - lastRan))
-    }
-  }
-}
+const SCROLL_DELAY = 900
+const MIN_SCROLL_DELTA = 10
+
 
 export default function Home() {
   const sections = useMemo(
@@ -64,14 +44,19 @@ export default function Home() {
 
   const chaosRef = useRef<HTMLDivElement>(null)
   const stepsRef = useRef<HTMLDivElement>(null)
+  const stepsCarouselRef = useRef<HTMLDivElement>(null)
+  const chaosSwipeRef = useRef<HTMLDivElement>(null)
   const statsRef = useRef<HTMLDivElement>(null)
   const [statsActive, setStatsActive] = useState(false)
+  const statsAnimatedRef = useRef(false)
+  const statValueRefs = useRef<Array<HTMLSpanElement | null>>([])
   const [activeSection, setActiveSection] = useState<string>(sections[0]?.id || "hero")
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0)
   const [scrollProgress, setScrollProgress] = useState(0)
   const [showStickyCTA, setShowStickyCTA] = useState(false)
   const isScrollingRef = useRef(false)
   const navigateToSectionRef = useRef<((index: number) => void) | null>(null)
+  const mainRef = useRef<HTMLElement | null>(null)
 
   // nav height -> css var para padding-top (memoizado con useCallback)
   useEffect(() => {
@@ -86,15 +71,17 @@ export default function Home() {
   // Scroll progress bar - OPTIMIZADO: throttle + requestAnimationFrame
   useEffect(() => {
     if (typeof window === "undefined") return
+    const root = mainRef.current
+    if (!root) return
 
     let rafId: number | null = null
     let ticking = false
 
     const updateScrollProgress = () => {
-      const scrollTop = window.scrollY
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight
+      const scrollTop = root.scrollTop
+      const docHeight = root.scrollHeight - root.clientHeight
       const progress = docHeight > 0 ? scrollTop / docHeight : 0
-      
+
       setScrollProgress(progress)
 
       // Mostrar sticky CTA después del hero (scroll > 400px en mobile)
@@ -103,7 +90,7 @@ export default function Home() {
       } else {
         setShowStickyCTA(false)
       }
-      
+
       ticking = false
     }
 
@@ -115,25 +102,23 @@ export default function Home() {
       }
     }
 
-    window.addEventListener("scroll", handleScroll, { passive: true })
+    root.addEventListener("scroll", handleScroll, { passive: true })
     updateScrollProgress() // Initial call
 
     return () => {
-      window.removeEventListener("scroll", handleScroll)
+      root.removeEventListener("scroll", handleScroll)
       if (rafId !== null) {
         cancelAnimationFrame(rafId)
       }
     }
   }, [])
 
-  // Scroll bloqueado section-by-section (Apple style) - SOLO DESKTOP
-  // OPTIMIZADO: Memoización de funciones, throttle, mejor IntersectionObserver
+  // Scroll bloqueado section-by-section (Apple style) - TODAS LAS RESOLUCIONES
+  // OPTIMIZADO: Mejor IntersectionObserver y handlers ligeros
   useEffect(() => {
     if (typeof window === "undefined") return
-
-    // Solo activar scroll snapping en desktop
-    const isDesktop = window.innerWidth >= 1024
-    if (!isDesktop) return
+    const root = mainRef.current
+    if (!root) return
 
     const sectionElements = sections.map((s) => document.getElementById(s.id)).filter(Boolean) as HTMLElement[]
     if (sectionElements.length === 0) return
@@ -141,7 +126,6 @@ export default function Home() {
     let sectionIndex = 0
     let touchStartY = 0
 
-    // Funciones de navegación - definidas dentro del effect para mejor performance
     const goToSection = (index: number) => {
       if (index < 0 || index >= sectionElements.length) return
       if (isScrollingRef.current) return
@@ -152,26 +136,16 @@ export default function Home() {
       setActiveSection(sections[index].id)
 
       const targetSection = sectionElements[index]
-      // Cache nav height calculation
-      const navHeight = parseInt(
-        getComputedStyle(document.documentElement).getPropertyValue("--nav-height") || "72",
-        10
-      )
-      const targetTop = targetSection.offsetTop - navHeight
-
-      // Usar scrollTo con smooth behavior (optimizado por el navegador)
-      window.scrollTo({
-        top: targetTop,
+      root.scrollTo({
+        top: targetSection.offsetTop,
         behavior: "smooth",
       })
 
-      // Clear timeout más eficiente usando ref
       setTimeout(() => {
         isScrollingRef.current = false
-      }, 900)
+      }, SCROLL_DELAY)
     }
 
-    // Exponer función para navegación desde botones
     navigateToSectionRef.current = goToSection
 
     const goNextSection = () => {
@@ -186,10 +160,8 @@ export default function Home() {
       }
     }
 
-    // IntersectionObserver OPTIMIZADO: mejor configuración para performance
     const observer = new IntersectionObserver(
       (entries) => {
-        // Procesar solo entradas que están intersecting para mejor performance
         entries.forEach((entry) => {
           if (entry.isIntersecting && !isScrollingRef.current && entry.intersectionRatio >= 0.6) {
             const index = sectionElements.indexOf(entry.target as HTMLElement)
@@ -201,128 +173,79 @@ export default function Home() {
           }
         })
       },
-      { 
-        threshold: [0.5, 0.6], // Multiple thresholds para mejor detección
-        rootMargin: "0px 0px -10% 0px" // Optimizar detección antes de entrar completamente
-      }
+      { threshold: [0.5, 0.6], root }
     )
 
-    // Observar todos los elementos
     sectionElements.forEach((el) => observer.observe(el))
 
-    // Interceptar wheel events
     const handleWheel = (e: WheelEvent) => {
       if (isScrollingRef.current) {
         e.preventDefault()
         return
       }
-
-      const isLastSection = sectionIndex === sectionElements.length - 1
-      const lastSectionElement = sectionElements[sectionElements.length - 1]
-      
-      if (isLastSection && lastSectionElement) {
-        // En la última sección: permitir scroll interno
-        const navHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--nav-height") || "72")
-        const lastSectionTop = lastSectionElement.offsetTop - navHeight
-        const lastSectionBottom = lastSectionElement.offsetTop + lastSectionElement.offsetHeight - navHeight
-        const currentScroll = window.scrollY + window.innerHeight
-        
-        // Si estamos scrolleando hacia abajo dentro de la última sección, permitir scroll libre
-        if (e.deltaY > 0) {
-          // Scroll hacia abajo: solo bloquear si ya llegamos al footer
-          if (currentScroll >= document.documentElement.scrollHeight - 10) {
-            e.preventDefault()
-            // Ya estamos en el final, no hacer nada
-            return
-          }
-          // Permitir scroll interno hacia abajo
-          return
-        }
-        
-        // Si estamos scrolleando hacia arriba desde el footer
-        if (e.deltaY < 0) {
-          // Verificar si estamos cerca del footer (últimos 100px)
-          const distanceToBottom = document.documentElement.scrollHeight - (window.scrollY + window.innerHeight)
-          
-          if (distanceToBottom < 100) {
-            // Estamos en el footer, volver a la sección anterior
-            e.preventDefault()
-            goPrevSection()
-            return
-          }
-          
-          // Permitir scroll interno hacia arriba dentro de la última sección
-          return
-        }
-        
-        return
-      }
-
-      // Para las demás secciones: scroll bloqueado normal
       e.preventDefault()
-
-      if (e.deltaY > 50) {
+      const delta = e.deltaY
+      if (Math.abs(delta) < MIN_SCROLL_DELTA) return
+      if (delta > 0) {
         goNextSection()
-      } else if (e.deltaY < -50) {
+      } else if (delta < 0) {
         goPrevSection()
       }
     }
 
-    // Interceptar touch events (mobile)
     const handleTouchStart = (e: TouchEvent) => {
       touchStartY = e.touches[0].clientY
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      const target = e.target as Node
+      const isStepsCarousel = stepsCarouselRef.current?.contains(target)
+      const isChaosSwipe = chaosSwipeRef.current?.contains(target)
+
+      if (!isStepsCarousel && !isChaosSwipe) {
+        e.preventDefault()
+      }
     }
 
     const handleTouchEnd = (e: TouchEvent) => {
       if (isScrollingRef.current) return
 
-      const isLastSection = sectionIndex === sectionElements.length - 1
+      const target = e.target as Node
+      const isStepsCarousel = stepsCarouselRef.current?.contains(target)
+      const isChaosSwipe = chaosSwipeRef.current?.contains(target)
       const touchEndY = e.changedTouches[0].clientY
       const diff = touchStartY - touchEndY
 
-      if (isLastSection) {
-        // En la última sección: solo bloquear si estamos en el footer y swipe arriba
-        const distanceToBottom = document.documentElement.scrollHeight - (window.scrollY + window.innerHeight)
-        
-        if (diff < -50 && distanceToBottom < 100) {
-          // Swipe arriba desde el footer: volver a la sección anterior
-          goPrevSection()
-        }
-        // Permitir scroll interno en la última sección
+      if (isStepsCarousel || isChaosSwipe) {
         return
       }
 
-      // Para las demás secciones: swipe bloqueado normal
       if (Math.abs(diff) > 50) {
-        if (diff > 0) {
-          goNextSection()
-        } else {
-          goPrevSection()
-        }
+        diff > 0 ? goNextSection() : goPrevSection()
       }
     }
+    root.addEventListener("wheel", handleWheel, { passive: false })
+    root.addEventListener("touchstart", handleTouchStart, { passive: true })
+    root.addEventListener("touchmove", handleTouchMove, { passive: false })
+    root.addEventListener("touchend", handleTouchEnd, { passive: false })
 
-    window.addEventListener("wheel", handleWheel, { passive: false })
-    window.addEventListener("touchstart", handleTouchStart, { passive: true })
-    window.addEventListener("touchend", handleTouchEnd, { passive: false })
-
-    // Forzar scroll a top al cargar
-    window.scrollTo(0, 0)
+    root.scrollTo({ top: 0 })
     goToSection(0)
 
     return () => {
       observer.disconnect()
-      window.removeEventListener("wheel", handleWheel)
-      window.removeEventListener("touchstart", handleTouchStart)
-      window.removeEventListener("touchend", handleTouchEnd)
+      root.removeEventListener("wheel", handleWheel)
+      root.removeEventListener("touchstart", handleTouchStart)
+      root.removeEventListener("touchmove", handleTouchMove)
+      root.removeEventListener("touchend", handleTouchEnd)
     }
   }, [sections])
 
   // Stats in-view trigger - OPTIMIZADO: IntersectionObserver con mejor configuración
   useEffect(() => {
-    if (!statsRef.current || statsActive) return // Early return si ya está activo
-    
-    // IntersectionObserver optimizado: observar solo cuando entra en viewport
+    const root = mainRef.current
+    if (!statsRef.current || statsActive || !root) return
+
     const obs = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -333,9 +256,10 @@ export default function Home() {
           }
         })
       },
-      { 
-        threshold: 0.1, // Activar cuando 10% visible
-        rootMargin: "50px" // Activar 50px antes de entrar (preload para smoothness)
+      {
+        threshold: 0.1,
+        rootMargin: "50px",
+        root,
       }
     )
     
@@ -348,10 +272,57 @@ export default function Home() {
     }
   }, [statsActive]) // Solo re-ejecutar si statsActive cambia
 
+  // Animated stats values (requestAnimationFrame) - ultra fluido, sin re-render
+  useEffect(() => {
+    if (!statsActive || statsAnimatedRef.current) return
+    statsAnimatedRef.current = true
+
+    const targets = [
+      { value: 10, delay: 0, decimals: 0, suffix: "+" },
+      { value: 10000, delay: 120, decimals: 0, suffix: "+" },
+      { value: 99.9, delay: 240, decimals: 1, suffix: "%" },
+    ]
+    const duration = 1400
+    const start = performance.now()
+    let rafId: number | null = null
+
+    const easeOut = (t: number) => 1 - Math.pow(1 - t, 3)
+
+    const formatValue = (value: number, decimals: number) => {
+      if (decimals > 0) return value.toFixed(decimals)
+      return Math.round(value).toLocaleString("es-ES")
+    }
+
+    const tick = (now: number) => {
+      let done = true
+      targets.forEach((t, idx) => {
+        const elapsed = Math.max(0, now - start - t.delay)
+        const progress = Math.min(1, elapsed / duration)
+        const eased = easeOut(progress)
+        const current = t.value * eased
+        if (progress < 1) done = false
+
+        const node = statValueRefs.current[idx]
+        if (node) {
+          node.textContent = `${formatValue(current, t.decimals)}${t.suffix}`
+        }
+      })
+
+      if (!done) {
+        rafId = requestAnimationFrame(tick)
+      }
+    }
+
+    rafId = requestAnimationFrame(tick)
+    return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId)
+    }
+  }, [statsActive])
+
   return (
     <main
-      className="relative min-h-screen overflow-y-auto overflow-x-hidden scrollbar-hide bg-gradient-to-b from-[#04050a] via-[#050814] to-[#040812] text-white scroll-smooth"
-      style={{ paddingTop: "var(--nav-height, 72px)" } as React.CSSProperties}
+      ref={mainRef}
+      className="relative h-screen overflow-y-scroll overflow-x-hidden scrollbar-hide text-white"
     >
       {/* Scroll Progress Bar */}
       <div
@@ -361,87 +332,82 @@ export default function Home() {
           transition: "transform 0.1s ease-out",
         }}
       />
-
-      <BackgroundGlow />
       <Navbar />
 
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(124,58,237,0.18),transparent_32%),radial-gradient(circle_at_80%_10%,rgba(59,130,246,0.16),transparent_30%),radial-gradient(circle_at_60%_70%,rgba(124,58,237,0.12),transparent_32%)]" />
-
-      {/* HERO + STATS */}
+      {/* HERO */}
       <Section id="hero">
-        <div className="relative mx-auto flex max-w-6xl flex-col items-center gap-6 sm:gap-8 md:gap-10 text-center px-4 sm:px-6 py-8 sm:py-12">
-          {/* Badge trust signal mobile-first */}
+        <div className="relative mx-auto flex w-full max-w-4xl flex-col items-center gap-6 sm:gap-8 px-4 sm:px-6 py-10 sm:py-14 text-center">
           <motion.div variants={fadeUp}>
-            <Pill text="+100 empresas operando en producción" />
+            <Pill text="+10 Sectores operando en producción" />
           </motion.div>
-          
-          {/* Headline mobile-first: máximo 2 líneas */}
           <AnimatedTitle
             as="h1"
-            lines={["El sistema operativo", "de tu negocio"]}
-            className="text-balance text-4xl sm:text-5xl md:text-6xl font-semibold leading-tight sm:leading-[1.05] px-2"
-            highlightWords={["sistema", "negocio"]}
+            lines={["Automatiza tu negocio", "con sistemas sin", "tocar código"]}
+            className="text-balance text-4xl sm:text-5xl md:text-6xl font-semibold leading-tight sm:leading-[1.05]"
+            highlightWords={["negocio", "sistemas", "código"]}
           />
-          
-          {/* Subheadline clara */}
-          <motion.p 
-            variants={fadeUp} 
-            className="max-w-2xl sm:max-w-3xl text-base sm:text-lg text-white/70 leading-relaxed px-2"
+          <motion.p
+            variants={fadeUp}
+            className="max-w-2xl text-base sm:text-lg text-white/70 leading-relaxed"
           >
-            Un solo sistema que conecta clientes, pagos, <span className="text-purple-400">métricas</span> y <span className="text-purple-400">automatizaciones</span>. 
-            <span className="hidden sm:inline"> Infraestructura diseñada para <span className="text-purple-400">escalar</span> operaciones reales.</span>
+            <span className="block sm:hidden">
+              Conecta clientes, pagos y métricas en un solo panel.
+            </span>
+            <span className="block sm:hidden">
+              Automatización real sin complejidad.
+            </span>
+            <span className="hidden sm:inline">
+              Un solo sistema que conecta clientes, pagos, <span className="text-purple-400">métricas</span> y <span className="text-purple-400">automatizaciones</span>. 
+              Infraestructura diseñada para <span className="text-purple-400">escalar</span> operaciones reales.
+            </span>
           </motion.p>
-          
-          {/* CTAs mobile-first: grandes y visibles */}
-          <motion.div 
-            variants={fadeUp} 
-            className="flex flex-col gap-3 sm:flex-row w-full max-w-md sm:max-w-none sm:w-auto px-4 sm:px-0"
-          >
-            <Button href="/register" variant="primary" className="w-full sm:w-auto">
-              Empezar gratis
-            </Button>
-            <Button href="/demo" variant="ghost" className="w-full sm:w-auto">
-              Ver cómo funciona
-            </Button>
-          </motion.div>
-          
-          {/* Trust microcopy mobile */}
-          <motion.p 
-            variants={fadeUp} 
-            className="text-xs sm:text-sm text-white/50 mt-2 sm:mt-0"
-          >
-            Sin tarjeta de crédito · Cancela en cualquier momento
-          </motion.p>
-
-          {/* Stats integradas - Mobile optimized */}
           <motion.div
             ref={statsRef}
             variants={fadeUp}
-            className="relative mx-auto mt-6 sm:mt-8 flex w-full max-w-5xl flex-col sm:flex-row items-stretch overflow-hidden rounded-2xl sm:rounded-[26px] border border-white/10 bg-gradient-to-r from-[#0e0f1a]/90 via-[#0b1022]/80 to-[#0e0f1a]/90 shadow-[0_20px_90px_rgba(0,0,0,0.35)] backdrop-blur"
+            className="mt-6 w-full max-w-4xl"
           >
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_25%_50%,rgba(124,58,237,0.16),transparent_35%),radial-gradient(circle_at_80%_50%,rgba(59,130,246,0.14),transparent_30%)]" />
-            {[
-              { value: 100, suffix: "+", label: "Empresas operando en producción" },
-              { value: 50000, suffix: "+", label: "Flujos ejecutados sin intervención humana" },
-              { value: 99.9, suffix: "%", label: "Infraestructura estable", decimals: 1 },
-            ].map((item, idx) => (
-              <div key={item.label} className="relative flex flex-1 items-center justify-center px-4 sm:px-6 py-4 sm:py-6 border-b sm:border-b-0 sm:border-r border-white/10 last:border-0">
-                <div className="absolute inset-2 sm:inset-3 rounded-xl sm:rounded-2xl bg-white/3 blur-2xl sm:blur-3xl" />
-                <div className="relative flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-3 text-center sm:text-left w-full">
-                  <span className="h-2 w-2 sm:h-3 sm:w-3 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.6)] sm:shadow-[0_0_22px_rgba(52,211,153,0.6)] flex-shrink-0" />
-                  <div className="space-y-0.5 sm:space-y-1 flex-1">
-                    <motion.p variants={fadeUp} className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight">
-                      <Counter to={item.value} decimals={item.decimals} active={statsActive} />
-                      {item.suffix}
-                    </motion.p>
-                    <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.24em] sm:tracking-[0.28em] text-white/55 leading-tight">{item.label}</p>
+            <div className="relative grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="absolute inset-0 -z-10 rounded-3xl bg-[radial-gradient(circle_at_20%_20%,rgba(124,58,237,0.18),transparent_40%),radial-gradient(circle_at_80%_30%,rgba(59,130,246,0.12),transparent_40%)] blur-2xl" />
+              {[
+                { label: "sectores activos" },
+                { label: "procesos automatizados" },
+                { label: "uptime monitorizado" },
+              ].map((item, idx) => {
+                return (
+                  <div
+                    key={item.label}
+                    className="rounded-2xl border border-white/10 bg-white/5 px-6 py-5 text-center backdrop-blur"
+                  >
+                    <p className="text-3xl sm:text-4xl font-semibold tracking-tight text-white">
+                      <span
+                        ref={(el) => {
+                          statValueRefs.current[idx] = el
+                        }}
+                      >
+                        0
+                      </span>
+                    </p>
+                    <p className="mt-2 text-[11px] uppercase tracking-[0.28em] text-white/55">
+                      {item.label}
+                    </p>
                   </div>
-                </div>
-              </div>
-            ))}
+                )
+              })}
+            </div>
           </motion.div>
-          <motion.p variants={fadeUp} className="text-[10px] sm:text-xs uppercase tracking-[0.28em] sm:tracking-[0.32em] text-white/40 mt-2 sm:mt-4">
-            Disponibilidad garantizada · Monitoreo continuo
+          <motion.div
+            variants={fadeUp}
+            className="flex w-full flex-col gap-3 sm:flex-row sm:w-auto"
+          >
+            <PrimaryButton href="/contacto" className="w-full sm:w-auto">
+              Empezar prueba gratis
+            </PrimaryButton>
+          </motion.div>
+          <motion.p
+            variants={fadeUp}
+            className="text-xs sm:text-sm text-white/50"
+          >
+            14 días gratis · Sin tarjeta · Activa en 30 segundos
           </motion.p>
         </div>
       </Section>
@@ -520,58 +486,62 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Mobile: Carrusel horizontal swipeable */}
+          {/* Mobile: Carrusel vertical premium */}
           <div className="md:hidden">
-            <div className="overflow-x-auto scrollbar-hide pb-4 -mx-6 px-6 snap-x snap-mandatory">
-              <div className="flex gap-6">
-                {[
-                  {
-                    num: "01",
-                    title: "Conecta tus herramientas",
-                    desc: "Integra Stripe, WordPress, CRMs y cualquier API en minutos. ClientLabs se conecta a tu stack actual sin interrumpir operaciones existentes. No migras, sincronizas.",
-                    icon: "⇆",
-                  },
-                  {
-                    num: "02",
-                    title: "Centraliza tus datos",
-                    desc: "Una única fuente de verdad. Unificamos clientes, pagos, eventos y métricas en tiempo real. Sin duplicados. Sin desajustes. Todo reconciliado automáticamente.",
-                    icon: "⟲",
-                  },
-                  {
-                    num: "03",
-                    title: "Automatiza procesos",
-                    desc: "Flujos visuales sin código: recuperación de pagos fallidos, onboarding de clientes, alertas internas, campañas automáticas. Todo monitorizado y trazable.",
-                    icon: "⚡",
-                  },
-                  {
-                    num: "04",
-                    title: "Escala con control",
-                    desc: "Dashboards en tiempo real y visibilidad completa. Crece sin perder control operativo. Decisiones basadas en datos, no en suposiciones.",
-                    icon: "📊",
-                  },
-                ].map((step, idx) => (
-                  <motion.div
-                    key={step.num}
-                    variants={fadeUp}
-                    transition={{ delay: idx * 0.08 }}
-                    className="relative min-w-[85vw] snap-center"
-                  >
-                    <div className="mb-6 flex items-center justify-center">
-                      <span className="text-5xl font-bold text-white/10">{step.num}</span>
-                      <span className="absolute text-xl font-semibold text-white/80">{step.num}</span>
-                    </div>
-                    <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-xl shadow-purple-900/20 backdrop-blur">
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2">
-                          <span className="text-lg text-white/70">{step.icon}</span>
-                          <h4 className="text-base font-semibold text-white">{step.title}</h4>
-                        </div>
-                        <p className="text-sm text-white/70 leading-relaxed">{step.desc}</p>
+            <div
+              ref={stepsCarouselRef}
+              className="relative max-h-[72vh] overflow-y-auto scrollbar-hide pr-2"
+            >
+              {[
+                {
+                  num: "01",
+                  title: "Conecta tus herramientas",
+                  desc: "Integra Stripe, WordPress y CRMs en minutos. Sin migraciones.",
+                },
+                {
+                  num: "02",
+                  title: "Centraliza tus datos",
+                  desc: "Clientes, pagos y métricas unificadas. Una sola fuente de verdad.",
+                },
+                {
+                  num: "03",
+                  title: "Automatiza procesos",
+                  desc: "Onboarding, cobros y alertas sin código. Todo trazable.",
+                },
+                {
+                  num: "04",
+                  title: "Escala con control",
+                  desc: "Dashboards en vivo y decisiones claras. Control total.",
+                },
+              ].map((step, idx, arr) => (
+                <motion.div
+                  key={step.num}
+                  variants={fadeUp}
+                  transition={{ delay: idx * 0.08 }}
+                  className="pb-6"
+                >
+                  <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-xl shadow-purple-900/20 backdrop-blur">
+                    <div className="flex items-center justify-between">
+                      <div className="relative">
+                        <span className="text-5xl font-bold text-white/10">{step.num}</span>
+                        <span className="absolute inset-0 flex items-center justify-center text-xl font-semibold text-white/80">
+                          {step.num}
+                        </span>
+                      </div>
+                      <div className="h-1 w-24 rounded-full bg-white/10 overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-purple-500 to-blue-500"
+                          style={{ width: `${((idx + 1) / arr.length) * 100}%` }}
+                        />
                       </div>
                     </div>
-                  </motion.div>
-                ))}
-              </div>
+                    <div className="mt-4 space-y-2">
+                      <h4 className="text-lg font-semibold text-white">{step.title}</h4>
+                      <p className="text-sm text-white/70 leading-relaxed">{step.desc}</p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
             </div>
           </div>
         </div>
@@ -604,32 +574,160 @@ export default function Home() {
       </Section>
 
       {/* CAOS → CONTROL - 3 FASES HORIZONTALES */}
+      {/* SECCIÓN CAOS → CONTROL - Tarjetas enterprise premium */}
       <Section id="caos">
-        <div ref={chaosRef} className="mx-auto flex h-full w-full max-w-7xl flex-col justify-center px-6 py-8">
-          {/* Título siempre visible */}
-          <motion.div variants={fadeUp} className="mb-6 text-center">
-            <h2 className="text-2xl font-semibold md:text-3xl">Tu negocio crece, pero tu sistema no</h2>
-            <p className="mt-2 text-sm text-white/60">El caos operativo que limita tu crecimiento</p>
+        <div ref={chaosRef} className="mx-auto flex h-full w-full max-w-7xl flex-col justify-center px-4 sm:px-6 lg:px-8 py-6 lg:py-0">
+          {/* Header - Siempre visible arriba */}
+          <motion.div variants={fadeUp} className="mb-8 lg:mb-10 text-center">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold leading-tight">
+              Tu negocio crece, pero tu sistema no
+            </h2>
+            <p className="mt-3 text-sm sm:text-base text-white/60 max-w-xl mx-auto">
+              El caos operativo que limita tu crecimiento
+            </p>
           </motion.div>
 
-          {/* 3 Fases horizontales - Compacto para que quepa en 1 pantalla */}
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-3 flex-1">
+          {/* Mobile: Swipe Antes → Después */}
+          <div className="md:hidden">
+            <div
+              ref={chaosSwipeRef}
+              className="overflow-x-auto scrollbar-hide -mx-4 px-4"
+            >
+              <div className="flex gap-4">
+                {/* ANTES */}
+                <div className="min-w-[85vw] rounded-3xl border border-white/10 bg-gradient-to-br from-white/5 to-white/3 p-6 shadow-xl shadow-black/30">
+                  <p className="text-[11px] uppercase tracking-[0.3em] text-white/50">Antes</p>
+                  <h4 className="mt-2 text-lg font-semibold text-white">Caos operativo</h4>
+                  <div className="mt-4 space-y-2">
+                    {[
+                      "Excel como base de datos",
+                      "CRMs aislados",
+                      "Automatizaciones rotas",
+                      "Datos duplicados",
+                    ].map((item) => (
+                      <div key={item} className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/70">
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* DESPUÉS */}
+                <div className="relative min-w-[85vw] rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-emerald-950/30 to-emerald-950/10 p-6 shadow-xl shadow-emerald-900/30">
+                  <div className="absolute inset-0 rounded-3xl bg-[radial-gradient(circle_at_30%_20%,rgba(52,211,153,0.18),transparent_50%)] opacity-70" />
+                  <p className="relative text-[11px] uppercase tracking-[0.3em] text-emerald-300">Después</p>
+                  <h4 className="relative mt-2 text-lg font-semibold text-white">Control operativo</h4>
+                  <div className="mt-4 space-y-2">
+                    {[
+                      "Panel único y claro",
+                      "Flujos activos",
+                      "Alertas en tiempo real",
+                      "Métricas confiables",
+                    ].map((item) => (
+                      <div key={item} className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-white/5 px-4 py-2 text-sm text-white/80">
+                        <span className="text-emerald-400">✓</span>
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p className="mt-3 text-center text-xs uppercase tracking-[0.3em] text-white/40">
+              Desliza para ver el cambio
+            </p>
+          </div>
+
+          {/* Tablet: 2 columnas (Antes | Después) */}
+          <div className="hidden md:grid lg:hidden grid-cols-2 gap-6">
+            {/* ANTES */}
+            <motion.div
+              variants={fadeUp}
+              className="relative rounded-3xl border border-white/10 bg-gradient-to-br from-white/6 to-white/3 p-7 shadow-xl shadow-black/25"
+            >
+              <p className="text-[11px] uppercase tracking-[0.3em] text-white/50">Antes</p>
+              <h4 className="mt-2 text-xl font-semibold text-white">Caos operativo</h4>
+              <div className="mt-4 space-y-2.5">
+                {[
+                  "Excel como base de datos",
+                  "CRMs aislados",
+                  "Automatizaciones rotas",
+                  "Datos duplicados",
+                  "Sin visibilidad real",
+                ].map((item) => (
+                  <div key={item} className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white/70">
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* DESPUÉS */}
+            <motion.div
+              variants={fadeUp}
+              transition={{ delay: 0.1 }}
+              className="relative rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-emerald-950/30 to-emerald-950/10 p-7 shadow-xl shadow-emerald-900/30"
+            >
+              <div className="absolute inset-0 rounded-3xl bg-[radial-gradient(circle_at_30%_20%,rgba(52,211,153,0.18),transparent_55%)] opacity-70" />
+              <p className="relative text-[11px] uppercase tracking-[0.3em] text-emerald-300">Después</p>
+              <h4 className="relative mt-2 text-xl font-semibold text-white">Control operativo</h4>
+              <div className="relative mt-4 space-y-2.5">
+                {[
+                  "Panel único y claro",
+                  "Flujos activos",
+                  "Alertas en tiempo real",
+                  "Métricas confiables",
+                  "Control total",
+                ].map((item) => (
+                  <div key={item} className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-white/5 px-4 py-2.5 text-sm text-white/80">
+                    <span className="text-emerald-400">✓</span>
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Desktop: 3 Fases horizontales - Cards enterprise con más espacio */}
+          <div className="hidden lg:grid grid-cols-1 gap-5 lg:gap-6 lg:grid-cols-3">
+            
             {/* FASE 1 — Caos */}
             <motion.div
               variants={fadeUp}
-              className="relative overflow-hidden rounded-xl border border-red-500/20 bg-gradient-to-br from-red-950/30 via-transparent to-transparent p-4 shadow-[0_30px_120px_rgba(239,68,68,0.15)]"
+              whileHover={{ scale: 1.02, y: -4 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="group relative overflow-hidden rounded-2xl border border-red-500/20 bg-gradient-to-br from-red-950/40 via-red-950/10 to-transparent p-6 lg:p-7 shadow-[0_20px_80px_rgba(239,68,68,0.12)] hover:shadow-[0_30px_100px_rgba(239,68,68,0.2)] hover:border-red-500/30 transition-all duration-300 min-h-[280px] lg:min-h-[320px]"
             >
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(239,68,68,0.12),transparent_50%)]" />
-              <div className="relative space-y-3">
-                <div className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-red-400 shadow-[0_0_20px_rgba(239,68,68,0.6)]" />
-                  <p className="text-[10px] uppercase tracking-[0.3em] text-red-300">FASE 1 — Caos</p>
+              {/* Glow effect on hover */}
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(239,68,68,0.15),transparent_50%)] opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
+              
+              <div className="relative space-y-5 h-full flex flex-col">
+                {/* Badge header */}
+                <div className="flex items-center gap-2.5">
+                  <span className="h-2 w-2 rounded-full bg-red-400 shadow-[0_0_16px_rgba(239,68,68,0.7)]" />
+                  <p className="text-[11px] uppercase tracking-[0.25em] text-red-300 font-medium">FASE 1 — Caos</p>
                 </div>
-                <div className="space-y-1.5">
-                  {["Hojas Excel como base de datos", "CRMs desconectados entre sí", "Automatizaciones que se rompen", "Datos duplicados en cada herramienta", "Sin visibilidad de lo que ocurre", "Decisiones basadas en intuición"].map((item) => (
-                    <div key={item} className="rounded-lg border border-white/5 bg-white/5 p-1.5 text-[11px] text-white/80 backdrop-blur-sm opacity-70">
+                
+                {/* Items list - más espaciado */}
+                <div className="space-y-2.5 flex-1">
+                  {[
+                    "Hojas Excel como base de datos",
+                    "CRMs desconectados entre sí",
+                    "Automatizaciones que se rompen",
+                    "Datos duplicados en cada herramienta",
+                    "Sin visibilidad de lo que ocurre",
+                    "Decisiones basadas en intuición"
+                  ].map((item, idx) => (
+                    <motion.div
+                      key={item}
+                      initial={{ opacity: 0, x: -10 }}
+                      whileInView={{ opacity: 0.8, x: 0 }}
+                      transition={{ delay: idx * 0.05, duration: 0.3 }}
+                      viewport={{ once: true }}
+                      className="rounded-xl border border-white/8 bg-white/5 px-4 py-2.5 text-[13px] text-white/75 backdrop-blur-sm"
+                    >
                       {item}
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               </div>
@@ -638,30 +736,44 @@ export default function Home() {
             {/* FASE 2 — Transición */}
             <motion.div
               variants={fadeUp}
-              transition={{ delay: 0.1 }}
-              className="relative overflow-hidden rounded-xl border border-amber-500/20 bg-gradient-to-br from-amber-950/20 via-transparent to-purple-950/20 p-4 shadow-[0_30px_120px_rgba(251,191,36,0.12)]"
+              whileHover={{ scale: 1.02, y: -4 }}
+              transition={{ duration: 0.3, ease: "easeOut", delay: 0.1 }}
+              className="group relative overflow-hidden rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-950/30 via-purple-950/20 to-transparent p-6 lg:p-7 shadow-[0_20px_80px_rgba(251,191,36,0.1)] hover:shadow-[0_30px_100px_rgba(124,58,237,0.2)] hover:border-purple-500/30 transition-all duration-300 min-h-[280px] lg:min-h-[320px]"
             >
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(124,58,237,0.2),transparent_60%)]" />
-              <div className="relative flex flex-col items-center justify-center space-y-3 text-center h-full">
-                <div className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.6)] animate-pulse" />
-                  <p className="text-[10px] uppercase tracking-[0.3em] text-amber-300">FASE 2 — Transición</p>
+              {/* Glow effect central */}
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(124,58,237,0.2),transparent_60%)] opacity-70 group-hover:opacity-100 transition-opacity duration-300" />
+              
+              <div className="relative flex flex-col items-center justify-center space-y-5 text-center h-full">
+                {/* Badge header */}
+                <div className="flex items-center gap-2.5">
+                  <span className="h-2 w-2 rounded-full bg-amber-400 shadow-[0_0_16px_rgba(251,191,36,0.7)] animate-pulse" />
+                  <p className="text-[11px] uppercase tracking-[0.25em] text-amber-300 font-medium">FASE 2 — Transición</p>
                 </div>
-                <div className="relative h-10 w-10">
+                
+                {/* Logo central */}
+                <motion.div 
+                  className="relative h-16 w-16"
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  transition={{ duration: 0.3 }}
+                >
                   <Image 
                     src="/logo.PNG" 
                     alt="ClientLabs" 
                     fill 
-                    className="object-contain"
-                    sizes="40px"
+                    className="object-contain drop-shadow-[0_0_20px_rgba(124,58,237,0.5)]"
+                    sizes="64px"
                     loading="lazy"
                   />
-                </div>
-                <div className="space-y-1 text-xs">
-                  <p className="font-semibold text-white">ClientLabs como núcleo</p>
-                  <p className="text-[11px] text-white/70">Todo empieza a ordenarse</p>
-                  <p className="text-[11px] text-white/70">Flujos orquestados</p>
-                  <p className="text-[11px] text-white/70">Métricas visibles</p>
+                </motion.div>
+                
+                {/* Text content */}
+                <div className="space-y-2">
+                  <p className="text-lg font-semibold text-white">ClientLabs como núcleo</p>
+                  <div className="space-y-1.5 text-sm text-white/70">
+                    <p>Todo empieza a ordenarse</p>
+                    <p>Flujos orquestados</p>
+                    <p>Métricas visibles</p>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -669,21 +781,41 @@ export default function Home() {
             {/* FASE 3 — Control */}
             <motion.div
               variants={fadeUp}
-              transition={{ delay: 0.2 }}
-              className="relative overflow-hidden rounded-xl border border-emerald-500/20 bg-gradient-to-br from-emerald-950/20 via-transparent to-transparent p-4 shadow-[0_30px_120px_rgba(52,211,153,0.15)]"
+              whileHover={{ scale: 1.02, y: -4 }}
+              transition={{ duration: 0.3, ease: "easeOut", delay: 0.2 }}
+              className="group relative overflow-hidden rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-950/30 via-emerald-950/10 to-transparent p-6 lg:p-7 shadow-[0_20px_80px_rgba(52,211,153,0.12)] hover:shadow-[0_30px_100px_rgba(52,211,153,0.2)] hover:border-emerald-500/30 transition-all duration-300 min-h-[280px] lg:min-h-[320px]"
             >
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(52,211,153,0.15),transparent_50%)]" />
-              <div className="relative space-y-3">
-                <div className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.6)]" />
-                  <p className="text-[10px] uppercase tracking-[0.3em] text-emerald-300">FASE 3 — Control</p>
+              {/* Glow effect on hover */}
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(52,211,153,0.18),transparent_50%)] opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
+              
+              <div className="relative space-y-5 h-full flex flex-col">
+                {/* Badge header */}
+                <div className="flex items-center gap-2.5">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_16px_rgba(52,211,153,0.7)]" />
+                  <p className="text-[11px] uppercase tracking-[0.25em] text-emerald-300 font-medium">FASE 3 — Control</p>
                 </div>
-                <div className="space-y-1.5">
-                  {["Un solo sistema centralizado", "Flujos automatizados activos", "Datos unificados y coherentes", "Alertas en tiempo real", "Métricas visibles y accionables", "Control total de operaciones"].map((item) => (
-                    <div key={item} className="flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-white/5 p-1.5 text-[11px] backdrop-blur-sm">
-                      <span className="text-emerald-400 text-xs">✅</span>
-                      <span className="font-medium text-white/90">{item}</span>
-                    </div>
+                
+                {/* Items list - más espaciado con checks */}
+                <div className="space-y-2.5 flex-1">
+                  {[
+                    "Un solo sistema centralizado",
+                    "Flujos automatizados activos",
+                    "Datos unificados y coherentes",
+                    "Alertas en tiempo real",
+                    "Métricas visibles y accionables",
+                    "Control total de operaciones"
+                  ].map((item, idx) => (
+                    <motion.div
+                      key={item}
+                      initial={{ opacity: 0, x: 10 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.05, duration: 0.3 }}
+                      viewport={{ once: true }}
+                      className="flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-white/5 px-4 py-2.5 backdrop-blur-sm group-hover:border-emerald-500/30 transition-colors"
+                    >
+                      <span className="text-emerald-400 text-sm flex-shrink-0">✓</span>
+                      <span className="text-[13px] font-medium text-white/90">{item}</span>
+                    </motion.div>
                   ))}
                 </div>
               </div>
@@ -709,34 +841,60 @@ export default function Home() {
             transition={{ delay: 0.2 }}
             className="flex flex-col items-center justify-center gap-4 sm:flex-row"
           >
-            <a
-              href="/register"
-              className="rounded-full border border-white/20 bg-white px-6 py-3 text-sm font-semibold text-black transition hover:bg-white/90 hover:shadow-lg hover:shadow-white/20"
-            >
-              Crear cuenta
-            </a>
-            <a
-              href="/producto"
-              className="rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white/90 transition hover:border-white/40 hover:text-white hover:shadow-lg hover:shadow-purple-900/30"
-            >
-              Ver cómo funciona
-            </a>
+            <PrimaryButton href="/contacto">
+              Empezar prueba gratis
+            </PrimaryButton>
           </motion.div>
+          <motion.p variants={fadeUp} className="text-xs text-white/60">
+            14 días gratis · Sin tarjeta · Activa en 30 segundos
+          </motion.p>
         </div>
       </Section>
 
       {/* SISTEMA OPERATIVO - ARQUITECTURA CLOUD */}
+      {/* SECCIÓN ARQUITECTURA - Compacta y ejecutiva */}
       <Section id="sistema">
-        <div className="mx-auto flex h-full w-full max-w-6xl flex-col justify-center px-6">
-          {/* Header - Siempre visible */}
-          <motion.div variants={fadeUp} className="mb-8 text-center">
-            <p className="text-xs uppercase tracking-[0.3em] text-white/50">Arquitectura</p>
-            <h2 className="mt-2 text-3xl font-semibold leading-tight md:text-4xl">Un solo <span className="text-purple-400">sistema</span>. Una fuente de verdad.</h2>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-white/70">Todos los módulos conectados en un único núcleo central. Trazabilidad total de principio a fin.</p>
+        <div className="mx-auto flex h-full w-full max-w-6xl flex-col justify-center px-4 sm:px-6 lg:px-8 py-4 lg:py-0">
+          {/* Header - Compacto */}
+          <motion.div variants={fadeUp} className="mb-6 lg:mb-8 text-center">
+            <p className="text-[11px] uppercase tracking-[0.3em] text-white/50 mb-2">Arquitectura</p>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold leading-tight">
+              Un solo <span className="text-purple-400">sistema</span>. Una fuente de verdad.
+            </h2>
+            <p className="mx-auto mt-2 max-w-xl text-sm text-white/65">
+              Todos los módulos conectados en un único núcleo central. Trazabilidad total de principio a fin.
+            </p>
           </motion.div>
 
-          {/* Diagrama arquitectónico */}
+          {/* Diagrama arquitectónico - Compacto */}
           <ArchitectureDiagram />
+
+          {/* Checklist de beneficios - Inline horizontal, animación stagger */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.4 }}
+            className="flex flex-wrap justify-center gap-3 mt-6 lg:mt-8"
+          >
+            {[
+              { icon: "✔", text: "Trazabilidad completa" },
+              { icon: "✔", text: "Automatización sin código" },
+              { icon: "✔", text: "Métricas en tiempo real" },
+            ].map((item, idx) => (
+              <motion.span
+                key={item.text}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.5 + idx * 0.1 }}
+                className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-950/20 px-4 py-2 text-xs sm:text-sm text-white/85"
+              >
+                <span className="text-emerald-400">{item.icon}</span>
+                {item.text}
+              </motion.span>
+            ))}
+          </motion.div>
         </div>
       </Section>
 
@@ -865,8 +1023,7 @@ export default function Home() {
       {/* CTA FINAL + FOOTER */}
       <section
         id="cta"
-        className="snap-section last-section min-h-screen flex flex-col justify-between relative"
-        style={{ scrollSnapAlign: "start" } as React.CSSProperties}
+        className="h-screen flex flex-col justify-between relative"
       >
         <motion.section
           initial="hidden"
@@ -888,30 +1045,39 @@ export default function Home() {
               Obtén visibilidad total en minutos. Sin código. Sin complejidad.
             </p>
             <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Button href="/register" variant="primary">
-                Empezar gratis
-              </Button>
-              <Button href="/login" variant="ghost">
-                Login
-              </Button>
+              <PrimaryButton href="/contacto">
+                Empezar prueba gratis
+              </PrimaryButton>
             </div>
+            <p className="text-xs text-white/60">14 días gratis · Sin tarjeta</p>
           </motion.div>
         </motion.section>
 
-        <footer className="border-t border-white/10 px-6 py-12 text-center text-sm text-white/50">
+        <footer className="border-t border-white/10 px-6 py-10 text-center text-sm text-white/50">
           <div className="mx-auto flex max-w-6xl flex-col items-center gap-4">
             <a href="/" className="flex items-center gap-3">
               <LogoMark size="sm" />
               <span className="text-base font-semibold tracking-tight text-white/90">ClientLabs</span>
             </a>
             <p>© {new Date().getFullYear()} ClientLabs</p>
-            <p className="mt-2">Infraestructura para negocios digitales serios.</p>
+            <div className="flex flex-wrap items-center justify-center gap-4 text-xs uppercase tracking-[0.24em] text-white/40">
+              <a href="/legal" className="hover:text-white/70 transition-colors">Legal</a>
+              <a href="/contacto" className="hover:text-white/70 transition-colors">Contacto</a>
+              <a href="/recursos" className="hover:text-white/70 transition-colors">Recursos</a>
+              <a href="/about" className="hover:text-white/70 transition-colors">Empresa</a>
+            </div>
+            <div className="flex items-center gap-4 text-xs text-white/40">
+              <a href="https://linkedin.com" className="hover:text-white/70 transition-colors">LinkedIn</a>
+              <a href="https://x.com" className="hover:text-white/70 transition-colors">X</a>
+              <a href="https://github.com" className="hover:text-white/70 transition-colors">GitHub</a>
+            </div>
+            <p className="mt-1 text-white/40">Infraestructura para negocios digitales serios.</p>
           </div>
         </footer>
       </section>
 
       {/* Indicador lateral (SOLO DESKTOP) */}
-      <nav className="fixed right-6 top-1/2 z-50 hidden -translate-y-1/2 flex-col gap-3 lg:flex">
+      <nav className="scroll-dots">
         {sections.map((s, index) => (
           <button
             key={s.id}
@@ -921,12 +1087,9 @@ export default function Home() {
                 navigateToSectionRef.current(index)
               }
             }}
-            className={`flex h-3 w-3 items-center justify-center rounded-full border border-white/20 transition-all duration-300 ${
-              currentSectionIndex === index
-                ? "bg-white shadow-[0_0_0_6px_rgba(255,255,255,0.08)] scale-110"
-                : "bg-white/30 hover:bg-white/60 hover:scale-105"
-            }`}
+            className={`dot ${currentSectionIndex === index ? "active" : ""}`}
             aria-label={s.label}
+            title={s.label}
           />
         ))}
       </nav>
@@ -950,7 +1113,7 @@ export default function Home() {
               <p className="text-xs text-white/60">Sin tarjeta de crédito · Cancela en cualquier momento</p>
             </div>
             <a
-              href="/register"
+              href="/contacto"
               className="flex-shrink-0 rounded-full bg-gradient-to-r from-[#7C3AED] via-indigo-500 to-blue-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-800/40 transition-all duration-200 active:scale-95 hover:shadow-purple-800/70 whitespace-nowrap"
             >
               Empezar
@@ -1002,7 +1165,7 @@ function Section({
       whileInView="show"
       viewport={{ once: true, amount: 0.4 }}
       variants={fadeUp}
-      className="panel min-h-screen flex items-center justify-center relative"
+      className="h-screen flex items-center justify-center relative"
     >
       {children}
     </motion.section>
@@ -1062,53 +1225,6 @@ function AnimatedTitle({
   )
 }
 
-function Counter({ to, decimals = 0, active = false }: { to: number; decimals?: number; active?: boolean }) {
-  const base = useMotionValue(0)
-  const spring = useSpring(base, { stiffness: 90, damping: 18 })
-  useEffect(() => {
-    if (active) base.set(to)
-  }, [active, base, to])
-  const rounded = useTransform(spring, (v) => v.toFixed(decimals))
-  return <motion.span>{rounded}</motion.span>
-}
-
-function Button({
-  href,
-  children,
-  variant = "primary",
-  className = "",
-}: {
-  href: string
-  children: React.ReactNode
-  variant?: "primary" | "ghost"
-  className?: string
-}) {
-  const base =
-    "inline-flex items-center justify-center rounded-full px-8 sm:px-10 py-3.5 sm:py-4 text-sm font-semibold transition will-change-transform active:scale-[0.98]"
-  if (variant === "primary") {
-    return (
-      <motion.a
-        whileHover={{ y: -2, scale: 1.01 }}
-        whileTap={{ scale: 0.99 }}
-        href={href}
-        className={`${base} ${className} bg-gradient-to-r from-[#7C3AED] via-indigo-500 to-blue-500 shadow-xl shadow-purple-800/40 hover:shadow-purple-800/70`}
-      >
-        {children}
-      </motion.a>
-    )
-  }
-  return (
-    <motion.a
-      whileHover={{ y: -2, scale: 1.01 }}
-      whileTap={{ scale: 0.99 }}
-      href={href}
-      className={`${base} ${className} border border-white/15 text-white/80 hover:border-white/40`}
-    >
-      {children}
-    </motion.a>
-  )
-}
-
 function ColumnCard({
   title,
   color,
@@ -1160,76 +1276,6 @@ function IntegrationsMarquee() {
   )
 }
 
-function ArchitectureDiagram() {
-  const modules = [
-    { name: "CRM", icon: "👥", desc: "Unifica clientes de todas tus herramientas. Sin duplicados. Sin desajustes." },
-    { name: "Pagos", icon: "💳", desc: "Gestiona cobros y suscripciones. Automatiza recuperación de pagos fallidos." },
-    { name: "Automatizaciones", icon: "⚙️", desc: "Flujos visuales sin código. Onboarding, alertas, campañas automáticas." },
-    { name: "Marketing", icon: "📢", desc: "Segmenta, personaliza y ejecuta campañas. Todo conectado con tus datos." },
-    { name: "IA", icon: "🤖", desc: "Lead scoring, generación de contenido, análisis predictivo. Decisiones inteligentes." },
-    { name: "Analytics", icon: "📊", desc: "Métricas en tiempo real. Dashboards accionables. Visibilidad total." },
-    { name: "Soporte", icon: "🎧", desc: "Centraliza tickets y conversaciones. Historial completo por cliente." },
-    { name: "APIs", icon: "</>", desc: "REST, webhooks, integraciones nativas. Conecta cualquier herramienta." },
-  ]
-
-  return (
-    <div className="mx-auto w-full max-w-5xl space-y-10">
-      {/* Núcleo central - ClientLabs */}
-      <motion.div
-        variants={fadeUp}
-        className="flex justify-center mb-8"
-      >
-        <div className="relative rounded-2xl border border-white/15 bg-white/10 px-8 py-6 backdrop-blur shadow-lg shadow-purple-800/30">
-          <div className="relative mx-auto h-16 w-16">
-            <Image
-              src="/logo.PNG"
-              alt="ClientLabs"
-              fill
-              className="object-contain"
-            />
-          </div>
-          <p className="mt-3 text-center text-base font-semibold tracking-wide text-white/90">ClientLabs</p>
-          <p className="mt-1 text-center text-xs text-white/60">Núcleo central</p>
-        </div>
-      </motion.div>
-
-      {/* Grid de módulos - Layout limpio sin solapamientos */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:gap-6">
-        {modules.map((module, idx) => (
-          <motion.div
-            key={module.name}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: idx * 0.06, duration: 0.5 }}
-            className="group relative rounded-xl border border-white/10 bg-white/5 p-5 text-center backdrop-blur transition-all duration-300 hover:border-white/20 hover:bg-white/8 hover:shadow-purple-900/30 hover:-translate-y-1"
-          >
-            <div className="mb-3 text-2xl md:text-3xl transition-transform duration-300 group-hover:scale-110">{module.icon}</div>
-            <p className="mb-1.5 text-sm font-semibold text-white/90 md:text-base">{module.name}</p>
-            <p className="text-xs text-white/60 md:text-sm leading-relaxed">{module.desc}</p>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Features debajo */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ delay: 0.5 }}
-        className="flex flex-wrap justify-center gap-3 pt-4"
-      >
-        <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/80 md:text-sm">
-          ✔ Trazabilidad completa
-        </span>
-        <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/80 md:text-sm">
-          ✔ Automatización sin código
-        </span>
-        <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/80 md:text-sm">
-          ✔ Métricas en tiempo real
-        </span>
-      </motion.div>
-    </div>
-  )
-}
+// ArchitectureDiagram - Diagrama de arquitectura compacto y ejecutivo
+// Sin emojis: usando dots morados minimalistas para estética premium
 

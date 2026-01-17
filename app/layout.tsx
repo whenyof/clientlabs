@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { WebVitals } from "./components/WebVitals";
+import GlobalBackground from "@/components/layout/GlobalBackground";
 
 // Font optimization: display swap for better LCP
 const geistSans = Geist({
@@ -18,17 +20,46 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ClientLabs - Automatiza tu negocio sin tocar código",
-  description: "ClientLabs centraliza clientes, pagos, métricas, automatizaciones y campañas en un solo panel profesional diseñado para escalar negocios reales.",
-  keywords: ["automatización", "CRM", "pagos", "SaaS", "negocios", "automatización sin código", "gestión de clientes"],
-  openGraph: {
-    title: "ClientLabs - Automatiza tu negocio sin tocar código",
-    description: "Infraestructura para negocios que crecen en serio. El sistema operativo que conecta todo tu negocio.",
-    type: "website",
+  title: "ClientLabs | Sistema operativo para negocios",
+  description:
+    "ClientLabs centraliza clientes, pagos, métricas y automatizaciones en un único panel profesional. Infraestructura diseñada para escalar operaciones reales.",
+  keywords: [
+    "ClientLabs",
+    "automatización",
+    "CRM",
+    "pagos",
+    "SaaS",
+    "negocios",
+    "sistema operativo empresarial",
+  ],
+  metadataBase: new URL("https://clientlabs.com"),
+  alternates: {
+    canonical: "/",
   },
-  // Performance: preconnect to critical domains
-  other: {
-    "dns-prefetch": "https://fonts.googleapis.com",
+  openGraph: {
+    title: "ClientLabs | Sistema operativo para negocios",
+    description:
+      "Infraestructura para negocios que crecen en serio. Un único sistema para clientes, pagos y automatizaciones.",
+    type: "website",
+    url: "https://clientlabs.com",
+    siteName: "ClientLabs",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ClientLabs | Sistema operativo para negocios",
+    description:
+      "Infraestructura para negocios que crecen en serio. Un único sistema para clientes, pagos y automatizaciones.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
   },
 };
 
@@ -39,14 +70,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <head>
-        {/* Preconnect to external resources */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased text-white`}
       >
+        <GlobalBackground />
+        <WebVitals />
         {children}
       </body>
     </html>

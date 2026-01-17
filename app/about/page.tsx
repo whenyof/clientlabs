@@ -1,9 +1,8 @@
-import { BackgroundGlow, Navbar } from "../ui/chrome"
+import { Navbar } from "../ui/chrome"
 
 export default function AboutPage() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#04050a] via-[#050814] to-[#040812] text-white">
-      <BackgroundGlow />
+    <main className="relative min-h-screen overflow-hidden text-white">
       <Navbar />
 
       <section className="mx-auto flex max-w-5xl flex-col items-center px-6 pt-28 pb-14 text-center md:pt-32">
@@ -43,4 +42,5 @@ export default function AboutPage() {
     </main>
   )
 }
+
 

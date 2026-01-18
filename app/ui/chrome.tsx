@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import Image from "next/image"
 import { PrimaryButton } from "./buttons"
 
@@ -111,9 +112,18 @@ export function Navbar() {
 
         {/* DERECHA - Login + CTA (TABLET+) / Menú (MOBILE) */}
         <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
-          <PrimaryButton href="/contacto" size="sm" className="hidden md:inline-flex">
-            Empezar prueba gratis
-          </PrimaryButton>
+          <Link
+            href="/auth"
+            className="hidden rounded-full border border-white/15 px-4 py-2 text-[13px] font-semibold text-white/80 transition-all duration-200 hover:border-white/40 hover:text-white hover:scale-105 md:inline-flex"
+          >
+            Login
+          </Link>
+          <Link
+            href="/auth"
+            className="hidden rounded-full bg-gradient-to-r from-[#7C3AED] via-indigo-500 to-blue-500 px-4 py-2 text-[13px] font-semibold text-white shadow-xl shadow-purple-800/30 transition-all duration-200 hover:scale-[1.02] hover:shadow-purple-800/60 md:inline-flex"
+          >
+            Empezar ahora
+          </Link>
           
           {/* Botón menú mobile */}
           <button
@@ -163,12 +173,20 @@ export function Navbar() {
 
           {/* CTA fijo abajo */}
           <div className="absolute bottom-0 left-0 right-0 border-t border-white/10 bg-black/80 backdrop-blur-2xl px-6 py-5 space-y-3">
-            <PrimaryButton href="/contacto" className="w-full">
-              Empezar prueba gratis
-            </PrimaryButton>
-            <p className="text-[11px] text-center text-white/50">
-              14 días gratis · Sin tarjeta
-            </p>
+            <Link
+              href="/auth"
+              onClick={() => setIsMenuOpen(false)}
+              className="block w-full rounded-full bg-gradient-to-r from-[#7C3AED] via-indigo-500 to-blue-500 px-6 py-3 text-center text-sm font-semibold text-white shadow-xl shadow-purple-800/30 transition-all duration-200 hover:scale-[1.02] hover:shadow-purple-800/60"
+            >
+              Empezar ahora
+            </Link>
+            <Link
+              href="/auth"
+              onClick={() => setIsMenuOpen(false)}
+              className="block w-full rounded-full border border-white/20 px-6 py-3 text-center text-sm font-semibold text-white/90 transition-all duration-200 hover:bg-white/10 hover:border-white/40"
+            >
+              Login
+            </Link>
           </div>
         </div>
       </div>

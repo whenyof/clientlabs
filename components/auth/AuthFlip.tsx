@@ -13,27 +13,39 @@ export default function AuthFlip() {
 
       <motion.div
         className="relative w-full preserve-3d min-h-[520px]"
-        animate={{ rotateY: side === "login" ? 0 : 180 }}
-        transition={{ duration: 0.8, ease: "easeInOut" }}
+        animate={{
+          rotateY: side === "login" ? 0 : 180,
+          scale: side === "login" ? 1 : 1.015
+        }}
+        transition={{
+          duration: 0.9,
+          ease: [0.16, 1, 0.3, 1]
+        }}
       >
 
-       {/* LOGIN */}
-<div className="absolute w-full backface-hidden">
-  <motion.div
-    animate={{ y: side === "login" ? -25 : 0 }}
-    transition={{ duration: 0.4, ease: "easeOut" }}
-  >
-    <AuthCard>
-      <Login onSwitch={() => setSide("register")} />
-    </AuthCard>
-  </motion.div>
-</div>
+        {/* LOGIN */}
+        <div className="absolute w-full backface-hidden">
+          <motion.div
+            animate={{
+              y: side === "login" ? -30 : 20,
+              opacity: side === "login" ? 1 : 0
+            }}
+            transition={{ duration: 0.45, ease: "easeOut" }}
+          >
+            <AuthCard>
+              <Login onSwitch={() => setSide("register")} />
+            </AuthCard>
+          </motion.div>
+        </div>
 
         {/* REGISTER */}
         <div className="absolute inset-0 rotate-y-180 backface-hidden flex">
           <motion.div
-            animate={{ y: side === "register" ? -60 : 0 }}
-            transition={{ duration: 0.4 }}
+            animate={{
+              y: side === "register" ? -30 : 20,
+              opacity: side === "register" ? 1 : 0
+            }}
+            transition={{ duration: 0.45, ease: "easeOut" }}
           >
             <AuthCard>
               <Register onSwitch={() => setSide("login")} />
@@ -48,16 +60,21 @@ export default function AuthFlip() {
 
 function AuthCard({ children }: { children: ReactNode }) {
   return (
-    <div className="
-      w-full
-      rounded-3xl
-      border border-white/10
-      bg-white/5
-      backdrop-blur-xl
-      shadow-2xl
-      p-8
-    ">
+    <motion.div
+      initial={{ opacity: 0, y: 25 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className="
+        w-full
+        rounded-3xl
+        border border-white/10
+        bg-white/5
+        backdrop-blur-xl
+        shadow-2xl
+        p-8
+      "
+    >
       {children}
-    </div>
+    </motion.div>
   )
 }

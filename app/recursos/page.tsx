@@ -177,10 +177,11 @@ export default function Recursos() {
         <div className="mx-auto flex w-full max-w-5xl flex-col items-center text-center gap-6 reveal">
           <p className="text-xs uppercase tracking-[0.3em] text-white/50">Recursos</p>
           <h1 className="text-4xl md:text-6xl font-semibold leading-tight">
-            Todo el conocimiento para operar sin improvisar
+            Todo el <span className="text-purple-400 font-semibold">conocimiento</span> para operar sin improvisar
           </h1>
           <p className="text-white/70 text-base md:text-lg">
-            Recursos estratégicos para escalar con control real. Documentación, guías y herramientas reales.
+            Recursos estratégicos para escalar con control real. Documentación,{" "}
+            <span className="text-purple-400 font-semibold">guías</span> y herramientas reales.
           </p>
           <PrimaryButton href="#grid">Ver recursos</PrimaryButton>
         </div>
@@ -193,7 +194,7 @@ export default function Recursos() {
               Infraestructura de conocimiento
             </p>
             <h2 className="mt-3 text-3xl md:text-5xl font-semibold">
-              Operaciones reales, decisiones basadas en datos
+              <span className="text-purple-400 font-semibold">Operaciones</span> reales, decisiones basadas en datos
             </h2>
           </div>
 

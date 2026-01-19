@@ -183,10 +183,11 @@ export default function ContactoClient() {
             Respuesta media: &lt; 2h
           </span>
           <h1 className="text-4xl md:text-6xl font-semibold leading-tight">
-            Habla con el equipo de ClientLabs
+            Habla con el <span className="text-purple-400 font-semibold">equipo</span> de ClientLabs
           </h1>
           <p className="text-white/70 text-base md:text-lg max-w-3xl">
-            Te ayudamos a diseñar tu sistema operativo. Soporte real. Respuestas humanas.
+            Te ayudamos a diseñar tu sistema operativo.{" "}
+            <span className="text-purple-400 font-semibold">Soporte</span> real. Respuestas humanas.
           </p>
           <div className="flex flex-col sm:flex-row items-center gap-4">
             <PrimaryButton href="#form">Contactar soporte</PrimaryButton>
@@ -199,10 +200,12 @@ export default function ContactoClient() {
           <div className="space-y-5 reveal">
             <p className="text-xs uppercase tracking-[0.3em] text-white/50">Soporte humano</p>
             <h2 className="text-3xl md:text-5xl font-semibold">
-              Operaciones reales requieren respuestas reales
+              Operaciones reales requieren{" "}
+              <span className="text-purple-400 font-semibold">resultados</span> reales
             </h2>
             <p className="text-white/70">
-              Infraestructura de soporte, onboarding guiado y acompañamiento continuo para decisiones basadas en datos.
+              Infraestructura de <span className="text-purple-400 font-semibold">soporte</span>, onboarding guiado y
+              acompañamiento continuo para decisiones basadas en datos.
             </p>
             <div className="text-sm text-white/60">
               Te respondemos en menos de 2h
@@ -270,9 +273,12 @@ export default function ContactoClient() {
       <section id="info" className="h-screen flex items-center px-6">
         <div className="mx-auto w-full max-w-5xl space-y-6 text-center reveal">
           <p className="text-xs uppercase tracking-[0.3em] text-white/50">Infraestructura de confianza</p>
-          <h2 className="text-3xl md:text-5xl font-semibold">Soporte humano para operaciones reales</h2>
+          <h2 className="text-3xl md:text-5xl font-semibold">
+            <span className="text-purple-400 font-semibold">Soporte</span> humano para operaciones reales
+          </h2>
           <p className="text-white/70 max-w-3xl mx-auto">
-            Partnership real para equipos que necesitan claridad operativa, acompañamiento y decisiones basadas en datos.
+            Partnership real para equipos que necesitan claridad operativa, acompañamiento y{" "}
+            <span className="text-purple-400 font-semibold">decisiones</span> basadas en datos.
           </p>
           <div className="grid gap-4 md:grid-cols-3">
             {["Onboarding guiado", "Playbooks operativos", "Acompañamiento real"].map((item) => (
@@ -291,7 +297,8 @@ export default function ContactoClient() {
               Habla con un humano. De verdad.
             </h2>
             <p className="text-white/70">
-              Estamos listos para ayudarte a escalar con control.
+              Estamos listos para darte <span className="text-purple-400 font-semibold">ayuda</span> y escalar con
+              control.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <PrimaryButton href="/contacto">Contactar ahora</PrimaryButton>

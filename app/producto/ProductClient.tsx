@@ -93,7 +93,7 @@ export default function ProductClient() {
   const reduceMotion = useReducedMotion()
   const [activeIndustry, setActiveIndustry] = useState(industries[0])
   const [activeSection, setActiveSection] = useState(sections[0].id)
-  const indicatorRef = useRef<(index: number) => void>()
+  const indicatorRef = useRef<((index: number) => void) | undefined>(undefined)
   const isScrollingRef = useRef(false)
   const mainRef = useRef<HTMLElement | null>(null)
   const sectionIndexRef = useRef(0)

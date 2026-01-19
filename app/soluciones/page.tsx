@@ -109,7 +109,8 @@ export default function Soluciones() {
             Soluciones reales para negocios reales
           </h1>
           <p className="text-white/70 text-base md:text-lg">
-            ClientLabs se adapta a cómo trabajas. No importa tu modelo. Importa tu operación.
+            ClientLabs se adapta a cómo trabajas. No importa tu modelo. Importa tu{" "}
+            <span className="text-purple-400 font-semibold">control</span> operativo.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <PrimaryButton href="/contacto">Probar gratis 14 días</PrimaryButton>
@@ -125,11 +126,13 @@ export default function Soluciones() {
               La mayoría escala mal. Nosotros lo hacemos bien.
             </p>
             <h2 className="text-3xl md:text-5xl font-semibold leading-tight">
-              El problema no es crecer. <br /> Es perder el control cuando creces.
+              El problema no es crecer. <br /> Es perder el{" "}
+              <span className="text-purple-400 font-semibold">control</span> cuando creces.
             </h2>
             <p className="text-white/70 text-base md:text-lg">
-              Empresas con buen producto fallan por sistemas débiles: datos dispersos, equipos desalineados y decisiones
-              a ciegas. ClientLabs nace para resolver exactamente eso.
+              Empresas con buen producto fallan por{" "}
+              <span className="text-purple-400 font-semibold">sistemas</span> débiles: datos dispersos, equipos
+              desalineados y decisiones a ciegas. ClientLabs nace para resolver exactamente eso.
             </p>
             <div className="grid gap-3 text-white/80">
               {["Datos centralizados", "Flujos automáticos estables", "Métricas en tiempo real", "Equipos sincronizados"].map(
@@ -176,9 +179,11 @@ export default function Soluciones() {
       <section className="snap-section min-h-screen" data-section={2}>
         <div className="mx-auto flex h-full w-full max-w-6xl flex-col justify-center gap-10 px-6">
           <div className="space-y-4 animate-on-view">
-            <p className="text-xs uppercase tracking-[0.3em] text-white/60">Crecer no es el problema.</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-white/60">
+              El <span className="text-purple-400 font-semibold">crecimiento</span> no es el problema.
+            </p>
             <h2 className="text-3xl md:text-5xl font-semibold leading-tight">
-              El problema es perder el control cuando creces.
+              El problema es perder el <span className="text-purple-400 font-semibold">control</span> cuando creces.
             </h2>
             <p className="text-white/70 text-base md:text-lg max-w-3xl">
               La mayoría de empresas mueren en la misma fase: cuando empiezan a tener éxito. Más clientes. Más equipo.
@@ -233,9 +238,10 @@ export default function Soluciones() {
 
       <section className="snap-section min-h-screen" data-section={3}>
         <div className="mx-auto flex h-full w-full max-w-5xl flex-col items-center justify-center px-6 text-center space-y-6">
-          <h2 className="text-3xl md:text-5xl font-semibold">
-            No trabajamos con plantillas. Diseñamos sistemas según tu negocio.
-          </h2>
+            <h2 className="text-3xl md:text-5xl font-semibold">
+              No trabajamos con plantillas. Diseñamos{" "}
+              <span className="text-purple-400 font-semibold">sistemas</span> según tu negocio.
+            </h2>
           <div className="mx-auto grid gap-4 text-white/70 md:grid-cols-2">
             {[
               "Modelamos tu flujo real",
@@ -258,7 +264,8 @@ export default function Soluciones() {
             <p className="text-xs uppercase tracking-[0.3em] text-white/60">Caso real</p>
             <h2 className="text-3xl md:text-4xl font-semibold">NextSite</h2>
             <p className="text-white/70">
-              Reducción del 63% en tiempo operativo. Recuperación automática de pagos. Control total en 30 días.
+              Reducción del 63% en tiempo operativo. Recuperación automática de pagos.{" "}
+              <span className="text-purple-400 font-semibold">Control</span> total en 30 días.
             </p>
           </div>
           <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
@@ -295,7 +302,7 @@ export default function Soluciones() {
             No vendemos software. Diseñamos infraestructura.
           </h2>
           <p className="text-white/70 text-base md:text-lg">
-            Arquitectura pensada para crecer sin romper nada.
+            Arquitectura <span className="text-purple-400 font-semibold">escalable</span> para crecer sin romper nada.
           </p>
         </div>
       </section>
@@ -305,7 +312,8 @@ export default function Soluciones() {
           <div className="flex flex-1 items-center justify-center px-6">
             <div className="max-w-4xl text-center space-y-6">
               <h2 className="text-4xl md:text-5xl font-semibold">
-                Deja de improvisar. Opera como una empresa seria.
+                Deja de improvisar. Opera con{" "}
+                <span className="text-purple-400 font-semibold">control</span> como una empresa seria.
               </h2>
               <PrimaryButton href="/contacto">Probar gratis 14 días</PrimaryButton>
             </div>

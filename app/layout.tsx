@@ -1,24 +1,28 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import { WebVitals } from "./components/WebVitals";
-import GlobalBackground from "@/components/layout/GlobalBackground";
+import type { Metadata } from "next"
+import { Geist, Geist_Mono } from "next/font/google"
+import "./globals.css"
+import { WebVitals } from "./components/WebVitals"
+import GlobalBackground from "@/components/layout/GlobalBackground"
+import ScrollProgress from "@/components/ui/ScrollProgress"
+import { ToastProvider } from "@/components/ui/toast"
+import Providers from "./providers"
 
-// Font optimization: display swap for better LCP
+// FONTS
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
   display: "swap",
   preload: true,
-});
+})
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
   display: "swap",
-  preload: false, // Not critical, lazy load
-});
+  preload: false,
+})
 
+// SEO
 export const metadata: Metadata = {
   title: "ClientLabs | Sistema operativo para negocios",
   description:
@@ -61,22 +65,33 @@ export const metadata: Metadata = {
       "max-video-preview": -1,
     },
   },
-};
+}
 
+// ROOT LAYOUT
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html lang="es">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased text-white`}
+        className={`
+          ${geistSans.variable} 
+          ${geistMono.variable} 
+          antialiased 
+          text-white
+        `}
       >
-        <GlobalBackground />
-        <WebVitals />
-        {children}
+        <Providers>
+          <ToastProvider>
+            <GlobalBackground />
+            <ScrollProgress />
+            <WebVitals />
+            {children}
+          </ToastProvider>
+        </Providers>
       </body>
     </html>
-  );
+  )
 }

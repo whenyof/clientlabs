@@ -297,129 +297,135 @@ export default function PricingClient() {
       {/* PRICING */}
       <section id="pricing" className="h-screen flex items-center justify-center px-6">
         <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }} className="mx-auto w-full max-w-6xl space-y-4">
-          <motion.div variants={fadeUp} className="mx-auto max-w-3xl text-center space-y-2">
-            <p className="text-xs uppercase tracking-[0.3em] text-white/50">Facturación</p>
-            <div className="mx-auto inline-flex rounded-full border border-white/10 bg-white/5 p-1 backdrop-blur">
-              <div className="flex items-center gap-1">
-                {(() => {
-                  const base = "w-32 px-4 py-2 rounded-full text-sm font-semibold transition text-center"
-                  const active = "bg-white text-black shadow-lg"
-                  const inactive = "border border-white/20 text-white/70 hover:border-white/40"
-                  return (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => setBilling("monthly")}
-                        className={`${base} ${billing === "monthly" ? active : inactive}`}
-                      >
-                        Mensual
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setBilling("annual")}
-                        className={`${base} ${billing === "annual" ? active : inactive}`}
-                      >
-                        Anual
-                      </button>
-                    </>
-                  )
-                })()}
+          <div className="mt-12 mb-6 relative z-10">
+            <motion.div variants={fadeUp} className="mx-auto max-w-3xl text-center space-y-2">
+              <p className="text-xs uppercase tracking-[0.3em] text-white/50">Facturación</p>
+              <div className="mx-auto inline-flex rounded-full border border-white/10 bg-white/5 p-1 backdrop-blur">
+                <div className="flex items-center gap-1">
+                  {(() => {
+                    const base = "w-32 px-4 py-2 rounded-full text-sm font-semibold transition text-center"
+                    const active = "bg-white text-black shadow-lg"
+                    const inactive = "border border-white/20 text-white/70 hover:border-white/40"
+                    return (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setBilling("monthly")}
+                          className={`${base} ${billing === "monthly" ? active : inactive}`}
+                        >
+                          Mensual
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setBilling("annual")}
+                          className={`${base} ${billing === "annual" ? active : inactive}`}
+                        >
+                          Anual
+                        </button>
+                      </>
+                    )
+                  })()}
+                </div>
               </div>
-            </div>
-          </motion.div>
-
-          <motion.p variants={fadeUp} className="text-xs text-white/70 text-center">
-            El 78% de nuestros clientes empiezan en <span className="text-purple-300">Growth</span> porque es donde ocurre la magia ⚡
-          </motion.p>
-          <div className="flex gap-4 overflow-x-auto scrollbar-hide md:grid md:grid-cols-3 md:overflow-visible">
-            {plans.map((p) => (
-              <motion.div
-                key={p.id}
-                variants={fadeUp}
-                whileHover={{ y: -6, scale: 1.03, zIndex: 20 }}
-                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                className={`min-w-[82vw] md:min-w-0 rounded-3xl border px-5 py-5 backdrop-blur transition-all will-change-transform ${
-                  p.highlight
-                    ? "border-2 border-purple-500/60 bg-gradient-to-b from-purple-500/20 via-purple-500/10 to-transparent shadow-[0_30px_120px_rgba(124,58,237,0.3)] md:scale-[1.05] relative"
-                    : "border-white/10 bg-white/5"
-                }`}
-              >
-                {p.highlight && (
-                  <span className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 px-4 py-1 text-[11px] font-semibold text-white shadow-[0_0_20px_rgba(124,58,237,0.6)] animate-pulse">
-                    🔥 Más elegido
-                  </span>
-                )}
-                <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-white/50">
-                    <span
-                      className={`h-2 w-2 rounded-full ${
-                        p.id === "starter"
-                          ? "bg-emerald-400"
-                          : p.id === "growth"
-                          ? "bg-purple-400"
-                          : "bg-indigo-300"
-                      }`}
-                    />
-                    Early Access
-                  </span>
-                </div>
-                <h2 className="mt-2 text-lg font-semibold">{p.name}</h2>
-                <p className="mt-2 text-xs text-white/70">{p.desc}</p>
-                <div className="mt-3 space-y-1">
-                  {p.id === "scale" && (
-                    <p className="text-xs text-white/60">💎 Para equipos serios</p>
-                  )}
-                  {billing === "monthly" ? (
-                    <div className="flex items-end gap-3">
-                      <p className="text-2xl font-semibold">{priceLabel(p)}</p>
-                      <p className="text-[9px] uppercase tracking-[0.28em] text-white/50">/mes</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-[11px] text-white/50">
-                        <span className="line-through">{formatPrice(p.monthly)}€/mes</span>
-                        <span className="rounded-full bg-purple-500/15 px-2 py-0.5 text-[10px] text-purple-300">2 meses gratis</span>
-                      </div>
-                      <div className="flex items-end gap-3">
-                        <p className="text-2xl font-semibold">
-                          {formatPrice(p.yearly / 12)}€ /mes
-                        </p>
-                        <p className="text-[9px] uppercase tracking-[0.28em] text-white/50">
-                          facturado anualmente
-                        </p>
-                      </div>
-                      <p className="text-[11px] text-purple-300">💜 Ahorra 2 meses pagando anual</p>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2 text-[10px] text-white/60">
-                    <span className="uppercase tracking-[0.24em]">{priceSubLabel(p)}</span>
-                  </div>
-                  {p.id === "scale" && (
-                    <p className="text-xs text-white/60">Menos de 1€ al día</p>
-                  )}
-                </div>
-                <p className="mt-3 text-xs text-white/70">{p.blurb}</p>
-                <div className="mt-3 space-y-1.5 text-xs text-white/80">
-                  {p.features.map((f) => (
-                    <div key={f} className="flex items-center gap-2">
-                      <span className="text-purple-300">✔</span>
-                      {f}
-                    </div>
-                  ))}
-                </div>
-                {p.id === "growth" && (
-                  <p className="mt-4 text-xs text-white/60">+127 equipos ya están usando este plan</p>
-                )}
-                <PrimaryButton href="/contacto" className="mt-4 w-full">
-                  Empezar prueba gratis
-                </PrimaryButton>
-                <p className="mt-2 text-[9px] uppercase tracking-[0.3em] text-white/40 text-center">
-                  Bloquea este precio para siempre
-                </p>
-              </motion.div>
-            ))}
+            </motion.div>
           </div>
-          <p className="text-xs text-white/60 text-center">⏳ Precios de early access por tiempo limitado</p>
+
+          <div className="mt-12 mb-6 h-px bg-white/10" />
+          <div className="mt-14">
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide md:grid md:grid-cols-3 md:overflow-visible items-stretch min-h-[520px]">
+              {plans.map((p) => (
+                <motion.div
+                  key={p.id}
+                  variants={fadeUp}
+                  whileHover={{ y: -6, scale: 1.03, zIndex: 20 }}
+                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                  className={`min-w-[82vw] md:min-w-0 rounded-3xl border px-5 py-5 backdrop-blur transition-all duration-300 ease-out will-change-transform h-full ${
+                    p.highlight
+                      ? "border-2 border-purple-500/60 bg-gradient-to-b from-purple-500/20 via-purple-500/10 to-transparent shadow-[0_30px_120px_rgba(124,58,237,0.3)] md:scale-[1.05] relative"
+                      : "border-white/10 bg-white/5"
+                  }`}
+                >
+                  {p.highlight && (
+                    <span className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 px-4 py-1 text-[11px] font-semibold text-white shadow-[0_0_20px_rgba(124,58,237,0.6)] animate-pulse">
+                      🔥 Más elegido
+                    </span>
+                  )}
+                  <div className="flex items-center justify-between">
+                    <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-white/50">
+                      <span
+                        className={`h-2 w-2 rounded-full ${
+                          p.id === "starter"
+                            ? "bg-emerald-400"
+                            : p.id === "growth"
+                            ? "bg-purple-400"
+                            : "bg-indigo-300"
+                        }`}
+                      />
+                      Early Access
+                    </span>
+                  </div>
+                  <h2 className="mt-2 text-lg font-semibold">{p.name}</h2>
+                  <p className="mt-2 text-xs text-white/70">{p.desc}</p>
+                  <div className="mt-3 space-y-1">
+                    {p.id === "scale" && (
+                      <p className="text-xs text-white/60">💎 Para equipos serios</p>
+                    )}
+                    {billing === "monthly" ? (
+                      <div className="flex items-end gap-3">
+                        <p className="text-2xl font-semibold">{priceLabel(p)}</p>
+                        <p className="text-[9px] uppercase tracking-[0.28em] text-white/50">/mes</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-[11px] text-white/50">
+                          <span className="line-through">{formatPrice(p.monthly)}€/mes</span>
+                          <span className="rounded-full bg-purple-500/15 px-2 py-0.5 text-[10px] text-purple-300">2 meses gratis</span>
+                        </div>
+                        <div className="flex items-end gap-3">
+                          <p className="text-2xl font-semibold">
+                            {formatPrice(p.yearly / 12)}€ /mes
+                          </p>
+                          <p className="text-[9px] uppercase tracking-[0.28em] text-white/50">
+                            facturado anualmente
+                          </p>
+                        </div>
+                        <p className="text-[11px] text-purple-300">💜 Ahorra 2 meses pagando anual</p>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2 text-[10px] text-white/60">
+                      <span className="uppercase tracking-[0.24em]">{priceSubLabel(p)}</span>
+                    </div>
+                    {p.id === "scale" && (
+                      <p className="text-xs text-white/60">Menos de 1€ al día</p>
+                    )}
+                  </div>
+                  <p className="mt-3 text-xs text-white/70">{p.blurb}</p>
+                  <div className="mt-3 space-y-1.5 text-xs text-white/80">
+                    {p.features.map((f) => (
+                      <div key={f} className="flex items-center gap-2">
+                        <span className="text-purple-300">✔</span>
+                        {f}
+                      </div>
+                    ))}
+                  </div>
+                  {p.id === "growth" && (
+                    <p className="mt-4 text-xs text-white/60">+127 equipos ya están usando este plan</p>
+                  )}
+                  <PrimaryButton href="/contacto" className="mt-4 w-full">
+                    Empezar prueba gratis
+                  </PrimaryButton>
+                  <p className="mt-2 text-[9px] uppercase tracking-[0.3em] text-white/40 text-center">
+                    Bloquea este precio para siempre
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+            <p className="mt-8 text-center text-sm text-white/60">
+              El <span className="text-purple-400 font-semibold">78%</span> de nuestros clientes empiezan en{" "}
+              <span className="text-purple-400 font-semibold">Growth</span> porque es donde ocurre la magia ⚡
+            </p>
+            <p className="text-xs text-white/60 text-center">⏳ Precios de early access por tiempo limitado</p>
+          </div>
         </motion.div>
       </section>
 

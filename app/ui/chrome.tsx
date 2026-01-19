@@ -1,42 +1,39 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { PrimaryButton } from "./buttons"
+import { signOut, useSession } from "next-auth/react"
 
-// BackgroundGlow - Efectos de fondo premium
-export function BackgroundGlow() {
-  return (
-    <>
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(124,58,237,0.24),transparent_32%),radial-gradient(circle_at_80%_10%,rgba(59,130,246,0.2),transparent_30%),radial-gradient(circle_at_60%_70%,rgba(124,58,237,0.16),transparent_32%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0)_22%,rgba(255,255,255,0.04)_45%,rgba(255,255,255,0)_68%,rgba(255,255,255,0.04)_90%)] opacity-30" />
-    </>
-  )
-}
-
-// LogoMark - Componente de logo optimizado
+/* LOGO */
 export function LogoMark({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
   const dimension =
-    size === "sm" ? "h-8 w-8" : size === "lg" ? "h-12 w-12" : "h-10 w-10"
+    size === "sm" ? 28 : size === "lg" ? 44 : 36
+
   return (
-    <div className={`relative ${dimension} flex-shrink-0`}>
+    <div
+      className="flex items-center justify-center"
+      style={{ width: dimension, height: dimension }}
+    >
       <Image
         src="/logo.PNG"
         alt="ClientLabs"
-        fill
+        width={dimension}
+        height={dimension}
         className="object-contain"
-        sizes="(max-width: 768px) 48px, 40px"
-        loading="lazy"
-        style={{ willChange: "transform" }}
+        priority
       />
     </div>
   )
 }
 
-// Navbar - Navegación principal con menú mobile premium
+/* NAVBAR */
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const userMenuRef = useRef<HTMLDivElement | null>(null)
+  const { data: session } = useSession()
+
   const navItems = [
     { label: "Producto", href: "/producto" },
     { label: "Precios", href: "/precios" },
@@ -45,151 +42,218 @@ export function Navbar() {
     { label: "Contacto", href: "/contacto" },
   ]
 
-  // Cerrar menú al tocar fuera o hacer scroll - OPTIMIZADO: throttle scroll listener
+  /* cerrar mobile al scroll */
   useEffect(() => {
     if (!isMenuOpen) return
-
-    let ticking = false
-    let rafId: number | null = null
-
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
-      if (!target.closest("nav") && !target.closest('[aria-label="Menu"]')) {
-        setIsMenuOpen(false)
-      }
-    }
-
-    // Throttled scroll handler usando requestAnimationFrame
-    const handleScroll = () => {
-      if (!ticking) {
-        rafId = requestAnimationFrame(() => {
-          setIsMenuOpen(false)
-          ticking = false
-        })
-        ticking = true
-      }
-    }
-
-    document.addEventListener("click", handleClickOutside, { passive: true })
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    document.body.style.overflow = "hidden"
-
-    return () => {
-      document.removeEventListener("click", handleClickOutside)
-      window.removeEventListener("scroll", handleScroll)
-      document.body.style.overflow = ""
-      if (rafId !== null) {
-        cancelAnimationFrame(rafId)
-      }
-    }
+    const close = () => setIsMenuOpen(false)
+    window.addEventListener("scroll", close)
+    return () => window.removeEventListener("scroll", close)
   }, [isMenuOpen])
 
+  useEffect(() => {
+    if (!isUserMenuOpen) return
+    const handleClick = (event: MouseEvent) => {
+      if (!userMenuRef.current) return
+      if (!userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false)
+      }
+    }
+    window.addEventListener("click", handleClick)
+    return () => window.removeEventListener("click", handleClick)
+  }, [isUserMenuOpen])
+
   return (
-    <nav className="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-black/50 backdrop-blur-2xl supports-[backdrop-filter]:bg-black/40 transition-all duration-300 shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
-      <div className="flex items-center justify-between w-full px-4 sm:px-6 lg:px-8 py-3 sm:py-4 relative">
-        {/* IZQUIERDA - Logo + ClientLabs */}
-        <a href="/" className="flex items-center gap-2.5 text-white group flex-shrink-0 z-50">
-          <div className="transition-transform duration-300 group-hover:scale-105">
-            <LogoMark size="md" />
+    <nav className="
+      fixed top-0 inset-x-0 z-50
+      bg-gradient-to-r from-[#0b0f1c]/90 via-[#0f172a]/85 to-[#111827]/80
+      backdrop-blur-xl
+      border-b border-white/10
+      shadow-[0_1px_0_rgba(255,255,255,0.04),0_12px_32px_rgba(2,6,23,0.35)]
+    ">
+      <div className="w-full px-6 py-4">
+
+        {/* GRID REAL */}
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center">
+
+          {/* IZQUIERDA */}
+          <Link
+            href="/"
+            className="flex items-center gap-2.5 justify-self-start"
+          >
+            <LogoMark />
+            <span className="text-[17px] font-semibold leading-none flex items-center">
+              Client<span className="text-purple-400">Labs</span>
+            </span>
+          </Link>
+
+          {/* CENTRO */}
+          <div className="hidden md:flex items-center justify-center gap-10 justify-self-center">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="text-sm text-white/60 hover:text-white transition"
+              >
+                {item.label}
+              </Link>
+            ))}
           </div>
-          <span className="text-xl sm:text-2xl md:text-2xl lg:text-3xl font-bold tracking-tight">
-            Client<span className="text-purple-500">Labs</span>
-          </span>
-        </a>
 
-        {/* CENTRO - Navigation Links (TABLET+) */}
-        <nav className="absolute left-1/2 -translate-x-1/2 hidden items-center gap-6 text-sm text-white/70 md:flex lg:gap-8">
-          {navItems.map((item) => (
-            <a
-              key={item.label}
-              href={item.href}
-              className="rounded-full px-3 py-1.5 transition-all duration-200 hover:text-white hover:bg-white/5 hover:scale-105"
-            >
-              {item.label}
-            </a>
-          ))}
-        </nav>
+          {/* DERECHA */}
+          <div className="hidden md:flex justify-end items-center gap-4 justify-self-end">
+            {!session && (
+              <>
+                <Link
+                  href="/auth"
+                  className="text-sm text-white/60 hover:text-white"
+                >
+                  Login
+                </Link>
 
-        {/* DERECHA - Login + CTA (TABLET+) / Menú (MOBILE) */}
-        <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
-          <Link
-            href="/auth"
-            className="hidden rounded-full border border-white/15 px-4 py-2 text-[13px] font-semibold text-white/80 transition-all duration-200 hover:border-white/40 hover:text-white hover:scale-105 md:inline-flex"
-          >
-            Login
-          </Link>
-          <Link
-            href="/auth"
-            className="hidden rounded-full bg-gradient-to-r from-[#7C3AED] via-indigo-500 to-blue-500 px-4 py-2 text-[13px] font-semibold text-white shadow-xl shadow-purple-800/30 transition-all duration-200 hover:scale-[1.02] hover:shadow-purple-800/60 md:inline-flex"
-          >
-            Empezar ahora
-          </Link>
-          
-          {/* Botón menú mobile */}
+                <Link
+                  href="/auth"
+                  className="
+                    px-5 py-2 rounded-full
+                    bg-gradient-to-r from-purple-500/90 via-indigo-500/90 to-blue-500/90
+                    border border-white/10
+                    text-sm font-semibold text-white
+                    shadow-lg shadow-purple-900/30
+                    hover:opacity-90 hover:shadow-purple-900/50 transition
+                  "
+                >
+                  Empezar ahora
+                </Link>
+              </>
+            )}
+
+            {session && (
+              <>
+                <div className="relative" ref={userMenuRef}>
+                  <button
+                    type="button"
+                    onClick={() => setIsUserMenuOpen((prev) => !prev)}
+                    className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-sm font-semibold text-white/80 hover:border-white/30 transition"
+                    aria-label="Abrir menú de usuario"
+                  >
+                    {session.user?.image ? (
+                      <img
+                        src={session.user.image}
+                        alt={session.user.name ?? "Usuario"}
+                        className="h-10 w-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <span>
+                        {(session.user?.name?.[0] || "U").toUpperCase()}
+                      </span>
+                    )}
+                  </button>
+                  {isUserMenuOpen && (
+                    <div className="absolute right-0 mt-3 w-48 rounded-xl border border-white/10 bg-[#0b0f1c]/95 p-2 shadow-2xl backdrop-blur">
+                      <Link
+                        href="/perfil"
+                        onClick={() => setIsUserMenuOpen(false)}
+                        className="block rounded-lg px-3 py-2 text-sm text-white/80 hover:bg-white/10"
+                      >
+                        Perfil
+                      </Link>
+                      <Link
+                        href="/ajustes"
+                        onClick={() => setIsUserMenuOpen(false)}
+                        className="block rounded-lg px-3 py-2 text-sm text-white/80 hover:bg-white/10"
+                      >
+                        Ajustes
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => signOut({ callbackUrl: "/" })}
+                        className="w-full rounded-lg px-3 py-2 text-left text-sm text-red-300 hover:bg-white/10"
+                      >
+                        Cerrar sesión
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* MOBILE */}
           <button
-            aria-label="Menu"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden relative w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-200 hover:bg-white/10 active:scale-95"
+            className="md:hidden justify-self-end text-xl"
           >
-            <span className={`absolute w-6 h-0.5 bg-white transition-all duration-300 ${isMenuOpen ? "rotate-45 translate-y-0" : "-translate-y-1.5"}`} />
-            <span className={`absolute w-6 h-0.5 bg-white transition-all duration-300 ${isMenuOpen ? "opacity-0" : "opacity-100"}`} />
-            <span className={`absolute w-6 h-0.5 bg-white transition-all duration-300 ${isMenuOpen ? "-rotate-45 translate-y-0" : "translate-y-1.5"}`} />
+            ☰
           </button>
         </div>
       </div>
 
-      {/* Drawer Mobile Premium */}
-      <div
-        className={`fixed inset-0 top-[var(--nav-height,64px)] z-40 md:hidden ${
-          isMenuOpen ? "visible" : "invisible"
-        }`}
-      >
-        {/* Backdrop blur */}
-        <div
-          className={`absolute inset-0 bg-black/80 backdrop-blur-2xl transition-opacity duration-300 ${
-            isMenuOpen ? "opacity-100" : "opacity-0"
-          }`}
-        />
+      {/* MOBILE MENU */}
+      {isMenuOpen && (
+        <div className="md:hidden border-t border-white/10 bg-[#0b0f1c]/95">
 
-        {/* Slide-in panel */}
-        <div
-          className={`absolute right-0 top-0 h-full w-full max-w-[340px] bg-[#0b0f1c]/95 backdrop-blur-2xl border-l border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.5)] transition-transform duration-300 ${
-            isMenuOpen ? "translate-x-0" : "translate-x-full"
-          }`}
-        >
-          <nav className="flex flex-col h-full px-6 pt-8 pb-24 space-y-3">
-            {navItems.map((item, idx) => (
-              <a
-                key={item.label}
-                href={item.href}
-                onClick={() => setIsMenuOpen(false)}
-                className="py-4 px-4 text-lg font-semibold text-white/90 rounded-2xl transition-all duration-200 hover:bg-white/10 hover:text-white active:scale-[0.98]"
-                style={{ animationDelay: `${idx * 40}ms` }}
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={() => setIsMenuOpen(false)}
+              className="block px-6 py-3 text-white/70 hover:text-white"
+            >
+              {item.label}
+            </Link>
+          ))}
+
+          {!session && (
+            <>
+              <Link
+                href="/auth"
+                className="block px-6 py-3 text-white/70"
               >
-                {item.label}
-              </a>
-            ))}
-          </nav>
+                Login
+              </Link>
 
-          {/* CTA fijo abajo */}
-          <div className="absolute bottom-0 left-0 right-0 border-t border-white/10 bg-black/80 backdrop-blur-2xl px-6 py-5 space-y-3">
-            <Link
-              href="/auth"
-              onClick={() => setIsMenuOpen(false)}
-              className="block w-full rounded-full bg-gradient-to-r from-[#7C3AED] via-indigo-500 to-blue-500 px-6 py-3 text-center text-sm font-semibold text-white shadow-xl shadow-purple-800/30 transition-all duration-200 hover:scale-[1.02] hover:shadow-purple-800/60"
-            >
-              Empezar ahora
-            </Link>
-            <Link
-              href="/auth"
-              onClick={() => setIsMenuOpen(false)}
-              className="block w-full rounded-full border border-white/20 px-6 py-3 text-center text-sm font-semibold text-white/90 transition-all duration-200 hover:bg-white/10 hover:border-white/40"
-            >
-              Login
-            </Link>
-          </div>
+              <Link
+                href="/auth"
+                className="block px-6 py-3 text-purple-400 font-semibold"
+              >
+                Empezar ahora
+              </Link>
+            </>
+          )}
+
+          {session && (
+            <>
+              <Link
+                href="/dashboard"
+                className="block px-6 py-3 font-semibold text-white bg-gradient-to-r from-purple-500/90 via-indigo-500/90 to-blue-500/90"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Dashboard
+              </Link>
+              <Link
+                href="/perfil"
+                className="block px-6 py-3 text-white/70 hover:text-white"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Perfil
+              </Link>
+              <Link
+                href="/ajustes"
+                className="block px-6 py-3 text-white/70 hover:text-white"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Ajustes
+              </Link>
+              <button
+                type="button"
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="block w-full px-6 py-3 text-left text-red-300 hover:text-red-200"
+              >
+                Cerrar sesión
+              </button>
+            </>
+          )}
         </div>
-      </div>
+      )}
     </nav>
   )
 }

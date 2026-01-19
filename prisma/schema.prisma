@@ -47,7 +47,7 @@ model AIPrediction {
 }
 
 model Account {
-  id                String  @id
+  id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
@@ -59,10 +59,10 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-  User              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
-  @@index([userId])
 }
 
 model AiLog {
@@ -124,15 +124,126 @@ model ApiKey {
 }
 
 model BusinessProfile {
-  id        String   @id
+  id        String   @id @default(cuid())
   userId    String   @unique
-  type      String
-  name      String
+  sector    String
+  name      String?
   createdAt DateTime @default(now())
-  updatedAt DateTime
-  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([type])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model RestaurantMetrics {
+  id              String   @id @default(cuid())
+  userId          String
+  date            DateTime @default(now())
+  salesToday      Float?
+  openTickets     Int?
+  tablesOccupied  Int?
+  activeEmployees Int?
+  User            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([date])
+  @@index([userId])
+}
+
+model GymMetrics {
+  id              String   @id @default(cuid())
+  userId          String
+  date            DateTime @default(now())
+  activeMembers   Int?
+  renewals        Int?
+  todayCheckins   Int?
+  pendingPayments Int?
+  User            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([date])
+  @@index([userId])
+}
+
+model WorkshopMetrics {
+  id              String   @id @default(cuid())
+  userId          String
+  date            DateTime @default(now())
+  openOrders      Int?
+  vehiclesOnSite  Int?
+  monthlyRevenue  Float?
+  deliveriesToday Int?
+  User            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([date])
+  @@index([userId])
+}
+
+model RealEstateMetrics {
+  id              String   @id @default(cuid())
+  userId          String
+  date            DateTime @default(now())
+  activeLeads     Int?
+  visitsToday     Int?
+  monthlyClosings Int?
+  commissions     Float?
+  User            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([date])
+  @@index([userId])
+}
+
+model RetailMetrics {
+  id            String   @id @default(cuid())
+  userId        String
+  date          DateTime @default(now())
+  dailySales    Float?
+  lowStock      Int?
+  averageTicket Float?
+  suppliers     Int?
+  User          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([date])
+  @@index([userId])
+}
+
+model HomeServiceMetrics {
+  id                String   @id @default(cuid())
+  userId            String
+  date              DateTime @default(now())
+  appointmentsToday Int?
+  activeTechnicians Int?
+  pendingInvoices   Int?
+  closedJobs        Int?
+  User              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([date])
+  @@index([userId])
+}
+
+model EventMetrics {
+  id             String   @id @default(cuid())
+  userId         String
+  date           DateTime @default(now())
+  reservations   Int?
+  capacity       Int?
+  revenue        Float?
+  upcomingEvents Int?
+  User           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([date])
+  @@index([userId])
+}
+
+model GenericMetrics {
+  id            String   @id @default(cuid())
+  userId        String
+  date          DateTime @default(now())
+  totalRevenue  Float?
+  activeClients Int?
+  openTasks     Int?
+  satisfaction  Float?
+  User          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([date])
   @@index([userId])
 }
 
@@ -478,27 +589,26 @@ model TrackingEvent {
 }
 
 model User {
-  id                   String            @id @default(cuid())
-  email                String            @unique
+  id                   String               @id @default(cuid())
+  email                String               @unique
   name                 String?
   password             String?
   phone                String?
-  googleId             String?           @unique
-  provider             String            @default("credentials")
+  googleId             String?              @unique
+  provider             String               @default("credentials")
   emailVerified        Boolean?
-  plan                 Plan              @default(TRIAL)
-  isTrial              Boolean           @default(true)
-  planStartedAt        DateTime          @default(now())
+  plan                 Plan                 @default(TRIAL)
+  isTrial              Boolean              @default(true)
+  planStartedAt        DateTime             @default(now())
   planExpiresAt        DateTime?
   billingCycle         BillingCycle?
   stripeCustomerId     String?
   stripeSubscriptionId String?
-  createdAt            DateTime          @default(now())
-  updatedAt            DateTime          @updatedAt
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
   image                String?
   AIInsight            AIInsight[]
   AIPrediction         AIPrediction[]
-  Account              Account[]
   AiLog                AiLog[]
   Alert                Alert[]
   ApiKey               ApiKey[]
@@ -512,10 +622,19 @@ model User {
   LeadAlert            LeadAlert[]
   LeadEvent            LeadEvent[]
   Notification         Notification[]
+  restaurantMetrics    RestaurantMetrics[]
+  gymMetrics           GymMetrics[]
+  workshopMetrics      WorkshopMetrics[]
+  realEstateMetrics    RealEstateMetrics[]
+  retailMetrics        RetailMetrics[]
+  homeServiceMetrics   HomeServiceMetrics[]
+  eventMetrics         EventMetrics[]
+  genericMetrics       GenericMetrics[]
   Sale                 Sale[]
-  Session              Session[]
   TrackingEvent        TrackingEvent[]
   Website              Website[]
+  accounts             Account[]
+  sessions             Session[]
 }
 
 model VerificationToken {
@@ -625,4 +744,15 @@ enum Plan {
   STARTER
   GROWTH
   PRO
+}
+
+enum Sector {
+  restaurante
+  gimnasio
+  taller_mecanico
+  inmobiliaria
+  tienda_fisica
+  servicios_domicilio
+  eventos
+  other
 }

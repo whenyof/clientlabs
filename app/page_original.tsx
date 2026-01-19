@@ -2,9 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import { motion, useMotionValue, useSpring, useTransform, Variants } from "framer-motion"
-import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { Navbar } from "./ui/chrome"
+import { BackgroundGlow, Navbar } from "./ui/chrome"
 
 // Animación ligera: sólo opacity/translate. Sin animar layouts completos.
 const fadeUp: Variants = {
@@ -13,27 +11,6 @@ const fadeUp: Variants = {
 }
 
 export default function Home() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
-
-  useEffect(() => {
-    if (status === "loading") return
-
-    if (session?.user) {
-      // User is logged in, redirect to sector selection
-      router.push("/select-sector")
-    }
-  }, [session, status, router])
-
-  // Show loading while checking authentication
-  if (status === "loading" || session?.user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    )
-  }
-
   const sections = useMemo(
     () => [
       { id: "hero", label: "Inicio" },
@@ -83,6 +60,7 @@ export default function Home() {
       className="relative h-screen overflow-y-scroll bg-gradient-to-b from-[#04050a] via-[#050814] to-[#040812] text-white snap-y snap-mandatory scroll-smooth"
       style={{ paddingTop: "var(--nav-height, 72px)" }}
     >
+      <BackgroundGlow />
       <Navbar />
 
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(124,58,237,0.18),transparent_32%),radial-gradient(circle_at_80%_10%,rgba(59,130,246,0.16),transparent_30%),radial-gradient(circle_at_60%_70%,rgba(124,58,237,0.12),transparent_32%)]" />

@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
 import { WebVitals } from "./components/WebVitals"
 import GlobalBackground from "@/components/layout/GlobalBackground"
-import ScrollProgress from "@/components/ui/ScrollProgress"
 import { ToastProvider } from "@/components/ui/toast"
 import Providers from "./providers"
 
@@ -77,16 +76,15 @@ export default function RootLayout({
     <html lang="es">
       <body
         className={`
-          ${geistSans.variable} 
-          ${geistMono.variable} 
-          antialiased 
+          ${geistSans.variable}
+          ${geistMono.variable}
+          antialiased
           text-white
         `}
       >
         <Providers>
           <ToastProvider>
             <GlobalBackground />
-            <ScrollProgress />
             <WebVitals />
             {children}
           </ToastProvider>

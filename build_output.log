@@ -1,0 +1,18 @@
+
+> clientlabs-app@0.1.0 build
+> next build
+
+▲ Next.js 16.1.2 (Turbopack)
+- Environments: .env.local, .env
+- Experiments (use with caution):
+  · optimizePackageImports
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 14.6s
+  Running TypeScript ...
+Failed to compile.
+
+Type error: Type 'typeof import("/Users/iyanrp_/Desktop/clientlabs-app/app/dashboard/other/finance/page")' does not satisfy the constraint 'AppPageConfig<"/dashboard/other/finance">'.
+  Property 'default' is missing in type 'typeof import("/Users/iyanrp_/Desktop/clientlabs-app/app/dashboard/other/finance/page")' but required in type 'AppPageConfig<"/dashboard/other/finance">'.
+
+Next.js build worker exited with code: 1 and signal: null

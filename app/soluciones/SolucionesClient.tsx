@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from "react"
-import { BackgroundGlow, Navbar, LogoMark } from "../ui/chrome"
+import { Navbar, LogoMark } from "../ui/chrome"
 import { PrimaryButton } from "../ui/buttons"
 
 const SCROLL_DELAY = 700
@@ -44,7 +44,7 @@ const systemCards = [
 
 export default function SolucionesClient() {
   const [activeSection, setActiveSection] = useState(sections[0].id)
-  const indicatorRef = useRef<(index: number) => void>()
+  const indicatorRef = useRef<((index: number) => void) | undefined>(undefined)
   const isScrollingRef = useRef(false)
   const lastScrollAtRef = useRef(0)
   const mainRef = useRef<HTMLElement | null>(null)
@@ -196,7 +196,6 @@ export default function SolucionesClient() {
       ref={mainRef}
       className="h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth text-white"
     >
-      <BackgroundGlow />
       <Navbar />
       <div className="pointer-events-none fixed inset-0 bg-gradient-to-b from-[#04050a] via-[#050814] to-[#040812]" />
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(124,58,237,0.18),transparent_32%),radial-gradient(circle_at_80%_10%,rgba(59,130,246,0.16),transparent_30%),radial-gradient(circle_at_60%_70%,rgba(124,58,237,0.12),transparent_32%)]" />

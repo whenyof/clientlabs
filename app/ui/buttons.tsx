@@ -4,7 +4,7 @@ import { ReactNode } from "react"
 type ButtonSize = "sm" | "md"
 
 type ButtonProps = {
-  href?: string
+  href: string
   children: ReactNode
   className?: string
   size?: ButtonSize

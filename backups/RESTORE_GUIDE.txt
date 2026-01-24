@@ -1,0 +1,132 @@
+============================
+CLIENTLABS BACKUP RESTORE GUIDE
+============================
+
+📋 AUTOMATIC CODE BACKUPS - RESTORE INSTRUCTIONS
+Generated on: 2026-01-22 22:28:28
+
+🚨 IMPORTANT NOTES:
+- Always backup current state before restore
+- Verify backup date and time
+- Test application after restore
+- Keep logs for audit trail
+
+============================
+1️⃣ LIST AVAILABLE BACKUPS
+============================
+
+Check what backups are available in Google Drive:
+
+rclone ls gdrive-secure:backups/code/
+
+Example output:
+   456789 backup_2026-01-22_03-00-01.zip
+   456789 backup_2026-01-21_03-00-01.zip
+   456789 backup_2026-01-20_03-00-01.zip
+
+============================
+2️⃣ DOWNLOAD BACKUP
+============================
+
+Download the desired backup to local machine:
+
+rclone copy gdrive-secure:backups/code/BACKUP_NAME.zip .
+
+Example (replace with actual backup name):
+rclone copy gdrive-secure:backups/code/backup_2026-01-22_03-00-01.zip .
+
+============================
+3️⃣ EXTRACT BACKUP
+============================
+
+Extract the downloaded backup:
+
+unzip backup_2026-01-22_03-00-01.zip
+
+This creates a 'backup' directory with all restored files.
+
+============================
+4️⃣ RESTORE PROJECT FILES
+============================
+
+⚠️  WARNING: This will REPLACE existing files!
+
+# Backup current state first (recommended)
+mkdir ../current-backup-$(date +%Y%m%d-%H%M%S)
+cp -r app prisma lib scripts components ../current-backup-$(date +%Y%m%d-%H%M%S)/
+
+# Remove old directories
+rm -rf app prisma lib scripts components
+
+# Move restored directories
+mv backup/app .
+mv backup/prisma .
+mv backup/lib .
+mv backup/scripts .
+mv backup/components .
+
+# Clean up backup directory
+rm -rf backup
+rm backup_2026-01-22_03-00-01.zip
+
+============================
+5️⃣ VERIFY AND RESTART
+============================
+
+# Install dependencies
+npm install
+
+# Verify application structure
+ls -la app/ lib/ scripts/
+
+# Start development server
+npm run dev
+
+# Test application in browser
+open http://localhost:3000
+
+============================
+6️⃣ EMERGENCY RESTORE
+============================
+
+If interactive restore is needed:
+
+bash scripts/restore-backup.sh
+
+Or for automatic restore:
+
+bash scripts/restore-backup.sh --auto backup_2026-01-22_03-00-01.zip
+
+============================
+📞 SUPPORT INFORMATION
+============================
+
+For support or issues:
+- Check logs: tail -f backups/auto-backup.log
+- Run diagnostics: bash scripts/validate-backup-system.sh
+- Contact: DevOps Team
+
+============================
+🔐 SECURITY NOTES
+============================
+
+- Never share backup files or guide documents
+- Verify file integrity after download
+- Use official restore scripts when possible
+- Keep backup secret keys secure
+
+============================
+📊 BACKUP SYSTEM STATUS
+============================
+
+Last Backup: 2026-01-22_22-28
+Total Backups: 1
+Next Backup: Daily at 3:00 AM (cron job)
+
+For more information:
+- bash scripts/backup-manager.sh
+- Open: AUTO_BACKUP_SYSTEM_README.md
+
+============================
+⚠️  END OF RESTORE GUIDE
+============================

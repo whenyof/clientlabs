@@ -2,6 +2,7 @@
 
 import { FunnelChart as RechartsFunnelChart, Funnel, LabelList, ResponsiveContainer, Tooltip } from 'recharts'
 import { motion } from 'framer-motion'
+import { ClientNumber } from "@/components/ClientNumber"
 
 const FUNNEL_DATA = [
   { name: 'Visitantes', value: 1000, fill: '#8B5CF6' },
@@ -69,7 +70,7 @@ export function FunnelChart() {
               style={{ backgroundColor: item.fill }}
             />
             <div className="text-2xl font-bold text-white">
-              {item.value.toLocaleString()}
+              <ClientNumber value={item.value} />
             </div>
             <div className="text-sm text-gray-400">
               {item.name}

@@ -8,7 +8,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
-import type { Transaction } from "./mock"
+import type { Transaction } from "@prisma/client"
 
 export function CashflowChart({
   data,

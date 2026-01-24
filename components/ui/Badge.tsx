@@ -1,25 +1,30 @@
-interface BadgeProps {
-  variant: "pro" | "new" | "beta" | "premium"
-  children: React.ReactNode
-  className?: string
+import * as React from "react"
+import { cn } from "@/lib/utils"
+
+export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
+  variant?: "default" | "secondary" | "destructive" | "outline"
 }
 
-const variants = {
-  pro: "bg-gradient-to-r from-purple-600 to-pink-600 text-white",
-  new: "bg-gradient-to-r from-green-500 to-emerald-500 text-white",
-  beta: "bg-gradient-to-r from-orange-500 to-yellow-500 text-black",
-  premium: "bg-gradient-to-r from-purple-700 to-indigo-700 text-white",
-}
+export function Badge({
+  className,
+  variant = "default",
+  ...props
+}: BadgeProps) {
+  const variants = {
+    default: "border-transparent bg-blue-500 text-white hover:bg-blue-600",
+    secondary: "border-transparent bg-gray-500 text-white hover:bg-gray-600",
+    destructive: "border-transparent bg-red-500 text-white hover:bg-red-600",
+    outline: "border-gray-300 text-gray-700 bg-white",
+  }
 
-export function Badge({ variant, children, className = "" }: BadgeProps) {
   return (
-    <span
-      className={`
-        inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider
-        ${variants[variant]} ${className}
-      `}
-    >
-      {children}
-    </span>
+    <div
+      className={cn(
+        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors",
+        variants[variant],
+        className
+      )}
+      {...props}
+    />
   )
 }

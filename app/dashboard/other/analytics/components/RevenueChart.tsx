@@ -1,6 +1,7 @@
 "use client"
 
 import { TrendingUp, TrendingDown } from "lucide-react"
+import { ClientNumber } from "@/components/ClientNumber"
 
 const REVENUE_DATA = [
   { month: "Ene", value: 8500, previous: 7800 },
@@ -35,7 +36,7 @@ export function RevenueChart() {
 
       <div className="flex items-center justify-between mb-6">
         <div>
-          <p className="text-2xl font-bold text-white">€{latestValue.toLocaleString()}</p>
+          <p className="text-2xl font-bold text-white">€<ClientNumber value={latestValue} /></p>
           <div className="flex items-center gap-1 mt-1">
             {change >= 0 ? (
               <TrendingUp className="w-4 h-4 text-green-400" />

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { DashboardContainer } from "@/components/layout/DashboardContainer"
 import { AnalyticsKPIs } from "./components/AnalyticsKPIs"
 import { DateRangePicker } from "./components/DateRangePicker"
 import { MainChart } from "./components/MainChart"
@@ -86,53 +87,53 @@ export default function AnalyticsPage() {
   }, [selectedRange])
 
   return (
-    <motion.div
-      className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 p-6"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <AnimatedCard className="p-6" delay={0.1}>
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-            >
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
-                Analítica avanzada
-              </h1>
-              <p className="text-gray-400 text-lg">
-                Métricas inteligentes y reportes ejecutivos para toma de decisiones
-              </p>
-            </motion.div>
+    <DashboardContainer>
+      <div className="mb-8">
+        <h1 className="text-2xl font-semibold text-white">Analítica avanzada</h1>
+        <p className="text-sm text-white/60">
+          Métricas inteligentes y reportes ejecutivos para toma de decisiones
+        </p>
+      </div>
 
-            <motion.div
-              className="flex items-center gap-4"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-            >
-              <DateRangePicker
-                selectedRange={selectedRange}
-                onRangeChange={handleRangeChange}
-              />
+      <AnimatedCard className="p-6" delay={0.1}>
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+          >
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+              Analítica avanzada
+            </h1>
+            <p className="text-gray-400 text-lg">
+              Métricas inteligentes y reportes ejecutivos para toma de decisiones
+            </p>
+          </motion.div>
 
-              <div className="flex gap-3">
-                <motion.button
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-lg transition-colors border border-gray-600"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <TableCellsIcon className="w-4 h-4" />
-                  Exportar CSV
-                </motion.button>
-              </div>
-            </motion.div>
-          </div>
-        </AnimatedCard>
+          <motion.div
+            className="flex items-center gap-4"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+          >
+            <DateRangePicker
+              selectedRange={selectedRange}
+              onRangeChange={handleRangeChange}
+            />
+
+            <div className="flex gap-3">
+              <motion.button
+                className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-lg transition-colors border border-gray-600"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <TableCellsIcon className="w-4 h-4" />
+                Exportar CSV
+              </motion.button>
+            </div>
+          </motion.div>
+        </div>
+      </AnimatedCard>
 
         {/* KPIs */}
         <motion.div
@@ -206,7 +207,6 @@ export default function AnalyticsPage() {
         >
           <AiInsights />
         </motion.div>
-      </div>
-    </motion.div>
+    </DashboardContainer>
   )
 }

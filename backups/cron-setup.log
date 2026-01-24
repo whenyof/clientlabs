@@ -1,0 +1,10 @@
+[2026-01-22 19:47:31] === ClientLabs Cron Setup Started ===
+[INFO][2026-01-22 19:47:31] Environment validation passed
+[INFO][2026-01-22 19:47:31] Setting up cron for user: iyanrp_
+[INFO][2026-01-22 19:47:31] Testing backup script...
+[ERROR][2026-01-22 19:47:31] Backup script test failed
+[2026-01-22 19:52:34] === ClientLabs Cron Setup Started ===
+[INFO][2026-01-22 19:52:34] Environment validation passed
+[INFO][2026-01-22 19:52:34] Setting up cron for user: iyanrp_
+[INFO][2026-01-22 19:52:34] Testing backup script...
+[ERROR][2026-01-22 19:52:34] Backup script test failed

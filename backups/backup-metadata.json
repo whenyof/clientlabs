@@ -1,0 +1,13 @@
+{
+  "backup_name": "backup_2026-01-22_22-28-20.zip",
+  "timestamp": "2026-01-22T21:28:28Z",
+  "project_root": "/Users/iyanrp_/Desktop/clientlabs-app",
+  "included_directories": ["app", "prisma", "lib", "scripts", "components"],
+  "excluded_patterns": ["node_modules", ".next", ".git", "*.log"],
+  "remote": "gdrive-secure",
+  "remote_path": "backups/code",
+  "rotation_policy": "keep_last_7",
+  "compression": "zip",
+  "restore_guide": true,
+  "status": "completed"
+}

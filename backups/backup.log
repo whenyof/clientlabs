@@ -1,0 +1,6 @@
+[INFO][2026-01-22 19:47:31] DRY RUN MODE - No actual backup will be performed
+[2026-01-22 19:52:22] === Starting ClientLabs Database Backup ===
+[2026-01-22 19:52:22] Script version: 1.0.0
+[2026-01-22 19:52:22] Project root: /Users/iyanrp_/Desktop/clientlabs-app
+[INFO][2026-01-22 19:52:22] Environment detected: development (/Users/iyanrp_/Desktop/clientlabs-app/.env.local)
+[INFO][2026-01-22 19:52:34] DRY RUN MODE - No actual backup will be performed

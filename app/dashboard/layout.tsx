@@ -1,27 +1,34 @@
-"use client"
+import { getServerSession } from "next-auth"
+import { redirect } from "next/navigation"
+import { authOptions } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 
-import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { useEffect } from "react"
-import { usePathname } from "next/navigation"
-
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const { data: session, status } = useSession()
-  const router = useRouter()
-  const pathname = usePathname()
+  // ✅ SERVER-SIDE AUTH + ONBOARDING GUARD
+  // Middleware only checks token presence; this enforces DB-backed user + onboarding
+  const session = await getServerSession(authOptions)
 
-  useEffect(() => {
-    if (status === "loading") return
-    if (!session) router.push("/auth")
-  }, [session, status, router])
+  if (!session?.user?.id) {
+    redirect("/auth")
+  }
 
-  // Skip wrapper for pixel-perfect layouts (like /dashboard/other)
-  if (pathname?.startsWith("/dashboard/other")) {
-    return children
+  const dbUser = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { id: true, onboardingCompleted: true },
+  })
+
+  if (!dbUser) {
+    // No DB user should ever reach the dashboard
+    redirect("/auth?error=user_missing")
+  }
+
+  if (!dbUser.onboardingCompleted) {
+    // Force onboarding before any dashboard access
+    redirect("/select-sector")
   }
 
   return children

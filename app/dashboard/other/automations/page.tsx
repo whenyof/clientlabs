@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { DashboardContainer } from "@/components/layout/DashboardContainer"
 import { AutomationKPIs } from "./components/AutomationKPIs"
 import AutomationsTable from "./components/AutomationsTable"
 import { CreateAutomationModal } from "./components/CreateAutomationModal"
@@ -28,35 +29,35 @@ export default function AutomationsPage() {
   }
 
   return (
-    <motion.div
-      className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 p-6"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <AnimatedCard className="p-6" delay={0.1}>
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-            >
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
-                Automatizaciones
-              </h1>
-              <p className="text-gray-400 text-lg">
-                Flujos inteligentes que optimizan tu negocio y generan ingresos automáticamente
-              </p>
-            </motion.div>
+    <DashboardContainer>
+      <div className="mb-8">
+        <h1 className="text-2xl font-semibold text-white">Automatizaciones</h1>
+        <p className="text-sm text-white/60">
+          Flujos inteligentes que optimizan tu negocio y generan ingresos automáticamente
+        </p>
+      </div>
 
-            <motion.div
-              className="flex items-center gap-4"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-            >
+      <AnimatedCard className="p-6" delay={0.1}>
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+          >
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+              Automatizaciones
+            </h1>
+            <p className="text-gray-400 text-lg">
+              Flujos inteligentes que optimizan tu negocio y generan ingresos automáticamente
+            </p>
+          </motion.div>
+
+          <motion.div
+            className="flex items-center gap-4"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+          >
               <motion.button
                 onClick={() => setShowLogs(true)}
                 className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-lg transition-colors border border-gray-600"
@@ -184,7 +185,6 @@ export default function AutomationsPage() {
             <LogsPanel onClose={() => setShowLogs(false)} />
           )}
         </AnimatePresence>
-      </div>
-    </motion.div>
+    </DashboardContainer>
   )
 }

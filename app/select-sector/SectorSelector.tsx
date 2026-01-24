@@ -42,13 +42,26 @@ export default function SectorSelector({
   const ordered = other ? [...normal, other] : normal
 
   const selectSector = async (sector: string) => {
-    await fetch("/api/onboarding/sector", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sector }),
-    })
+    try {
+      const response = await fetch("/api/onboarding/sector", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sector }),
+      })
 
-    router.push(`/dashboard/${sector}`)
+      const data = await response.json()
+
+      if (data.success) {
+        // ✅ ONBOARDING COMPLETED - REDIRECT TO DASHBOARD
+        router.push(data.redirect)
+      } else {
+        console.error("Error completing onboarding:", data.error)
+        // Handle error (could show toast notification)
+      }
+    } catch (error) {
+      console.error("Error selecting sector:", error)
+      // Handle error (could show toast notification)
+    }
   }
 
   return (

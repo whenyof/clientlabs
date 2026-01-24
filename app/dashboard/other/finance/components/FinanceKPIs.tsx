@@ -1,65 +1,165 @@
 "use client"
 
-import type { Transaction } from "./mock"
+import { motion } from "framer-motion"
+import {
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
+  BanknotesIcon,
+  CreditCardIcon,
+  ChartBarIcon,
+  ClockIcon,
+  CalculatorIcon,
+  CurrencyEuroIcon
+} from "@heroicons/react/24/outline"
+import { mockFinanceKPIs, formatCurrency, formatPercentage } from "../mock"
 
-export function FinanceKPIs({
-  transactions = [],
-}: {
-  transactions?: Transaction[]
-}) {
-
-  const income = transactions
-    .filter((t) => t.type === "income")
-    .reduce((s, t) => s + t.amount, 0)
-
-  const expenses = transactions
-    .filter((t) => t.type === "expense")
-    .reduce((s, t) => s + t.amount, 0)
-
-  const balance = income - expenses
-
+export function FinanceKPIs() {
   const kpis = [
     {
-      label: "Ingresos",
-      value: `€${income.toLocaleString()}`,
-      color: "text-green-400",
+      title: "Ingresos Totales",
+      value: formatCurrency(mockFinanceKPIs.totalIncome),
+      subtitle: "este período",
+      icon: BanknotesIcon,
+      color: "from-green-500 to-emerald-600",
+      bgColor: "from-green-500/10 to-emerald-600/10",
+      trend: "+15.2%",
+      trendUp: true,
+      change: mockFinanceKPIs.totalIncome * 0.152
     },
     {
-      label: "Gastos",
-      value: `€${expenses.toLocaleString()}`,
-      color: "text-red-400",
+      title: "Gastos Totales",
+      value: formatCurrency(mockFinanceKPIs.totalExpenses),
+      subtitle: "este período",
+      icon: CreditCardIcon,
+      color: "from-red-500 to-pink-600",
+      bgColor: "from-red-500/10 to-pink-600/10",
+      trend: "+8.1%",
+      trendUp: false,
+      change: mockFinanceKPIs.totalExpenses * 0.081
     },
     {
-      label: "Balance",
-      value: `€${balance.toLocaleString()}`,
-      color: balance >= 0 ? "text-green-400" : "text-red-400",
+      title: "Beneficio Neto",
+      value: formatCurrency(mockFinanceKPIs.netProfit),
+      subtitle: "resultado final",
+      icon: ChartBarIcon,
+      color: "from-blue-500 to-indigo-600",
+      bgColor: "from-blue-500/10 to-indigo-600/10",
+      trend: "+22.4%",
+      trendUp: true,
+      change: mockFinanceKPIs.netProfit * 0.224
     },
     {
-      label: "Movimientos",
-      value: transactions.length,
-      color: "text-white",
+      title: "Pendiente de Cobro",
+      value: formatCurrency(mockFinanceKPIs.pendingPayments),
+      subtitle: "facturas por cobrar",
+      icon: ClockIcon,
+      color: "from-orange-500 to-amber-600",
+      bgColor: "from-orange-500/10 to-amber-600/10",
+      trend: "-5.3%",
+      trendUp: true,
+      change: -mockFinanceKPIs.pendingPayments * 0.053
     },
+    {
+      title: "Burn Rate",
+      value: formatCurrency(mockFinanceKPIs.burnRate),
+      subtitle: "gasto mensual",
+      icon: CalculatorIcon,
+      color: "from-purple-500 to-violet-600",
+      bgColor: "from-purple-500/10 to-violet-600/10",
+      trend: "-12.1%",
+      trendUp: true,
+      change: -mockFinanceKPIs.burnRate * 0.121
+    },
+    {
+      title: "Pagos Recurrentes",
+      value: formatCurrency(mockFinanceKPIs.recurringPayments),
+      subtitle: "gastos fijos mensuales",
+      icon: CurrencyEuroIcon,
+      color: "from-cyan-500 to-teal-600",
+      bgColor: "from-cyan-500/10 to-teal-600/10",
+      trend: "+2.8%",
+      trendUp: false,
+      change: mockFinanceKPIs.recurringPayments * 0.028
+    },
+    {
+      title: "Tasa de Crecimiento",
+      value: formatPercentage(mockFinanceKPIs.growthRate),
+      subtitle: "vs período anterior",
+      icon: ArrowTrendingUpIcon,
+      color: "from-emerald-500 to-green-600",
+      bgColor: "from-emerald-500/10 to-green-600/10",
+      trend: "+3.2%",
+      trendUp: true,
+      change: mockFinanceKPIs.growthRate * 0.032
+    },
+    {
+      title: "Flujo de Caja",
+      value: formatCurrency(mockFinanceKPIs.cashFlow),
+      subtitle: "liquidez disponible",
+      icon: BanknotesIcon,
+      color: "from-indigo-500 to-purple-600",
+      bgColor: "from-indigo-500/10 to-purple-600/10",
+      trend: "+18.7%",
+      trendUp: true,
+      change: mockFinanceKPIs.cashFlow * 0.187
+    }
   ]
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-      {kpis.map((k) => (
-        <div
-          key={k.label}
-          className="
-            bg-white/5 border border-white/10
-            rounded-2xl p-5
-            hover:scale-[1.02] transition
-          "
-        >
-          <p className="text-xs uppercase tracking-wider text-white/40">
-            {k.label}
-          </p>
-          <p className={`mt-2 text-2xl font-semibold ${k.color}`}>
-            {k.value}
-          </p>
-        </div>
-      ))}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-6">
+      {kpis.map((kpi, index) => {
+        const Icon = kpi.icon
+        return (
+          <motion.div
+            key={index}
+            className="relative overflow-hidden rounded-2xl bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 hover:border-gray-600/50 transition-all duration-300 hover:scale-105 group"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 + (index * 0.05), duration: 0.5 }}
+            whileHover={{ y: -2 }}
+          >
+            {/* Background gradient */}
+            <div className={`absolute inset-0 bg-gradient-to-br ${kpi.bgColor} opacity-50`} />
+
+            {/* Content */}
+            <div className="relative p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className={`p-3 rounded-xl bg-gradient-to-br ${kpi.color} shadow-lg`}>
+                  <Icon className="w-6 h-6 text-white" />
+                </div>
+                <div className={`text-xs font-medium px-2 py-1 rounded-full flex items-center gap-1 ${
+                  kpi.trendUp ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                }`}>
+                  {kpi.trendUp ? (
+                    <ArrowTrendingUpIcon className="w-3 h-3" />
+                  ) : (
+                    <ArrowTrendingDownIcon className="w-3 h-3" />
+                  )}
+                  {kpi.trend}
+                </div>
+              </div>
+
+              <div className="text-2xl font-bold text-white mb-1">
+                {kpi.value}
+              </div>
+
+              <div className="text-sm text-gray-400 font-medium mb-2">
+                {kpi.title}
+              </div>
+
+              <div className="text-xs text-gray-500 flex items-center gap-1">
+                <span>{kpi.subtitle}</span>
+                <span className={`ml-1 ${kpi.change >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  ({kpi.change >= 0 ? '+' : ''}{formatCurrency(Math.abs(kpi.change))})
+                </span>
+              </div>
+            </div>
+
+            {/* Hover effect */}
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-600/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          </motion.div>
+        )
+      })}
     </div>
   )
 }

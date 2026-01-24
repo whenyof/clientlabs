@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { DashboardContainer } from "@/components/layout/DashboardContainer"
 import { BillingKPIs } from "./components/BillingKPIs"
 import { BillingTabs } from "./components/BillingTabs"
 import { InvoicesTable } from "./components/InvoicesTable"
@@ -13,10 +14,15 @@ export default function BillingPage() {
   const [selectedTab, setSelectedTab] = useState("all")
 
   return (
-    <div className="space-y-8">
+    <DashboardContainer>
+      <div className="mb-8">
+        <h1 className="text-2xl font-semibold text-white">Facturación</h1>
+        <p className="text-sm text-white/60">
+          Gestiona tus facturas, pagos e integraciones con Hacienda
+        </p>
+      </div>
 
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8">
         <div className="space-y-2">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
             Facturación
@@ -70,7 +76,6 @@ export default function BillingPage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />
-
-    </div>
+    </DashboardContainer>
   )
 }

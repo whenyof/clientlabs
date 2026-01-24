@@ -5,68 +5,23 @@ import { WebVitals } from "./components/WebVitals"
 import GlobalBackground from "@/components/layout/GlobalBackground"
 import { ToastProvider } from "@/components/ui/toast"
 import Providers from "./providers"
+import { AiFloatingAssistant } from "@/components/AiFloatingAssistant"
 
-// FONTS
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
-  display: "swap",
-  preload: true,
 })
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
-  display: "swap",
-  preload: false,
 })
 
-// SEO
 export const metadata: Metadata = {
-  title: "ClientLabs | Sistema operativo para negocios",
-  description:
-    "ClientLabs centraliza clientes, pagos, métricas y automatizaciones en un único panel profesional. Infraestructura diseñada para escalar operaciones reales.",
-  keywords: [
-    "ClientLabs",
-    "automatización",
-    "CRM",
-    "pagos",
-    "SaaS",
-    "negocios",
-    "sistema operativo empresarial",
-  ],
-  metadataBase: new URL("https://clientlabs.com"),
-  alternates: {
-    canonical: "/",
-  },
-  openGraph: {
-    title: "ClientLabs | Sistema operativo para negocios",
-    description:
-      "Infraestructura para negocios que crecen en serio. Un único sistema para clientes, pagos y automatizaciones.",
-    type: "website",
-    url: "https://clientlabs.com",
-    siteName: "ClientLabs",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "ClientLabs | Sistema operativo para negocios",
-    description:
-      "Infraestructura para negocios que crecen en serio. Un único sistema para clientes, pagos y automatizaciones.",
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-      "max-video-preview": -1,
-    },
-  },
+  title: "ClientLabs - SaaS para Profesionales",
+  description: "Plataforma SaaS completa para gestión de clientes, ventas y automatizaciones.",
 }
 
-// ROOT LAYOUT
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -75,18 +30,14 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body
-        className={`
-          ${geistSans.variable}
-          ${geistMono.variable}
-          antialiased
-          text-white
-        `}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#0b0f1c]`}
       >
         <Providers>
           <ToastProvider>
             <GlobalBackground />
             <WebVitals />
             {children}
+            <AiFloatingAssistant />
           </ToastProvider>
         </Providers>
       </body>

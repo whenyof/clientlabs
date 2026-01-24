@@ -1,83 +1,192 @@
 "use client"
 
 import { useState } from "react"
-import { User, Mail, Save } from "lucide-react"
+import { motion } from "framer-motion"
+import { UserIcon, PencilIcon, CheckIcon, XMarkIcon } from "@heroicons/react/24/outline"
 
 export function ProfileForm() {
+  const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState({
-    name: "Juan Pérez",
-    email: "juan@email.com",
-    company: "Mi Empresa S.L."
+    name: 'Juan Pérez',
+    email: 'juan@empresa.com',
+    phone: '+34 600 123 456',
+    language: 'es',
+    timezone: 'Europe/Madrid'
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log("Saving profile:", formData)
+  const handleSave = () => {
+    console.log('Saving profile:', formData)
+    setIsEditing(false)
+    // TODO: Save to API
   }
 
-  const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+  const handleCancel = () => {
+    setIsEditing(false)
+    // Reset form data
   }
 
   return (
-    <div className="bg-gray-900/50 backdrop-blur-xl border border-gray-800 rounded-xl p-6">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 bg-purple-500/10 rounded-lg">
-          <User className="w-5 h-5 text-purple-400" />
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="text-2xl font-bold text-white mb-2">Perfil Personal</h2>
+          <p className="text-gray-400">Gestiona tu información personal y preferencias</p>
         </div>
-        <h3 className="text-lg font-semibold text-white">Perfil de Usuario</h3>
+
+        {!isEditing ? (
+          <motion.button
+            onClick={() => setIsEditing(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <PencilIcon className="w-4 h-4" />
+            Editar
+          </motion.button>
+        ) : (
+          <div className="flex gap-3">
+            <motion.button
+              onClick={handleSave}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <CheckIcon className="w-4 h-4" />
+              Guardar
+            </motion.button>
+            <motion.button
+              onClick={handleCancel}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <XMarkIcon className="w-4 h-4" />
+              Cancelar
+            </motion.button>
+          </div>
+        )}
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Nombre completo
-          </label>
-          <input
-            type="text"
-            value={formData.name}
-            onChange={(e) => handleChange("name", e.target.value)}
-            className="w-full px-3 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Email
-          </label>
+      <div className="space-y-8">
+        {/* Profile Picture */}
+        <div className="flex items-center gap-6">
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => handleChange("email", e.target.value)}
-              className="w-full pl-10 pr-3 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
-            />
+            <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center">
+              <UserIcon className="w-10 h-10 text-white" />
+            </div>
+            {isEditing && (
+              <button className="absolute -bottom-2 -right-2 w-8 h-8 bg-purple-600 hover:bg-purple-700 text-white rounded-full flex items-center justify-center transition-colors">
+                <PencilIcon className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-white">{formData.name}</h3>
+            <p className="text-gray-400">{formData.email}</p>
+            <p className="text-sm text-gray-500">Administrador</p>
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Empresa
-          </label>
-          <input
-            type="text"
-            value={formData.company}
-            onChange={(e) => handleChange("company", e.target.value)}
-            className="w-full px-3 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
-          />
+        {/* Form Fields */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-400 mb-2">
+              Nombre completo
+            </label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              disabled={!isEditing}
+              className="w-full px-4 py-3 bg-gray-900 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-400 mb-2">
+              Email
+            </label>
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              disabled={!isEditing}
+              className="w-full px-4 py-3 bg-gray-900 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-400 mb-2">
+              Teléfono
+            </label>
+            <input
+              type="tel"
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              disabled={!isEditing}
+              className="w-full px-4 py-3 bg-gray-900 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-400 mb-2">
+              Idioma
+            </label>
+            <select
+              value={formData.language}
+              onChange={(e) => setFormData({ ...formData, language: e.target.value })}
+              disabled={!isEditing}
+              className="w-full px-4 py-3 bg-gray-900 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <option value="es">Español</option>
+              <option value="en">English</option>
+              <option value="fr">Français</option>
+              <option value="de">Deutsch</option>
+            </select>
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-400 mb-2">
+              Zona horaria
+            </label>
+            <select
+              value={formData.timezone}
+              onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
+              disabled={!isEditing}
+              className="w-full px-4 py-3 bg-gray-900 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <option value="Europe/Madrid">Europe/Madrid (CET)</option>
+              <option value="Europe/London">Europe/London (GMT)</option>
+              <option value="America/New_York">America/New_York (EST)</option>
+              <option value="America/Los_Angeles">America/Los_Angeles (PST)</option>
+              <option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
+            </select>
+          </div>
         </div>
 
-        <div className="flex justify-end">
-          <button
-            type="submit"
-            className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors"
-          >
-            <Save className="w-4 h-4" />
-            Guardar Cambios
-          </button>
+        {/* Account Status */}
+        <div className="bg-gray-900/50 rounded-xl p-6">
+          <h4 className="text-lg font-semibold text-white mb-4">Estado de la cuenta</h4>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-400 mb-1">Pro</div>
+              <div className="text-sm text-gray-400">Plan actual</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-blue-400 mb-1">Activa</div>
+              <div className="text-sm text-gray-400">Suscripción</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-purple-400 mb-1">15 días</div>
+              <div className="text-sm text-gray-400">Próxima renovación</div>
+            </div>
+          </div>
         </div>
-      </form>
-    </div>
+      </div>
+    </motion.div>
   )
 }

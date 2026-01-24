@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { signOut, useSession } from "next-auth/react"
+import { DashboardButton } from "@/components/DashboardButton"
+import { DashboardButtonMobile } from "@/components/DashboardButtonMobile"
 
 /* LOGO */
 export function LogoMark({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
@@ -128,6 +130,9 @@ export function Navbar() {
 
             {session && (
               <>
+                {/* Dashboard Button - appears when authenticated */}
+                <DashboardButton />
+
                 <div className="relative" ref={userMenuRef}>
                   <button
                     type="button"
@@ -222,13 +227,7 @@ export function Navbar() {
 
           {session && (
             <>
-              <Link
-                href="/dashboard"
-                className="block px-6 py-3 font-semibold text-white bg-gradient-to-r from-purple-500/90 via-indigo-500/90 to-blue-500/90"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Dashboard
-              </Link>
+              <DashboardButtonMobile onClick={() => setIsMenuOpen(false)} />
               <Link
                 href="/perfil"
                 className="block px-6 py-3 text-white/70 hover:text-white"

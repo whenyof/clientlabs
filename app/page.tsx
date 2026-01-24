@@ -12,49 +12,31 @@ const fadeUp: Variants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
 }
 
+// ✅ HOOKS MUST EXECUTE IN THE SAME ORDER EVERY TIME
+// Rules of Hooks: No conditional execution of hooks
+const sections = [
+  { id: "hero", label: "Inicio" },
+  { id: "pasos", label: "Pasos" },
+  { id: "caos", label: "Problemas" },
+  { id: "sistema", label: "Plataforma" },
+  { id: "about", label: "About" },
+  { id: "soporte", label: "Soporte" },
+  { id: "apis", label: "APIs" },
+  { id: "cta", label: "CTA" },
+]
+
 export default function Home() {
+  // ✅ ALL HOOKS EXECUTE UNCONDITIONALLY FIRST
   const { data: session, status } = useSession()
   const router = useRouter()
 
-  useEffect(() => {
-    if (status === "loading") return
-
-    if (session?.user) {
-      // User is logged in, redirect to sector selection
-      router.push("/select-sector")
-    }
-  }, [session, status, router])
-
-  // Show loading while checking authentication
-  if (status === "loading" || session?.user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    )
-  }
-
-  const sections = useMemo(
-    () => [
-      { id: "hero", label: "Inicio" },
-      { id: "pasos", label: "Pasos" },
-      { id: "caos", label: "Problemas" },
-      { id: "sistema", label: "Plataforma" },
-      { id: "about", label: "About" },
-      { id: "soporte", label: "Soporte" },
-      { id: "apis", label: "APIs" },
-      { id: "cta", label: "CTA" },
-    ],
-    []
-  )
   const activeId = useScrollSpy(sections.map((s) => s.id), 0.4)
-
   const chaosRef = useRef<HTMLDivElement>(null)
   const stepsRef = useRef<HTMLDivElement>(null)
   const statsRef = useRef<HTMLDivElement>(null)
   const [statsActive, setStatsActive] = useState(false)
 
-  // nav height -> css var para padding-top
+  // ✅ EFFECTS ALWAYS EXECUTE
   useEffect(() => {
     if (typeof window === "undefined") return
     const nav = document.querySelector("nav")
@@ -63,7 +45,6 @@ export default function Home() {
     }
   }, [])
 
-  // Stats in-view trigger
   useEffect(() => {
     if (!statsRef.current) return
     const obs = new IntersectionObserver(
@@ -77,6 +58,9 @@ export default function Home() {
     obs.observe(statsRef.current)
     return () => obs.disconnect()
   }, [])
+
+  // ✅ LANDING PAGE IS ALWAYS PUBLIC
+  // No conditional returns based on session - always render
 
   return (
     <main
@@ -610,12 +594,23 @@ export default function Home() {
             Crea tu cuenta, conecta tus fuentes y obtén claridad en minutos con flujos sin código y métricas confiables.
           </p>
           <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Button href="/register" variant="primary">
-              Crear cuenta gratis
-            </Button>
-            <Button href="/login" variant="ghost">
-              Login
-            </Button>
+            {session?.user ? (
+              <>
+                <Button href="/dashboard/other" variant="primary">
+                  Ir al Dashboard
+                </Button>
+                <p className="text-xs text-white/60">Bienvenido de vuelta, {session.user.name || session.user.email}</p>
+              </>
+            ) : (
+              <>
+                <Button href="/register" variant="primary">
+                  Crear cuenta gratis
+                </Button>
+                <Button href="/auth" variant="ghost">
+                  Iniciar sesión
+                </Button>
+              </>
+            )}
           </div>
         </motion.div>
       </Section>

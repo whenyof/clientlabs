@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   LayoutDashboard,
@@ -15,11 +16,14 @@ import {
   Zap,
   Settings,
   Plug,
+  ShieldCheck,
   Bell,
   ChevronLeft,
   ChevronRight,
   Building2,
-  Sparkles
+  Sparkles,
+  Banknote,
+  Crown
 } from "lucide-react"
 
 interface SidebarProps {
@@ -66,40 +70,67 @@ interface MenuGroup {
   items: MenuItem[]
 }
 
-const menu: MenuGroup[] = [
-  {
-    title: "CORE",
-    items: [
-      { label: "Dashboard", href: "/dashboard/other", icon: LayoutDashboard },
-      { label: "Leads", href: "/dashboard/other/leads", icon: Target },
-      { label: "Clientes", href: "/dashboard/other/clients", icon: Users },
-      { label: "Proveedores", href: "/dashboard/other/providers", icon: Building2 },
-      { label: "Ventas", href: "/dashboard/other/sales", icon: TrendingUp },
-      { label: "Tareas", href: "/dashboard/other/tasks", icon: CheckSquare, count: 23 },
-      { label: "Finanzas", href: "/dashboard/other/finance", icon: DollarSign },
-      { label: "Facturación", href: "/dashboard/other/billing", icon: CreditCard },
-    ],
-  },
-  {
-    title: "INTELIGENCIA",
-    items: [
-      { label: "Analytics", href: "/dashboard/other/analytics", icon: BarChart3 },
-      { label: "Automatizaciones", href: "/dashboard/other/automations", icon: Zap },
-      { label: "IA Assistant", href: "/dashboard/other/ai-assistant", icon: Sparkles },
-    ],
-  },
-  {
-    title: "SISTEMA",
-    items: [
-      { label: "Integraciones", href: "/dashboard/other/integrations", icon: Plug },
-      { label: "Ajustes", href: "/dashboard/other/settings", icon: Settings },
-    ],
-  },
-]
-
 export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: SidebarProps) {
   const router = useRouter()
   const pathname = usePathname()
+  const { data: session, status } = useSession()
+  const isAdmin = session?.user?.role === "ADMIN"
+
+  // Show loading state while session is loading
+  if (status === "loading") {
+    return (
+      <div className="w-64 bg-[#0e1424]/95 backdrop-blur-xl border-r border-white/10 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500" />
+      </div>
+    )
+  }
+
+  const menu: MenuGroup[] = [
+    {
+      title: "CORE",
+      items: [
+        { label: "Dashboard", href: "/dashboard/other", icon: LayoutDashboard },
+        { label: "Leads", href: "/dashboard/other/leads", icon: Target },
+        { label: "Clientes", href: "/dashboard/other/clients", icon: Users },
+        { label: "Proveedores", href: "/dashboard/other/providers", icon: Building2 },
+        { label: "Ventas", href: "/dashboard/other/sales", icon: TrendingUp },
+        { label: "Tareas", href: "/dashboard/other/tasks", icon: CheckSquare, count: 23 },
+        { label: "Finanzas", href: "/dashboard/other/finance", icon: DollarSign },
+        { label: "Facturación", href: "/dashboard/other/billing", icon: CreditCard },
+
+      ],
+    },
+    {
+      title: "INTELIGENCIA",
+      items: [
+        { label: "Analytics", href: "/dashboard/other/analytics", icon: BarChart3 },
+        { label: "Automatizaciones", href: "/dashboard/other/automations", icon: Zap },
+        { label: "IA Assistant", href: "/dashboard/other/ai-assistant", icon: Sparkles },
+      ],
+    },
+    {
+      title: "SISTEMA",
+      items: [
+        { label: "Integraciones", href: "/dashboard/other/integrations", icon: Plug },
+        // Backup system only visible to PRO/ENTERPRISE users or admins
+        ...(session?.user?.plan === "PRO" || session?.user?.plan === "ENTERPRISE" || isAdmin
+          ? [{ label: "Sistema de Backups", href: "/dashboard/other/system/backups", icon: ShieldCheck }]
+          : []
+        ),
+        { label: "Ajustes", href: "/dashboard/other/settings", icon: Settings },
+      ],
+    },
+  ]
+
+  // Add admin section if user is admin
+  if (isAdmin) {
+    menu.push({
+      title: "ADMIN",
+      items: [
+        { label: "Admin Panel", href: "/admin", icon: Crown },
+      ],
+    })
+  }
 
   return (
     <motion.aside
@@ -162,7 +193,7 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
 
                 return (
                   <button
-                    key={item.label}
+                  key={`${group.title}-${item.href}`}
                     onClick={() => router.push(item.href)}
                     className={`
                       w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm
@@ -200,28 +231,40 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
 
         {/* USER */}
         <div className="flex items-center gap-3">
-
           {/* AVATAR */}
-          <div className="h-9 w-9 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-            U
+          <div className="h-9 w-9 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold overflow-hidden">
+            {session?.user?.image ? (
+              <img
+                src={session.user.image}
+                alt="Avatar"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-sm">
+                {session?.user?.name?.charAt(0)?.toUpperCase() || session?.user?.email?.charAt(0)?.toUpperCase() || "U"}
+              </span>
+            )}
           </div>
 
           {!isCollapsed && (
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-white">Usuario</p>
-              <p className="text-xs text-white/60">user@email.com</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-white truncate">
+                {session?.user?.name || "Usuario"}
+              </p>
+              <p className="text-xs text-white/60 truncate">
+                {session?.user?.email || "user@email.com"}
+              </p>
             </div>
           )}
-
         </div>
 
         {/* PLAN */}
-        {!isCollapsed && (
+        {!isCollapsed && session?.user?.plan && (
           <button
             onClick={() => router.push("/dashboard/other/billing")}
             className="w-full text-left text-xs text-purple-400 hover:text-purple-300"
           >
-            Plan: <b>PRO</b> → Cambiar plan
+            Plan: <b>{session.user.plan.toUpperCase()}</b> → Cambiar plan
           </button>
         )}
 

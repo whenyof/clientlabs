@@ -59,8 +59,7 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -129,8 +128,7 @@ model BusinessProfile {
   sector    String
   name      String?
   createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
@@ -280,51 +278,38 @@ model CalendarEvent {
 }
 
 model Client {
-  id     String @id @default(cuid())
-  userId String
-
-  name  String?
-  email String?
-  phone String?
-  notes String?
-
-  totalSpent Float  @default(0)
-  currency   String @default("EUR")
-
-  source String?
-  page   String?
-
-  conversionSource  String?
-  conversionProduct String?
-
-  // 🔁 1:1 Lead → Client (conversión REAL)
-  convertedFromLeadId String? @unique
-  convertedFromLead   Lead?   @relation("LeadToClient", fields: [convertedFromLeadId], references: [id])
-
-  firstScore   Int @default(0)
-  initialScore Int @default(0)
-  finalScore   Int @default(0)
-
-  conversionTime Int?
-  timeToConvert  Int?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // 🔁 1:N Client → Leads (histórico / CRM)
-  leads Lead[] @relation("ClientLeads")
-
-  User User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  CalendarEvent CalendarEvent[]
-  Sale          Sale[]
-  transactions  Transaction[]
+  id                  String          @id @default(cuid())
+  userId              String
+  name                String?
+  email               String?
+  phone               String?
+  notes               String?
+  totalSpent          Float           @default(0)
+  currency            String          @default("EUR")
+  source              String?
+  page                String?
+  conversionSource    String?
+  conversionProduct   String?
+  convertedFromLeadId String?
+  firstScore          Int             @default(0)
+  initialScore        Int             @default(0)
+  finalScore          Int             @default(0)
+  conversionTime      Int?
+  timeToConvert       Int?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  CalendarEvent       CalendarEvent[]
+  User                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  leads               Lead[]          @relation("ClientLeads")
+  Sale                Sale[]
+  transactions        Transaction[]
 
   @@index([createdAt])
   @@index([email])
   @@index([page])
   @@index([source])
   @@index([userId])
+  @@index([convertedFromLeadId])
 }
 
 model Event {
@@ -369,17 +354,17 @@ model FinancialRecord {
 }
 
 model Lead {
-  id                    String     @id @default(cuid())
+  id                    String          @id @default(cuid())
   userId                String
   websiteId             String?
   email                 String?
   name                  String?
   phone                 String?
   message               String?
-  source                String     @default("WEB")
+  source                String          @default("WEB")
   formId                String?
-  status                String     @default("NEW")
-  leadStatus            LeadStatus @default(NEW)
+  status                String          @default("NEW")
+  leadStatus            LeadStatus      @default(NEW)
   temperature           LeadTemp?
   page                  String?
   lastAction            String?
@@ -388,18 +373,18 @@ model Lead {
   aiPrediction          Float?
   aiReasoning           String?
   aiSegment             String?
-  converted             Boolean    @default(false)
-  validationStatus      String     @default("PENDING")
+  converted             Boolean         @default(false)
+  validationStatus      String          @default("PENDING")
   category              String?
-  priority              String     @default("MEDIUM")
-  tags                  String[]   @default([])
+  priority              String          @default("MEDIUM")
+  tags                  String[]        @default([])
   notes                 String?
   ip                    String?
   country               String?
   device                String?
   userAgent             String?
-  spamScore             Float      @default(0)
-  score                 Int        @default(0)
+  spamScore             Float           @default(0)
+  score                 Int             @default(0)
   stageId               String?
   interactions          Json?
   conversionProbability Float?
@@ -414,30 +399,23 @@ model Lead {
   conversionProduct     String?
   allowedDomain         String?
   aiReason              String?
-  createdAt             DateTime   @default(now())
-  updatedAt             DateTime   @updatedAt
-
-  // Relación N:1 → Lead pertenece a un Client (CRM normal)
-  client Client? @relation("ClientLeads", fields: [clientId], references: [id])
-
-  // Relación 1:1 → Lead convertido en Client
-  convertedClient Client? @relation("LeadToClient")
-
-  User    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  Website Website?       @relation(fields: [websiteId], references: [id])
-  stage   PipelineStage? @relation(fields: [stageId], references: [id])
-
-  AIInsight     AIInsight[]
-  AiLog         AiLog[]
-  Alert         Alert[]
-  Event         Event[]
-  LeadAIInsight LeadAIInsight?
-  LeadAlert     LeadAlert[]
-  LeadEvent     LeadEvent[]
-  TrackingEvent TrackingEvent[]
-  activities    Activity[]
-  leadScores    LeadScore[]
-  aiInsights    AiInsight[]
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  AIInsight             AIInsight[]
+  activities            Activity[]
+  aiInsights            AiInsight[]
+  AiLog                 AiLog[]
+  Alert                 Alert[]
+  Event                 Event[]
+  client                Client?         @relation("ClientLeads", fields: [clientId], references: [id])
+  stage                 PipelineStage?  @relation(fields: [stageId], references: [id])
+  User                  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Website               Website?        @relation(fields: [websiteId], references: [id])
+  LeadAIInsight         LeadAIInsight?
+  LeadAlert             LeadAlert[]
+  LeadEvent             LeadEvent[]
+  leadScores            LeadScore[]
+  TrackingEvent         TrackingEvent[]
 
   @@index([category])
   @@index([clientId])
@@ -616,84 +594,81 @@ model TrackingEvent {
 }
 
 model User {
-  id                   String    @id @default(cuid())
-  email                String    @unique
+  id                   String                 @id @default(cuid())
+  email                String                 @unique
   name                 String?
   password             String?
   phone                String?
   emailVerified        DateTime?
-  role                 UserRole  @default(USER)
-  plan                 PlanType  @default(FREE)
-  onboardingCompleted  Boolean   @default(false)
+  role                 UserRole               @default(USER)
+  plan                 PlanType               @default(FREE)
+  onboardingCompleted  Boolean                @default(false)
   selectedSector       String?
   planId               String?
-  isTrial              Boolean   @default(true)
-  planStartedAt        DateTime  @default(now())
+  isTrial              Boolean                @default(true)
+  planStartedAt        DateTime               @default(now())
   planExpiresAt        DateTime?
   billingCycle         String?
   stripeCustomerId     String?
   stripeSubscriptionId String?
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
   image                String?
-
-  // Admin feature fields
-  isBlocked     Boolean   @default(false)
-  isActive      Boolean   @default(true)
-  blockedAt     DateTime?
-  blockedReason String?
-  lastLoginAt   DateTime?
-  lastActiveAt  DateTime?
-
-  planRelation        Plan?                  @relation(fields: [planId], references: [id])
-  AIInsight           AIInsight[]
-  AIPrediction        AIPrediction[]
-  AiLog               AiLog[]
-  Alert               Alert[]
-  ApiKey              ApiKey[]
-  BusinessProfile     BusinessProfile?
-  CalendarEvent       CalendarEvent[]
-  Client              Client[]
-  Event               Event[]
-  FinancialRecord     FinancialRecord[]
-  Lead                Lead[]
-  LeadAIInsight       LeadAIInsight[]
-  LeadAlert           LeadAlert[]
-  LeadEvent           LeadEvent[]
-  Notification        Notification[]
-  restaurantMetrics   RestaurantMetrics[]
-  gymMetrics          GymMetrics[]
-  workshopMetrics     WorkshopMetrics[]
-  realEstateMetrics   RealEstateMetrics[]
-  retailMetrics       RetailMetrics[]
-  homeServiceMetrics  HomeServiceMetrics[]
-  eventMetrics        EventMetrics[]
-  genericMetrics      GenericMetrics[]
-  Sale                Sale[]
-  TrackingEvent       TrackingEvent[]
-  Website             Website[]
-  accounts            Account[]
-  sessions            Session[]
-  transactions        Transaction[]
-  fixedExpenses       FixedExpense[]
-  budgets             Budget[]
-  financialGoals      FinancialGoal[]
-  financeAlerts       FinanceAlert[]
-  cashflowForecasts   CashflowForecast[]
-  integrations        Integration[]
-  integrationLogs     IntegrationLog[]
-  teamMembers         TeamMember[]
-  subscriptions       Subscription[]
-  payments            Payment[]
-  activities          Activity[]
-  leadScores          LeadScore[]
-  pipelineStages      PipelineStage[]
-  automations         Automation[]
-  automationLogs      AutomationLog[]
-  aiInsights          AiInsight[]
-  adminLogs           AdminLog[]             @relation("AdminLogs")
-  impersonatedBy      ImpersonationSession[] @relation("ImpersonatedBy")
-  impersonationTarget ImpersonationSession[] @relation("ImpersonationTarget")
+  isBlocked            Boolean                @default(false)
+  isActive             Boolean                @default(true)
+  blockedAt            DateTime?
+  blockedReason        String?
+  lastLoginAt          DateTime?
+  lastActiveAt         DateTime?
+  AIInsight            AIInsight[]
+  AIPrediction         AIPrediction[]
+  accounts             Account[]
+  activities           Activity[]
+  aiInsights           AiInsight[]
+  AiLog                AiLog[]
+  Alert                Alert[]
+  ApiKey               ApiKey[]
+  automations          Automation[]
+  automationLogs       AutomationLog[]
+  budgets              Budget[]
+  BusinessProfile      BusinessProfile?
+  CalendarEvent        CalendarEvent[]
+  cashflowForecasts    CashflowForecast[]
+  Client               Client[]
+  Event                Event[]
+  eventMetrics         EventMetrics[]
+  financeAlerts        FinanceAlert[]
+  financialGoals       FinancialGoal[]
+  FinancialRecord      FinancialRecord[]
+  fixedExpenses        FixedExpense[]
+  genericMetrics       GenericMetrics[]
+  gymMetrics           GymMetrics[]
+  homeServiceMetrics   HomeServiceMetrics[]
+  integrations         Integration[]
+  integrationLogs      IntegrationLog[]
+  Lead                 Lead[]
+  LeadAIInsight        LeadAIInsight[]
+  LeadAlert            LeadAlert[]
+  LeadEvent            LeadEvent[]
+  leadScores           LeadScore[]
+  Notification         Notification[]
+  payments             Payment[]
+  pipelineStages       PipelineStage[]
+  realEstateMetrics    RealEstateMetrics[]
+  restaurantMetrics    RestaurantMetrics[]
+  retailMetrics        RetailMetrics[]
+  Sale                 Sale[]
+  sessions             Session[]
+  subscriptions        Subscription[]
+  teamMembers          TeamMember[]
+  TrackingEvent        TrackingEvent[]
+  transactions         Transaction[]
+  planRelation         Plan?                  @relation(fields: [planId], references: [id])
+  Website              Website[]
+  workshopMetrics      WorkshopMetrics[]
+  adminLogs            AdminLog[]             @relation("AdminLogs")
+  impersonatedBy       ImpersonationSession[] @relation("ImpersonatedBy")
+  impersonationTarget  ImpersonationSession[] @relation("ImpersonationTarget")
 }
 
 model Plan {
@@ -752,75 +727,6 @@ model WebsitePage {
   content   Json
   createdAt DateTime @default(now())
   Website   Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
-}
-
-enum AlertType {
-  HOT_LEAD
-  SCORE_DROP
-  HIGH_INTENT
-  CONVERSION_RISK
-}
-
-enum BillingCycle {
-  MONTHLY
-  YEARLY
-}
-
-enum EventPriority {
-  LOW
-  MEDIUM
-  HIGH
-}
-
-enum EventSource {
-  LEAD
-  SALE
-  MANUAL
-  AUTOMATION
-  BOOKING
-}
-
-enum EventStatus {
-  PENDING
-  CONFIRMED
-  COMPLETED
-  CANCELLED
-}
-
-enum EventType {
-  RESERVA
-  LLAMADA
-  REUNION
-  TAREA
-  SEGUIMIENTO
-  PAGO
-  ENTREGA
-}
-
-enum LeadStatus {
-  NEW
-  CONTACTED
-  INTERESTED
-  QUALIFIED
-  LOST
-  CONVERTED
-}
-
-enum LeadTemp {
-  HOT
-  WARM
-  COLD
-}
-
-enum PlanType {
-  FREE
-  PRO
-  ENTERPRISE
-}
-
-enum UserRole {
-  USER
-  ADMIN
 }
 
 model Transaction {
@@ -1019,13 +925,240 @@ model IntegrationLog {
   error         String?
   metadata      Json?
   createdAt     DateTime    @default(now())
-  User          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   Integration   Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  User          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([createdAt])
   @@index([integrationId])
   @@index([success])
   @@index([type])
+}
+
+model Activity {
+  id          String   @id @default(cuid())
+  userId      String
+  leadId      String
+  type        String
+  title       String
+  description String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  Lead        Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  User        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([leadId])
+  @@index([createdAt])
+  @@index([type])
+}
+
+model LeadScore {
+  id        String   @id @default(cuid())
+  userId    String
+  leadId    String
+  score     Int
+  rule      String
+  points    Int
+  metadata  Json?
+  createdAt DateTime @default(now())
+  Lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([leadId])
+  @@index([createdAt])
+}
+
+model PipelineStage {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  order     Int
+  color     String   @default("#6366f1")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  leads     Lead[]
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, order])
+  @@index([userId])
+}
+
+model Automation {
+  id          String          @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  trigger     Json
+  actions     Json
+  active      Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  User        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logs        AutomationLog[]
+
+  @@index([userId])
+  @@index([active])
+}
+
+model AutomationLog {
+  id           String     @id @default(cuid())
+  userId       String
+  automationId String
+  leadId       String?
+  action       String
+  result       String
+  error        String?
+  executedAt   DateTime   @default(now())
+  Automation   Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  User         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([automationId])
+  @@index([leadId])
+  @@index([executedAt])
+}
+
+model AiInsight {
+  id         String   @id @default(cuid())
+  userId     String
+  leadId     String
+  type       String
+  title      String
+  content    String
+  confidence Float    @default(0.5)
+  metadata   Json?
+  createdAt  DateTime @default(now())
+  Lead       Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([leadId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model AdminLog {
+  id          String      @id @default(cuid())
+  adminId     String
+  adminEmail  String
+  action      AdminAction
+  targetType  String?
+  targetId    String?
+  targetEmail String?
+  metadata    Json?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime    @default(now())
+  admin       User        @relation("AdminLogs", fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([action])
+  @@index([targetId])
+  @@index([createdAt])
+  @@map("admin_logs")
+}
+
+model ImpersonationSession {
+  id           String    @id @default(cuid())
+  adminId      String
+  targetUserId String
+  startedAt    DateTime  @default(now())
+  endedAt      DateTime?
+  ipAddress    String?
+  admin        User      @relation("ImpersonatedBy", fields: [adminId], references: [id], onDelete: Cascade)
+  targetUser   User      @relation("ImpersonationTarget", fields: [targetUserId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([targetUserId])
+  @@index([startedAt])
+  @@map("impersonation_sessions")
+}
+
+model BackupMetadata {
+  id           String       @id @default(cuid())
+  filename     String
+  size         BigInt
+  location     String
+  triggeredBy  String?
+  status       BackupStatus
+  type         BackupType
+  createdAt    DateTime     @default(now())
+  completedAt  DateTime?
+  errorMessage String?
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("backup_metadata")
+}
+
+enum AlertType {
+  HOT_LEAD
+  SCORE_DROP
+  HIGH_INTENT
+  CONVERSION_RISK
+}
+
+enum BillingCycle {
+  MONTHLY
+  YEARLY
+}
+
+enum EventPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum EventSource {
+  LEAD
+  SALE
+  MANUAL
+  AUTOMATION
+  BOOKING
+}
+
+enum EventStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum EventType {
+  RESERVA
+  LLAMADA
+  REUNION
+  TAREA
+  SEGUIMIENTO
+  PAGO
+  ENTREGA
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  INTERESTED
+  QUALIFIED
+  LOST
+  CONVERTED
+}
+
+enum LeadTemp {
+  HOT
+  WARM
+  COLD
+}
+
+enum PlanType {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum UserRole {
+  USER
+  ADMIN
 }
 
 enum TransactionType {
@@ -1112,110 +1245,6 @@ enum LogType {
   CONFIG_UPDATE
 }
 
-model Activity {
-  id          String   @id @default(cuid())
-  userId      String // Add userId for relation
-  leadId      String
-  type        String // email, call, meeting, note, etc.
-  title       String
-  description String?
-  metadata    Json? // additional data like email content, call duration, etc.
-  createdAt   DateTime @default(now())
-  User        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  Lead        Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([leadId])
-  @@index([createdAt])
-  @@index([type])
-}
-
-model LeadScore {
-  id        String   @id @default(cuid())
-  userId    String
-  leadId    String
-  score     Int
-  rule      String // the scoring rule that triggered this
-  points    Int // points added/subtracted
-  metadata  Json? // additional context
-  createdAt DateTime @default(now())
-  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  Lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([leadId])
-  @@index([createdAt])
-}
-
-model PipelineStage {
-  id        String   @id @default(cuid())
-  userId    String
-  name      String
-  order     Int
-  color     String   @default("#6366f1")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  leads     Lead[]
-
-  @@unique([userId, order])
-  @@index([userId])
-}
-
-model Automation {
-  id          String          @id @default(cuid())
-  userId      String
-  name        String
-  description String?
-  trigger     Json // trigger conditions
-  actions     Json // actions to execute
-  active      Boolean         @default(true)
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-  User        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  logs        AutomationLog[]
-
-  @@index([userId])
-  @@index([active])
-}
-
-model AutomationLog {
-  id           String     @id @default(cuid())
-  userId       String
-  automationId String
-  leadId       String?
-  action       String
-  result       String
-  error        String?
-  executedAt   DateTime   @default(now())
-  User         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  Automation   Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([automationId])
-  @@index([leadId])
-  @@index([executedAt])
-}
-
-model AiInsight {
-  id         String   @id @default(cuid())
-  userId     String
-  leadId     String
-  type       String // prediction, recommendation, alert, etc.
-  title      String
-  content    String
-  confidence Float    @default(0.5)
-  metadata   Json? // additional AI data
-  createdAt  DateTime @default(now())
-  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  Lead       Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([leadId])
-  @@index([type])
-  @@index([createdAt])
-}
-
 enum Sector {
   restaurante
   gimnasio
@@ -1225,32 +1254,6 @@ enum Sector {
   servicios_domicilio
   eventos
   other
-}
-
-// ============================================
-// ADMIN PANEL EXTENSIONS
-// ============================================
-
-model AdminLog {
-  id          String      @id @default(cuid())
-  adminId     String
-  adminEmail  String
-  action      AdminAction
-  targetType  String? // "USER", "BACKUP", "SYSTEM"
-  targetId    String?
-  targetEmail String?
-  metadata    Json? // Additional context
-  ipAddress   String?
-  userAgent   String?
-  createdAt   DateTime    @default(now())
-
-  admin User @relation("AdminLogs", fields: [adminId], references: [id], onDelete: Cascade)
-
-  @@index([adminId])
-  @@index([action])
-  @@index([targetId])
-  @@index([createdAt])
-  @@map("admin_logs")
 }
 
 enum AdminAction {
@@ -1266,40 +1269,6 @@ enum AdminAction {
   BACKUP_TRIGGERED
   BACKUP_RESTORED
   TELEGRAM_COMMAND_SENT
-}
-
-model ImpersonationSession {
-  id           String    @id @default(cuid())
-  adminId      String
-  targetUserId String
-  startedAt    DateTime  @default(now())
-  endedAt      DateTime?
-  ipAddress    String?
-
-  admin      User @relation("ImpersonatedBy", fields: [adminId], references: [id], onDelete: Cascade)
-  targetUser User @relation("ImpersonationTarget", fields: [targetUserId], references: [id], onDelete: Cascade)
-
-  @@index([adminId])
-  @@index([targetUserId])
-  @@index([startedAt])
-  @@map("impersonation_sessions")
-}
-
-model BackupMetadata {
-  id           String       @id @default(cuid())
-  filename     String
-  size         BigInt
-  location     String // rclone path
-  triggeredBy  String? // admin ID
-  status       BackupStatus
-  type         BackupType
-  createdAt    DateTime     @default(now())
-  completedAt  DateTime?
-  errorMessage String?
-
-  @@index([status])
-  @@index([createdAt])
-  @@map("backup_metadata")
 }
 
 enum BackupStatus {

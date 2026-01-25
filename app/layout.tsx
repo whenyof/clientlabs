@@ -1,11 +1,13 @@
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
+
 import { WebVitals } from "./components/WebVitals"
 import GlobalBackground from "@/components/layout/GlobalBackground"
 import { ToastProvider } from "@/components/ui/toast"
 import Providers from "./providers"
 import { AiFloatingAssistant } from "@/components/AiFloatingAssistant"
+import { Toaster } from "sonner"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,14 +21,15 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "ClientLabs - SaaS para Profesionales",
-  description: "Plataforma SaaS completa para gestión de clientes, ventas y automatizaciones.",
+  description:
+    "Plataforma SaaS completa para gestión de clientes, ventas y automatizaciones.",
 }
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
     <html lang="es">
       <body
@@ -38,6 +41,7 @@ export default function RootLayout({
             <WebVitals />
             {children}
             <AiFloatingAssistant />
+            <Toaster richColors position="top-right" />
           </ToastProvider>
         </Providers>
       </body>

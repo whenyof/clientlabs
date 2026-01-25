@@ -6,6 +6,9 @@ import { LeadsTable } from "./components/LeadsTable"
 import { CreateLeadButton } from "./components/CreateLeadButton"
 import { LeadsKPIs } from "./components/LeadsKPIs"
 import { LeadsFilters } from "./components/LeadsFilters"
+import { ImportButton } from "./components/ImportButton"
+import { Zap } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import type { LeadStatus, LeadTemp } from "@prisma/client"
 
 type SearchParams = Promise<{
@@ -125,14 +128,31 @@ export default async function LeadsPage({
   /* ---------------- RENDER ---------------- */
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* Strategic Header */}
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-white">Leads</h1>
-          <p className="text-sm text-white/60">
-            Gestiona y convierte contactos en oportunidades
+          <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">Pipeline de Oportunidades</h1>
+          <p className="text-base text-white/60 max-w-2xl">
+            Identifica, prioriza y convierte tus mejores oportunidades en clientes
           </p>
         </div>
-        <CreateLeadButton />
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Import Button - Blue/Cyan */}
+          <ImportButton />
+
+          {/* Automations Button - Purple */}
+          <Button
+            variant="outline"
+            className="gap-2 bg-purple-500/10 border-purple-500/30 text-purple-400 hover:bg-purple-500/20 hover:border-purple-500/50 transition-all"
+            disabled
+          >
+            <Zap className="h-4 w-4" />
+            <span>Automatizar</span>
+          </Button>
+
+          {/* Create Lead Button - Primary */}
+          <CreateLeadButton />
+        </div>
       </div>
 
       <LeadsKPIs kpis={kpis} />

@@ -10,6 +10,8 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
+    DropdownMenuSeparator,
+    DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu"
 import {
     Dialog,
@@ -21,7 +23,15 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { MoreVertical, Edit, MessageSquare, XCircle, CheckCircle, Phone, ExternalLink } from "lucide-react"
+import {
+    MoreVertical,
+    MessageSquare,
+    XCircle,
+    CheckCircle,
+    Phone,
+    ExternalLink,
+    Loader2
+} from "lucide-react"
 import { changeLeadStatus, addLeadNote, registerLeadCall, markLeadLost, convertLeadToClient } from "../actions"
 
 export function LeadRowActions({ lead }: { lead: Lead }) {
@@ -41,7 +51,6 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
         try {
             await changeLeadStatus(lead.id, status)
             router.refresh()
-            // Success feedback
             const statusLabels = {
                 NEW: "Nuevo",
                 CONTACTED: "Contactado",
@@ -142,56 +151,100 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
 
     return (
         <>
-            <div className="flex items-center justify-end gap-1">
+            <div className="flex items-center justify-end gap-1.5">
                 {/* View Client button for converted leads */}
                 {lead.leadStatus === "CONVERTED" && lead.clientId && (
                     <Link href="/dashboard/other/clients">
-                        <Button size="sm" variant="outline" className="h-8 text-xs">
-                            <ExternalLink className="mr-1 h-3 w-3" />
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-9 text-xs gap-1.5 bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20"
+                        >
+                            <ExternalLink className="h-3.5 w-3.5" />
                             Ver Cliente
                         </Button>
                     </Link>
                 )}
 
+                {/* Quick Action Buttons */}
+                {!isReadOnly && (
+                    <>
+                        {/* Add Note - Gray */}
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setNoteDialog(true)}
+                            disabled={loading}
+                            className="h-9 w-9 p-0 bg-white/5 border-white/20 text-white/60 hover:bg-white/10 hover:text-white hover:border-white/30 transition-all"
+                            title="Añadir nota"
+                        >
+                            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
+                        </Button>
+
+                        {/* Register Call - Blue */}
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setCallDialog(true)}
+                            disabled={loading}
+                            className="h-9 w-9 p-0 bg-blue-500/10 border-blue-500/30 text-blue-400 hover:bg-blue-500/20 hover:border-blue-500/50 transition-all"
+                            title="Registrar llamada"
+                        >
+                            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Phone className="h-4 w-4" />}
+                        </Button>
+
+                        {/* Convert to Client - Green */}
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={handleConvert}
+                            disabled={loading}
+                            className="h-9 w-9 p-0 bg-green-500/10 border-green-500/30 text-green-400 hover:bg-green-500/20 hover:border-green-500/50 transition-all"
+                            title="Convertir a cliente"
+                        >
+                            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
+                        </Button>
+
+                        {/* Mark Lost - Red Outline */}
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setLostDialog(true)}
+                            disabled={loading}
+                            className="h-9 w-9 p-0 border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50 transition-all"
+                            title="Marcar perdido"
+                        >
+                            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
+                        </Button>
+                    </>
+                )}
+
+                {/* More Actions Dropdown */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button
                             size="sm"
                             variant="ghost"
                             disabled={loading}
-                            className="h-8 w-8 p-0"
+                            className="h-9 w-9 p-0 hover:bg-white/10 transition-all"
                         >
                             <MoreVertical className="h-4 w-4" />
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => setNoteDialog(true)} disabled={isReadOnly}>
-                            <MessageSquare className="mr-2 h-4 w-4" />
-                            Añadir nota
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setCallDialog(true)} disabled={isReadOnly}>
-                            <Phone className="mr-2 h-4 w-4" />
-                            Registrar llamada
+                    <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuLabel className="text-xs text-white/60">Cambiar estado</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => handleStatusChange("NEW")} disabled={isReadOnly}>
+                            Marcar como Nuevo
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleStatusChange("CONTACTED")} disabled={isReadOnly}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Marcar contactado
+                            Marcar como Contactado
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleStatusChange("INTERESTED")} disabled={isReadOnly}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Marcar interesado
+                            Marcar como Interesado
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleStatusChange("QUALIFIED")} disabled={isReadOnly}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Marcar cualificado
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={handleConvert} disabled={isReadOnly}>
-                            <CheckCircle className="mr-2 h-4 w-4" />
-                            Convertir a cliente
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setLostDialog(true)} disabled={isReadOnly}>
-                            <XCircle className="mr-2 h-4 w-4" />
-                            Marcar perdido
+                            Marcar como Cualificado
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -199,18 +252,19 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
 
             {/* Note Dialog */}
             <Dialog open={noteDialog} onOpenChange={setNoteDialog}>
-                <DialogContent>
+                <DialogContent className="bg-zinc-900 border-white/10">
                     <DialogHeader>
-                        <DialogTitle>Añadir nota</DialogTitle>
+                        <DialogTitle className="text-white">Añadir nota</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                         <div>
-                            <Label>Nota</Label>
+                            <Label className="text-white/80">Nota</Label>
                             <Textarea
                                 value={note}
                                 onChange={(e) => setNote(e.target.value)}
                                 placeholder="Escribe una nota..."
                                 rows={4}
+                                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 mt-2"
                             />
                         </div>
                     </div>
@@ -218,8 +272,47 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
                         <Button variant="outline" onClick={() => setNoteDialog(false)}>
                             Cancelar
                         </Button>
-                        <Button onClick={handleAddNote} disabled={loading || !note.trim()}>
+                        <Button
+                            onClick={handleAddNote}
+                            disabled={loading || !note.trim()}
+                            className="bg-blue-500/20 border-blue-500/30 text-blue-400 hover:bg-blue-500/30"
+                        >
+                            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Guardar
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Call Dialog */}
+            <Dialog open={callDialog} onOpenChange={setCallDialog}>
+                <DialogContent className="bg-zinc-900 border-white/10">
+                    <DialogHeader>
+                        <DialogTitle className="text-white">Registrar llamada</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <div>
+                            <Label className="text-white/80">Notas de la llamada</Label>
+                            <Textarea
+                                value={callNotes}
+                                onChange={(e) => setCallNotes(e.target.value)}
+                                placeholder="¿Qué se discutió en la llamada?"
+                                rows={4}
+                                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 mt-2"
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setCallDialog(false)}>
+                            Cancelar
+                        </Button>
+                        <Button
+                            onClick={handleRegisterCall}
+                            disabled={loading || !callNotes.trim()}
+                            className="bg-blue-500/20 border-blue-500/30 text-blue-400 hover:bg-blue-500/30"
+                        >
+                            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Registrar
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -227,17 +320,18 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
 
             {/* Lost Dialog */}
             <Dialog open={lostDialog} onOpenChange={setLostDialog}>
-                <DialogContent>
+                <DialogContent className="bg-zinc-900 border-white/10">
                     <DialogHeader>
-                        <DialogTitle>Marcar como perdido</DialogTitle>
+                        <DialogTitle className="text-white">Marcar como perdido</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                         <div>
-                            <Label>Razón</Label>
+                            <Label className="text-white/80">Razón</Label>
                             <Input
                                 value={lostReason}
                                 onChange={(e) => setLostReason(e.target.value)}
                                 placeholder="¿Por qué se perdió este lead?"
+                                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 mt-2"
                             />
                         </div>
                     </div>
@@ -248,8 +342,9 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
                         <Button
                             onClick={handleMarkLost}
                             disabled={loading || !lostReason.trim()}
-                            variant="destructive"
+                            className="bg-red-500/20 border-red-500/30 text-red-400 hover:bg-red-500/30"
                         >
+                            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Marcar perdido
                         </Button>
                     </DialogFooter>

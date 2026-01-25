@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Plus } from "lucide-react"
+import { Plus, Loader2 } from "lucide-react"
 import { createLead } from "../actions"
 
 export function CreateLeadButton() {
@@ -47,20 +47,23 @@ export function CreateLeadButton() {
 
     return (
         <>
-            <Button onClick={() => setOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
+            <Button
+                onClick={() => setOpen(true)}
+                className="gap-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-blue-500/30 text-white hover:from-blue-500/30 hover:to-purple-500/30 hover:border-blue-500/50 transition-all shadow-lg shadow-blue-500/10"
+            >
+                <Plus className="h-4 w-4" />
                 Nuevo Lead
             </Button>
 
             <Dialog open={open} onOpenChange={setOpen}>
-                <DialogContent>
+                <DialogContent className="bg-zinc-900 border-white/10">
                     <DialogHeader>
-                        <DialogTitle>Crear Nuevo Lead</DialogTitle>
+                        <DialogTitle className="text-white text-xl">Crear Nuevo Lead</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleSubmit}>
                         <div className="space-y-4">
                             <div>
-                                <Label htmlFor="name">
+                                <Label htmlFor="name" className="text-white/80">
                                     Nombre <span className="text-red-500">*</span>
                                 </Label>
                                 <Input
@@ -71,10 +74,11 @@ export function CreateLeadButton() {
                                     }
                                     placeholder="Juan Pérez"
                                     required
+                                    className="bg-white/5 border-white/10 text-white placeholder:text-white/40 mt-2"
                                 />
                             </div>
                             <div>
-                                <Label htmlFor="email">Email</Label>
+                                <Label htmlFor="email" className="text-white/80">Email</Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -83,10 +87,11 @@ export function CreateLeadButton() {
                                         setFormData({ ...formData, email: e.target.value })
                                     }
                                     placeholder="juan@example.com"
+                                    className="bg-white/5 border-white/10 text-white placeholder:text-white/40 mt-2"
                                 />
                             </div>
                             <div>
-                                <Label htmlFor="phone">Teléfono</Label>
+                                <Label htmlFor="phone" className="text-white/80">Teléfono</Label>
                                 <Input
                                     id="phone"
                                     value={formData.phone}
@@ -94,10 +99,11 @@ export function CreateLeadButton() {
                                         setFormData({ ...formData, phone: e.target.value })
                                     }
                                     placeholder="+34 600 000 000"
+                                    className="bg-white/5 border-white/10 text-white placeholder:text-white/40 mt-2"
                                 />
                             </div>
                             <div>
-                                <Label htmlFor="source">Fuente</Label>
+                                <Label htmlFor="source" className="text-white/80">Fuente</Label>
                                 <Input
                                     id="source"
                                     value={formData.source}
@@ -105,6 +111,7 @@ export function CreateLeadButton() {
                                         setFormData({ ...formData, source: e.target.value })
                                     }
                                     placeholder="Web, Referido, LinkedIn..."
+                                    className="bg-white/5 border-white/10 text-white placeholder:text-white/40 mt-2"
                                 />
                             </div>
                         </div>
@@ -116,7 +123,12 @@ export function CreateLeadButton() {
                             >
                                 Cancelar
                             </Button>
-                            <Button type="submit" disabled={loading || !formData.name.trim()}>
+                            <Button
+                                type="submit"
+                                disabled={loading || !formData.name.trim()}
+                                className="bg-blue-500/20 border-blue-500/30 text-blue-400 hover:bg-blue-500/30"
+                            >
+                                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 Crear Lead
                             </Button>
                         </DialogFooter>

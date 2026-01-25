@@ -331,3 +331,106 @@ export async function createLead(data: {
     revalidatePath("/dashboard/other/leads")
     return { success: true, leadId: lead.id }
 }
+
+// Import leads from CSV/Excel
+export async function importLeads(
+    leads: Array<{
+        name?: string
+        email?: string
+        phone?: string
+        source?: string
+        temperature?: LeadTemp
+    }>,
+    fileType: "csv" | "excel"
+) {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+        return { success: false, error: "Unauthorized", created: 0, skipped: 0, invalid: 0 }
+    }
+
+    // Rate limiting: max 1000 leads per import
+    if (leads.length > 1000) {
+        return { success: false, error: "Máximo 1000 leads por importación", created: 0, skipped: 0, invalid: 0 }
+    }
+
+    let created = 0
+    let skipped = 0
+    let invalid = 0
+
+    const batchDate = new Date().toISOString().split('T')[0] // YYYY-MM-DD
+
+    for (const leadData of leads) {
+        try {
+            // Validation: must have at least email OR phone
+            if (!leadData.email && !leadData.phone) {
+                invalid++
+                continue
+            }
+
+            // Normalize data
+            const email = leadData.email?.trim().toLowerCase() || null
+            const phone = leadData.phone?.trim() || null
+            const name = leadData.name?.trim() || email || phone || "Sin nombre"
+            const source = leadData.source?.trim() || "import"
+
+            // Check for duplicates (email OR phone)
+            const existingLead = await prisma.lead.findFirst({
+                where: {
+                    userId: session.user.id,
+                    OR: [
+                        email ? { email: { equals: email, mode: 'insensitive' as const } } : undefined,
+                        phone ? { phone } : undefined
+                    ].filter((obj): obj is NonNullable<typeof obj> => obj !== undefined)
+                }
+            })
+
+            if (existingLead) {
+                skipped++
+                continue
+            }
+
+            // Generate auto-tags
+            const tags: string[] = []
+            tags.push("imported")
+            tags.push(fileType) // "csv" or "excel"
+
+            if (source && source !== "import") {
+                tags.push(`source:${source}`)
+            }
+
+            if (email) {
+                const domain = email.split('@')[1]
+                if (domain) {
+                    tags.push(`domain:${domain}`)
+                }
+            }
+
+            tags.push(`batch:${batchDate}`)
+
+            // Create lead with safe defaults
+            await prisma.lead.create({
+                data: {
+                    userId: session.user.id,
+                    name,
+                    email,
+                    phone,
+                    source,
+                    leadStatus: "NEW",
+                    temperature: leadData.temperature || "COLD", // Use provided temperature or default to COLD
+                    score: 0,
+                    converted: false,
+                    tags,
+                    lastActionAt: new Date(),
+                }
+            })
+
+            created++
+        } catch (error) {
+            console.error("Error creating lead:", error)
+            invalid++
+        }
+    }
+
+    revalidatePath("/dashboard/other/leads")
+    return { success: true, created, skipped, invalid }
+}

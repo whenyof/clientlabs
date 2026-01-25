@@ -113,6 +113,35 @@ export async function changeLeadStatus(leadId: string, status: LeadStatus) {
     return { success: true }
 }
 
+// Change lead temperature
+export async function changeLeadTemperature(leadId: string, temperature: LeadTemp) {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) throw new Error("Unauthorized")
+
+    const lead = await prisma.lead.findUnique({
+        where: { id: leadId, userId: session.user.id },
+    })
+
+    if (!lead) throw new Error("Lead not found")
+    if (lead.leadStatus === "CONVERTED") throw new Error("Cannot modify converted lead")
+    if (lead.leadStatus === "LOST") throw new Error("Cannot modify lost lead")
+
+    await prisma.lead.update({
+        where: { id: leadId, userId: session.user.id },
+        data: {
+            temperature,
+            lastActionAt: new Date(),
+        },
+    })
+
+    // Recalculate score
+    await recalculateLeadScore(leadId)
+
+    revalidatePath("/dashboard/other/leads")
+    return { success: true }
+}
+
+
 // Add note to lead
 export async function addLeadNote(leadId: string, text: string) {
     const session = await getServerSession(authOptions)
@@ -126,6 +155,7 @@ export async function addLeadNote(leadId: string, text: string) {
     if (lead.leadStatus === "CONVERTED") throw new Error("Cannot modify converted lead")
     if (lead.leadStatus === "LOST") throw new Error("Cannot modify lost lead")
 
+    // 1️⃣ Guardar en historial
     await prisma.activity.create({
         data: {
             userId: session.user.id,
@@ -136,15 +166,22 @@ export async function addLeadNote(leadId: string, text: string) {
         },
     })
 
+    // 2️⃣ Guardar en el lead (ESTO ES LO QUE FALTABA)
+    const newNote = `[${new Date().toLocaleString()}] ${text}`
+
     await prisma.lead.update({
         where: { id: leadId },
-        data: { lastActionAt: new Date() },
+        data: {
+            notes: lead.notes
+                ? `${lead.notes}\n\n${newNote}`
+                : newNote,
+            lastActionAt: new Date(),
+        },
     })
 
-    // Recalculate score (+10 for note)
     await recalculateLeadScore(leadId)
-
     revalidatePath("/dashboard/other/leads")
+
     return { success: true }
 }
 

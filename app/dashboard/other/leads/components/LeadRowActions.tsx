@@ -28,20 +28,20 @@ import {
     MessageSquare,
     XCircle,
     CheckCircle,
-    Phone,
+    Mail,
     ExternalLink,
     Loader2
 } from "lucide-react"
-import { changeLeadStatus, addLeadNote, registerLeadCall, markLeadLost, convertLeadToClient } from "../actions"
+import { changeLeadStatus, addLeadNote, markLeadLost, convertLeadToClient } from "../actions"
+import { toast } from "sonner"
 
 export function LeadRowActions({ lead }: { lead: Lead }) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [noteDialog, setNoteDialog] = useState(false)
-    const [callDialog, setCallDialog] = useState(false)
     const [lostDialog, setLostDialog] = useState(false)
+    const [convertDialog, setConvertDialog] = useState(false)
     const [note, setNote] = useState("")
-    const [callNotes, setCallNotes] = useState("")
     const [lostReason, setLostReason] = useState("")
 
     const isReadOnly = lead.leadStatus === "CONVERTED" || lead.leadStatus === "LOST"
@@ -59,10 +59,10 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
                 CONVERTED: "Convertido",
                 LOST: "Perdido"
             }
-            alert(`✅ Lead marcado como ${statusLabels[status]}`)
+            toast.success(`Lead marcado como ${statusLabels[status]}`)
         } catch (error) {
             console.error(error)
-            alert("❌ Error al cambiar estado")
+            toast.error("Error al cambiar estado")
         } finally {
             setLoading(false)
         }
@@ -76,32 +76,19 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
             setNote("")
             setNoteDialog(false)
             router.refresh()
-            alert("✅ Nota añadida correctamente")
+            toast.success("Nota añadida correctamente")
         } catch (error) {
             console.error(error)
             const message = error instanceof Error ? error.message : "Error al añadir nota"
-            alert(`❌ ${message}`)
+            toast.error(message)
         } finally {
             setLoading(false)
         }
     }
 
-    const handleRegisterCall = async () => {
-        if (!callNotes.trim()) return
-        setLoading(true)
-        try {
-            await registerLeadCall(lead.id, callNotes)
-            setCallNotes("")
-            setCallDialog(false)
-            router.refresh()
-            alert("✅ Llamada registrada correctamente")
-        } catch (error) {
-            console.error(error)
-            const message = error instanceof Error ? error.message : "Error al registrar llamada"
-            alert(`❌ ${message}`)
-        } finally {
-            setLoading(false)
-        }
+    const handleEmailClick = () => {
+        if (!lead.email) return
+        window.location.href = `mailto:${lead.email}?subject=Contacto desde ClientLabs`
     }
 
     const handleMarkLost = async () => {
@@ -112,38 +99,31 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
             setLostReason("")
             setLostDialog(false)
             router.refresh()
-            alert("✅ Lead marcado como perdido")
+            toast.success("Lead marcado como perdido")
         } catch (error) {
             console.error(error)
-            alert("❌ Error al marcar como perdido")
+            toast.error("Error al marcar como perdido")
         } finally {
             setLoading(false)
         }
     }
 
     const handleConvert = async () => {
-        const confirmed = confirm(
-            "⚠️ ¿Convertir este lead a cliente?\n\n" +
-            "Esta acción es IRREVERSIBLE.\n" +
-            "El lead quedará marcado como CONVERTIDO y no podrás modificarlo.\n\n" +
-            "¿Continuar?"
-        )
-        if (!confirmed) return
-
         setLoading(true)
         try {
             const result = await convertLeadToClient(lead.id)
+            setConvertDialog(false)
             router.refresh()
 
             if (result.clientCreated) {
-                alert("✅ Lead convertido a cliente")
+                toast.success("Lead convertido a cliente")
             } else {
-                alert("✅ Lead convertido y vinculado a cliente existente")
+                toast.success("Lead convertido y vinculado a cliente existente")
             }
         } catch (error) {
             console.error(error)
             const message = error instanceof Error ? error.message : "Error al convertir lead"
-            alert(`❌ ${message}`)
+            toast.error(message)
         } finally {
             setLoading(false)
         }
@@ -181,23 +161,23 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
                             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
                         </Button>
 
-                        {/* Register Call - Blue */}
+                        {/* Send Email - Blue */}
                         <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => setCallDialog(true)}
-                            disabled={loading}
-                            className="h-9 w-9 p-0 bg-blue-500/10 border-blue-500/30 text-blue-400 hover:bg-blue-500/20 hover:border-blue-500/50 transition-all"
-                            title="Registrar llamada"
+                            onClick={handleEmailClick}
+                            disabled={!lead.email}
+                            className="h-9 w-9 p-0 bg-blue-500/10 border-blue-500/30 text-blue-400 hover:bg-blue-500/20 hover:border-blue-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            title={lead.email ? `Enviar email a ${lead.email}` : "Sin email"}
                         >
-                            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Phone className="h-4 w-4" />}
+                            <Mail className="h-4 w-4" />
                         </Button>
 
                         {/* Convert to Client - Green */}
                         <Button
                             size="sm"
                             variant="outline"
-                            onClick={handleConvert}
+                            onClick={() => setConvertDialog(true)}
                             disabled={loading}
                             className="h-9 w-9 p-0 bg-green-500/10 border-green-500/30 text-green-400 hover:bg-green-500/20 hover:border-green-500/50 transition-all"
                             title="Convertir a cliente"
@@ -284,40 +264,6 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
                 </DialogContent>
             </Dialog>
 
-            {/* Call Dialog */}
-            <Dialog open={callDialog} onOpenChange={setCallDialog}>
-                <DialogContent className="bg-zinc-900 border-white/10">
-                    <DialogHeader>
-                        <DialogTitle className="text-white">Registrar llamada</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                        <div>
-                            <Label className="text-white/80">Notas de la llamada</Label>
-                            <Textarea
-                                value={callNotes}
-                                onChange={(e) => setCallNotes(e.target.value)}
-                                placeholder="¿Qué se discutió en la llamada?"
-                                rows={4}
-                                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 mt-2"
-                            />
-                        </div>
-                    </div>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setCallDialog(false)}>
-                            Cancelar
-                        </Button>
-                        <Button
-                            onClick={handleRegisterCall}
-                            disabled={loading || !callNotes.trim()}
-                            className="bg-blue-500/20 border-blue-500/30 text-blue-400 hover:bg-blue-500/30"
-                        >
-                            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Registrar
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-
             {/* Lost Dialog */}
             <Dialog open={lostDialog} onOpenChange={setLostDialog}>
                 <DialogContent className="bg-zinc-900 border-white/10">
@@ -346,6 +292,42 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
                         >
                             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Marcar perdido
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Convert Confirmation Dialog */}
+            <Dialog open={convertDialog} onOpenChange={setConvertDialog}>
+                <DialogContent className="bg-zinc-900 border-white/10">
+                    <DialogHeader>
+                        <DialogTitle className="text-white text-xl">¿Convertir lead a cliente?</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30">
+                            <p className="text-sm text-amber-300 font-medium mb-2">⚠️ Esta acción es IRREVERSIBLE</p>
+                            <ul className="text-xs text-white/70 space-y-1">
+                                <li>• El lead quedará marcado como CONVERTIDO</li>
+                                <li>• No podrás modificar su información</li>
+                                <li>• Se creará o vinculará a un cliente</li>
+                            </ul>
+                        </div>
+                        <div className="p-3 rounded-lg bg-white/5">
+                            <p className="text-sm text-white/80"><strong>Lead:</strong> {lead.name}</p>
+                            <p className="text-xs text-white/60">{lead.email}</p>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setConvertDialog(false)}>
+                            Cancelar
+                        </Button>
+                        <Button
+                            onClick={handleConvert}
+                            disabled={loading}
+                            className="bg-emerald-500/20 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/30"
+                        >
+                            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Confirmar Conversión
                         </Button>
                     </DialogFooter>
                 </DialogContent>

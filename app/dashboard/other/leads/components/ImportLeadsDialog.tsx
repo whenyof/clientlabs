@@ -16,6 +16,7 @@ import Papa from "papaparse"
 import * as XLSX from "xlsx"
 import { importLeads } from "../actions"
 import type { LeadTemp } from "@prisma/client"
+import { toast } from "sonner"
 
 type LeadRow = {
     name?: string
@@ -64,7 +65,7 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
                     },
                     error: (error) => {
                         console.error("CSV parse error:", error)
-                        alert("❌ Error al leer el archivo CSV")
+                        toast.error("Error al leer el archivo CSV")
                         setLoading(false)
                     }
                 })
@@ -79,7 +80,7 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
             }
         } catch (error) {
             console.error("File processing error:", error)
-            alert("❌ Error al procesar el archivo")
+            toast.error("Error al procesar el archivo")
             setLoading(false)
         }
     }
@@ -191,7 +192,7 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
         // Filter: valid AND not excluded
         const leadsToImport = leads.filter(l => l.status === "valid" && !l.excluded)
         if (leadsToImport.length === 0) {
-            alert("⚠️ No hay leads válidos para importar")
+            toast.warning("No hay leads válidos para importar")
             return
         }
 
@@ -203,17 +204,19 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
             const result = await importLeads(leadsToImport, fileType)
 
             if (result.success) {
-                alert(`✅ Importación completada:\n\n• ${result.created} leads creados\n• ${result.skipped} duplicados omitidos\n• ${result.invalid} inválidos omitidos`)
+                toast.success("Importación completada", {
+                    description: `${result.created} leads creados • ${result.skipped} duplicados omitidos • ${result.invalid} inválidos omitidos`
+                })
                 onOpenChange(false)
                 router.refresh()
                 resetDialog()
             } else {
-                alert(`❌ Error: ${result.error}`)
+                toast.error(`Error: ${result.error}`)
                 setStep("preview")
             }
         } catch (error) {
             console.error("Import error:", error)
-            alert("❌ Error al importar leads")
+            toast.error("Error al importar leads")
             setStep("preview")
         } finally {
             setLoading(false)

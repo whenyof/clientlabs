@@ -142,6 +142,149 @@ export async function changeLeadTemperature(leadId: string, temperature: LeadTem
 }
 
 
+// Add tag to lead
+export async function addLeadTag(leadId: string, tag: string) {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) throw new Error("Unauthorized")
+
+    const lead = await prisma.lead.findUnique({
+        where: { id: leadId, userId: session.user.id },
+    })
+
+    if (!lead) throw new Error("Lead not found")
+    if (lead.leadStatus === "CONVERTED") throw new Error("Cannot modify converted lead")
+    if (lead.leadStatus === "LOST") throw new Error("Cannot modify lost lead")
+
+    const currentTags = lead.tags || []
+    if (currentTags.includes(tag)) {
+        throw new Error("Tag already exists")
+    }
+
+    await prisma.lead.update({
+        where: { id: leadId, userId: session.user.id },
+        data: {
+            tags: [...currentTags, tag],
+            lastActionAt: new Date(),
+        },
+    })
+
+    revalidatePath("/dashboard/other/leads")
+    return { success: true }
+}
+
+// Remove tag from lead
+export async function removeLeadTag(leadId: string, tag: string) {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) throw new Error("Unauthorized")
+
+    const lead = await prisma.lead.findUnique({
+        where: { id: leadId, userId: session.user.id },
+    })
+
+    if (!lead) throw new Error("Lead not found")
+    if (lead.leadStatus === "CONVERTED") throw new Error("Cannot modify converted lead")
+    if (lead.leadStatus === "LOST") throw new Error("Cannot modify lost lead")
+
+    const currentTags = lead.tags || []
+    const newTags = currentTags.filter(t => t !== tag)
+
+    await prisma.lead.update({
+        where: { id: leadId, userId: session.user.id },
+        data: {
+            tags: newTags,
+            lastActionAt: new Date(),
+        },
+    })
+
+    revalidatePath("/dashboard/other/leads")
+    return { success: true }
+}
+
+
+// Set reminder for lead
+export async function setLeadReminder(
+    leadId: string,
+    reminder: {
+        type: "call" | "email" | "follow_up" | "custom"
+        date: string
+        time?: string
+        note?: string
+    }
+) {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) throw new Error("Unauthorized")
+
+    const lead = await prisma.lead.findUnique({
+        where: { id: leadId, userId: session.user.id },
+    })
+
+    if (!lead) throw new Error("Lead not found")
+    if (lead.leadStatus === "CONVERTED") throw new Error("Cannot modify converted lead")
+    if (lead.leadStatus === "LOST") throw new Error("Cannot modify lost lead")
+
+    const metadata = (lead.metadata as any) || {}
+    metadata.reminder = {
+        ...reminder,
+        createdAt: new Date().toISOString(),
+    }
+
+    await prisma.lead.update({
+        where: { id: leadId, userId: session.user.id },
+        data: {
+            metadata,
+            lastActionAt: new Date(),
+        },
+    })
+
+    revalidatePath("/dashboard/other/leads")
+    return { success: true }
+}
+
+// Complete reminder for lead
+export async function completeLeadReminder(leadId: string) {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) throw new Error("Unauthorized")
+
+    const lead = await prisma.lead.findUnique({
+        where: { id: leadId, userId: session.user.id },
+    })
+
+    if (!lead) throw new Error("Lead not found")
+
+    const metadata = (lead.metadata as any) || {}
+    const reminder = metadata.reminder
+
+    if (!reminder) {
+        throw new Error("No reminder found")
+    }
+
+    await prisma.activity.create({
+        data: {
+            userId: session.user.id,
+            leadId,
+            type: "REMINDER_COMPLETED",
+            title: "Recordatorio completado",
+            description: `Recordatorio completado: ${reminder.type}`,
+            metadata: { reminder },
+        },
+    })
+
+    delete metadata.reminder
+
+    await prisma.lead.update({
+        where: { id: leadId, userId: session.user.id },
+        data: {
+            metadata,
+            lastActionAt: new Date(),
+        },
+    })
+
+    revalidatePath("/dashboard/other/leads")
+    return { success: true }
+}
+
+
+
 // Add note to lead
 export async function addLeadNote(leadId: string, text: string) {
     const session = await getServerSession(authOptions)
@@ -470,4 +613,109 @@ export async function importLeads(
 
     revalidatePath("/dashboard/other/leads")
     return { success: true, created, skipped, invalid }
+}
+
+/* ==================== AI SUGGESTIONS ==================== */
+
+/**
+ * Dismiss AI suggestion for a lead
+ * Saves in metadata to prevent showing again
+ */
+export async function dismissAISuggestion(leadId: string) {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+        throw new Error("No autenticado")
+    }
+
+    const lead = await prisma.lead.findUnique({
+        where: { id: leadId, userId: session.user.id },
+    })
+
+    if (!lead) {
+        throw new Error("Lead no encontrado")
+    }
+
+    // Don't modify CONVERTED or LOST
+    if (lead.leadStatus === "CONVERTED" || lead.leadStatus === "LOST") {
+        throw new Error("No se puede modificar un lead convertido o perdido")
+    }
+
+    const metadata = (lead.metadata as any) || {}
+    metadata.aiDismissed = true
+
+    await prisma.lead.update({
+        where: { id: leadId },
+        data: {
+            metadata,
+            lastActionAt: new Date(),
+        },
+    })
+
+    revalidatePath("/dashboard/other/leads")
+    return { success: true }
+}
+
+/* ==================== AUTOMATIONS ==================== */
+
+/**
+ * Get automation suggestions for a lead
+ * Uses OpenAI if available, falls back to rule-based
+ */
+export async function getAutomationSuggestions(leadId: string) {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+        throw new Error("No autenticado")
+    }
+
+    const lead = await prisma.lead.findUnique({
+        where: { id: leadId, userId: session.user.id },
+    })
+
+    if (!lead) {
+        throw new Error("Lead no encontrado")
+    }
+
+    // Don't suggest for CONVERTED or LOST
+    if (lead.leadStatus === "CONVERTED" || lead.leadStatus === "LOST") {
+        return []
+    }
+
+    // Import dynamically to avoid bundling OpenAI in client
+    const { generateAutomationSuggestions } = await import("./utils/openai")
+    const suggestions = await generateAutomationSuggestions(lead)
+
+    return suggestions
+}
+
+/* ==================== DELETE LEAD ==================== */
+
+/**
+ * Delete a lead permanently
+ * Does NOT allow deleting CONVERTED leads
+ */
+export async function deleteLead(leadId: string) {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+        throw new Error("No autenticado")
+    }
+
+    const lead = await prisma.lead.findUnique({
+        where: { id: leadId, userId: session.user.id },
+    })
+
+    if (!lead) {
+        throw new Error("Lead no encontrado")
+    }
+
+    // Don't allow deleting CONVERTED leads
+    if (lead.leadStatus === "CONVERTED") {
+        throw new Error("No se puede eliminar un lead convertido")
+    }
+
+    await prisma.lead.delete({
+        where: { id: leadId },
+    })
+
+    revalidatePath("/dashboard/other/leads")
+    return { success: true }
 }

@@ -30,10 +30,12 @@ import {
     CheckCircle,
     Mail,
     ExternalLink,
-    Loader2
+    Loader2,
+    Trash2
 } from "lucide-react"
 import { changeLeadStatus, addLeadNote, markLeadLost, convertLeadToClient } from "../actions"
 import { toast } from "sonner"
+import { DeleteLeadDialog } from "./DeleteLeadDialog"
 
 export function LeadRowActions({ lead }: { lead: Lead }) {
     const router = useRouter()
@@ -41,6 +43,7 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
     const [noteDialog, setNoteDialog] = useState(false)
     const [lostDialog, setLostDialog] = useState(false)
     const [convertDialog, setConvertDialog] = useState(false)
+    const [deleteDialog, setDeleteDialog] = useState(false)
     const [note, setNote] = useState("")
     const [lostReason, setLostReason] = useState("")
 
@@ -226,6 +229,15 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
                         <DropdownMenuItem onClick={() => handleStatusChange("QUALIFIED")} disabled={isReadOnly}>
                             Marcar como Cualificado
                         </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                            onClick={() => setDeleteDialog(true)}
+                            disabled={lead.leadStatus === "CONVERTED"}
+                            className="text-red-400 hover:bg-red-500/10 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Eliminar lead
+                        </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
@@ -332,6 +344,15 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* Delete Dialog */}
+            <DeleteLeadDialog
+                open={deleteDialog}
+                onClose={() => setDeleteDialog(false)}
+                leadId={lead.id}
+                leadName={lead.name}
+                onDeleted={() => router.refresh()}
+            />
         </>
     )
 }

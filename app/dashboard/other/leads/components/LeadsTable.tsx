@@ -6,8 +6,11 @@ import { LeadStatusBadge } from "./LeadStatusBadge"
 import { LeadTemperature } from "./LeadTemperature"
 import { LeadRowActions } from "./LeadRowActions"
 import { LeadSidePanel } from "./LeadSidePanel"
+import { TagPill } from "./TagPill"
+import { BatchActionBar } from "./BatchActionBar"
 import { Mail, Phone, Globe, Clock, TrendingUp, Sparkles, FileText, Upload, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { getLeadSuggestion, getPriorityColor, getPriorityLabel } from "../utils/leadSuggestions"
 
 // Source icon mapping
 const sourceIcons: Record<string, any> = {
@@ -88,6 +91,7 @@ export function LeadsTable({
 }) {
     const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
     const [isPanelOpen, setIsPanelOpen] = useState(false)
+    const [selectedLeads, setSelectedLeads] = useState<string[]>([])
 
     const handleLeadClick = (lead: Lead) => {
         setSelectedLead(lead)
@@ -100,6 +104,27 @@ export function LeadsTable({
         setTimeout(() => setSelectedLead(null), 200)
     }
 
+    const handleToggleSelect = (leadId: string, e: React.MouseEvent) => {
+        e.stopPropagation()
+        setSelectedLeads(prev =>
+            prev.includes(leadId)
+                ? prev.filter(id => id !== leadId)
+                : [...prev, leadId]
+        )
+    }
+
+    const handleSelectAll = () => {
+        if (selectedLeads.length === leads.length) {
+            setSelectedLeads([])
+        } else {
+            setSelectedLeads(leads.map(l => l.id))
+        }
+    }
+
+    const handleClearSelection = () => {
+        setSelectedLeads([])
+    }
+
     if (leads.length === 0) {
         return <EmptyState />
     }
@@ -107,6 +132,25 @@ export function LeadsTable({
     return (
         <>
             <div className="space-y-3">
+                {/* Header with Select All */}
+                {leads.length > 0 && (
+                    <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-white/5 border border-white/10">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={selectedLeads.length === leads.length}
+                                onChange={handleSelectAll}
+                                className="w-4 h-4 rounded border-white/20 bg-white/10 text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer"
+                            />
+                            <span className="text-sm text-white/60">
+                                {selectedLeads.length > 0
+                                    ? `${selectedLeads.length} seleccionados`
+                                    : "Seleccionar todos"}
+                            </span>
+                        </label>
+                    </div>
+                )}
+
                 {/* Opportunity Cards */}
                 <div className="space-y-3">
                     {leads.map((lead) => {
@@ -116,16 +160,19 @@ export function LeadsTable({
                         const needsAttention = lead.temperature === "HOT" || lead.temperature === "WARM"
                         const isInactive = lead.lastActionAt &&
                             (Date.now() - new Date(lead.lastActionAt).getTime()) > (14 * 24 * 60 * 60 * 1000)
+                        const isSelected = selectedLeads.includes(lead.id)
 
                         return (
                             <div
                                 key={lead.id}
                                 onClick={() => handleLeadClick(lead)}
-                                className={`group rounded-xl border backdrop-blur-sm transition-all duration-300 hover:scale-[1.01] hover:shadow-xl cursor-pointer ${isUrgent
-                                    ? "border-red-500/40 bg-gradient-to-br from-red-500/10 to-red-500/5 hover:border-red-500/60 shadow-lg shadow-red-500/10"
-                                    : needsAttention
-                                        ? "border-orange-500/30 bg-gradient-to-br from-orange-500/8 to-orange-500/3 hover:border-orange-500/50 shadow-md shadow-orange-500/5"
-                                        : "border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20"
+                                className={`group rounded-xl border backdrop-blur-sm transition-all duration-300 hover:scale-[1.01] hover:shadow-xl cursor-pointer ${isSelected
+                                    ? "border-blue-500/60 bg-blue-500/10 shadow-lg shadow-blue-500/20"
+                                    : isUrgent
+                                        ? "border-red-500/40 bg-gradient-to-br from-red-500/10 to-red-500/5 hover:border-red-500/60 shadow-lg shadow-red-500/10"
+                                        : needsAttention
+                                            ? "border-orange-500/30 bg-gradient-to-br from-orange-500/8 to-orange-500/3 hover:border-orange-500/50 shadow-md shadow-orange-500/5"
+                                            : "border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20"
                                     }`}
                             >
                                 <div className="p-5">
@@ -133,6 +180,22 @@ export function LeadsTable({
                                         {/* Left: Lead Identity */}
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-3 mb-3">
+                                                {/* Checkbox */}
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isSelected}
+                                                    onChange={(e) => {
+                                                        e.stopPropagation()
+                                                        setSelectedLeads(prev =>
+                                                            prev.includes(lead.id)
+                                                                ? prev.filter(id => id !== lead.id)
+                                                                : [...prev, lead.id]
+                                                        )
+                                                    }}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    className="w-4 h-4 rounded border-white/20 bg-white/10 text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer"
+                                                />
+
                                                 {/* Source Icon */}
                                                 <div className={`p-2.5 rounded-lg border transition-all ${isUrgent
                                                     ? "bg-red-500/20 border-red-500/40"
@@ -148,6 +211,21 @@ export function LeadsTable({
                                                         <h3 className="text-white font-bold text-lg truncate">
                                                             {lead.name || "Sin nombre"}
                                                         </h3>
+                                                        {/* AI Suggestion Indicator */}
+                                                        {(() => {
+                                                            const suggestion = getLeadSuggestion(lead)
+                                                            if (!suggestion) return null
+                                                            const colors = getPriorityColor(suggestion.priority)
+                                                            return (
+                                                                <div className="relative group">
+                                                                    <Sparkles className={`h-3.5 w-3.5 ${colors.text}`} />
+                                                                    <div className="absolute hidden group-hover:block bottom-full left-0 mb-2 p-2 bg-zinc-900 border border-white/20 rounded-lg shadow-xl whitespace-nowrap z-50">
+                                                                        <p className="text-xs text-white/60">Sugerencia IA: {suggestion.icon} {getPriorityLabel(suggestion.priority)}</p>
+                                                                        <p className="text-xs text-white">{suggestion.actionLabel}</p>
+                                                                    </div>
+                                                                </div>
+                                                            )
+                                                        })()}
                                                         {isUrgent && (
                                                             <span className="flex h-2.5 w-2.5">
                                                                 <span className="animate-ping absolute inline-flex h-2.5 w-2.5 rounded-full bg-red-400 opacity-75"></span>
@@ -184,13 +262,18 @@ export function LeadsTable({
                                                     <span className="text-white/40">pts</span>
                                                 </div>
 
-                                                {/* Last Action */}
+                                                {/* Last Action / Stale Badge */}
                                                 <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium ${isInactive
-                                                    ? "bg-red-500/20 border border-red-500/30 text-red-400"
+                                                    ? "bg-orange-500/20 border border-orange-500/40 text-orange-400"
                                                     : "bg-white/10 border border-white/10 text-white/60"
                                                     }`}>
                                                     <Clock className="h-3.5 w-3.5" />
                                                     <span>{daysSince}</span>
+                                                    {isInactive && (
+                                                        <span className="text-orange-300 font-semibold">
+                                                            ⚠️
+                                                        </span>
+                                                    )}
                                                 </div>
 
                                                 {/* Source Badge */}
@@ -199,6 +282,57 @@ export function LeadsTable({
                                                         {lead.source}
                                                     </div>
                                                 )}
+
+                                                {/* Tags */}
+                                                {lead.tags && lead.tags.length > 0 && (
+                                                    <div className="flex flex-wrap gap-1.5">
+                                                        {lead.tags.slice(0, 3).map((tag, idx) => (
+                                                            <TagPill key={idx} tag={tag} size="sm" />
+                                                        ))}
+                                                        {lead.tags.length > 3 && (
+                                                            <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-xs text-white/40">
+                                                                +{lead.tags.length - 3}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                )}
+
+                                                {/* Reminder Badge */}
+                                                {(() => {
+                                                    const metadata = (lead.metadata as any) || {}
+                                                    const reminder = metadata.reminder
+                                                    if (!reminder) return null
+
+                                                    const reminderDate = new Date(reminder.date)
+                                                    const now = new Date()
+                                                    const isOverdue = reminderDate < now
+                                                    const isToday = reminderDate.toDateString() === now.toDateString()
+
+                                                    if (isOverdue) {
+                                                        return (
+                                                            <div className="px-2 py-0.5 rounded-full bg-red-500/20 border border-red-500/40 text-xs text-red-400 flex items-center gap-1">
+                                                                <Clock className="h-3 w-3" />
+                                                                Vencido
+                                                            </div>
+                                                        )
+                                                    }
+
+                                                    if (isToday) {
+                                                        return (
+                                                            <div className="px-2 py-0.5 rounded-full bg-orange-500/20 border border-orange-500/40 text-xs text-orange-400 flex items-center gap-1">
+                                                                <Clock className="h-3 w-3" />
+                                                                Hoy
+                                                            </div>
+                                                        )
+                                                    }
+
+                                                    return (
+                                                        <div className="px-2 py-0.5 rounded-full bg-green-500/20 border border-green-500/40 text-xs text-green-400 flex items-center gap-1">
+                                                            <Clock className="h-3 w-3" />
+                                                            Programado
+                                                        </div>
+                                                    )
+                                                })()}
                                             </div>
                                         </div>
 
@@ -226,6 +360,13 @@ export function LeadsTable({
                     )}
                 </div>
             </div>
+
+            {/* Batch Action Bar */}
+            <BatchActionBar
+                selectedLeads={selectedLeads}
+                onClearSelection={handleClearSelection}
+                leadsData={leads.map(l => ({ id: l.id, leadStatus: l.leadStatus }))}
+            />
 
             {/* Side Panel */}
             <LeadSidePanel

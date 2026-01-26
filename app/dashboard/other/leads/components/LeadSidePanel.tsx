@@ -6,7 +6,7 @@ import { X, Flame, CloudSun, CloudSnow, Calendar, MapPin, Tag as TagIcon, FileTe
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { TemperatureIcon } from "./TemperatureIcon"
-import { addLeadNote, markLeadLost, convertLeadToClient, changeLeadTemperature } from "../actions"
+import { addLeadNote, markLeadLost, convertLeadToClient, changeLeadTemperature, addLeadTag, removeLeadTag, setLeadReminder, completeLeadReminder } from "../actions"
 import { useRouter } from "next/navigation"
 import type { LeadTemp } from "@prisma/client"
 import { toast } from "sonner"
@@ -18,11 +18,21 @@ import {
     DialogTitle,
     DialogFooter,
 } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { TagPill } from "./TagPill"
+import { ReminderDialog } from "./ReminderDialog"
+import { DeleteLeadDialog } from "./DeleteLeadDialog"
+import { getLeadSuggestion } from "../utils/leadSuggestions"
+import { AISuggestionCard } from "./AISuggestionCard"
 import {
     Mail,
     User,
     StickyNote,
     Snowflake,
+    Clock,
+    Bell,
+    CheckCircle2,
+    Trash2,
 } from "lucide-react"
 
 type LeadSidePanelProps = {
@@ -39,6 +49,9 @@ export function LeadSidePanel({ lead, isOpen, onClose }: LeadSidePanelProps) {
     const [lostDialog, setLostDialog] = useState(false)
     const [convertDialog, setConvertDialog] = useState(false)
     const [temperatureDialog, setTemperatureDialog] = useState(false)
+    const [newTag, setNewTag] = useState("")
+    const [reminderDialog, setReminderDialog] = useState(false)
+    const [deleteDialog, setDeleteDialog] = useState(false)
 
     // Initialize note with existing notes
     useEffect(() => {
@@ -128,6 +141,67 @@ export function LeadSidePanel({ lead, isOpen, onClose }: LeadSidePanelProps) {
         }
     }
 
+    const handleAddTag = async () => {
+        if (!newTag.trim()) return
+        setLoading(true)
+        try {
+            await addLeadTag(lead.id, newTag.trim())
+            setNewTag("")
+            router.refresh()
+            toast.success("Tag añadido")
+        } catch (error) {
+            console.error(error)
+            const message = error instanceof Error ? error.message : "Error al añadir tag"
+            toast.error(message)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleRemoveTag = async (tag: string) => {
+        setLoading(true)
+        try {
+            await removeLeadTag(lead.id, tag)
+            router.refresh()
+            toast.success("Tag eliminado")
+        } catch (error) {
+            console.error(error)
+            toast.error("Error al eliminar tag")
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleSetReminder = async (reminder: { type: string; date: string; time?: string; note?: string }) => {
+        setLoading(true)
+        try {
+            await setLeadReminder(lead.id, reminder as any)
+            setReminderDialog(false)
+            router.refresh()
+            toast.success("Recordatorio añadido")
+        } catch (error) {
+            console.error(error)
+            const message = error instanceof Error ? error.message : "Error al añadir recordatorio"
+            toast.error(message)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleCompleteReminder = async () => {
+        setLoading(true)
+        try {
+            await completeLeadReminder(lead.id)
+            router.refresh()
+            toast.success("Recordatorio completado")
+        } catch (error) {
+            console.error(error)
+            toast.error("Error al completar recordatorio")
+        } finally {
+            setLoading(false)
+        }
+    }
+
     const formatDate = (date: Date | null) => {
         if (!date) return "-"
         return new Date(date).toLocaleDateString("es-ES", {
@@ -183,6 +257,45 @@ export function LeadSidePanel({ lead, isOpen, onClose }: LeadSidePanelProps) {
                                 </span>
                             )}
                         </div>
+
+                        {/* AI Suggestions */}
+                        {(() => {
+                            const suggestion = getLeadSuggestion(lead)
+                            if (!suggestion) return null
+
+                            const handleApplyAction = () => {
+                                switch (suggestion.action) {
+                                    case "email":
+                                        handleSendEmail()
+                                        break
+                                    case "call":
+                                        toast.info("Registra la llamada en las notas")
+                                        break
+                                    case "reminder":
+                                        setReminderDialog(true)
+                                        break
+                                    case "convert":
+                                        setConvertDialog(true)
+                                        break
+                                    case "nurture":
+                                        toast.info("Añade tags de nurturing o crea recordatorio")
+                                        break
+                                    case "follow_up":
+                                        toast.info("Registra el seguimiento en las notas")
+                                        break
+                                }
+                            }
+
+                            return (
+                                <div className="mt-4">
+                                    <AISuggestionCard
+                                        leadId={lead.id}
+                                        suggestion={suggestion}
+                                        onApplyAction={handleApplyAction}
+                                    />
+                                </div>
+                            )
+                        })()}
                     </div>
 
                     {/* Content - Scrollable */}
@@ -228,7 +341,117 @@ export function LeadSidePanel({ lead, isOpen, onClose }: LeadSidePanelProps) {
                                     </Button>
                                 </div>
                             </div>
-                        )}
+                        )}                       {/* Reminder Section */}
+                        <div>
+                            <h3 className="text-sm font-medium text-white/80 mb-3 flex items-center gap-2">
+                                <Bell className="h-4 w-4" />
+                                Próximo Recordatorio
+                            </h3>
+
+                            {(() => {
+                                const metadata = (lead.metadata as any) || {}
+                                const reminder = metadata.reminder
+
+                                if (reminder && !isReadOnly) {
+                                    const reminderDate = new Date(reminder.date)
+                                    const now = new Date()
+                                    const isOverdue = reminderDate < now
+                                    const isToday = reminderDate.toDateString() === now.toDateString()
+
+                                    const typeEmojis: Record<string, string> = {
+                                        call: "📞",
+                                        email: "✉️",
+                                        follow_up: "📝",
+                                        custom: "🔔"
+                                    }
+
+                                    const typeLabels: Record<string, string> = {
+                                        call: "Llamar",
+                                        email: "Responder email",
+                                        follow_up: "Seguimiento",
+                                        custom: "Personalizado"
+                                    }
+
+                                    return (
+                                        <div className="p-3 rounded-lg bg-white/5 border border-white/10 space-y-3">
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="text-lg">{typeEmojis[reminder.type]}</span>
+                                                        <span className="text-white font-medium">{typeLabels[reminder.type]}</span>
+                                                    </div>
+                                                    <div className="text-sm text-white/60">
+                                                        🗓️ {reminderDate.toLocaleDateString("es-ES", {
+                                                            day: "numeric",
+                                                            month: "short"
+                                                        })}
+                                                        {reminder.time && ` · ${reminder.time}`}
+                                                    </div>
+                                                    {isOverdue && (
+                                                        <div className="text-xs text-red-400 mt-1">
+                                                            🔴 Vencido
+                                                        </div>
+                                                    )}
+                                                    {isToday && !isOverdue && (
+                                                        <div className="text-xs text-orange-400 mt-1">
+                                                            🟠 Hoy
+                                                        </div>
+                                                    )}
+                                                    {reminder.note && (
+                                                        <div className="text-xs text-white/40 mt-2">
+                                                            {reminder.note}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    onClick={() => setReminderDialog(true)}
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="flex-1 bg-white/5 border-white/10 text-white/80 hover:bg-white/10"
+                                                    disabled={loading}
+                                                >
+                                                    Cambiar
+                                                </Button>
+                                                <Button
+                                                    onClick={handleCompleteReminder}
+                                                    size="sm"
+                                                    className="flex-1 bg-green-500/20 border-green-500/30 text-green-400 hover:bg-green-500/30"
+                                                    disabled={loading}
+                                                >
+                                                    <CheckCircle2 className="h-4 w-4 mr-1" />
+                                                    Completar
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    )
+                                }
+
+                                if (!isReadOnly) {
+                                    return (
+                                        <div className="p-3 rounded-lg bg-white/5 border border-white/10 text-center">
+                                            <p className="text-sm text-white/40 mb-3">Sin recordatorios</p>
+                                            <Button
+                                                onClick={() => setReminderDialog(true)}
+                                                size="sm"
+                                                className="bg-blue-500/20 border-blue-500/30 text-blue-400 hover:bg-blue-500/30"
+                                                disabled={loading}
+                                            >
+                                                <Bell className="h-4 w-4 mr-2" />
+                                                Añadir recordatorio
+                                            </Button>
+                                        </div>
+                                    )
+                                }
+
+                                return (
+                                    <p className="text-sm text-white/40">
+                                        No disponible para leads {lead.leadStatus === "CONVERTED" ? "convertidos" : "perdidos"}
+                                    </p>
+                                )
+                            })()}
+                        </div>
 
                         {/* Information */}
                         <div>
@@ -260,24 +483,60 @@ export function LeadSidePanel({ lead, isOpen, onClose }: LeadSidePanelProps) {
                         </div>
 
                         {/* Tags */}
-                        {lead.tags && lead.tags.length > 0 && (
-                            <div>
-                                <h3 className="text-sm font-medium text-white/80 mb-3 flex items-center gap-2">
-                                    <TagIcon className="h-4 w-4" />
-                                    Tags
-                                </h3>
-                                <div className="flex flex-wrap gap-2">
+                        <div>
+                            <h3 className="text-sm font-medium text-white/80 mb-3 flex items-center gap-2">
+                                <TagIcon className="h-4 w-4" />
+                                Tags
+                            </h3>
+
+                            {/* Existing Tags */}
+                            {lead.tags && lead.tags.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mb-3">
                                     {lead.tags.map((tag, idx) => (
-                                        <span
+                                        <TagPill
                                             key={idx}
-                                            className="px-2 py-1 rounded bg-white/5 border border-white/10 text-xs text-white/70"
-                                        >
-                                            {tag}
-                                        </span>
+                                            tag={tag}
+                                            size="md"
+                                            onRemove={!isReadOnly ? () => handleRemoveTag(tag) : undefined}
+                                        />
                                     ))}
                                 </div>
-                            </div>
-                        )}
+                            )}
+
+                            {/* Add New Tag */}
+                            {!isReadOnly && (
+                                <div className="flex gap-2">
+                                    <Input
+                                        value={newTag}
+                                        onChange={(e) => setNewTag(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter") {
+                                                e.preventDefault()
+                                                handleAddTag()
+                                            }
+                                        }}
+                                        placeholder="Añadir tag..."
+                                        className="bg-white/5 border-white/10 text-white placeholder:text-white/40 text-sm"
+                                        disabled={loading}
+                                    />
+                                    <Button
+                                        onClick={handleAddTag}
+                                        disabled={loading || !newTag.trim()}
+                                        size="sm"
+                                        className="bg-blue-500/20 border-blue-500/30 text-blue-400 hover:bg-blue-500/30 shrink-0"
+                                    >
+                                        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        Añadir
+                                    </Button>
+                                </div>
+                            )}
+
+                            {!lead.tags || lead.tags.length === 0 && (
+                                <p className="text-sm text-white/40 mb-3">
+                                    {isReadOnly ? "Sin tags" : "Añade tags para organizar este lead"}
+                                </p>
+                            )}
+                        </div>
 
                         {/* Notes */}
                         <div>
@@ -448,6 +707,26 @@ export function LeadSidePanel({ lead, isOpen, onClose }: LeadSidePanelProps) {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* Reminder Dialog */}
+            <ReminderDialog
+                open={reminderDialog}
+                onClose={() => setReminderDialog(false)}
+                onSave={handleSetReminder}
+                loading={loading}
+            />
+
+            {/* Delete Dialog */}
+            <DeleteLeadDialog
+                open={deleteDialog}
+                onClose={() => setDeleteDialog(false)}
+                leadId={lead.id}
+                leadName={lead.name || "Sin nombre"}
+                onDeleted={() => {
+                    onClose()
+                    router.refresh()
+                }}
+            />
         </>
     )
 }

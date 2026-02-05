@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
+import { useSectorConfig } from "@/hooks/useSectorConfig"
 import { DashboardContainer } from "@/components/layout/DashboardContainer"
 import { AssistantHeader } from "./components/AssistantHeader"
 import { AssistantKPIs } from "./components/AssistantKPIs"
@@ -24,18 +25,20 @@ import {
 } from "@heroicons/react/24/outline"
 
 export default function AiAssistantPage() {
+  const { labels } = useSectorConfig()
+  const t = labels.aiAssistant.tabs
   const [activeTab, setActiveTab] = useState<'overview' | 'insights' | 'leads' | 'predictions' | 'recommendations' | 'automations' | 'settings' | 'timeline' | 'chat'>('overview')
 
   const tabs = [
-    { id: 'overview' as const, label: 'Vista General', icon: LightBulbIcon },
-    { id: 'insights' as const, label: 'Insights IA', icon: SparklesIcon },
-    { id: 'leads' as const, label: 'Leads Calientes', icon: UserGroupIcon },
-    { id: 'predictions' as const, label: 'Predicciones', icon: ChartBarIcon },
-    { id: 'recommendations' as const, label: 'Recomendaciones', icon: SparklesIcon },
-    { id: 'automations' as const, label: 'Automatizaciones', icon: CogIcon },
-    { id: 'chat' as const, label: 'Chat IA', icon: ChatBubbleLeftRightIcon },
-    { id: 'timeline' as const, label: 'Historial', icon: ClockIcon },
-    { id: 'settings' as const, label: 'Configuración', icon: CogIcon }
+    { id: 'overview' as const, label: t.overview, icon: LightBulbIcon },
+    { id: 'insights' as const, label: t.insights, icon: SparklesIcon },
+    { id: 'leads' as const, label: t.hotLeads, icon: UserGroupIcon },
+    { id: 'predictions' as const, label: t.predictions, icon: ChartBarIcon },
+    { id: 'recommendations' as const, label: t.recommendations, icon: SparklesIcon },
+    { id: 'automations' as const, label: t.automations, icon: CogIcon },
+    { id: 'chat' as const, label: t.chat, icon: ChatBubbleLeftRightIcon },
+    { id: 'timeline' as const, label: t.timeline, icon: ClockIcon },
+    { id: 'settings' as const, label: t.settings, icon: CogIcon }
   ]
 
   const renderContent = () => {
@@ -75,9 +78,9 @@ export default function AiAssistantPage() {
   return (
     <DashboardContainer>
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-white">Asistente IA</h1>
+        <h1 className="text-2xl font-semibold text-white">{labels.aiAssistant.title}</h1>
         <p className="text-sm text-white/60">
-          Inteligencia artificial para optimizar tu negocio
+          {labels.aiAssistant.pageSubtitle}
         </p>
       </div>
 

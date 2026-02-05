@@ -2,7 +2,9 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
+import { useSectorConfig } from "@/hooks/useSectorConfig"
 import { DashboardContainer } from "@/components/layout/DashboardContainer"
+import { FinanceDataProvider } from "./context/FinanceDataContext"
 import { FinanceHeader } from "./components/FinanceHeader"
 import { FinanceKPIs } from "./components/FinanceKPIs"
 import { MainChart } from "./components/MainChart"
@@ -26,17 +28,19 @@ import {
 } from "@heroicons/react/24/outline"
 
 export default function FinancePage() {
+  const { labels } = useSectorConfig()
+  const t = labels.finance.tabs
   const [activeTab, setActiveTab] = useState<'overview' | 'transactions' | 'budgets' | 'forecast' | 'goals' | 'alerts' | 'automation'>('overview')
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
   const tabs = [
-    { id: 'overview' as const, label: 'Vista General', icon: ChartBarIcon },
-    { id: 'transactions' as const, label: 'Movimientos', icon: CreditCardIcon },
-    { id: 'budgets' as const, label: 'Presupuestos', icon: BanknotesIcon },
-    { id: 'forecast' as const, label: 'Pronóstico', icon: CurrencyEuroIcon },
-    { id: 'goals' as const, label: 'Objetivos', icon: BellIcon },
-    { id: 'alerts' as const, label: 'Alertas', icon: BellIcon },
-    { id: 'automation' as const, label: 'Automatización', icon: CogIcon }
+    { id: 'overview' as const, label: t.overview, icon: ChartBarIcon },
+    { id: 'transactions' as const, label: t.transactions, icon: CreditCardIcon },
+    { id: 'budgets' as const, label: t.budgets, icon: BanknotesIcon },
+    { id: 'forecast' as const, label: t.forecast, icon: CurrencyEuroIcon },
+    { id: 'goals' as const, label: t.goals, icon: BellIcon },
+    { id: 'alerts' as const, label: t.alerts, icon: BellIcon },
+    { id: 'automation' as const, label: t.automation, icon: CogIcon }
   ]
 
   const renderContent = () => {
@@ -77,10 +81,11 @@ export default function FinancePage() {
 
   return (
     <DashboardContainer>
+      <FinanceDataProvider>
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-white">Finanzas</h1>
+        <h1 className="text-2xl font-semibold text-white">{labels.finance.title}</h1>
         <p className="text-sm text-white/60">
-          Gestiona tus ingresos y gastos
+          {labels.finance.pageSubtitle}
         </p>
       </div>
 
@@ -132,6 +137,7 @@ export default function FinancePage() {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
       />
+      </FinanceDataProvider>
     </DashboardContainer>
   )
 }

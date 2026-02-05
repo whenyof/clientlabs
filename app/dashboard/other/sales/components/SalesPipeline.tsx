@@ -1,1 +1,0 @@
-"use client"\n+\n+import PipelineBoard from \"./PipelineBoard\"\n+import { MOCK_DEALS } from \"./constants\"\n+\n+// TODO: Replace mock with API call to GET /api/sales/deals\n+export default function SalesPipeline() {\n+  return <PipelineBoard deals={MOCK_DEALS} />\n+}\n+\n*** End Patch

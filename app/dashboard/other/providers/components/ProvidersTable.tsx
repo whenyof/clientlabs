@@ -7,7 +7,8 @@ import {
   TrashIcon,
   StarIcon,
   PhoneIcon,
-  EnvelopeIcon
+  EnvelopeIcon,
+  BuildingStorefrontIcon
 } from "@heroicons/react/24/outline"
 import { motion } from "framer-motion"
 
@@ -80,11 +81,10 @@ export function ProvidersTable({
     return Array.from({ length: 5 }, (_, i) => (
       <StarIcon
         key={i}
-        className={`w-4 h-4 ${
-          i < Math.floor(rating)
+        className={`w-4 h-4 ${i < Math.floor(rating)
             ? 'text-yellow-400 fill-yellow-400'
             : 'text-gray-600'
-        }`}
+          }`}
       />
     ))
   }

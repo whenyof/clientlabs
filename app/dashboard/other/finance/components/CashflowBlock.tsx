@@ -2,12 +2,34 @@
 
 import { motion } from "framer-motion"
 import { ArrowUpIcon, ArrowDownIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/outline"
-import { mockFinanceKPIs, formatCurrency } from "../mock"
+import { formatCurrency } from "../lib/formatters"
+import { useFinanceData } from "../context/FinanceDataContext"
 
 export function CashflowBlock() {
-  const cashFlow = mockFinanceKPIs.netProfit
-  const inflow = mockFinanceKPIs.totalIncome
-  const outflow = mockFinanceKPIs.totalExpenses
+  const { analytics, loading } = useFinanceData()
+  const k = analytics?.kpis
+  const cashFlow = k?.netProfit ?? 0
+  const inflow = k?.totalIncome ?? 0
+  const outflow = Math.abs(k?.totalExpenses ?? 0)
+
+  if (loading) {
+    return (
+      <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-gray-700/50 p-6 animate-pulse h-64" />
+    )
+  }
+
+  if (inflow === 0 && outflow === 0) {
+    return (
+      <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-gray-700/50 p-6">
+        <h3 className="text-xl font-bold text-white mb-2">Flujo de Caja</h3>
+        <p className="text-gray-400 text-sm mb-4">Entradas vs salidas del período</p>
+        <div className="py-8 text-center text-gray-400">
+          <p className="text-white/80">Sin datos de flujo</p>
+          <p className="text-sm mt-1">Añade transacciones para ver entradas y salidas.</p>
+        </div>
+      </div>
+    )
+  }
 
   const flowItems = [
     {

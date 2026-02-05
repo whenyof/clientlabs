@@ -298,10 +298,14 @@ model Client {
   timeToConvert       Int?
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
+  status              String          @default("ACTIVE")
+  clientTraits        String[]        @default([])
+  riskLevel           String?         @default("LOW")
   CalendarEvent       CalendarEvent[]
   User                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   leads               Lead[]          @relation("ClientLeads")
   Sale                Sale[]
+  Task                Task[]
   transactions        Transaction[]
 
   @@index([createdAt])
@@ -310,6 +314,7 @@ model Client {
   @@index([source])
   @@index([userId])
   @@index([convertedFromLeadId])
+  @@index([status])
 }
 
 model Event {
@@ -415,6 +420,7 @@ model Lead {
   LeadAlert             LeadAlert[]
   LeadEvent             LeadEvent[]
   leadScores            LeadScore[]
+  Task                  Task[]
   TrackingEvent         TrackingEvent[]
 
   @@index([category])
@@ -594,81 +600,91 @@ model TrackingEvent {
 }
 
 model User {
-  id                   String                 @id @default(cuid())
-  email                String                 @unique
-  name                 String?
-  password             String?
-  phone                String?
-  emailVerified        DateTime?
-  role                 UserRole               @default(USER)
-  plan                 PlanType               @default(FREE)
-  onboardingCompleted  Boolean                @default(false)
-  selectedSector       String?
-  planId               String?
-  isTrial              Boolean                @default(true)
-  planStartedAt        DateTime               @default(now())
-  planExpiresAt        DateTime?
-  billingCycle         String?
-  stripeCustomerId     String?
-  stripeSubscriptionId String?
-  createdAt            DateTime               @default(now())
-  updatedAt            DateTime               @updatedAt
-  image                String?
-  isBlocked            Boolean                @default(false)
-  isActive             Boolean                @default(true)
-  blockedAt            DateTime?
-  blockedReason        String?
-  lastLoginAt          DateTime?
-  lastActiveAt         DateTime?
-  AIInsight            AIInsight[]
-  AIPrediction         AIPrediction[]
-  accounts             Account[]
-  activities           Activity[]
-  aiInsights           AiInsight[]
-  AiLog                AiLog[]
-  Alert                Alert[]
-  ApiKey               ApiKey[]
-  automations          Automation[]
-  automationLogs       AutomationLog[]
-  budgets              Budget[]
-  BusinessProfile      BusinessProfile?
-  CalendarEvent        CalendarEvent[]
-  cashflowForecasts    CashflowForecast[]
-  Client               Client[]
-  Event                Event[]
-  eventMetrics         EventMetrics[]
-  financeAlerts        FinanceAlert[]
-  financialGoals       FinancialGoal[]
-  FinancialRecord      FinancialRecord[]
-  fixedExpenses        FixedExpense[]
-  genericMetrics       GenericMetrics[]
-  gymMetrics           GymMetrics[]
-  homeServiceMetrics   HomeServiceMetrics[]
-  integrations         Integration[]
-  integrationLogs      IntegrationLog[]
-  Lead                 Lead[]
-  LeadAIInsight        LeadAIInsight[]
-  LeadAlert            LeadAlert[]
-  LeadEvent            LeadEvent[]
-  leadScores           LeadScore[]
-  Notification         Notification[]
-  payments             Payment[]
-  pipelineStages       PipelineStage[]
-  realEstateMetrics    RealEstateMetrics[]
-  restaurantMetrics    RestaurantMetrics[]
-  retailMetrics        RetailMetrics[]
-  Sale                 Sale[]
-  sessions             Session[]
-  subscriptions        Subscription[]
-  teamMembers          TeamMember[]
-  TrackingEvent        TrackingEvent[]
-  transactions         Transaction[]
-  planRelation         Plan?                  @relation(fields: [planId], references: [id])
-  Website              Website[]
-  workshopMetrics      WorkshopMetrics[]
-  adminLogs            AdminLog[]             @relation("AdminLogs")
-  impersonatedBy       ImpersonationSession[] @relation("ImpersonatedBy")
-  impersonationTarget  ImpersonationSession[] @relation("ImpersonationTarget")
+  id                     String                  @id @default(cuid())
+  email                  String                  @unique
+  name                   String?
+  password               String?
+  phone                  String?
+  emailVerified          DateTime?
+  role                   UserRole                @default(USER)
+  plan                   PlanType                @default(FREE)
+  onboardingCompleted    Boolean                 @default(false)
+  selectedSector         String?
+  planId                 String?
+  isTrial                Boolean                 @default(true)
+  planStartedAt          DateTime                @default(now())
+  planExpiresAt          DateTime?
+  billingCycle           String?
+  stripeCustomerId       String?
+  stripeSubscriptionId   String?
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  image                  String?
+  isBlocked              Boolean                 @default(false)
+  isActive               Boolean                 @default(true)
+  blockedAt              DateTime?
+  blockedReason          String?
+  lastLoginAt            DateTime?
+  lastActiveAt           DateTime?
+  AIInsight              AIInsight[]
+  AIPrediction           AIPrediction[]
+  accounts               Account[]
+  activities             Activity[]
+  aiInsights             AiInsight[]
+  AiLog                  AiLog[]
+  Alert                  Alert[]
+  ApiKey                 ApiKey[]
+  automations            Automation[]
+  automationLogs         AutomationLog[]
+  budgets                Budget[]
+  BusinessProfile        BusinessProfile?
+  CalendarEvent          CalendarEvent[]
+  cashflowForecasts      CashflowForecast[]
+  Client                 Client[]
+  Event                  Event[]
+  eventMetrics           EventMetrics[]
+  financeAlerts          FinanceAlert[]
+  financialGoals         FinancialGoal[]
+  FinancialRecord        FinancialRecord[]
+  fixedExpenses          FixedExpense[]
+  genericMetrics         GenericMetrics[]
+  gymMetrics             GymMetrics[]
+  homeServiceMetrics     HomeServiceMetrics[]
+  integrations           Integration[]
+  integrationLogs        IntegrationLog[]
+  Lead                   Lead[]
+  LeadAIInsight          LeadAIInsight[]
+  LeadAlert              LeadAlert[]
+  LeadEvent              LeadEvent[]
+  leadScores             LeadScore[]
+  Notification           Notification[]
+  payments               Payment[]
+  pipelineStages         PipelineStage[]
+  providers              Provider[]
+  providerContactLogs    ProviderContactLog[]
+  providerFiles          ProviderFile[]
+  providerNotes          ProviderNote[]
+  providerOrders         ProviderOrder[]
+  providerPayments       ProviderPayment[]
+  providerTasks          ProviderTask[]
+  providerTimelineEvents ProviderTimelineEvent[]
+  realEstateMetrics      RealEstateMetrics[]
+  restaurantMetrics      RestaurantMetrics[]
+  retailMetrics          RetailMetrics[]
+  Sale                   Sale[]
+  services               Service[]
+  sessions               Session[]
+  subscriptions          Subscription[]
+  Task                   Task[]
+  teamMembers            TeamMember[]
+  TrackingEvent          TrackingEvent[]
+  transactions           Transaction[]
+  planRelation           Plan?                   @relation(fields: [planId], references: [id])
+  Website                Website[]
+  workshopMetrics        WorkshopMetrics[]
+  adminLogs              AdminLog[]              @relation("AdminLogs")
+  impersonatedBy         ImpersonationSession[]  @relation("ImpersonatedBy")
+  impersonationTarget    ImpersonationSession[]  @relation("ImpersonationTarget")
 }
 
 model Plan {
@@ -1092,6 +1108,238 @@ model BackupMetadata {
   @@map("backup_metadata")
 }
 
+model Task {
+  id          String       @id
+  userId      String
+  title       String
+  description String?
+  status      TaskStatus   @default(PENDING)
+  priority    TaskPriority @default(MEDIUM)
+  dueDate     DateTime?
+  type        TaskType     @default(MANUAL)
+  clientId    String?
+  leadId      String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  Client      Client?      @relation(fields: [clientId], references: [id])
+  Lead        Lead?        @relation(fields: [leadId], references: [id])
+  User        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([clientId])
+  @@index([leadId])
+  @@index([status])
+  @@index([dueDate])
+}
+
+model Provider {
+  id                       String                   @id @default(cuid())
+  userId                   String
+  name                     String
+  type                     String?
+  status                   ProviderStatus           @default(ACTIVE)
+  dependencyLevel          ProviderDependency       @default(LOW)
+  operationalState         ProviderOperationalState @default(OK)
+  monthlyCost              Float?
+  monthlyBudgetLimit       Float?
+  lastOrderDate            DateTime?
+  averageOrderFrequency    Int?
+  estimatedConsumptionRate Float?
+  isCritical               Boolean                  @default(false)
+  contactEmail             String?
+  contactPhone             String?
+  website                  String?
+  notes                    String?
+  reminderInterval         Int?
+  lastReminderDate         DateTime?
+  emailTemplates           String?
+  autoCreateTaskOnRisk     Boolean                  @default(false)
+  autoNotifyBeforeRestock  Int?
+  autoSuggestOrder         Boolean                  @default(false)
+  aiInsightsEnabled        Boolean                  @default(true)
+  ignoredInsightIds        String?                  @default("")
+  affectedArea             String?
+  hasAlternative           Boolean                  @default(true)
+  createdAt                DateTime                 @default(now())
+  updatedAt                DateTime                 @updatedAt
+  User                     User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contactLogs              ProviderContactLog[]
+  files                    ProviderFile[]
+  notes_list               ProviderNote[]
+  orders                   ProviderOrder[]
+  payments                 ProviderPayment[]
+  tasks                    ProviderTask[]
+  timelineEvents           ProviderTimelineEvent[]
+  services                 Service[]                @relation("ProviderToService")
+
+  @@index([userId])
+  @@index([status])
+  @@index([dependencyLevel])
+  @@index([operationalState])
+  @@index([isCritical])
+  @@index([lastOrderDate])
+}
+
+model ProviderOrder {
+  id                   String                  @id @default(cuid())
+  providerId           String
+  userId               String
+  amount               Float                   @default(0)
+  status               ProviderOrderStatus     @default(PENDING)
+  orderDate            DateTime                @default(now())
+  expectedDeliveryDate DateTime?
+  type                 ProviderOrderType
+  description          String?
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
+  files                ProviderFile[]          @relation("OrderFiles")
+  Provider             Provider                @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  User                 User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payment              ProviderPayment?
+  timelineEvents       ProviderTimelineEvent[]
+
+  @@index([providerId])
+  @@index([userId])
+  @@index([status])
+}
+
+model ProviderPayment {
+  id             String                  @id @default(cuid())
+  providerId     String
+  userId         String
+  amount         Float
+  paymentDate    DateTime
+  concept        String?
+  notes          String?
+  createdAt      DateTime                @default(now())
+  method         String?
+  orderId        String?                 @unique
+  status         ProviderPaymentStatus   @default(PAID)
+  files          ProviderFile[]
+  order          ProviderOrder?          @relation(fields: [orderId], references: [id])
+  Provider       Provider                @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  User           User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  timelineEvents ProviderTimelineEvent[]
+
+  @@index([providerId])
+  @@index([userId])
+  @@index([paymentDate])
+  @@index([status])
+}
+
+model ProviderTask {
+  id             String                  @id @default(cuid())
+  providerId     String
+  userId         String
+  title          String
+  description    String?
+  status         TaskStatus              @default(PENDING)
+  priority       TaskPriority            @default(MEDIUM)
+  dueDate        DateTime?
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
+  Provider       Provider                @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  User           User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  timelineEvents ProviderTimelineEvent[]
+
+  @@index([providerId])
+  @@index([userId])
+  @@index([status])
+  @@index([dueDate])
+}
+
+model ProviderNote {
+  id             String                  @id @default(cuid())
+  providerId     String
+  userId         String
+  content        String
+  createdAt      DateTime                @default(now())
+  Provider       Provider                @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  User           User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  timelineEvents ProviderTimelineEvent[]
+
+  @@index([providerId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model ProviderContactLog {
+  id          String              @id @default(cuid())
+  providerId  String
+  userId      String
+  contactType ProviderContactType
+  subject     String?
+  notes       String?
+  createdAt   DateTime            @default(now())
+  Provider    Provider            @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  User        User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([providerId])
+  @@index([userId])
+}
+
+model ProviderFile {
+  id                    String                  @id @default(cuid())
+  providerId            String
+  userId                String
+  name                  String
+  url                   String
+  category              ProviderFileCategory
+  group                 String?
+  notes                 String?
+  size                  Int?
+  type                  String?
+  createdAt             DateTime                @default(now())
+  orderId               String?
+  paymentId             String?
+  order                 ProviderOrder?          @relation("OrderFiles", fields: [orderId], references: [id])
+  payment               ProviderPayment?        @relation(fields: [paymentId], references: [id])
+  Provider              Provider                @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  User                  User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ProviderTimelineEvent ProviderTimelineEvent[]
+
+  @@index([providerId])
+  @@index([userId])
+  @@index([category])
+  @@index([orderId])
+  @@index([paymentId])
+}
+
+model ProviderTimelineEvent {
+  id           String                    @id @default(cuid())
+  userId       String
+  providerId   String
+  type         ProviderTimelineEventType
+  noteId       String?
+  orderId      String?
+  paymentId    String?
+  taskId       String?
+  createdAt    DateTime                  @default(now())
+  fileId       String?
+  ProviderFile ProviderFile?             @relation(fields: [fileId], references: [id])
+  note         ProviderNote?             @relation(fields: [noteId], references: [id])
+  order        ProviderOrder?            @relation(fields: [orderId], references: [id])
+  payment      ProviderPayment?          @relation(fields: [paymentId], references: [id])
+  Provider     Provider                  @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  task         ProviderTask?             @relation(fields: [taskId], references: [id])
+  User         User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([providerId])
+  @@index([userId])
+}
+
+model Service {
+  id        String     @id @default(cuid())
+  userId    String
+  name      String
+  createdAt DateTime   @default(now())
+  User      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  providers Provider[] @relation("ProviderToService")
+
+  @@unique([userId, name])
+  @@index([userId])
+}
+
 enum AlertType {
   HOT_LEAD
   SCORE_DROP
@@ -1282,4 +1530,96 @@ enum BackupType {
   MANUAL
   SCHEDULED
   PRE_RESTORE
+}
+
+enum TaskStatus {
+  PENDING
+  DONE
+  CANCELLED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum TaskType {
+  CALL
+  EMAIL
+  MEETING
+  MANUAL
+}
+
+enum ProviderStatus {
+  ACTIVE
+  PAUSED
+  BLOCKED
+  OK
+  PENDING
+  ISSUE
+}
+
+enum ProviderDependency {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ProviderOperationalState {
+  OK
+  ATTENTION
+  RISK
+}
+
+enum ProviderOrderStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+  RECEIVED
+  DELAYED
+  PAID
+  DRAFT
+  ISSUE
+  CLOSED
+}
+
+enum ProviderPaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+}
+
+enum ProviderOrderType {
+  MATERIAL
+  SERVICE
+  SUBSCRIPTION
+  ONE_OFF
+  ONE_TIME
+  RECURRING
+}
+
+enum ProviderContactType {
+  EMAIL
+  CALL
+  REMINDER
+  CALENDAR
+  EXTERNAL_LINK
+}
+
+enum ProviderFileCategory {
+  INVOICE
+  ORDER
+  CONTRACT
+  OTHER
+}
+
+enum ProviderTimelineEventType {
+  ORDER
+  PAYMENT
+  NOTE
+  TASK
+  FILE
 }

@@ -96,7 +96,7 @@ export class PipelineService {
             select: {
               id: true,
               name: true,
-              aiScore: true,
+              score: true,
               status: true
             }
           }

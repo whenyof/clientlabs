@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
 
     console.log('Starting rollback via API:', {
       backupName,
-      user: accessCheck.user.email
+      user: accessCheck.user?.email
     })
 
     // Execute rollback script
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
 
     console.log('Rollback completed via API:', {
       backupName,
-      user: accessCheck.user.email
+      user: accessCheck.user?.email
     })
 
     return NextResponse.json({

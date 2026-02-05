@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Log admin action
-    console.log(`Admin backup created by ${accessCheck.user.email}: ${backupResult.encryptedPath}`)
+    console.log(`Admin backup created by ${accessCheck.user?.email}: ${backupResult.encryptedPath}`)
 
     return NextResponse.json({
       success: true,

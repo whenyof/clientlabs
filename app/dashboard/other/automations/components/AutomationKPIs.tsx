@@ -1,6 +1,5 @@
 "use client"
 
-import { mockAutomationKPIs, formatCurrency } from "../mock"
 import {
   CogIcon,
   PlayIcon,
@@ -11,19 +10,24 @@ import {
 } from "@heroicons/react/24/outline"
 import { motion } from "framer-motion"
 
-export function AutomationKPIs() {
+interface AutomationKPIsProps {
+  total?: number
+  active?: number
+}
+
+export function AutomationKPIs({ total = 0, active = 0 }: AutomationKPIsProps) {
   const kpis = [
     {
       title: "Automatizaciones Activas",
-      value: mockAutomationKPIs.activeAutomations.toString(),
-      subtitle: `${mockAutomationKPIs.totalAutomations} total`,
+      value: active.toString(),
+      subtitle: `${total} total`,
       icon: CogIcon,
       color: "from-blue-500 to-cyan-600",
       bgColor: "from-blue-500/10 to-cyan-600/10"
     },
     {
       title: "Ejecuciones Totales",
-      value: mockAutomationKPIs.totalRuns.toString(),
+      value: "0",
       subtitle: "este mes",
       icon: PlayIcon,
       color: "from-green-500 to-emerald-600",
@@ -31,7 +35,7 @@ export function AutomationKPIs() {
     },
     {
       title: "Tasa de Éxito",
-      value: `${mockAutomationKPIs.successRate}%`,
+      value: "—",
       subtitle: "promedio",
       icon: CheckCircleIcon,
       color: "from-purple-500 to-indigo-600",
@@ -39,7 +43,7 @@ export function AutomationKPIs() {
     },
     {
       title: "Ingresos Generados",
-      value: formatCurrency(mockAutomationKPIs.revenueGenerated),
+      value: "€0",
       subtitle: "por automatizaciones",
       icon: CurrencyDollarIcon,
       color: "from-orange-500 to-amber-600",
@@ -47,7 +51,7 @@ export function AutomationKPIs() {
     },
     {
       title: "Tiempo Ahorrado",
-      value: `${mockAutomationKPIs.timeSaved}h`,
+      value: "—",
       subtitle: "mensual",
       icon: ClockIcon,
       color: "from-cyan-500 to-teal-600",
@@ -55,7 +59,7 @@ export function AutomationKPIs() {
     },
     {
       title: "ROI Promedio",
-      value: "340%",
+      value: "—",
       subtitle: "retorno inversión",
       icon: ArrowTrendingUpIcon,
       color: "from-pink-500 to-rose-600",

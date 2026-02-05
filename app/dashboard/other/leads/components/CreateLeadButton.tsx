@@ -88,7 +88,7 @@ export function CreateLeadButton() {
                                 <button
                                     key={mode.id}
                                     onClick={() => handleModeSelect(mode.id)}
-                                    className={`relative p-6 rounded-lg border-2 transition-all duration-200 hover:scale-[1.02] text-left ${colorClasses[mode.color]}`}
+                                    className={`relative p-6 rounded-lg border-2 transition-all duration-200 hover:scale-[1.02] text-left ${colorClasses[mode.color as keyof typeof colorClasses]}`}
                                 >
                                     {mode.badge && (
                                         <span className="absolute top-2 right-2 px-2 py-0.5 rounded text-[10px] bg-white/10 text-white/60">

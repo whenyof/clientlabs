@@ -112,7 +112,7 @@ export function ProviderStats() {
                 cy="50%"
                 outerRadius={80}
                 dataKey="value"
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
               >
                 {statusData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
@@ -147,11 +147,10 @@ export function ProviderStats() {
                 {Array.from({ length: 5 }, (_, i) => (
                   <StarIcon
                     key={i}
-                    className={`w-3 h-3 ${
-                      i < Math.floor(avgRating)
-                        ? 'text-yellow-400 fill-yellow-400'
-                        : 'text-gray-600'
-                    }`}
+                    className={`w-3 h-3 ${i < Math.floor(avgRating)
+                      ? 'text-yellow-400 fill-yellow-400'
+                      : 'text-gray-600'
+                      }`}
                   />
                 ))}
               </div>

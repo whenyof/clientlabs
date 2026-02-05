@@ -5,26 +5,28 @@ import Stripe from 'stripe'
 import { PLANS } from './plans'
 
 if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is required')
+  console.warn('STRIPE_SECRET_KEY is missing. Stripe features will be disabled.')
 }
 
 if (!process.env.STRIPE_WEBHOOK_SECRET) {
-  throw new Error('STRIPE_WEBHOOK_SECRET is required')
+  console.warn('STRIPE_WEBHOOK_SECRET is missing.')
 }
 
 if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
-  throw new Error('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is required')
+  console.warn('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is missing.')
 }
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2024-12-18.acacia',
-  typescript: true,
-})
+export const stripe = process.env.STRIPE_SECRET_KEY
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: '2025-12-15.clover',
+    typescript: true,
+  })
+  : null as unknown as Stripe
 
 export const stripeConfig = {
-  publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
-  secretKey: process.env.STRIPE_SECRET_KEY,
-  webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
+  publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '',
+  secretKey: process.env.STRIPE_SECRET_KEY || '',
+  webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
 }
 
 // Stripe Products and Prices
@@ -78,6 +80,7 @@ export async function createCheckoutSession({
   cancelUrl: string
 }) {
   try {
+    if (!stripe) throw new Error('Stripe is not initialized')
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       payment_method_types: ['card'],
@@ -114,10 +117,11 @@ export async function createCustomerPortalSession({
   returnUrl: string
 }) {
   try {
+    if (!stripe) throw new Error('Stripe is not initialized')
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
       return_url: returnUrl,
-      configuration: CUSTOMER_PORTAL_CONFIG,
+      configuration: CUSTOMER_PORTAL_CONFIG as any,
     })
 
     return { url: session.url }
@@ -130,6 +134,7 @@ export async function createCustomerPortalSession({
 // Get Customer by Email
 export async function getCustomerByEmail(email: string) {
   try {
+    if (!stripe) return null
     const customers = await stripe.customers.list({
       email,
       limit: 1,
@@ -222,10 +227,11 @@ export const WEBHOOK_EVENTS = {
 // Webhook Handler
 export async function handleWebhook(rawBody: string, signature: string) {
   try {
+    if (!stripe) throw new Error('Stripe is not initialized')
     const event = stripe.webhooks.constructEvent(
       rawBody,
       signature,
-      stripeConfig.webhookSecret
+      stripeConfig.webhookSecret || ''
     )
 
     switch (event.type) {

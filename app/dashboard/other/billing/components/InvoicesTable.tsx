@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { mockInvoices, type Invoice } from "../mock"
+import type { Invoice } from "../mock"
 import { PaymentStatusBadge } from "./PaymentStatusBadge"
 import { SendToHaciendaButton } from "./SendToHaciendaButton"
 import {
@@ -16,19 +16,19 @@ import {
 interface InvoicesTableProps {
   searchTerm: string
   statusFilter?: string
+  invoices?: Invoice[]
 }
 
-export function InvoicesTable({ searchTerm, statusFilter }: InvoicesTableProps) {
+/** Invoices from DB; no Invoice model exists so default empty. */
+export function InvoicesTable({ searchTerm, statusFilter, invoices = [] }: InvoicesTableProps) {
   const [selectedInvoices, setSelectedInvoices] = useState<string[]>([])
 
-  const filteredInvoices = mockInvoices.filter(invoice => {
+  const filteredInvoices = invoices.filter(invoice => {
     const matchesSearch =
       invoice.number.toLowerCase().includes(searchTerm.toLowerCase()) ||
       invoice.client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      invoice.client.email.toLowerCase().includes(searchTerm.toLowerCase())
-
+      (invoice.client.email || "").toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = !statusFilter || statusFilter === "all" || invoice.status === statusFilter
-
     return matchesSearch && matchesStatus
   })
 
@@ -89,7 +89,14 @@ export function InvoicesTable({ searchTerm, statusFilter }: InvoicesTableProps) 
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-700/50">
-            {filteredInvoices.map((invoice) => (
+            {filteredInvoices.length === 0 ? (
+              <tr>
+                <td colSpan={9} className="px-6 py-16 text-center text-gray-400">
+                  <p className="text-white/80 font-medium">Sin facturas</p>
+                  <p className="text-sm mt-1">No hay modelo de facturas en la base de datos. Este panel mostrará datos cuando exista backend.</p>
+                </td>
+              </tr>
+            ) : filteredInvoices.map((invoice) => (
               <tr
                 key={invoice.id}
                 className="hover:bg-gray-700/30 transition-colors duration-200"

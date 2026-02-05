@@ -2,14 +2,15 @@ import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { LeadsTable } from "./components/LeadsTable"
-import { CreateLeadButton } from "./components/CreateLeadButton"
-import { LeadsKPIsSimple } from "./components/LeadsKPIsSimple"
-import { WorkViews } from "./components/WorkViews"
-import { LeadsFilters } from "./components/LeadsFilters"
-import { ImportHistoryPanel } from "./components/ImportHistoryPanel"
-import { AutomationsButton } from "./components/AutomationsButton"
-import { ConnectWebButton } from "./components/ConnectWebButton"
+import { LeadsTable } from "@/modules/leads/components/LeadsTable"
+import { CreateLeadButton } from "@/modules/leads/components/CreateLeadButton"
+import { LeadsKPIsSimple } from "@/modules/leads/components/LeadsKPIsSimple"
+import { WorkViews } from "@/modules/leads/components/WorkViews"
+import { LeadsFilters } from "@/modules/leads/components/LeadsFilters"
+import { ImportHistoryPanel } from "@/modules/leads/components/ImportHistoryPanel"
+import { AutomationsButton } from "@/modules/leads/components/AutomationsButton"
+import { ConnectWebButton } from "@/modules/leads/components/ConnectWebButton"
+import { getSectorConfigByPath } from "@/config/sectors"
 import { Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { LeadStatus, LeadTemp } from "@prisma/client"
@@ -255,15 +256,20 @@ export default async function LeadsPage({
     }
   }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) // Most recent first
 
+  const config = getSectorConfigByPath('/dashboard/other/leads')
+  const { labels } = config
+
   /* ---------------- RENDER ---------------- */
   return (
     <div className="space-y-6">
-      {/* Strategic Header */}
+      {/* Strategic Header - título y subtítulo desde SectorConfig */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">Pipeline de Oportunidades</h1>
+          <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">
+            {labels.leads.pageTitle}
+          </h1>
           <p className="text-base text-white/60 max-w-2xl">
-            Identifica, prioriza y convierte tus mejores oportunidades en clientes
+            {labels.leads.pageSubtitle}
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">

@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
         { email: { contains: search, mode: 'insensitive' } },
-        { company: { contains: search, mode: 'insensitive' } }
+        { email: { contains: search, mode: 'insensitive' } }
       ]
     }
 
@@ -107,10 +107,12 @@ export async function POST(request: NextRequest) {
         name,
         email,
         phone,
-        company,
         source: source || 'Web',
-        budget: budget ? parseFloat(budget) : null,
-        notes
+        notes,
+        metadata: {
+          ...(company ? { company } : {}),
+          ...(budget ? { budget: parseFloat(budget) } : {})
+        }
       },
       include: {
         stage: true
@@ -124,7 +126,7 @@ export async function POST(request: NextRequest) {
     // Update lead with initial score
     const updatedLead = await prisma.lead.update({
       where: { id: lead.id },
-      data: { aiScore: initialScore },
+      data: { score: initialScore },
       include: { stage: true }
     })
 

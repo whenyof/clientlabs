@@ -43,12 +43,12 @@ export class LeadScoringService {
 
       // Rule 1: Website visits and time spent
       const visitActivities = lead.activities.filter(a =>
-        a.type === 'page_view' || a.metadata?.page
+        a.type === 'page_view' || (a.metadata as any)?.page
       )
 
       for (const activity of visitActivities) {
         // +30 points for visiting pricing page
-        if (activity.metadata?.page?.includes('pricing')) {
+        if ((activity.metadata as any)?.page?.includes('pricing')) {
           totalScore += 30
           appliedRules.push({
             leadId,
@@ -70,7 +70,7 @@ export class LeadScoringService {
         }
 
         // Time-based scoring
-        const timeSpent = activity.metadata?.timeSpent || 0
+        const timeSpent = (activity.metadata as any)?.timeSpent || 0
         if (timeSpent >= 120) { // 2+ minutes
           totalScore += 10
           appliedRules.push({
@@ -153,7 +153,7 @@ export class LeadScoringService {
       // Update lead score and log scoring events
       await prisma.lead.update({
         where: { id: leadId },
-        data: { aiScore: totalScore }
+        data: { aiPrediction: totalScore }
       })
 
       // Log scoring events

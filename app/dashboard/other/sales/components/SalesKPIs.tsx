@@ -1,5 +1,6 @@
 "use client"
 
+import { useSectorConfig } from "@/hooks/useSectorConfig"
 import type { SaleRecord } from "./constants"
 
 const currencyFormatter = new Intl.NumberFormat("es-ES", {
@@ -13,6 +14,8 @@ interface SalesKPIsProps {
 }
 
 export function SalesKPIs({ data }: SalesKPIsProps) {
+  const { labels } = useSectorConfig()
+  const k = labels.sales.kpis
   const today = new Date().toISOString().split("T")[0]
   const currentMonth = new Date().getMonth()
   const currentYear = new Date().getFullYear()
@@ -35,30 +38,10 @@ export function SalesKPIs({ data }: SalesKPIsProps) {
   const ratioConversion = Math.round((ganadas / Math.max(data.length, 1)) * 100)
 
   const cards = [
-    {
-      id: "kpi-fact-hoy",
-      label: "Facturación hoy",
-      value: currencyFormatter.format(facturacionHoy),
-      hint: "Solo ventas con fecha actual",
-    },
-    {
-      id: "kpi-fact-mes",
-      label: "Facturación mes",
-      value: currencyFormatter.format(facturacionMes),
-      hint: "Incluye webinars, inbound y pipeline",
-    },
-    {
-      id: "kpi-ticket",
-      label: "Ticket medio",
-      value: currencyFormatter.format(ticketMedio),
-      hint: "Promedio de importes activos",
-    },
-    {
-      id: "kpi-ratio",
-      label: "Ratio de conversión",
-      value: `${ratioConversion}%`,
-      hint: "Ganadas ÷ total",
-    },
+    { id: "kpi-fact-hoy", label: k.factHoy, value: currencyFormatter.format(facturacionHoy), hint: k.hintHoy },
+    { id: "kpi-fact-mes", label: k.factMes, value: currencyFormatter.format(facturacionMes), hint: k.hintMes },
+    { id: "kpi-ticket", label: k.ticketMedio, value: currencyFormatter.format(ticketMedio), hint: k.hintTicket },
+    { id: "kpi-ratio", label: k.ratioConversion, value: `${ratioConversion}%`, hint: k.hintRatio },
   ]
 
   return (

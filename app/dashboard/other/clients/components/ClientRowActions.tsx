@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { MoreVertical, Edit, MessageSquare, Phone, Mail, Users } from "lucide-react"
-import { updateClientInfo, updateClientStatus, addClientNote, registerClientInteraction } from "../actions"
+import { updateClientInfo, addClientNote, registerClientInteraction } from "../actions"
 
 export function ClientRowActions({ client }: { client: Client }) {
     const router = useRouter()
@@ -34,7 +34,6 @@ export function ClientRowActions({ client }: { client: Client }) {
         name: client.name || "",
         email: client.email || "",
         phone: client.phone || "",
-        estimatedValue: client.estimatedValue || 0,
     })
     const [note, setNote] = useState("")
     const [interactionType, setInteractionType] = useState<"CALL" | "MEETING" | "EMAIL">("CALL")
@@ -56,21 +55,7 @@ export function ClientRowActions({ client }: { client: Client }) {
         }
     }
 
-    const handleToggleStatus = async () => {
-        const newStatus = client.status === "ACTIVE" ? "INACTIVE" : "ACTIVE"
-        setLoading(true)
-        try {
-            await updateClientStatus(client.id, newStatus)
-            router.refresh()
-            alert(`✅ Cliente marcado como ${newStatus === "ACTIVE" ? "Activo" : "Inactivo"}`)
-        } catch (error) {
-            console.error(error)
-            const message = error instanceof Error ? error.message : "Error al cambiar estado"
-            alert(`❌ ${message}`)
-        } finally {
-            setLoading(false)
-        }
-    }
+
 
     const handleAddNote = async () => {
         if (!note.trim()) return
@@ -110,34 +95,69 @@ export function ClientRowActions({ client }: { client: Client }) {
 
     return (
         <>
-            <div className="flex items-center justify-end gap-1">
+            <div className="flex items-center justify-end gap-2">
+                {/* Inline Quick Actions */}
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {client.email && (
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 w-8 p-0 text-white/40 hover:text-blue-400 hover:bg-blue-500/10"
+                            onClick={() => window.location.href = `mailto:${client.email}`}
+                            title="Enviar Email"
+                        >
+                            <Mail className="h-4 w-4" />
+                        </Button>
+                    )}
+                    {client.phone && (
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 w-8 p-0 text-white/40 hover:text-emerald-400 hover:bg-emerald-500/10"
+                            onClick={() => window.location.href = `tel:${client.phone}`}
+                            title="Llamar"
+                        >
+                            <Phone className="h-4 w-4" />
+                        </Button>
+                    )}
+                    <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0 text-white/40 hover:text-amber-400 hover:bg-amber-500/10"
+                        onClick={() => setNoteDialog(true)}
+                        title="Añadir Nota"
+                    >
+                        <MessageSquare className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0 text-white/40 hover:text-violet-400 hover:bg-violet-500/10"
+                        onClick={() => setInteractionDialog(true)}
+                        title="Registrar Interacción"
+                    >
+                        <Users className="h-4 w-4" />
+                    </Button>
+                </div>
+
+                {/* Secondary Actions */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button
                             size="sm"
                             variant="ghost"
                             disabled={loading}
-                            className="h-8 w-8 p-0"
+                            className="h-8 w-8 p-0 text-white/40 hover:text-white"
                         >
                             <MoreVertical className="h-4 w-4" />
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => setEditDialog(true)}>
+                    <DropdownMenuContent align="end" className="bg-zinc-900 border-white/10">
+                        <DropdownMenuItem onClick={() => setEditDialog(true)} className="text-white hover:bg-white/10 cursor-pointer">
                             <Edit className="mr-2 h-4 w-4" />
                             Editar información
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setNoteDialog(true)}>
-                            <MessageSquare className="mr-2 h-4 w-4" />
-                            Añadir nota
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setInteractionDialog(true)}>
-                            <Users className="mr-2 h-4 w-4" />
-                            Registrar interacción
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={handleToggleStatus}>
-                            {client.status === "ACTIVE" ? "Marcar inactivo" : "Marcar activo"}
-                        </DropdownMenuItem>
+                        {/* Secondary items can go here if needed */}
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
@@ -171,14 +191,7 @@ export function ClientRowActions({ client }: { client: Client }) {
                                 onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
                             />
                         </div>
-                        <div>
-                            <Label>Valor Estimado ($)</Label>
-                            <Input
-                                type="number"
-                                value={editData.estimatedValue}
-                                onChange={(e) => setEditData({ ...editData, estimatedValue: parseFloat(e.target.value) || 0 })}
-                            />
-                        </div>
+
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setEditDialog(false)}>

@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { mockActivityData, formatCurrency } from "../mock"
 import {
   MagnifyingGlassIcon,
   AdjustmentsHorizontalIcon,
@@ -18,7 +17,10 @@ interface ActivityTableProps {
 type FilterType = 'all' | 'manual' | 'bot'
 type SortField = 'date' | 'impact' | 'event'
 
-export function ActivityTable({ selectedRange }: ActivityTableProps) {
+/** No analytics activity backend — empty table. */
+const emptyActivityData: { date: string; event: string; user: string; category: string; impact: number; type: string }[] = []
+
+export function ActivityTable({ selectedRange: _selectedRange }: ActivityTableProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [filterType, setFilterType] = useState<FilterType>('all')
   const [sortField, setSortField] = useState<SortField>('date')
@@ -27,7 +29,7 @@ export function ActivityTable({ selectedRange }: ActivityTableProps) {
   const itemsPerPage = 10
 
   const filteredAndSortedData = useMemo(() => {
-    let filtered = mockActivityData
+    let filtered = emptyActivityData
 
     // Filtrar por búsqueda
     if (searchTerm) {
@@ -221,7 +223,7 @@ export function ActivityTable({ selectedRange }: ActivityTableProps) {
             <AnimatePresence>
               {paginatedData.map((activity, index) => (
                 <motion.tr
-                  key={activity.id}
+                  key={(activity as any).id ?? index}
                   className="hover:bg-gray-700/30 transition-colors"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -261,7 +263,7 @@ export function ActivityTable({ selectedRange }: ActivityTableProps) {
                       }`}
                       whileHover={{ scale: 1.05 }}
                     >
-                      {activity.impact !== 0 ? formatCurrency(activity.impact) : '-'}
+                      {activity.impact !== 0 ? `€${activity.impact.toLocaleString('es-ES')}` : '-'}
                     </motion.span>
                   </td>
                   <td className="px-6 py-4">

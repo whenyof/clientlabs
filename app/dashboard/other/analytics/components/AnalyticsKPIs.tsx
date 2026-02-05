@@ -8,7 +8,6 @@ import {
   TicketIcon,
   CogIcon
 } from "@heroicons/react/24/outline"
-import { getKPIsForRange, formatCurrency, formatPercentage, getTrendColor } from "../mock"
 import { motion } from "framer-motion"
 import { AnimatedCard } from "./AnimatedCard"
 
@@ -16,54 +15,53 @@ interface AnalyticsKPIsProps {
   selectedRange: string
 }
 
-export function AnalyticsKPIs({ selectedRange }: AnalyticsKPIsProps) {
-  const kpis = getKPIsForRange(selectedRange)
-
+/** No analytics backend — show zeros. */
+export function AnalyticsKPIs({ selectedRange: _selectedRange }: AnalyticsKPIsProps) {
   const kpiData = [
     {
       title: "Ingresos Totales",
-      value: formatCurrency(kpis.totalRevenue),
-      change: kpis.revenueGrowth,
+      value: "€0",
+      change: 0,
       icon: CurrencyDollarIcon,
       color: "from-green-500 to-emerald-600",
       bgColor: "from-green-500/10 to-emerald-600/10"
     },
     {
       title: "Crecimiento",
-      value: formatPercentage(kpis.revenueGrowth),
-      change: kpis.revenueGrowth,
+      value: "0%",
+      change: 0,
       icon: ArrowTrendingUpIcon,
-      color: kpis.revenueGrowth >= 0 ? "from-green-500 to-emerald-600" : "from-red-500 to-rose-600",
-      bgColor: kpis.revenueGrowth >= 0 ? "from-green-500/10 to-emerald-600/10" : "from-red-500/10 to-rose-600/10"
+      color: "from-green-500 to-emerald-600",
+      bgColor: "from-green-500/10 to-emerald-600/10"
     },
     {
       title: "Leads Nuevos",
-      value: kpis.newLeads.toString(),
-      change: 12.5,
+      value: "0",
+      change: 0,
       icon: UserGroupIcon,
       color: "from-blue-500 to-cyan-600",
       bgColor: "from-blue-500/10 to-cyan-600/10"
     },
     {
       title: "Conversión",
-      value: `${kpis.conversionRate}%`,
-      change: kpis.conversionRate,
+      value: "0%",
+      change: 0,
       icon: ArrowPathIcon,
       color: "from-purple-500 to-indigo-600",
       bgColor: "from-purple-500/10 to-indigo-600/10"
     },
     {
       title: "Ticket Medio",
-      value: formatCurrency(kpis.averageTicket),
-      change: 5.2,
+      value: "€0",
+      change: 0,
       icon: TicketIcon,
       color: "from-orange-500 to-amber-600",
       bgColor: "from-orange-500/10 to-amber-600/10"
     },
     {
       title: "% Automatizado",
-      value: `${kpis.automationRate}%`,
-      change: kpis.automationRate,
+      value: "0%",
+      change: 0,
       icon: CogIcon,
       color: "from-cyan-500 to-teal-600",
       bgColor: "from-cyan-500/10 to-teal-600/10"
@@ -105,12 +103,12 @@ export function AnalyticsKPIs({ selectedRange }: AnalyticsKPIsProps) {
                     {kpi.value}
                   </motion.div>
                   <motion.div
-                    className={`text-sm font-medium ${getTrendColor(kpi.change)}`}
+                    className="text-sm font-medium text-gray-400"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.4 + (index * 0.1), duration: 0.3 }}
                   >
-                    {formatPercentage(kpi.change)}
+                    {kpi.change >= 0 ? '+' : ''}{kpi.change}%
                   </motion.div>
                 </div>
               </motion.div>

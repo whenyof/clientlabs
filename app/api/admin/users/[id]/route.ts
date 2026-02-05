@@ -11,8 +11,9 @@ import { prisma } from "@/lib/prisma"
  */
 export async function PATCH(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    props: { params: Promise<{ id: string }> }
 ) {
+    const params = await props.params;
     try {
         // ✅ SERVER-SIDE ADMIN CHECK
         const session = await getServerSession(authOptions)

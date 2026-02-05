@@ -11,99 +11,44 @@ import {
   CalculatorIcon,
   CurrencyEuroIcon
 } from "@heroicons/react/24/outline"
-import { mockFinanceKPIs, formatCurrency, formatPercentage } from "../mock"
+import { formatCurrency, formatPercentage } from "../lib/formatters"
+import { useFinanceData } from "../context/FinanceDataContext"
 
 export function FinanceKPIs() {
-  const kpis = [
-    {
-      title: "Ingresos Totales",
-      value: formatCurrency(mockFinanceKPIs.totalIncome),
-      subtitle: "este período",
-      icon: BanknotesIcon,
-      color: "from-green-500 to-emerald-600",
-      bgColor: "from-green-500/10 to-emerald-600/10",
-      trend: "+15.2%",
-      trendUp: true,
-      change: mockFinanceKPIs.totalIncome * 0.152
-    },
-    {
-      title: "Gastos Totales",
-      value: formatCurrency(mockFinanceKPIs.totalExpenses),
-      subtitle: "este período",
-      icon: CreditCardIcon,
-      color: "from-red-500 to-pink-600",
-      bgColor: "from-red-500/10 to-pink-600/10",
-      trend: "+8.1%",
-      trendUp: false,
-      change: mockFinanceKPIs.totalExpenses * 0.081
-    },
-    {
-      title: "Beneficio Neto",
-      value: formatCurrency(mockFinanceKPIs.netProfit),
-      subtitle: "resultado final",
-      icon: ChartBarIcon,
-      color: "from-blue-500 to-indigo-600",
-      bgColor: "from-blue-500/10 to-indigo-600/10",
-      trend: "+22.4%",
-      trendUp: true,
-      change: mockFinanceKPIs.netProfit * 0.224
-    },
-    {
-      title: "Pendiente de Cobro",
-      value: formatCurrency(mockFinanceKPIs.pendingPayments),
-      subtitle: "facturas por cobrar",
-      icon: ClockIcon,
-      color: "from-orange-500 to-amber-600",
-      bgColor: "from-orange-500/10 to-amber-600/10",
-      trend: "-5.3%",
-      trendUp: true,
-      change: -mockFinanceKPIs.pendingPayments * 0.053
-    },
-    {
-      title: "Burn Rate",
-      value: formatCurrency(mockFinanceKPIs.burnRate),
-      subtitle: "gasto mensual",
-      icon: CalculatorIcon,
-      color: "from-purple-500 to-violet-600",
-      bgColor: "from-purple-500/10 to-violet-600/10",
-      trend: "-12.1%",
-      trendUp: true,
-      change: -mockFinanceKPIs.burnRate * 0.121
-    },
-    {
-      title: "Pagos Recurrentes",
-      value: formatCurrency(mockFinanceKPIs.recurringPayments),
-      subtitle: "gastos fijos mensuales",
-      icon: CurrencyEuroIcon,
-      color: "from-cyan-500 to-teal-600",
-      bgColor: "from-cyan-500/10 to-teal-600/10",
-      trend: "+2.8%",
-      trendUp: false,
-      change: mockFinanceKPIs.recurringPayments * 0.028
-    },
-    {
-      title: "Tasa de Crecimiento",
-      value: formatPercentage(mockFinanceKPIs.growthRate),
-      subtitle: "vs período anterior",
-      icon: ArrowTrendingUpIcon,
-      color: "from-emerald-500 to-green-600",
-      bgColor: "from-emerald-500/10 to-green-600/10",
-      trend: "+3.2%",
-      trendUp: true,
-      change: mockFinanceKPIs.growthRate * 0.032
-    },
-    {
-      title: "Flujo de Caja",
-      value: formatCurrency(mockFinanceKPIs.cashFlow),
-      subtitle: "liquidez disponible",
-      icon: BanknotesIcon,
-      color: "from-indigo-500 to-purple-600",
-      bgColor: "from-indigo-500/10 to-purple-600/10",
-      trend: "+18.7%",
-      trendUp: true,
-      change: mockFinanceKPIs.cashFlow * 0.187
-    }
-  ]
+  const { analytics, loading } = useFinanceData()
+  const k = analytics?.kpis
+
+  const kpis = k
+    ? [
+        { title: "Ingresos Totales", value: formatCurrency(k.totalIncome), subtitle: "este período", icon: BanknotesIcon, color: "from-green-500 to-emerald-600", bgColor: "from-green-500/10 to-emerald-600/10", trend: (analytics.trends?.incomeGrowth ?? 0) >= 0 ? `+${(analytics.trends?.incomeGrowth ?? 0).toFixed(1)}%` : `${(analytics.trends?.incomeGrowth ?? 0).toFixed(1)}%`, trendUp: (analytics.trends?.incomeGrowth ?? 0) >= 0, change: k.totalIncome * 0.1 },
+        { title: "Gastos Totales", value: formatCurrency(Math.abs(k.totalExpenses)), subtitle: "este período", icon: CreditCardIcon, color: "from-red-500 to-pink-600", bgColor: "from-red-500/10 to-pink-600/10", trend: (analytics.trends?.expenseGrowth ?? 0) >= 0 ? `+${(analytics.trends?.expenseGrowth ?? 0).toFixed(1)}%` : `${(analytics.trends?.expenseGrowth ?? 0).toFixed(1)}%`, trendUp: false, change: Math.abs(k.totalExpenses) * 0.1 },
+        { title: "Beneficio Neto", value: formatCurrency(k.netProfit), subtitle: "resultado final", icon: ChartBarIcon, color: "from-blue-500 to-indigo-600", bgColor: "from-blue-500/10 to-indigo-600/10", trend: (analytics.trends?.profitGrowth ?? 0) >= 0 ? `+${(analytics.trends?.profitGrowth ?? 0).toFixed(1)}%` : `${(analytics.trends?.profitGrowth ?? 0).toFixed(1)}%`, trendUp: (analytics.trends?.profitGrowth ?? 0) >= 0, change: k.netProfit * 0.1 },
+        { title: "Pendiente de Cobro", value: formatCurrency(k.pendingPayments), subtitle: "facturas por cobrar", icon: ClockIcon, color: "from-orange-500 to-amber-600", bgColor: "from-orange-500/10 to-amber-600/10", trend: "—", trendUp: true, change: 0 },
+        { title: "Burn Rate", value: formatCurrency(k.burnRate), subtitle: "gasto mensual", icon: CalculatorIcon, color: "from-purple-500 to-violet-600", bgColor: "from-purple-500/10 to-violet-600/10", trend: "—", trendUp: true, change: 0 },
+        { title: "Pagos Recurrentes", value: formatCurrency(k.recurringPayments), subtitle: "gastos fijos mensuales", icon: CurrencyEuroIcon, color: "from-cyan-500 to-teal-600", bgColor: "from-cyan-500/10 to-teal-600/10", trend: "—", trendUp: false, change: 0 },
+        { title: "Tasa de Crecimiento", value: formatPercentage(k.growthRate), subtitle: "vs período anterior", icon: ArrowTrendingUpIcon, color: "from-emerald-500 to-green-600", bgColor: "from-emerald-500/10 to-green-600/10", trend: `${k.growthRate >= 0 ? "+" : ""}${k.growthRate.toFixed(1)}%`, trendUp: k.growthRate >= 0, change: k.growthRate },
+        { title: "Flujo de Caja", value: formatCurrency(k.cashFlow), subtitle: "liquidez disponible", icon: BanknotesIcon, color: "from-indigo-500 to-purple-600", bgColor: "from-indigo-500/10 to-purple-600/10", trend: "—", trendUp: k.cashFlow >= 0, change: k.cashFlow * 0.1 },
+      ]
+    : []
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-6">
+        {[...Array(8)].map((_, i) => (
+          <div key={i} className="rounded-2xl bg-gray-800/50 border border-gray-700/50 p-6 animate-pulse h-36" />
+        ))}
+      </div>
+    )
+  }
+
+  if (kpis.length === 0) {
+    return (
+      <div className="rounded-2xl bg-gray-800/50 border border-gray-700/50 p-12 text-center text-gray-400">
+        <p className="text-lg font-medium text-white/80">Sin datos financieros</p>
+        <p className="text-sm mt-1">Añade transacciones para ver los KPIs.</p>
+      </div>
+    )
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-6">

@@ -6,8 +6,9 @@ const prisma = new PrismaClient()
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params;
   try {
     const session = await getServerSession()
     if (!session?.user?.id) {
@@ -41,11 +42,7 @@ export async function POST(
       }
     })
 
-    // Update lead's last activity timestamp
-    await prisma.lead.update({
-      where: { id: params.id },
-      data: { lastActivity: new Date() }
-    })
+
 
     // Recalculate lead score if relevant activity
     if (['email_open', 'page_view', 'meeting_booked'].includes(type)) {

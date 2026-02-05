@@ -1,0 +1,1176 @@
+"use client"
+
+import { useState, useEffect, useOptimistic, startTransition, useMemo, useRef, useCallback } from "react"
+import type { Client } from "@prisma/client"
+import {
+    X, Mail, Phone, Tag as TagIcon, Clock, DollarSign, TrendingUp,
+    MessageSquare, Edit3, Save, Plus, ShoppingCart, Bell, CheckSquare,
+    AlertTriangle, Star, UserPlus, Sparkles
+} from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Badge } from "@/components/ui/badge"
+import { StatusBadgeSelector } from "./StatusBadgeSelector"
+import { PaymentStatusBadge } from "./PaymentStatusBadge"
+import { ReminderDialog } from "./ReminderDialog"
+import { CallDialog } from "./CallDialog"
+import { EnhancedTimeline } from "./EnhancedTimeline"
+import { SaleSidePanel } from "./SaleSidePanel"
+import { SaleDialog } from "./SaleDialog"
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+} from "@/components/ui/dialog"
+import { formatDistanceToNow, formatDate } from "date-fns"
+import { es } from "date-fns/locale"
+import { toast } from "sonner"
+import { updateClientData, addClientNote, addClientPurchase, getClientTimeline, updateClientStatus, getClientSales } from "../actions"
+import { TaskDialog } from "@/components/tasks/TaskDialog"
+import { TaskCard, type Task } from "@/components/tasks/TaskCard"
+import { getTasks } from "@/app/dashboard/tasks/actions"
+import { useAssistant } from "@/context/AssistantContext"
+
+type ClientWithLead = Client & {
+    convertedFromLead: {
+        id: string
+        name: string | null
+        convertedAt: Date | null
+    } | null
+    tasks?: { id: string }[]
+    Sale?: any[]
+    isForgotten?: boolean
+    daysSinceActivity?: number
+}
+
+type TimelineEvent = {
+    id: string
+    type: string
+    title: string
+    description: string
+    date: Date
+    amount?: number
+    notes?: string | null
+    icon?: string
+}
+
+type ClientSidePanelProps = {
+    client: ClientWithLead | null
+    isOpen: boolean
+    onClose: () => void
+    onClientUpdate?: (clientId: string, data: Partial<ClientWithLead>) => void
+}
+
+export function ClientSidePanel({ client, isOpen, onClose, onClientUpdate }: ClientSidePanelProps) {
+    const [isEditing, setIsEditing] = useState(false)
+    const [editData, setEditData] = useState({ source: "", notes: "" })
+    const [note, setNote] = useState("")
+    const [serverTimeline, setServerTimeline] = useState<TimelineEvent[]>([])
+    const [optimisticEvents, setOptimisticEvents] = useState<TimelineEvent[]>([])
+    const [loadingTimeline, setLoadingTimeline] = useState(false)
+    const [isMounted, setIsMounted] = useState(false)
+
+    useEffect(() => {
+        setIsMounted(true)
+    }, [])
+
+    // Derived timeline
+    const timeline = [...optimisticEvents, ...serverTimeline].sort((a, b) => b.date.getTime() - a.date.getTime())
+
+    const loadTimeline = async () => {
+        if (!client) return
+        setLoadingTimeline(true)
+        try {
+            const data = await getClientTimeline(client.id)
+            // Filter out any events that we already have in optimistic state (by ID/content?)
+            // actually usually server data overrides optimistic.
+            // But if server data is *stale*, we lose the item.
+            // For now, just set server timeline.
+            setServerTimeline(data)
+
+            // Clear optimistic events that are now present in server data
+            // (Assumes we can match them, or just clear all if we assume consistency)
+            // A simple strategy: Clear optimistic events longer than 5 seconds? 
+            // Or matches by content? 
+            // For this specific issue "disappears after 1s", it implies the revalidatePath finished but the query didn't pick it up? 
+            // Or `getClientTimeline` is cached?
+            // Let's just setServerTimeline(data). 
+            // To fix "disappearing", we need to ensure we don't clear optimistic events until we are SURE they are in serverTimeline.
+            // But matching is hard without IDs. 
+
+        } catch (error) {
+            console.error("Error loading timeline:", error)
+        } finally {
+            setLoadingTimeline(false)
+        }
+    }
+    const [purchaseDialog, setPurchaseDialog] = useState(false)
+    const [purchaseData, setPurchaseData] = useState({
+        concept: "",
+        amount: 0,
+        date: new Date().toISOString().split("T")[0],
+        note: "",
+    })
+    const [reminderDialog, setReminderDialog] = useState(false)
+    const [callDialog, setCallDialog] = useState(false)
+    const [noteDialog, setNoteDialog] = useState(false)
+    const [quickNote, setQuickNote] = useState("")
+    const [sales, setSales] = useState<any[]>([])
+    const [loadingSales, setLoadingSales] = useState(false)
+    const [saleDialog, setSaleDialog] = useState(false)
+    const [editingSale, setEditingSale] = useState<any | null>(null)
+
+    // Task State
+    const [tasks, setTasks] = useState<Task[]>([])
+    const tasksRef = useRef(tasks)
+    useEffect(() => { tasksRef.current = tasks }, [tasks])
+
+    const [taskDialog, setTaskDialog] = useState(false)
+
+    // Sale Panel State
+    const [selectedSale, setSelectedSale] = useState<any | null>(null)
+    // AI Assistant Sync
+    const { setSuggestions, clearSuggestions } = useAssistant()
+    const [isSalePanelOpen, setIsSalePanelOpen] = useState(false)
+
+    // Normalize status to prevent crashes with legacy/invalid data
+    const normalizeStatus = (status: any): "ACTIVE" | "FOLLOW_UP" | "INACTIVE" | "VIP" => {
+        const validStatuses = ["ACTIVE", "FOLLOW_UP", "INACTIVE", "VIP"]
+        return validStatuses.includes(status) ? status : "INACTIVE"
+    }
+
+    const [optimisticStatus, setOptimisticStatus] = useOptimistic(
+        client ? normalizeStatus(client.status) : "ACTIVE",
+        (_state, newStatus: string) => newStatus as "ACTIVE" | "FOLLOW_UP" | "INACTIVE" | "VIP"
+    )
+
+    // Centralized Status Logic
+    const syncClientStatus = (currentTasks: Task[]) => {
+        if (!client) return
+
+        const activeTasks = currentTasks.filter(t => t.status === "PENDING")
+        const hasPendingTasks = activeTasks.length > 0
+        const currentStatus = optimisticStatus
+
+        let newStatus = currentStatus
+
+        if (currentStatus !== "VIP") {
+            if (hasPendingTasks) {
+                newStatus = "FOLLOW_UP"
+            } else if (!hasPendingTasks) {
+                // Determine rollback status
+                // Simple logic: If no tasks, revert to ACTIVE or keep INACTIVE?
+                // Default to ACTIVE if it was FOLLOW_UP
+                if (currentStatus === "FOLLOW_UP") {
+                    newStatus = "ACTIVE"
+                }
+            }
+        }
+
+        if (newStatus !== currentStatus) {
+            startTransition(() => {
+                setOptimisticStatus(newStatus)
+            })
+
+            // Server Sync
+            if (onClientUpdate) {
+                onClientUpdate(client.id, { status: newStatus, updatedAt: new Date() })
+            }
+            // Fire and forget server update
+            updateClientStatus(client.id, newStatus).catch(console.error)
+        }
+    }
+
+    const handleTaskSuccess = (newTask: Task, replaceId?: string) => {
+        if (!client || !newTask) return
+
+        setTasks(prev => {
+            let currentTasks = prev
+            if (replaceId) {
+                currentTasks = currentTasks.filter(t => t.id !== replaceId)
+            }
+
+            const exists = currentTasks.some(t => t.id === newTask.id)
+            let nextTasks: Task[]
+
+            if (exists) {
+                nextTasks = currentTasks.map(t => t.id === newTask.id ? newTask : t)
+            } else {
+                nextTasks = [newTask, ...currentTasks]
+            }
+            return nextTasks
+        })
+
+        // Sync Logic
+        // We use 'tasks' from closure but filter out replaceId first if present
+        let currentForLogic = tasks
+        if (replaceId) currentForLogic = currentForLogic.filter(t => t.id !== replaceId)
+
+        const nextTasksForLogic = currentForLogic.some(t => t.id === newTask.id)
+            ? currentForLogic.map(t => t.id === newTask.id ? newTask : t)
+            : [newTask, ...currentForLogic]
+
+        syncClientStatus(nextTasksForLogic)
+    }
+
+    // Helper to format currency safely
+    const formatCurrency = (amount: number, currency: string = 'EUR') => {
+        if (!isMounted) return ""
+        try {
+            return new Intl.NumberFormat('es-ES', {
+                style: 'currency',
+                currency: currency || 'EUR'
+            }).format(amount)
+        } catch (e) {
+            return `${amount} ${currency}`
+        }
+    }
+
+    const handleStatusChange = async (newStatus: "ACTIVE" | "FOLLOW_UP" | "INACTIVE" | "VIP") => {
+        if (!client) return
+
+        startTransition(() => {
+            setOptimisticStatus(newStatus)
+        })
+
+        if (onClientUpdate) {
+            onClientUpdate(client.id, { status: newStatus, updatedAt: new Date() })
+        }
+
+        try {
+            await updateClientStatus(client.id, newStatus)
+            toast.success("Estado actualizado correctamente")
+        } catch (error) {
+            toast.error("Error al actualizar estado")
+        }
+    }
+
+    useEffect(() => {
+        if (client?.id && isOpen) {
+            getTasks({ clientId: client.id }).then(fetchedTasks => {
+                // Ensure unique IDs even from server?
+                const unique = Array.from(new Map(fetchedTasks.map(t => [t.id, t])).values())
+                setTasks(unique)
+            })
+        }
+    }, [client?.id, isOpen])
+
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = "hidden"
+        } else {
+            document.body.style.overflow = "unset"
+        }
+        return () => {
+            document.body.style.overflow = "unset"
+        }
+    }, [isOpen])
+
+    useEffect(() => {
+        if (client && isOpen) {
+            setEditData({
+                source: client.source || "",
+                notes: client.notes || "",
+            })
+            // Initial Load
+            loadTimeline()
+            loadSales()
+        }
+    }, [client, isOpen])
+
+    // loadTimeline is defined above
+
+
+    const loadSales = async () => {
+        if (!client) return
+        setLoadingSales(true)
+        try {
+            const data = await getClientSales(client.id)
+            setSales(data)
+        } catch (error) {
+            console.error("Error loading sales:", error)
+        } finally {
+            setLoadingSales(false)
+        }
+    }
+
+    const handleEditSale = (sale: any) => {
+        setEditingSale(sale)
+        setSaleDialog(true)
+    }
+
+    const handleCloseSaleDialog = () => {
+        setSaleDialog(false)
+        setEditingSale(null)
+    }
+
+    const handleSaleSuccess = (newSale?: any) => {
+        if (newSale && client) {
+            // Optimistic update for sales list
+            setSales(prev => [newSale, ...prev])
+
+            // Update Timeline
+            const newEvent: TimelineEvent = {
+                id: newSale.id,
+                type: "SALE",
+                title: "Compra registrada",
+                description: newSale.product,
+                date: new Date(),
+                amount: newSale.total,
+                notes: newSale.notes,
+                icon: "shopping-cart"
+            };
+            setOptimisticEvents(prev => [newEvent, ...prev]);
+
+            // Update Total Spent in Parent Table
+            if (onClientUpdate) {
+                // Ensure we add the number correctly
+                const currentTotal = client.totalSpent || 0
+                const newTotal = currentTotal + Number(newSale.total)
+                onClientUpdate(client.id, { totalSpent: newTotal, updatedAt: new Date() })
+            }
+
+            // Reload to sync
+            setTimeout(() => {
+                loadTimeline().then(() => {
+                    setOptimisticEvents(prev => prev.filter(e => e.id !== newEvent.id))
+                })
+            }, 1000)
+
+        } else {
+            loadSales()
+            loadTimeline()
+        }
+    }
+
+    const handleSaleClick = (sale: any) => {
+        setSelectedSale(sale)
+        setIsSalePanelOpen(true)
+    }
+
+    const handleSaleStatusChange = (saleId: string, newStatus: string) => {
+        const sale = sales.find(s => s.id === saleId)
+        if (!sale || !client) return
+
+        const oldStatus = sale.status
+        const isOldPaid = oldStatus === 'PAID' || oldStatus === 'PAGADO'
+        const isNewPaid = newStatus === 'PAID' || newStatus === 'PAGADO'
+
+        let diff = 0
+        if (isOldPaid && !isNewPaid) diff = -sale.total
+        if (!isOldPaid && isNewPaid) diff = sale.total
+
+        // Optimistic Sales Update
+        setSales(prev => prev.map(s => s.id === saleId ? { ...s, status: newStatus } : s))
+
+        // Optimistic Client Update
+        if (diff !== 0 && onClientUpdate) {
+            const currentTotal = client.totalSpent || 0
+            onClientUpdate(client.id, { totalSpent: currentTotal + diff })
+        }
+    }
+
+    const handleSaleDelete = (saleId: string) => {
+        const sale = sales.find(s => s.id === saleId)
+        if (!sale || !client) return
+
+        const isPaid = sale.status === 'PAID' || sale.status === 'PAGADO'
+
+        // Optimistic Sales Update
+        setSales(prev => prev.filter(s => s.id !== saleId))
+
+        // Optimistic Client Update
+        if (isPaid && onClientUpdate) {
+            const currentTotal = client.totalSpent || 0
+            onClientUpdate(client.id, { totalSpent: currentTotal - sale.total })
+        }
+    }
+
+    const handleSaveData = async () => {
+        if (!client) return
+        try {
+            await updateClientData(client.id, editData)
+            toast.success("Datos actualizados correctamente")
+            setIsEditing(false)
+            if (onClientUpdate) {
+                onClientUpdate(client.id, { ...editData, updatedAt: new Date() })
+            }
+        } catch (error) {
+            toast.error("Error al actualizar datos")
+        }
+    }
+
+    const handleAddNote = async () => {
+        if (!client || !note.trim()) return
+
+        // Optimistic Update
+        const tempId = `temp-${Date.now()}`
+        const newEvent: TimelineEvent = {
+            id: tempId,
+            type: "NOTE",
+            title: "Nota añadida",
+            description: note,
+            date: new Date(),
+            icon: "message-square"
+        }
+
+        // Add to optimistic state
+        setOptimisticEvents(prev => [newEvent, ...prev])
+        setNote("")
+
+        if (onClientUpdate) {
+            onClientUpdate(client.id, { updatedAt: new Date() })
+        }
+
+        try {
+            await addClientNote(client.id, note)
+            toast.success("Nota añadida correctamente")
+
+            // Wait a bit before reloading to allow DB propagation
+            setTimeout(() => {
+                loadTimeline().then(() => {
+                    // Remove optimistic event after we (hopefully) have the real one
+                    // In a real app we'd match by content or return ID from server action
+                    setOptimisticEvents(prev => prev.filter(e => e.id !== tempId))
+                })
+            }, 1000)
+
+        } catch (error) {
+            toast.error("Error al añadir nota")
+            setOptimisticEvents(prev => prev.filter(e => e.id !== tempId)) // Revert
+        }
+    }
+
+    const handleQuickNote = async () => {
+        if (!client || !quickNote.trim()) return
+
+        // Optimistic Update
+        const tempId = `temp-quick-${Date.now()}`
+        const newEvent: TimelineEvent = {
+            id: tempId,
+            type: "NOTE",
+            title: "Nota añadida",
+            description: quickNote,
+            date: new Date(),
+            icon: "message-square"
+        }
+        setOptimisticEvents(prev => [newEvent, ...prev])
+        setQuickNote("")
+        setNoteDialog(false)
+
+        if (onClientUpdate) {
+            onClientUpdate(client.id, { updatedAt: new Date() })
+        }
+
+        try {
+            await addClientNote(client.id, quickNote)
+            toast.success("Nota añadida")
+
+            setTimeout(() => {
+                loadTimeline().then(() => {
+                    setOptimisticEvents(prev => prev.filter(e => e.id !== tempId))
+                })
+            }, 1000)
+
+        } catch (error) {
+            toast.error("Error al añadir nota")
+            setOptimisticEvents(prev => prev.filter(e => e.id !== tempId))
+        }
+    }
+
+    const handleAddPurchase = async () => {
+        if (!client || !purchaseData.concept || purchaseData.amount <= 0) {
+            toast.error("Completa todos los campos")
+            return
+        }
+
+        // Optimistic Update setup
+        const tempId = `temp-sale-${Date.now()}`
+        const optimisticSale = {
+            id: tempId,
+            product: purchaseData.concept,
+            total: purchaseData.amount,
+            notes: purchaseData.note,
+            createdAt: new Date(),
+            saleDate: new Date(purchaseData.date)
+        }
+
+        // Add to timeline
+        const newEvent: TimelineEvent = {
+            id: tempId,
+            type: "SALE",
+            title: "Compra registrada",
+            description: purchaseData.concept,
+            date: new Date(),
+            amount: purchaseData.amount,
+            notes: purchaseData.note,
+            icon: "shopping-cart"
+        }
+        setOptimisticEvents(prev => [newEvent, ...prev])
+        setSales(prev => [optimisticSale, ...prev])
+
+        // Reset form
+        setPurchaseDialog(false)
+        const amount = purchaseData.amount; // Store for calculation
+        setPurchaseData({ concept: "", amount: 0, date: new Date().toISOString().split("T")[0], note: "" })
+
+        // Update Parent Table
+        if (onClientUpdate) {
+            const newTotal = (client.totalSpent || 0) + amount
+            onClientUpdate(client.id, { totalSpent: newTotal, updatedAt: new Date() })
+        }
+
+        try {
+            await addClientPurchase(client.id, {
+                concept: optimisticSale.product,
+                amount: amount,
+                date: new Date(optimisticSale.saleDate),
+                note: optimisticSale.notes,
+            })
+            toast.success("Compra registrada correctamente")
+
+            setTimeout(() => {
+                loadTimeline().then(() => {
+                    setOptimisticEvents(prev => prev.filter(e => e.id !== tempId))
+                })
+                loadSales()
+            }, 1000)
+
+        } catch (error) {
+            toast.error("Error al registrar compra")
+            // Revert
+            setOptimisticEvents(prev => prev.filter(e => e.id !== tempId))
+            setSales(prev => prev.filter(s => s.id !== tempId))
+            if (onClientUpdate) {
+                // Revert total spent (approximate)
+                onClientUpdate(client.id, { totalSpent: (client.totalSpent || 0) })
+            }
+        }
+    }
+
+    const handleTaskUpdate = useCallback((taskId: string, status: "PENDING" | "DONE") => {
+        const currentTasks = tasksRef.current
+        const nextTasks = currentTasks.map(t => t.id === taskId ? { ...t, status } : t)
+
+        setTasks(nextTasks)
+        syncClientStatus(nextTasks)
+    }, [syncClientStatus])
+
+    const handleTaskDelete = useCallback((taskId: string) => {
+        const currentTasks = tasksRef.current
+        const nextTasks = currentTasks.filter(t => t.id !== taskId)
+
+        setTasks(nextTasks)
+        syncClientStatus(nextTasks)
+
+        if (client && onClientUpdate) {
+            onClientUpdate(client.id, {
+                updatedAt: new Date(),
+                tasks: nextTasks.map(t => ({ id: t.id }))
+            });
+        }
+    }, [client, onClientUpdate, syncClientStatus])
+
+    // Suggestion Dismissal Logic using notes metadata
+    const dismissedSuggestions = useMemo(() => {
+        if (!client?.notes) return [];
+        const match = client.notes.match(/\[DISMISSED_SUGGESTIONS:([^\]]+)\]/);
+        return match ? match[1].split(",") : [];
+    }, [client?.notes]);
+
+    // Rule-based Suggestions
+    const suggestions = useMemo(() => {
+        if (!client) return [];
+
+        const list = [];
+        const status = optimisticStatus;
+        const hasSales = (client.Sale && client.Sale.length > 0) || (client.totalSpent || 0) > 0;
+        const hasTasks = tasks.length > 0; // Use tasks instead of optimisticTasks
+        const isForgotten = (client as any).isForgotten;
+        const daysSinceActivity = (client as any).daysSinceActivity || 0;
+
+        // 1. Forgotten (High)
+        if (isForgotten) {
+            list.push({
+                id: "forgotten",
+                priority: "high" as const,
+                icon: AlertTriangle,
+                text: `Este cliente lleva ${daysSinceActivity} días sin seguimiento`,
+                actionLabel: "Crear tarea",
+                onAction: () => setTaskDialog(true)
+            });
+        }
+
+        // 2. FOLLOW_UP without tasks (High)
+        if (status === "FOLLOW_UP" && !hasTasks) {
+            list.push({
+                id: "followup_no_tasks",
+                priority: "high" as const,
+                icon: CheckSquare,
+                text: "Cliente en seguimiento pero sin tareas pendientes",
+                actionLabel: "Programar tarea",
+                onAction: () => setTaskDialog(true)
+            });
+        }
+
+        // 3. ACTIVE without sales (Medium)
+        if (status === "ACTIVE" && !hasSales) {
+            list.push({
+                id: "active_no_sales",
+                priority: "medium" as const,
+                icon: DollarSign,
+                text: "Cliente activo pero sin compras registradas",
+                actionLabel: "Registrar venta",
+                onAction: () => setSaleDialog(true)
+            });
+        }
+
+        // 4. VIP without recent contact (Medium)
+        if (status === "VIP" && daysSinceActivity > 7) {
+            list.push({
+                id: "vip_no_contact",
+                priority: "medium" as const,
+                icon: Star,
+                text: "VIP sin contacto reciente (más de 7 días)",
+                actionLabel: "Llamar ahora",
+                onAction: () => setCallDialog(true)
+            });
+        }
+
+        // 5. NEW without actions (Low)
+        if (daysSinceActivity <= 1 && !hasTasks && !hasSales) {
+            list.push({
+                id: "new_client",
+                priority: "low" as const,
+                icon: UserPlus,
+                text: "Nuevo cliente: Inicia el primer contacto",
+                actionLabel: "Enviar email",
+                onAction: () => {
+                    if (client.email) window.location.href = `mailto:${client.email}`;
+                }
+            });
+        }
+
+        return list
+            .filter(s => !dismissedSuggestions.includes(s.id))
+            .slice(0, 2);
+    }, [client, optimisticStatus, tasks, dismissedSuggestions]);
+
+    // Update global AI Assistant suggestions when this panel is open
+    // FIX: Optimized to prevent infinite loops by removing setSuggestions from dependency
+    // and ensuring clearSuggestions is ONLY called on unmount or close
+    useEffect(() => {
+        if (isOpen && suggestions.length > 0) {
+            setSuggestions(suggestions);
+        }
+
+        // This effect should only run when isOpen or suggestions content changes
+        // We do NOT call clearSuggestions in the main body to avoid flickering loops
+
+        return () => {
+            clearSuggestions();
+        }
+    }, [isOpen, suggestions, setSuggestions, clearSuggestions]);
+
+    if (!client) return null
+
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+    const displayLastActivity = client.updatedAt || client.createdAt
+    const displayTotalSpent = client.totalSpent || 0
+
+    const isActive = displayLastActivity >= thirtyDaysAgo
+    const isForgotten = (client as any).isForgotten
+    const daysSinceActivity = (client as any).daysSinceActivity || 0
+
+    const handleDismissSuggestion = async (id: string) => {
+        const newDismissed = [...dismissedSuggestions, id];
+        const metadataTag = `[DISMISSED_SUGGESTIONS:${newDismissed.join(",")}]`;
+
+        let newNotes = client.notes || "";
+        if (newNotes.includes("[DISMISSED_SUGGESTIONS:")) {
+            newNotes = newNotes.replace(/\[DISMISSED_SUGGESTIONS:[^\]]+\]/, metadataTag).trim();
+        } else {
+            newNotes += (newNotes ? "\n" : "") + metadataTag;
+        }
+
+        if (onClientUpdate) {
+            onClientUpdate(client.id, { notes: newNotes });
+        }
+
+        try {
+            await updateClientData(client.id, { notes: newNotes });
+        } catch (error) {
+            toast.error("Error al ignorar sugerencia");
+        }
+    };
+
+    return (
+        <>
+            {/* Task Dialog */}
+            <TaskDialog
+                open={taskDialog}
+                onOpenChange={setTaskDialog}
+                clientId={client.id}
+                onSuccess={handleTaskSuccess}
+            />
+
+            <ReminderDialog
+                clientId={client.id}
+                isOpen={reminderDialog}
+                onClose={() => setReminderDialog(false)}
+                onSuccess={(task, replaceId) => {
+                    if (task) handleTaskSuccess(task, replaceId)
+                    loadTimeline() // Also refresh timeline to show the reminder entry
+                }}
+            />
+
+            {/* Backdrop Overlay */}
+            {isOpen && (
+                <div
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity animate-in fade-in duration-300"
+                    onClick={onClose}
+                />
+            )}
+
+            <div
+                className={`fixed inset-y-0 right-0 w-full md:w-[600px] bg-zinc-950 border-l border-white/10 shadow-2xl transform transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] z-50 ${isOpen ? "translate-x-0" : "translate-x-full pointer-events-none"
+                    }`}
+            >
+                <div className="h-full flex flex-col overflow-hidden bg-zinc-950">
+                    {/* Header Client */}
+                    <div className="p-8 border-b border-white/5 bg-gradient-to-b from-white/5 to-transparent shrink-0">
+                        <div className="flex items-start justify-between mb-6">
+                            <div className="flex-1">
+                                <div className="flex items-center gap-3 mb-2">
+                                    <h2 className="text-3xl font-bold text-white tracking-tight">{client.name || "Sin nombre"}</h2>
+                                    <StatusBadgeSelector
+                                        currentStatus={optimisticStatus as "ACTIVE" | "FOLLOW_UP" | "INACTIVE" | "VIP"}
+                                        onStatusChange={handleStatusChange}
+                                    />
+                                </div>
+                                <p className="text-sm text-white/40 mb-4">
+                                    Cliente desde {isMounted ? formatDistanceToNow(client.createdAt, { addSuffix: true, locale: es }) : ""}
+                                </p>
+                                <div className="flex flex-wrap gap-4">
+                                    {client.email && (
+                                        <a href={`mailto:${client.email}`} className="text-sm text-white/60 hover:text-blue-400 transition-colors flex items-center gap-2 group">
+                                            <div className="p-1.5 rounded-md bg-white/5 group-hover:bg-blue-500/10 transition-colors">
+                                                <Mail className="h-3.5 w-3.5" />
+                                            </div>
+                                            {client.email}
+                                        </a>
+                                    )}
+                                    {client.phone && (
+                                        <a href={`tel:${client.phone}`} className="text-sm text-white/60 hover:text-green-400 transition-colors flex items-center gap-2 group">
+                                            <div className="p-1.5 rounded-md bg-white/5 group-hover:bg-green-500/10 transition-colors">
+                                                <Phone className="h-3.5 w-3.5" />
+                                            </div>
+                                            {client.phone}
+                                        </a>
+                                    )}
+                                </div>
+                            </div>
+                            <button
+                                onClick={onClose}
+                                className="p-2.5 hover:bg-white/10 rounded-xl transition-all text-white/40 hover:text-white border border-transparent hover:border-white/10 shadow-lg"
+                            >
+                                <X className="h-5 w-5" />
+                            </button>
+                        </div>
+
+                        {/* Quick Actions Header */}
+                        <div className="flex gap-3">
+                            <Button
+                                onClick={() => setNoteDialog(true)}
+                                className="flex-1 bg-white/5 border border-white/10 hover:bg-white/10 text-white h-11 rounded-xl group transition-all"
+                            >
+                                <MessageSquare className="h-4 w-4 mr-2 text-blue-400 group-hover:scale-110 transition-transform" />
+                                Nota
+                            </Button>
+                            <Button
+                                onClick={() => setReminderDialog(true)}
+                                className="flex-1 bg-white/5 border border-white/10 hover:bg-white/10 text-white h-11 rounded-xl group transition-all"
+                            >
+                                <Bell className="h-4 w-4 mr-2 text-amber-400 group-hover:scale-110 transition-transform" />
+                                Recordatorio
+                            </Button>
+                            <Button
+                                onClick={() => setCallDialog(true)}
+                                className="flex-1 bg-white/5 border border-white/10 hover:bg-white/10 text-white h-11 rounded-xl group transition-all"
+                            >
+                                <Phone className="h-4 w-4 mr-2 text-green-400 group-hover:scale-110 transition-transform" />
+                                Llamada
+                            </Button>
+                            <Button
+                                onClick={() => setSaleDialog(true)}
+                                className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white h-11 rounded-xl group transition-all border-none font-semibold shadow-emerald-500/10 shadow-lg"
+                            >
+                                <DollarSign className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
+                                Venta
+                            </Button>
+                        </div>
+                    </div>
+
+                    {/* Scrollable Content */}
+                    <div className="flex-1 overflow-y-auto custom-scrollbar bg-zinc-950 pb-20">
+                        {/* KPI Metrics */}
+                        <div className="p-8 border-b border-white/5 bg-white/[0.01]">
+                            <div className="bg-white/5 rounded-2xl p-5 border border-white/5 shadow-inner">
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-y-6 gap-x-4">
+                                    {/* Estado */}
+                                    <div className="space-y-1">
+                                        <p className="text-[10px] font-bold text-white/30 uppercase tracking-wider">Estado</p>
+                                        <div className="flex items-center">
+                                            {client.status === "ACTIVE" && <span className="text-sm font-bold text-emerald-400">Activo</span>}
+                                            {client.status === "FOLLOW_UP" && <span className="text-sm font-bold text-blue-400">Seguimiento</span>}
+                                            {client.status === "INACTIVE" && <span className="text-sm font-bold text-zinc-500">Inactivo</span>}
+                                            {client.status === "VIP" && <span className="text-sm font-bold text-amber-400">VIP</span>}
+                                        </div>
+                                    </div>
+
+                                    {/* Total Facturado */}
+                                    <div className="space-y-1">
+                                        <p className="text-[10px] font-bold text-white/30 uppercase tracking-wider">Total Facturado</p>
+                                        <p className="text-sm font-bold text-white tracking-tight">
+                                            {formatCurrency(displayTotalSpent, client.currency || 'EUR')}
+                                        </p>
+                                    </div>
+
+                                    {/* Compras */}
+                                    <div className="space-y-1">
+                                        <p className="text-[10px] font-bold text-white/30 uppercase tracking-wider">Compras</p>
+                                        <p className="text-sm font-bold text-white">
+                                            {sales.length} <span className="text-white/30 font-normal">transacciones</span>
+                                        </p>
+                                    </div>
+
+                                    {/* Última Actividad */}
+                                    <div className="space-y-1 col-span-2 md:col-span-1">
+                                        <p className="text-[10px] font-bold text-white/30 uppercase tracking-wider">Última Actividad</p>
+                                        <p className="text-sm font-medium text-white/80">
+                                            {isActive ? (isMounted ? formatDistanceToNow(displayLastActivity, { addSuffix: true, locale: es }) : "") : "Sin actividad reciente"}
+                                        </p>
+                                    </div>
+
+                                    {/* Cliente Desde */}
+                                    <div className="space-y-1 col-span-2 md:col-span-2">
+                                        <p className="text-[10px] font-bold text-white/30 uppercase tracking-wider">Cliente Desde</p>
+                                        <p className="text-sm font-medium text-white/80">
+                                            {isMounted ? formatDate(new Date(client.createdAt), "d 'de' MMMM, yyyy", { locale: es }) : ""}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Forgotten Banner (Dentro del scroll ahora para no saturar) */}
+                        {isForgotten && (
+                            <div className="m-8 bg-amber-500/10 border border-amber-500/20 p-4 rounded-2xl animate-in slide-in-from-top duration-500">
+                                <div className="flex items-start gap-4">
+                                    <div className="p-2 bg-amber-500/20 rounded-lg">
+                                        <AlertTriangle className="h-5 w-5 text-amber-500" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <h4 className="text-sm font-bold text-amber-500">Sin seguimiento activo</h4>
+                                        <p className="text-xs text-amber-500/70 mt-1">
+                                            No hay actividad desde hace {daysSinceActivity} días.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="p-8 space-y-12">
+                            {/* Tareas Section */}
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <CheckSquare className="h-4 w-4 text-indigo-400" />
+                                        <h3 className="text-xs font-bold text-white/40 uppercase tracking-[0.2em]">Tareas Pendientes</h3>
+                                    </div>
+                                    <Button
+                                        onClick={() => setTaskDialog(true)}
+                                        size="sm"
+                                        variant="outline"
+                                        className="h-8 text-[10px] border-white/10 hover:bg-white/5 rounded-lg px-3"
+                                    >
+                                        ➕ Nueva
+                                    </Button>
+                                </div>
+
+                                <div className="space-y-3">
+                                    {tasks.length > 0 ? (
+                                        tasks.map(task => (
+                                            <TaskCard
+                                                key={task.id}
+                                                task={task}
+                                                onUpdate={handleTaskUpdate}
+                                                onDelete={handleTaskDelete}
+                                            />
+                                        ))
+                                    ) : (
+                                        <div className="text-center py-8 border border-dashed border-white/5 rounded-2xl bg-white/[0.01]">
+                                            <p className="text-xs text-white/30">No hay tareas pendientes</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Ventas Section */}
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <ShoppingCart className="h-4 w-4 text-emerald-400" />
+                                        <h3 className="text-xs font-bold text-white/40 uppercase tracking-[0.2em]">Historial de Ventas</h3>
+                                    </div>
+                                    <Badge variant="outline" className="bg-white/5 border-white/10 text-white/40 text-[10px] h-5">
+                                        {sales.length}
+                                    </Badge>
+                                </div>
+
+                                <div className="space-y-3">
+                                    {sales.length > 0 ? (
+                                        sales.map(sale => (
+                                            <div
+                                                key={sale.id}
+                                                className="group flex flex-col p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all cursor-pointer"
+                                                onClick={() => handleSaleClick(sale)}
+                                            >
+                                                <div className="flex items-start justify-between gap-4 mb-2">
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="font-bold text-white text-sm truncate group-hover:text-blue-400 transition-colors uppercase tracking-tight">{sale.product}</p>
+                                                        <p className="text-[10px] text-white/40 font-medium mt-0.5">
+                                                            {isMounted ? new Date(sale.saleDate).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) : ""}
+                                                        </p>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="font-bold text-white text-sm tabular-nums">
+                                                            {formatCurrency(sale.total, sale.currency)}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center justify-between mt-2 pt-3 border-t border-white/5">
+                                                    <div onClick={(e) => e.stopPropagation()}>
+                                                        <PaymentStatusBadge
+                                                            saleId={sale.id}
+                                                            initialStatus={sale.status}
+                                                            onStatusChange={(newStatus) => handleSaleStatusChange(sale.id, newStatus)}
+                                                        />
+                                                    </div>
+                                                    <Clock className="h-3 w-3 text-white/20" />
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="text-center py-8 border border-dashed border-white/5 rounded-2xl bg-white/[0.01]">
+                                            <p className="text-xs text-white/30">Sin historial de pagos</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Timeline Section */}
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-2 px-1">
+                                    <Clock className="h-4 w-4 text-white/20" />
+                                    <h3 className="text-xs font-bold text-white/40 uppercase tracking-[0.2em]">Línea de Tiempo</h3>
+                                </div>
+
+                                <div className="relative pl-2">
+                                    <EnhancedTimeline events={timeline} />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Bottom Quick Note */}
+                    <div className="p-6 border-t border-white/5 bg-zinc-900/80 backdrop-blur-md shrink-0">
+                        <div className="relative group">
+                            <Textarea
+                                placeholder="Escribir nota..."
+                                value={note}
+                                onChange={(e) => setNote(e.target.value)}
+                                className="bg-white/5 border-white/10 group-hover:border-white/20 text-white pr-24 min-h-[52px] max-h-[120px] resize-none py-4 px-5 rounded-2xl focus:ring-1 focus:ring-blue-500/50 transition-all text-sm"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault();
+                                        handleAddNote();
+                                    }
+                                }}
+                            />
+                            <div className="absolute right-3 bottom-2.5">
+                                <Button
+                                    size="sm"
+                                    className="h-8 text-[11px] bg-white text-black hover:bg-zinc-200 font-bold rounded-xl px-4 shadow-xl"
+                                    disabled={!note.trim()}
+                                    onClick={handleAddNote}
+                                >
+                                    Guardar
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Purchase Dialog */}
+            <Dialog open={purchaseDialog} onOpenChange={setPurchaseDialog}>
+                <DialogContent className="bg-zinc-900 border-white/10">
+                    <DialogHeader>
+                        <DialogTitle className="text-white">Registrar Compra</DialogTitle>
+                    </DialogHeader>
+
+                    <div className="space-y-4 py-4">
+                        <div>
+                            <Label htmlFor="concept" className="text-white">Concepto *</Label>
+                            <Input
+                                id="concept"
+                                value={purchaseData.concept}
+                                onChange={(e) => setPurchaseData({ ...purchaseData, concept: e.target.value })}
+                                placeholder="Ej: Producto Premium"
+                                className="bg-white/5 border-white/10 text-white mt-1"
+                            />
+                        </div>
+
+                        <div>
+                            <Label htmlFor="amount" className="text-white">Importe *</Label>
+                            <Input
+                                id="amount"
+                                type="number"
+                                value={purchaseData.amount}
+                                onChange={(e) => setPurchaseData({ ...purchaseData, amount: parseFloat(e.target.value) || 0 })}
+                                placeholder="0.00"
+                                className="bg-white/5 border-white/10 text-white mt-1"
+                            />
+                        </div>
+
+                        <div>
+                            <Label htmlFor="date" className="text-white">Fecha *</Label>
+                            <Input
+                                id="date"
+                                type="date"
+                                value={purchaseData.date}
+                                onChange={(e) => setPurchaseData({ ...purchaseData, date: e.target.value })}
+                                className="bg-white/5 border-white/10 text-white mt-1"
+                            />
+                        </div>
+
+                        <div>
+                            <Label htmlFor="note" className="text-white">Nota (opcional)</Label>
+                            <Textarea
+                                id="note"
+                                value={purchaseData.note}
+                                onChange={(e) => setPurchaseData({ ...purchaseData, note: e.target.value })}
+                                placeholder="Detalles adicionales..."
+                                className="bg-white/5 border-white/10 text-white mt-1"
+                            />
+                        </div>
+                    </div>
+
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => setPurchaseDialog(false)}
+                            className="bg-white/5 border-white/10 text-white hover:bg-white/10"
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            onClick={handleAddPurchase}
+                            className="bg-green-600 hover:bg-green-700"
+                        >
+                            Registrar Compra
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+
+
+            {/* CallDialog */}
+            <CallDialog
+                clientId={client.id}
+                isOpen={callDialog}
+                onClose={() => setCallDialog(false)}
+                onSuccess={() => {
+                    // Optimistic update for Call (Generic)
+                    const tempId = `temp-call-${Date.now()}`
+                    setOptimisticEvents(prev => [{
+                        id: tempId,
+                        type: "CALL",
+                        title: "Llamada",
+                        description: "Interacción registrada",
+                        date: new Date(),
+                        icon: "phone"
+                    }, ...prev])
+
+                    if (onClientUpdate) onClientUpdate(client.id, { updatedAt: new Date() })
+
+                    setTimeout(() => {
+                        loadTimeline().then(() => {
+                            setOptimisticEvents(prev => prev.filter(e => e.id !== tempId))
+                        })
+                    }, 1000)
+                }}
+            />
+
+            {/* Quick Note Dialog */}
+            <Dialog open={noteDialog} onOpenChange={setNoteDialog}>
+                <DialogContent className="bg-zinc-900 border-white/10">
+                    <DialogHeader>
+                        <DialogTitle className="text-white">Añadir Nota Rápida</DialogTitle>
+                    </DialogHeader>
+                    <div className="py-4">
+                        <Textarea
+                            value={quickNote}
+                            onChange={(e) => setQuickNote(e.target.value)}
+                            placeholder="Escribe una nota sobre este cliente..."
+                            className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+                            rows={4}
+                            autoFocus
+                        />
+                    </div>
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => setNoteDialog(false)}
+                            className="bg-white/5 border-white/10 text-white hover:bg-white/10"
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            onClick={handleQuickNote}
+                            disabled={!quickNote.trim()}
+                            className="bg-blue-600 hover:bg-blue-700"
+                        >
+                            Añadir Nota
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Sale Dialog */}
+            <SaleDialog
+                clientId={client.id}
+                sale={editingSale}
+                isOpen={saleDialog}
+                onClose={handleCloseSaleDialog}
+                onSuccess={handleSaleSuccess}
+            />
+
+            <SaleSidePanel
+                sale={selectedSale}
+                isOpen={isSalePanelOpen}
+                onClose={() => setIsSalePanelOpen(false)}
+                onStatusChange={handleSaleStatusChange}
+                onDelete={handleSaleDelete}
+            />
+        </>
+    )
+}

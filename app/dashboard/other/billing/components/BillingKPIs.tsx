@@ -1,49 +1,19 @@
 "use client"
 
 import { CurrencyDollarIcon, ClockIcon, CheckCircleIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline"
-import { mockKPIs } from "../mock"
 
 interface BillingKPIsProps {
   className?: string
 }
 
+/** Billing has no Invoice model in DB — KPIs show zeros until backend exists. */
 export function BillingKPIs({ className }: BillingKPIsProps) {
   const kpis = [
-    {
-      title: "Facturación Mes",
-      value: `€${mockKPIs.monthlyRevenue.toLocaleString('es-ES')}`,
-      icon: CurrencyDollarIcon,
-      color: "from-green-500 to-emerald-600",
-      bgColor: "from-green-500/10 to-emerald-600/10"
-    },
-    {
-      title: "IVA Pendiente",
-      value: `€${mockKPIs.monthlyTax.toLocaleString('es-ES')}`,
-      icon: CurrencyDollarIcon,
-      color: "from-blue-500 to-cyan-600",
-      bgColor: "from-blue-500/10 to-cyan-600/10"
-    },
-    {
-      title: "Facturas Pendientes",
-      value: mockKPIs.pendingInvoices.toString(),
-      icon: ClockIcon,
-      color: "from-yellow-500 to-orange-600",
-      bgColor: "from-yellow-500/10 to-orange-600/10"
-    },
-    {
-      title: "Pagadas",
-      value: mockKPIs.paidInvoices.toString(),
-      icon: CheckCircleIcon,
-      color: "from-green-500 to-emerald-600",
-      bgColor: "from-green-500/10 to-emerald-600/10"
-    },
-    {
-      title: "Vencidas",
-      value: mockKPIs.overdueInvoices.toString(),
-      icon: ExclamationTriangleIcon,
-      color: "from-red-500 to-rose-600",
-      bgColor: "from-red-500/10 to-rose-600/10"
-    }
+    { title: "Facturación Mes", value: "€0", icon: CurrencyDollarIcon, color: "from-green-500 to-emerald-600", bgColor: "from-green-500/10 to-emerald-600/10" },
+    { title: "IVA Pendiente", value: "€0", icon: CurrencyDollarIcon, color: "from-blue-500 to-cyan-600", bgColor: "from-blue-500/10 to-cyan-600/10" },
+    { title: "Facturas Pendientes", value: "0", icon: ClockIcon, color: "from-yellow-500 to-orange-600", bgColor: "from-yellow-500/10 to-orange-600/10" },
+    { title: "Pagadas", value: "0", icon: CheckCircleIcon, color: "from-green-500 to-emerald-600", bgColor: "from-green-500/10 to-emerald-600/10" },
+    { title: "Vencidas", value: "0", icon: ExclamationTriangleIcon, color: "from-red-500 to-rose-600", bgColor: "from-red-500/10 to-rose-600/10" }
   ]
 
   return (

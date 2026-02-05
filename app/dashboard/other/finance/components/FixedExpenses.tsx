@@ -1,7 +1,8 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { mockFixedExpenses, formatCurrency, formatExpenseFrequency } from "../mock"
+import { formatCurrency, formatExpenseFrequency } from "../lib/formatters"
+import { useFinanceData } from "../context/FinanceDataContext"
 import {
   ClockIcon,
   CalendarIcon,
@@ -11,6 +12,9 @@ import {
 } from "@heroicons/react/24/outline"
 
 export function FixedExpenses() {
+  const { analytics, loading } = useFinanceData()
+  const expenses = analytics?.fixedExpenses ?? []
+
   const handleToggleExpense = (expenseId: string) => {
     console.log('Toggle expense:', expenseId)
   }
@@ -19,19 +23,31 @@ export function FixedExpenses() {
     console.log('Edit expense:', expenseId)
   }
 
-  const getNextPaymentDate = (nextPayment: Date, frequency: string) => {
+  const getNextPaymentDate = (nextPayment: Date | string, _frequency: string) => {
+    const date = typeof nextPayment === 'string' ? new Date(nextPayment) : nextPayment
     const now = new Date()
-    const daysUntil = Math.ceil((nextPayment.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+    const daysUntil = Math.ceil((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+    if (daysUntil < 0) return { text: 'Vencido', color: 'text-red-400' }
+    if (daysUntil === 0) return { text: 'Hoy', color: 'text-orange-400' }
+    if (daysUntil <= 7) return { text: `En ${daysUntil} días`, color: 'text-yellow-400' }
+    return { text: date.toLocaleDateString('es-ES'), color: 'text-gray-400' }
+  }
 
-    if (daysUntil < 0) {
-      return { text: 'Vencido', color: 'text-red-400' }
-    } else if (daysUntil === 0) {
-      return { text: 'Hoy', color: 'text-orange-400' }
-    } else if (daysUntil <= 7) {
-      return { text: `En ${daysUntil} días`, color: 'text-yellow-400' }
-    } else {
-      return { text: nextPayment.toLocaleDateString('es-ES'), color: 'text-gray-400' }
-    }
+  if (loading) {
+    return <div className="bg-gray-800/50 rounded-2xl border border-gray-700/50 p-6 animate-pulse h-48" />
+  }
+
+  if (expenses.length === 0) {
+    return (
+      <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-gray-700/50 p-6">
+        <h3 className="text-xl font-bold text-white mb-2">Gastos Fijos</h3>
+        <p className="text-gray-400 text-sm mb-4">Pagos recurrentes y suscripciones</p>
+        <div className="py-8 text-center text-gray-400">
+          <p className="text-white/80">Sin gastos fijos</p>
+          <p className="text-sm mt-1">Los gastos recurrentes aparecerán aquí.</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -47,17 +63,17 @@ export function FixedExpenses() {
           <p className="text-gray-400 text-sm">Pagos recurrentes y suscripciones</p>
         </div>
         <div className="text-sm text-gray-400">
-          {mockFixedExpenses.filter(e => e.active).length} activos
+          {expenses.filter(e => e.active).length} activos
         </div>
       </div>
 
       <div className="space-y-4">
-        {mockFixedExpenses.map((expense, index) => {
+        {expenses.map((expense, index) => {
           const nextPayment = getNextPaymentDate(expense.nextPayment, expense.frequency)
 
           return (
             <motion.div
-              key={index}
+              key={expense.id}
               className={`p-4 rounded-xl border transition-all duration-300 hover:scale-105 ${
                 expense.active
                   ? 'bg-gray-900/50 border-gray-700/50 hover:border-gray-600/50'
@@ -155,7 +171,7 @@ export function FixedExpenses() {
             Total mensual estimado:
           </span>
           <span className="text-red-400 font-semibold">
-            {formatCurrency(mockFixedExpenses
+            {formatCurrency(expenses
               .filter(e => e.active)
               .reduce((total, expense) => {
                 switch (expense.frequency) {

@@ -36,8 +36,18 @@ export async function POST(request: NextRequest) {
         })
       }
 
+        interface Customer {
+          id: string
+          name: string
+          lastActivity: number
+          engagementScore: number
+          contractValue: number
+          timeAsCustomer: number
+          supportTickets: number
+        }
+
       case 'churn': {
-        const customers = data.customers || [
+        const customers: Customer[] = data.customers || [
           {
             id: '1',
             name: 'TechCorp S.L.',
@@ -96,8 +106,14 @@ export async function POST(request: NextRequest) {
         })
       }
 
+        interface FunnelStage {
+          stage: string
+          count: number
+          conversion: number
+        }
+
       case 'conversion': {
-        const leadData = data.leads || [
+        const leadData: FunnelStage[] = data.leads || [
           { stage: 'visitors', count: 1000, conversion: 100 },
           { stage: 'leads', count: 250, conversion: 25 },
           { stage: 'qualified', count: 80, conversion: 32 },
@@ -107,7 +123,7 @@ export async function POST(request: NextRequest) {
         ]
 
         // Calculate funnel metrics
-        const funnelMetrics = leadData.map((stage, index) => {
+        const funnelMetrics = leadData.map((stage: FunnelStage, index: number) => {
           const nextStage = leadData[index + 1]
           const dropoff = nextStage ? ((stage.count - nextStage.count) / stage.count) * 100 : 0
 
@@ -118,7 +134,7 @@ export async function POST(request: NextRequest) {
           }
         })
 
-        const totalValue = funnelMetrics.reduce((sum, stage) => sum + (stage.count * stage.value), 0)
+        const totalValue = funnelMetrics.reduce((sum: number, stage: any) => sum + (stage.count * stage.value), 0)
         const conversionRate = (funnelMetrics[funnelMetrics.length - 1].count / funnelMetrics[0].count) * 100
 
         return NextResponse.json({

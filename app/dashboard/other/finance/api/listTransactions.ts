@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { TransactionType } from '@prisma/client'
 import { getServerSession } from 'next-auth'
-
-const prisma = new PrismaClient()
+import { prisma } from '@/lib/prisma'
 
 export async function GET(request: NextRequest) {
   try {
@@ -77,7 +76,7 @@ export async function GET(request: NextRequest) {
     const summary = await prisma.transaction.aggregate({
       where: {
         userId: session.user.id,
-        ...(type && { type }),
+        ...(type && { type: type as TransactionType }),
         ...(startDate && endDate && {
           date: {
             gte: new Date(startDate),

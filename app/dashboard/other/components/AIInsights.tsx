@@ -1,43 +1,21 @@
 "use client"
 
+import { useSectorConfig } from "@/hooks/useSectorConfig"
+
 import { Brain, TrendingUp, AlertTriangle, Lightbulb, Target, Zap } from "lucide-react"
 
-const INSIGHTS = [
-  {
-    type: "opportunity",
-    title: "Oportunidad de crecimiento",
-    message: "Los clientes de Madrid representan el 40% de tus ingresos. Considera expandir tu presencia local.",
-    icon: TrendingUp,
-    color: "text-green-400 bg-green-500/10",
-    priority: "high"
-  },
-  {
-    type: "alert",
-    title: "Cliente en riesgo",
-    message: "Empresa ABC no ha realizado compras en 30 días. Envía una oferta especial.",
-    icon: AlertTriangle,
-    color: "text-yellow-400 bg-yellow-500/10",
-    priority: "medium"
-  },
-  {
-    type: "insight",
-    title: "Patrón detectado",
-    message: "Las ventas aumentan un 25% los viernes. Optimiza tu estrategia de email marketing.",
-    icon: Lightbulb,
-    color: "text-blue-400 bg-blue-500/10",
-    priority: "medium"
-  },
-  {
-    type: "action",
-    title: "Acción recomendada",
-    message: "Automatiza el proceso de onboarding de nuevos clientes para reducir el tiempo de respuesta.",
-    icon: Zap,
-    color: "text-purple-400 bg-purple-500/10",
-    priority: "high"
-  }
-]
 
-function InsightCard({ insight }: { insight: typeof INSIGHTS[0] }) {
+function InsightCard({ insight }: {
+  insight: {
+    type: string
+    title: string
+    message: string
+    icon: any
+    color: string
+    priority: string
+  }
+}) {
+  const { labels } = useSectorConfig()
   const Icon = insight.icon
 
   return (
@@ -52,7 +30,7 @@ function InsightCard({ insight }: { insight: typeof INSIGHTS[0] }) {
             <h4 className="font-medium text-white text-sm">{insight.title}</h4>
             {insight.priority === "high" && (
               <span className="px-2 py-0.5 bg-red-500/20 text-red-400 text-xs rounded-full">
-                Alta
+                {labels.tasks.priorities.HIGH || "Alta"}
               </span>
             )}
           </div>
@@ -61,10 +39,10 @@ function InsightCard({ insight }: { insight: typeof INSIGHTS[0] }) {
 
           <div className="flex items-center gap-3 mt-3">
             <button className="text-xs text-purple-400 hover:text-purple-300 font-medium">
-              Aplicar
+              {labels.aiAssistant.apply}
             </button>
             <button className="text-xs text-gray-400 hover:text-gray-300">
-              Ignorar
+              {labels.aiAssistant.ignore}
             </button>
           </div>
         </div>
@@ -74,6 +52,44 @@ function InsightCard({ insight }: { insight: typeof INSIGHTS[0] }) {
 }
 
 export function AIInsights() {
+  const { labels } = useSectorConfig()
+
+  const w = labels.dashboard.widgets
+  const INSIGHTS = [
+    {
+      type: "opportunity",
+      title: w.insightOpportunityTitle,
+      message: w.insightOpportunityMessage,
+      icon: TrendingUp,
+      color: "text-green-400 bg-green-500/10",
+      priority: "high"
+    },
+    {
+      type: "alert",
+      title: `${labels.clients.singular} en riesgo`,
+      message: w.insightClientRiskMessage,
+      icon: AlertTriangle,
+      color: "text-yellow-400 bg-yellow-500/10",
+      priority: "medium"
+    },
+    {
+      type: "insight",
+      title: w.insightPatternTitle,
+      message: w.insightPatternMessage,
+      icon: Lightbulb,
+      color: "text-blue-400 bg-blue-500/10",
+      priority: "medium"
+    },
+    {
+      type: "action",
+      title: w.insightActionTitle,
+      message: w.insightActionMessage,
+      icon: Zap,
+      color: "text-purple-400 bg-purple-500/10",
+      priority: "high"
+    }
+  ]
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -82,14 +98,14 @@ export function AIInsights() {
             <Brain className="w-5 h-5 text-purple-400" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-white">AI Insights</h3>
-            <p className="text-sm text-gray-400">Inteligencia artificial para tu negocio</p>
+            <h3 className="text-lg font-semibold text-white">{labels.aiAssistant.title}</h3>
+            <p className="text-sm text-gray-400">{labels.aiAssistant.subtitle}</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           <span className="px-3 py-1 bg-purple-600/20 text-purple-300 text-sm rounded-full">
-            4 insights nuevos
+            4 {labels.aiAssistant.newInsights}
           </span>
         </div>
       </div>
@@ -104,17 +120,17 @@ export function AIInsights() {
         <div className="flex items-center gap-4 text-sm">
           <div className="flex items-center gap-1">
             <Target className="w-4 h-4 text-green-400" />
-            <span className="text-gray-400">Precisión: 94%</span>
+            <span className="text-gray-400">{labels.aiAssistant.precision}: 94%</span>
           </div>
           <div className="flex items-center gap-1">
             <Brain className="w-4 h-4 text-blue-400" />
-            <span className="text-gray-400">Última actualización: 5 min</span>
+            <span className="text-gray-400">{labels.aiAssistant.lastUpdate}: 5 min</span>
           </div>
         </div>
 
         <button className="flex items-center gap-2 px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 rounded-lg transition-colors text-sm">
           <Brain className="w-4 h-4" />
-          Ver análisis completo
+          {labels.aiAssistant.viewFullAnalysis}
         </button>
       </div>
     </div>

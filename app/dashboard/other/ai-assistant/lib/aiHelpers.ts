@@ -16,7 +16,7 @@ export const generateLeadScore = (leadData: any): number => {
   else if (leadData.companySize > 50) score += 5
 
   // Budget factor
-  const budgetScores = { 'low': 0, 'medium': 5, 'high': 10, 'enterprise': 15 }
+  const budgetScores: Record<string, number> = { 'low': 0, 'medium': 5, 'high': 10, 'enterprise': 15 }
   score += budgetScores[leadData.budget] || 0
 
   // Random variation for realism
@@ -152,7 +152,7 @@ export const predictRevenue = (historicalData: number[]): {
 
   // Calculate trend
   const trend = recent[recent.length - 1] > recent[0] ? 'up' :
-               recent[recent.length - 1] < recent[0] ? 'down' : 'stable'
+    recent[recent.length - 1] < recent[0] ? 'down' : 'stable'
 
   // Add some variation for prediction
   const variation = (Math.random() - 0.5) * 0.2 // ±10%

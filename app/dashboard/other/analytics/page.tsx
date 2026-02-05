@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useSectorConfig } from "@/hooks/useSectorConfig"
 import { DashboardContainer } from "@/components/layout/DashboardContainer"
 import { AnalyticsKPIs } from "./components/AnalyticsKPIs"
 import { DateRangePicker } from "./components/DateRangePicker"
@@ -17,81 +18,28 @@ import {
   TableCellsIcon
 } from "@heroicons/react/24/outline"
 import { motion } from "framer-motion"
-import { getKPIsForRange, getChartDataForRange, formatValue } from "./mock"
 import { ExportData } from "./lib/exportUtils"
 
+/** Analytics/reports has no dedicated backend — no mock data. */
 export default function AnalyticsPage() {
+  const { labels } = useSectorConfig()
+  const a = labels.analytics
   const [selectedRange, setSelectedRange] = useState("7d")
   const [isLoading, setIsLoading] = useState(false)
-  const [analyticsData, setAnalyticsData] = useState<ExportData | null>(null)
+  const [analyticsData] = useState<ExportData | null>(null)
 
   const handleRangeChange = async (range: string) => {
     setIsLoading(true)
-    // Simular carga al cambiar rango
-    await new Promise(resolve => setTimeout(resolve, 500))
     setSelectedRange(range)
     setIsLoading(false)
   }
 
-  // Preparar datos para exportación
-  useEffect(() => {
-    const kpis = getKPIsForRange(selectedRange)
-    const chartData = getChartDataForRange(selectedRange)
-
-    const exportData: ExportData = {
-      title: `Análisis Analytics - ${selectedRange}`,
-      dateRange: selectedRange,
-      kpis: [
-        {
-          label: 'Ingresos Totales',
-          value: formatValue(kpis.totalRevenue, 'currency'),
-          change: `+${kpis.revenueGrowth}%`
-        },
-        {
-          label: 'Leads Nuevos',
-          value: kpis.newLeads.toString(),
-          change: '+12.5%'
-        },
-        {
-          label: 'Conversión',
-          value: `${kpis.conversionRate}%`,
-          change: `+${kpis.conversionRate}%`
-        },
-        {
-          label: 'Crecimiento',
-          value: `+${kpis.revenueGrowth}%`,
-          change: `+${kpis.revenueGrowth}%`
-        }
-      ],
-      chartData: chartData.map(point => ({
-        label: point.date,
-        value: point.revenue,
-        secondaryValue: point.leads
-      })),
-      tableData: Array.from({ length: 25 }, (_, i) => ({
-        fecha: new Date(Date.now() - (24 - i) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        evento: ['Nueva venta', 'Lead convertido', 'Email enviado', 'Cliente registrado'][Math.floor(Math.random() * 4)],
-        usuario: ['María García', 'Carlos Rodríguez', 'Ana López'][Math.floor(Math.random() * 3)],
-        impacto: Math.floor(Math.random() * 2000) + 100,
-        tipo: Math.random() > 0.5 ? 'manual' : 'automatic'
-      })),
-      summary: {
-        totalRecords: 245,
-        totalValue: kpis.totalRevenue,
-        averageValue: Math.round(kpis.totalRevenue / 245),
-        conversionRate: kpis.conversionRate
-      }
-    }
-
-    setAnalyticsData(exportData)
-  }, [selectedRange])
-
   return (
     <DashboardContainer>
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-white">Analítica avanzada</h1>
+        <h1 className="text-2xl font-semibold text-white">{a.pageTitle}</h1>
         <p className="text-sm text-white/60">
-          Métricas inteligentes y reportes ejecutivos para toma de decisiones
+          {a.pageSubtitle}
         </p>
       </div>
 
@@ -103,10 +51,10 @@ export default function AnalyticsPage() {
             transition={{ delay: 0.3, duration: 0.5 }}
           >
             <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
-              Analítica avanzada
+              {a.pageTitle}
             </h1>
             <p className="text-gray-400 text-lg">
-              Métricas inteligentes y reportes ejecutivos para toma de decisiones
+              {a.pageSubtitle}
             </p>
           </motion.div>
 
@@ -184,7 +132,7 @@ export default function AnalyticsPage() {
           <ActivityTable selectedRange={selectedRange} />
         </motion.div>
 
-        {/* Export Buttons */}
+        {/* Export: no data until backend exists */}
         {analyticsData && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}

@@ -1,0 +1,156 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { Input } from "@/components/ui/input"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+import { Search, ArrowUpDown } from "lucide-react"
+import { useSectorConfig } from "@/hooks/useSectorConfig"
+
+type Filters = {
+    status: string
+    temperature: string
+    source: string
+    search: string
+    sortBy: string
+    sortOrder: string
+    showConverted: boolean
+    showLost: boolean
+}
+
+export function LeadsFilters({
+    currentFilters,
+    sources,
+}: {
+    currentFilters: Filters
+    sources: string[]
+}) {
+    const { labels } = useSectorConfig()
+    const ui = labels.leads.ui
+    const router = useRouter()
+    const searchParams = useSearchParams()
+    const [searchTerm, setSearchTerm] = useState(currentFilters.search)
+
+    // Debounced search
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            updateFilters({ search: searchTerm })
+        }, 300)
+        return () => clearTimeout(timer)
+    }, [searchTerm])
+
+    const updateFilters = (updates: Partial<Filters>) => {
+        const params = new URLSearchParams(searchParams.toString())
+
+        Object.entries(updates).forEach(([key, value]) => {
+            if (value && value !== "all" && value !== "" && value !== "false") {
+                params.set(key, String(value))
+            } else {
+                params.delete(key)
+            }
+        })
+
+        router.push(`?${params.toString()}`)
+    }
+
+    return (
+        <div className="flex items-center gap-3">
+            {/* Left: Filters */}
+            <div className="flex items-center gap-2">
+                {/* Status Filter */}
+                <Select
+                    value={currentFilters.status}
+                    onValueChange={(value) => updateFilters({ status: value })}
+                >
+                    <SelectTrigger className="w-[140px] h-10 bg-white/5 border-white/10 text-white text-sm hover:bg-white/10 transition-all">
+                        <SelectValue placeholder={ui.filterStatus} />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">{ui.filterAll}</SelectItem>
+                        <SelectItem value="NEW">{labels.leads.status.NEW}</SelectItem>
+                        <SelectItem value="CONTACTED">{labels.leads.status.CONTACTED}</SelectItem>
+                        <SelectItem value="INTERESTED">{labels.leads.status.INTERESTED}</SelectItem>
+                        <SelectItem value="QUALIFIED">{labels.leads.status.QUALIFIED}</SelectItem>
+                    </SelectContent>
+                </Select>
+
+                {/* Temperature Filter */}
+                <Select
+                    value={currentFilters.temperature}
+                    onValueChange={(value) => updateFilters({ temperature: value })}
+                >
+                    <SelectTrigger className="w-[140px] h-10 bg-white/5 border-white/10 text-white text-sm hover:bg-white/10 transition-all">
+                        <SelectValue placeholder={ui.filterTemperature} />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">{ui.filterAllTemps}</SelectItem>
+                        <SelectItem value="HOT">🔥 {labels.leads.temperatures.HOT}</SelectItem>
+                        <SelectItem value="WARM">🌤️ {labels.leads.temperatures.WARM}</SelectItem>
+                        <SelectItem value="COLD">❄️ {labels.leads.temperatures.COLD}</SelectItem>
+                    </SelectContent>
+                </Select>
+
+                {/* Source Filter */}
+                {sources.length > 0 && (
+                    <Select
+                        value={currentFilters.source}
+                        onValueChange={(value) => updateFilters({ source: value })}
+                    >
+                        <SelectTrigger className="w-[140px] h-10 bg-white/5 border-white/10 text-white text-sm hover:bg-white/10 transition-all">
+                            <SelectValue placeholder={ui.filterSource} />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">{ui.filterSourceAll}</SelectItem>
+                            {sources.map((source) => (
+                                <SelectItem key={source} value={source}>
+                                    {source}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                )}
+            </div>
+
+            {/* Middle: Sort */}
+            <Select
+                value={`${currentFilters.sortBy}-${currentFilters.sortOrder}`}
+                onValueChange={(value) => {
+                    const [sortBy, sortOrder] = value.split("-")
+                    updateFilters({ sortBy, sortOrder })
+                }}
+            >
+                <SelectTrigger className="w-[180px] h-10 bg-white/5 border-white/10 text-white text-sm hover:bg-white/10 transition-all">
+                    <ArrowUpDown className="mr-2 h-4 w-4" />
+                    <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="score-desc">{ui.sortScoreDesc}</SelectItem>
+                    <SelectItem value="score-asc">{ui.sortScoreAsc}</SelectItem>
+                    <SelectItem value="lastActionAt-desc">{ui.sortLastActionDesc}</SelectItem>
+                    <SelectItem value="lastActionAt-asc">{ui.sortLastActionAsc}</SelectItem>
+                    <SelectItem value="createdAt-desc">{ui.sortCreatedDesc}</SelectItem>
+                    <SelectItem value="createdAt-asc">{ui.sortCreatedAsc}</SelectItem>
+                    <SelectItem value="temperature-asc">{ui.sortTempHotFirst}</SelectItem>
+                </SelectContent>
+            </Select>
+
+            {/* Right: Search (full width) */}
+            <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
+                <Input
+                    type="text"
+                    placeholder={ui.searchPlaceholder}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 h-10 bg-white/5 border-white/10 text-white placeholder:text-white/40 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                />
+            </div>
+        </div>
+    )
+}

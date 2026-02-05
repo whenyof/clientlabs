@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth"
 import { redirect } from "next/navigation"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import DashboardShell from "@/components/layout/DashboardShell"
 
 export default async function DashboardLayout({
   children,
@@ -31,5 +32,9 @@ export default async function DashboardLayout({
     redirect("/select-sector")
   }
 
-  return children
+  return (
+    <DashboardShell>
+      {children}
+    </DashboardShell>
+  )
 }

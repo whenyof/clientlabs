@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
 import type { LeadStatus, LeadTemp } from "@prisma/client"
+import { ensureUserExists } from "@/lib/ensure-user"
 
 /* ==================== SCORING & TEMPERATURE ==================== */
 
@@ -110,6 +111,7 @@ export async function changeLeadStatus(leadId: string, status: LeadStatus) {
     await recalculateLeadScore(leadId)
 
     revalidatePath("/dashboard/other/leads")
+    revalidatePath("/dashboard/other")
     return { success: true }
 }
 
@@ -138,6 +140,7 @@ export async function changeLeadTemperature(leadId: string, temperature: LeadTem
     await recalculateLeadScore(leadId)
 
     revalidatePath("/dashboard/other/leads")
+    revalidatePath("/dashboard/other")
     return { success: true }
 }
 
@@ -169,6 +172,7 @@ export async function addLeadTag(leadId: string, tag: string) {
     })
 
     revalidatePath("/dashboard/other/leads")
+    revalidatePath("/dashboard/other")
     return { success: true }
 }
 
@@ -197,6 +201,7 @@ export async function removeLeadTag(leadId: string, tag: string) {
     })
 
     revalidatePath("/dashboard/other/leads")
+    revalidatePath("/dashboard/other")
     return { success: true }
 }
 
@@ -237,6 +242,7 @@ export async function setLeadReminder(
     })
 
     revalidatePath("/dashboard/other/leads")
+    revalidatePath("/dashboard/other")
     return { success: true }
 }
 
@@ -280,6 +286,7 @@ export async function completeLeadReminder(leadId: string) {
     })
 
     revalidatePath("/dashboard/other/leads")
+    revalidatePath("/dashboard/other")
     return { success: true }
 }
 
@@ -324,6 +331,7 @@ export async function addLeadNote(leadId: string, text: string) {
 
     await recalculateLeadScore(leadId)
     revalidatePath("/dashboard/other/leads")
+    revalidatePath("/dashboard/other")
 
     return { success: true }
 }
@@ -360,6 +368,7 @@ export async function registerLeadCall(leadId: string, notes: string) {
     await recalculateLeadScore(leadId)
 
     revalidatePath("/dashboard/other/leads")
+    revalidatePath("/dashboard/other")
     return { success: true }
 }
 
@@ -396,6 +405,7 @@ export async function markLeadLost(leadId: string, reason: string) {
     })
 
     revalidatePath("/dashboard/other/leads")
+    revalidatePath("/dashboard/other")
     return { success: true }
 }
 
@@ -403,6 +413,8 @@ export async function markLeadLost(leadId: string, reason: string) {
 export async function convertLeadToClient(leadId: string) {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) throw new Error("Unauthorized")
+
+    await ensureUserExists(session.user as any)
 
     // Validate lead exists and belongs to user
     const lead = await prisma.lead.findUnique({
@@ -470,7 +482,9 @@ export async function convertLeadToClient(leadId: string) {
     })
 
     revalidatePath("/dashboard/other/leads")
-    revalidatePath("/dashboard/other/clients")
+    revalidatePath("/dashboard/other")
+    revalidatePath("/dashboard/clients")
+    revalidatePath("/dashboard/other")
     return { success: true, clientId: client.id, clientCreated }
 }
 
@@ -488,6 +502,8 @@ export async function createLead(data: {
 }) {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) throw new Error("Unauthorized")
+
+    await ensureUserExists(session.user as any)
 
     // Validate required fields
     if (!data.name || data.name.trim().length === 0) {
@@ -509,6 +525,7 @@ export async function createLead(data: {
     })
 
     revalidatePath("/dashboard/other/leads")
+    revalidatePath("/dashboard/other")
     return { success: true, leadId: lead.id }
 }
 
@@ -527,6 +544,8 @@ export async function importLeads(
     if (!session?.user?.id) {
         return { success: false, error: "Unauthorized", created: 0, skipped: 0, invalid: 0 }
     }
+
+    await ensureUserExists(session.user as any)
 
     // Rate limiting: max 1000 leads per import
     if (leads.length > 1000) {
@@ -612,6 +631,7 @@ export async function importLeads(
     }
 
     revalidatePath("/dashboard/other/leads")
+    revalidatePath("/dashboard/other")
     return { success: true, created, skipped, invalid }
 }
 
@@ -652,6 +672,7 @@ export async function dismissAISuggestion(leadId: string) {
     })
 
     revalidatePath("/dashboard/other/leads")
+    revalidatePath("/dashboard/other")
     return { success: true }
 }
 
@@ -717,5 +738,6 @@ export async function deleteLead(leadId: string) {
     })
 
     revalidatePath("/dashboard/other/leads")
+    revalidatePath("/dashboard/other")
     return { success: true }
 }

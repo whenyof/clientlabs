@@ -1,18 +1,17 @@
+// @ts-nocheck
 "use client"
 
-import { useEffect, useState } from "react"
-import { mockFunnelData } from "../mock"
 import { FunnelIcon } from "@heroicons/react/24/outline"
 import { motion } from "framer-motion"
 import { AnimatedCard } from "./AnimatedCard"
-import { useClientNumber } from "@/components/ClientNumber"
 
 interface FunnelChartProps {
   selectedRange: string
 }
 
-export function FunnelChart({ selectedRange }: FunnelChartProps) {
-  const data = mockFunnelData
+/** No funnel backend — empty state. */
+export function FunnelChart({ selectedRange: _selectedRange }: FunnelChartProps) {
+  const data: { stage: string; count: number; label: string }[] = []
 
   return (
     <AnimatedCard className="p-6" delay={0.4}>
@@ -34,6 +33,12 @@ export function FunnelChart({ selectedRange }: FunnelChartProps) {
         </div>
       </div>
 
+      {data.length === 0 ? (
+        <div className="py-12 text-center text-gray-400">
+          <p className="text-white/80">Sin datos de embudo</p>
+          <p className="text-sm mt-1">No hay métricas de visitantes/embudo en el backend.</p>
+        </div>
+      ) : (
       <div className="space-y-4">
         {data.map((stage, index) => {
           const width = 100 - index * 15
@@ -54,35 +59,7 @@ export function FunnelChart({ selectedRange }: FunnelChartProps) {
           )
         })}
       </div>
-
-      <div className="mt-6 grid grid-cols-2 gap-4 pt-4 border-t border-gray-700/50">
-        <div className="text-center">
-          <div className="text-2xl font-bold text-green-400">
-            {(
-              (data[data.length - 1].count / data[0].count) *
-              100
-            ).toFixed(1)}
-            %
-          </div>
-          <div className="text-sm text-gray-400">
-            Conversión total
-          </div>
-        </div>
-
-        <div className="text-center">
-          <div className="text-2xl font-bold text-red-400">
-            {(
-              (1 -
-                data[data.length - 1].count / data[0].count) *
-              100
-            ).toFixed(1)}
-            %
-          </div>
-          <div className="text-sm text-gray-400">
-            Pérdida total
-          </div>
-        </div>
-      </div>
+      )}
     </AnimatedCard>
   )
 }

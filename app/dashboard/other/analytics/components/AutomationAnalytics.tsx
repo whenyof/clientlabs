@@ -1,6 +1,7 @@
 "use client"
 
-import { mockSectionAnalytics, formatPercentage } from "../mock"
+const emptySection = { kpis: { primary: 0, secondary: 0, trend: 0 }, chart: [], table: [] }
+const formatPercentage = (n: number) => n.toFixed(1) + '%'
 import { CogIcon, PlayIcon, CheckCircleIcon, CpuChipIcon } from "@heroicons/react/24/outline"
 
 interface AutomationAnalyticsProps {
@@ -8,7 +9,7 @@ interface AutomationAnalyticsProps {
 }
 
 export function AutomationAnalytics({ selectedRange }: AutomationAnalyticsProps) {
-  const data = mockSectionAnalytics.automatizaciones
+  const data = emptySection as any
 
   const kpis = [
     {

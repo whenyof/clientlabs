@@ -9,7 +9,7 @@ import {
   CpuChipIcon,
   EnvelopeIcon,
   CalendarIcon,
-  SwitchHorizontalIcon,
+  ArrowsRightLeftIcon,
   AdjustmentsHorizontalIcon
 } from "@heroicons/react/24/outline"
 

@@ -154,7 +154,8 @@ export const mockTransactions: Omit<Transaction, 'id' | 'userId' | 'createdAt' |
     paymentMethod: 'Tarjeta de crédito',
     status: 'COMPLETED',
     origin: 'AUTOMATIC',
-    date: new Date('2025-01-14')
+    date: new Date('2025-01-14'),
+    clientId: null
   },
   {
     type: 'EXPENSE',
@@ -164,7 +165,8 @@ export const mockTransactions: Omit<Transaction, 'id' | 'userId' | 'createdAt' |
     paymentMethod: 'Domiciliación',
     status: 'COMPLETED',
     origin: 'AUTOMATIC',
-    date: new Date('2025-01-13')
+    date: new Date('2025-01-13'),
+    clientId: null
   },
   {
     type: 'EXPENSE',
@@ -174,7 +176,8 @@ export const mockTransactions: Omit<Transaction, 'id' | 'userId' | 'createdAt' |
     paymentMethod: 'Tarjeta de débito',
     status: 'COMPLETED',
     origin: 'AUTOMATIC',
-    date: new Date('2025-01-11')
+    date: new Date('2025-01-11'),
+    clientId: null
   },
   {
     type: 'EXPENSE',
@@ -184,7 +187,8 @@ export const mockTransactions: Omit<Transaction, 'id' | 'userId' | 'createdAt' |
     paymentMethod: 'Efectivo',
     status: 'COMPLETED',
     origin: 'MANUAL',
-    date: new Date('2025-01-09')
+    date: new Date('2025-01-09'),
+    clientId: null
   },
   {
     type: 'EXPENSE',
@@ -194,7 +198,8 @@ export const mockTransactions: Omit<Transaction, 'id' | 'userId' | 'createdAt' |
     paymentMethod: 'PayPal',
     status: 'PENDING',
     origin: 'AUTOMATIC',
-    date: new Date('2025-01-07')
+    date: new Date('2025-01-07'),
+    clientId: null
   },
   {
     type: 'EXPENSE',
@@ -323,36 +328,41 @@ export const mockFinancialGoals: Omit<FinancialGoal, 'id' | 'userId' | 'createdA
 ]
 
 // Finance alerts
-export const mockFinanceAlerts: Omit<FinanceAlert, 'id' | 'userId' | 'createdAt'>[] = [
+export const mockFinanceAlerts: Omit<FinanceAlert, 'id' | 'userId'>[] = [
   {
     type: 'BUDGET_EXCEEDED',
     message: 'Presupuesto de Marketing excedido en 45%. Considera reducir gastos o aumentar límite.',
     severity: 'HIGH',
-    read: false
+    read: false,
+    createdAt: new Date()
   },
   {
     type: 'HIGH_EXPENSE',
     message: 'Gasto inusual detectado: €2,800 en nóminas. Revisa si es correcto.',
     severity: 'MEDIUM',
-    read: false
+    read: false,
+    createdAt: new Date()
   },
   {
     type: 'CASHFLOW_RISK',
     message: 'Proyección de flujo de caja negativo en 15 días. Considera acelerar cobros pendientes.',
     severity: 'CRITICAL',
-    read: false
+    read: false,
+    createdAt: new Date()
   },
   {
     type: 'RECURRING_PAYMENT',
     message: 'Pago recurrente de AWS vence en 3 días. Saldo disponible: €4,250.',
     severity: 'LOW',
-    read: false
+    read: false,
+    createdAt: new Date()
   },
   {
     type: 'GOAL_DEADLINE',
     message: 'Objetivo "Reserva de emergencia" vence en 30 días. Progreso: 57%.',
     severity: 'MEDIUM',
-    read: false
+    read: false,
+    createdAt: new Date()
   }
 ]
 

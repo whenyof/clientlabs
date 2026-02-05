@@ -1,6 +1,5 @@
 "use client"
 
-import { mockAiInsights } from "../mock"
 import {
   LightBulbIcon,
   ExclamationTriangleIcon,
@@ -9,6 +8,8 @@ import {
 } from "@heroicons/react/24/outline"
 import { motion } from "framer-motion"
 import { AnimatedCard } from "./AnimatedCard"
+
+const emptyInsights: { id: string; type: string; impact: string; confidence: number; title: string; description: string }[] = []
 
 export function AiInsights() {
   const getInsightIcon = (type: string) => {
@@ -79,7 +80,12 @@ export function AiInsights() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {mockAiInsights.map((insight, index) => {
+          {emptyInsights.length === 0 ? (
+            <div className="col-span-full py-8 text-center text-gray-400">
+              <p className="text-white/80">Sin insights de IA</p>
+              <p className="text-sm mt-1">No hay backend de insights para analytics.</p>
+            </div>
+          ) : emptyInsights.map((insight, index) => {
             const Icon = getInsightIcon(insight.type)
             const impactBadge = getImpactBadge(insight.impact)
 
@@ -117,7 +123,7 @@ export function AiInsights() {
                       whileHover={{ rotate: 10, scale: 1.1 }}
                       transition={{ type: "spring", stiffness: 400 }}
                     >
-                      <span className="text-lg">{insight.icon}</span>
+                      <span className="text-lg">{(insight as any).icon ?? "💡"}</span>
                     </motion.div>
                     <motion.span
                       className={`px-2 py-1 rounded-full text-xs font-medium border ${impactBadge.color}`}
@@ -179,10 +185,10 @@ export function AiInsights() {
           transition={{ delay: 1.0, duration: 0.5 }}
         >
           {[
-            { label: "Prioridad alta", value: mockAiInsights.filter(i => i.impact === 'high').length, color: "text-red-400" },
-            { label: "Prioridad media", value: mockAiInsights.filter(i => i.impact === 'medium').length, color: "text-yellow-400" },
-            { label: "Oportunidades", value: mockAiInsights.filter(i => i.impact === 'low').length, color: "text-blue-400" },
-            { label: "Precisión IA", value: "94%", color: "text-green-400" }
+            { label: "Prioridad alta", value: emptyInsights.filter(i => i.impact === 'high').length, color: "text-red-400" },
+            { label: "Prioridad media", value: emptyInsights.filter(i => i.impact === 'medium').length, color: "text-yellow-400" },
+            { label: "Oportunidades", value: emptyInsights.filter(i => i.impact === 'low').length, color: "text-blue-400" },
+            { label: "Precisión IA", value: "—", color: "text-green-400" }
           ].map((stat, index) => (
             <motion.div
               key={index}

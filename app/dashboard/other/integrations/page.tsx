@@ -2,7 +2,9 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
+import { useSectorConfig } from "@/hooks/useSectorConfig"
 import { DashboardContainer } from "@/components/layout/DashboardContainer"
+import { useIntegrations } from "./hooks/useIntegrations"
 import { IntegrationHero } from "./components/IntegrationHero"
 import { IntegrationCategories } from "./components/IntegrationCategories"
 import { IntegrationGrid } from "./components/IntegrationGrid"
@@ -12,16 +14,19 @@ import { AIRecommendations } from "./components/AIRecommendations"
 import { IntegrationModal } from "./components/IntegrationModal"
 
 export default function IntegrationsPage() {
+  const { labels } = useSectorConfig()
+  const t = labels.integrations.tabs
+  const { integrations } = useIntegrations()
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [activeTab, setActiveTab] = useState<'overview' | 'logs' | 'workflows' | 'ai'>('overview')
   const [selectedIntegration, setSelectedIntegration] = useState<any>(null)
   const [showModal, setShowModal] = useState(false)
 
   const tabs = [
-    { id: 'overview' as const, label: 'Vista General', icon: '🔗' },
-    { id: 'logs' as const, label: 'Logs', icon: '📋' },
-    { id: 'workflows' as const, label: 'Automatizaciones', icon: '⚡' },
-    { id: 'ai' as const, label: 'IA', icon: '🤖' }
+    { id: 'overview' as const, label: t.overview, icon: '🔗' },
+    { id: 'logs' as const, label: t.logs, icon: '📋' },
+    { id: 'workflows' as const, label: t.workflows, icon: '⚡' },
+    { id: 'ai' as const, label: t.ai, icon: '🤖' }
   ]
 
   const handleIntegrationAction = (integration: any, action: string) => {
@@ -41,6 +46,7 @@ export default function IntegrationsPage() {
             <IntegrationGrid
               selectedCategory={selectedCategory}
               onIntegrationAction={handleIntegrationAction}
+              integrations={integrations}
             />
           </div>
         )
@@ -58,9 +64,9 @@ export default function IntegrationsPage() {
   return (
     <DashboardContainer>
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-white">Integraciones</h1>
+        <h1 className="text-2xl font-semibold text-white">{labels.integrations.title}</h1>
         <p className="text-sm text-white/60">
-          Conecta tus herramientas favoritas y automatiza procesos
+          {labels.integrations.pageSubtitle}
         </p>
       </div>
 

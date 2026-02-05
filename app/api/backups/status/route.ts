@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
       if (fs.existsSync(backupDir)) {
         const files = fs.readdirSync(backupDir)
         const zipFiles = files
-          .filter(f => f.endsWith('.zip'))
+          .filter((f: string) => f.endsWith('.zip'))
           .sort()
           .reverse()
           .slice(0, 10) // Last 10
@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get cloud backups
-    let cloudBackups = []
+    let cloudBackups: { name: string; size: number }[] = []
     let cloudError = null
     try {
       const { stdout } = await execAsync('rclone lsf gdrive-secure:backups/code/ --format "pst"', {
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
 
       const lines = stdout.split('\n').filter(line => line.trim())
       cloudBackups = lines
-        .filter(line => line.includes('.zip'))
+        .filter((line: string) => line.includes('.zip'))
         .map(line => {
           const parts = line.split(' ')
           const size = parseInt(parts[0]) || 0
@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
         })
         .sort((a, b) => b.name.localeCompare(a.name))
         .slice(0, 10) // Last 10
-    } catch (error) {
+    } catch (error: any) {
       cloudError = error.message
       console.error('Error reading cloud backups:', error)
     }

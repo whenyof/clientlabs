@@ -3,8 +3,8 @@
 import { useState } from "react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, AreaChart, Area } from 'recharts'
 import { motion } from "framer-motion"
-import { mockFinanceAnalytics } from "../mock"
 import { formatCurrency } from "../lib/formatters"
+import { useFinanceData } from "../context/FinanceDataContext"
 import {
   ChartBarIcon,
   Bars3Icon,
@@ -12,8 +12,10 @@ import {
 } from "@heroicons/react/24/outline"
 
 export function MainChart() {
+  const { analytics, loading } = useFinanceData()
   const [chartType, setChartType] = useState<'line' | 'bar' | 'area'>('line')
   const [granularity, setGranularity] = useState<'daily' | 'weekly' | 'monthly'>('monthly')
+  const chartData = analytics?.monthlyTrend ?? []
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -39,7 +41,7 @@ export function MainChart() {
 
   const renderChart = () => {
     const chartProps = {
-      data: mockFinanceAnalytics.monthlyTrend,
+      data: chartData,
       margin: { top: 20, right: 30, left: 20, bottom: 20 }
     }
 
@@ -207,9 +209,18 @@ export function MainChart() {
       </div>
 
       <div className="h-80">
-        <ResponsiveContainer width="100%" height="100%">
-          {renderChart()}
-        </ResponsiveContainer>
+        {loading ? (
+          <div className="flex items-center justify-center h-full text-gray-400">Cargando…</div>
+        ) : chartData.length === 0 ? (
+          <div className="flex items-center justify-center h-full text-gray-400">
+            <p className="text-white/80">Sin datos de evolución</p>
+            <p className="text-sm mt-1">Añade transacciones para ver el gráfico.</p>
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            {renderChart()}
+          </ResponsiveContainer>
+        )}
       </div>
 
       {/* Legend */}

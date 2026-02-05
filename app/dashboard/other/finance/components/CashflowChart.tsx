@@ -20,7 +20,7 @@ export function CashflowChart({
     .sort((a, b) => +new Date(a.date) - +new Date(b.date))
     .map((tx) => ({
       date: tx.date,
-      value: tx.type === "income" ? tx.amount : -tx.amount,
+      value: tx.type === "INCOME" ? tx.amount : -tx.amount,
     }))
 
   return (

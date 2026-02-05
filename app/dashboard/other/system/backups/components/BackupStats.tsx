@@ -38,11 +38,11 @@ export function BackupStats({ status }: BackupStatsProps) {
   const getCronIcon = (status: string) => {
     switch (status) {
       case 'active':
-        return <CheckCircleIcon className="w-5 h-5 text-green-400" />
+        return CheckCircleIcon
       case 'inactive':
-        return <XCircleIcon className="w-5 h-5 text-red-400" />
+        return XCircleIcon
       default:
-        return <ExclamationTriangleIcon className="w-5 h-5 text-yellow-400" />
+        return ExclamationTriangleIcon
     }
   }
 
@@ -96,7 +96,7 @@ export function BackupStats({ status }: BackupStatsProps) {
       transition={{ duration: 0.5 }}
     >
       {stats.map((stat, index) => {
-        const Icon = stat.icon
+        const IconComponent = stat.icon as any
 
         return (
           <motion.div
@@ -109,7 +109,7 @@ export function BackupStats({ status }: BackupStatsProps) {
           >
             <div className="flex items-center justify-between mb-4">
               <div className={`p-3 rounded-lg ${stat.color}`}>
-                <Icon className="w-5 h-5" />
+                <IconComponent className="w-5 h-5" />
               </div>
             </div>
 

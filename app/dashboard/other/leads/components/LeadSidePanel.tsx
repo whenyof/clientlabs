@@ -10,6 +10,10 @@ import { addLeadNote, markLeadLost, convertLeadToClient, changeLeadTemperature, 
 import { useRouter } from "next/navigation"
 import type { LeadTemp } from "@prisma/client"
 import { toast } from "sonner"
+import { TaskDialog } from "@/components/tasks/TaskDialog"
+import { TaskCard, type Task } from "@/components/tasks/TaskCard"
+import { getTasks } from "@/app/dashboard/tasks/actions"
+import { CheckSquare } from "lucide-react"
 import { useEffect } from "react"
 import {
     Dialog,
@@ -44,6 +48,8 @@ type LeadSidePanelProps = {
 export function LeadSidePanel({ lead, isOpen, onClose }: LeadSidePanelProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
+    const [tasks, setTasks] = useState<Task[]>([])
+    const [taskDialog, setTaskDialog] = useState(false)
     const [note, setNote] = useState("")
     const [lostReason, setLostReason] = useState("")
     const [lostDialog, setLostDialog] = useState(false)
@@ -60,7 +66,11 @@ export function LeadSidePanel({ lead, isOpen, onClose }: LeadSidePanelProps) {
         } else {
             setNote("")
         }
-    }, [lead])
+
+        if (lead && isOpen) {
+            getTasks({ leadId: lead.id }).then(setTasks)
+        }
+    }, [lead, isOpen])
 
     if (!lead) return null
 
@@ -213,13 +223,28 @@ export function LeadSidePanel({ lead, isOpen, onClose }: LeadSidePanelProps) {
 
     return (
         <>
+            <TaskDialog
+                open={taskDialog}
+                onOpenChange={(open) => {
+                    setTaskDialog(open)
+                    if (!open && lead) {
+                        getTasks({ leadId: lead.id }).then(setTasks)
+                    }
+                }}
+                leadId={lead.id}
+                onSuccess={() => {
+                    if (lead) getTasks({ leadId: lead.id }).then(setTasks)
+                }}
+            />
             {/* Overlay */}
-            {isOpen && (
-                <div
-                    className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-200"
-                    onClick={onClose}
-                />
-            )}
+            {
+                isOpen && (
+                    <div
+                        className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-200"
+                        onClick={onClose}
+                    />
+                )
+            }
 
             {/* Side Panel */}
             <div
@@ -266,19 +291,13 @@ export function LeadSidePanel({ lead, isOpen, onClose }: LeadSidePanelProps) {
                             const handleApplyAction = () => {
                                 switch (suggestion.action) {
                                     case "email":
-                                        handleSendEmail()
+                                        handleEmailClick()
                                         break
                                     case "call":
                                         toast.info("Registra la llamada en las notas")
                                         break
-                                    case "reminder":
-                                        setReminderDialog(true)
-                                        break
                                     case "convert":
                                         setConvertDialog(true)
-                                        break
-                                    case "nurture":
-                                        toast.info("Añade tags de nurturing o crea recordatorio")
                                         break
                                     case "follow_up":
                                         toast.info("Registra el seguimiento en las notas")
@@ -341,7 +360,38 @@ export function LeadSidePanel({ lead, isOpen, onClose }: LeadSidePanelProps) {
                                     </Button>
                                 </div>
                             </div>
-                        )}                       {/* Reminder Section */}
+                        )}
+
+                        {/* Tasks Section */}
+                        <div>
+                            <div className="flex items-center justify-between mb-3">
+                                <h3 className="text-sm font-medium text-white/80 flex items-center gap-2">
+                                    <CheckSquare className="h-4 w-4" />
+                                    Tareas
+                                </h3>
+                                <Button
+                                    onClick={() => setTaskDialog(true)}
+                                    size="sm"
+                                    className="h-7 text-xs bg-blue-600 hover:bg-blue-700"
+                                >
+                                    + Añadir
+                                </Button>
+                            </div>
+
+                            <div className="space-y-2">
+                                {tasks.length > 0 ? (
+                                    tasks.map(task => (
+                                        <TaskCard key={task.id} task={task} />
+                                    ))
+                                ) : (
+                                    <p className="text-sm text-white/40 text-center py-4 border border-white/5 rounded-lg bg-white/5">
+                                        No hay tareas pendientes
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Reminder Section */}
                         <div>
                             <h3 className="text-sm font-medium text-white/80 mb-3 flex items-center gap-2">
                                 <Bell className="h-4 w-4" />
@@ -712,7 +762,11 @@ export function LeadSidePanel({ lead, isOpen, onClose }: LeadSidePanelProps) {
             <ReminderDialog
                 open={reminderDialog}
                 onClose={() => setReminderDialog(false)}
-                onSave={handleSetReminder}
+                onSave={(date, note) => handleSetReminder({
+                    type: "custom",
+                    date: date.toISOString(),
+                    note
+                })}
                 loading={loading}
             />
 

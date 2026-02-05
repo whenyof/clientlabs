@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
 import { getServerSession } from 'next-auth'
+import { prisma } from '@/lib/prisma'
 import { calculateNetProfit, calculateGrowthRate, analyzeTransactionPatterns } from '../lib/calculations'
 import { predictMonthlyRevenue, predictMonthlyExpenses, predictCashFlow } from '../lib/predictors'
-
-const prisma = new PrismaClient()
 
 export async function GET(request: NextRequest) {
   try {
@@ -190,7 +188,7 @@ export async function GET(request: NextRequest) {
     )
 
     const predictedExpenses = predictMonthlyExpenses(
-      monthlyTrend.map(item => ({ month: item.month, revenue: item.expenses })),
+      monthlyTrend.map(item => ({ month: item.month, expenses: item.expenses })),
       fixedExpenses
     )
 
@@ -232,9 +230,17 @@ export async function GET(request: NextRequest) {
       take: 5
     })
 
+    // Get financial goals
+    const financialGoals = await prisma.financialGoal.findMany({
+      where: { userId: session.user.id },
+      orderBy: { deadline: 'asc' }
+    })
+
     return NextResponse.json({
       success: true,
       period,
+      fixedExpenses,
+      financialGoals,
       kpis: {
         totalIncome: income,
         totalExpenses: expenses,

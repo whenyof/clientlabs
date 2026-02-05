@@ -7,7 +7,7 @@ import { handleWebhook } from '@/app/dashboard/other/settings/lib/stripe'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.text()
-    const sig = headers().get('stripe-signature')
+    const sig = (await headers()).get('stripe-signature')
 
     if (!sig) {
       return NextResponse.json(

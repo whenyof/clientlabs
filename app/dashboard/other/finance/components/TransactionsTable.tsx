@@ -2,30 +2,30 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { mockTransactions, formatCurrency, getTransactionTypeColor, getTransactionStatusColor } from "../mock"
+import { formatCurrency, getAmountColor, getStatusColor } from "../lib/formatters"
+import { useFinanceData } from "../context/FinanceDataContext"
 import {
   MagnifyingGlassIcon,
-  FunnelIcon,
   ArrowUpIcon,
   ArrowDownIcon,
   PencilIcon,
   TrashIcon,
   DocumentDuplicateIcon,
-  PlusIcon
 } from "@heroicons/react/24/outline"
 
 export function TransactionsTable() {
+  const { transactions: transactionsRes, transactionsLoading } = useFinanceData()
+  const rawList = transactionsRes?.transactions ?? []
   const [searchTerm, setSearchTerm] = useState("")
   const [sortBy, setSortBy] = useState<'date' | 'amount' | 'concept'>('date')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [filterType, setFilterType] = useState<'all' | 'INCOME' | 'EXPENSE'>('all')
   const [filterStatus, setFilterStatus] = useState<'all' | 'PENDING' | 'COMPLETED'>('all')
 
-  // Filter and sort transactions
-  const filteredTransactions = mockTransactions.filter(transaction => {
+  const filteredTransactions = rawList.filter((transaction: { concept: string; category: string; type: string; status: string; Client?: { name: string } | null }) => {
     const matchesSearch = transaction.concept.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         transaction.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (transaction.Client?.name || '').toLowerCase().includes(searchTerm.toLowerCase())
+      transaction.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (transaction.Client?.name || '').toLowerCase().includes(searchTerm.toLowerCase())
 
     const matchesType = filterType === 'all' || transaction.type === filterType
     const matchesStatus = filterStatus === 'all' || transaction.status === filterStatus
@@ -33,9 +33,8 @@ export function TransactionsTable() {
     return matchesSearch && matchesType && matchesStatus
   })
 
-  const sortedTransactions = [...filteredTransactions].sort((a, b) => {
+  const sortedTransactions = [...filteredTransactions].sort((a: { date: string; amount: number; concept: string }, b: { date: string; amount: number; concept: string }) => {
     let comparison = 0
-
     switch (sortBy) {
       case 'date':
         comparison = new Date(a.date).getTime() - new Date(b.date).getTime()
@@ -47,7 +46,6 @@ export function TransactionsTable() {
         comparison = a.concept.localeCompare(b.concept)
         break
     }
-
     return sortOrder === 'asc' ? comparison : -comparison
   })
 
@@ -69,6 +67,14 @@ export function TransactionsTable() {
     return sortOrder === 'asc' ?
       <ArrowUpIcon className="w-4 h-4" /> :
       <ArrowDownIcon className="w-4 h-4" />
+  }
+
+  if (transactionsLoading) {
+    return (
+      <div className="rounded-2xl bg-gray-800/50 border border-gray-700/50 p-12 text-center text-gray-400">
+        Cargando transacciones…
+      </div>
+    )
   }
 
   return (
@@ -180,9 +186,16 @@ export function TransactionsTable() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-700/50">
-              {sortedTransactions.map((transaction, index) => (
+              {sortedTransactions.length === 0 ? (
+                <tr>
+                  <td colSpan={10} className="px-6 py-16 text-center text-gray-400">
+                    <p className="text-white/80">Sin transacciones</p>
+                    <p className="text-sm mt-1">Los movimientos aparecerán aquí cuando existan en la base de datos.</p>
+                  </td>
+                </tr>
+              ) : sortedTransactions.map((transaction: { id: string; date: string; type: string; concept: string; category: string; amount: number; paymentMethod: string; status: string; origin: string; Client?: { name: string } | null }, index: number) => (
                 <motion.tr
-                  key={index}
+                  key={transaction.id || index}
                   className="hover:bg-gray-700/30 transition-colors group"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -200,11 +213,10 @@ export function TransactionsTable() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      transaction.type === 'INCOME'
-                        ? 'bg-green-500/20 text-green-400'
-                        : 'bg-red-500/20 text-red-400'
-                    }`}>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${transaction.type === 'INCOME'
+                      ? 'bg-green-500/20 text-green-400'
+                      : 'bg-red-500/20 text-red-400'
+                      }`}>
                       {transaction.type === 'INCOME' ? 'Ingreso' : 'Gasto'}
                     </span>
                   </td>
@@ -222,7 +234,7 @@ export function TransactionsTable() {
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className={`text-lg font-bold ${getTransactionTypeColor(transaction.type)}`}>
+                    <div className={`text-lg font-bold ${getAmountColor(transaction.type === 'INCOME' ? transaction.amount : -transaction.amount)}`}>
                       {formatCurrency(transaction.amount)}
                     </div>
                   </td>
@@ -230,17 +242,16 @@ export function TransactionsTable() {
                     {transaction.paymentMethod}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTransactionStatusColor(transaction.status)}`}>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(transaction.status)}`}>
                       {transaction.status === 'COMPLETED' ? 'Completado' :
-                       transaction.status === 'PENDING' ? 'Pendiente' : 'Cancelado'}
+                        transaction.status === 'PENDING' ? 'Pendiente' : 'Cancelado'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      transaction.origin === 'AUTOMATIC'
-                        ? 'bg-blue-500/20 text-blue-400'
-                        : 'bg-gray-500/20 text-gray-400'
-                    }`}>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${transaction.origin === 'AUTOMATIC'
+                      ? 'bg-blue-500/20 text-blue-400'
+                      : 'bg-gray-500/20 text-gray-400'
+                      }`}>
                       {transaction.origin === 'AUTOMATIC' ? 'Automático' : 'Manual'}
                     </span>
                   </td>

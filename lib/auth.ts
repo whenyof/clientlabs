@@ -48,53 +48,77 @@ export const authOptions: NextAuthOptions = {
   ],
 
   callbacks: {
-    async jwt({ token, user }) {
-      let dbUser = null
-
-      // ✅ Persist user on first login (Google or Credentials)
-      if (user?.email) {
-        dbUser = await prisma.user.findUnique({
-          where: { email: user.email },
-        })
-
-        if (!dbUser) {
-          dbUser = await prisma.user.create({
-            data: {
-              email: user.email,
-              name: user.name || null,
-              image: user.image || null,
-              provider: "google",
-              role: "USER",
-              plan: "FREE",
-              onboardingCompleted: false,
-              selectedSector: null,
-            },
+    async jwt({ token, user, trigger, session }) {
+      // 🚀 HARDENING: Manejo de errores de base de datos para evitar loops
+      try {
+        // En el primer login, persistimos o recuperamos el usuario
+        if (user) {
+          const dbUser = await prisma.user.findUnique({
+            where: { email: user.email! },
+            select: {
+              id: true,
+              role: true,
+              plan: true,
+              onboardingCompleted: true,
+              selectedSector: true,
+              name: true,
+              email: true,
+              image: true,
+            }
           })
+
+          if (!dbUser) {
+            // Caso especial: Creación de usuario (Google login nuevo)
+            const newUser = await prisma.user.create({
+              data: {
+                email: user.email!,
+                name: user.name || null,
+                image: user.image || null,
+                role: "USER",
+                plan: "FREE",
+                onboardingCompleted: false,
+              },
+            })
+            token.userId = newUser.id
+            token.role = newUser.role
+            token.onboardingCompleted = false
+          } else {
+            token.userId = dbUser.id
+            token.role = dbUser.role
+            token.plan = dbUser.plan
+            token.onboardingCompleted = dbUser.onboardingCompleted
+            token.selectedSector = dbUser.selectedSector
+          }
         }
-      } else if (token.sub) {
-        dbUser = await prisma.user.findUnique({
-          where: { id: token.sub },
-        })
+
+        // ✅ OPTIMIZACIÓN: Solo volver a consultar la DB si faltan datos críticos
+        // o si se dispara una actualización manual (update session)
+        if (!token.userId || trigger === "update") {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: token.sub },
+            select: {
+              id: true,
+              role: true,
+              plan: true,
+              onboardingCompleted: true,
+              selectedSector: true,
+            }
+          })
+          if (dbUser) {
+            token.userId = dbUser.id
+            token.role = dbUser.role
+            token.plan = dbUser.plan
+            token.onboardingCompleted = dbUser.onboardingCompleted
+            token.selectedSector = dbUser.selectedSector
+          }
+        }
+
+        return token
+      } catch (error) {
+        console.error("❌ Auth JWT Callback Error:", error)
+        // Devolvemos el token actual para no romper la sesión si la DB falla temporalmente
+        return token
       }
-
-      if (!dbUser) {
-        // User doesn't exist in DB - invalidate token
-        console.error(`User ${token.sub ?? "unknown"} not found in database`)
-        return { ...token, error: "UserNotFound" }
-      }
-
-      // ✅ Inject DB-backed data into token
-      token.sub = dbUser.id
-      token.userId = dbUser.id
-      token.role = dbUser.role
-      token.plan = dbUser.plan
-      token.onboardingCompleted = dbUser.onboardingCompleted
-      token.selectedSector = dbUser.selectedSector
-      token.name = dbUser.name
-      token.email = dbUser.email
-      token.picture = dbUser.image
-
-      return token
     },
 
     async session({ session, token }) {

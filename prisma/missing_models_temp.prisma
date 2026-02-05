@@ -1,0 +1,111 @@
+
+model ProviderPayment {
+  id          String   @id @default(cuid())
+  providerId  String
+  userId      String
+  
+  // Link to Order (New Architecture)
+  orderId     String?  @unique
+  order       ProviderOrder? @relation(fields: [orderId], references: [id])
+  
+  amount      Float
+  paymentDate DateTime
+  concept     String?
+  notes       String?
+  method      String?
+
+  createdAt   DateTime @default(now())
+  Provider    Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  User        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Timeline relation (reverse access)
+  timelineEvents ProviderTimelineEvent[]
+
+  @@index([providerId])
+  @@index([userId])
+  @@index([paymentDate])
+}
+
+model ProviderTask {
+  id          String       @id @default(cuid())
+  providerId  String
+  userId      String
+  title       String
+  description String?
+  status      TaskStatus   @default(PENDING)
+  priority    TaskPriority @default(MEDIUM)
+  dueDate     DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  Provider    Provider     @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  User        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Timeline relation
+  timelineEvents ProviderTimelineEvent[]
+
+  @@index([providerId])
+  @@index([userId])
+  @@index([status])
+  @@index([dueDate])
+}
+
+model ProviderNote {
+  id         String   @id @default(cuid())
+  providerId String
+  userId     String
+  content    String
+  createdAt  DateTime @default(now())
+  Provider   Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Timeline relation (reverse access)
+  timelineEvents ProviderTimelineEvent[]
+
+  @@index([providerId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model ProviderContactLog {
+  id         String   @id @default(cuid())
+  providerId String
+  userId     String
+  contactType ProviderContactType
+  subject    String?
+  notes      String?
+  createdAt  DateTime @default(now())
+
+  Provider   Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([providerId])
+  @@index([userId])
+}
+
+model Service {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  createdAt DateTime @default(now())
+  
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  providers Provider[]
+
+  @@unique([userId, name])
+  @@index([userId])
+}
+
+enum ProviderContactType {
+  EMAIL
+  CALL
+  REMINDER
+  CALENDAR
+  EXTERNAL_LINK
+}
+
+enum ProviderFileCategory {
+  INVOICE
+  ORDER
+  CONTRACT
+  OTHER
+}

@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { getChartDataForRange, formatCurrency } from "../mock"
 import {
   ChartBarIcon,
   ChartPieIcon,
@@ -16,25 +15,19 @@ interface MainChartProps {
 
 type Granularity = 'day' | 'week' | 'month'
 
-export function MainChart({ selectedRange }: MainChartProps) {
+/** No analytics backend — empty chart. */
+export function MainChart({ selectedRange: _selectedRange }: MainChartProps) {
   const [granularity, setGranularity] = useState<Granularity>('day')
   const [viewMode, setViewMode] = useState<'combined' | 'revenue' | 'leads'>('combined')
   const [isLoading, setIsLoading] = useState(false)
 
-  const data = getChartDataForRange(selectedRange)
-
-  // Calcular métricas para el período
-  const totalRevenue = data.reduce((sum, item) => sum + item.revenue, 0)
-  const totalLeads = data.reduce((sum, item) => sum + item.leads, 0)
-  const avgConversion = data.length > 0 ? (totalLeads / data.length).toFixed(1) : '0'
-
-  // Preparar datos para Recharts
-  const chartData = data.slice(-10).map((point, index) => ({
+  const data: { date: string; revenue: number; leads: number }[] = []
+  const totalRevenue = 0
+  const totalLeads = 0
+  const avgConversion = '0'
+  const chartData = data.slice(-10).map((point) => ({
     ...point,
-    date: new Date(point.date).toLocaleDateString('es-ES', {
-      month: 'short',
-      day: 'numeric'
-    })
+    date: new Date(point.date).toLocaleDateString('es-ES', { month: 'short', day: 'numeric' })
   }))
 
   const handleGranularityChange = async (newGranularity: Granularity) => {
@@ -156,7 +149,7 @@ export function MainChart({ selectedRange }: MainChartProps) {
           transition={{ type: "spring", stiffness: 300 }}
         >
           <div className="text-2xl font-bold text-green-400 mb-1">
-            {formatCurrency(totalRevenue)}
+            €{totalRevenue.toLocaleString('es-ES')}
           </div>
           <div className="text-sm text-gray-400">Ingresos totales</div>
         </motion.div>
@@ -189,6 +182,12 @@ export function MainChart({ selectedRange }: MainChartProps) {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.4, duration: 0.5 }}
       >
+        {chartData.length === 0 ? (
+          <div className="flex items-center justify-center h-full text-gray-400">
+            <p className="text-white/80">Sin datos de rendimiento</p>
+            <p className="text-sm mt-1">No hay backend de analytics para este gráfico.</p>
+          </div>
+        ) : (
         <ResponsiveContainer width="100%" height="100%">
           {viewMode === 'combined' ? (
             <AreaChart data={chartData}>
@@ -274,6 +273,7 @@ export function MainChart({ selectedRange }: MainChartProps) {
             </BarChart>
           )}
         </ResponsiveContainer>
+        )}
 
         {/* Loading overlay */}
         {isLoading && (

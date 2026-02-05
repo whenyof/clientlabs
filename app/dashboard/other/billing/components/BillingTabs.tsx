@@ -1,7 +1,5 @@
 "use client"
 
-import { mockInvoices } from "../mock"
-
 interface BillingTabsProps {
   selectedTab: string
   onTabChange: (tab: string) => void
@@ -17,11 +15,9 @@ const tabs = [
   { id: "cancelled", label: "Canceladas", status: "cancelled" }
 ]
 
+/** No Invoice model in DB — tab counts are 0. */
 export function BillingTabs({ selectedTab, onTabChange }: BillingTabsProps) {
-  const getTabCount = (status: string | null) => {
-    if (status === null) return mockInvoices.length
-    return mockInvoices.filter(invoice => invoice.status === status).length
-  }
+  const getTabCount = (_status: string | null) => 0
 
   return (
     <div className="flex flex-wrap gap-2 p-1 bg-gray-800/50 rounded-xl backdrop-blur-sm border border-gray-700/50">

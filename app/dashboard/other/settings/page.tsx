@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
+import { useSectorConfig } from "@/hooks/useSectorConfig"
 import { DashboardContainer } from "@/components/layout/DashboardContainer"
 import { ProfileForm } from "./components/ProfileForm"
 import { SecuritySettings } from "./components/SecuritySettings"
@@ -28,20 +29,22 @@ import {
 } from "@heroicons/react/24/outline"
 
 export default function SettingsPage() {
+  const { labels } = useSectorConfig()
+  const s = labels.settings
   const [activeSection, setActiveSection] = useState('profile')
 
   const sections = [
-    { id: 'profile', label: 'Perfil', icon: UserIcon, component: ProfileForm },
-    { id: 'security', label: 'Seguridad', icon: ShieldCheckIcon, component: SecuritySettings },
-    { id: 'company', label: 'Empresa', icon: BuildingOfficeIcon, component: CompanySettings },
-    { id: 'notifications', label: 'Notificaciones', icon: BellIcon, component: NotificationSettings },
-    { id: 'team', label: 'Equipo', icon: UsersIcon, component: TeamMembers },
-    { id: 'permissions', label: 'Permisos', icon: KeyIcon, component: PermissionsPanel, pro: true },
-    { id: 'plans', label: 'Planes', icon: CreditCardIcon, component: PlansSection },
-    { id: 'billing', label: 'Facturación', icon: ChartBarIcon, component: BillingHistory },
-    { id: 'usage', label: 'Límites', icon: ChartBarIcon, component: UsageLimits },
-    { id: 'appearance', label: 'Apariencia', icon: PaintBrushIcon, component: AppearanceSettings },
-    { id: 'danger', label: 'Zona Peligrosa', icon: ExclamationTriangleIcon, component: DangerZone, danger: true },
+    { id: 'profile', label: s.profile, icon: UserIcon, component: ProfileForm },
+    { id: 'security', label: s.security, icon: ShieldCheckIcon, component: SecuritySettings },
+    { id: 'company', label: s.company, icon: BuildingOfficeIcon, component: CompanySettings },
+    { id: 'notifications', label: s.notifications, icon: BellIcon, component: NotificationSettings },
+    { id: 'team', label: s.team, icon: UsersIcon, component: TeamMembers },
+    { id: 'permissions', label: s.permissions, icon: KeyIcon, component: PermissionsPanel, pro: true },
+    { id: 'plans', label: s.plans, icon: CreditCardIcon, component: PlansSection },
+    { id: 'billing', label: s.billing, icon: ChartBarIcon, component: BillingHistory },
+    { id: 'usage', label: s.usage, icon: ChartBarIcon, component: UsageLimits },
+    { id: 'appearance', label: s.appearance, icon: PaintBrushIcon, component: AppearanceSettings },
+    { id: 'danger', label: s.dangerZone, icon: ExclamationTriangleIcon, component: DangerZone, danger: true },
   ]
 
   const ActiveComponent = sections.find(s => s.id === activeSection)?.component || ProfileForm
@@ -49,9 +52,9 @@ export default function SettingsPage() {
   return (
     <DashboardContainer>
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-white">Configuración</h1>
+        <h1 className="text-2xl font-semibold text-white">{s.title}</h1>
         <p className="text-sm text-white/60">
-          Gestiona tu cuenta, equipo, facturación y preferencias
+          {s.pageSubtitle}
         </p>
       </div>
 

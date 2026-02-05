@@ -17,29 +17,24 @@ export function useIntegrations() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Mock data for now - will be replaced with real API calls
   useEffect(() => {
-    const mockIntegrations: Integration[] = [
-      {
-        id: '1',
-        name: 'Stripe',
-        provider: 'stripe',
-        status: 'connected',
-        lastSync: '2025-01-21T10:30:00Z'
-      },
-      {
-        id: '2',
-        name: 'PayPal',
-        provider: 'paypal',
-        status: 'connected',
-        lastSync: '2025-01-21T09:15:00Z'
-      }
-    ]
-
-    setTimeout(() => {
-      setIntegrations(mockIntegrations)
-      setLoading(false)
-    }, 1000)
+    let cancelled = false
+    fetch('/api/integrations')
+      .then(res => res.ok ? res.json() : { data: [] })
+      .then((json: { data?: Array<{ id: string; name: string; provider: string; status: string; lastSync?: string }> }) => {
+        if (cancelled) return
+        const list = json.data || []
+        setIntegrations(list.map(i => ({
+          id: i.id,
+          name: i.name,
+          provider: i.provider,
+          status: (i.status === 'CONNECTED' ? 'connected' : i.status === 'ERROR' ? 'error' : i.status === 'PENDING' ? 'pending' : 'disconnected') as Integration['status'],
+          lastSync: i.lastSync,
+        })))
+      })
+      .catch(() => { if (!cancelled) setIntegrations([]) })
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
   }, [])
 
   const connectIntegration = async (integrationId: string, config: any) => {

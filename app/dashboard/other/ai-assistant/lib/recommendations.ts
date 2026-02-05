@@ -7,6 +7,7 @@ export interface LeadContext {
   lastActivity: number // days ago
   interactions: number
   companySize?: number
+  company?: string
   budget?: string
   timeline?: string
 }

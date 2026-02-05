@@ -137,7 +137,7 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
             <div className="flex items-center justify-end gap-1.5">
                 {/* View Client button for converted leads */}
                 {lead.leadStatus === "CONVERTED" && lead.clientId && (
-                    <Link href="/dashboard/other/clients">
+                    <Link href="/dashboard/clients">
                         <Button
                             size="sm"
                             variant="outline"
@@ -350,7 +350,7 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
                 open={deleteDialog}
                 onClose={() => setDeleteDialog(false)}
                 leadId={lead.id}
-                leadName={lead.name}
+                leadName={lead.name || "Sin nombre"}
                 onDeleted={() => router.refresh()}
             />
         </>

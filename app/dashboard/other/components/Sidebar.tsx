@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
+import { useSectorConfig } from "@/hooks/useSectorConfig"
 import {
   LayoutDashboard,
   Users,
@@ -22,7 +22,6 @@ import {
   ChevronRight,
   Building2,
   Sparkles,
-  Banknote,
   Crown
 } from "lucide-react"
 
@@ -74,6 +73,8 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
   const router = useRouter()
   const pathname = usePathname()
   const { data: session, status } = useSession()
+  const { labels } = useSectorConfig()
+  const nav = labels.nav
   const isAdmin = session?.user?.role === "ADMIN"
 
   // Show loading state while session is loading
@@ -89,35 +90,33 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
     {
       title: "CORE",
       items: [
-        { label: "Dashboard", href: "/dashboard/other", icon: LayoutDashboard },
-        { label: "Leads", href: "/dashboard/other/leads", icon: Target },
-        { label: "Clientes", href: "/dashboard/other/clients", icon: Users },
-        { label: "Proveedores", href: "/dashboard/other/providers", icon: Building2 },
-        { label: "Ventas", href: "/dashboard/other/sales", icon: TrendingUp },
-        { label: "Tareas", href: "/dashboard/other/tasks", icon: CheckSquare, count: 23 },
-        { label: "Finanzas", href: "/dashboard/other/finance", icon: DollarSign },
-        { label: "Facturación", href: "/dashboard/other/billing", icon: CreditCard },
-
+        { label: nav.dashboard, href: "/dashboard/other", icon: LayoutDashboard },
+        { label: nav.leads, href: "/dashboard/other/leads", icon: Target },
+        { label: nav.clients, href: "/dashboard/clients", icon: Users },
+        { label: nav.providers, href: "/dashboard/providers", icon: Building2 },
+        { label: nav.sales, href: "/dashboard/other/sales", icon: TrendingUp },
+        { label: nav.tasks, href: "/dashboard/tasks", icon: CheckSquare },
+        { label: nav.finance, href: "/dashboard/other/finance", icon: DollarSign },
+        { label: nav.billing, href: "/dashboard/other/billing", icon: CreditCard },
       ],
     },
     {
       title: "INTELIGENCIA",
       items: [
-        { label: "Analytics", href: "/dashboard/other/analytics", icon: BarChart3 },
-        { label: "Automatizaciones", href: "/dashboard/other/automations", icon: Zap },
-        { label: "IA Assistant", href: "/dashboard/other/ai-assistant", icon: Sparkles },
+        { label: nav.analytics, href: "/dashboard/other/analytics", icon: BarChart3 },
+        { label: labels.automations.title, href: "/dashboard/other/automations", icon: Zap },
+        { label: labels.aiAssistant.title, href: "/dashboard/other/ai-assistant", icon: Sparkles },
       ],
     },
     {
       title: "SISTEMA",
       items: [
-        { label: "Integraciones", href: "/dashboard/other/integrations", icon: Plug },
-        // Backup system only visible to PRO/ENTERPRISE users or admins
+        { label: nav.integrations, href: "/dashboard/other/integrations", icon: Plug },
         ...(session?.user?.plan === "PRO" || session?.user?.plan === "ENTERPRISE" || isAdmin
           ? [{ label: "Sistema de Backups", href: "/dashboard/other/system/backups", icon: ShieldCheck }]
           : []
         ),
-        { label: "Ajustes", href: "/dashboard/other/settings", icon: Settings },
+        { label: nav.settings, href: "/dashboard/other/settings", icon: Settings },
       ],
     },
   ]

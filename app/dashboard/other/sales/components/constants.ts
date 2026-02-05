@@ -35,83 +35,53 @@ export interface StatItem {
   hint?: string
 }
 
-export const MOCK_SALES: SaleRecord[] = [
-  {
-    id: "sale-01",
-    cliente: "Luz & Asociados",
-    producto: "CRM Enterprise",
-    importe: 18200,
-    canal: "Web",
-    comercial: "Marcos",
-    estado: "negociación",
-    fecha: "2026-01-19",
-    origen: "manual",
-    detalles: "Demo estratégica con equipo directivo.",
-    notas: ["Enviar contrato legal", "Revisar cláusula de soporte"],
-  },
-  {
-    id: "sale-02",
-    cliente: "Moderno Retail",
-    producto: "Automatización de campañas",
-    importe: 7200,
-    canal: "Email Pro",
-    comercial: "Lucía",
-    estado: "seguimiento",
-    fecha: "2026-01-18",
-    origen: "automático",
-    detalles: "Webhook Shopify detectó nuevo lead con alto ticket.",
-    notas: ["Preparar propuesta económica", "Coordinar llamada final"],
-  },
-  {
-    id: "sale-03",
-    cliente: "Studio Fenix",
-    producto: "Analytics Premium",
-    importe: 13200,
-    canal: "Inbound",
-    comercial: "Andrés",
-    estado: "ganada",
-    fecha: "2026-01-15",
-    origen: "manual",
-    detalles: "Cliente renovó y añadió módulos IA.",
-    notas: ["Emitir factura", "Agendar onboarding"],
-  },
-  {
-    id: "sale-04",
-    cliente: "Café Nimbus",
-    producto: "Automatización de lead scoring",
-    importe: 5400,
-    canal: "Publicidad",
-    comercial: "Marcos",
-    estado: "nueva",
-    fecha: "2026-01-20",
-    origen: "automático",
-    detalles: "Webhook Stripe detectó pago rechazado, se envió workflow.",
-    notas: ["Responder con plantillas personalizadas"],
-  },
-  {
-    id: "sale-05",
-    cliente: "Orbit Finance",
-    producto: "Consultoría CX",
-    importe: 26400,
-    canal: "Partner",
-    comercial: "Andrés",
-    estado: "ganada",
-    fecha: "2026-01-10",
-    origen: "manual",
-    detalles: "Contrató paquete anual con onboarding acelerado.",
-    notas: ["Enviar reporte mensual", "Coordinar success call"],
-  },
-  {
-    id: "sale-06",
-    cliente: "Nodespace Labs",
-    producto: "Ecosistema API",
-    importe: 9800,
-    canal: "Demo",
-    comercial: "Lucía",
-    estado: "perdida",
-    fecha: "2026-01-08",
-    origen: "manual",
-    detalles: "Rechazaron por presupuesto, etiquetado como churn potencial.",
-    notas: ["Registrar motivo en CRM", "Programar reenganche en Q3"],
-  },
-]
+/** Map DB status string to UI SaleStatus */
+export function dbStatusToUiStatus(dbStatus: string): SaleStatus {
+  const s = (dbStatus || "").toLowerCase()
+  if (s === "ganada" || s === "pagado" || s === "closed" || s === "won") return "ganada"
+  if (s === "perdida" || s === "lost" || s === "churn") return "perdida"
+  if (s === "nueva" || s === "new") return "nueva"
+  if (s === "negociación" || s === "negociacion") return "negociación"
+  if (s === "seguimiento" || s === "follow-up") return "seguimiento"
+  return "seguimiento"
+}
+
+/** Map UI SaleStatus to DB status string for API */
+export function uiStatusToDbStatus(ui: SaleStatus): string {
+  return ui
+}
+
+/** Shape returned by GET /api/sales (Prisma Sale) */
+export interface ApiSale {
+  id: string
+  clientName: string
+  clientEmail?: string | null
+  product: string
+  category?: string | null
+  price: number
+  total: number
+  provider: string
+  paymentMethod: string
+  status: string
+  notes?: string | null
+  saleDate: string
+}
+
+/** Map API sale to UI SaleRecord */
+export function mapApiSaleToRecord(sale: ApiSale): SaleRecord {
+  const fecha = sale.saleDate ? sale.saleDate.slice(0, 10) : new Date().toISOString().slice(0, 10)
+  const isManual = (sale.paymentMethod || sale.provider || "").toUpperCase() === "MANUAL"
+  return {
+    id: sale.id,
+    cliente: sale.clientName || "—",
+    producto: sale.product || "—",
+    importe: Number(sale.total) || 0,
+    canal: sale.category || sale.provider || "—",
+    comercial: "—",
+    estado: dbStatusToUiStatus(sale.status),
+    fecha,
+    origen: isManual ? "manual" : "automático",
+    detalles: sale.notes || "—",
+    notas: sale.notes ? sale.notes.split(/\n/).filter(Boolean) : [],
+  }
+}

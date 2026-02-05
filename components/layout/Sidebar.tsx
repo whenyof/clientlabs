@@ -17,7 +17,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react"
-import { Badge } from "../ui/Badge"
+import { Badge } from "@/components/ui/badge"
 
 interface MenuItem {
   label: string
@@ -36,9 +36,9 @@ const menu: MenuGroup[] = [
     title: "CORE",
     items: [
       { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard/other" },
-      { label: "Clientes", icon: Users, href: "/dashboard/other/clients" },
+      { label: "Clientes", icon: Users, href: "/dashboard/clients" },
       { label: "Ventas", icon: BarChart3, href: "/dashboard/other/sales" },
-      { label: "Tareas", icon: CheckSquare, href: "/dashboard/other/tasks" },
+      { label: "Tareas", icon: CheckSquare, href: "/dashboard/tasks" },
     ],
   },
   {
@@ -165,10 +165,9 @@ export function Sidebar() {
                     className={`
                       w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm
                       transition-all duration-200 group
-                      ${
-                        active
-                          ? "bg-purple-600/20 text-purple-400 shadow-lg shadow-purple-500/20"
-                          : "text-white/70 hover:bg-white/10 hover:text-white"
+                      ${active
+                        ? "bg-purple-600/20 text-purple-400 shadow-lg shadow-purple-500/20"
+                        : "text-white/70 hover:bg-white/10 hover:text-white"
                       }
                     `}
                     whileHover={{ scale: 1.02 }}
@@ -186,7 +185,7 @@ export function Sidebar() {
                         >
                           <span className="truncate">{item.label}</span>
                           {item.badge && (
-                            <Badge variant={item.badge} className="ml-2 scale-75">
+                            <Badge variant={item.badge as any} className="ml-2 scale-75">
                               {item.badge}
                             </Badge>
                           )}
@@ -202,7 +201,7 @@ export function Sidebar() {
                           exit={{ scale: 0 }}
                           className="absolute -right-2 -top-1"
                         >
-                          <Badge variant={item.badge} className="scale-75">
+                          <Badge variant={item.badge as any} className="scale-75">
                             {item.badge}
                           </Badge>
                         </motion.div>

@@ -297,7 +297,7 @@ export const generateCashFlowForecast = (
 
     const historicalExpenses = transactions
       .filter(t => t.type === 'EXPENSE')
-      .map(t => ({ month: t.date.toISOString().substring(0, 7), revenue: Math.abs(t.amount) }))
+      .map(t => ({ month: t.date.toISOString().substring(0, 7), expenses: Math.abs(t.amount) }))
 
     const predictedIncome = predictMonthlyRevenue(historicalIncome, 3)
     const predictedExpenses = predictMonthlyExpenses(historicalExpenses, fixedExpenses, 3)

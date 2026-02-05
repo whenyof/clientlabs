@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSectorConfig } from "@/hooks/useSectorConfig"
 import { DashboardContainer } from "@/components/layout/DashboardContainer"
 import { AutomationKPIs } from "./components/AutomationKPIs"
 import AutomationsTable from "./components/AutomationsTable"
@@ -17,12 +18,23 @@ import {
 import { motion, AnimatePresence } from "framer-motion"
 
 export default function AutomationsPage() {
+  const { labels } = useSectorConfig()
+  const a = labels.automations
+  const ui = a.ui
+  const [automations, setAutomations] = useState<Array<{ id: string; name: string; description: string | null; trigger: unknown; actions: unknown; active: boolean; createdAt: string }>>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [selectedStatus, setSelectedStatus] = useState("all")
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showTemplates, setShowTemplates] = useState(false)
   const [showLogs, setShowLogs] = useState(false)
+
+  useEffect(() => {
+    fetch('/api/automations')
+      .then(res => res.ok ? res.json() : { data: [] })
+      .then((json: { data?: typeof automations }) => setAutomations(json.data || []))
+      .catch(() => setAutomations([]))
+  }, [])
 
   const handleCreateAutomation = () => {
     setShowCreateModal(true)
@@ -31,9 +43,9 @@ export default function AutomationsPage() {
   return (
     <DashboardContainer>
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-white">Automatizaciones</h1>
+        <h1 className="text-2xl font-semibold text-white">{a.title}</h1>
         <p className="text-sm text-white/60">
-          Flujos inteligentes que optimizan tu negocio y generan ingresos automáticamente
+          {a.pageSubtitle}
         </p>
       </div>
 
@@ -45,10 +57,10 @@ export default function AutomationsPage() {
             transition={{ delay: 0.3, duration: 0.5 }}
           >
             <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
-              Automatizaciones
+              {a.title}
             </h1>
             <p className="text-gray-400 text-lg">
-              Flujos inteligentes que optimizan tu negocio y generan ingresos automáticamente
+              {a.pageSubtitle}
             </p>
           </motion.div>
 
@@ -65,7 +77,7 @@ export default function AutomationsPage() {
                 whileTap={{ scale: 0.98 }}
               >
                 <FunnelIcon className="w-4 h-4" />
-                Logs
+                {ui.logs}
               </motion.button>
 
               <motion.button
@@ -75,7 +87,7 @@ export default function AutomationsPage() {
                 whileTap={{ scale: 0.98 }}
               >
                 <SparklesIcon className="w-4 h-4" />
-                Templates
+                {ui.templates}
               </motion.button>
 
               <motion.button
@@ -85,7 +97,7 @@ export default function AutomationsPage() {
                 whileTap={{ scale: 0.95 }}
               >
                 <PlusIcon className="w-5 h-5" />
-                Nueva Automatización
+                {a.newButton}
               </motion.button>
             </motion.div>
           </div>
@@ -97,7 +109,7 @@ export default function AutomationsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.5 }}
         >
-          <AutomationKPIs />
+          <AutomationKPIs total={automations.length} active={automations.filter(x => x.active).length} />
         </motion.div>
 
         {/* Filtros */}
@@ -105,13 +117,13 @@ export default function AutomationsPage() {
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-400 mb-2">
-                Buscar automatizaciones
+                {ui.searchLabel}
               </label>
               <div className="relative">
                 <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Buscar por nombre, descripción o trigger..."
+                  placeholder={ui.searchPlaceholder}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-9 pr-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -121,34 +133,34 @@ export default function AutomationsPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-2">
-                Categoría
+                {ui.categoryLabel}
               </label>
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               >
-                <option value="all">Todas las categorías</option>
-                <option value="sales">Ventas</option>
-                <option value="ai">IA</option>
-                <option value="operations">Operaciones</option>
-                <option value="marketing">Marketing</option>
+                <option value="all">{ui.categoryAll}</option>
+                <option value="sales">{ui.categorySales}</option>
+                <option value="ai">{ui.categoryAi}</option>
+                <option value="operations">{ui.categoryOperations}</option>
+                <option value="marketing">{ui.categoryMarketing}</option>
               </select>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-2">
-                Estado
+                {ui.statusLabel}
               </label>
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
                 className="px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               >
-                <option value="all">Todos los estados</option>
-                <option value="active">Activas</option>
-                <option value="paused">Pausadas</option>
-                <option value="draft">Borradores</option>
+                <option value="all">{ui.statusAll}</option>
+                <option value="active">{ui.statusActive}</option>
+                <option value="paused">{ui.statusPaused}</option>
+                <option value="draft">{ui.statusDraft}</option>
               </select>
             </div>
           </div>
@@ -164,6 +176,7 @@ export default function AutomationsPage() {
             searchTerm={searchTerm}
             categoryFilter={selectedCategory}
             statusFilter={selectedStatus}
+            automations={automations}
           />
         </motion.div>
 

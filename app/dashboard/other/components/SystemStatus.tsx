@@ -1,43 +1,8 @@
 "use client"
 
+import { useSectorConfig } from "@/hooks/useSectorConfig"
 import { Server, Database, Zap, Wifi, CheckCircle, AlertTriangle, XCircle } from "lucide-react"
 
-const STATUS_ITEMS: Array<{
-  label: string
-  status: "online" | "warning" | "offline"
-  icon: any
-  description: string
-  uptime: string
-}> = [
-  {
-    label: "API Server",
-    status: "online",
-    icon: Server,
-    description: "Respuesta en 45ms",
-    uptime: "99.9%"
-  },
-  {
-    label: "Base de Datos",
-    status: "online",
-    icon: Database,
-    description: "PostgreSQL activo",
-    uptime: "99.95%"
-  },
-  {
-    label: "Automatizaciones",
-    status: "online",
-    icon: Zap,
-    description: "12 bots activos",
-    uptime: "98.7%"
-  },
-  {
-    label: "Integraciones",
-    status: "warning",
-    icon: Wifi,
-    description: "2 servicios con problemas",
-    uptime: "95.2%"
-  }
-]
 
 function StatusIcon({ status }: { status: "online" | "warning" | "offline" }) {
   switch (status) {
@@ -50,31 +15,78 @@ function StatusIcon({ status }: { status: "online" | "warning" | "offline" }) {
   }
 }
 
-function StatusBadge({ status }: { status: "online" | "warning" | "offline" }) {
+function StatusBadge({
+  status,
+  labels: { statusOnline, statusWarning, statusOffline },
+}: {
+  status: "online" | "warning" | "offline"
+  labels: { statusOnline: string; statusWarning: string; statusOffline: string }
+}) {
   const styles = {
     online: "bg-green-500/10 text-green-400 border-green-500/20",
     warning: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
     offline: "bg-red-500/10 text-red-400 border-red-500/20"
   }
-
+  const text = status === "online" ? statusOnline : status === "warning" ? statusWarning : statusOffline
   return (
     <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${styles[status]}`}>
-      {status === "online" ? "En línea" : status === "warning" ? "Advertencia" : "Fuera de línea"}
+      {text}
     </span>
   )
 }
 
 export function SystemStatus() {
+  const { labels } = useSectorConfig()
+  const w = labels.dashboard.widgets
+
+  const STATUS_ITEMS: Array<{
+    label: string
+    status: "online" | "warning" | "offline"
+    icon: any
+    description: string
+    uptime: string
+  }> = [
+      {
+        label: w.apiServer,
+        status: "online",
+        icon: Server,
+        description: w.apiServerDesc,
+        uptime: "99.9%"
+      },
+      {
+        label: w.database,
+        status: "online",
+        icon: Database,
+        description: w.databaseDesc,
+        uptime: "99.95%"
+      },
+      {
+        label: labels.automations.title,
+        status: "online",
+        icon: Zap,
+        description: w.automationsStatusDesc,
+        uptime: "98.7%"
+      },
+      {
+        label: labels.integrations.title,
+        status: "warning",
+        icon: Wifi,
+        description: w.integrationsStatusDesc,
+        uptime: "95.2%"
+      }
+    ]
+
   const onlineCount = STATUS_ITEMS.filter(item => item.status === "online").length
   const totalCount = STATUS_ITEMS.length
+  const statusLabels = { statusOnline: w.statusOnline, statusWarning: w.statusWarning, statusOffline: w.statusOffline }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-white">Estado del Sistema</h3>
+        <h3 className="text-lg font-semibold text-white">{w.systemStatusTitle}</h3>
         <div className="text-right">
           <div className="text-2xl font-bold text-white">{onlineCount}/{totalCount}</div>
-          <div className="text-sm text-gray-400">servicios activos</div>
+          <div className="text-sm text-gray-400">{w.systemStatusActiveServices}</div>
         </div>
       </div>
 
@@ -94,8 +106,8 @@ export function SystemStatus() {
               </div>
 
               <div className="text-right">
-                <StatusBadge status={item.status} />
-                <p className="text-gray-400 text-xs mt-1">{item.uptime} uptime</p>
+                <StatusBadge status={item.status} labels={statusLabels} />
+                <p className="text-gray-400 text-xs mt-1">{item.uptime} {w.uptime}</p>
               </div>
             </div>
           )

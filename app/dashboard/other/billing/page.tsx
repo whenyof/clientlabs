@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useSectorConfig } from "@/hooks/useSectorConfig"
 import { DashboardContainer } from "@/components/layout/DashboardContainer"
 import { BillingKPIs } from "./components/BillingKPIs"
 import { BillingTabs } from "./components/BillingTabs"
@@ -9,6 +10,8 @@ import { InvoiceModal } from "./components/InvoiceModal"
 import { PlusIcon } from "@heroicons/react/24/outline"
 
 export default function BillingPage() {
+  const { labels } = useSectorConfig()
+  const b = labels.billing
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedTab, setSelectedTab] = useState("all")
@@ -16,19 +19,19 @@ export default function BillingPage() {
   return (
     <DashboardContainer>
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-white">Facturación</h1>
+        <h1 className="text-2xl font-semibold text-white">{b.title}</h1>
         <p className="text-sm text-white/60">
-          Gestiona tus facturas, pagos e integraciones con Hacienda
+          {b.pageSubtitle}
         </p>
       </div>
 
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8">
         <div className="space-y-2">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
-            Facturación
+            {b.title}
           </h1>
           <p className="text-gray-400 text-lg">
-            Gestiona tus facturas, pagos e integraciones con Hacienda
+            {b.pageSubtitle}
           </p>
         </div>
 
@@ -39,7 +42,7 @@ export default function BillingPage() {
           <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl blur-lg opacity-0 group-hover:opacity-75 transition-opacity duration-300" />
           <div className="relative flex items-center gap-2">
             <PlusIcon className="w-5 h-5" />
-            Nueva Factura
+            {b.newInvoice}
           </div>
         </button>
       </div>
@@ -51,7 +54,7 @@ export default function BillingPage() {
       <div className="relative">
         <input
           type="text"
-          placeholder="Buscar facturas por cliente, número o descripción..."
+          placeholder={b.searchPlaceholder}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent backdrop-blur-sm"
@@ -65,10 +68,11 @@ export default function BillingPage() {
         onTabChange={setSelectedTab}
       />
 
-      {/* Table */}
+      {/* Table — no Invoice in DB, always empty */}
       <InvoicesTable
         searchTerm={searchTerm}
         statusFilter={selectedTab === "all" ? undefined : selectedTab}
+        invoices={[]}
       />
 
       {/* Modal */}

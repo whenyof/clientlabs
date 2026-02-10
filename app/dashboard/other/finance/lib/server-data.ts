@@ -10,6 +10,8 @@ import {
   getFinanceChartSeries,
 } from "@/modules/finance/services/finance-aggregator"
 import { getUnifiedMovements } from "@/modules/finance/finance-engine"
+import { getMovements } from "@/modules/finance/movements"
+import type { Movement } from "@/modules/finance/movements"
 import { predictMonthlyRevenue, predictMonthlyExpenses, predictCashFlow } from "./predictors"
 import { detectRecurringExpenses } from "./recurring-expenses"
 
@@ -38,21 +40,22 @@ function getDateRange(period: string) {
     }
     case "quarter": {
       const q = Math.floor(now.getMonth() / 3)
+      const toDate = new Date(now.getFullYear(), q * 3 + 3, 0)
       return {
         from: new Date(now.getFullYear(), q * 3, 1),
-        to: new Date(now.getFullYear(), q * 3 + 3, 0),
+        to: new Date(toDate.getFullYear(), toDate.getMonth(), toDate.getDate(), 23, 59, 59, 999),
       }
     }
     case "year":
       return {
         from: new Date(now.getFullYear(), 0, 1),
-        to: new Date(now.getFullYear(), 11, 31),
+        to: new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999),
       }
     default:
       // month
       return {
         from: new Date(now.getFullYear(), now.getMonth(), 1),
-        to: new Date(now.getFullYear(), now.getMonth() + 1, 0),
+        to: new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999),
       }
   }
 }
@@ -134,6 +137,8 @@ export type FinancePageData = {
     }>
   }
   movements: Array<{ id: string; type: string; date: string; amount: number; label: string; meta?: Record<string, unknown> }>
+  /** Ledger: same source as KPIs (sales + purchases + transactions), for Movements tab */
+  ledgerMovements: Movement[]
 }
 
 export async function loadFinancePageData(
@@ -147,13 +152,14 @@ export async function loadFinancePageData(
     const twelveMonthsAgo = new Date()
     twelveMonthsAgo.setFullYear(twelveMonthsAgo.getFullYear() - 1)
 
-    const [summary, prevSummary, monthlyTrend, chartSeries, movements, fixedExpenses, transactions, transactionsForRecurrence, budgets, alerts, financialGoals] =
+    const [summary, prevSummary, monthlyTrend, chartSeries, movements, ledgerMovements, fixedExpenses, transactions, transactionsForRecurrence, budgets, alerts, financialGoals] =
       await Promise.all([
         getFinanceSummary(userId, from, to),
         getFinanceSummary(userId, prevFrom, prevTo),
         getFinanceMonthlyTrend(userId),
         getFinanceChartSeries(userId, period),
         getUnifiedMovements(userId, from, to),
+        getMovements({ userId, from, to }),
         prisma.fixedExpense.findMany({ where: { userId, active: true } }),
         prisma.transaction.findMany({
           where: { userId, date: { gte: from, lte: to } },
@@ -182,6 +188,9 @@ export async function loadFinancePageData(
     const income = summary.income
     const expenses = summary.expenses
     const netProfit = summary.profit
+    if (typeof process !== "undefined") {
+      console.log("KPI income:", income, "KPI expenses:", expenses, "Movements:", ledgerMovements.length)
+    }
     const cashFlow = summary.profit
     const pendingPayments = summary.pendingIncome
     const incomeGrowth = growthRate(income, prevSummary.income)
@@ -308,6 +317,7 @@ export async function loadFinancePageData(
         transactionCount: transactions.length,
       },
       movements: serializedMovements,
+      ledgerMovements,
     }
   } catch (err) {
     console.error("[loadFinancePageData] error:", err)
@@ -330,6 +340,7 @@ export async function loadFinancePageData(
         detectedRecurringExpenses: [],
       },
       movements: [],
+      ledgerMovements: [],
     }
   }
 }

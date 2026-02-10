@@ -76,7 +76,7 @@ export default function BackupManagementPage() {
             La funcionalidad de backups está disponible solo para planes PRO y ENTERPRISE.
           </p>
           <button
-            onClick={() => router.push("/dashboard/other/billing")}
+            onClick={() => router.push("/dashboard/finance/billing")}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
           >
             Ver Planes

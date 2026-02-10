@@ -94,10 +94,8 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
         { label: nav.leads, href: "/dashboard/other/leads", icon: Target },
         { label: nav.clients, href: "/dashboard/clients", icon: Users },
         { label: nav.providers, href: "/dashboard/providers", icon: Building2 },
-        { label: nav.sales, href: "/dashboard/other/sales", icon: TrendingUp },
         { label: nav.tasks, href: "/dashboard/tasks", icon: CheckSquare },
-        { label: nav.finance, href: "/dashboard/other/finance", icon: DollarSign },
-        { label: nav.billing, href: "/dashboard/other/billing", icon: CreditCard },
+        { label: nav.finance, href: "/dashboard/finance", icon: DollarSign },
       ],
     },
     {
@@ -260,7 +258,7 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
         {/* PLAN */}
         {!isCollapsed && session?.user?.plan && (
           <button
-            onClick={() => router.push("/dashboard/other/billing")}
+            onClick={() => router.push("/dashboard/finance/billing")}
             className="w-full text-left text-xs text-purple-400 hover:text-purple-300"
           >
             Plan: <b>{session.user.plan.toUpperCase()}</b> → Cambiar plan

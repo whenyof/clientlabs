@@ -1,18 +1,16 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter, usePathname } from "next/navigation"
+import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
-import { useSectorConfig } from "@/hooks/useSectorConfig"
 import { FinanceDataProvider } from "./context/FinanceDataContext"
-import { FinanceHeader } from "./components/FinanceHeader"
 import { FinanceNavTabs, type FinanceTabId } from "./components/FinanceNavTabs"
 import { FinanceKPIs } from "./components/FinanceKPIs"
 import { MainChart } from "./components/MainChart"
 import { CFOInsights } from "./components/CFOInsights"
 import { CashflowBlock } from "./components/CashflowBlock"
 import { BusinessHealth } from "./components/BusinessHealth"
-import { MovementsList } from "./components/MovementsList"
+import { FinanceMovementsView } from "./components/movements"
 import { FixedExpenses } from "./components/FixedExpenses"
 import { Budgets } from "./components/Budgets"
 import { Forecast } from "./components/Forecast"
@@ -25,23 +23,36 @@ import type { FinancePageData } from "./lib/server-data"
 type Props = {
   initialData: FinancePageData
   period: string
+  view?: string
 }
 
-export function FinanceView({ initialData, period }: Props) {
-  const [activeTab, setActiveTab] = useState<FinanceTabId>("overview")
+export function FinanceView({ initialData, period, view }: Props) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [kpiFilter, setKpiFilter] = useState<string | null>(null)
   const router = useRouter()
   const pathname = usePathname()
+  const searchParams = useSearchParams()
+
+  // URL is the source of truth for the active section inside Finance
+  const urlView = searchParams.get("view") ?? view
+  const allowedTabs: FinanceTabId[] = [
+    "overview",
+    "transactions",
+    "budgets",
+    "forecast",
+    "goals",
+    "alerts",
+    "automation",
+  ]
+  const activeTab: FinanceTabId = allowedTabs.includes(urlView as FinanceTabId)
+    ? (urlView as FinanceTabId)
+    : "overview"
 
   const renderSectionContent = () => {
     switch (activeTab) {
       case "overview":
         return (
           <div className="w-full space-y-8">
-            <section aria-label="Hero chart" className="w-full">
-              <MainChart />
-            </section>
             <section aria-label="CFO insights" className="w-full">
               <CFOInsights />
             </section>
@@ -57,7 +68,7 @@ export function FinanceView({ initialData, period }: Props) {
       case "transactions":
         return (
           <section aria-label="Explorador de movimientos">
-            <MovementsList />
+            <FinanceMovementsView initialMovements={initialData.ledgerMovements} />
           </section>
         )
       case "budgets":
@@ -100,10 +111,15 @@ export function FinanceView({ initialData, period }: Props) {
     }
   }
 
-  const { labels } = useSectorConfig()
-
   const handleSetPeriod = (nextPeriod: string) => {
-    const params = new URLSearchParams({ period: nextPeriod })
+    const params = new URLSearchParams(searchParams.toString())
+    params.set("period", nextPeriod)
+    router.push(`${pathname}?${params.toString()}`)
+  }
+
+  const handleSectionTabChange = (next: FinanceTabId) => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set("view", next)
     router.push(`${pathname}?${params.toString()}`)
   }
 
@@ -112,7 +128,7 @@ export function FinanceView({ initialData, period }: Props) {
   }
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 w-full min-h-screen max-w-none overflow-y-auto bg-gradient-to-br from-[#1E1F2B] to-[#242538] px-4 pt-5 pb-10">
+    <div className="flex flex-col flex-1 min-h-0 w-full min-h-screen max-w-none bg-gradient-to-br from-[#1E1F2B] to-[#242538] px-4 pt-2 pb-10">
       <FinanceDataProvider
         initialAnalytics={initialData.analytics}
         initialMovements={initialData.movements}
@@ -121,25 +137,29 @@ export function FinanceView({ initialData, period }: Props) {
         onRefetch={handleRefetch}
       >
         <div className="flex flex-col flex-1 min-h-0 w-full max-w-none">
-          <header className="shrink-0 space-y-2">
-            <div className="flex flex-col gap-0.5">
-              <h1 className="text-base font-semibold text-white tracking-tight">
-                {labels.finance.title}
-              </h1>
-              <p className="text-xs text-white/40">{labels.finance.pageSubtitle}</p>
-            </div>
-            <FinanceHeader onCreateTransaction={() => setIsCreateModalOpen(true)} />
-          </header>
+          <div className="flex-1 min-h-0 min-w-0 pb-10 overflow-y-auto">
+            {activeTab === "overview" && (
+              <section
+                aria-label="Resumen financiero principal"
+                className="h-[calc(100vh-260px)] flex flex-col gap-6 overflow-hidden"
+              >
+                <div className="shrink-0">
+                  <FinanceKPIs onKpiClick={(id) => setKpiFilter(id)} />
+                </div>
+                <section aria-label="Hero chart" className="w-full">
+                  <MainChart />
+                </section>
+              </section>
+            )}
 
-          <div className="shrink-0 mt-2">
-            <FinanceNavTabs activeTab={activeTab} onTabChange={setActiveTab} />
-          </div>
+            {activeTab === "overview" && <div className="h-24 shrink-0" />}
 
-          <div className="shrink-0 mt-3 mb-5">
-            <FinanceKPIs onKpiClick={(id) => setKpiFilter(id)} />
-          </div>
+            {activeTab !== "overview" && (
+              <div className="shrink-0 mb-5">
+                <FinanceKPIs onKpiClick={(id) => setKpiFilter(id)} />
+              </div>
+            )}
 
-          <div className="flex-1 min-h-0 min-w-0 pb-10 overflow-visible">
             {kpiFilter && (
               <p className="text-xs text-white/40 mb-4">
                 Filtro activo: <span className="text-white/60 capitalize">{kpiFilter}</span>

@@ -37,7 +37,7 @@ const menu: MenuGroup[] = [
     items: [
       { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard/other" },
       { label: "Clientes", icon: Users, href: "/dashboard/clients" },
-      { label: "Ventas", icon: BarChart3, href: "/dashboard/other/sales" },
+      { label: "Finanzas", icon: BarChart3, href: "/dashboard/finance" },
       { label: "Tareas", icon: CheckSquare, href: "/dashboard/tasks" },
     ],
   },

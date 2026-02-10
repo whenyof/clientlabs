@@ -16,12 +16,12 @@ export default function DashboardShell({
 
   return (
     <div
-      className="flex h-screen w-screen overflow-hidden bg-[#0e1424]"
+      className="flex min-h-screen w-screen bg-[#0e1424]"
       data-debug="shell"
     >
       {/* Sidebar */}
       <div
-        className="h-screen shrink-0 transition-all duration-300"
+        className="sticky top-0 h-screen shrink-0 transition-all duration-300"
         style={{ width: isCollapsed ? 72 : 240 }}
       >
         <Sidebar
@@ -34,7 +34,6 @@ export default function DashboardShell({
       <main
         className="
           flex flex-col flex-1 min-w-0 min-h-0
-          h-screen
           overflow-y-auto overflow-x-hidden
           bg-gradient-to-br from-[#1E1F2B] to-[#242538]
           text-gray-200

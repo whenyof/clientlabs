@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import {
     X, Mail, Phone, Tag as TagIcon, Clock, DollarSign, TrendingUp,
     MessageSquare, Edit3, Save, Plus, ShoppingCart, Bell, CheckSquare,
-    AlertTriangle, Star, UserPlus, Sparkles
+    AlertTriangle, Star, UserPlus, Sparkles, Circle, CheckCircle2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -20,7 +20,7 @@ import {
     DialogTitle,
     DialogFooter,
 } from "@/components/ui/dialog"
-import { formatDistanceToNow, formatDate } from "date-fns"
+import { formatDistanceToNow, formatDate, format } from "date-fns"
 import { es } from "date-fns/locale"
 import { toast } from "sonner"
 
@@ -44,7 +44,7 @@ import { EnhancedTimeline } from "./EnhancedTimeline"
 import { SaleSidePanel } from "./SaleSidePanel"
 import { SaleDialog } from "./SaleDialog"
 import { TaskDialog } from "@/components/tasks/TaskDialog"
-import { TaskCard, type Task } from "@/components/tasks/TaskCard"
+import type { Task } from "@/components/tasks/TaskCard"
 
 type ClientWithLead = Client & {
     convertedFromLead: {
@@ -736,6 +736,7 @@ export function ClientSidePanel({ client, isOpen, onClose, onClientUpdate }: Cli
                 open={taskDialog}
                 onOpenChange={setTaskDialog}
                 clientId={client.id}
+                entityName={client.name ?? undefined}
                 onSubmit={handleOptimisticTaskCreate}
             />
 
@@ -768,11 +769,11 @@ export function ClientSidePanel({ client, isOpen, onClose, onClientUpdate }: Cli
                 className={`fixed inset-y-0 right-0 w-full md:w-[600px] bg-zinc-950 border-l border-white/10 shadow-2xl z-50 ${isOpen ? "pointer-events-auto" : "pointer-events-none"}`}
             >
                 <div className="h-full flex flex-col overflow-hidden bg-zinc-950">
-                    <div className="p-8 border-b border-white/5 bg-gradient-to-b from-white/5 to-transparent shrink-0">
-                        <div className="flex items-start justify-between mb-6">
-                            <div className="flex-1">
+                    <div className="p-6 border-b border-white/10 bg-zinc-950 shrink-0">
+                        <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1 min-w-0">
                                 <div className="flex flex-wrap items-center gap-3 mb-3">
-                                    <h2 className="text-3xl font-bold text-white tracking-tight">{client.name || labels.common.noResults}</h2>
+                                    <h2 className="text-xl font-bold text-white tracking-tight truncate">{client.name || labels.common.noResults}</h2>
                                     <div className="flex items-center gap-2">
                                         <StatusBadgeSelector
                                             currentStatus={optimisticStatus as "ACTIVE" | "FOLLOW_UP" | "INACTIVE" | "VIP"}
@@ -816,11 +817,11 @@ export function ClientSidePanel({ client, isOpen, onClose, onClientUpdate }: Cli
                                     )}
                                 </div>
                             </div>
-                            <button onClick={onClose} className="p-2.5 hover:bg-white/10 rounded-xl transition-all text-white/40 hover:text-white">
+                            <Button variant="ghost" size="icon" onClick={onClose} className="text-white/60 hover:text-white hover:bg-white/10 shrink-0">
                                 <X className="h-5 w-5" />
-                            </button>
+                            </Button>
                         </div>
-                        <div className="flex gap-3">
+                        <div className="flex flex-wrap gap-2">
                             <Button onClick={() => setNoteDialog(true)} className="flex-1 bg-white/5 border border-white/10 hover:bg-white/10 h-11 rounded-xl">
                                 <MessageSquare className="h-4 w-4 mr-2 text-blue-400" /> {labels.providers.actions.addNote}
                             </Button>
@@ -837,13 +838,13 @@ export function ClientSidePanel({ client, isOpen, onClose, onClientUpdate }: Cli
                     </div>
 
                     <div className="flex-1 overflow-y-auto custom-scrollbar bg-zinc-950 pb-20">
-                        <div className="px-8 pt-6 sticky top-0 bg-zinc-950 z-20 pb-4">
-                            <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 backdrop-blur-md">
+                        <div className="border-b border-white/10 px-6 bg-zinc-950 sticky top-0 z-20">
+                            <div className="flex gap-4">
                                 <button
                                     onClick={() => setActiveTab("timeline")}
                                     className={cn(
-                                        "flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold rounded-lg transition-all",
-                                        activeTab === "timeline" ? "bg-white text-black shadow-xl" : "text-white/40 hover:text-white/60"
+                                        "px-4 py-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2",
+                                        activeTab === "timeline" ? "border-blue-500 text-white" : "border-transparent text-white/60 hover:text-white"
                                     )}
                                 >
                                     <Clock className="h-3.5 w-3.5" /> Timeline
@@ -852,8 +853,8 @@ export function ClientSidePanel({ client, isOpen, onClose, onClientUpdate }: Cli
                                     <button
                                         onClick={() => setActiveTab("tasks")}
                                         className={cn(
-                                            "flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold rounded-lg transition-all",
-                                            activeTab === "tasks" ? "bg-white text-black shadow-xl" : "text-white/40 hover:text-white/60"
+                                            "px-4 py-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2",
+                                            activeTab === "tasks" ? "border-blue-500 text-white" : "border-transparent text-white/60 hover:text-white"
                                         )}
                                     >
                                         <CheckSquare className="h-3.5 w-3.5" /> {labels.tasks.plural}
@@ -863,8 +864,8 @@ export function ClientSidePanel({ client, isOpen, onClose, onClientUpdate }: Cli
                                     <button
                                         onClick={() => setActiveTab("sales")}
                                         className={cn(
-                                            "flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold rounded-lg transition-all",
-                                            activeTab === "sales" ? "bg-white text-black shadow-xl" : "text-white/40 hover:text-white/60"
+                                            "px-4 py-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2",
+                                            activeTab === "sales" ? "border-blue-500 text-white" : "border-transparent text-white/60 hover:text-white"
                                         )}
                                     >
                                         <ShoppingCart className="h-3.5 w-3.5" /> {labels.sales.plural}
@@ -874,18 +875,18 @@ export function ClientSidePanel({ client, isOpen, onClose, onClientUpdate }: Cli
                                     <button
                                         onClick={() => setActiveTab("notes")}
                                         className={cn(
-                                            "flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold rounded-lg transition-all",
-                                            activeTab === "notes" ? "bg-white text-black shadow-xl" : "text-white/40 hover:text-white/60"
+                                            "px-4 py-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2",
+                                            activeTab === "notes" ? "border-blue-500 text-white" : "border-transparent text-white/60 hover:text-white"
                                         )}
                                     >
-                                        <MessageSquare className="h-3.5 w-3.5" /> {labels.providers.actions.addNote}
+                                        <MessageSquare className="h-3.5 w-3.5" /> Notas
                                     </button>
                                 )}
                             </div>
                         </div>
 
-                        <div className="p-8 border-b border-white/5">
-                            <div className="bg-white/5 rounded-2xl p-5 border border-white/5 shadow-inner">
+                        <div className="px-6 py-4 border-b border-white/10">
+                            <div className="rounded-xl p-4 border border-white/10 bg-white/5">
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-y-6 gap-x-4">
                                     <div className="space-y-1">
                                         <p className="text-[10px] font-bold text-white/30 uppercase tracking-wider">Estado</p>
@@ -927,31 +928,83 @@ export function ClientSidePanel({ client, isOpen, onClose, onClientUpdate }: Cli
                         <div className="p-8 space-y-12">
                             {activeTab === "timeline" && (
                                 <div className="relative pl-2">
-                                    <EnhancedTimeline events={timeline} />
+                                    <EnhancedTimeline
+                                        events={timeline}
+                                        onEventClick={(event) => {
+                                            if (event.type === "SALE") setActiveTab("sales")
+                                            else if (event.type === "NOTE") setActiveTab("notes")
+                                            else if (["TASK", "REMINDER_CREATED", "REMINDER_COMPLETED"].includes(event.type)) setActiveTab("tasks")
+                                        }}
+                                    />
                                 </div>
                             )}
 
                             {activeTab === "tasks" && (
-                                <div className="space-y-6">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <CheckSquare className="h-4 w-4 text-indigo-400" />
-                                            <h3 className="text-xs font-bold text-white/40 uppercase tracking-[0.2em]">{labels.tasks.plural} Pendientes</h3>
-                                        </div>
-                                        <Button onClick={() => setTaskDialog(true)} size="sm" className="bg-indigo-600 text-white rounded-xl">
-                                            <Plus className="h-3.5 w-3.5 mr-2" /> {labels.common.create} {labels.tasks.singular}
+                                <div className="p-6 space-y-4">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h3 className="text-white font-medium">{labels.nav.tasks} y Seguimiento</h3>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="bg-white/5 text-white border-white/10 hover:bg-white/10"
+                                            onClick={() => setTaskDialog(true)}
+                                        >
+                                            <Plus className="h-4 w-4 mr-2" /> {labels.providers.actions.newTask}
                                         </Button>
                                     </div>
-                                    <div className="space-y-3">
-                                        {tasks.map(task => (
-                                            <TaskCard key={task.id} task={task} onUpdate={handleTaskUpdate} onDelete={handleTaskDelete} />
-                                        ))}
-                                        {tasks.length === 0 && (
-                                            <div className="text-center py-8 border border-dashed border-white/5 rounded-2xl">
-                                                <p className="text-xs text-white/30">{labels.common.noResults} {labels.tasks.plural.toLowerCase()}</p>
-                                            </div>
-                                        )}
-                                    </div>
+                                    {tasks.length === 0 ? (
+                                        <div className="text-center py-12 text-white/20 border-2 border-dashed border-white/5 rounded-xl">
+                                            <CheckCircle2 className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                                            <p>No hay tareas registradas</p>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-2">
+                                            {tasks.map(task => (
+                                                <div
+                                                    key={task.id}
+                                                    className={cn(
+                                                        "flex items-center gap-3 p-3 rounded-lg bg-white/5 border group transition-all",
+                                                        task.status === "DONE"
+                                                            ? "border-green-500/20 bg-green-500/5"
+                                                            : "border-white/10 hover:border-white/20"
+                                                    )}
+                                                >
+                                                    <button
+                                                        onClick={() => handleTaskUpdate(task.id, task.status !== "DONE" ? "DONE" : "PENDING")}
+                                                        className="transition-all hover:scale-110"
+                                                        disabled={false}
+                                                    >
+                                                        {task.status === "DONE" ? (
+                                                            <CheckCircle2 className="h-5 w-5 text-green-500 shadow-[0_0_8px_rgba(34,197,94,0.3)]" />
+                                                        ) : (
+                                                            <Circle className="h-5 w-5 text-white/20 hover:text-white/40" />
+                                                        )}
+                                                    </button>
+                                                    <div className="flex-1 min-w-0">
+                                                        <h4 className={cn(
+                                                            "text-sm font-medium truncate transition-all",
+                                                            task.status === "DONE" ? "line-through text-white/30" : "text-white"
+                                                        )}>
+                                                            {task.title}
+                                                        </h4>
+                                                        <div className="flex items-center gap-2 mt-0.5">
+                                                            {task.dueDate && (
+                                                                <p className="text-[10px] text-white/40">Vence: {format(new Date(task.dueDate), "d MMM", { locale: es })}</p>
+                                                            )}
+                                                            <Badge variant="outline" className={cn(
+                                                                "text-[9px] py-0 px-1 leading-none h-4",
+                                                                task.priority === "HIGH" ? "border-red-500/50 text-red-400" :
+                                                                task.priority === "MEDIUM" ? "border-amber-500/50 text-amber-400" :
+                                                                "border-blue-500/50 text-blue-400"
+                                                            )}>
+                                                                {task.priority}
+                                                            </Badge>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             )}
 

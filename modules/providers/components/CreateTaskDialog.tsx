@@ -111,18 +111,24 @@ export function CreateTaskDialog({ providerId, providerName, open, onOpenChange,
                     <div className="grid grid-cols-2 gap-4">
                         {/* Priority */}
                         <div>
-                            <Label htmlFor="priority" className="text-white/80">Prioridad</Label>
+                            <Label htmlFor="priority" className="text-zinc-200">Prioridad</Label>
                             <Select
                                 value={formData.priority}
                                 onValueChange={(value: any) => setFormData(prev => ({ ...prev, priority: value }))}
                             >
-                                <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                                <SelectTrigger className="bg-zinc-800 border-zinc-600 text-white hover:bg-zinc-700 data-[state=open]:bg-zinc-700">
                                     <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent className="bg-zinc-900 border-white/10">
-                                    <SelectItem value="LOW">{labels.providers.dependency.LOW}</SelectItem>
-                                    <SelectItem value="MEDIUM">{labels.providers.dependency.MEDIUM}</SelectItem>
-                                    <SelectItem value="HIGH">{labels.providers.dependency.HIGH}</SelectItem>
+                                <SelectContent className="bg-zinc-900 border-white/10 text-white">
+                                    <SelectItem value="LOW" className="text-white bg-transparent data-[highlighted]:bg-zinc-700 data-[highlighted]:text-white cursor-pointer">
+                                        {labels.providers.dependency.LOW}
+                                    </SelectItem>
+                                    <SelectItem value="MEDIUM" className="text-white bg-transparent data-[highlighted]:bg-zinc-700 data-[highlighted]:text-white cursor-pointer">
+                                        {labels.providers.dependency.MEDIUM}
+                                    </SelectItem>
+                                    <SelectItem value="HIGH" className="text-white bg-transparent data-[highlighted]:bg-zinc-700 data-[highlighted]:text-white cursor-pointer">
+                                        {labels.providers.dependency.HIGH}
+                                    </SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

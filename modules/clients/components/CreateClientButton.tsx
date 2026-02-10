@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useSectorConfig } from "@/hooks/useSectorConfig"
 import {
     Dialog,
     DialogContent,
@@ -16,6 +17,7 @@ import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 
 export function CreateClientButton() {
+    const { labels } = useSectorConfig()
     const [open, setOpen] = useState(false)
     const [loading, setLoading] = useState(false)
 
@@ -33,10 +35,10 @@ export function CreateClientButton() {
         <>
             <Button
                 onClick={() => setOpen(true)}
-                className="gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white border-0"
+                className="h-11 px-6 shrink-0 bg-blue-500 hover:bg-blue-600 text-white font-semibold shadow-[0_0_20px_rgba(59,130,246,0.2)]"
             >
-                <Plus className="h-4 w-4" />
-                Nuevo Cliente
+                <Plus className="h-4 w-4 mr-2" />
+                {labels.clients.newButton}
             </Button>
 
             <Dialog open={open} onOpenChange={setOpen}>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import { useState } from "react"
 import {
   Utensils,
   Dumbbell,
@@ -34,14 +34,14 @@ export default function SectorSelector({
 }: {
   sectors: readonly Sector[]
 }) {
-  const router = useRouter()
+  const [loading, setLoading] = useState<string | null>(null)
 
-  // "other" siempre el último
   const normal = sectors.filter((s) => s.id !== "other")
   const other = sectors.find((s) => s.id === "other")
   const ordered = other ? [...normal, other] : normal
 
   const selectSector = async (sector: string) => {
+    setLoading(sector)
     try {
       const response = await fetch("/api/onboarding/sector", {
         method: "POST",
@@ -52,15 +52,14 @@ export default function SectorSelector({
       const data = await response.json()
 
       if (data.success) {
-        // ✅ ONBOARDING COMPLETED - REDIRECT TO DASHBOARD
-        router.push(data.redirect)
+        window.location.href = "/dashboard"
       } else {
         console.error("Error completing onboarding:", data.error)
-        // Handle error (could show toast notification)
+        setLoading(null)
       }
     } catch (error) {
       console.error("Error selecting sector:", error)
-      // Handle error (could show toast notification)
+      setLoading(null)
     }
   }
 
@@ -87,6 +86,8 @@ export default function SectorSelector({
             return (
               <button
                 key={sector.id}
+                type="button"
+                disabled={loading !== null}
                 onClick={() => selectSector(sector.id)}
                 className="
                   group relative p-7 rounded-2xl

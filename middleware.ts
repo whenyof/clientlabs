@@ -2,10 +2,15 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import { getToken } from "next-auth/jwt"
 
+/**
+ * Middleware: ONLY auth. No onboarding logic here (avoids JWT/DB desync and redirect loops).
+ * - Unauthenticated → /auth
+ * - Admin routes → require ADMIN role
+ * Onboarding is enforced in dashboard layout (server, DB-backed).
+ */
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
 
-  // 🌍 PUBLIC
   if (
     pathname === "/" ||
     pathname.startsWith("/auth") ||
@@ -24,7 +29,6 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/auth", req.url))
   }
 
-  // 🛡️ ADMIN FIRST
   if (pathname.startsWith("/admin")) {
     if (token.role !== "ADMIN") {
       return NextResponse.redirect(new URL("/dashboard", req.url))
@@ -32,17 +36,9 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next()
   }
 
-  // 🧭 ONBOARDING (NO ADMIN)
-  if (
-    pathname.startsWith("/dashboard") &&
-    token.onboardingCompleted === false
-  ) {
-    return NextResponse.redirect(new URL("/select-sector", req.url))
-  }
-
   return NextResponse.next()
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/dashboard/:path*", "/select-sector"],
+  matcher: ["/admin/:path*", "/dashboard/:path*", "/onboarding/:path*"],
 }

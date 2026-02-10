@@ -46,7 +46,7 @@ const menu: MenuGroup[] = [
     items: [
       { label: "Automatizaciones", icon: Zap, href: "/dashboard/other/automations", badge: "pro" },
       { label: "Analytics", icon: LineChart, href: "/dashboard/other/analytics", badge: "beta" },
-      { label: "Reportes", icon: FileText, href: "/dashboard/other/reports" },
+      { label: "Reporte Ejecutivo", icon: FileText, href: "/dashboard/other/reporting" },
     ],
   },
   {

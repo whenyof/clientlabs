@@ -2,7 +2,7 @@
 
 import { useSectorConfig } from "@/hooks/useSectorConfig"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import type { Lead } from "@prisma/client"
 import { LeadStatusBadge } from "./LeadStatusBadge"
 import { LeadTemperature } from "./LeadTemperature"
@@ -105,9 +105,15 @@ export function LeadsTable({
 
     const handleClosePanel = () => {
         setIsPanelOpen(false)
-        // Delay clearing selected lead for smooth animation
         setTimeout(() => setSelectedLead(null), 200)
     }
+
+    // Sync selected lead when leads list updates (e.g. after temperature/reminder change + router.refresh)
+    useEffect(() => {
+        if (!selectedLead) return
+        const updated = leads.find((l) => l.id === selectedLead.id)
+        if (updated) setSelectedLead(updated)
+    }, [leads])
 
     const handleToggleSelect = (leadId: string, e: React.MouseEvent) => {
         e.stopPropagation()

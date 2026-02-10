@@ -35,8 +35,11 @@ export function TaskFilters() {
     }
 
     const views = [
+        { id: "dashboard", label: viewsConfig.dashboard },
         { id: "today", label: viewsConfig.today },
         { id: "week", label: viewsConfig.week },
+        { id: "day-plan", label: viewsConfig.dayPlan },
+        { id: "calendar", label: viewsConfig.calendar },
         { id: "overdue", label: viewsConfig.overdue },
         { id: "all", label: viewsConfig.all }
     ]

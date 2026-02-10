@@ -17,7 +17,7 @@ export async function PATCH(
     }
     const { id } = await params
     const body = await request.json()
-    const { status } = body
+    const { status, invoiceUrl } = body
 
     const sale = await prisma.sale.findFirst({
       where: { id, userId: session.user.id },
@@ -30,6 +30,7 @@ export async function PATCH(
       where: { id },
       data: {
         ...(typeof status === 'string' && status.trim() ? { status: status.trim() } : {}),
+        ...(invoiceUrl !== undefined ? { invoiceUrl: invoiceUrl === null || invoiceUrl === '' ? null : String(invoiceUrl) } : {}),
         updatedAt: new Date(),
       },
     })

@@ -6,8 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import {
     ShoppingBag,
     CheckSquare,
-    MessageSquare,
-    ChevronRight,
+    Mail,
     Package,
     Wrench,
     Code,
@@ -18,7 +17,6 @@ import { es } from "date-fns/locale"
 import { cn } from "@/lib/utils"
 import { RegisterOrderDialog } from "./RegisterOrderDialog"
 import { CreateTaskDialog } from "./CreateTaskDialog"
-import { AddNoteDialog } from "./AddNoteDialog"
 
 import { useSectorConfig } from "@/hooks/useSectorConfig"
 
@@ -35,6 +33,7 @@ type Provider = {
     updatedAt: Date
     payments: any[]
     tasks: any[]
+    contactEmail?: string | null
     _count: {
         payments: number
         tasks: number
@@ -76,7 +75,6 @@ export function ProvidersTable({ providers, onProviderClick, onProviderUpdate }:
 
     const [orderDialogProvider, setOrderDialogProvider] = useState<Provider | null>(null)
     const [taskDialogProvider, setTaskDialogProvider] = useState<Provider | null>(null)
-    const [noteDialogProvider, setNoteDialogProvider] = useState<Provider | null>(null)
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('es-ES', {
@@ -181,43 +179,42 @@ export function ProvidersTable({ providers, onProviderClick, onProviderUpdate }:
                                             </span>
                                         </td>
 
-                                        {/* Quick Actions */}
+                                        {/* Acciones rápidas: siempre visibles, solo iconos con tooltips */}
                                         <td className="p-4" onClick={(e) => e.stopPropagation()}>
-                                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="flex items-center justify-end gap-1">
                                                 <Button
                                                     size="sm"
                                                     variant="ghost"
-                                                    className="h-8 px-2 text-white/60 hover:text-white hover:bg-white/10"
                                                     title={labels.providers.actions.newOrder}
-                                                    onClick={() => setOrderDialogProvider(provider)}
+                                                    className="h-8 w-8 p-0 text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 border border-transparent hover:border-blue-500/20"
+                                                    onClick={(e) => { e.stopPropagation(); setOrderDialogProvider(provider) }}
                                                 >
                                                     <ShoppingBag className="h-4 w-4" />
                                                 </Button>
                                                 <Button
                                                     size="sm"
                                                     variant="ghost"
-                                                    className="h-8 px-2 text-white/60 hover:text-white hover:bg-white/10"
                                                     title={labels.providers.actions.newTask}
-                                                    onClick={() => setTaskDialogProvider(provider)}
+                                                    className="h-8 w-8 p-0 text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 border border-transparent hover:border-amber-500/20"
+                                                    onClick={(e) => { e.stopPropagation(); setTaskDialogProvider(provider) }}
                                                 >
                                                     <CheckSquare className="h-4 w-4" />
                                                 </Button>
                                                 <Button
                                                     size="sm"
                                                     variant="ghost"
-                                                    className="h-8 px-2 text-white/60 hover:text-white hover:bg-white/10"
-                                                    title={labels.providers.actions.addNote}
-                                                    onClick={() => setNoteDialogProvider(provider)}
+                                                    title="Enviar email"
+                                                    className="h-8 w-8 p-0 text-green-400 hover:text-green-300 hover:bg-green-500/10 border border-transparent hover:border-green-500/20"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        if (provider.contactEmail) {
+                                                            window.location.href = `mailto:${provider.contactEmail}`
+                                                        } else {
+                                                            onProviderClick(provider)
+                                                        }
+                                                    }}
                                                 >
-                                                    <MessageSquare className="h-4 w-4" />
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    className="h-8 px-2 text-white/60 hover:text-white hover:bg-white/10"
-                                                    onClick={() => onProviderClick(provider)}
-                                                >
-                                                    <ChevronRight className="h-4 w-4" />
+                                                    <Mail className="h-4 w-4" />
                                                 </Button>
                                             </div>
                                         </td>
@@ -255,15 +252,6 @@ export function ProvidersTable({ providers, onProviderClick, onProviderUpdate }:
                 />
             )}
 
-            {noteDialogProvider && (
-                <AddNoteDialog
-                    providerId={noteDialogProvider.id}
-                    providerName={noteDialogProvider.name}
-                    open={!!noteDialogProvider}
-                    onOpenChange={(open) => !open && setNoteDialogProvider(null)}
-                    onSuccess={() => onProviderUpdate(noteDialogProvider.id, {})}
-                />
-            )}
         </>
     )
 }

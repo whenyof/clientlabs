@@ -116,6 +116,7 @@ export interface SectorLabels {
         finance: string
         billing: string
         analytics: string
+        reporting: string
         integrations: string
         notifications: string
         settings: string
@@ -377,12 +378,15 @@ export interface SectorLabels {
             EMAIL: string
             MEETING: string
         }
-        /** Vistas de filtro (Hoy, Esta semana, Vencidas, Todas) */
+        /** Vistas de filtro (Hoy, Esta semana, Vencidas, Todas, Day plan) */
         views: {
             today: string
             week: string
             overdue: string
             all: string
+            dayPlan: string
+            dashboard: string
+            calendar: string
         }
         /** Textos de UI: empty state, filtros, diálogos, toasts, etc. */
         ui: {
@@ -460,6 +464,15 @@ export interface SectorLabels {
             ganada: string
             perdida: string
         }
+        paymentStatus: {
+            PAGADO?: string
+            PAID?: string
+            PENDIENTE?: string
+            PENDING?: string
+            PARCIAL?: string
+            PARTIAL?: string
+            CANCELLED?: string
+        }
         ui: {
             automationTitle: string
             externalInputs: string
@@ -477,6 +490,61 @@ export interface SectorLabels {
             webhookOrigin: string
             currentState: string
             moveTo: string
+        }
+        /** Selector de rango temporal del panel */
+        timeRanges: {
+            today: string
+            last7: string
+            last30: string
+            month: string
+            last6months: string
+            year: string
+            custom: string
+        }
+        /** Modos de la gráfica hero (Ingresos / Nº ventas / Ticket medio) */
+        chartModes: {
+            revenue: string
+            count: string
+            avgTicket: string
+        }
+        /** Títulos de cards de comparativa / insights */
+        insights: {
+            vsPreviousPeriod: string
+            topClient: string
+            paidShare: string
+        }
+        /** Distribución: por estado de pago / por cliente */
+        distribution: {
+            byStatus: string
+            byClient: string
+        }
+        /** Título gráfica principal */
+        heroChartTitle: string
+        /** Comparativa año contra año (YoY) */
+        yoy?: {
+            title: string
+            chartTitle: string
+            noDataMessage: string
+            tooltip: string
+            revenueLabel: string
+            salesLabel: string
+            avgTicketLabel: string
+            currentYear: string
+            previousYear: string
+            newGrowth: string
+        }
+        /** Forecast ejecutivo (determinista, sin IA externa) */
+        forecast?: {
+            title: string
+            chartRevenueTitle: string
+            chartSalesTitle: string
+            noDataMessage: string
+            scenarios: { base: string; conservador: string; optimista: string }
+            summaryNext30: string
+            summaryNext90: string
+            summaryEndOfMonth: string
+            historical: string
+            projected: string
         }
     }
 
@@ -516,6 +584,50 @@ export interface SectorLabels {
         conversionRate: string
         roi: string
         performance: string
+    }
+
+    // Executive Reporting
+    reporting: {
+        title: string
+        pageSubtitle: string
+        kpis: {
+            revenue: string
+            sales: string
+            avgTicket: string
+            growth: string
+        }
+        periods: {
+            day: string
+            last7: string
+            last30: string
+            last6m: string
+            last12m: string
+        }
+        breakdown: {
+            topClients: string
+            revenueByType: string
+        }
+        insight: {
+            title: string
+        }
+        chartTitle: string
+        forecast: {
+            title: string
+            historical: string
+            conservative: string
+            realistic: string
+            optimistic: string
+        }
+        yoy: {
+            title: string
+            currentYear: string
+            previousYear: string
+            revenueYoY: string
+            salesYoY: string
+            avgTicketYoY: string
+            periodYtd: string
+            periodFullYear: string
+        }
     }
 
     // Notificaciones
@@ -667,6 +779,7 @@ export interface SectorFeatures {
         automations: boolean
         aiInsights: boolean
         analytics: boolean
+        reporting: boolean
         integrations: boolean
         notifications: boolean
     }

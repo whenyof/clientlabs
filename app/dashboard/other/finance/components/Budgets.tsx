@@ -3,7 +3,7 @@
 import { motion } from "framer-motion"
 import { formatCurrency } from "../lib/formatters"
 import { useFinanceData } from "../context/FinanceDataContext"
-import { TagIcon, ArrowTrendingUpIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline"
+import { TagIcon } from "@heroicons/react/24/outline"
 
 function getBudgetStatusClass(status?: string) {
   if (status === 'exceeded') return { bg: 'bg-red-500/20', text: 'text-red-400', label: 'Excedido' }
@@ -16,40 +16,35 @@ export function Budgets() {
   const budgets = analytics?.budgets ?? []
 
   if (loading) {
-    return <div className="bg-gray-800/50 rounded-2xl border border-gray-700/50 p-6 animate-pulse h-48" />
+    return <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5 animate-pulse h-48" />
   }
 
   if (budgets.length === 0) {
     return (
-      <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-gray-700/50 p-6">
-        <h3 className="text-xl font-bold text-white mb-2">Presupuestos</h3>
-        <p className="text-gray-400 text-sm mb-4">Control de gastos por categorías</p>
-        <div className="py-8 text-center text-gray-400">
-          <p className="text-white/80">Sin presupuestos</p>
-          <p className="text-sm mt-1">Crea presupuestos por categoría para controlar gastos.</p>
-        </div>
+      <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
+        <h3 className="text-sm font-semibold text-white mb-1">Presupuestos</h3>
+        <p className="text-xs text-white/50 mb-4">Control por categorías</p>
+        <div className="py-6 text-center text-white/40 text-sm">Sin presupuestos</div>
       </div>
     )
   }
 
   return (
     <motion.div
-      className="bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-gray-700/50 p-6"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.5, duration: 0.5 }}
+      className="rounded-xl border border-white/10 bg-white/[0.03] p-5"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.25 }}
     >
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-xl font-bold text-white mb-2">Presupuestos</h3>
-          <p className="text-gray-400 text-sm">Control de gastos por categorías</p>
+          <h3 className="text-sm font-semibold text-white">Presupuestos</h3>
+          <p className="text-xs text-white/50">Control por categorías</p>
         </div>
-        <div className="text-sm text-gray-400">
-          {budgets.length} presupuestos activos
-        </div>
+        <span className="text-xs text-white/45">{budgets.length} activos</span>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-3">
         {budgets.map((budget, index) => {
           const utilization = (budget.spent / budget.limit) * 100
           const statusClass = getBudgetStatusClass(budget.status)
@@ -139,34 +134,20 @@ export function Budgets() {
         })}
       </div>
 
-      {/* Summary */}
-      <motion.div
-        className="mt-6 p-4 bg-gray-900/50 rounded-xl border border-gray-700/50"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.0, duration: 0.5 }}
-      >
-        <div className="grid grid-cols-3 gap-4 text-center">
-          <div>
-            <div className="text-2xl font-bold text-green-400">
-              {budgets.filter(b => b.status === 'good').length}
-            </div>
-            <div className="text-xs text-gray-400">En regla</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-yellow-400">
-              {budgets.filter(b => b.status === 'warning').length}
-            </div>
-            <div className="text-xs text-gray-400">Cerca límite</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-red-400">
-              {budgets.filter(b => b.status === 'exceeded' || b.status === 'danger').length}
-            </div>
-            <div className="text-xs text-gray-400">Excedidos</div>
-          </div>
+      <div className="mt-4 pt-3 border-t border-white/10 grid grid-cols-3 gap-2 text-center text-xs">
+        <div>
+          <span className="font-semibold text-emerald-400">{budgets.filter(b => b.status === 'good').length}</span>
+          <span className="text-white/45 ml-1">ok</span>
         </div>
-      </motion.div>
+        <div>
+          <span className="font-semibold text-amber-400">{budgets.filter(b => b.status === 'warning').length}</span>
+          <span className="text-white/45 ml-1">aviso</span>
+        </div>
+        <div>
+          <span className="font-semibold text-rose-400">{budgets.filter(b => b.status === 'exceeded' || b.status === 'danger').length}</span>
+          <span className="text-white/45 ml-1">exced.</span>
+        </div>
+      </div>
     </motion.div>
   )
 }

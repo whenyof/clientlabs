@@ -29,7 +29,7 @@ export function DashboardButtonMobile({ onClick }: { onClick?: () => void }) {
 
         // Users who haven't completed onboarding go to sector selection
         if (user.onboardingCompleted === false) {
-            return "/select-sector"
+            return "/onboarding/sector"
         }
 
         // Regular users go to dashboard

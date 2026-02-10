@@ -39,7 +39,7 @@ export function FilePreviewModal({ file, open, onOpenChange }: FilePreviewModalP
                             variant="ghost"
                             size="sm"
                             asChild
-                            className="text-white/60 hover:text-white"
+                            className="text-zinc-300 hover:text-white hover:bg-white/10"
                         >
                             <a href={file.url} download={file.name}>
                                 <Download className="h-4 w-4 mr-2" />
@@ -50,7 +50,7 @@ export function FilePreviewModal({ file, open, onOpenChange }: FilePreviewModalP
                             variant="ghost"
                             size="icon"
                             onClick={() => onOpenChange(false)}
-                            className="text-white/60 hover:text-white"
+                            className="text-zinc-300 hover:text-white hover:bg-white/10"
                         >
                             <X className="h-5 w-5" />
                         </Button>

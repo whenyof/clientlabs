@@ -1,0 +1,1 @@
+export { getReportingData } from "./getReportingData"

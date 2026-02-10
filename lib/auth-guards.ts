@@ -44,7 +44,7 @@ export async function requireOnboardedUser() {
   const { session, dbUser } = await requireAuthenticatedUser()
 
   if (!dbUser.onboardingCompleted) {
-    redirect("/select-sector")
+    redirect("/onboarding/sector")
   }
 
   return {

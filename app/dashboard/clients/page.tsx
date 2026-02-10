@@ -92,13 +92,13 @@ export default async function ClientsPage({
     }))
 
     return (
-        <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                <div>
-                    <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">
+        <div className="space-y-8">
+            <div className="flex flex-wrap items-center gap-3">
+                <div className="min-w-0">
+                    <h1 className="text-2xl font-bold text-white tracking-tight truncate">
                         {labels.clients.title}
                     </h1>
-                    <p className="text-base text-white/60 max-w-2xl">
+                    <p className="text-sm text-white/60 mt-0.5 truncate max-w-xl">
                         Gestión de relaciones e ingresos para {labels.clients.plural.toLowerCase()}
                     </p>
                 </div>

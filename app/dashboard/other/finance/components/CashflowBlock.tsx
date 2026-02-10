@@ -14,19 +14,16 @@ export function CashflowBlock() {
 
   if (loading) {
     return (
-      <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-gray-700/50 p-6 animate-pulse h-64" />
+      <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5 animate-pulse h-56" />
     )
   }
 
   if (inflow === 0 && outflow === 0) {
     return (
-      <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-gray-700/50 p-6">
-        <h3 className="text-xl font-bold text-white mb-2">Flujo de Caja</h3>
-        <p className="text-gray-400 text-sm mb-4">Entradas vs salidas del período</p>
-        <div className="py-8 text-center text-gray-400">
-          <p className="text-white/80">Sin datos de flujo</p>
-          <p className="text-sm mt-1">Añade transacciones para ver entradas y salidas.</p>
-        </div>
+      <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
+        <h3 className="text-sm font-semibold text-white mb-1">Flujo de caja</h3>
+        <p className="text-xs text-white/50 mb-4">Entradas, salidas y neto</p>
+        <div className="py-6 text-center text-white/40 text-sm">Sin datos</div>
       </div>
     )
   }
@@ -58,101 +55,54 @@ export function CashflowBlock() {
     }
   ]
 
+  const total = Math.max(inflow, outflow, 1)
+  const percentage = (v: number) => (Math.abs(v) / total) * 100
+
   return (
     <motion.div
-      className="bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-gray-700/50 p-6"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.3, duration: 0.5 }}
+      className="rounded-xl border border-white/10 bg-white/[0.03] p-5"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.25 }}
     >
-      <div className="mb-6">
-        <h3 className="text-xl font-bold text-white mb-2">Flujo de Caja</h3>
-        <p className="text-gray-400 text-sm">Entradas vs salidas del período</p>
-      </div>
+      <h3 className="text-sm font-semibold text-white mb-1">Flujo de caja</h3>
+      <p className="text-xs text-white/50 mb-4">Entradas, salidas y neto</p>
 
-      <div className="space-y-4">
-        {flowItems.map((item, index) => {
+      <div className="space-y-3">
+        {flowItems.map((item) => {
           const Icon = item.icon
-          const percentage = ((item.amount / inflow) * 100)
-
+          const pct = item.label === "Flujo Neto" ? undefined : percentage(item.amount)
           return (
-            <motion.div
-              key={index}
-              className={`p-4 rounded-xl border ${item.bgColor} ${item.borderColor} transition-all duration-300 hover:scale-105`}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 + (index * 0.1), duration: 0.5 }}
+            <div
+              key={item.label}
+              className={`flex items-center justify-between gap-3 p-3 rounded-lg border ${item.borderColor} ${item.bgColor}`}
             >
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg ${item.bgColor}`}>
-                    <Icon className={`w-5 h-5 ${item.color}`} />
-                  </div>
-                  <div>
-                    <div className="text-white font-medium">{item.label}</div>
-                    <div className="text-xs text-gray-400">
-                      {percentage.toFixed(1)}% del total
-                    </div>
-                  </div>
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className={`p-1.5 rounded-md ${item.bgColor}`}>
+                  <Icon className={`w-4 h-4 ${item.color}`} />
                 </div>
-
-                <div className="text-right">
-                  <div className={`text-xl font-bold ${item.color}`}>
-                    {formatCurrency(item.amount)}
-                  </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-white/80">{item.label}</p>
+                  {pct != null && (
+                    <p className="text-[10px] text-white/45">{pct.toFixed(0)}%</p>
+                  )}
                 </div>
               </div>
-
-              {/* Progress bar */}
-              <div className="w-full bg-gray-700 rounded-full h-2">
-                <motion.div
-                  className={`h-2 rounded-full ${item.color.replace('text-', 'bg-')}`}
-                  style={{ width: `${Math.min(percentage, 100)}%` }}
-                  initial={{ width: 0 }}
-                  animate={{ width: `${Math.min(percentage, 100)}%` }}
-                  transition={{ delay: 0.6 + (index * 0.1), duration: 0.8 }}
-                />
-              </div>
-            </motion.div>
+              <p className={`text-sm font-semibold tabular-nums shrink-0 ${item.color}`}>
+                {formatCurrency(item.amount)}
+              </p>
+            </div>
           )
         })}
       </div>
 
-      {/* Summary */}
-      <motion.div
-        className="mt-6 p-4 bg-gray-900/50 rounded-xl border border-gray-700/50"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.7, duration: 0.5 }}
-      >
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-white font-medium">Estado del Flujo</div>
-            <div className="text-sm text-gray-400">Resultado neto del período</div>
-          </div>
-          <div className="text-right">
-            <div className={`text-2xl font-bold ${cashFlow >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-              {cashFlow >= 0 ? '✅ Positivo' : '⚠️ Negativo'}
-            </div>
-            <div className="text-sm text-gray-400">
-              {formatCurrency(Math.abs(cashFlow))} {cashFlow >= 0 ? 'superávit' : 'déficit'}
-            </div>
-          </div>
-        </div>
-
-        {/* Cash flow indicator */}
-        <div className="mt-4 flex items-center justify-center">
-          <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
-            cashFlow >= 0 ? 'bg-green-500/20' : 'bg-red-500/20'
-          }`}>
-            {cashFlow >= 0 ? (
-              <ArrowUpIcon className="w-8 h-8 text-green-400" />
-            ) : (
-              <ArrowDownIcon className="w-8 h-8 text-red-400" />
-            )}
-          </div>
-        </div>
-      </motion.div>
+      <div className={`mt-4 flex items-center justify-between p-3 rounded-lg ${cashFlow >= 0 ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-rose-500/10 border border-rose-500/20'}`}>
+        <span className="text-xs font-medium text-white/80">Estado</span>
+        <span className={`text-sm font-semibold ${cashFlow >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+          {cashFlow >= 0 ? 'Positivo' : 'Negativo'}
+        </span>
+        <span className="text-xs text-white/50">{formatCurrency(Math.abs(cashFlow))}</span>
+      </div>
     </motion.div>
   )
 }

@@ -1,12 +1,18 @@
 "use client"
 
 import { useState, useMemo, useCallback, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { Search, Plus } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 import { ClientsKPIs } from "./ClientsKPIs"
 import { ClientsTable } from "./ClientsTable"
 import { ClientsFilters } from "./ClientsFilters"
 import { ClientSidePanel } from "./ClientSidePanel"
+import { CreateClientButton } from "./CreateClientButton"
 import { Client } from "@prisma/client"
 import { deriveClientStatus, isClientForgotten } from "@/lib/logic/client-status"
+import { useSectorConfig } from "@/hooks/useSectorConfig"
 
 type ClientWithLead = Client & {
     convertedFromLead: {
@@ -42,8 +48,12 @@ type ClientsViewProps = {
 }
 
 export function ClientsView({ initialClients, allClientsBase, currentFilters, serverNow }: ClientsViewProps & { serverNow?: string }) {
+    const { labels } = useSectorConfig()
+    const router = useRouter()
+    const searchParams = useSearchParams()
     // 1. Unified Reference Date for Hydration Consistency
     const [referenceDate] = useState(() => serverNow ? new Date(serverNow) : new Date());
+    const [searchTerm, setSearchTerm] = useState(currentFilters.search)
 
     // State for the table
     const [clients, setClients] = useState<ClientWithLead[]>(initialClients)
@@ -60,9 +70,30 @@ export function ClientsView({ initialClients, allClientsBase, currentFilters, se
         setClients(initialClients)
     }, [initialClients])
 
+    // Sync selected client when server data changes (e.g. after task/note/reminder + router.refresh)
+    useEffect(() => {
+        if (!selectedClient) return
+        const updated = initialClients.find((c) => c.id === selectedClient.id)
+        if (updated) setSelectedClient(updated)
+    }, [initialClients])
+
     useEffect(() => {
         setKpiClients(allClientsBase)
     }, [allClientsBase])
+
+    useEffect(() => {
+        setSearchTerm(currentFilters.search)
+    }, [currentFilters.search])
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            const params = new URLSearchParams(searchParams.toString())
+            if (searchTerm) params.set("search", searchTerm)
+            else params.delete("search")
+            router.push(`?${params.toString()}`)
+        }, 300)
+        return () => clearTimeout(timer)
+    }, [searchTerm])
 
     const handleClientUpdate = useCallback((clientId: string, data: Partial<ClientWithLead>) => {
         const updateFn = (c: any) => {
@@ -107,17 +138,31 @@ export function ClientsView({ initialClients, allClientsBase, currentFilters, se
     }, [kpiClients, derivedLogic])
 
     return (
-        <div className="flex flex-col gap-8">
-            {/* 1. KPIs */}
+        <div className="space-y-8">
+            {/* Barra de búsqueda + botón Nuevo cliente (igual que Providers) */}
+            <div className="flex flex-wrap items-center gap-3">
+                <div className="relative flex-1 min-w-[200px] max-w-md">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                    <Input
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder={`Buscar ${labels.clients.plural.toLowerCase()}...`}
+                        className="bg-white/5 border-white/10 text-white pl-10 h-11"
+                    />
+                </div>
+                <CreateClientButton />
+            </div>
+
+            {/* KPIs */}
             <ClientsKPIs kpis={kpis} />
 
-            {/* 2. Filters & Actions */}
-            <div className="bg-zinc-900/50 backdrop-blur-sm p-4 rounded-xl border border-white/5 shadow-2xl">
+            {/* Filters */}
+            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur p-4">
                 <ClientsFilters currentFilters={currentFilters} />
             </div>
 
             {/* 3. Table */}
-            <div className="bg-zinc-900/50 backdrop-blur-sm rounded-xl border border-white/5 overflow-hidden shadow-2xl">
+            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur overflow-hidden">
                 <ClientsTable
                     clients={clientsWithDerivedStatus}
                     onClientUpdate={handleClientUpdate}

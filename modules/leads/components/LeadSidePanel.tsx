@@ -5,7 +5,9 @@ import { useSectorConfig } from "@/hooks/useSectorConfig"
 import { useState } from "react"
 import type { Lead } from "@prisma/client"
 import { X, Flame, CloudSun, CloudSnow, Calendar, MapPin, Tag as TagIcon, FileText, MessageSquare, CheckCircle, XCircle, Loader2 } from "lucide-react"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { TemperatureIcon } from "./TemperatureIcon"
 import { addLeadNote, markLeadLost, convertLeadToClient, changeLeadTemperature, addLeadTag, removeLeadTag, setLeadReminder, completeLeadReminder } from "../actions"
@@ -13,9 +15,12 @@ import { useRouter } from "next/navigation"
 import type { LeadTemp } from "@prisma/client"
 import { toast } from "sonner"
 import { TaskDialog } from "@/components/tasks/TaskDialog"
-import { TaskCard, type Task } from "@/components/tasks/TaskCard"
+import type { Task } from "@/components/tasks/TaskCard"
 import { getTasks } from "@/app/dashboard/tasks/actions"
-import { CheckSquare } from "lucide-react"
+import { toggleTaskCompletion } from "@/app/dashboard/tasks/actions"
+import { format } from "date-fns"
+import { es } from "date-fns/locale"
+import { CheckSquare, Circle } from "lucide-react"
 import { useEffect } from "react"
 import {
     Dialog,
@@ -28,6 +33,7 @@ import { Input } from "@/components/ui/input"
 import { TagPill } from "./TagPill"
 import { ReminderDialog } from "./ReminderDialog"
 import { DeleteLeadDialog } from "./DeleteLeadDialog"
+import { cn } from "@/lib/utils"
 import { getLeadSuggestion } from "../utils/leadSuggestions"
 import { AISuggestionCard } from "./AISuggestionCard"
 import {
@@ -62,6 +68,22 @@ export function LeadSidePanel({ lead, isOpen, onClose }: LeadSidePanelProps) {
     const [newTag, setNewTag] = useState("")
     const [reminderDialog, setReminderDialog] = useState(false)
     const [deleteDialog, setDeleteDialog] = useState(false)
+    const [activeTab, setActiveTab] = useState<"summary" | "tasks" | "reminders" | "notes">("summary")
+    const [taskTogglePending, setTaskTogglePending] = useState(false)
+
+    const handleToggleTask = async (taskId: string, completed: boolean) => {
+        setTaskTogglePending(true)
+        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: completed ? "DONE" : "PENDING" } : t))
+        try {
+            await toggleTaskCompletion(taskId, completed)
+            router.refresh()
+        } catch {
+            setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: completed ? "PENDING" : "DONE" } : t))
+            toast.error(ui.toastErrorNote)
+        } finally {
+            setTaskTogglePending(false)
+        }
+    }
 
     // Initialize note with existing notes
     useEffect(() => {
@@ -231,93 +253,56 @@ export function LeadSidePanel({ lead, isOpen, onClose }: LeadSidePanelProps) {
                     }
                 }}
                 leadId={lead.id}
+                entityName={lead.name ?? undefined}
                 onSuccess={() => {
-                    if (lead) getTasks({ leadId: lead.id }).then(setTasks)
+                    if (lead) {
+                        getTasks({ leadId: lead.id }).then(setTasks)
+                        router.refresh()
+                    }
                 }}
             />
-            {/* Overlay */}
-            {
-                isOpen && (
-                    <div
-                        className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-200"
-                        onClick={onClose}
-                    />
-                )
-            }
-
-            {/* Side Panel */}
-            <div
-                className={`fixed top-0 right-0 h-full w-full md:w-[480px] bg-zinc-900 border-l border-white/10 z-50 transform transition-transform duration-200 ease-out ${isOpen ? "translate-x-0" : "translate-x-full"
-                    }`}
-            >
-                <div className="flex flex-col h-full">
-                    {/* Header */}
-                    <div className="p-6 border-b border-white/10">
-                        <div className="flex items-start justify-between mb-4">
-                            <div className="flex-1">
-                                <h2 className="text-2xl font-bold text-white mb-2">{lead.name}</h2>
-                                <p className="text-sm text-white/60">{lead.email}</p>
-                                {lead.phone && <p className="text-sm text-white/60">{lead.phone}</p>}
+            <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
+                <SheetContent side="right" className="w-full sm:max-w-2xl bg-zinc-950 border-l border-white/10 p-0 flex flex-col focus:outline-none">
+                    <SheetHeader className="z-10 bg-zinc-950 border-b border-white/10 p-6">
+                        <div className="flex items-start justify-between">
+                            <div className="flex-1 min-w-0">
+                                <SheetTitle className="text-white text-xl truncate">{lead.name}</SheetTitle>
+                                <p className="text-sm text-white/60 truncate mt-1">{lead.email}</p>
+                                {lead.phone && <p className="text-sm text-white/60 truncate">{lead.phone}</p>}
+                                <div className="flex flex-wrap gap-2 mt-3">
+                                    <TemperatureIcon temperature={lead.temperature || "COLD"} showLabel />
+                                    {lead.leadStatus === "CONVERTED" && (
+                                        <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/40 text-[10px] h-5">{labels.leads.status.CONVERTED}</Badge>
+                                    )}
+                                    {lead.leadStatus === "LOST" && (
+                                        <Badge className="bg-rose-500/20 text-rose-400 border-rose-500/40 text-[10px] h-5">{labels.leads.status.LOST}</Badge>
+                                    )}
+                                </div>
                             </div>
-                            <button
-                                onClick={onClose}
-                                className="p-2 rounded-lg hover:bg-white/10 transition-colors"
-                            >
-                                <X className="h-5 w-5 text-white/60" />
-                            </button>
+                            <Button variant="ghost" size="icon" onClick={onClose} className="text-white/60 hover:text-white hover:bg-white/10 shrink-0">
+                                <X className="h-5 w-5" />
+                            </Button>
                         </div>
-
-                        {/* Badges */}
-                        <div className="flex flex-wrap gap-2">
-                            <TemperatureIcon temperature={lead.temperature || "COLD"} showLabel />
-                            {lead.leadStatus === "CONVERTED" && (
-                                <span className="px-3 py-1 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-xs font-medium">
-                                    ✓ {labels.leads.status.CONVERTED}
-                                </span>
-                            )}
-                            {lead.leadStatus === "LOST" && (
-                                <span className="px-3 py-1 rounded-lg bg-rose-500/20 border border-rose-500/40 text-rose-400 text-xs font-medium">
-                                    ✗ {labels.leads.status.LOST}
-                                </span>
-                            )}
-                        </div>
-
-                        {/* AI Suggestions */}
+                    </SheetHeader>
+                    <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+                        {/* AI suggestion arriba */}
                         {(() => {
                             const suggestion = getLeadSuggestion(lead)
                             if (!suggestion) return null
-
                             const handleApplyAction = () => {
                                 switch (suggestion.action) {
-                                    case "email":
-                                        handleEmailClick()
-                                        break
-                                    case "call":
-                                        toast.info(ui.registerCallInNotes)
-                                        break
-                                    case "convert":
-                                        setConvertDialog(true)
-                                        break
-                                    case "follow_up":
-                                        toast.info(ui.registerFollowUpInNotes)
-                                        break
+                                    case "email": handleEmailClick(); break
+                                    case "call": toast.info(ui.registerCallInNotes); break
+                                    case "convert": setConvertDialog(true); break
+                                    case "follow_up": toast.info(ui.registerFollowUpInNotes); break
                                 }
                             }
-
                             return (
-                                <div className="mt-4">
-                                    <AISuggestionCard
-                                        leadId={lead.id}
-                                        suggestion={suggestion}
-                                        onApplyAction={handleApplyAction}
-                                    />
+                                <div>
+                                    <AISuggestionCard leadId={lead.id} suggestion={suggestion} onApplyAction={handleApplyAction} />
                                 </div>
                             )
                         })()}
-                    </div>
-
-                    {/* Content - Scrollable */}
-                    <div className="flex-1 overflow-y-auto p-6 space-y-6">
                         {/* Quick Actions */}
                         {!isReadOnly && (
                             <div>
@@ -361,33 +346,72 @@ export function LeadSidePanel({ lead, isOpen, onClose }: LeadSidePanelProps) {
                             </div>
                         )}
 
-                        {/* Tasks Section */}
+                        {/* Tasks Section — mismo layout que Providers */}
                         <div>
-                            <div className="flex items-center justify-between mb-3">
-                                <h3 className="text-sm font-medium text-white/80 flex items-center gap-2">
-                                    <CheckSquare className="h-4 w-4" />
-                                    {ui.sidebarTasks}
-                                </h3>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-white font-medium">{labels.nav.tasks} y Seguimiento</h3>
                                 <Button
-                                    onClick={() => setTaskDialog(true)}
+                                    variant="outline"
                                     size="sm"
-                                    className="h-7 text-xs bg-blue-600 hover:bg-blue-700"
+                                    className="bg-white/5 text-white border-white/10 hover:bg-white/10"
+                                    onClick={() => setTaskDialog(true)}
                                 >
-                                    + {ui.sidebarAddTask}
+                                    <CheckSquare className="h-4 w-4 mr-2" /> {labels.providers.actions.newTask}
                                 </Button>
                             </div>
-
-                            <div className="space-y-2">
-                                {tasks.length > 0 ? (
-                                    tasks.map(task => (
-                                        <TaskCard key={task.id} task={task} />
-                                    ))
-                                ) : (
-                                    <p className="text-sm text-white/40 text-center py-4 border border-white/5 rounded-lg bg-white/5">
-                                        {ui.sidebarNoTasks}
-                                    </p>
-                                )}
-                            </div>
+                            {tasks.length === 0 ? (
+                                <div className="text-center py-12 text-white/20 border-2 border-dashed border-white/5 rounded-xl">
+                                    <CheckCircle2 className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                                    <p>No hay tareas registradas</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-2">
+                                    {tasks.map(task => (
+                                        <div
+                                            key={task.id}
+                                            className={cn(
+                                                "flex items-center gap-3 p-3 rounded-lg bg-white/5 border group transition-all",
+                                                task.status === "DONE"
+                                                    ? "border-green-500/20 bg-green-500/5"
+                                                    : "border-white/10 hover:border-white/20"
+                                            )}
+                                        >
+                                            <button
+                                                onClick={() => handleToggleTask(task.id, task.status !== "DONE")}
+                                                className="transition-all hover:scale-110"
+                                                disabled={taskTogglePending}
+                                            >
+                                                {task.status === "DONE" ? (
+                                                    <CheckCircle2 className="h-5 w-5 text-green-500 shadow-[0_0_8px_rgba(34,197,94,0.3)]" />
+                                                ) : (
+                                                    <Circle className="h-5 w-5 text-white/20 hover:text-white/40" />
+                                                )}
+                                            </button>
+                                            <div className="flex-1 min-w-0">
+                                                <h4 className={cn(
+                                                    "text-sm font-medium truncate transition-all",
+                                                    task.status === "DONE" ? "line-through text-white/30" : "text-white"
+                                                )}>
+                                                    {task.title}
+                                                </h4>
+                                                <div className="flex items-center gap-2 mt-0.5">
+                                                    {task.dueDate && (
+                                                        <p className="text-[10px] text-white/40">Vence: {format(new Date(task.dueDate), "d MMM", { locale: es })}</p>
+                                                    )}
+                                                    <Badge variant="outline" className={cn(
+                                                        "text-[9px] py-0 px-1 leading-none h-4",
+                                                        task.priority === "HIGH" ? "border-red-500/50 text-red-400" :
+                                                        task.priority === "MEDIUM" ? "border-amber-500/50 text-amber-400" :
+                                                        "border-blue-500/50 text-blue-400"
+                                                    )}>
+                                                        {task.priority}
+                                                    </Badge>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                         {/* Reminder Section */}
@@ -633,15 +657,15 @@ export function LeadSidePanel({ lead, isOpen, onClose }: LeadSidePanelProps) {
 
                         {/* Automation Placeholder */}
                         <div className="p-4 rounded-lg bg-purple-500/10 border border-purple-500/30">
-                            <h3 className="text-sm font-medium text-purple-300 mb-2">🤖 {ui.automationTitle}</h3>
+                            <h3 className="text-sm font-medium text-purple-300 mb-2">{ui.automationTitle}</h3>
                             <p className="text-xs text-white/60">
                                 Este lead entrará automáticamente en reglas de seguimiento según su temperatura y tags.
                             </p>
                             <p className="text-xs text-purple-400 mt-2">{ui.automationComing}</p>
                         </div>
                     </div>
-                </div>
-            </div>
+                </SheetContent>
+            </Sheet>
 
             {/* Lost Dialog */}
             <Dialog open={lostDialog} onOpenChange={setLostDialog}>

@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
 }
 
 model AIInsight {
@@ -555,6 +556,7 @@ model Sale {
   metadata         Json?
   notes            String?
   saleDate         DateTime @default(now())
+  invoiceUrl       String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime
   Client           Client?  @relation(fields: [clientId], references: [id])
@@ -672,10 +674,12 @@ model User {
   restaurantMetrics      RestaurantMetrics[]
   retailMetrics          RetailMetrics[]
   Sale                   Sale[]
+  monthlyGoals           MonthlyGoal[]
   services               Service[]
   sessions               Session[]
   subscriptions          Subscription[]
   Task                   Task[]
+  TaskCalendarSync       TaskCalendarSync[]
   teamMembers            TeamMember[]
   TrackingEvent          TrackingEvent[]
   transactions           Transaction[]
@@ -685,6 +689,74 @@ model User {
   adminLogs              AdminLog[]              @relation("AdminLogs")
   impersonatedBy         ImpersonationSession[]  @relation("ImpersonatedBy")
   impersonationTarget    ImpersonationSession[]  @relation("ImpersonationTarget")
+  UserWorkingHours       UserWorkingHours[]
+  UserTimeOff            UserTimeOff[]
+  CalendarBlock          CalendarBlock[]
+  Reminder               Reminder[]
+}
+
+model UserWorkingHours {
+  id     String   @id @default(cuid())
+  userId String
+  weekday Int     // 0 = Sunday, 1 = Monday, ... 6 = Saturday
+  start  DateTime // time-of-day (use date part as reference only)
+  end    DateTime
+  User   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, weekday])
+}
+
+model UserTimeOff {
+  id     String    @id @default(cuid())
+  userId String
+  start  DateTime
+  end    DateTime
+  reason String?
+  User   User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model CalendarBlock {
+  id     String    @id @default(cuid())
+  userId String
+  start  DateTime
+  end    DateTime
+  reason String?
+  User   User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Reminder {
+  id        String       @id @default(cuid())
+  userId    String
+  title     String
+  start     DateTime
+  end       DateTime
+  status    ReminderStatus @default(PENDING)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  User      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([start])
+  @@index([status])
+}
+
+model MonthlyGoal {
+  id        String   @id @default(cuid())
+  userId    String
+  month     Int
+  year      Int
+  amount    Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, month, year])
+  @@index([userId])
+  @@index([month, year])
 }
 
 model Plan {
@@ -1109,27 +1181,98 @@ model BackupMetadata {
 }
 
 model Task {
-  id          String       @id
-  userId      String
-  title       String
-  description String?
-  status      TaskStatus   @default(PENDING)
-  priority    TaskPriority @default(MEDIUM)
-  dueDate     DateTime?
-  type        TaskType     @default(MANUAL)
-  clientId    String?
-  leadId      String?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  Client      Client?      @relation(fields: [clientId], references: [id])
-  Lead        Lead?        @relation(fields: [leadId], references: [id])
-  User        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                    String       @id
+  userId                String
+  title                 String
+  description           String?
+  status                TaskStatus   @default(PENDING)
+  priority              TaskPriority @default(MEDIUM)
+  dueDate               DateTime?
+  type                  TaskType     @default(MANUAL)
+  clientId              String?
+  leadId                String?
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+  // --- New optional fields (backward compatible) ---
+  estimatedMinutes      Int?
+  slaMinutes            Int?      // SLA en minutos para cálculo de cumplimiento
+  completedAt           DateTime?
+  startedAt             DateTime?
+  startAt               DateTime?   // planned start (calendar slot)
+  endAt                 DateTime?   // planned end (calendar slot)
+  priorityScore         Float?
+  lastPriorityCalc      DateTime?
+  energyScore           Float?
+  financialImpact      Float?
+  isBlocking            Boolean?     @default(false)
+  blockedReason         String?
+  recurrenceRule        String?
+  parentTaskId          String?
+  sourceModule          String?
+  sourceId              String?
+  autoGenerated         Boolean?     @default(false)
+  completionQualityScore Float?
+  assignedTo            String?
+  latitude              Float?
+  longitude             Float?
+  routeOrder            Int?
+  // --- Relations (existing unchanged) ---
+  Client                Client?      @relation(fields: [clientId], references: [id])
+  Lead                  Lead?       @relation(fields: [leadId], references: [id])
+  User                  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parentTask            Task?        @relation("TaskSubtasks", fields: [parentTaskId], references: [id], onDelete: SetNull)
+  subtasks              Task[]       @relation("TaskSubtasks")
+  calendarSyncs         TaskCalendarSync[]
 
   @@index([userId])
   @@index([clientId])
   @@index([leadId])
   @@index([status])
   @@index([dueDate])
+  @@index([assignedTo])
+  @@index([priorityScore])
+  @@index([parentTaskId])
+  @@index([sourceModule])
+  @@index([completedAt])
+  @@index([startAt])
+  @@index([endAt])
+}
+
+model TaskCalendarSync {
+  id               String   @id @default(cuid())
+  taskId           String
+  userId           String
+  provider         CalendarSyncProvider
+  externalEventId  String
+  lastSyncedAt     DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  Task             Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  User             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, provider])
+  @@index([userId])
+  @@index([provider])
+}
+
+model CalendarSyncJob {
+  id           String                @id @default(cuid())
+  taskId       String
+  userId       String
+  provider     CalendarSyncProvider
+  operation    CalendarSyncOperation
+  payload      Json?
+  status       CalendarSyncJobStatus @default(PENDING)
+  errorMessage String?
+  attempts     Int                   @default(0)
+  maxAttempts  Int                   @default(5)
+  nextRetryAt  DateTime?
+  createdAt    DateTime              @default(now())
+  processedAt  DateTime?
+
+  @@index([status])
+  @@index([nextRetryAt])
+  @@index([userId])
 }
 
 model Provider {
@@ -1538,6 +1681,11 @@ enum TaskStatus {
   CANCELLED
 }
 
+enum ReminderStatus {
+  PENDING
+  DONE
+}
+
 enum TaskPriority {
   LOW
   MEDIUM
@@ -1549,6 +1697,24 @@ enum TaskType {
   EMAIL
   MEETING
   MANUAL
+}
+
+enum CalendarSyncProvider {
+  GOOGLE
+  APPLE
+}
+
+enum CalendarSyncOperation {
+  CREATE
+  UPDATE
+  DELETE
+}
+
+enum CalendarSyncJobStatus {
+  PENDING
+  PROCESSING
+  DONE
+  FAILED
 }
 
 enum ProviderStatus {

@@ -99,10 +99,10 @@ export function ProvidersView({ initialProviders, initialKPIs }: ProvidersViewPr
 
     return (
         <div className="space-y-8">
-            {/* Header & Search */}
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-                <div className="relative w-full md:max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
+            {/* Barra de búsqueda + botón "Nuevo proveedor" a la misma altura */}
+            <div className="flex flex-wrap items-center gap-3">
+                <div className="relative flex-1 min-w-[200px] max-w-md">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                     <Input
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -112,7 +112,7 @@ export function ProvidersView({ initialProviders, initialKPIs }: ProvidersViewPr
                 </div>
                 <Button
                     onClick={() => setIsCreateOpen(true)}
-                    className="w-full md:w-auto bg-blue-500 hover:bg-blue-600 text-white font-semibold h-11 px-6 shadow-[0_0_20px_rgba(59,130,246,0.2)]"
+                    className="h-11 px-6 shrink-0 bg-blue-500 hover:bg-blue-600 text-white font-semibold shadow-[0_0_20px_rgba(59,130,246,0.2)]"
                 >
                     <Plus className="h-4 w-4 mr-2" />
                     {labels.providers.newButton}

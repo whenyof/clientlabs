@@ -101,9 +101,14 @@ export const formatTransactionOrigin = (origin: string): string => {
 
 export const formatExpenseFrequency = (frequency: string): string => {
   switch (frequency) {
+    case 'WEEKLY':
+    case 'weekly':
+      return 'Semanal'
     case 'MONTHLY':
+    case 'monthly':
       return 'Mensual'
     case 'QUARTERLY':
+    case 'quarterly':
       return 'Trimestral'
     case 'SEMIANNUAL':
       return 'Semestral'

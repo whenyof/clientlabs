@@ -19,6 +19,7 @@ import { TaskDialog } from "./TaskDialog"
 import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog"
 import { toast } from "sonner"
 import { useSectorConfig } from "@/hooks/useSectorConfig"
+import { getPriorityScoreLabel, getPriorityScoreBadgeClass } from "@/modules/tasks/lib/priority-score-badge"
 
 // Define simplified type for UI
 export type Task = {
@@ -26,6 +27,8 @@ export type Task = {
     title: string
     status: "PENDING" | "DONE" | "CANCELLED"
     priority: "LOW" | "MEDIUM" | "HIGH"
+    /** Calculated priority score for badge (Crítica / Alta / Media / Baja). */
+    priorityScore?: number | null
     type: "MANUAL" | "CALL" | "EMAIL" | "MEETING"
     dueDate: Date | string | null
     clientId?: string | null
@@ -135,11 +138,15 @@ export const TaskCard = memo(function TaskCard({ task, onUpdate, onDelete }: Tas
                         )}>
                             {task.title}
                         </span>
-                        {task.priority === "HIGH" && (
+                        {getPriorityScoreLabel(task.priorityScore ?? null) ? (
+                            <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0 h-4", getPriorityScoreBadgeClass(task.priorityScore))}>
+                                {getPriorityScoreLabel(task.priorityScore ?? null)}
+                            </Badge>
+                        ) : task.priority === "HIGH" ? (
                             <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-orange-500/10 border-orange-500/20 text-orange-400 animate-in fade-in zoom-in duration-300">
                                 🔥 {ui.priorityHighBadge}
                             </Badge>
-                        )}
+                        ) : null}
                         {isOverdue && (
                             <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-red-500/10 border-red-500/20 text-red-400 animate-pulse">
                                 {ui.overdueBadge}

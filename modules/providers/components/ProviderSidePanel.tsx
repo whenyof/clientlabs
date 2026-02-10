@@ -4,7 +4,7 @@ import { useState, useEffect, useOptimistic, useTransition } from "react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { X, Package, Wrench, Code, HelpCircle, Plus, MessageSquare, CreditCard, ShoppingBag, CheckCircle2, Circle, FileText, ExternalLink, Download, Eye, AlertTriangle, ShieldCheck, Activity, Target, ChevronDown, ChevronUp, Phone, Mail, Globe, Upload, Calendar, Clock, DollarSign } from "lucide-react"
+import { X, Package, Wrench, Code, HelpCircle, Plus, MessageSquare, CreditCard, ShoppingBag, CheckCircle2, Circle, FileText, ExternalLink, Download, Eye, AlertTriangle, ShieldCheck, Activity, Target, ChevronDown, ChevronUp, Phone, Mail, Globe, Upload, Calendar, Clock, DollarSign, Trash2 } from "lucide-react"
 import {
     getProviderOrders,
     getProviderTimeline,
@@ -13,10 +13,12 @@ import {
     toggleProviderTaskStatus,
     addProviderNote,
     registerProviderFile,
+    registerProviderPayment,
     completeProviderOrder,
     cancelProviderOrder,
     getProviderAlertsAction,
-    updateProvider
+    updateProvider,
+    deleteProviderFile
 } from "../actions"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
@@ -25,6 +27,18 @@ import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { useSectorConfig } from "@/hooks/useSectorConfig"
 
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import {
+    AlertDialog,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { AddNoteDialog } from "./AddNoteDialog"
 import { CreateTaskDialog } from "./CreateTaskDialog"
 import { RegisterOrderDialog } from "./RegisterOrderDialog"
@@ -87,6 +101,7 @@ type Order = {
         name: string
         url: string
         category: string
+        createdAt?: Date
     }[]
 }
 
@@ -152,10 +167,19 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
     const [showNoteDialog, setShowNoteDialog] = useState(false)
     const [showFileDialog, setShowFileDialog] = useState(false)
     const [selectedFile, setSelectedFile] = useState<any | null>(null)
-    const [fileUploadContext, setFileUploadContext] = useState<{ entityType: 'PROVIDER' | 'ORDER' | 'PAYMENT', entityId: string } | null>(null)
+    const [fileToDelete, setFileToDelete] = useState<{ id: string; name: string } | null>(null)
+    const [fileUploadContext, setFileUploadContext] = useState<{ entityType: 'PROVIDER' | 'ORDER' | 'PAYMENT', entityId: string, presetCategory?: 'INVOICE' | 'ORDER' } | null>(null)
 
     // Expanded Order/Payment states
     const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null)
+    // Registrar pago: order para el que se abre el diálogo
+    const [orderForPayment, setOrderForPayment] = useState<Order | null>(null)
+    const [paymentForm, setPaymentForm] = useState({ amount: 0, paymentDate: format(new Date(), "yyyy-MM-dd"), concept: "" })
+    const [paymentSubmitting, setPaymentSubmitting] = useState(false)
+    // Note modal (timeline click → full content)
+    const [selectedNoteContent, setSelectedNoteContent] = useState<string | null>(null)
+    // Collapsible file groups (order/payment ids)
+    const [collapsedFileGroups, setCollapsedFileGroups] = useState<Record<string, boolean>>({})
 
     // Sync active tab with initialTab prop
     useEffect(() => {
@@ -329,7 +353,6 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
             const res = await cancelProviderOrder(orderId)
             if (res.success && res.order) {
                 toast.success("Pedido cancelado")
-                // Update local state immediately
                 setOrders(prev => prev.map(o =>
                     o.id === orderId ? { ...o, status: res.order.status } : o
                 ))
@@ -343,27 +366,83 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
         }
     }
 
-    const handleRegisterFile = async (fileData: { name: string, url: string, category: string }) => {
+    const handleOpenRegisterPayment = (order: Order) => {
+        setOrderForPayment(order)
+        setPaymentForm({
+            amount: order.amount,
+            paymentDate: format(new Date(), "yyyy-MM-dd"),
+            concept: order.description || ""
+        })
+    }
+
+    const handleRegisterPaymentSubmit = async (e: React.FormEvent) => {
+        if (!orderForPayment) return
+        e.preventDefault()
+        setPaymentSubmitting(true)
+        try {
+            const res = await registerProviderPayment({
+                providerId: provider.id,
+                orderId: orderForPayment.id,
+                amount: paymentForm.amount,
+                paymentDate: new Date(paymentForm.paymentDate),
+                concept: paymentForm.concept || undefined,
+                status: "PAID"
+            })
+            if (res.success) {
+                toast.success("Pago registrado. Pedido actualizado.")
+                setOrderForPayment(null)
+                loadOrders()
+                loadTimeline()
+                onUpdate(provider.id, {})
+            } else {
+                toast.error(res.error || "Error al registrar pago")
+            }
+        } catch (error) {
+            toast.error("Error al registrar pago")
+        } finally {
+            setPaymentSubmitting(false)
+        }
+    }
+
+    const handleRegisterFile = async (fileData: { name: string, url: string, category: string } | { name: string, url: string, category: string }[]) => {
         if (!fileUploadContext) return
 
-        const res = await registerProviderFile({
-            providerId: provider.id,
-            name: fileData.name,
-            url: fileData.url,
-            category: fileData.category as any,
-            orderId: fileUploadContext.entityType === 'ORDER' ? fileUploadContext.entityId : undefined,
-            paymentId: fileUploadContext.entityType === 'PAYMENT' ? fileUploadContext.entityId : undefined,
-        })
-
-        if (res.success) {
-            toast.success("Archivo registrado con éxito.")
+        const items = Array.isArray(fileData) ? fileData : [fileData]
+        let allOk = true
+        for (const item of items) {
+            const res = await registerProviderFile({
+                providerId: provider.id,
+                name: item.name,
+                url: item.url,
+                category: item.category as any,
+                orderId: fileUploadContext.entityType === 'ORDER' ? fileUploadContext.entityId : undefined,
+                paymentId: fileUploadContext.entityType === 'PAYMENT' ? fileUploadContext.entityId : undefined,
+            })
+            if (!res.success) {
+                toast.error(res.error || "Error al registrar el archivo.")
+                allOk = false
+            }
+        }
+        if (allOk) {
             loadOrders()
             loadTimeline()
             loadFiles()
             setShowFileDialog(false)
             setFileUploadContext(null)
+        }
+    }
+
+    const handleDeleteFile = async (fileId: string) => {
+        const res = await deleteProviderFile(fileId)
+        if (res.success) {
+            loadOrders()
+            loadTimeline()
+            loadFiles()
+            setFileToDelete(null)
+            if (selectedFile?.id === fileId) setSelectedFile(null)
+            toast.success("Archivo eliminado")
         } else {
-            toast.error(res.error || "Error al registrar el archivo.")
+            toast.error(res.error || "Error al eliminar")
         }
     }
 
@@ -375,6 +454,9 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
             maximumFractionDigits: 0
         }).format(amount)
     }
+
+    const fileCategoryLabel = (cat: string) =>
+        cat === "INVOICE" ? "Factura" : cat === "ORDER" ? "Albarán" : cat === "CONTRACT" ? "Contrato" : "Recibo u otros"
 
     const pendingTasksCount = optimisticTasks.filter(t => t.status !== 'DONE').length
     const pendingOrdersCount = orders.filter(o => o.status === 'PENDING').length
@@ -733,19 +815,19 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
                                 <div className="grid grid-cols-4 gap-2">
                                     <button onClick={() => setShowOrderDialog(true)} className="flex flex-col items-center gap-1.5 p-3 rounded-lg bg-white/[0.03] border border-white/[0.06] hover:bg-blue-500/10 hover:border-blue-500/20 transition-all group">
                                         <ShoppingBag className="h-5 w-5 text-blue-400/60 group-hover:text-blue-400" />
-                                        <span className="text-[10px] text-white/40 group-hover:text-white/70">Pedido</span>
+                                        <span className="text-[10px] text-zinc-400 group-hover:text-white">Pedido</span>
                                     </button>
                                     <button onClick={() => setShowTaskDialog(true)} className="flex flex-col items-center gap-1.5 p-3 rounded-lg bg-white/[0.03] border border-white/[0.06] hover:bg-amber-500/10 hover:border-amber-500/20 transition-all group">
                                         <CheckCircle2 className="h-5 w-5 text-amber-400/60 group-hover:text-amber-400" />
-                                        <span className="text-[10px] text-white/40 group-hover:text-white/70">Tarea</span>
+                                        <span className="text-[10px] text-zinc-400 group-hover:text-white">Tarea</span>
                                     </button>
                                     <button onClick={() => setShowNoteDialog(true)} className="flex flex-col items-center gap-1.5 p-3 rounded-lg bg-white/[0.03] border border-white/[0.06] hover:bg-purple-500/10 hover:border-purple-500/20 transition-all group">
                                         <MessageSquare className="h-5 w-5 text-purple-400/60 group-hover:text-purple-400" />
-                                        <span className="text-[10px] text-white/40 group-hover:text-white/70">Nota</span>
+                                        <span className="text-[10px] text-zinc-400 group-hover:text-white">Nota</span>
                                     </button>
                                     <button onClick={() => { setFileUploadContext({ entityType: 'PROVIDER', entityId: provider.id }); setShowFileDialog(true) }} className="flex flex-col items-center gap-1.5 p-3 rounded-lg bg-white/[0.03] border border-white/[0.06] hover:bg-green-500/10 hover:border-green-500/20 transition-all group">
                                         <Upload className="h-5 w-5 text-green-400/60 group-hover:text-green-400" />
-                                        <span className="text-[10px] text-white/40 group-hover:text-white/70">Archivo</span>
+                                        <span className="text-[10px] text-zinc-400 group-hover:text-white">Archivo</span>
                                     </button>
                                 </div>
 
@@ -916,7 +998,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
                                                                         <p className="text-white font-bold">{formatCurrency(order.amount)}</p>
                                                                         <Badge className={cn(
                                                                             "text-[10px] py-0 px-1.5",
-                                                                            order.status === 'CLOSED' ? "bg-green-500/20 text-green-400 border-green-500/30" :
+                                                                            order.status === 'PAID' || order.status === 'CLOSED' ? "bg-green-500/20 text-green-400 border-green-500/30" :
                                                                             order.status === 'COMPLETED' ? "bg-green-500/20 text-green-400 border-green-500/30" :
                                                                             order.status === 'RECEIVED' ? "bg-blue-500/20 text-blue-400 border-blue-500/30" :
                                                                             order.status === 'ISSUE' ? "bg-orange-500/20 text-orange-400 border-orange-500/30" :
@@ -924,8 +1006,8 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
                                                                             order.status === 'DRAFT' ? "bg-gray-500/20 text-gray-400 border-gray-500/30" :
                                                                             "bg-amber-500/20 text-amber-400 border-amber-500/30"
                                                                         )}>
-                                                                            {order.status === 'CLOSED' ? 'CERRADO' :
-                                                                            order.status === 'COMPLETED' ? 'CERRADO' :
+                                                                            {order.status === 'PAID' || order.status === 'CLOSED' ? 'PAGADO' :
+                                                                            order.status === 'COMPLETED' ? 'PAGADO' :
                                                                             order.status === 'RECEIVED' ? 'RECIBIDO' :
                                                                             order.status === 'ISSUE' ? 'INCIDENCIA' :
                                                                             order.status === 'CANCELLED' ? 'CANCELADO' :
@@ -978,26 +1060,47 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
                                                                 {/* Files */}
                                                                 <div className="space-y-2">
                                                                     <p className="text-[10px] text-white/40 uppercase tracking-wider">Archivos adjuntos</p>
-                                                                    <div className="flex flex-wrap gap-2">
-                                                                        {order.files && order.files.map((file) => (
-                                                                            <button
-                                                                                key={file.id}
-                                                                                onClick={() => setSelectedFile(file)}
-                                                                                className="flex items-center gap-2 bg-white/5 border border-white/10 rounded px-2 py-1 text-[10px] text-white/60 hover:text-white hover:border-white/30 transition-colors"
-                                                                            >
-                                                                                <FileText className="h-3 w-3" />
-                                                                                {file.name}
-                                                                            </button>
+                                                                    <div className="flex flex-wrap gap-2 items-center">
+                                                                        {order.files && order.files.map((file: { id: string; name: string; url?: string; category: string; createdAt?: Date }) => (
+                                                                            <div key={file.id} className="flex items-center gap-1 bg-white/5 border border-white/10 rounded px-2 py-1.5 text-[11px] text-zinc-200 hover:border-white/30 transition-colors">
+                                                                                <button type="button" onClick={() => setSelectedFile(file)} className="flex items-center gap-2 min-w-0 text-left flex-1">
+                                                                                    <FileText className="h-3 w-3 text-blue-400 shrink-0" />
+                                                                                    <span className="truncate max-w-[120px]">{file.name}</span>
+                                                                                    <span className="text-white/50 shrink-0">{fileCategoryLabel(file.category)}</span>
+                                                                                    {file.createdAt && <span className="text-white/40 shrink-0">{format(new Date(file.createdAt), 'dd/MM/yy', { locale: es })}</span>}
+                                                                                </button>
+                                                                                {file.url && (
+                                                                                    <a href={file.url} download={file.name} className="p-0.5 text-blue-400 hover:text-blue-300 shrink-0" title="Descargar"><Download className="h-3 w-3" /></a>
+                                                                                )}
+                                                                                <button type="button" onClick={(e) => { e.stopPropagation(); setFileToDelete({ id: file.id, name: file.name }) }} className="p-0.5 text-red-400 hover:text-red-300 shrink-0" title="Eliminar"><Trash2 className="h-3 w-3" /></button>
+                                                                            </div>
                                                                         ))}
-                                                                        <button
-                                                                            className="flex items-center gap-1 text-[10px] text-white/40 hover:text-white px-2 py-1 border border-dashed border-white/10 rounded"
-                                                                            onClick={() => {
-                                                                                setFileUploadContext({ entityType: 'ORDER', entityId: order.id })
-                                                                                setShowFileDialog(true)
-                                                                            }}
-                                                                        >
-                                                                            <Plus className="h-3 w-3" /> Subir factura
-                                                                        </button>
+                                                                        <div className="flex gap-2">
+                                                                            <Button
+                                                                                type="button"
+                                                                                size="sm"
+                                                                                variant="outline"
+                                                                                className="text-[11px] border-blue-500/40 text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 hover:text-blue-200"
+                                                                                onClick={() => {
+                                                                                    setFileUploadContext({ entityType: 'ORDER', entityId: order.id, presetCategory: 'INVOICE' })
+                                                                                    setShowFileDialog(true)
+                                                                                }}
+                                                                            >
+                                                                                <Upload className="h-3.5 w-3.5 mr-1.5" /> Subir factura
+                                                                            </Button>
+                                                                            <Button
+                                                                                type="button"
+                                                                                size="sm"
+                                                                                variant="outline"
+                                                                                className="text-[11px] border-amber-500/40 text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 hover:text-amber-200"
+                                                                                onClick={() => {
+                                                                                    setFileUploadContext({ entityType: 'ORDER', entityId: order.id, presetCategory: 'ORDER' })
+                                                                                    setShowFileDialog(true)
+                                                                                }}
+                                                                            >
+                                                                                <Upload className="h-3.5 w-3.5 mr-1.5" /> Subir albarán
+                                                                            </Button>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
 
@@ -1029,19 +1132,20 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
                                                                             variant="outline"
                                                                             className="border-red-500/30 text-red-400 hover:bg-red-500/10"
                                                                         >
-                                                                            <X className="h-4 w-4" />
+                                                                            <X className="h-4 w-4 mr-1.5" />
+                                                                            Cancelar
                                                                         </Button>
                                                                     </div>
                                                                 )}
                                                                 {(order.status === 'RECEIVED') && (
                                                                     <div className="flex gap-2 pt-2">
                                                                         <Button
-                                                                            onClick={() => handleCompleteOrder(order.id, "COMPLETED")}
+                                                                            onClick={() => handleOpenRegisterPayment(order)}
                                                                             size="sm"
                                                                             className="flex-1 bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500/30"
                                                                         >
-                                                                            <CheckCircle2 className="h-4 w-4 mr-2" />
-                                                                            Cerrar pedido
+                                                                            <CreditCard className="h-4 w-4 mr-2" />
+                                                                            Registrar pago
                                                                         </Button>
                                                                     </div>
                                                                 )}
@@ -1060,7 +1164,8 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
                                                                             variant="outline"
                                                                             className="border-red-500/30 text-red-400 hover:bg-red-500/10"
                                                                         >
-                                                                            <X className="h-4 w-4" />
+                                                                            <X className="h-4 w-4 mr-1.5" />
+                                                                            Cancelar
                                                                         </Button>
                                                                     </div>
                                                                 )}
@@ -1091,7 +1196,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                className="bg-white/5 text-white border-white/10 hover:bg-white/10"
+                                                className="border-blue-500/40 text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 hover:text-blue-200"
                                                 onClick={() => {
                                                     setFileUploadContext({ entityType: 'PROVIDER', entityId: provider.id })
                                                     setShowFileDialog(true)
@@ -1101,108 +1206,150 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
                                             </Button>
                                         </div>
 
-                                        {/* Section: Order Files */}
+                                        {/* Section: Order Files (colapsable por pedido) */}
                                         {filesData.grouped.orders.length > 0 && (
                                             <div className="space-y-3">
                                                 <h4 className="text-xs font-bold text-blue-400/80 uppercase tracking-widest flex items-center gap-2">
                                                     <ShoppingBag className="h-3.5 w-3.5" /> Archivos de Pedidos
                                                 </h4>
-                                                {filesData.grouped.orders.map((group: any) => (
-                                                    <div key={group.order?.id || 'unknown'} className="rounded-lg border border-blue-500/10 bg-blue-500/5 p-3 space-y-2">
-                                                        <div className="flex items-center justify-between">
-                                                            <div className="flex items-center gap-2">
-                                                                <ShoppingBag className="h-3.5 w-3.5 text-blue-400" />
-                                                                <span className="text-xs font-medium text-white/80">
-                                                                    {group.order?.description || `Pedido #${group.order?.id?.slice(-4).toUpperCase()}`}
-                                                                </span>
-                                                                {group.order?.amount != null && (
-                                                                    <span className="text-[10px] text-white/40 font-mono">{formatCurrency(group.order.amount)}</span>
-                                                                )}
-                                                            </div>
-                                                            <button
-                                                                onClick={() => {
-                                                                    setFileUploadContext({ entityType: 'ORDER', entityId: group.order.id })
-                                                                    setShowFileDialog(true)
-                                                                }}
-                                                                className="text-[10px] text-blue-400/60 hover:text-blue-400 flex items-center gap-1"
+                                                {filesData.grouped.orders.map((group: any) => {
+                                                    const orderKey = `order-${group.order?.id || 'unknown'}`
+                                                    const isCollapsed = collapsedFileGroups[orderKey]
+                                                    return (
+                                                        <div key={orderKey} className="rounded-lg border border-blue-500/10 bg-blue-500/5 overflow-hidden">
+                                                            <div
+                                                                role="button"
+                                                                tabIndex={0}
+                                                                onClick={() => setCollapsedFileGroups(prev => ({ ...prev, [orderKey]: !prev[orderKey] }))}
+                                                                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setCollapsedFileGroups(prev => ({ ...prev, [orderKey]: !prev[orderKey] })) } }}
+                                                                className="w-full p-3 flex items-center justify-between text-left hover:bg-blue-500/10 transition-colors cursor-pointer"
                                                             >
-                                                                <Plus className="h-3 w-3" /> Adjuntar
-                                                            </button>
-                                                        </div>
-                                                        <div className="flex flex-wrap gap-2">
-                                                            {group.files.map((file: any) => (
-                                                                <button
-                                                                    key={file.id}
-                                                                    onClick={() => setSelectedFile(file)}
-                                                                    className="flex items-center gap-2 bg-white/5 border border-white/10 rounded px-2.5 py-1.5 text-[11px] text-white/70 hover:text-white hover:border-blue-500/30 hover:bg-blue-500/10 transition-all group/file"
+                                                                <div className="flex items-center gap-2 min-w-0">
+                                                                    {isCollapsed ? <ChevronDown className="h-4 w-4 text-blue-400 shrink-0" /> : <ChevronUp className="h-4 w-4 text-blue-400 shrink-0" />}
+                                                                    <ShoppingBag className="h-3.5 w-3.5 text-blue-400 shrink-0" />
+                                                                    <span className="text-xs font-medium text-white/80 truncate">
+                                                                        {group.order?.description || `Pedido #${group.order?.id?.slice(-4).toUpperCase()}`}
+                                                                    </span>
+                                                                    {group.order?.amount != null && (
+                                                                        <span className="text-[10px] text-white/40 font-mono shrink-0">{formatCurrency(group.order.amount)}</span>
+                                                                    )}
+                                                                    <span className="text-[10px] text-white/30">({group.files?.length ?? 0})</span>
+                                                                </div>
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={(e) => { e.stopPropagation(); e.preventDefault(); setFileUploadContext({ entityType: 'ORDER', entityId: group.order.id }); setShowFileDialog(true) }}
+                                                                    className="text-xs text-blue-300 hover:text-blue-200 hover:bg-blue-500/10 shrink-0"
                                                                 >
-                                                                    <FileText className="h-3.5 w-3.5 text-blue-400/60 group-hover/file:text-blue-400" />
-                                                                    <span className="truncate max-w-[160px]">{file.name}</span>
-                                                                    <Badge className="text-[8px] px-1 py-0 h-3.5 bg-white/5 border-white/10 text-white/40">{file.category}</Badge>
-                                                                </button>
-                                                            ))}
+                                                                    <Plus className="h-3 w-3 mr-1" /> Adjuntar
+                                                                </Button>
+                                                            </div>
+                                                            {!isCollapsed && (
+                                                                <div className="px-3 pb-3 flex flex-col gap-2">
+                                                                    {group.files?.map((file: any) => (
+                                                                        <div
+                                                                            key={file.id}
+                                                                            className="flex items-center gap-2 bg-white/5 border border-white/10 rounded px-2.5 py-1.5 text-[11px] text-zinc-200 hover:border-blue-500/30 hover:bg-blue-500/10 transition-all group/file w-full"
+                                                                        >
+                                                                            <button type="button" onClick={() => setSelectedFile(file)} className="flex items-center gap-2 min-w-0 flex-1 text-left">
+                                                                                <FileText className="h-3.5 w-3.5 text-blue-400 shrink-0" />
+                                                                                <span className="truncate flex-1 min-w-0">{file.name}</span>
+                                                                                <span className="text-blue-300/80 shrink-0">{fileCategoryLabel(file.category)}</span>
+                                                                                {file.createdAt && <span className="text-white/50 shrink-0">{format(new Date(file.createdAt), 'dd/MM/yyyy', { locale: es })}</span>}
+                                                                            </button>
+                                                                            <a href={file.url} download={file.name} className="shrink-0 text-blue-400 hover:text-blue-300 p-1" title="Descargar">
+                                                                                <Download className="h-3.5 w-3.5" />
+                                                                            </a>
+                                                                            <button type="button" onClick={() => setFileToDelete({ id: file.id, name: file.name })} className="shrink-0 text-red-400 hover:text-red-300 p-1" title="Eliminar">
+                                                                                <Trash2 className="h-3.5 w-3.5" />
+                                                                            </button>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            )}
                                                         </div>
-                                                    </div>
-                                                ))}
+                                                    )
+                                                })}
                                             </div>
                                         )}
 
-                                        {/* Section: Payment Files */}
+                                        {/* Section: Payment Files (colapsable por pago) */}
                                         {filesData.grouped.payments.length > 0 && (
                                             <div className="space-y-3">
                                                 <h4 className="text-xs font-bold text-green-400/80 uppercase tracking-widest flex items-center gap-2">
                                                     <CreditCard className="h-3.5 w-3.5" /> Justificantes de Pago
                                                 </h4>
-                                                {filesData.grouped.payments.map((group: any) => (
-                                                    <div key={group.payment?.id || 'unknown'} className="rounded-lg border border-green-500/10 bg-green-500/5 p-3 space-y-2">
-                                                        <div className="flex items-center justify-between">
-                                                            <div className="flex items-center gap-2">
-                                                                <CreditCard className="h-3.5 w-3.5 text-green-400" />
-                                                                <span className="text-xs font-medium text-white/80">
-                                                                    {group.payment?.concept || 'Pago'}
-                                                                </span>
-                                                                {group.payment?.amount != null && (
-                                                                    <span className="text-[10px] text-white/40 font-mono">{formatCurrency(group.payment.amount)}</span>
-                                                                )}
-                                                                {group.payment?.status && (
-                                                                    <Badge className={cn("text-[8px] px-1 py-0 h-3.5 border-0",
-                                                                        group.payment.status === 'PAID' ? "bg-green-500/20 text-green-400" :
-                                                                        group.payment.status === 'FAILED' ? "bg-red-500/20 text-red-400" :
-                                                                        "bg-amber-500/20 text-amber-400"
-                                                                    )}>
-                                                                        {group.payment.status === 'PAID' ? 'Pagado' : group.payment.status === 'FAILED' ? 'Fallido' : 'Pendiente'}
-                                                                    </Badge>
-                                                                )}
-                                                            </div>
-                                                            <button
-                                                                onClick={() => {
-                                                                    setFileUploadContext({ entityType: 'PAYMENT', entityId: group.payment.id })
-                                                                    setShowFileDialog(true)
-                                                                }}
-                                                                className="text-[10px] text-green-400/60 hover:text-green-400 flex items-center gap-1"
+                                                {filesData.grouped.payments.map((group: any) => {
+                                                    const payKey = `payment-${group.payment?.id || 'unknown'}`
+                                                    const isCollapsed = collapsedFileGroups[payKey]
+                                                    return (
+                                                        <div key={payKey} className="rounded-lg border border-green-500/10 bg-green-500/5 overflow-hidden">
+                                                            <div
+                                                                role="button"
+                                                                tabIndex={0}
+                                                                onClick={() => setCollapsedFileGroups(prev => ({ ...prev, [payKey]: !prev[payKey] }))}
+                                                                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setCollapsedFileGroups(prev => ({ ...prev, [payKey]: !prev[payKey] })) } }}
+                                                                className="w-full p-3 flex items-center justify-between text-left hover:bg-green-500/10 transition-colors cursor-pointer"
                                                             >
-                                                                <Plus className="h-3 w-3" /> Adjuntar
-                                                            </button>
-                                                        </div>
-                                                        <div className="flex flex-wrap gap-2">
-                                                            {group.files.map((file: any) => (
-                                                                <button
-                                                                    key={file.id}
-                                                                    onClick={() => setSelectedFile(file)}
-                                                                    className="flex items-center gap-2 bg-white/5 border border-white/10 rounded px-2.5 py-1.5 text-[11px] text-white/70 hover:text-white hover:border-green-500/30 hover:bg-green-500/10 transition-all group/file"
+                                                                <div className="flex items-center gap-2 min-w-0">
+                                                                    {isCollapsed ? <ChevronDown className="h-4 w-4 text-green-400 shrink-0" /> : <ChevronUp className="h-4 w-4 text-green-400 shrink-0" />}
+                                                                    <CreditCard className="h-3.5 w-3.5 text-green-400 shrink-0" />
+                                                                    <span className="text-xs font-medium text-white/80 truncate">{group.payment?.concept || 'Pago'}</span>
+                                                                    {group.payment?.amount != null && (
+                                                                        <span className="text-[10px] text-white/40 font-mono shrink-0">{formatCurrency(group.payment.amount)}</span>
+                                                                    )}
+                                                                    {group.payment?.status && (
+                                                                        <Badge className={cn("text-[8px] px-1 py-0 h-3.5 border-0 shrink-0",
+                                                                            group.payment.status === 'PAID' ? "bg-green-500/20 text-green-400" :
+                                                                            group.payment.status === 'FAILED' ? "bg-red-500/20 text-red-400" :
+                                                                            "bg-amber-500/20 text-amber-400"
+                                                                        )}>
+                                                                            {group.payment.status === 'PAID' ? 'Pagado' : group.payment.status === 'FAILED' ? 'Fallido' : 'Pendiente'}
+                                                                        </Badge>
+                                                                    )}
+                                                                    <span className="text-[10px] text-white/30">({group.files?.length ?? 0})</span>
+                                                                </div>
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={(e) => { e.stopPropagation(); e.preventDefault(); setFileUploadContext({ entityType: 'PAYMENT', entityId: group.payment.id }); setShowFileDialog(true) }}
+                                                                    className="text-xs text-green-300 hover:text-green-200 hover:bg-green-500/10 shrink-0"
                                                                 >
-                                                                    <FileText className="h-3.5 w-3.5 text-green-400/60 group-hover/file:text-green-400" />
-                                                                    <span className="truncate max-w-[160px]">{file.name}</span>
-                                                                    <Badge className="text-[8px] px-1 py-0 h-3.5 bg-white/5 border-white/10 text-white/40">{file.category}</Badge>
-                                                                </button>
-                                                            ))}
+                                                                    <Plus className="h-3 w-3 mr-1" /> Adjuntar
+                                                                </Button>
+                                                            </div>
+                                                            {!isCollapsed && (
+                                                                <div className="px-3 pb-3 flex flex-col gap-2">
+                                                                    {group.files?.map((file: any) => (
+                                                                        <div
+                                                                            key={file.id}
+                                                                            className="flex items-center gap-2 bg-white/5 border border-white/10 rounded px-2.5 py-1.5 text-[11px] text-zinc-200 hover:border-green-500/30 hover:bg-green-500/10 transition-all group/file w-full"
+                                                                        >
+                                                                            <button type="button" onClick={() => setSelectedFile(file)} className="flex items-center gap-2 min-w-0 flex-1 text-left">
+                                                                                <FileText className="h-3.5 w-3.5 text-green-400 shrink-0" />
+                                                                                <span className="truncate flex-1 min-w-0">{file.name}</span>
+                                                                                <span className="text-green-300/80 shrink-0">{fileCategoryLabel(file.category)}</span>
+                                                                                {file.createdAt && <span className="text-white/50 shrink-0">{format(new Date(file.createdAt), 'dd/MM/yyyy', { locale: es })}</span>}
+                                                                            </button>
+                                                                            <a href={file.url} download={file.name} className="shrink-0 text-green-400 hover:text-green-300 p-1" title="Descargar">
+                                                                                <Download className="h-3.5 w-3.5" />
+                                                                            </a>
+                                                                            <button type="button" onClick={() => setFileToDelete({ id: file.id, name: file.name })} className="shrink-0 text-red-400 hover:text-red-300 p-1" title="Eliminar">
+                                                                                <Trash2 className="h-3.5 w-3.5" />
+                                                                            </button>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            )}
                                                         </div>
-                                                    </div>
-                                                ))}
+                                                    )
+                                                })}
                                             </div>
                                         )}
 
-                                        {/* Section: General Files */}
+                                        {/* Section: General Files (solo con contexto explícito) */}
                                         <div className="space-y-3">
                                             <h4 className="text-xs font-bold text-white/30 uppercase tracking-widest flex items-center gap-2">
                                                 <FileText className="h-3.5 w-3.5" /> Documentos Generales
@@ -1211,36 +1358,50 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
                                                 <div className="text-center py-8 text-white/20 border border-dashed border-white/10 rounded-lg">
                                                     <FileText className="h-8 w-8 mx-auto mb-2 opacity-30" />
                                                     <p className="text-xs">Sin documentos generales</p>
-                                                    <button
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="sm"
                                                         onClick={() => {
                                                             setFileUploadContext({ entityType: 'PROVIDER', entityId: provider.id })
                                                             setShowFileDialog(true)
                                                         }}
-                                                        className="mt-2 text-[10px] text-purple-400 hover:text-purple-300"
+                                                        className="mt-2 text-xs text-purple-300 border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20"
                                                     >
-                                                        + Subir documento
-                                                    </button>
+                                                        <Plus className="h-3 w-3 mr-1" /> Subir documento
+                                                    </Button>
                                                 </div>
                                             ) : (
                                                 <div className="space-y-1.5">
                                                     {filesData.grouped.general.map((file: any) => (
-                                                        <button
+                                                        <div
                                                             key={file.id}
-                                                            onClick={() => setSelectedFile(file)}
-                                                            className="w-full flex items-center justify-between gap-3 bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2.5 hover:bg-white/[0.06] hover:border-white/[0.15] transition-all group/file text-left"
+                                                            className="w-full flex items-center justify-between gap-3 bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2.5 hover:bg-white/[0.06] hover:border-white/[0.15] transition-all group/file"
                                                         >
-                                                            <div className="flex items-center gap-3 min-w-0">
-                                                                <FileText className="h-4 w-4 text-white/30 group-hover/file:text-white/60 shrink-0" />
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setSelectedFile(file)}
+                                                                className="flex items-center gap-3 min-w-0 flex-1 text-left"
+                                                            >
+                                                                <FileText className="h-4 w-4 text-zinc-400 group-hover/file:text-white shrink-0" />
                                                                 <div className="min-w-0">
                                                                     <p className="text-xs text-white/80 truncate">{file.name}</p>
-                                                                    <p className="text-[10px] text-white/30">{format(new Date(file.createdAt), 'd MMM yyyy', { locale: es })}</p>
+                                                                    <p className="text-[10px] text-zinc-500">{format(new Date(file.createdAt), 'd MMM yyyy', { locale: es })}</p>
                                                                 </div>
-                                                            </div>
+                                                            </button>
                                                             <div className="flex items-center gap-2 shrink-0">
-                                                                <Badge className="text-[8px] px-1.5 py-0 h-4 bg-white/5 border-white/10 text-white/40">{file.category}</Badge>
-                                                                <Eye className="h-3 w-3 text-white/0 group-hover/file:text-white/40" />
+                                                                <span className="text-[11px] text-zinc-400">{fileCategoryLabel(file.category)}</span>
+                                                                <a href={file.url} download={file.name} className="p-1 text-zinc-500 hover:text-white" title="Descargar">
+                                                                    <Download className="h-3.5 w-3.5" />
+                                                                </a>
+                                                                <button type="button" onClick={() => setSelectedFile(file)} className="p-1 text-zinc-500 hover:text-white" title="Vista previa">
+                                                                    <Eye className="h-3.5 w-3.5" />
+                                                                </button>
+                                                                <button type="button" onClick={() => setFileToDelete({ id: file.id, name: file.name })} className="p-1 text-red-400 hover:text-red-300" title="Eliminar">
+                                                                    <Trash2 className="h-3.5 w-3.5" />
+                                                                </button>
                                                             </div>
-                                                        </button>
+                                                        </div>
                                                     ))}
                                                 </div>
                                             )}
@@ -1390,7 +1551,8 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
                                                         (event.type === 'PAYMENT' && event.entityId) ||
                                                         (event.type === 'TASK' && event.entityId) ||
                                                         (event.type === 'NOTE' && event.content) ||
-                                                        (event.type === 'CONTACT_LOG')
+                                                        (event.type === 'CONTACT_LOG') ||
+                                                        (event.type === 'FILE_ADDED' && event.entityId)
                                                     )
 
                                                     // Navigate handler
@@ -1402,14 +1564,18 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
                                                         }
                                                         if (event.type === 'PAYMENT' && event.entityId) {
                                                             setActiveTab('orders')
-                                                            // If we know the order, expand it
                                                             const linkedOrder = orders.find(o => o.payment?.id === event.entityId)
                                                             if (linkedOrder) setExpandedOrderId(linkedOrder.id)
                                                         }
                                                         if (event.type === 'TASK' && event.entityId) {
                                                             setActiveTab('tasks')
                                                         }
-                                                        // NOTE: just scroll to it (content is inline)
+                                                        if (event.type === 'NOTE' && event.content) {
+                                                            setSelectedNoteContent(event.content)
+                                                        }
+                                                        if (event.type === 'FILE_ADDED' && event.entityId && event.url) {
+                                                            setSelectedFile({ id: event.entityId, name: event.name || event.title || 'Archivo', url: event.url, category: event.category || 'OTHER' })
+                                                        }
                                                     }
 
                                                     // CTA label
@@ -1417,6 +1583,8 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
                                                         event.type === 'ORDER' ? 'Ver pedido' :
                                                         event.type === 'PAYMENT' ? 'Ver pago' :
                                                         event.type === 'TASK' ? 'Ver tarea' :
+                                                        event.type === 'NOTE' ? 'Ver nota' :
+                                                        event.type === 'FILE_ADDED' ? 'Ver archivo' :
                                                         null
 
                                                     // Status badge config
@@ -1636,6 +1804,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
                 providerId={provider.id}
                 entityType={fileUploadContext?.entityType || 'PROVIDER'}
                 entityId={fileUploadContext?.entityId || provider.id}
+                presetCategory={fileUploadContext?.presetCategory}
             />
 
             <FilePreviewModal
@@ -1643,6 +1812,90 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
                 onOpenChange={(open) => !open && setSelectedFile(null)}
                 file={selectedFile}
             />
+
+            <AlertDialog open={!!fileToDelete} onOpenChange={(open) => !open && setFileToDelete(null)}>
+                <AlertDialogContent className="bg-zinc-900 border-white/10">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="text-white">Eliminar archivo</AlertDialogTitle>
+                        <AlertDialogDescription className="text-zinc-400">
+                            ¿Eliminar &quot;{fileToDelete?.name}&quot;? Esta acción no se puede deshacer.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel className="text-zinc-300 border-zinc-600 hover:bg-zinc-800">Cancelar</AlertDialogCancel>
+                        <Button
+                            type="button"
+                            onClick={() => { if (fileToDelete) handleDeleteFile(fileToDelete.id) }}
+                            className="bg-red-600 hover:bg-red-700 text-white"
+                        >
+                            Eliminar
+                        </Button>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Modal: nota completa al hacer click en evento NOTE del timeline */}
+            <Dialog open={!!selectedNoteContent} onOpenChange={(open) => !open && setSelectedNoteContent(null)}>
+                <DialogContent className="bg-zinc-900 border-white/10 max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="text-white">Nota</DialogTitle>
+                    </DialogHeader>
+                    <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-lg p-4 max-h-[60vh] overflow-y-auto">
+                        <p className="text-sm text-white/90 whitespace-pre-wrap">{selectedNoteContent}</p>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Modal: Registrar pago (RECEIVED → PAID solo vía pago) */}
+            <Dialog open={!!orderForPayment} onOpenChange={(open) => !open && setOrderForPayment(null)}>
+                <DialogContent className="bg-zinc-900 border-white/10 max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="text-white">Registrar pago</DialogTitle>
+                        <p className="text-xs text-zinc-400">Al completar, el pedido pasará a Pagado.</p>
+                    </DialogHeader>
+                    <form onSubmit={handleRegisterPaymentSubmit} className="space-y-4">
+                        <div className="space-y-2">
+                            <Label className="text-zinc-400">Importe (€)</Label>
+                            <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                value={paymentForm.amount || ""}
+                                onChange={(e) => setPaymentForm(prev => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))}
+                                className="bg-zinc-800 border-white/5 text-white"
+                                required
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-zinc-400">Fecha de pago</Label>
+                            <Input
+                                type="date"
+                                value={paymentForm.paymentDate}
+                                onChange={(e) => setPaymentForm(prev => ({ ...prev, paymentDate: e.target.value }))}
+                                className="bg-zinc-800 border-white/5 text-white"
+                                required
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-zinc-400">Concepto (opcional)</Label>
+                            <Input
+                                value={paymentForm.concept}
+                                onChange={(e) => setPaymentForm(prev => ({ ...prev, concept: e.target.value }))}
+                                className="bg-zinc-800 border-white/5 text-white"
+                                placeholder="Ej: Pago factura enero"
+                            />
+                        </div>
+                        <DialogFooter className="pt-4 border-t border-white/5">
+                            <Button type="button" variant="ghost" onClick={() => setOrderForPayment(null)} className="text-zinc-400 hover:text-white">
+                                {labels.common.cancel}
+                            </Button>
+                            <Button type="submit" disabled={paymentSubmitting} className="bg-green-500 hover:bg-green-600 text-white">
+                                {paymentSubmitting ? labels.common.loading : "Registrar pago"}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
         </>
     )
 }

@@ -261,30 +261,25 @@ export default async function LeadsPage({
 
   /* ---------------- RENDER ---------------- */
   return (
-    <div className="space-y-6">
-      {/* Strategic Header - título y subtítulo desde SectorConfig */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-        <div>
-          <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">
+    <div className="space-y-8">
+      {/* Header: título compacto + acciones (mismo patrón que Providers) */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-bold text-white tracking-tight truncate">
             {labels.leads.pageTitle}
           </h1>
-          <p className="text-base text-white/60 max-w-2xl">
+          <p className="text-sm text-white/60 mt-0.5 truncate max-w-xl">
             {labels.leads.pageSubtitle}
           </p>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Connect Web Button - Blue/Cyan */}
+        <div className="flex items-center gap-2 flex-wrap ml-auto">
           <ConnectWebButton />
-
-          {/* Automations Button - Purple */}
           <AutomationsButton />
-
-          {/* Create Lead Button - Primary */}
           <CreateLeadButton />
         </div>
       </div>
 
-      {/* Main KPIs */}
+      {/* KPIs: máximo 4, misma estética que Providers */}
       <LeadsKPIsSimple kpis={kpis} />
 
       {/* Import History */}

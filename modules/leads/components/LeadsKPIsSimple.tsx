@@ -1,143 +1,115 @@
 "use client"
 
-import { useSectorConfig } from "@/hooks/useSectorConfig"
-
-import { TrendingUp, Flame, Sun, Snowflake, CheckCircle, XCircle } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { TrendingUp, Flame, CheckCircle, AlertTriangle } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 
-export function LeadsKPIsSimple({ kpis }: {
-    kpis: {
-        total: number
-        hot: number
-        warm: number
-        cold: number
-        converted: number
-        lost: number
-    }
-}) {
-    const { labels } = useSectorConfig()
+type Kpis = {
+    total: number
+    hot: number
+    warm: number
+    cold: number
+    converted: number
+    lost: number
+    stale?: number
+}
+
+export function LeadsKPIsSimple({ kpis }: { kpis: Kpis }) {
     const router = useRouter()
     const searchParams = useSearchParams()
+    const activeLeads = kpis.total - kpis.converted - kpis.lost
+    const stale = kpis.stale ?? 0
 
-    const stats = [
+    const cards = [
         {
-            label: `Total ${labels.leads.plural}`,
+            label: "Total",
             value: kpis.total,
+            sub: `${activeLeads} activos`,
             icon: TrendingUp,
-            color: "text-white",
-            bgColor: "bg-white/5",
-            borderColor: "border-white/10",
+            gradient: "from-blue-500/10 to-blue-600/5",
+            iconColor: "text-blue-400",
             onClick: () => {
-                router.push("/dashboard/other/leads")
+                const p = new URLSearchParams(searchParams.toString())
+                p.delete("temperature")
+                p.delete("showConverted")
+                p.delete("showLost")
+                p.delete("stale")
+                router.push(`?${p.toString()}`)
             },
-            isActive: !searchParams.get("temperature") && !searchParams.get("showConverted") && !searchParams.get("showLost")
+            active: !searchParams.get("temperature") && !searchParams.get("showConverted") && !searchParams.get("showLost") && searchParams.get("stale") !== "true",
         },
         {
-            label: `🔥 ${labels.leads.temperatures.HOT}`,
+            label: "Hot",
             value: kpis.hot,
+            sub: "Atención prioritaria",
             icon: Flame,
-            color: "text-red-400",
-            bgColor: "bg-red-500/10",
-            borderColor: "border-red-500/30",
+            gradient: "from-red-500/10 to-red-600/5",
+            iconColor: "text-red-400",
             onClick: () => {
-                const params = new URLSearchParams(searchParams.toString())
-                params.set("temperature", "HOT")
-                params.delete("showConverted")
-                params.delete("showLost")
-                router.push(`?${params.toString()}`)
+                const p = new URLSearchParams(searchParams.toString())
+                p.set("temperature", "HOT")
+                p.delete("showConverted")
+                p.delete("showLost")
+                router.push(`?${p.toString()}`)
             },
-            isActive: searchParams.get("temperature") === "HOT"
+            active: searchParams.get("temperature") === "HOT",
         },
         {
-            label: `🌤️ ${labels.leads.temperatures.WARM}`,
-            value: kpis.warm,
-            icon: Sun,
-            color: "text-orange-400",
-            bgColor: "bg-orange-500/10",
-            borderColor: "border-orange-500/30",
-            onClick: () => {
-                const params = new URLSearchParams(searchParams.toString())
-                params.set("temperature", "WARM")
-                params.delete("showConverted")
-                params.delete("showLost")
-                router.push(`?${params.toString()}`)
-            },
-            isActive: searchParams.get("temperature") === "WARM"
-        },
-        {
-            label: `❄️ ${labels.leads.temperatures.COLD}`,
-            value: kpis.cold,
-            icon: Snowflake,
-            color: "text-blue-400",
-            bgColor: "bg-blue-500/10",
-            borderColor: "border-blue-500/30",
-            onClick: () => {
-                const params = new URLSearchParams(searchParams.toString())
-                params.set("temperature", "COLD")
-                params.delete("showConverted")
-                params.delete("showLost")
-                router.push(`?${params.toString()}`)
-            },
-            isActive: searchParams.get("temperature") === "COLD"
-        },
-        {
-            label: `✅ ${labels.leads.status.CONVERTED}`,
+            label: "Convertidos",
             value: kpis.converted,
+            sub: kpis.total > 0 ? `${Math.round((kpis.converted / kpis.total) * 100)}% tasa` : "tasa",
             icon: CheckCircle,
-            color: "text-emerald-400",
-            bgColor: "bg-emerald-500/10",
-            borderColor: "border-emerald-500/30",
+            gradient: "from-green-500/10 to-green-600/5",
+            iconColor: "text-green-400",
             onClick: () => {
-                const params = new URLSearchParams(searchParams.toString())
-                params.set("showConverted", "true")
-                params.delete("temperature")
-                params.delete("showLost")
-                router.push(`?${params.toString()}`)
+                const p = new URLSearchParams(searchParams.toString())
+                p.set("showConverted", "true")
+                p.delete("temperature")
+                p.delete("showLost")
+                router.push(`?${p.toString()}`)
             },
-            isActive: searchParams.get("showConverted") === "true"
+            active: searchParams.get("showConverted") === "true",
         },
         {
-            label: `❌ ${labels.leads.status.LOST}`,
-            value: kpis.lost,
-            icon: XCircle,
-            color: "text-rose-400",
-            bgColor: "bg-rose-500/10",
-            borderColor: "border-rose-500/30",
+            label: "Estancados",
+            value: stale,
+            sub: "Sin acción 14+ días",
+            icon: AlertTriangle,
+            gradient: "from-amber-500/10 to-amber-600/5",
+            iconColor: "text-amber-400",
             onClick: () => {
-                const params = new URLSearchParams(searchParams.toString())
-                params.set("showLost", "true")
-                params.delete("temperature")
-                params.delete("showConverted")
-                router.push(`?${params.toString()}`)
+                const p = new URLSearchParams(searchParams.toString())
+                p.set("stale", "true")
+                p.delete("temperature")
+                p.delete("showConverted")
+                p.delete("showLost")
+                router.push(`?${p.toString()}`)
             },
-            isActive: searchParams.get("showLost") === "true"
+            active: searchParams.get("stale") === "true",
         },
     ]
 
     return (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            {stats.map((stat) => {
-                const Icon = stat.icon
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {cards.map((card) => {
+                const Icon = card.icon
                 return (
                     <button
-                        key={stat.label}
-                        onClick={stat.onClick}
-                        className={`group relative p-4 rounded-xl border backdrop-blur-sm transition-all duration-200 hover:scale-105 ${stat.isActive
-                            ? `${stat.borderColor} ${stat.bgColor} shadow-lg ring-2 ring-offset-0 ${stat.borderColor.replace('border-', 'ring-')}`
-                            : `border-white/10 bg-white/5 hover:${stat.bgColor} hover:${stat.borderColor} opacity-80 hover:opacity-100`
-                            }`}
+                        key={card.label}
+                        type="button"
+                        onClick={card.onClick}
+                        className={cn(
+                            "rounded-xl border border-white/10 bg-gradient-to-br p-6 text-left backdrop-blur transition-colors",
+                            card.gradient,
+                            card.active && "ring-1 ring-white/10 border-white/20"
+                        )}
                     >
-                        <div className="flex flex-col items-center gap-2">
-                            <Icon className={`h-5 w-5 ${stat.color}`} />
-                            <div className="text-center">
-                                <div className={`text-2xl font-bold ${stat.color}`}>
-                                    {stat.value}
-                                </div>
-                                <div className="text-xs text-white/60 mt-1">
-                                    {stat.label}
-                                </div>
-                            </div>
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm text-white/60">{card.label}</span>
+                            <Icon className={`h-5 w-5 ${card.iconColor}`} />
                         </div>
+                        <p className="text-3xl font-bold text-white">{card.value}</p>
+                        <p className="text-xs text-white/40 mt-1">{card.sub}</p>
                     </button>
                 )
             })}

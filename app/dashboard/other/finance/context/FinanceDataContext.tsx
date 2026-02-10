@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useCallback, useContext, useEffect, useState } from "react"
+import { createContext, useContext, useMemo, useCallback } from "react"
 
 export interface FinanceAnalyticsData {
   success?: boolean
@@ -17,6 +17,7 @@ export interface FinanceAnalyticsData {
   }
   trends?: { incomeGrowth?: number; expenseGrowth?: number; profitGrowth?: number }
   monthlyTrend?: { month: string; income: number; expenses: number; profit: number }[]
+  chartSeries?: { date: string; label: string; income: number; expense: number; profit: number }[]
   predictions?: {
     nextMonthRevenue?: number
     nextMonthExpenses?: number
@@ -25,6 +26,13 @@ export interface FinanceAnalyticsData {
   budgets?: Array<{ id: string; category: string; limit: number; spent: number; remaining?: number; status?: string; utilization?: number }>
   alerts?: Array<{ id: string; type: string; message: string; severity: string; read: boolean }>
   fixedExpenses?: Array<{ id: string; name: string; amount: number; frequency: string; nextPayment: string; active: boolean }>
+  detectedRecurringExpenses?: Array<{
+    supplier: string
+    averageAmount: number
+    frequency: "monthly" | "weekly" | "quarterly"
+    lastPayment: string
+    nextEstimatedPayment: string
+  }>
   financialGoals?: Array<{ id: string; title: string; target: number; current: number; deadline: string; status: string; priority?: string }>
 }
 
@@ -47,84 +55,128 @@ export interface TransactionsResponse {
   summary?: { totalAmount: number; totalCount: number }
 }
 
+export type MovementRow = {
+  id: string
+  type: string
+  date: string
+  amount: number
+  label: string
+  meta?: Record<string, unknown>
+}
+
 type FinanceDataContextValue = {
-  analytics: FinanceAnalyticsData | null
+  analytics: FinanceAnalyticsData
   transactions: TransactionsResponse | null
+  movements: MovementRow[]
   loading: boolean
   transactionsLoading: boolean
-  refetch: () => void
+  period: string
+  setPeriod: (period: string) => void
+  refetch: (period?: string) => void
   refetchTransactions: () => void
 }
 
 const FinanceDataContext = createContext<FinanceDataContextValue | null>(null)
 
-export function FinanceDataProvider({ children }: { children: React.ReactNode }) {
-  const [analytics, setAnalytics] = useState<FinanceAnalyticsData | null>(null)
-  const [transactions, setTransactions] = useState<TransactionsResponse | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [transactionsLoading, setTransactionsLoading] = useState(true)
+const defaultKpis = {
+  totalIncome: 0,
+  totalExpenses: 0,
+  netProfit: 0,
+  pendingPayments: 0,
+  burnRate: 0,
+  recurringPayments: 0,
+  growthRate: 0,
+  cashFlow: 0,
+}
 
-  const fetchAnalytics = useCallback(async () => {
-    setLoading(true)
-    try {
-      const res = await fetch("/api/finance/analytics")
-      if (res.ok) {
-        const data = await res.json()
-        setAnalytics(data)
-      } else {
-        setAnalytics(null)
-      }
-    } catch {
-      setAnalytics(null)
-    } finally {
-      setLoading(false)
+function defaultMonthlyTrend(): { month: string; income: number; expenses: number; profit: number }[] {
+  const now = new Date()
+  return Array.from({ length: 6 }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1)
+    return {
+      month: d.toLocaleDateString("es-ES", { month: "short", year: "numeric" }),
+      income: 0,
+      expenses: 0,
+      profit: 0,
     }
-  }, [])
+  })
+}
 
-  const fetchTransactions = useCallback(async () => {
-    setTransactionsLoading(true)
-    try {
-      const res = await fetch("/api/transactions?limit=200")
-      if (res.ok) {
-        const data = await res.json()
-        setTransactions(data)
-      } else {
-        setTransactions(null)
-      }
-    } catch {
-      setTransactions(null)
-    } finally {
-      setTransactionsLoading(false)
-    }
-  }, [])
+const fallbackAnalytics: FinanceAnalyticsData = {
+  success: false,
+  kpis: defaultKpis,
+  trends: { incomeGrowth: 0, expenseGrowth: 0, profitGrowth: 0 },
+  monthlyTrend: defaultMonthlyTrend(),
+  chartSeries: [],
+}
 
-  const refetch = useCallback(() => {
-    fetchAnalytics()
-  }, [fetchAnalytics])
+type FinanceDataProviderProps = {
+  children: React.ReactNode
+  initialAnalytics: FinanceAnalyticsData
+  initialMovements?: MovementRow[]
+  period: string
+  onSetPeriod: (period: string) => void
+  onRefetch: () => void
+}
+
+export function FinanceDataProvider({
+  children,
+  initialAnalytics,
+  initialMovements = [],
+  period,
+  onSetPeriod,
+  onRefetch,
+}: FinanceDataProviderProps) {
+  const analytics = useMemo(
+    () => ({
+      ...fallbackAnalytics,
+      ...initialAnalytics,
+      kpis: initialAnalytics.kpis ?? defaultKpis,
+      trends: initialAnalytics.trends ?? { incomeGrowth: 0, expenseGrowth: 0, profitGrowth: 0 },
+      monthlyTrend:
+        Array.isArray(initialAnalytics.monthlyTrend) && initialAnalytics.monthlyTrend.length > 0
+          ? initialAnalytics.monthlyTrend
+          : defaultMonthlyTrend(),
+      chartSeries: initialAnalytics.chartSeries ?? [],
+    }),
+    [initialAnalytics]
+  )
+
+  const setPeriod = useCallback(
+    (nextPeriod: string) => {
+      onSetPeriod(nextPeriod)
+    },
+    [onSetPeriod]
+  )
+
+  const refetch = useCallback(
+    (_period?: string) => {
+      onRefetch()
+    },
+    [onRefetch]
+  )
 
   const refetchTransactions = useCallback(() => {
-    fetchTransactions()
-  }, [fetchTransactions])
+    onRefetch()
+  }, [onRefetch])
 
-  useEffect(() => {
-    fetchAnalytics()
-  }, [fetchAnalytics])
-
-  useEffect(() => {
-    fetchTransactions()
-  }, [fetchTransactions])
+  const value = useMemo<FinanceDataContextValue>(
+    () => ({
+      analytics,
+      transactions: null,
+      movements: initialMovements,
+      loading: false,
+      transactionsLoading: false,
+      period,
+      setPeriod,
+      refetch,
+      refetchTransactions,
+    }),
+    [analytics, initialMovements, period, setPeriod, refetch, refetchTransactions]
+  )
 
   return (
-    <FinanceDataContext.Provider
-      value={{
-        analytics,
-        transactions,
-        loading,
-        transactionsLoading,
-        refetch,
-        refetchTransactions,
-      }}
-    >
+    <FinanceDataContext.Provider value={value}>
       {children}
     </FinanceDataContext.Provider>
   )

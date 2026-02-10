@@ -240,7 +240,7 @@ export async function registerProviderPayment(data: {
                         providerId: data.providerId,
                         amount: data.amount,
                         orderDate: data.paymentDate,
-                        status: paymentStatus === "PAID" ? ProviderOrderStatus.CLOSED : ProviderOrderStatus.PENDING,
+                        status: paymentStatus === "PAID" ? ProviderOrderStatus.PAID : ProviderOrderStatus.PENDING,
                         type: ProviderOrderType.ONE_TIME,
                         description: data.concept || "Pago directo"
                     }
@@ -275,11 +275,11 @@ export async function registerProviderPayment(data: {
                 }
             })
 
-            // 4. SYNC RULE: Payment PAID → Order CLOSED
+            // 4. SYNC RULE: Payment PAID → Order PAID (pedido solo pasa a PAID con pago completado)
             if (paymentStatus === "PAID" && data.orderId) {
                 await tx.providerOrder.update({
                     where: { id: data.orderId },
-                    data: { status: ProviderOrderStatus.CLOSED }
+                    data: { status: ProviderOrderStatus.PAID }
                 })
                 await tx.provider.update({
                     where: { id: data.providerId },
@@ -300,6 +300,7 @@ export async function registerProviderPayment(data: {
         }
 
         revalidatePath("/dashboard/providers")
+        revalidatePath("/dashboard/other/finance")
         return { success: true, payment: result }
 
     } catch (error) {
@@ -351,11 +352,11 @@ export async function updateProviderPaymentStatus(
                 }
             })
 
-            // SYNC RULE: Payment PAID → Order CLOSED
+            // SYNC RULE: Payment PAID → Order PAID (pedido solo puede estar PAID si existe pago PAID)
             if (newStatus === "PAID" && payment.orderId) {
                 await tx.providerOrder.update({
                     where: { id: payment.orderId },
-                    data: { status: ProviderOrderStatus.CLOSED }
+                    data: { status: ProviderOrderStatus.PAID }
                 })
                 await tx.providerTimelineEvent.create({
                     data: {
@@ -369,6 +370,29 @@ export async function updateProviderPaymentStatus(
                     where: { id: payment.providerId },
                     data: { lastOrderDate: new Date() }
                 })
+            }
+
+            // SYNC RULE: Payment CANCELLED → Order vuelve a RECEIVED y se desvincula el pago (permitir registrar otro)
+            if (newStatus === "CANCELLED" && payment.orderId) {
+                const ord = await tx.providerOrder.findUnique({ where: { id: payment.orderId } })
+                if (ord && (ord.status === "PAID" || ord.status === "CLOSED")) {
+                    await tx.providerOrder.update({
+                        where: { id: payment.orderId },
+                        data: { status: ProviderOrderStatus.RECEIVED }
+                    })
+                    await tx.providerPayment.update({
+                        where: { id: payment.id },
+                        data: { orderId: null }
+                    })
+                    await tx.providerTimelineEvent.create({
+                        data: {
+                            userId: session.user.id,
+                            providerId: payment.providerId,
+                            type: ProviderTimelineEventType.ORDER,
+                            orderId: payment.orderId
+                        }
+                    })
+                }
             }
 
             // SYNC RULE: Payment FAILED → Order ISSUE
@@ -394,6 +418,7 @@ export async function updateProviderPaymentStatus(
         }))
 
         revalidatePath("/dashboard/providers")
+        revalidatePath("/dashboard/other/finance")
         return { success: true, payment: result }
     } catch (error: any) {
         console.error("Error updating payment status:", error)
@@ -624,6 +649,7 @@ export async function getProviderTimeline(providerId: string) {
                     },
                     payment: true,
                     task: true,
+                    ProviderFile: true,
                 }
             }),
             // 2. Fetch Contact Logs (Directly)
@@ -664,7 +690,7 @@ export async function getProviderTimeline(providerId: string) {
                     CANCELLED: { label: 'Cancelado', severity: 'error' },
                     CLOSED: { label: 'Cerrado', severity: 'success' },
                     COMPLETED: { label: 'Cerrado', severity: 'success' },
-                    PAID: { label: 'Cerrado', severity: 'success' },
+                    PAID: { label: 'Pagado', severity: 'success' },
                 }
                 const config = statusMap[e.order.status] || { label: e.order.status, severity: 'info' }
 
@@ -716,6 +742,23 @@ export async function getProviderTimeline(providerId: string) {
                     severity: e.task.status === "DONE" ? 'success' : 'warning',
                     entityId: e.task.id,
                     status: e.task.status
+                }
+            }
+            if (e.type === ProviderTimelineEventType.FILE && e.ProviderFile) {
+                const f = e.ProviderFile
+                return {
+                    id: `file-${f.id}-${e.id}`,
+                    type: 'FILE_ADDED',
+                    title: f.name,
+                    description: `${f.name} (${f.category})`,
+                    date: e.createdAt,
+                    icon: 'file-text',
+                    importance: 'LOW',
+                    entityId: f.id,
+                    fileId: f.id,
+                    url: f.url,
+                    name: f.name,
+                    category: f.category
                 }
             }
             return null
@@ -1824,19 +1867,16 @@ export async function createProviderOrder(data: {
 // ────────────────────────────────────────────────────────────
 // ORDER STATUS TRANSITIONS (with sync rules)
 // ────────────────────────────────────────────────────────────
-// Valid transitions:
-//   DRAFT → PENDING
-//   PENDING → RECEIVED, CANCELLED, ISSUE
-//   RECEIVED → CLOSED (via payment PAID), ISSUE
-//   ISSUE → PENDING, CANCELLED
-//   CANCELLED → (terminal)
-//   CLOSED → (terminal)
-
+// FASE B: Flujo PENDING → RECEIVED → PAID (solo vía pago) | CANCELLED
+// RECEIVED no puede pasar a PAID/CLOSED manualmente; solo al marcar pago como PAID.
 const VALID_ORDER_TRANSITIONS: Record<string, string[]> = {
-    DRAFT: ["PENDING"],
+    DRAFT: ["PENDING", "CANCELLED"],
     PENDING: ["RECEIVED", "CANCELLED", "ISSUE"],
-    RECEIVED: ["CLOSED", "ISSUE"],
-    ISSUE: ["PENDING", "CANCELLED"],
+    RECEIVED: ["CANCELLED", "ISSUE"], // PAID solo vía updateProviderPaymentStatus/registerProviderPayment
+    ISSUE: ["RECEIVED", "CANCELLED"],
+    CANCELLED: [],
+    PAID: [],
+    CLOSED: [],
 }
 
 /**
@@ -1865,9 +1905,9 @@ export async function updateProviderOrderStatus(
                 throw new Error(`Transición inválida: ${currentOrder.status} → ${newStatus}`)
             }
 
-            // CLOSED only allowed when payment is PAID
-            if (newStatus === "CLOSED" && currentOrder.payment?.status !== "PAID") {
-                throw new Error("No se puede cerrar un pedido sin pago confirmado")
+            // PAID/CLOSED solo vía pago (no transición manual desde RECEIVED)
+            if ((newStatus === "CLOSED" || newStatus === "PAID") && currentOrder.payment?.status !== "PAID") {
+                throw new Error("El pedido solo puede estar pagado cuando existe un pago completado. Use «Registrar pago».")
             }
 
             // Update order
@@ -1887,8 +1927,8 @@ export async function updateProviderOrderStatus(
                 }
             })
 
-            // Sync: CLOSED → update lastOrderDate
-            if (newStatus === "CLOSED") {
+            // Sync: PAID/CLOSED → update lastOrderDate
+            if (newStatus === "PAID" || newStatus === "CLOSED") {
                 await tx.provider.update({
                     where: { id: order.providerId },
                     data: { lastOrderDate: new Date() }
@@ -2064,12 +2104,13 @@ export async function registerProviderFile(data: {
                 }
             })
 
-            // Timeline event for the file
+            // Timeline event for the file (FILE type + fileId so it appears in timeline)
             await tx.providerTimelineEvent.create({
                 data: {
                     userId: session.user.id,
                     providerId: data.providerId,
-                    type: ProviderTimelineEventType.NOTE,
+                    type: ProviderTimelineEventType.FILE,
+                    fileId: file.id,
                     orderId: data.orderId,
                     paymentId: data.paymentId,
                 }

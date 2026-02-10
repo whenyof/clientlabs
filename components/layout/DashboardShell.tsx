@@ -15,7 +15,10 @@ export default function DashboardShell({
   const [isCollapsed, setIsCollapsed] = useState(false)
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-[#0e1424]">
+    <div
+      className="flex h-screen w-screen overflow-hidden bg-[#0e1424]"
+      data-debug="shell"
+    >
       {/* Sidebar */}
       <div
         className="h-screen shrink-0 transition-all duration-300"
@@ -27,16 +30,19 @@ export default function DashboardShell({
         />
       </div>
 
-      {/* Main Content */}
-      <main className="
-        flex-1
-        h-screen
-        overflow-y-auto
-        bg-gradient-to-br from-[#1E1F2B] to-[#242538]
-        text-gray-200
-        px-12 py-10
-      ">
-        <div className="max-w-[1600px] mx-auto space-y-10">
+      {/* Main Content — flex column so child can get flex-1 and real height */}
+      <main
+        className="
+          flex flex-col flex-1 min-w-0 min-h-0
+          h-screen
+          overflow-y-auto overflow-x-hidden
+          bg-gradient-to-br from-[#1E1F2B] to-[#242538]
+          text-gray-200
+          px-6 py-6 lg:px-8 xl:px-10
+        "
+        data-debug="shell-main"
+      >
+        <div className="flex-1 min-h-0 w-full flex flex-col">
           {children}
         </div>
       </main>

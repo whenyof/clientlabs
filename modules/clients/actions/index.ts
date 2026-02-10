@@ -65,6 +65,7 @@ export async function updateClientInfo(
 
     revalidatePath("/dashboard/clients")
     revalidatePath("/dashboard/other")
+    revalidatePath("/dashboard/other/sales")
     return { success: true }
 }
 
@@ -96,6 +97,7 @@ export async function addClientNote(clientId: string, text: string) {
 
     revalidatePath("/dashboard/clients")
     revalidatePath("/dashboard/other")
+    revalidatePath("/dashboard/other/sales")
     return { success: true }
 }
 
@@ -137,6 +139,7 @@ export async function registerClientInteraction(
 
     revalidatePath("/dashboard/clients")
     revalidatePath("/dashboard/other")
+    revalidatePath("/dashboard/other/sales")
     return { success: true }
 }
 
@@ -194,6 +197,7 @@ export async function addClientPurchase(
 
     revalidatePath("/dashboard/clients")
     revalidatePath("/dashboard/other")
+    revalidatePath("/dashboard/other/sales")
     return { success: true }
 }
 
@@ -445,22 +449,15 @@ export async function createClientReminder(
 
     if (!client) return { success: false, error: "Client not found" }
 
-    // 1. Create Task automatically
-    const task = await prisma.task.create({
-        data: {
-            id: `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            userId: session.user.id,
-            clientId: clientId,
-            title: `Recordatorio: ${data.type}`,
-            description: data.note || "Recordatorio automático",
-            dueDate: data.dueDate,
-            priority: "HIGH",
-            type: (data.type === "Llamar" || data.type === "CALL") ? "CALL" :
-                (data.type === "Enviar email" || data.type === "EMAIL") ? "EMAIL" :
-                    (data.type === "Reunión" || data.type === "MEETING") ? "MEETING" : "MANUAL",
-            status: "PENDING",
-            updatedAt: new Date(),
-        }
+    // 1. Create Task via centralized API
+    const { createTask } = await import("@/lib/api/tasks")
+    const task = await createTask({
+        title: `Recordatorio: ${data.type}`,
+        description: data.note || "Recordatorio automático",
+        dueDate: data.dueDate.toISOString(),
+        priority: "HIGH",
+        entityType: "CLIENT",
+        entityId: clientId,
     })
 
     // 2. Store reminder in client notes (legacy support/timeline)
@@ -648,6 +645,7 @@ export async function createClientSale(
 
     revalidatePath("/dashboard/clients")
     revalidatePath("/dashboard/other")
+    revalidatePath("/dashboard/other/sales")
     return sale
 }
 
@@ -700,6 +698,7 @@ export async function updateSaleStatus(saleId: string, newStatus: string) {
 
     revalidatePath("/dashboard/clients")
     revalidatePath("/dashboard/other")
+    revalidatePath("/dashboard/other/sales")
     return { success: true }
 }
 
@@ -744,6 +743,7 @@ export async function updateClientSale(
 
     revalidatePath("/dashboard/clients")
     revalidatePath("/dashboard/other")
+    revalidatePath("/dashboard/other/sales")
     return updatedSale
 }
 
@@ -787,6 +787,7 @@ export async function deleteClientSale(saleId: string) {
 
     revalidatePath("/dashboard/clients")
     revalidatePath("/dashboard/other")
+    revalidatePath("/dashboard/other/sales")
     return { success: true }
 }
 

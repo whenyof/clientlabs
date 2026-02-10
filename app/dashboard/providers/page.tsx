@@ -3,7 +3,6 @@ import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { ProvidersView } from "@/modules/providers/components/ProvidersView"
-import { CreateProviderButton } from "@/modules/providers/components/CreateProviderButton"
 import { getSectorConfigByPath } from "@/config/sectors"
 
 async function getProviders(userId: string) {
@@ -66,20 +65,20 @@ export default async function ProvidersPage() {
 
     return (
         <div className="space-y-6">
-            {/* Premium Header */}
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                <div>
-                    <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">
-                        {labels.providers.title}
-                    </h1>
-                    <p className="text-base text-white/60 max-w-2xl">
-                        Control de costes, dependencias y riesgos operativos
-                    </p>
-                </div>
-                <CreateProviderButton />
+            {/* Header: título + contador */}
+            <div>
+                <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">
+                    {labels.providers.title}
+                    <span className="ml-3 text-2xl font-normal text-white/50">
+                        ({kpis.totalProviders})
+                    </span>
+                </h1>
+                <p className="text-base text-white/60 max-w-2xl">
+                    Control de costes, dependencias y riesgos operativos
+                </p>
             </div>
 
-            {/* View Container (KPIs + Table) */}
+            {/* Barra búsqueda + botón único y vista (KPIs + tabla) */}
             <ProvidersView
                 initialProviders={providers}
                 initialKPIs={kpis}

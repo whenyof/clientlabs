@@ -24,6 +24,7 @@ type TimelineEvent = {
 
 type EnhancedTimelineProps = {
     events: TimelineEvent[]
+    onEventClick?: (event: TimelineEvent) => void
 }
 
 const ICON_MAP: Record<string, any> = {
@@ -62,7 +63,7 @@ const TYPE_COLORS: Record<string, string> = {
     SALE_DELETED: "bg-rose-500/20 border-rose-500/30",
 }
 
-export function EnhancedTimeline({ events }: EnhancedTimelineProps) {
+export function EnhancedTimeline({ events, onEventClick }: EnhancedTimelineProps) {
     const [isMounted, setIsMounted] = useState(false)
     useEffect(() => {
         setIsMounted(true)
@@ -92,6 +93,7 @@ export function EnhancedTimeline({ events }: EnhancedTimelineProps) {
                     const isHighlighted = isImportantSale || isRiskChange || isStatusChange
                     const isNew = event.id.startsWith("temp-")
 
+                    const isClickable = !!onEventClick
                     return (
                         <motion.div
                             key={event.id}
@@ -99,9 +101,11 @@ export function EnhancedTimeline({ events }: EnhancedTimelineProps) {
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.3 }}
+                            role={isClickable ? "button" : undefined}
+                            onClick={isClickable ? () => onEventClick?.(event) : undefined}
                             className={`flex gap-3 rounded-xl p-3 -ml-3 transition-all duration-300 ${isHighlighted
                                 ? "bg-white/5 border border-white/10 shadow-lg scale-[1.02] z-10 my-2"
-                                : isNew ? "bg-white/5" : "hover:bg-white/5"}`}
+                                : isNew ? "bg-white/5" : "hover:bg-white/5"} ${isClickable ? "cursor-pointer hover:border-white/15" : ""}`}
                         >
                             {/* Icon */}
                             <div className="flex flex-col items-center">

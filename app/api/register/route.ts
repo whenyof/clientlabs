@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import prisma from "@/lib/prisma"
+import { prisma } from "@/lib/prisma"
 import bcrypt from "bcrypt"
 
 export async function POST(req: Request) {
@@ -19,9 +19,13 @@ export async function POST(req: Request) {
 
   await prisma.user.create({
     data: {
-      name,
+      name: name ?? null,
       email,
       password: hashed,
+      role: "USER",
+      plan: "FREE",
+      onboardingCompleted: false,
+      selectedSector: null,
     },
   })
 

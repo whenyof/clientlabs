@@ -1,243 +1,377 @@
 "use client"
 
-import { useState } from "react"
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, AreaChart, Area } from 'recharts'
-import { motion } from "framer-motion"
+import { useMemo, useCallback } from "react"
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts"
+import { motion, AnimatePresence } from "framer-motion"
 import { formatCurrency } from "../lib/formatters"
 import { useFinanceData } from "../context/FinanceDataContext"
-import {
-  ChartBarIcon,
-  Bars3Icon,
-  ChartPieIcon
-} from "@heroicons/react/24/outline"
+import { ArrowTrendingUpIcon, ArrowTrendingDownIcon } from "@heroicons/react/24/outline"
+
+const RANGE_OPTIONS = [
+  { value: "today", label: "Hoy" },
+  { value: "week", label: "Semana" },
+  { value: "month", label: "Mes" },
+  { value: "year", label: "Año" },
+] as const
+
+type RangeValue = (typeof RANGE_OPTIONS)[number]["value"]
 
 export function MainChart() {
-  const { analytics, loading } = useFinanceData()
-  const [chartType, setChartType] = useState<'line' | 'bar' | 'area'>('line')
-  const [granularity, setGranularity] = useState<'daily' | 'weekly' | 'monthly'>('monthly')
-  const chartData = analytics?.monthlyTrend ?? []
+  const { analytics, period, setPeriod, refetch } = useFinanceData()
+  const chartSeries = analytics?.chartSeries ?? []
+  const trends = analytics?.trends
+  const kpis = analytics?.kpis
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 shadow-lg">
-          <p className="text-white font-medium mb-2">{`Mes: ${label}`}</p>
-          <div className="space-y-1">
-            <p className="text-green-400">
-              💰 Ingresos: {formatCurrency(payload[0]?.value || 0)}
-            </p>
-            <p className="text-red-400">
-              💸 Gastos: {formatCurrency(payload[1]?.value || 0)}
-            </p>
-            <p className="text-blue-400">
-              📈 Beneficio: {formatCurrency((payload[0]?.value || 0) - (payload[1]?.value || 0))}
-            </p>
-          </div>
-        </div>
-      )
-    }
-    return null
-  }
+  const range = (["today", "week", "month", "year"].includes(period) ? period : "month") as RangeValue
 
-  const renderChart = () => {
-    const chartProps = {
-      data: chartData,
-      margin: { top: 20, right: 30, left: 20, bottom: 20 }
-    }
+  const handleRangeChange = useCallback(
+    (next: RangeValue) => {
+      setPeriod(next)
+      refetch()
+    },
+    [setPeriod, refetch]
+  )
 
-    switch (chartType) {
-      case 'bar':
-        return (
-          <BarChart {...chartProps}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-            <XAxis
-              dataKey="month"
-              stroke="#9CA3AF"
-              fontSize={12}
-            />
-            <YAxis
-              stroke="#9CA3AF"
-              fontSize={12}
-              tickFormatter={(value) => `${(value / 1000).toFixed(0)}k€`}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="income" fill="#10B981" radius={[2, 2, 0, 0]} />
-            <Bar dataKey="expenses" fill="#EF4444" radius={[2, 2, 0, 0]} />
-          </BarChart>
-        )
+  const chartData = useMemo(() => {
+    return chartSeries.map((d) => ({
+      label: d.label,
+      income: d.income,
+      expense: d.expense,
+      profit: d.profit,
+    }))
+  }, [chartSeries])
 
-      case 'area':
-        return (
-          <AreaChart {...chartProps}>
-            <defs>
-              <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="#10B981" stopOpacity={0.1}/>
-              </linearGradient>
-              <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#EF4444" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="#EF4444" stopOpacity={0.1}/>
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-            <XAxis
-              dataKey="month"
-              stroke="#9CA3AF"
-              fontSize={12}
-            />
-            <YAxis
-              stroke="#9CA3AF"
-              fontSize={12}
-              tickFormatter={(value) => `${(value / 1000).toFixed(0)}k€`}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Area
-              type="monotone"
-              dataKey="income"
-              stroke="#10B981"
-              strokeWidth={3}
-              fill="url(#incomeGradient)"
-            />
-            <Area
-              type="monotone"
-              dataKey="expenses"
-              stroke="#EF4444"
-              strokeWidth={3}
-              fill="url(#expenseGradient)"
-            />
-          </AreaChart>
-        )
+  const yDomain = useMemo(() => {
+    if (!chartData.length) return [0, 100]
+    const flat = chartData.flatMap((d) => [d.income, d.expense, d.profit].filter(Number.isFinite))
+    const min = Math.min(0, ...flat)
+    const max = Math.max(...flat)
+    const pad = (max - min) * 0.1 || 100
+    return [Math.floor(min - pad), Math.ceil(max + pad)]
+  }, [chartData])
 
-      default: // line
-        return (
-          <LineChart {...chartProps}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-            <XAxis
-              dataKey="month"
-              stroke="#9CA3AF"
-              fontSize={12}
-            />
-            <YAxis
-              stroke="#9CA3AF"
-              fontSize={12}
-              tickFormatter={(value) => `${(value / 1000).toFixed(0)}k€`}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Line
-              type="monotone"
-              dataKey="income"
-              stroke="#10B981"
-              strokeWidth={3}
-              dot={{ fill: '#10B981', strokeWidth: 2, r: 4 }}
-              activeDot={{ r: 6, stroke: '#10B981', strokeWidth: 2 }}
-            />
-            <Line
-              type="monotone"
-              dataKey="expenses"
-              stroke="#EF4444"
-              strokeWidth={3}
-              dot={{ fill: '#EF4444', strokeWidth: 2, r: 4 }}
-              activeDot={{ r: 6, stroke: '#EF4444', strokeWidth: 2 }}
-            />
-            <Line
-              type="monotone"
-              dataKey="profit"
-              stroke="#3B82F6"
-              strokeWidth={2}
-              strokeDasharray="5 5"
-              dot={{ fill: '#3B82F6', strokeWidth: 2, r: 3 }}
-              activeDot={{ r: 5, stroke: '#3B82F6', strokeWidth: 2 }}
-            />
-          </LineChart>
-        )
-    }
-  }
+  const hasData = chartData.length > 0 && chartData.some((d) => d.income > 0 || d.expense > 0 || d.profit !== 0)
+  const isLoading = false
+
+  const periodProfit = kpis?.netProfit ?? 0
+  const profitGrowth = trends?.profitGrowth ?? 0
 
   return (
     <motion.div
-      className="bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-gray-700/50 p-6"
-      initial={{ opacity: 0, y: 20 }}
+      className="rounded-xl border border-white/10 bg-gradient-to-b from-white/[0.06] to-transparent p-5 flex flex-col min-h-[380px] w-full overflow-hidden"
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.2, duration: 0.5 }}
+      transition={{ duration: 0.3 }}
     >
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h3 className="text-xl font-bold text-white mb-2">Evolución Financiera</h3>
-          <p className="text-gray-400 text-sm">Ingresos vs gastos mensuales</p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {/* Chart Type Selector */}
-          <div className="flex items-center bg-gray-900/50 rounded-lg p-1">
+      {/* Range selector */}
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-2 shrink-0">
+        <div className="flex items-center gap-1 rounded-xl bg-white/5 border border-white/10 p-0.5">
+          {RANGE_OPTIONS.map((opt) => (
             <button
-              onClick={() => setChartType('line')}
-              className={`p-2 rounded-md transition-colors ${
-                chartType === 'line' ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-white'
-              }`}
+              key={opt.value}
+              type="button"
+              onClick={() => handleRangeChange(opt.value)}
+              className={`
+                px-4 py-2 rounded-lg text-sm font-medium transition-all
+                ${range === opt.value
+                  ? "bg-white/15 text-white shadow-sm"
+                  : "text-white/60 hover:text-white/80 hover:bg-white/5"}
+              `}
             >
-              <ChartPieIcon className="w-4 h-4" />
+              {opt.label}
             </button>
-            <button
-              onClick={() => setChartType('bar')}
-              className={`p-2 rounded-md transition-colors ${
-                chartType === 'bar' ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              <Bars3Icon className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setChartType('area')}
-              className={`p-2 rounded-md transition-colors ${
-                chartType === 'area' ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              <ChartBarIcon className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* Granularity Selector */}
-          <select
-            value={granularity}
-            onChange={(e) => setGranularity(e.target.value as typeof granularity)}
-            className="px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-          >
-            <option value="daily">Diario</option>
-            <option value="weekly">Semanal</option>
-            <option value="monthly">Mensual</option>
-          </select>
+          ))}
         </div>
       </div>
 
-      <div className="h-80">
-        {loading ? (
-          <div className="flex items-center justify-center h-full text-gray-400">Cargando…</div>
-        ) : chartData.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-gray-400">
-            <p className="text-white/80">Sin datos de evolución</p>
-            <p className="text-sm mt-1">Añade transacciones para ver el gráfico.</p>
-          </div>
+      {/* Executive summary — profit hero, above the chart */}
+      <div className="shrink-0 mb-4 px-0.5">
+        <p className="text-xs uppercase tracking-wider text-white/50 font-medium mb-0.5">
+          Beneficio del período
+        </p>
+        <div className="flex items-baseline gap-3 flex-wrap">
+          <span
+            className={`text-3xl font-bold tabular-nums tracking-tight ${
+              periodProfit >= 0 ? "text-violet-400" : "text-red-400"
+            }`}
+          >
+            {formatCurrency(periodProfit)}
+          </span>
+          {profitGrowth != null && (
+            <span
+              className={`flex items-center gap-1 text-sm font-medium ${
+                profitGrowth >= 0 ? "text-emerald-400" : "text-red-400"
+              }`}
+            >
+              {profitGrowth >= 0 ? (
+                <ArrowTrendingUpIcon className="w-4 h-4" />
+              ) : (
+                <ArrowTrendingDownIcon className="w-4 h-4" />
+              )}
+              {profitGrowth >= 0 ? "+" : ""}
+              {profitGrowth.toFixed(1)}% vs anterior
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Chart area — fixed height */}
+      <div className="w-full h-[380px] min-h-[380px] shrink-0 relative">
+        {isLoading ? (
+          <div className="w-full h-full rounded-lg bg-white/5 animate-pulse" />
+        ) : !hasData ? (
+          <EmptyChartWithAxes />
         ) : (
-          <ResponsiveContainer width="100%" height="100%">
-            {renderChart()}
-          </ResponsiveContainer>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={range}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="absolute inset-0"
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart
+                  data={chartData}
+                  margin={{ top: 12, right: 12, left: 4, bottom: 12 }}
+                >
+                  <defs>
+                    <linearGradient id="chartIncome" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#10b981" stopOpacity={0.35} />
+                      <stop offset="100%" stopColor="#10b981" stopOpacity={0.02} />
+                    </linearGradient>
+                    <linearGradient id="chartExpense" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#ef4444" stopOpacity={0.2} />
+                      <stop offset="100%" stopColor="#ef4444" stopOpacity={0.02} />
+                    </linearGradient>
+                    <linearGradient id="chartProfit" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#a78bfa" stopOpacity={0.45} />
+                      <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.05} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid
+                    strokeDasharray="2 2"
+                    stroke="rgba(255,255,255,0.04)"
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey="label"
+                    stroke="rgba(255,255,255,0.35)"
+                    fontSize={10}
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={6}
+                  />
+                  <YAxis
+                    stroke="rgba(255,255,255,0.35)"
+                    fontSize={10}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(v) => `${(v / 1000).toFixed(0)}k€`}
+                    domain={yDomain}
+                    width={40}
+                    tickMargin={2}
+                  />
+                  <Tooltip
+                    content={
+                      <ChartTooltip
+                    trends={trends}
+                    previousPoints={chartData}
+                  />
+                }
+                    cursor={{ stroke: "rgba(255,255,255,0.18)", strokeWidth: 1 }}
+                    isAnimationActive={false}
+                  />
+                  {/* Income — base reference, thicker + soft gradient */}
+                  <Area
+                    type="monotone"
+                    dataKey="income"
+                    stroke="#10b981"
+                    strokeWidth={3}
+                    fill="url(#chartIncome)"
+                    isAnimationActive
+                    animationDuration={600}
+                    animationEasing="ease-out"
+                    dot={false}
+                    activeDot={{ r: 5, fill: "#10b981", stroke: "rgba(255,255,255,0.4)", strokeWidth: 2 }}
+                  />
+                  {/* Expenses — contextual, thin */}
+                  <Area
+                    type="monotone"
+                    dataKey="expense"
+                    stroke="#f87171"
+                    strokeWidth={1.5}
+                    fill="url(#chartExpense)"
+                    isAnimationActive
+                    animationDuration={600}
+                    animationEasing="ease-out"
+                    dot={false}
+                    activeDot={{ r: 4, fill: "#ef4444", stroke: "rgba(255,255,255,0.3)", strokeWidth: 2 }}
+                  />
+                  {/* Profit — hero, thicker + glow */}
+                  <Area
+                    type="monotone"
+                    dataKey="profit"
+                    stroke="#a78bfa"
+                    strokeWidth={3.5}
+                    fill="url(#chartProfit)"
+                    isAnimationActive
+                    animationDuration={600}
+                    animationEasing="ease-out"
+                    dot={false}
+                    activeDot={{
+                      r: 6,
+                      fill: "#a78bfa",
+                      stroke: "rgba(255,255,255,0.5)",
+                      strokeWidth: 2,
+                      style: { filter: "drop-shadow(0 0 6px rgba(167,139,250,0.6))" },
+                    }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </motion.div>
+          </AnimatePresence>
         )}
       </div>
 
       {/* Legend */}
-      <div className="flex items-center justify-center gap-6 mt-4">
+      <div className="flex items-center justify-center gap-6 mt-3 shrink-0 pt-3 border-t border-white/10">
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-          <span className="text-sm text-gray-400">Ingresos</span>
+          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+          <span className="text-xs font-medium text-white/60">Ingresos</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-          <span className="text-sm text-gray-400">Gastos</span>
+          <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
+          <span className="text-xs font-medium text-white/60">Gastos</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-blue-500 rounded-full opacity-60"></div>
-          <span className="text-sm text-gray-400">Beneficio</span>
+          <div className="w-2.5 h-2.5 rounded-full bg-violet-400 shadow-[0_0_8px_rgba(167,139,250,0.5)]" />
+          <span className="text-xs font-medium text-white/60">Beneficio</span>
         </div>
       </div>
     </motion.div>
+  )
+}
+
+type TooltipPayload = { dataKey: string; value: number }[]
+
+function ChartTooltip({
+  active,
+  payload,
+  label,
+  trends,
+  previousPoints,
+}: {
+  active?: boolean
+  payload?: TooltipPayload
+  label?: string
+  trends?: { incomeGrowth?: number; expenseGrowth?: number; profitGrowth?: number }
+  previousPoints: { label: string; income: number; expense: number; profit: number }[]
+}) {
+  if (!active || !payload?.length || !label) return null
+
+  const income = payload.find((p) => p.dataKey === "income")?.value ?? 0
+  const expense = payload.find((p) => p.dataKey === "expense")?.value ?? 0
+  const profit = payload.find((p) => p.dataKey === "profit")?.value ?? 0
+
+  const idx = previousPoints.findIndex((p) => p.label === label)
+  const prev = idx > 0 ? previousPoints[idx - 1] : null
+  const deltaIncome = prev != null && prev.income !== 0 ? ((income - prev.income) / prev.income) * 100 : null
+  const deltaExpense = prev != null && prev.expense !== 0 ? ((expense - prev.expense) / prev.expense) * 100 : null
+  const deltaProfit = prev != null && prev.profit !== 0 ? ((profit - prev.profit) / Math.abs(prev.profit)) * 100 : null
+
+  return (
+    <div className="rounded-2xl border border-white/20 bg-black/80 shadow-2xl backdrop-blur-xl overflow-hidden min-w-[220px] ring-1 ring-white/10">
+      <div className="px-4 pt-3.5 pb-2.5 border-b border-white/10">
+        <p className="text-xs font-semibold text-white/90 uppercase tracking-wider">{label}</p>
+      </div>
+      <div className="px-4 py-3.5 space-y-2.5">
+        <div className="flex justify-between items-baseline gap-6">
+          <span className="text-sm text-white/55">Ingresos</span>
+          <span className="text-base font-semibold tabular-nums text-emerald-400">
+            {formatCurrency(income)}
+          </span>
+        </div>
+        {deltaIncome != null && (
+          <p className="text-[11px] text-white/45 -mt-1">
+            {deltaIncome >= 0 ? "+" : ""}{deltaIncome.toFixed(1)}% vs anterior
+          </p>
+        )}
+        <div className="flex justify-between items-baseline gap-6">
+          <span className="text-sm text-white/55">Gastos</span>
+          <span className="text-base font-semibold tabular-nums text-red-400">
+            {formatCurrency(expense)}
+          </span>
+        </div>
+        {deltaExpense != null && (
+          <p className="text-[11px] text-white/45 -mt-1">
+            {deltaExpense >= 0 ? "+" : ""}{deltaExpense.toFixed(1)}% vs anterior
+          </p>
+        )}
+        <div className="flex justify-between items-baseline gap-6 pt-2 border-t border-white/10">
+          <span className="text-sm text-white/55">Beneficio</span>
+          <span className="text-base font-semibold tabular-nums text-violet-400">
+            {formatCurrency(profit)}
+          </span>
+        </div>
+        {deltaProfit != null && (
+          <p className="text-[11px] text-white/45 -mt-1">
+            {deltaProfit >= 0 ? "+" : ""}{deltaProfit.toFixed(1)}% vs anterior
+          </p>
+        )}
+        {trends && (trends.incomeGrowth != null || trends.profitGrowth != null) && (
+          <div className="pt-2 mt-2 border-t border-white/10 flex flex-wrap gap-x-2 text-[11px] text-white/50">
+            <span>Resumen período:</span>
+            {trends.incomeGrowth != null && (
+              <span className={trends.incomeGrowth >= 0 ? "text-emerald-400" : "text-red-400"}>
+                Ingresos {trends.incomeGrowth >= 0 ? "+" : ""}{trends.incomeGrowth.toFixed(1)}%
+              </span>
+            )}
+            {trends.profitGrowth != null && (
+              <span className={trends.profitGrowth >= 0 ? "text-violet-400" : "text-red-400"}>
+                Resultado {trends.profitGrowth >= 0 ? "+" : ""}{trends.profitGrowth.toFixed(1)}%
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function EmptyChartWithAxes() {
+  const emptyData = useMemo(() => [{ label: "", income: 0, expense: 0, profit: 0 }], [])
+  return (
+    <div className="relative w-full h-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={emptyData} margin={{ top: 12, right: 12, left: 4, bottom: 12 }}>
+          <CartesianGrid strokeDasharray="2 2" stroke="rgba(255,255,255,0.05)" vertical={false} />
+          <XAxis dataKey="label" stroke="rgba(255,255,255,0.25)" fontSize={10} tickLine={false} axisLine={false} />
+          <YAxis
+            stroke="rgba(255,255,255,0.25)"
+            fontSize={10}
+            tickLine={false}
+            axisLine={false}
+            tickFormatter={(v) => `${(v / 1000).toFixed(0)}k€`}
+            domain={[0, 100]}
+            width={40}
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <p className="text-sm text-white/45 text-center max-w-[260px]">
+          Sin datos en este período. Cambia el rango o registra movimientos.
+        </p>
+      </div>
+    </div>
   )
 }

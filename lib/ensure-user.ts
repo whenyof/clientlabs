@@ -31,8 +31,12 @@ export async function ensureUserExists(sessionUser: {
                 data: {
                     id: sessionUser.id,
                     email: sessionUser.email ?? "",
-                    name: sessionUser.name ?? "",
+                    name: sessionUser.name ?? null,
+                    image: (sessionUser as { image?: string | null }).image ?? null,
+                    role: "USER",
+                    plan: "FREE",
                     onboardingCompleted: false,
+                    selectedSector: null,
                 },
             })
         )

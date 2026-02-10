@@ -1,8 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Input } from "@/components/ui/input"
 import {
     Select,
     SelectContent,
@@ -10,7 +8,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { Search, ArrowUpDown } from "lucide-react"
+import { ArrowUpDown } from "lucide-react"
 
 type ClientsFiltersProps = {
     currentFilters: {
@@ -24,21 +22,6 @@ type ClientsFiltersProps = {
 export function ClientsFilters({ currentFilters }: ClientsFiltersProps) {
     const router = useRouter()
     const searchParams = useSearchParams()
-    const [searchTerm, setSearchTerm] = useState(currentFilters.search)
-
-    // Debounced search
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            const params = new URLSearchParams(searchParams.toString())
-            if (searchTerm) {
-                params.set("search", searchTerm)
-            } else {
-                params.delete("search")
-            }
-            router.push(`?${params.toString()}`)
-        }, 300)
-        return () => clearTimeout(timer)
-    }, [searchTerm])
 
     const updateFilter = (key: string, value: string) => {
         const params = new URLSearchParams(searchParams.toString())
@@ -107,18 +90,6 @@ export function ClientsFilters({ currentFilters }: ClientsFiltersProps) {
                     <SelectItem value="name-desc">Nombre Z-A</SelectItem>
                 </SelectContent>
             </Select>
-
-            {/* Right: Search (full width) */}
-            <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
-                <Input
-                    type="text"
-                    placeholder="Buscar por nombre, email o teléfono..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 h-10 bg-white/5 border-white/10 text-white placeholder:text-white/40 focus:ring-2 focus:ring-blue-500/20 transition-all"
-                />
-            </div>
         </div>
     )
 }

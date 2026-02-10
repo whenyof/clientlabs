@@ -55,9 +55,9 @@ export function ReportingBreakdown({ topClients, revenueByType }: Props) {
                     border: "1px solid rgba(255,255,255,0.1)",
                     borderRadius: "8px",
                   }}
-                  formatter={(value: number, _name: string, props: { payload: { fullName?: string; count: number } }) => [
-                    formatReportingCurrency(value),
-                    props.payload?.fullName ?? props.payload?.name,
+                  formatter={(value: number | undefined, _name: string | undefined, props?: { payload?: { fullName?: string; count: number } }) => [
+                    formatReportingCurrency(value ?? 0),
+                    props?.payload?.fullName ?? "",
                   ]}
                   labelFormatter={() => ""}
                 />
@@ -96,7 +96,7 @@ export function ReportingBreakdown({ topClients, revenueByType }: Props) {
                     border: "1px solid rgba(255,255,255,0.1)",
                     borderRadius: "8px",
                   }}
-                  formatter={(value: number) => [formatReportingCurrency(value), revenueLabel]}
+                  formatter={(value: number | undefined) => [formatReportingCurrency(value ?? 0), revenueLabel]}
                 />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                   {typeData.map((_, i) => (

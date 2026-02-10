@@ -10,7 +10,6 @@ export type {
   ReportActionItem,
   ReportExecutiveSummary,
   ReportForecast,
-  ReportExecutiveSummary,
 } from "./executive-report.types"
 export {
   buildExecutiveSummaryNarrative,

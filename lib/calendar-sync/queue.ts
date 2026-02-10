@@ -26,7 +26,7 @@ export async function enqueueTaskCalendarSync(
         userId,
         provider,
         operation,
-        payload: payload ?? undefined,
+        payload: (payload ?? undefined) as import("@prisma/client").Prisma.InputJsonValue | undefined,
         status: "PENDING",
       },
     })

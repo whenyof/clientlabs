@@ -157,7 +157,7 @@ export function ReportingYoY({ sales }: Props) {
                   borderRadius: "8px",
                 }}
                 labelStyle={{ color: "rgba(255,255,255,0.8)" }}
-                formatter={(value: number) => [formatReportingCurrency(value), ""]}
+                formatter={(value: number | undefined) => [formatReportingCurrency(value ?? 0), ""]}
                 labelFormatter={(label) => label}
               />
               <Legend

@@ -520,6 +520,22 @@ export interface SectorLabels {
         }
         /** Título gráfica principal */
         heroChartTitle: string
+        /** Export PDF modal */
+        exportPdf?: { title?: string; description?: string; generate?: string }
+        /** Scenario simulator labels */
+        scenarios?: {
+            title?: string
+            extraSales?: string
+            ticketChange?: string
+            convertedLeads?: string
+            reactivated?: string
+            discount?: string
+            projectedRevenue?: string
+            growth?: string
+            projectedSales?: string
+            goalCompletion?: string
+            neededSales?: string
+        }
         /** Comparativa año contra año (YoY) */
         yoy?: {
             title: string

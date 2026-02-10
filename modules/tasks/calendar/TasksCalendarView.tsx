@@ -11,7 +11,7 @@ import {
 } from "./types"
 import { CalendarHeader } from "./CalendarHeader"
 import { CalendarFilters, type CalendarFiltersState } from "./CalendarFilters"
-import { CalendarGrid } from "./CalendarGrid"
+import { CalendarGrid } from "../components/CalendarGrid"
 import { CalendarSidePanel } from "./CalendarSidePanel"
 
 const DEFAULT_FILTERS: CalendarFiltersState = {
@@ -149,12 +149,10 @@ export function TasksCalendarView() {
           </div>
         ) : (
           <CalendarGrid
-            viewMode={viewMode}
+            view={viewMode}
             currentDate={currentDate}
-            dayKeys={dayKeys}
-            tasks={calendarTasks}
-            assignees={gridAssignees}
-            onTaskClick={setSelectedTask}
+            tasks={calendarTasks as import("../components/CalendarGrid").CalendarTask[]}
+            onTaskClick={(task) => setSelectedTask(task as unknown as CalendarTask)}
           />
         )}
       </div>

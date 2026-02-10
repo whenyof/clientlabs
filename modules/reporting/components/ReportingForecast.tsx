@@ -68,7 +68,7 @@ export function ReportingForecast({ forecast }: Props) {
                 borderRadius: "8px",
               }}
               labelStyle={{ color: "rgba(255,255,255,0.8)" }}
-              formatter={(value: number) => (value != null ? [formatReportingCurrency(value), ""] : [])}
+              formatter={(value: number | undefined) => (value != null ? [formatReportingCurrency(value), ""] : [])}
               labelFormatter={(label) => label}
             />
             <ReferenceLine x={chartData[n - 1]?.label} stroke="rgba(255,255,255,0.2)" strokeDasharray="4 4" />

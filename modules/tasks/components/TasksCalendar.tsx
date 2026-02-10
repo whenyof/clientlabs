@@ -98,7 +98,7 @@ export function TasksCalendar({
     setError(null)
     try {
       const list = await fetchTasks({ from, to })
-      const normalized = (Array.isArray(list) ? list : []).map(toCalendarTask)
+      const normalized = (Array.isArray(list) ? list : []).map((t) => toCalendarTask(t as Parameters<typeof toCalendarTask>[0]))
       setTasks(normalized)
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load tasks")

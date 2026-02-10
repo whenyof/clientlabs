@@ -21,6 +21,12 @@ function startOfDay(d: Date): Date {
   return out
 }
 
+function endOfDay(d: Date): Date {
+  const out = new Date(d)
+  out.setHours(23, 59, 59, 999)
+  return out
+}
+
 function workStart(d: Date): Date {
   const out = new Date(d)
   out.setHours(WORK_START_HOUR, 0, 0, 0)
@@ -97,7 +103,7 @@ export async function detectIdleGaps(
     },
   })
 
-  const byAssignee = new Map<string, { startAt: Date; endAt: Date }[]>()
+  const byAssignee = new Map<string, { start: Date; end: Date }[]>()
   for (const t of tasks) {
     if (!t.assignedTo || !t.startAt || !t.endAt) continue
     const clamped = clampToWorkDay(t.startAt, t.endAt, wStart, wEnd)

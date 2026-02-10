@@ -82,10 +82,10 @@ function ForecastChartRealAndScenarios({ chartData }: { chartData: ForecastChart
               borderRadius: "8px",
             }}
             labelStyle={{ color: "rgba(255,255,255,0.8)" }}
-            formatter={(value: number, name: string) => [
-              typeof value === "number" && (name === "revenue" || name.startsWith("forecast"))
-                ? formatSaleCurrency(value)
-                : value,
+            formatter={(value: number | undefined, name: string | undefined) => [
+              typeof value === "number" && (name === "revenue" || name?.startsWith("forecast"))
+                ? formatSaleCurrency(value ?? 0)
+                : value ?? 0,
               name === "revenue"
                 ? realLabel
                 : name === "forecastBase"
@@ -94,7 +94,7 @@ function ForecastChartRealAndScenarios({ chartData }: { chartData: ForecastChart
                     ? optLabel
                     : name === "forecastConservative"
                       ? consLabel
-                      : name,
+                      : name ?? "",
             ]}
             labelFormatter={(label) => label}
           />
@@ -173,9 +173,9 @@ function ForecastChartRevenue({ chartData }: { chartData: SalesForecastResult["c
               borderRadius: "8px",
             }}
             labelStyle={{ color: "rgba(255,255,255,0.8)" }}
-            formatter={(value: number, name: string) => [
-              name === "revenue" ? formatSaleCurrency(value) : value,
-              name === "revenue" ? historicalLabel : name === "forecastRevenue" ? projectedLabel : name,
+            formatter={(value: number | undefined, name: string | undefined) => [
+              name === "revenue" ? formatSaleCurrency(value ?? 0) : value ?? 0,
+              name === "revenue" ? historicalLabel : name === "forecastRevenue" ? projectedLabel : name ?? "",
             ]}
             labelFormatter={(label) => label}
           />
@@ -234,9 +234,9 @@ function ForecastChartCount({ chartData }: { chartData: SalesForecastResult["cha
               borderRadius: "8px",
             }}
             labelStyle={{ color: "rgba(255,255,255,0.8)" }}
-            formatter={(value: number, name: string) => [
-              Math.round(Number(value)),
-              name === "count" ? historicalLabel : name === "forecastCount" ? projectedLabel : name,
+            formatter={(value: number | undefined, name: string | undefined) => [
+              Math.round(Number(value ?? 0)),
+              name === "count" ? historicalLabel : name === "forecastCount" ? projectedLabel : name ?? "",
             ]}
             labelFormatter={(label) => label}
           />

@@ -90,7 +90,7 @@ export function SalesChart({ sales, dateRange, preset }: Props) {
                   borderRadius: "8px",
                 }}
                 labelStyle={{ color: "rgba(255,255,255,0.8)" }}
-                formatter={(value: number) => [formatValue(value), tooltipLabel]}
+                formatter={(value: number | undefined) => [formatValue(value ?? 0), tooltipLabel]}
                 labelFormatter={(label) => label}
               />
               <Bar dataKey={dataKey} radius={[4, 4, 0, 0]}>
@@ -125,7 +125,7 @@ export function SalesChart({ sales, dateRange, preset }: Props) {
                   borderRadius: "8px",
                 }}
                 labelStyle={{ color: "rgba(255,255,255,0.8)" }}
-                formatter={(value: number) => [formatValue(value), tooltipLabel]}
+                formatter={(value: number | undefined) => [formatValue(value ?? 0), tooltipLabel]}
                 labelFormatter={(label) => label}
               />
               <Line

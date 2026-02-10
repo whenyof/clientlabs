@@ -60,7 +60,7 @@ export function MovementsList() {
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-white truncate">{m.label}</p>
                   <p className="text-xs text-white/50">
-                    {typeLabel(m.type)} · {formatDate(m.date)}
+                    {typeLabel(m.type as MovementType)} · {formatDate(m.date)}
                   </p>
                 </div>
               </div>

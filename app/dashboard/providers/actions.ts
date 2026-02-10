@@ -1884,7 +1884,7 @@ const VALID_ORDER_TRANSITIONS: Record<string, string[]> = {
  */
 export async function updateProviderOrderStatus(
     orderId: string,
-    newStatus: "DRAFT" | "PENDING" | "RECEIVED" | "ISSUE" | "CANCELLED" | "CLOSED"
+    newStatus: "DRAFT" | "PENDING" | "RECEIVED" | "ISSUE" | "CANCELLED" | "CLOSED" | "PAID"
 ) {
     const session = await checkAuth()
     if (!session) return { success: false, error: "Unauthorized" }

@@ -1,3 +1,5 @@
+import type { FinancialInsight } from "@/modules/finance/insights"
+import type { FinancialAction } from "@/modules/finance/strategy"
 import type {
   ExecutiveReport,
   ExecutiveReportInput,

@@ -129,6 +129,7 @@ function MonthGrid({
   onDragStart,
   onDragEnd,
   onDropTargetChange,
+  overloadedDayKeys,
 }: {
   currentDate: Date
   tasks: CalendarTask[]
@@ -274,6 +275,7 @@ function WeekGrid({
   onDragStart,
   onDragEnd,
   onDropTargetChange,
+  overloadedDayKeys,
 }: {
   currentDate: Date
   tasks: CalendarTask[]
@@ -386,6 +388,7 @@ function DayGrid({
   onDragStart,
   onDragEnd,
   onDropTargetChange,
+  overloadedDayKeys,
 }: {
   currentDate: Date
   tasks: CalendarTask[]

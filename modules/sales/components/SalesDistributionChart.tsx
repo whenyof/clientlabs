@@ -75,10 +75,11 @@ export function SalesDistributionChart({ sales, variant = "byStatus" }: Props) {
                 border: "1px solid rgba(255,255,255,0.1)",
                 borderRadius: "8px",
               }}
-              formatter={(value: number, _name: string, props: { payload: { value: number } }) => {
+              formatter={(value: number | undefined, _name: string | undefined, props?: { payload?: { value: number } }) => {
+                const v = value ?? 0
                 const total = data.reduce((s, d) => s + d.value, 0)
-                const pct = total > 0 ? Math.round((value / total) * 100) : 0
-                return [value, `${pct}%`]
+                const pct = total > 0 ? Math.round((v / total) * 100) : 0
+                return [v, `${pct}%`]
               }}
             />
             <Legend

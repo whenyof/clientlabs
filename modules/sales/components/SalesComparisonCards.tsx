@@ -16,7 +16,7 @@ export function SalesComparisonCards({ kpis, salesCurrent }: Props) {
   const sl = labels.sales
   const insights = labels.sales.insights
 
-  const topClient = useMemo(() => {
+  const topClient = useMemo((): { name: string; total: number } | null => {
     const byClient = new Map<string, number>()
     for (const s of salesCurrent) {
       const name = s.clientName || "Sin cliente"

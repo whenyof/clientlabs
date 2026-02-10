@@ -5,6 +5,7 @@ import {
   getFinanceSummary,
   getFinanceMonthlyTrend,
 } from "@/modules/finance/services/finance-aggregator"
+import { getSalesComparisons } from "@/modules/sales/services/salesAnalytics"
 import { predictMonthlyRevenue, predictMonthlyExpenses, predictCashFlow } from "../lib/predictors"
 
 function growthRate(current: number, previous: number): number {

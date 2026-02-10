@@ -93,10 +93,7 @@ export async function calculateAndStorePriority(taskId: string): Promise<number 
 
   await prisma.task.update({
     where: { id: taskId },
-    data: {
-      priorityScore: score,
-      lastPriorityCalc: new Date(),
-    },
+    data: { priorityScore: score },
   })
   return score
 }
@@ -130,7 +127,6 @@ export async function calculateUserTaskPriorities(userId: string): Promise<void>
             slaMinutes: t.slaMinutes,
             isBlocking: t.isBlocking,
           }),
-          lastPriorityCalc: now,
         },
       })
     )

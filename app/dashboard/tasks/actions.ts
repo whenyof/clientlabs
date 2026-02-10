@@ -99,13 +99,8 @@ export async function toggleTaskCompletion(id: string, completed: boolean) {
     const session = await checkAuth()
     if (!session) return { success: false, error: "Unauthorized" }
 
-    let task: { clientId?: string | null }
-    if (completed) {
-        task = await completeTaskViaApi(id)
-    } else {
-        task = await updateTaskViaApi(id, { status: "PENDING", completedAt: null })
-    }
-
+    const completedTask = completed ? await completeTaskViaApi(id) : await updateTaskViaApi(id, { status: "PENDING", completedAt: null })
+    const task = completedTask as { clientId?: string | null }
     if (task?.clientId) {
         await recalculateClientStatus(task.clientId)
     }

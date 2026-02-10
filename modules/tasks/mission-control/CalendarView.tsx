@@ -321,10 +321,10 @@ const TaskCardContent = memo(function TaskCardContent({
               </span>
             )}
             {showRisk && (
-              <AlertTriangle className="w-3 h-3 text-amber-400 shrink-0" title="Retrasada" aria-hidden />
+              <AlertTriangle className="w-3 h-3 text-amber-400 shrink-0" aria-label="Retrasada" aria-hidden />
             )}
             {showScheduleRisk && (
-              <AlertCircle className="w-3 h-3 text-amber-400 shrink-0" title={scheduleRiskTooltip} aria-hidden />
+              <AlertCircle className="w-3 h-3 text-amber-400 shrink-0" aria-label={scheduleRiskTooltip} aria-hidden />
             )}
           </div>
           {meta && (
@@ -358,7 +358,7 @@ const TaskCardContent = memo(function TaskCardContent({
             <TypeIcon className="w-2.5 h-2.5 text-zinc-400 shrink-0" />
           )}
           {showRisk && <AlertTriangle className="w-2.5 h-2.5 text-amber-400 shrink-0" />}
-          {showScheduleRisk && <AlertCircle className="w-2.5 h-2.5 text-amber-400 shrink-0" title={scheduleRiskTooltip} />}
+          {showScheduleRisk && <AlertCircle className="w-2.5 h-2.5 text-amber-400 shrink-0" aria-label={scheduleRiskTooltip} />}
         </div>
       </>
     )
@@ -387,8 +387,8 @@ const TaskCardContent = memo(function TaskCardContent({
               {autoPriority}
             </span>
           )}
-          {showRisk && <AlertTriangle className="w-3 h-3 text-amber-400 shrink-0" title="Retrasada" />}
-          {showScheduleRisk && <AlertCircle className="w-3 h-3 text-amber-400 shrink-0" title={scheduleRiskTooltip} />}
+          {showRisk && <AlertTriangle className="w-3 h-3 text-amber-400 shrink-0" aria-label="Retrasada" />}
+          {showScheduleRisk && <AlertCircle className="w-3 h-3 text-amber-400 shrink-0" aria-label={scheduleRiskTooltip} />}
         </div>
       </>
     )
@@ -418,8 +418,8 @@ const TaskCardContent = memo(function TaskCardContent({
                 {autoPriority}
               </span>
             )}
-            {showRisk && <AlertTriangle className="w-3 h-3 text-amber-400 shrink-0" title="Retrasada" />}
-            {showScheduleRisk && <AlertCircle className="w-3 h-3 text-amber-400 shrink-0" title={scheduleRiskTooltip} />}
+            {showRisk && <AlertTriangle className="w-3 h-3 text-amber-400 shrink-0" aria-label="Retrasada" />}
+            {showScheduleRisk && <AlertCircle className="w-3 h-3 text-amber-400 shrink-0" aria-label={scheduleRiskTooltip} />}
           </div>
           {meta && (
             <span className="text-[10px] text-white/70 truncate block mt-0.5 opacity-70">{meta}</span>
@@ -464,10 +464,10 @@ const TaskCardContent = memo(function TaskCardContent({
             </span>
           )}
           {showRisk && (
-            <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" title="Retrasada" aria-hidden />
+            <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" aria-label="Retrasada" aria-hidden />
           )}
           {showScheduleRisk && (
-            <AlertCircle className="w-3.5 h-3.5 text-amber-400 shrink-0" title={scheduleRiskTooltip} aria-hidden />
+            <AlertCircle className="w-3.5 h-3.5 text-amber-400 shrink-0" aria-label={scheduleRiskTooltip} aria-hidden />
           )}
         </div>
         {meta && (

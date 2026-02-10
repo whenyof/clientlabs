@@ -4,8 +4,8 @@ import { formatSaleCurrency } from "../utils"
 
 type Props = {
   active?: boolean
-  payload?: Array<{ name?: string; value?: number; dataKey?: string }>
-  label?: string
+  payload?: ReadonlyArray<{ name?: string; value?: number; dataKey?: string }>
+  label?: string | number | undefined
   labelFormatter?: (label: string) => string
 }
 

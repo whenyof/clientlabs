@@ -12,7 +12,7 @@ export function BusinessHealth() {
   const cashFlow = k?.cashFlow ?? 0
   const profitGrowth = trends?.profitGrowth ?? 0
   const expenseGrowth = trends?.expenseGrowth ?? 0
-  const totalRev = clientRevenue.reduce((s, c) => s + c.totalRevenue, 0)
+  const totalRev = clientRevenue.reduce((s: number, c: { totalRevenue: number }) => s + c.totalRevenue, 0)
   const topShare = totalRev > 0 && clientRevenue[0] ? (clientRevenue[0].totalRevenue / totalRev) * 100 : 0
 
   const items = [

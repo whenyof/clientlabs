@@ -3,7 +3,7 @@
 import { motion } from "framer-motion"
 import { formatCurrency } from "../lib/formatters"
 import { useFinanceData } from "../context/FinanceDataContext"
-import { TagIcon } from "@heroicons/react/24/outline"
+import { ArrowTrendingUpIcon, ExclamationTriangleIcon, TagIcon } from "@heroicons/react/24/outline"
 
 function getBudgetStatusClass(status?: string) {
   if (status === 'exceeded') return { bg: 'bg-red-500/20', text: 'text-red-400', label: 'Excedido' }

@@ -41,6 +41,13 @@ async function processGoogleJob(
   if (!task) {
     throw new Error("Task not found")
   }
+  const taskPayload = {
+    id: task.id,
+    title: task.title,
+    description: task.description,
+    dueDate: task.dueDate?.toISOString() ?? null,
+    status: task.status ?? undefined,
+  }
 
   const sync = await prisma.taskCalendarSync.findUnique({
     where: { taskId_provider: { taskId, provider: "GOOGLE" } },
@@ -48,13 +55,13 @@ async function processGoogleJob(
 
   if (operation === "CREATE") {
     if (sync?.externalEventId) {
-      await googleCalendarSync.update(userId, sync.externalEventId, task)
+      await googleCalendarSync.update(userId, sync.externalEventId, taskPayload)
       await prisma.taskCalendarSync.update({
         where: { id: sync.id },
         data: { lastSyncedAt: new Date(), updatedAt: new Date() },
       })
     } else {
-      const externalEventId = await googleCalendarSync.create(userId, task)
+      const externalEventId = await googleCalendarSync.create(userId, taskPayload)
       await prisma.taskCalendarSync.upsert({
         where: { taskId_provider: { taskId, provider: "GOOGLE" } },
         create: { taskId, userId, provider: "GOOGLE", externalEventId },
@@ -66,13 +73,13 @@ async function processGoogleJob(
 
   if (operation === "UPDATE") {
     if (sync?.externalEventId) {
-      await googleCalendarSync.update(userId, sync.externalEventId, task)
+      await googleCalendarSync.update(userId, sync.externalEventId, taskPayload)
       await prisma.taskCalendarSync.update({
         where: { id: sync.id },
         data: { lastSyncedAt: new Date(), updatedAt: new Date() },
       })
     } else {
-      const externalEventId = await googleCalendarSync.create(userId, task)
+      const externalEventId = await googleCalendarSync.create(userId, taskPayload)
       await prisma.taskCalendarSync.upsert({
         where: { taskId_provider: { taskId, provider: "GOOGLE" } },
         create: { taskId, userId, provider: "GOOGLE", externalEventId },

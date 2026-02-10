@@ -195,7 +195,7 @@ function DroppableDayColumn({
   children: React.ReactNode
 }) {
   const { setNodeRef, isOver: isOverDnd } = useDroppable({
-    id: DAY_DROPPABLE_PREFIX + dayKey,
+    id: DROPPABLE_DAY_PREFIX + dayKey,
     data: { dayKey },
   })
   const over = isOver || isOverDnd
@@ -427,9 +427,9 @@ export function MissionCalendar({
   const [overId, setOverId] = useState<string | null>(null)
   const [createOpen, setCreateOpen] = useState(false)
   const [createPreselectedDate, setCreatePreselectedDate] = useState<string | null>(null)
-  const [selectedTask, setSelectedTask] = useState<MissionControlTask | null>(null)
+  const [selectedTask, setSelectedTask] = useState<MissionControlCalendarItem | null>(null)
   const [panelOpen, setPanelOpen] = useState(false)
-  const [moveTask, setMoveTask] = useState<MissionControlTask | null>(null)
+  const [moveTask, setMoveTask] = useState<MissionControlCalendarItem | null>(null)
   const [moveDate, setMoveDate] = useState("")
   const [moving, setMoving] = useState(false)
 
@@ -552,7 +552,7 @@ export function MissionCalendar({
     refresh()
   }, [refresh])
 
-  const handleOpenMove = useCallback((task: MissionControlTask) => {
+  const handleOpenMove = useCallback((task: MissionControlCalendarItem) => {
     setMoveTask(task)
     setMoveDate(
       task.dueDate
@@ -566,7 +566,7 @@ export function MissionCalendar({
     const startAt = new Date(moveDate + "T12:00:00.000Z").toISOString()
     const dur = (moveTask.estimatedMinutes ?? 30) * 60 * 1000
     const endAt = new Date(new Date(startAt).getTime() + dur).toISOString()
-    const optimisticTask = { ...moveTask, dueDate: startAt, startAt }
+    const optimisticTask: MissionControlCalendarItem = { ...moveTask, kind: moveTask.kind ?? "TASK", dueDate: startAt, startAt }
     const optimisticEvent = displayItemToCalendarItem(optimisticTask, {
       start: startAt,
       end: endAt,
@@ -607,7 +607,7 @@ export function MissionCalendar({
   }, [])
 
   const handleDragOver = useCallback((event: DragOverEvent) => {
-    setOverId(event.over?.id ?? null)
+    setOverId(event.over?.id != null ? String(event.over.id) : null)
   }, [])
 
   const handleDragEnd = useCallback(

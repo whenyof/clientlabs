@@ -34,6 +34,7 @@ export interface FinanceAnalyticsData {
     nextEstimatedPayment: string
   }>
   financialGoals?: Array<{ id: string; title: string; target: number; current: number; deadline: string; status: string; priority?: string }>
+  clientRevenue?: Array<{ clientId: string; clientName: string; totalRevenue: number; transactions?: number }>
 }
 
 export interface TransactionsResponse {

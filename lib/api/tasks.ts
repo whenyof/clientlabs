@@ -25,9 +25,9 @@ export type CreateTaskPayload = {
 export type UpdateTaskPayload = {
   title?: string
   description?: string | null
-  dueDate?: string | null
-  startAt?: string | null
-  endAt?: string | null
+  dueDate?: string | Date | null
+  startAt?: string | Date | null
+  endAt?: string | Date | null
   priority?: TaskPriority | null
   assignedToId?: string | null
   status?: "PENDING" | "DONE" | "CANCELLED" | null

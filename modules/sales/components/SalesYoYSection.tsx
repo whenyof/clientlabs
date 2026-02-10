@@ -67,10 +67,10 @@ export function SalesYoYSection({ yoyMetrics, chartData, yearCurrent, yearPrevio
                     borderRadius: "8px",
                   }}
                   labelStyle={{ color: "rgba(255,255,255,0.8)" }}
-                  formatter={(value: number, name: string) => [
+                  formatter={(value: number | undefined, name: string | undefined) => [
                     name === "revenueCurrent" || name === "revenuePrevious"
-                      ? formatSaleCurrency(value)
-                      : Math.round(Number(value)),
+                      ? formatSaleCurrency(value ?? 0)
+                      : Math.round(Number(value ?? 0)),
                     name === "revenueCurrent" || name === "countCurrent" ? currentYearLabel : previousYearLabel,
                   ]}
                   labelFormatter={(label) => label}

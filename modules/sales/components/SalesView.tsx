@@ -318,7 +318,7 @@ export function SalesView({ initialSales }: Props) {
     const list: { type: "positive" | "warning" | "opportunity"; title: string; description: string }[] = []
     if (filteredSales.length === 0 && salesPrevious.length === 0) return list
 
-    if (salesPrevious.length > 0 && growth > 20) {
+    if (salesPrevious.length > 0 && growth != null && growth > 20) {
       list.push({
         type: "positive",
         title: "Strong growth",
@@ -451,7 +451,7 @@ export function SalesView({ initialSales }: Props) {
         revenue: kpis.revenue,
         salesCount: kpis.count,
         avgTicket: kpis.avg,
-        growthPercent: growth,
+        growthPercent: growth ?? 0,
         goalCompletionPct,
       },
       monthlyGoal: monthlyGoalTarget ?? undefined,

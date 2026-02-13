@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache"
 import type { LeadStatus, LeadTemp } from "@prisma/client"
 import { ensureUserExists } from "@/lib/ensure-user"
 
+
 /* ==================== SCORING & TEMPERATURE ==================== */
 
 // Internal function to recalculate lead score and temperature
@@ -440,6 +441,7 @@ export async function convertLeadToClient(leadId: string) {
 
     // If no existing client, create new one from lead
     if (!client) {
+
         client = await prisma.client.create({
             data: {
                 id: crypto.randomUUID(),
@@ -447,11 +449,13 @@ export async function convertLeadToClient(leadId: string) {
                 name: lead.name,
                 email: lead.email,
                 phone: lead.phone,
-                source: "lead", // Mark that this client originated from a lead
+                source: "lead",
                 convertedFromLeadId: leadId,
                 updatedAt: new Date(),
+
             },
         })
+
         clientCreated = true
     }
 

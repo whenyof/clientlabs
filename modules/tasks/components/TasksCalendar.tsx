@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useMemo, useEffect, useRef } from "react"
+import { useState, useCallback, useMemo, useEffect, useRef, memo } from "react"
 import { useRouter } from "next/navigation"
 import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, startOfDay, endOfDay, isSameDay } from "date-fns"
 import { CalendarToolbar, type CalendarView } from "./CalendarToolbar"
@@ -74,7 +74,7 @@ function toCalendarTask(t: {
   }
 }
 
-export function TasksCalendar({
+function TasksCalendarComponent({
   onTaskSelect,
   defaultView = "month",
   className,
@@ -256,3 +256,5 @@ export function TasksCalendar({
     </div>
   )
 }
+
+export const TasksCalendar = memo(TasksCalendarComponent)

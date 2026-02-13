@@ -6,6 +6,7 @@ import { authOptions } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
 import { ensureUserExists } from "@/lib/ensure-user"
 
+
 /* ==================== CLIENT ACTIONS ==================== */
 
 // Update client generic data
@@ -22,10 +23,13 @@ export async function updateClientData(
 
     if (!client) return { success: false, error: "Client not found" }
 
+    const merged = { ...client, ...data }
+
     const updated = await prisma.client.update({
         where: { id: clientId },
         data: {
             ...data,
+
             updatedAt: new Date()
         },
     })
@@ -53,12 +57,17 @@ export async function updateClientInfo(
 
     if (!client) return { success: false, error: "Client not found" }
 
+    const updateData = {
+        name: data.name?.trim() || client.name,
+        email: data.email?.trim() || client.email,
+        phone: data.phone?.trim() || client.phone,
+    }
+    const merged = { ...client, ...updateData }
     await prisma.client.update({
         where: { id: clientId },
         data: {
-            name: data.name?.trim() || client.name,
-            email: data.email?.trim() || client.email,
-            phone: data.phone?.trim() || client.phone,
+            ...updateData,
+
             updatedAt: new Date(),
         },
     })
@@ -86,11 +95,12 @@ export async function addClientNote(clientId: string, text: string) {
     const timestamp = new Date().toISOString()
     const newNote = `[NOTE:${timestamp}] ${text}`
     const updatedNotes = currentNotes ? `${currentNotes}\n\n${newNote}` : newNote
-
+    const merged = { ...client, notes: updatedNotes }
     await prisma.client.update({
         where: { id: clientId },
         data: {
             notes: updatedNotes,
+
             updatedAt: new Date()
         },
     })
@@ -128,11 +138,12 @@ export async function registerClientInteraction(
     // Format must match getClientTimeline regex: [INTERACTION:ISO] TYPE - Content
     const newNote = `[INTERACTION:${timestamp}] ${type} - ${notes.replace(/\n/g, " ")}`
     const updatedNotes = currentNotes ? `${currentNotes}\n\n${newNote}` : newNote
-
+    const merged = { ...client, notes: updatedNotes }
     await prisma.client.update({
         where: { id: clientId },
         data: {
             notes: updatedNotes,
+
             updatedAt: new Date()
         },
     })
@@ -187,10 +198,13 @@ export async function addClientPurchase(
     })
 
     // Update client totalSpent
+    const newTotalSpent = (client.totalSpent ?? 0) + data.amount
+    const merged = { ...client, totalSpent: newTotalSpent }
     await prisma.client.update({
         where: { id: clientId },
         data: {
-            totalSpent: { increment: data.amount },
+            totalSpent: newTotalSpent,
+
             updatedAt: new Date(),
         },
     })
@@ -417,10 +431,12 @@ export async function updateClientStatus(
 
     if (!client) return { success: false, error: "Client not found" }
 
+    const merged = { ...client, status }
     await prisma.client.update({
         where: { id: clientId },
         data: {
             status,
+
             updatedAt: new Date(),
         },
     })
@@ -462,11 +478,13 @@ export async function createClientReminder(
 
     // 2. Store reminder in client notes (legacy support/timeline)
     const reminderEntry = `\n[REMINDER:${new Date().toISOString()}] ${data.type} - Due: ${data.dueDate.toISOString()} - ${data.note || "No note"} [STATUS:PENDING]`
-
+    const updatedNotes = (client.notes || "") + reminderEntry
+    const merged = { ...client, notes: updatedNotes }
     await prisma.client.update({
         where: { id: clientId },
         data: {
-            notes: (client.notes || "") + reminderEntry,
+            notes: updatedNotes,
+
             updatedAt: new Date(),
         },
     })
@@ -495,11 +513,12 @@ export async function completeClientReminder(
         `[REMINDER:${reminderTimestamp}]`,
         `[REMINDER_COMPLETED:${reminderTimestamp}]`
     ).replace("[STATUS:PENDING]", "[STATUS:COMPLETED]")
-
+    const merged = { ...client, notes: updatedNotes }
     await prisma.client.update({
         where: { id: clientId },
         data: {
             notes: updatedNotes,
+
             updatedAt: new Date(),
         },
     })
@@ -568,25 +587,26 @@ export async function getClientSales(clientId: string) {
 
 // Helper to recalculate total spent
 async function recalculateClientTotalSpent(clientId: string) {
-    const aggregations = await prisma.sale.aggregate({
-        where: {
-            clientId,
-            OR: [
-                { status: "PAID" },
-                { status: "PAGADO" } // Legacy support
-            ]
-        },
-        _sum: {
-            total: true
-        }
-    })
-
+    const [aggregations, client] = await Promise.all([
+        prisma.sale.aggregate({
+            where: {
+                clientId,
+                OR: [
+                    { status: "PAID" },
+                    { status: "PAGADO" } // Legacy support
+                ]
+            },
+            _sum: { total: true },
+        }),
+        prisma.client.findUnique({ where: { id: clientId } }),
+    ])
     const totalSpent = aggregations._sum.total || 0
-
+    const merged = client ? { ...client, totalSpent } : null
     await prisma.client.update({
         where: { id: clientId },
         data: {
             totalSpent,
+
             updatedAt: new Date()
         }
     })
@@ -775,10 +795,13 @@ export async function deleteClientSale(saleId: string) {
 
         if (client) {
             const noteEntry = `\n[INTERACTION:${new Date().toISOString()}] SALE_DELETED - Venta eliminada: ${sale.product}`
+            const updatedNotes = (client.notes || "") + noteEntry
+            const merged = { ...client, notes: updatedNotes }
             await prisma.client.update({
                 where: { id: sale.clientId },
                 data: {
-                    notes: (client.notes || "") + noteEntry,
+                    notes: updatedNotes,
+
                     updatedAt: new Date(),
                 },
             })

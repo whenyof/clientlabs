@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth"
 import { prisma, safeDbCheck, safePrismaQuery } from "@/lib/prisma"
 import { revalidatePath, unstable_noStore } from "next/cache"
 import { ensureUserExists } from "@/lib/ensure-user"
+import { createInvoiceForProviderOrder } from "@/modules/invoicing/services/invoice.service"
 import {
     ProviderOrderType,
     ProviderOrderStatus,
@@ -2061,7 +2062,8 @@ export async function getProviderOrders(providerId: string) {
             orderBy: { orderDate: 'desc' },
             include: {
                 payment: true,
-                files: true
+                files: true,
+                invoice: { select: { id: true, number: true, status: true, total: true } }
             }
         })
         return { success: true, orders }
@@ -2118,6 +2120,15 @@ export async function registerProviderFile(data: {
 
             return file
         })
+
+        // When attaching an INVOICE to an order, create/link the billing Invoice (Flujo B — single source of truth)
+        if (data.category === "INVOICE" && data.orderId) {
+            try {
+                await createInvoiceForProviderOrder(data.orderId, session.user.id)
+            } catch (e) {
+                console.error("createInvoiceForProviderOrder failed:", e)
+            }
+        }
 
         revalidatePath("/dashboard/providers")
         return { success: true, file: result }

@@ -1,11 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useSectorConfig } from "@/hooks/useSectorConfig"
 import { DashboardContainer } from "@/components/layout/DashboardContainer"
 import { BillingKPIs } from "./components/BillingKPIs"
+import { AgingReport } from "./components/AgingReport"
 import { BillingTabs } from "./components/BillingTabs"
-import { InvoicesTable } from "./components/InvoicesTable"
+import { InvoicesTable, type InvoiceRow } from "./components/InvoicesTable"
 import { InvoiceModal } from "./components/InvoiceModal"
 import { PlusIcon } from "@heroicons/react/24/outline"
 
@@ -15,6 +16,24 @@ export default function BillingPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedTab, setSelectedTab] = useState("all")
+  const [invoices, setInvoices] = useState<InvoiceRow[]>([])
+
+  const loadInvoices = useCallback(async () => {
+    console.log("LOADING INVOICES FROM API")
+    const res = await fetch("/api/billing", {
+      credentials: "include",
+      cache: "no-store",
+    })
+    const data = await res.json()
+    console.log("API RESPONSE:", data)
+    setInvoices(data.invoices ?? [])
+  }, [])
+
+  useEffect(() => {
+    loadInvoices()
+  }, [loadInvoices])
+
+  console.log("INVOICES IN STATE:", invoices.length)
 
   return (
     <DashboardContainer>
@@ -47,8 +66,11 @@ export default function BillingPage() {
         </button>
       </div>
 
-      {/* KPIs */}
-      <BillingKPIs />
+      {/* Executive KPIs */}
+      <BillingKPIs className="mb-8" />
+
+      {/* Aging Report */}
+      <AgingReport className="mb-8" />
 
       {/* Search */}
       <div className="relative">
@@ -68,11 +90,10 @@ export default function BillingPage() {
         onTabChange={setSelectedTab}
       />
 
-      {/* Table — no Invoice in DB, always empty */}
       <InvoicesTable
         searchTerm={searchTerm}
         statusFilter={selectedTab === "all" ? undefined : selectedTab}
-        invoices={[]}
+        invoices={invoices}
       />
 
       {/* Modal */}

@@ -38,6 +38,7 @@ import { useAssistant } from "@/context/AssistantContext"
 
 import { StatusBadgeSelector } from "./StatusBadgeSelector"
 import { PaymentStatusBadge } from "./PaymentStatusBadge"
+import { PaymentBehaviourCard } from "./PaymentBehaviourCard"
 import { ReminderDialog } from "./ReminderDialog"
 import { CallDialog } from "./CallDialog"
 import { EnhancedTimeline } from "./EnhancedTimeline"
@@ -161,6 +162,8 @@ export function ClientSidePanel({ client, isOpen, onClose, onClientUpdate }: Cli
     const [loadingSales, setLoadingSales] = useState(false)
     const [saleDialog, setSaleDialog] = useState(false)
     const [editingSale, setEditingSale] = useState<any | null>(null)
+    const [clientInvoices, setClientInvoices] = useState<Array<{ id: string; number: string; total: number; status: string; dueDate: string; currency?: string }>>([])
+    const [loadingInvoices, setLoadingInvoices] = useState(false)
 
     // Task State
     const [tasks, setTasks] = useState<Task[]>([])
@@ -287,6 +290,29 @@ export function ClientSidePanel({ client, isOpen, onClose, onClientUpdate }: Cli
         }
     }, [isOpen])
 
+    const loadClientInvoices = useCallback(async () => {
+        if (!client?.id) return
+        setLoadingInvoices(true)
+        try {
+            const res = await fetch(`/api/billing?clientId=${encodeURIComponent(client.id)}`, { credentials: "include" })
+            const data = await res.json().catch(() => ({}))
+            const list = Array.isArray(data.invoices) ? data.invoices : []
+            setClientInvoices(list.map((inv: any) => ({
+                id: inv.id,
+                number: inv.number ?? inv.id,
+                total: Number(inv.total ?? 0),
+                status: inv.status ?? "",
+                dueDate: inv.dueDate ?? "",
+                currency: inv.currency,
+            })))
+        } catch (e) {
+            console.error("Error loading client invoices:", e)
+            setClientInvoices([])
+        } finally {
+            setLoadingInvoices(false)
+        }
+    }, [client?.id])
+
     useEffect(() => {
         if (client && isOpen) {
             setEditData({
@@ -295,8 +321,9 @@ export function ClientSidePanel({ client, isOpen, onClose, onClientUpdate }: Cli
             })
             loadTimeline()
             loadSales()
+            loadClientInvoices()
         }
-    }, [client, isOpen])
+    }, [client, isOpen, loadClientInvoices])
 
     const loadSales = async () => {
         if (!client) return
@@ -913,6 +940,10 @@ export function ClientSidePanel({ client, isOpen, onClose, onClientUpdate }: Cli
                             </div>
                         </div>
 
+                        <div className="px-6 py-3">
+                            <PaymentBehaviourCard clientId={client.id} currency={client.currency || "EUR"} />
+                        </div>
+
                         {isForgottenBadge && (
                             <div className="m-8 bg-amber-500/10 border border-amber-500/20 p-4 rounded-2xl">
                                 <div className="flex items-start gap-4">
@@ -1038,6 +1069,31 @@ export function ClientSidePanel({ client, isOpen, onClose, onClientUpdate }: Cli
                                         {sales.length === 0 && (
                                             <div className="text-center py-8 border border-dashed border-white/5 rounded-2xl">
                                                 <p className="text-xs text-white/30">No hay registros</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="pt-6 border-t border-white/10 space-y-3">
+                                        <div className="flex items-center gap-2">
+                                            <DollarSign className="h-4 w-4 text-white/40" />
+                                            <h3 className="text-xs font-bold text-white/40 uppercase tracking-[0.2em]">Facturas relacionadas</h3>
+                                        </div>
+                                        {loadingInvoices ? (
+                                            <p className="text-xs text-white/30">Cargando…</p>
+                                        ) : clientInvoices.length === 0 ? (
+                                            <p className="text-xs text-white/30">Ninguna factura vinculada a este cliente</p>
+                                        ) : (
+                                            <div className="space-y-2">
+                                                {clientInvoices.map((inv) => (
+                                                    <a
+                                                        key={inv.id}
+                                                        href={`/dashboard/finance/billing?invoice=${inv.id}`}
+                                                        className="flex justify-between items-center p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors"
+                                                    >
+                                                        <span className="text-sm font-medium text-white">{inv.number}</span>
+                                                        <span className="text-sm text-white/80">{formatCurrency(inv.total, inv.currency || "EUR")}</span>
+                                                        <Badge variant="outline" className="text-[10px] border-white/20 text-white/70">{inv.status}</Badge>
+                                                    </a>
+                                                ))}
                                             </div>
                                         )}
                                     </div>

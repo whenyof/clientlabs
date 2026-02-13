@@ -1,5 +1,6 @@
 "use client"
 
+import React, { memo } from "react"
 import {
   AreaChart,
   Area,
@@ -16,7 +17,7 @@ type Props = {
   data: ChartPoint[]
 }
 
-export function ReportingChart({ data }: Props) {
+function ReportingChartComponent({ data }: Props) {
   const { labels } = useSectorConfig()
   const r = labels.reporting
   const chartTitle = r.chartTitle
@@ -75,3 +76,5 @@ export function ReportingChart({ data }: Props) {
     </div>
   )
 }
+
+export const ReportingChart = memo(ReportingChartComponent)

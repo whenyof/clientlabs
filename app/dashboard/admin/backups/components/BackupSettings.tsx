@@ -50,9 +50,7 @@ export function BackupSettings() {
       alert('Por favor, configura una clave secreta válida')
       return
     }
-
     // TODO: Save to environment file or secure storage
-    console.log('Saving backup settings:', { backupSecret })
     alert('Configuración guardada. Recuerda actualizar tu archivo .env')
   }
 

@@ -9,7 +9,7 @@ import {
   BellIcon,
   Cog6ToothIcon,
 } from "@heroicons/react/24/outline"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams, usePathname } from "next/navigation"
 
 export type FinanceTabId =
   | "overview"
@@ -73,8 +73,7 @@ export function FinanceNavTabs({ activeTab, onTabChange }: FinanceNavTabsProps) 
   )
 }
 
-// Hub-level tabs for /dashboard/finance — exact order and labels
-// view= param pushed to URL; movements uses "transactions" (FinanceView section id)
+// Hub-level tabs for /dashboard/finance — view= param; billing is the only invoice entry (BillingView)
 const HUB_TABS = [
   { id: "overview", label: "Vista General", view: undefined },
   { id: "movements", label: "Movimientos", view: "transactions" },
@@ -90,15 +89,20 @@ type HubTabId = (typeof HUB_TABS)[number]["id"]
 export function FinanceHubTabs({ period }: { period?: string }) {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const pathname = usePathname()
 
   const currentView = searchParams.get("view") || "overview"
 
   const isActive = (tab: (typeof HUB_TABS)[number]) => {
+    const href = "href" in tab && typeof (tab as { href?: string }).href === "string" ? (tab as { href: string }).href : null
+    if (href) return pathname === href
     if (!tab.view && (currentView === "overview" || !currentView)) return true
     return tab.view === currentView
   }
 
   const buildHref = (tab: (typeof HUB_TABS)[number]) => {
+    const href = "href" in tab && typeof (tab as { href?: string }).href === "string" ? (tab as { href: string }).href : null
+    if (href) return href
     const params = new URLSearchParams()
     if (tab.view) params.set("view", tab.view)
     if (period && period !== "month") params.set("period", period)

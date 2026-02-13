@@ -51,9 +51,6 @@ export function FinanceMovementsView({ initialMovements = [] }: FinanceMovements
       const data = await res.json()
       if (data.success && Array.isArray(data.movements)) {
         setMovements(data.movements)
-        if (typeof window !== "undefined") {
-          console.log("API MOVEMENTS:", data.movements.length)
-        }
       } else {
         console.warn("Movements fetch: invalid response", data)
       }
@@ -73,9 +70,8 @@ export function FinanceMovementsView({ initialMovements = [] }: FinanceMovements
   }, [fetchMovements])
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      console.log("MOVEMENTS:", movements.length)
-    }
+    // Keep effect in place for potential future side-effects tied to movement count,
+    // but avoid debug logging in the client UI.
   }, [movements.length])
 
   const handleSortChange = useCallback((by: MovementSortField, dir: MovementSortDir) => {

@@ -27,7 +27,6 @@ export function CreateTransactionModal({ isOpen, onClose }: CreateTransactionMod
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     // Here you would call the API to create the transaction
-    console.log('Creating transaction:', formData)
     onClose()
     // Reset form
     setFormData({

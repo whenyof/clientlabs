@@ -2,7 +2,7 @@
 
 import { useSectorConfig } from "@/hooks/useSectorConfig"
 
-import { useState, useMemo, useEffect, useCallback } from "react"
+import { useState, useMemo, useEffect, useCallback, memo } from "react"
 import type { Client } from "@prisma/client"
 import { ClientRowActions } from "./ClientRowActions"
 import { StatusBadgeSelector } from "./StatusBadgeSelector"
@@ -34,7 +34,7 @@ type ClientsTableProps = {
   onClientClick?: (client: ClientWithLead) => void
 }
 
-export function ClientsTable({ clients, onClientUpdate, onClientClick }: ClientsTableProps) {
+function ClientsTableComponent({ clients, onClientUpdate, onClientClick }: ClientsTableProps) {
   const { labels } = useSectorConfig()
   const [selectedClients, setSelectedClients] = useState<string[]>([])
   const [isMounted, setIsMounted] = useState(false)
@@ -235,3 +235,5 @@ export function ClientsTable({ clients, onClientUpdate, onClientClick }: Clients
     </>
   )
 }
+
+export const ClientsTable = memo(ClientsTableComponent)

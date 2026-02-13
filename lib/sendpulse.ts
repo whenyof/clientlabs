@@ -289,3 +289,75 @@ export async function sendTemplateEmail(options: SendTemplateEmailOptions): Prom
     throw err
   }
 }
+
+// ---------------------------------------------------------------------------
+// sendInvoiceReminder (billing)
+// ---------------------------------------------------------------------------
+
+export type SendInvoiceReminderOptions = {
+  clientEmail: string
+  clientName: string
+  invoiceNumber: string
+  amount: number
+  dueDate: Date | string
+  /** If set, reminder is after due (firmer tone). If undefined/0, friendly before-due tone. */
+  daysLate?: number
+}
+
+function formatDueDate(d: Date | string): string {
+  const date = typeof d === "string" ? new Date(d) : d
+  return date.toLocaleDateString("es-ES", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  })
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+}
+
+/**
+ * Sends an invoice payment reminder. BEFORE due → friendly; AFTER → progressively firmer.
+ */
+export async function sendInvoiceReminder(options: SendInvoiceReminderOptions): Promise<{ id: string }> {
+  const { clientEmail, clientName, invoiceNumber, amount, dueDate, daysLate = 0 } = options
+  const dueStr = formatDueDate(dueDate)
+  const amountStr = new Intl.NumberFormat("es-ES", {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: 2,
+  }).format(amount)
+  const name = clientName?.trim() || "Cliente"
+
+  const isAfterDue = daysLate > 0
+  const subject = isAfterDue
+    ? `Recordatorio: factura ${invoiceNumber} vencida hace ${daysLate} día(s)`
+    : `Recordatorio: factura ${invoiceNumber} próximamente a vencer`
+
+  const html = isAfterDue
+    ? `
+    <p>Hola ${escapeHtml(name)},</p>
+    <p>Te recordamos que la factura <strong>${escapeHtml(invoiceNumber)}</strong> (${amountStr}) venció el ${escapeHtml(dueStr)} y lleva <strong>${daysLate} día(s)</strong> de retraso.</p>
+    <p>Por favor, regulariza el pago lo antes posible. Si ya lo has realizado, puedes ignorar este mensaje.</p>
+    <p>Gracias,<br/>Equipo ClientLabs</p>
+  `
+    : `
+    <p>Hola ${escapeHtml(name)},</p>
+    <p>Te recordamos amablemente que la factura <strong>${escapeHtml(invoiceNumber)}</strong> (${amountStr}) vence el <strong>${escapeHtml(dueStr)}</strong>.</p>
+    <p>Si tienes alguna duda, no dudes en contactarnos.</p>
+    <p>Gracias,<br/>Equipo ClientLabs</p>
+  `
+
+  return sendEmail({
+    to: clientEmail,
+    subject,
+    html: html.trim(),
+  })
+}

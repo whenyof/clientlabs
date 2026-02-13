@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, memo } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -53,7 +53,7 @@ const TYPE_ICONS = {
     OTHER: HelpCircle
 }
 
-export function ProvidersTable({ providers, onProviderClick, onProviderUpdate }: ProvidersTableProps) {
+function ProvidersTableComponent({ providers, onProviderClick, onProviderUpdate }: ProvidersTableProps) {
     const { labels } = useSectorConfig()
 
     const TYPE_LABELS = labels.providers.types
@@ -256,3 +256,4 @@ export function ProvidersTable({ providers, onProviderClick, onProviderUpdate }:
     )
 }
 
+export const ProvidersTable = memo(ProvidersTableComponent)

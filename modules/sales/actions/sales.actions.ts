@@ -5,6 +5,9 @@ import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { authOptions } from "@/lib/auth"
 import { ensureUserExists } from "@/lib/ensure-user"
+
+import { generateInvoiceFromSale } from "@/modules/billing/services/invoice-generator.service"
+import { createInvoiceFromSale } from "@/modules/billing/services/finance-invoice"
 import type { SaleCreateInput, SaleUpdateInput } from "../types"
 
 async function checkAuth() {
@@ -92,6 +95,21 @@ export async function createSale(data: SaleCreateInput) {
     await recalculateClientTotalSpent(data.clientId)
   }
 
+  console.log("SALE CREATED:", sale.id)
+  console.log("CALLING createInvoiceFromSale")
+  try {
+    void generateInvoiceFromSale(sale.id).catch((err) => {
+      console.error("Auto invoice from sale failed", sale.id, err)
+    })
+    void createInvoiceFromSale(sale.id, session.user.id).then((r) => {
+      if (r) revalidatePath("/dashboard/finance")
+    }).catch((err) => {
+      console.error("Invoicing draft from sale failed", sale.id, err)
+    })
+  } catch (_) {
+    // non-blocking
+  }
+
   revalidatePath("/dashboard/other/sales")
   revalidatePath("/dashboard/other")
   revalidatePath("/dashboard/other/finance")
@@ -134,6 +152,21 @@ export async function updateSale(id: string, data: SaleUpdateInput) {
     await recalculateClientTotalSpent(existing.clientId)
   }
 
+  console.log("SALE UPDATED:", id)
+  console.log("CALLING createInvoiceFromSale")
+  try {
+    void generateInvoiceFromSale(id).catch((err) => {
+      console.error("Auto invoice from sale failed", id, err)
+    })
+    void createInvoiceFromSale(id, session.user.id).then((r) => {
+      if (r) revalidatePath("/dashboard/finance")
+    }).catch((err) => {
+      console.error("Invoicing draft from sale failed", id, err)
+    })
+  } catch (_) {
+    // non-blocking
+  }
+
   revalidatePath("/dashboard/other/sales")
   revalidatePath("/dashboard/other")
   revalidatePath("/dashboard/other/finance")
@@ -150,9 +183,13 @@ async function recalculateClientTotalSpent(clientId: string) {
     _sum: { total: true },
   })
   const totalSpent = agg._sum.total ?? 0
+
   await prisma.client.update({
     where: { id: clientId },
-    data: { totalSpent, updatedAt: new Date() },
+    data: {
+      totalSpent,
+      updatedAt: new Date(),
+    },
   })
   return totalSpent
 }

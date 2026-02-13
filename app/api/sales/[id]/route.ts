@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
+import { generateInvoiceFromSale } from '@/modules/billing/services/invoice-generator.service'
+import { createInvoiceFromSale } from '@/modules/billing/services/finance-invoice'
 
 /**
  * PATCH /api/sales/[id] - Update sale (e.g. status). Real persistence.
@@ -34,6 +36,18 @@ export async function PATCH(
         updatedAt: new Date(),
       },
     })
+    console.log("SALE UPDATED:", id)
+    console.log("CALLING createInvoiceFromSale")
+    try {
+      void generateInvoiceFromSale(id).catch((err) => {
+        console.error('Auto invoice from sale failed', id, err)
+      })
+      void createInvoiceFromSale(id, session.user.id).catch((err) => {
+        console.error('Invoicing draft from sale failed', id, err)
+      })
+    } catch (_) {
+      // non-blocking
+    }
     revalidatePath('/dashboard/other')
     revalidatePath('/dashboard/other/sales')
     return NextResponse.json({ sale: updated })

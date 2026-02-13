@@ -12,42 +12,42 @@ export function QuickActions() {
       label: `${labels.common.create} ${labels.clients.singular}`,
       description: `Añadir ${labels.clients.singular.toLowerCase()} manualmente`,
       icon: Users,
-      action: () => console.log("Nuevo cliente"),
+      action: () => {},
       color: "bg-blue-500/10 text-blue-400"
     },
     {
       label: w.newInvoice,
       description: w.newInvoiceDesc,
       icon: Receipt,
-      action: () => console.log("Nueva factura"),
+      action: () => {},
       color: "bg-green-500/10 text-green-400"
     },
     {
       label: `${labels.common.create} ${labels.tasks.singular}`,
       description: `Crear ${labels.tasks.singular.toLowerCase()} pendiente`,
       icon: CheckSquare,
-      action: () => console.log("Nueva tarea"),
+      action: () => {},
       color: "bg-orange-500/10 text-orange-400"
     },
     {
       label: w.newAutomation,
       description: w.newAutomationDesc,
       icon: Zap,
-      action: () => console.log("Nueva automatización"),
+      action: () => {},
       color: "bg-purple-500/10 text-purple-400"
     },
     {
       label: labels.analytics.title || "Ver Analytics",
       description: w.viewAnalyticsDesc,
       icon: BarChart3,
-      action: () => console.log("Ver analytics"),
+      action: () => {},
       color: "bg-cyan-500/10 text-cyan-400"
     },
     {
       label: w.createReport,
       description: w.createReportDesc,
       icon: Plus,
-      action: () => console.log("Crear reporte"),
+      action: () => {},
       color: "bg-pink-500/10 text-pink-400"
     }
   ]

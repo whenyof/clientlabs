@@ -25,7 +25,10 @@ import type { Sale } from "../types"
 
 export type MegaChartPreset = "today" | "7d" | "30d" | "6m" | "ytd" | "custom"
 
+type Mode = "sales" | "purchases"
+
 type SalesMegaChartProps = {
+  mode?: Mode
   sales: Sale[]
   initialPreset?: MegaChartPreset
   customRange?: { from: Date; to: Date } | null
@@ -76,12 +79,14 @@ function amountFor(s: Sale): number {
 }
 
 export function SalesMegaChart({
+  mode = "sales",
   sales,
   initialPreset = "30d",
   customRange = null,
 }: SalesMegaChartProps) {
   const { labels } = useSectorConfig()
   const sl = labels.sales
+  const isPurchases = mode === "purchases"
   const [preset, setPreset] = useState<MegaChartPreset>(initialPreset)
   const [showRevenue, setShowRevenue] = useState(true)
   const [showSales, setShowSales] = useState(true)
@@ -166,7 +171,7 @@ export function SalesMegaChart({
       <div className="p-4 border-b border-white/10">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h3 className="text-sm font-semibold text-white/90">
-            {sl?.heroChartTitle ?? "Sales Performance"}
+            {isPurchases ? "Evolución del gasto" : (sl?.heroChartTitle ?? "Sales Performance")}
           </h3>
           <div className="flex flex-wrap items-center gap-2">
             <div className="flex rounded-lg bg-white/5 p-0.5 border border-white/10">
@@ -192,7 +197,7 @@ export function SalesMegaChart({
                   onChange={(e) => setShowRevenue(e.target.checked)}
                   className="rounded border-white/30 bg-white/5"
                 />
-                Revenue
+                {isPurchases ? "Gastos" : "Revenue"}
               </label>
               <label className="flex items-center gap-1.5 text-xs text-white/70 cursor-pointer">
                 <input
@@ -201,7 +206,7 @@ export function SalesMegaChart({
                   onChange={(e) => setShowSales(e.target.checked)}
                   className="rounded border-white/30 bg-white/5"
                 />
-                Sales
+                {isPurchases ? "Órdenes" : "Sales"}
               </label>
               <label className="flex items-center gap-1.5 text-xs text-white/70 cursor-pointer">
                 <input
@@ -210,7 +215,7 @@ export function SalesMegaChart({
                   onChange={(e) => setShowAvg(e.target.checked)}
                   className="rounded border-white/30 bg-white/5"
                 />
-                Avg Ticket
+                {isPurchases ? "Coste medio" : "Avg Ticket"}
               </label>
             </div>
           </div>
@@ -242,6 +247,7 @@ export function SalesMegaChart({
               <Tooltip
                 content={({ active, payload, label }) => (
                   <SalesMegaTooltip
+                    mode={mode}
                     active={active}
                     payload={payload}
                     label={label}

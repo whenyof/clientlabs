@@ -3,9 +3,8 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { loadFinancePageData } from "@/app/dashboard/other/finance/lib/server-data"
 import { FinanceView } from "@/app/dashboard/other/finance/FinanceView"
-import { FinanceHubTabs } from "@/app/dashboard/other/finance/components/FinanceNavTabs"
 import SalesPage from "@/app/dashboard/other/sales/page"
-import BillingPage from "@/app/dashboard/other/billing/page"
+import { BillingView } from "@/modules/billing/components"
 import PurchasesPage from "./purchases/page"
 
 type PageSearchParams = {
@@ -39,13 +38,14 @@ export default async function FinancePage({ searchParams }: PageProps) {
 
   switch (view) {
     case "income":
+    case "sales":
       content = <SalesPage />
       break
     case "purchases":
       content = <PurchasesPage />
       break
     case "billing":
-      content = <BillingPage />
+      content = <BillingView />
       break
     case "transactions":
     case "alerts":
@@ -59,17 +59,7 @@ export default async function FinancePage({ searchParams }: PageProps) {
       break
   }
 
-  return (
-    <div className="flex flex-col flex-1 min-h-0 w-full h-full max-w-none">
-      {/* Hub-level tabs (Finance as the financial brain) */}
-      <div className="shrink-0 px-4 pt-5 pb-3">
-        <FinanceHubTabs period={period} />
-      </div>
-
-      {/* Active tab content */}
-      <div className="flex-1 min-h-0 w-full px-4 pb-10">{content}</div>
-    </div>
-  )
+  return <>{content}</>
 }
 
 

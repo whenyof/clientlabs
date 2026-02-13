@@ -46,11 +46,20 @@ import type { ExecutivePDFInput } from "../lib/executivePdf"
 import type { Sale } from "../types"
 import type { DateRangePreset } from "../types"
 
+// Feature flag to toggle higher-level narrative / AI-style insights for Sales.
+// Kept false to visually simplify the module without deleting any components.
+const ENABLE_SALES_INTELLIGENCE = false as const
+
+type Mode = "sales" | "purchases"
+
+
+
 type Props = {
   initialSales: Sale[]
+  mode?: Mode
 }
 
-export function SalesView({ initialSales }: Props) {
+export function SalesView({ initialSales, mode = "sales" }: Props) {
   const { labels, name: sectorName } = useSectorConfig()
   const router = useRouter()
   const sl = labels.sales
@@ -92,15 +101,16 @@ export function SalesView({ initialSales }: Props) {
   }, [initialSales])
 
   useEffect(() => {
-    refetchMonthlyGoal()
-  }, [refetchMonthlyGoal])
+    if (mode === "sales") refetchMonthlyGoal()
+  }, [refetchMonthlyGoal, mode])
 
   useEffect(() => {
+    if (mode !== "sales") return
     fetch("/api/sales/client-predictions")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => setClientPredictions(data ?? null))
       .catch(() => setClientPredictions(null))
-  }, [])
+  }, [mode])
 
   const { from, to } = useMemo(
     () => getDateRange(datePreset, datePreset === "custom" ? customRange ?? undefined : undefined),
@@ -120,6 +130,7 @@ export function SalesView({ initialSales }: Props) {
   )
 
   useEffect(() => {
+    if (mode !== "sales") return
     setLoadingComparisons(true)
     const fromIso = from.toISOString()
     const toIso = to.toISOString()
@@ -128,18 +139,27 @@ export function SalesView({ initialSales }: Props) {
       .then((data) => setComparisons(data ?? null))
       .catch(() => setComparisons(null))
       .finally(() => setLoadingComparisons(false))
-  }, [from, to])
+  }, [from, to, mode])
 
   useEffect(() => {
+    if (mode !== "sales") return
     const fromIso = from.toISOString()
     const toIso = to.toISOString()
     fetch(`/api/sales/anomalies?from=${encodeURIComponent(fromIso)}&to=${encodeURIComponent(toIso)}`)
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => setAnomalies(Array.isArray(data) ? data : []))
       .catch(() => setAnomalies([]))
-  }, [from, to])
+  }, [from, to, mode])
 
   const kpis = useMemo(() => {
+    if (mode === "purchases") {
+      const { current } = rangeComparison
+      return {
+        revenue: current.revenue,
+        count: current.count,
+        avg: current.ticket,
+      }
+    }
     if (comparisons) {
       return {
         revenue: comparisons.revenue.current,
@@ -153,17 +173,48 @@ export function SalesView({ initialSales }: Props) {
       count: current.count,
       avg: current.ticket,
     }
-  }, [comparisons, rangeComparison])
+  }, [mode, comparisons, rangeComparison])
 
   const growth = useMemo((): number | null => {
-    if (comparisons) return comparisons.revenue.growthVsPrevious
-    const currentRevenue = rangeComparison.current.revenue
-    const previousRevenue = rangeComparison.previous.revenue
-    if (previousRevenue === 0) return currentRevenue > 0 ? 100 : 0
-    return Math.round(((currentRevenue - previousRevenue) / previousRevenue) * 100)
-  }, [comparisons, rangeComparison])
+    if (mode === "purchases" || !comparisons) {
+      const currentRevenue = rangeComparison.current.revenue
+      const previousRevenue = rangeComparison.previous.revenue
+      if (previousRevenue === 0) return currentRevenue > 0 ? 100 : 0
+      return Math.round(((currentRevenue - previousRevenue) / previousRevenue) * 100)
+    }
+    return comparisons.revenue.growthVsPrevious
+  }, [mode, comparisons, rangeComparison])
 
   const kpiComparisons = useMemo(() => {
+    if (mode === "purchases") {
+      const c = rangeComparison.current
+      const p = rangeComparison.previous
+      const a = rangeComparison.average
+      const y = rangeComparison.yearAgo
+      const hasAverage = a.revenue > 0 || a.count > 0
+      return {
+        revenue: {
+          vsPrevious: percentageChange(c.revenue, p.revenue),
+          vsAverage: hasAverage ? percentageChange(c.revenue, a.revenue) : null,
+          vsYearAgo: y ? percentageChange(c.revenue, y.revenue) : null,
+        },
+        count: {
+          vsPrevious: percentageChange(c.count, p.count),
+          vsAverage: hasAverage ? percentageChange(c.count, a.count) : null,
+          vsYearAgo: y ? percentageChange(c.count, y.count) : null,
+        },
+        ticket: {
+          vsPrevious: percentageChange(c.ticket, p.ticket),
+          vsAverage: hasAverage ? percentageChange(c.ticket, a.ticket) : null,
+          vsYearAgo: y ? percentageChange(c.ticket, y.ticket) : null,
+        },
+        growth: {
+          vsPrevious: percentageChange(c.revenue, p.revenue),
+          vsAverage: hasAverage ? percentageChange(c.revenue, a.revenue) : null,
+          vsYearAgo: y ? percentageChange(c.revenue, y.revenue) : null,
+        },
+      }
+    }
     if (comparisons) {
       return {
         revenue: {
@@ -215,7 +266,7 @@ export function SalesView({ initialSales }: Props) {
         vsYearAgo: y ? percentageChange(c.revenue, y.revenue) : null,
       },
     }
-  }, [comparisons, rangeComparison])
+  }, [mode, comparisons, rangeComparison])
 
   const narrative = useMemo(() => buildSalesNarrative(comparisons), [comparisons])
 
@@ -381,7 +432,7 @@ export function SalesView({ initialSales }: Props) {
               ? () => chartSectionRef.current?.scrollIntoView({ behavior: "smooth" })
               : a.payload.href
                 ? () => router.push(a.payload.href!)
-                : () => {},
+                : () => { },
     }))
   }, [suggestedActions, router])
 
@@ -389,8 +440,8 @@ export function SalesView({ initialSales }: Props) {
     () =>
       filteredSales.filter(
         (s) =>
-          s.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          s.product.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (s.clientName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (s.product || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
           (s.clientEmail && s.clientEmail.toLowerCase().includes(searchTerm.toLowerCase()))
       ),
     [filteredSales, searchTerm]
@@ -439,8 +490,8 @@ export function SalesView({ initialSales }: Props) {
     }))
     const goalCompletionPct =
       monthlyGoalTarget != null &&
-      monthlyGoalTarget > 0 &&
-      monthlyGoalAnalytics != null
+        monthlyGoalTarget > 0 &&
+        monthlyGoalAnalytics != null
         ? monthlyGoalAnalytics.progress * 100
         : null
     return {
@@ -513,35 +564,42 @@ export function SalesView({ initialSales }: Props) {
   }, [router, refetchMonthlyGoal])
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <SalesDateRangePicker value={datePreset} customRange={customRange} onChange={handleRangeChange} />
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="relative flex-1 min-w-[180px] max-w-xs">
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+        {/* Date Picker - Full width on mobile */}
+        <div className="w-full sm:w-auto">
+          <SalesDateRangePicker value={datePreset} customRange={customRange} onChange={handleRangeChange} />
+        </div>
+
+        {/* Controls - Horizontal scroll on very small screens or wrap */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar sm:overflow-visible sm:flex-wrap">
+          <div className="relative min-w-[160px] max-w-xs">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
             <Input
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder={`Buscar ${sl.plural.toLowerCase()}...`}
-              className="bg-white/5 border-white/10 text-white pl-9 h-9 text-sm"
+              placeholder={mode === "purchases" ? "Buscar..." : `Buscar ${sl.plural.toLowerCase()}...`}
+              className="bg-white/5 border-white/10 text-white pl-9 h-11 sm:h-9 text-sm min-w-[200px] sm:min-w-0"
             />
           </div>
           <Button
             type="button"
             onClick={() => setExportPDFOpen(true)}
-            title="Descargar informe ejecutivo"
-            className="h-9 px-4 shrink-0 bg-violet-600 hover:bg-violet-700 text-white font-medium text-sm shadow-[0_0_16px_rgba(139,92,246,0.2)]"
+            title={mode === "purchases" ? "Exportar informe" : "Descargar informe ejecutivo"}
+            className="h-11 sm:h-9 px-4 shrink-0 bg-violet-600 hover:bg-violet-700 text-white font-medium text-sm shadow-[0_0_16px_rgba(139,92,246,0.2)] whitespace-nowrap"
           >
             <FileDown className="h-4 w-4 mr-1.5" />
-            Exportar PDF
+            Exportar
           </Button>
-          <Button
-            onClick={() => setIsCreateOpen(true)}
-            className="h-9 px-4 shrink-0 bg-purple-600 hover:bg-purple-700 text-white font-medium text-sm border border-purple-600"
-          >
-            <Plus className="h-4 w-4 mr-1.5" />
-            {sl.newButton}
-          </Button>
+          {mode === "sales" && (
+            <Button
+              onClick={() => setIsCreateOpen(true)}
+              className="h-11 sm:h-9 px-4 shrink-0 bg-purple-600 hover:bg-purple-700 text-white font-medium text-sm border border-purple-600 whitespace-nowrap"
+            >
+              <Plus className="h-4 w-4 mr-1.5" />
+              {sl.newButton}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -552,46 +610,53 @@ export function SalesView({ initialSales }: Props) {
       />
 
       <SalesKPIs
+        mode={mode}
         data={kpis}
         growth={growth}
         comparisons={kpiComparisons}
+
         hasHistory={
           comparisons
             ? comparisons.revenue.previous > 0 || comparisons.salesCount.previous > 0
             : rangeComparison.previous.revenue > 0 ||
-              rangeComparison.previous.count > 0 ||
-              rangeComparison.average.revenue > 0 ||
-              rangeComparison.average.count > 0
+            rangeComparison.previous.count > 0 ||
+            rangeComparison.average.revenue > 0 ||
+            rangeComparison.average.count > 0
         }
       />
 
-      <SalesInsights insights={businessInsights} />
-
-      <SalesNarrative data={narrative} />
-
-      <SalesActions actions={actionItems} />
+      {ENABLE_SALES_INTELLIGENCE && mode === "sales" && (
+        <>
+          <SalesInsights insights={businessInsights} />
+          <SalesNarrative data={narrative} />
+          <SalesActions actions={actionItems} />
+        </>
+      )}
 
       <div ref={chartSectionRef}>
-        <SalesMegaChart sales={filteredSales} />
+        <SalesMegaChart mode={mode} sales={filteredSales} />
       </div>
 
       <SalesGoalCard
+        mode={mode}
         target={monthlyGoalTarget ?? 0}
         analytics={monthlyGoalAnalytics}
         daysRemaining={daysRemaining}
         onGoalSaved={(targetRevenue) => setMonthlyGoalTarget(targetRevenue)}
         onRefetch={refetchMonthlyGoal}
+        currentMonthAmount={mode === "purchases" ? currentMonthRevenue : undefined}
       />
 
-      <SalesRiskPanel alerts={riskAlerts} />
+      {ENABLE_SALES_INTELLIGENCE && mode === "sales" && (
+        <>
+          <SalesRiskPanel alerts={riskAlerts} />
+          <SalesAnomalyPanel anomalies={anomalies} />
+          <SalesOpportunitiesPanel opportunities={growthOpportunities} />
+          <ClientPredictions data={clientPredictions} />
+        </>
+      )}
 
-      <SalesAnomalyPanel anomalies={anomalies} />
-
-      <SalesOpportunitiesPanel opportunities={growthOpportunities} />
-
-      <ClientPredictions data={clientPredictions} />
-
-      <SalesLedger sales={filteredForLedger} onSelectSale={setSelectedSale} />
+      <SalesLedger mode={mode} sales={filteredForLedger} onSelectSale={setSelectedSale} />
 
       {selectedSale && (
         <SaleSidePanel
@@ -621,6 +686,8 @@ export function SalesView({ initialSales }: Props) {
     </div>
   )
 }
+
+export const SalesDashboard = SalesView
 
 function CreateTaskFromInsightDialog({
   title,

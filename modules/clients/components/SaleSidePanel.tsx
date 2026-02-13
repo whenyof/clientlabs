@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { X, DollarSign, Calendar, CreditCard, FileText, Trash2, User, AlertCircle } from "lucide-react"
+import { useState, useEffect, useCallback } from "react"
+import { X, DollarSign, Calendar, CreditCard, FileText, Trash2, User, AlertCircle, ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { formatDate } from "date-fns"
@@ -22,10 +22,32 @@ export function SaleSidePanel({ sale, isOpen, onClose, onStatusChange, onDelete 
     const [isDeleting, setIsDeleting] = useState(false)
     const [isConfirmingDelete, setIsConfirmingDelete] = useState(false)
     const [isMounted, setIsMounted] = useState(false)
+    const [saleInvoice, setSaleInvoice] = useState<{ id: string; number: string; total: number; status: string } | null>(null)
+    const [loadingInvoice, setLoadingInvoice] = useState(false)
 
     useEffect(() => {
         setIsMounted(true)
     }, [])
+
+    const loadSaleInvoice = useCallback(async () => {
+        if (!sale?.id) return
+        setLoadingInvoice(true)
+        try {
+            const res = await fetch(`/api/billing?saleId=${encodeURIComponent(sale.id)}`, { credentials: "include" })
+            const data = await res.json().catch(() => ({}))
+            const list = Array.isArray(data.invoices) ? data.invoices : []
+            const first = list[0]
+            setSaleInvoice(first ? { id: first.id, number: first.number ?? first.id, total: Number(first.total ?? 0), status: first.status ?? "" } : null)
+        } catch {
+            setSaleInvoice(null)
+        } finally {
+            setLoadingInvoice(false)
+        }
+    }, [sale?.id])
+
+    useEffect(() => {
+        if (sale?.id && isOpen) loadSaleInvoice()
+    }, [sale?.id, isOpen, loadSaleInvoice])
 
     if (!isOpen || !sale) return null
 
@@ -129,16 +151,32 @@ export function SaleSidePanel({ sale, isOpen, onClose, onStatusChange, onDelete 
 
                         <div className="h-[1px] bg-white/10 w-full" />
 
-                        {/* Invoice Placeholder */}
+                        {/* Factura emitida */}
                         <div className="space-y-3">
-                            <h3 className="text-sm font-semibold text-white/40 uppercase tracking-wider">Facturación</h3>
-                            <div className="border border-dashed border-white/10 rounded-lg p-6 flex flex-col items-center justify-center text-center bg-white/5">
-                                <FileText className="h-8 w-8 text-white/20 mb-2" />
-                                <p className="text-sm text-white/60">No hay factura adjunta</p>
-                                <Button variant="link" className="text-blue-400 h-auto p-0 text-xs mt-1">
-                                    Subir factura (Próximamente)
-                                </Button>
-                            </div>
+                            <h3 className="text-sm font-semibold text-white/40 uppercase tracking-wider">Factura emitida</h3>
+                            {loadingInvoice ? (
+                                <p className="text-sm text-white/40">Cargando…</p>
+                            ) : saleInvoice ? (
+                                <a
+                                    href={`/dashboard/finance/billing?invoice=${saleInvoice.id}`}
+                                    className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <FileText className="h-5 w-5 text-white/60" />
+                                        <div>
+                                            <p className="font-medium text-white">{saleInvoice.number}</p>
+                                            <p className="text-xs text-white/50">{saleInvoice.status}</p>
+                                        </div>
+                                    </div>
+                                    <ExternalLink className="h-4 w-4 text-white/40" />
+                                </a>
+                            ) : (
+                                <div className="border border-dashed border-white/10 rounded-lg p-6 flex flex-col items-center justify-center text-center bg-white/5">
+                                    <FileText className="h-8 w-8 text-white/20 mb-2" />
+                                    <p className="text-sm text-white/60">No hay factura vinculada a este pedido</p>
+                                    <a href="/dashboard/finance/billing" className="text-blue-400 text-xs mt-1 hover:underline">Ir a facturación</a>
+                                </div>
+                            )}
                         </div>
 
                         {/* Notes */}

@@ -144,7 +144,6 @@ export function BackupList({ backups, loading }: BackupListProps) {
                   className="p-2 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-lg transition-colors"
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
-                  onClick={() => console.log('View details:', backup.id)}
                 >
                   <EyeIcon className="w-4 h-4" />
                 </motion.button>
@@ -153,7 +152,6 @@ export function BackupList({ backups, loading }: BackupListProps) {
                   className="p-2 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-lg transition-colors"
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
-                  onClick={() => console.log('Download:', backup.id)}
                 >
                   <ArrowDownTrayIcon className="w-4 h-4" />
                 </motion.button>

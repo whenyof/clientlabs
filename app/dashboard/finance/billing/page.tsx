@@ -1,3 +1,8 @@
-// Billing inside Finance: reuse existing billing page implementation.
-export { default } from "@/app/dashboard/other/billing/page"
+"use client"
+
+import { BillingView } from "@/modules/billing/components"
+
+export default function FinanceBillingPage() {
+  return <BillingView />
+}
 

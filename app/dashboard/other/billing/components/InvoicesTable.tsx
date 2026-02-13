@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import type { Invoice } from "../mock"
 import { PaymentStatusBadge } from "./PaymentStatusBadge"
 import { SendToHaciendaButton } from "./SendToHaciendaButton"
 import {
@@ -13,22 +12,40 @@ import {
   ArrowDownTrayIcon
 } from "@heroicons/react/24/outline"
 
+/** API invoice shape: Client, issueDate, or legacy mock shape: client, date */
+export type InvoiceRow = {
+  id: string
+  number: string
+  status?: string
+  total?: number
+  Client?: { name?: string | null; email?: string | null; nif?: string | null }
+  client?: { name?: string; email?: string; nif?: string }
+  issueDate?: Date | string
+  date?: string
+  origin?: string
+  haciendaStatus?: string
+}
+
 interface InvoicesTableProps {
   searchTerm: string
   statusFilter?: string
-  invoices?: Invoice[]
+  invoices?: InvoiceRow[]
 }
 
-/** Invoices from DB; no Invoice model exists so default empty. */
 export function InvoicesTable({ searchTerm, statusFilter, invoices = [] }: InvoicesTableProps) {
   const [selectedInvoices, setSelectedInvoices] = useState<string[]>([])
 
-  const filteredInvoices = invoices.filter(invoice => {
+  const name = (inv: InvoiceRow) => inv.Client?.name ?? inv.client?.name ?? ""
+  const email = (inv: InvoiceRow) => inv.Client?.email ?? inv.client?.email ?? ""
+  const dateStr = (inv: InvoiceRow) => inv.issueDate != null ? String(inv.issueDate) : (inv.date ?? "")
+
+  const filteredInvoices = invoices.filter((invoice) => {
     const matchesSearch =
-      invoice.number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      invoice.client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (invoice.client.email || "").toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = !statusFilter || statusFilter === "all" || invoice.status === statusFilter
+      (invoice.number ?? "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      name(invoice).toLowerCase().includes(searchTerm.toLowerCase()) ||
+      email(invoice).toLowerCase().includes(searchTerm.toLowerCase())
+    const status = (invoice.status ?? "").toLowerCase()
+    const matchesStatus = !statusFilter || statusFilter === "all" || status === statusFilter.toLowerCase()
     return matchesSearch && matchesStatus
   })
 
@@ -117,34 +134,42 @@ export function InvoicesTable({ searchTerm, statusFilter, invoices = [] }: Invoi
                 </td>
                 <td className="px-6 py-4">
                   <div>
-                    <div className="text-white font-medium">{invoice.client.name}</div>
-                    <div className="text-gray-400 text-sm">{invoice.client.nif}</div>
+                    <div className="text-white font-medium">{name(invoice)}</div>
+                    <div className="text-gray-400 text-sm">{invoice.Client?.nif ?? invoice.client?.nif ?? ""}</div>
                   </div>
                 </td>
                 <td className="px-6 py-4 text-gray-300">
-                  {new Date(invoice.date).toLocaleDateString('es-ES')}
+                  {dateStr(invoice) ? new Date(dateStr(invoice)).toLocaleDateString("es-ES") : ""}
                 </td>
                 <td className="px-6 py-4">
                   <span className="text-white font-semibold">
-                    €{invoice.total.toLocaleString('es-ES')}
+                    €{Number(invoice.total ?? 0).toLocaleString("es-ES")}
                   </span>
                 </td>
                 <td className="px-6 py-4">
-                  <PaymentStatusBadge status={invoice.status} />
+                  <PaymentStatusBadge
+                    status={
+                      (() => {
+                        const s = (invoice.status ?? "draft").toLowerCase().replace("canceled", "cancelled")
+                        const allowed = ["draft", "issued", "sent", "paid", "overdue", "cancelled"] as const
+                        return allowed.includes(s as (typeof allowed)[number]) ? (s as (typeof allowed)[number]) : "draft"
+                      })()
+                    }
+                  />
                 </td>
                 <td className="px-6 py-4">
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    invoice.origin === 'automatic'
-                      ? 'bg-blue-500/20 text-blue-400'
-                      : 'bg-purple-500/20 text-purple-400'
+                    (invoice.origin ?? "manual") === "automatic"
+                      ? "bg-blue-500/20 text-blue-400"
+                      : "bg-purple-500/20 text-purple-400"
                   }`}>
-                    {invoice.origin === 'automatic' ? 'Automática' : 'Manual'}
+                    {(invoice.origin ?? "manual") === "automatic" ? "Automática" : "Manual"}
                   </span>
                 </td>
                 <td className="px-6 py-4">
                   <SendToHaciendaButton
                     invoiceId={invoice.id}
-                    status={invoice.haciendaStatus}
+                    status={(invoice.haciendaStatus === "sent" || invoice.haciendaStatus === "accepted" || invoice.haciendaStatus === "rejected" ? invoice.haciendaStatus : "pending") as "pending" | "sent" | "accepted" | "rejected"}
                   />
                 </td>
                 <td className="px-6 py-4">

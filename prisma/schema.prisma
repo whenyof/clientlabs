@@ -124,12 +124,29 @@ model ApiKey {
 }
 
 model BusinessProfile {
-  id        String   @id @default(cuid())
-  userId    String   @unique
-  sector    String
-  name      String?
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  sector                String
+  name                  String?
+  logoUrl               String?
+  companyName           String?
+  legalName             String?
+  taxId                 String?
+  address               String?
+  city                  String?
+  postalCode            String?
+  country               String?
+  phone                 String?
+  email                 String?
+  website               String?
+  iban                  String?
+  bic                   String?
+  invoiceLanguage       String?
+  defaultNotesTemplate  String?
+  defaultTermsTemplate  String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
@@ -302,12 +319,25 @@ model Client {
   status              String          @default("ACTIVE")
   clientTraits        String[]        @default([])
   riskLevel           String?         @default("LOW")
+  // Fiscal / legal invoicing (Spain): optional, non-breaking
+  legalType           String?         // "individual" (persona física) | "business" (empresa/autónomo)
+  taxId               String?         // NIF (personas) / CIF (empresas)
+  address             String?         // Domicilio fiscal
+  postalCode          String?
+  city                String?
+  country             String?
+  companyName         String?        // Razón social (when legalType = business)
+  legalName           String?        // Nombre fiscal (persona física o razón social)
+  isFiscalComplete    Boolean?       // Computed: minimum legal data for invoicing (Spain)
   CalendarEvent       CalendarEvent[]
   User                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   leads               Lead[]          @relation("ClientLeads")
   Sale                Sale[]
   Task                Task[]
   transactions        Transaction[]
+  Invoice             Invoice[]
+  BillingInvoice      BillingInvoice[]
+  PaymentProfile      ClientPaymentProfile?
 
   @@index([createdAt])
   @@index([email])
@@ -316,6 +346,25 @@ model Client {
   @@index([userId])
   @@index([convertedFromLeadId])
   @@index([status])
+}
+
+/// Payment behaviour per client: delay, late rate, unpaid, risk. Recalculated on payment/issue/overdue.
+model ClientPaymentProfile {
+  id                    String    @id @default(cuid())
+  clientId              String    @unique
+  averageDelayDays      Float     @default(0)   // average(paidAt - dueDate) in days
+  lateRate              Float     @default(0)   // 0–100 % of invoices paid after due
+  unpaidAmount          Decimal   @default(0)   @db.Decimal(14, 2) // sum overdue outstanding
+  lastPaymentAt         DateTime?
+  riskScore             Int       @default(0)  // 0–100 (0–20 low, 21–50 medium, 51+ high)
+  totalHistoricalBilled Decimal   @default(0)   @db.Decimal(14, 2)
+  totalHistoricalPaid   Decimal   @default(0)   @db.Decimal(14, 2)
+  updatedAt             DateTime  @updatedAt
+  Client                Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([riskScore])
+  @@index([updatedAt])
 }
 
 model Event {
@@ -559,8 +608,10 @@ model Sale {
   createdAt        DateTime @default(now())
   updatedAt        DateTime
   invoiceUrl       String?
-  Client           Client?  @relation(fields: [clientId], references: [id])
-  User             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Client           Client?   @relation(fields: [clientId], references: [id])
+  User             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Invoice          Invoice[]
+  BillingInvoice   BillingInvoice[]
 
   @@index([category])
   @@index([paymentMethod])
@@ -677,6 +728,9 @@ model User {
   restaurantMetrics      RestaurantMetrics[]
   retailMetrics          RetailMetrics[]
   Sale                   Sale[]
+  Invoice                Invoice[]
+  InvoiceSeries          InvoiceSeries[]
+  BillingInvoice         BillingInvoice[]
   services               Service[]
   sessions               Session[]
   subscriptions          Subscription[]
@@ -1311,6 +1365,7 @@ model Provider {
   tasks                    ProviderTask[]
   timelineEvents           ProviderTimelineEvent[]
   services                 Service[]                @relation("ProviderToService")
+  invoices                 Invoice[]
 
   @@index([userId])
   @@index([status])
@@ -1336,6 +1391,7 @@ model ProviderOrder {
   Provider             Provider                @relation(fields: [providerId], references: [id], onDelete: Cascade)
   User                 User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
   payment              ProviderPayment?
+  invoice              Invoice?
   timelineEvents       ProviderTimelineEvent[]
 
   @@index([providerId])
@@ -1357,6 +1413,7 @@ model ProviderPayment {
   status         ProviderPaymentStatus   @default(PAID)
   files          ProviderFile[]
   order          ProviderOrder?          @relation(fields: [orderId], references: [id])
+  invoice        Invoice?
   Provider       Provider                @relation(fields: [providerId], references: [id], onDelete: Cascade)
   User           User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
   timelineEvents ProviderTimelineEvent[]
@@ -1785,4 +1842,245 @@ enum ProviderTimelineEventType {
   NOTE
   TASK
   FILE
+}
+
+// ---------------------------------------------------------------------------
+// Invoicing module
+// ---------------------------------------------------------------------------
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  VIEWED
+  PARTIAL
+  PAID
+  OVERDUE
+  CANCELED
+}
+
+enum InvoiceType {
+  CUSTOMER
+  VENDOR
+}
+
+model Invoice {
+  id                    String            @id @default(cuid())
+  userId                String
+  type                  InvoiceType      @default(CUSTOMER)
+  number                String
+  series                String
+  clientId              String?
+  providerId            String?
+  saleId                String?
+  providerOrderId      String?           @unique
+  providerPaymentId    String?           @unique
+  linkedInvoicePaymentId String?         @unique
+  issueDate             DateTime
+  dueDate               DateTime
+  serviceDate           DateTime?
+  currency              String            @default("EUR")
+  invoiceLanguage       String?
+  subtotal              Decimal           @db.Decimal(14, 2)
+  taxAmount             Decimal           @db.Decimal(14, 2)
+  total                 Decimal           @db.Decimal(14, 2)
+  status                InvoiceStatus     @default(DRAFT)
+  notes                 String?
+  terms                 String?
+  paymentMethod         String?
+  iban                  String?
+  bic                   String?
+  paymentReference      String?
+  paidAt                DateTime?
+  pdfUrl                String?
+  pdfGeneratedAt        DateTime?
+  issuedCompanySnapshot Json?
+  issuedClientSnapshot  Json?
+  issuedItemsSnapshot   Json?
+  issuedTotalsSnapshot  Json?
+  issuedAt              DateTime?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  isRectification       Boolean           @default(false)
+  rectifiesInvoiceId    String?
+  rectificationReason   String?
+  Client                Client?           @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  Provider              Provider?         @relation(fields: [providerId], references: [id], onDelete: Restrict)
+  Sale                  Sale?             @relation(fields: [saleId], references: [id], onDelete: SetNull)
+  ProviderOrder         ProviderOrder?    @relation(fields: [providerOrderId], references: [id], onDelete: SetNull)
+  ProviderPayment       ProviderPayment?  @relation(fields: [providerPaymentId], references: [id], onDelete: SetNull)
+  LinkedInvoicePayment  InvoicePayment?  @relation("LinkedFromPayment", fields: [linkedInvoicePaymentId], references: [id], onDelete: SetNull)
+  RectifiesInvoice      Invoice?          @relation("Rectifications", fields: [rectifiesInvoiceId], references: [id], onDelete: Restrict)
+  Rectifications        Invoice[]         @relation("Rectifications")
+  User                  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lines                 InvoiceLine[]
+  payments              InvoicePayment[]  @relation("InvoicePayments")
+  events                InvoiceEvent[]
+  reminderLogs          InvoiceReminderLog[]
+
+  @@unique([userId, saleId])
+  @@index([userId])
+  @@index([clientId])
+  @@index([providerId])
+  @@index([saleId])
+  @@index([providerOrderId])
+  @@index([providerPaymentId])
+  @@index([status])
+  @@index([issueDate])
+  @@index([dueDate])
+  @@index([rectifiesInvoiceId])
+}
+
+model InvoiceReminderLog {
+  id        String   @id @default(cuid())
+  invoiceId String
+  ruleKey   String
+  sentAt    DateTime @default(now())
+  Invoice   Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@unique([invoiceId, ruleKey])
+  @@index([invoiceId])
+  @@index([sentAt])
+}
+
+model InvoiceLine {
+  id             String   @id @default(cuid())
+  invoiceId      String
+  description    String
+  quantity       Decimal  @db.Decimal(14, 4)
+  unitPrice      Decimal  @db.Decimal(14, 2)
+  discountPercent Decimal? @db.Decimal(5, 2)
+  taxPercent     Decimal  @db.Decimal(5, 2)
+  subtotal       Decimal  @db.Decimal(14, 2)
+  taxAmount      Decimal  @db.Decimal(14, 2)
+  total          Decimal  @db.Decimal(14, 2)
+  Invoice        Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+}
+
+model InvoicePayment {
+  id                    String    @id @default(cuid())
+  invoiceId             String
+  amount                Decimal   @db.Decimal(14, 2)
+  method                String
+  reference             String?
+  notes                 String?
+  paidAt                DateTime  @default(now())
+  Invoice               Invoice   @relation("InvoicePayments", fields: [invoiceId], references: [id], onDelete: Cascade)
+  LinkedFromInvoice     Invoice?  @relation("LinkedFromPayment")
+
+  @@index([invoiceId])
+}
+
+model InvoiceEvent {
+  id        String   @id @default(cuid())
+  invoiceId String
+  type      String
+  metadata  Json?
+  createdAt DateTime @default(now())
+  Invoice   Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model InvoiceSeries {
+  id         String   @id @default(cuid())
+  userId     String
+  name       String
+  prefix     String
+  nextNumber Int      @default(1)
+  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name])
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// Billing module (foundation) — independent from existing Invoice/InvoiceLine
+// ---------------------------------------------------------------------------
+
+enum BillingInvoiceStatus {
+  DRAFT
+  SENT
+  PARTIAL
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+model BillingInvoice {
+  id        String              @id @default(cuid())
+  userId    String
+  clientId  String
+  saleId    String?
+  number    String
+  status    BillingInvoiceStatus @default(DRAFT)
+  currency  String               @default("EUR")
+  subtotal  Decimal              @db.Decimal(14, 2)
+  tax       Decimal              @db.Decimal(14, 2)
+  total     Decimal              @db.Decimal(14, 2)
+  issuedAt  DateTime
+  dueAt     DateTime
+  paidAt    DateTime?
+  notes     String?
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+  Client    Client              @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  User      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Sale      Sale?               @relation(fields: [saleId], references: [id], onDelete: SetNull)
+  items     BillingInvoiceItem[]
+  payments  BillingPayment[]
+  reminderLogs BillingReminderLog[]
+
+  @@index([userId])
+  @@index([clientId])
+  @@index([status])
+  @@index([issuedAt])
+  @@index([dueAt])
+}
+
+enum BillingReminderType {
+  BEFORE
+  AFTER
+}
+
+model BillingReminderLog {
+  id        String             @id @default(cuid())
+  invoiceId String
+  type      BillingReminderType
+  stage     String
+  sentAt    DateTime           @default(now())
+  BillingInvoice BillingInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@unique([invoiceId, stage])
+  @@index([invoiceId])
+  @@index([sentAt])
+}
+
+model BillingPayment {
+  id        String        @id @default(cuid())
+  invoiceId String
+  amount    Decimal       @db.Decimal(14, 2)
+  paidAt    DateTime      @default(now())
+  method    String?
+  reference String?
+  BillingInvoice BillingInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+  @@index([paidAt])
+}
+
+model BillingInvoiceItem {
+  id          String        @id @default(cuid())
+  invoiceId   String
+  description String
+  quantity    Decimal       @db.Decimal(14, 4)
+  unitPrice   Decimal       @db.Decimal(14, 2)
+  taxRate     Decimal       @db.Decimal(5, 2)
+  total       Decimal       @db.Decimal(14, 2)
+  BillingInvoice BillingInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
 }

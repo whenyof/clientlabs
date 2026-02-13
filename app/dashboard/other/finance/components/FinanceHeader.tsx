@@ -36,7 +36,7 @@ export function FinanceHeader({ onCreateTransaction }: FinanceHeaderProps) {
   const [compareOn, setCompareOn] = useState(false)
 
   const handleExport = (format: "pdf" | "excel" | "csv") => {
-    console.log(`Exporting as ${format}`)
+    // Hook for future export implementation; avoid debug logging in UI.
   }
 
   return (

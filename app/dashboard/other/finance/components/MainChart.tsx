@@ -83,8 +83,8 @@ export function MainChart() {
 
   const chartContainerRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
-    const h = chartContainerRef.current?.clientHeight
-    console.log("chart container height", h)
+    // Read container height if needed for future layout logic, but avoid debug logging in production.
+    void chartContainerRef.current?.clientHeight
   }, [])
 
   const periodProfit = kpis?.netProfit ?? 0

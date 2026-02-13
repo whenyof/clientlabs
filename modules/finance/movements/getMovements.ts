@@ -1,8 +1,8 @@
 /**
- * Ledger: all real money movement. Same from/to, same userId.
+ * Ledger: real money movement only (cash executed).
  * - Income: Sales (PAGADO/PAID).
- * - Expenses: ProviderPayment + ProviderOrder + Transaction EXPENSE.
- * Provider money flow lives in providerOrders and providerPayments; both included.
+ * - Expenses: ProviderPayment + Transaction EXPENSE only. Never ProviderOrder (commitments).
+ * Double-count fix: orders and their payments must not both appear; ledger = payments + expenses.
  */
 
 import { prisma } from "@/lib/prisma"
@@ -30,12 +30,13 @@ async function fetchInvoices(_userId: string, _from: Date, _to: Date): Promise<M
 
 /**
  * Fetch and normalize all financial records into a single Movement[].
- * Sources: sales, providerPayments, providerOrders, invoices (none yet), manual (Transaction).
+ * Sources: sales (income), providerPayments (expense), transactions EXPENSE (expense).
+ * ProviderOrder is NOT included — only executed cash (providerPayment) and manual expenses.
  */
 export async function getMovements(params: GetMovementsParams): Promise<Movement[]> {
   const { userId, from, to, search, filters, sortBy = "date", sortDir = "desc" } = params
 
-  const [sales, purchases, providerOrders, invoices, transactions] = await Promise.all([
+  const [sales, purchases, invoices, transactions] = await Promise.all([
     prisma.sale.findMany({
       where: {
         userId,
@@ -64,23 +65,6 @@ export async function getMovements(params: GetMovementsParams): Promise<Movement
         Provider: { select: { name: true } },
       },
       orderBy: { paymentDate: "desc" },
-    }),
-    prisma.providerOrder.findMany({
-      where: {
-        userId,
-        orderDate: { gte: from, lte: to },
-      },
-      select: {
-        id: true,
-        amount: true,
-        orderDate: true,
-        createdAt: true,
-        status: true,
-        description: true,
-        providerId: true,
-        Provider: { select: { id: true, name: true } },
-      },
-      orderBy: { orderDate: "desc" },
     }),
     fetchInvoices(userId, from, to),
     prisma.transaction.findMany({
@@ -138,24 +122,6 @@ export async function getMovements(params: GetMovementsParams): Promise<Movement
     })
   }
 
-  for (const order of providerOrders) {
-    const date = order.orderDate ?? order.createdAt
-    const providerName = (order.Provider as { name?: string } | null)?.name ?? null
-    items.push({
-      id: `po_${order.id}`,
-      date: date.toISOString(),
-      type: "expense",
-      amount: -(Number(order.amount) ?? 0),
-      contactName: providerName,
-      contactType: "supplier",
-      concept: order.description || "Proveedor",
-      category: undefined,
-      status: toStatus(String(order.status)),
-      originModule: "provider_order",
-      originId: order.id,
-    })
-  }
-
   items.push(...invoices)
 
   for (const t of transactions) {
@@ -208,8 +174,7 @@ export async function getMovements(params: GetMovementsParams): Promise<Movement
   })
 
   if (typeof process !== "undefined") {
-    console.log("MOVEMENTS TOTAL:", result.length)
-    console.log("FROM PROVIDER ORDERS:", providerOrders.length)
+    // Keep aggregation logic; avoid noisy logging in production.
   }
   return result
 }

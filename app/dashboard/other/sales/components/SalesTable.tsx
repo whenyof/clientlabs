@@ -1,6 +1,7 @@
 // @ts-nocheck
 "use client"
 
+import React, { memo } from "react"
 import { useSectorConfig } from "@/hooks/useSectorConfig"
 import type { SaleRecord, SaleStatus } from "./constants"
 
@@ -21,7 +22,7 @@ interface SalesTableProps {
   onManualRegister: () => void
 }
 
-export function SalesTable({ data, onSelect, onManualRegister }: SalesTableProps) {
+function SalesTableComponent({ data, onSelect, onManualRegister }: SalesTableProps) {
   const { labels } = useSectorConfig()
   const t = labels.sales.table
   const s = labels.sales.status
@@ -93,5 +94,7 @@ export function SalesTable({ data, onSelect, onManualRegister }: SalesTableProps
     </section>
   )
 }
+
+export const SalesTable = memo(SalesTableComponent)
 
 export default SalesTable

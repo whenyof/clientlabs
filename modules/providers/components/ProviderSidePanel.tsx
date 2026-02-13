@@ -96,6 +96,7 @@ type Order = {
         paymentDate: Date
         concept?: string | null
     } | null
+    invoice?: { id: string; number: string; status: string; total?: unknown } | null
     files?: {
         id: string
         name: string
@@ -157,6 +158,8 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
     const [loadingOrders, setLoadingOrders] = useState(false)
     const [loadingTasks, setLoadingTasks] = useState(false)
     const [loadingFiles, setLoadingFiles] = useState(false)
+    const [providerInvoices, setProviderInvoices] = useState<Array<{ id: string; number: string; total: number; status: string }>>([])
+    const [loadingProviderInvoices, setLoadingProviderInvoices] = useState(false)
     const [insights, setInsights] = useState<any>(null)
     const [loadingInsights, setLoadingInsights] = useState(false)
     const [isEditing, setIsEditing] = useState(false)
@@ -219,6 +222,21 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
     )
     const [isPending, startTransition] = useTransition()
 
+    const loadProviderInvoices = async () => {
+        if (!provider?.id) return
+        setLoadingProviderInvoices(true)
+        try {
+            const res = await fetch(`/api/billing?providerId=${encodeURIComponent(provider.id)}`, { credentials: "include" })
+            const data = await res.json().catch(() => ({}))
+            const list = Array.isArray(data.invoices) ? data.invoices : []
+            setProviderInvoices(list.map((inv: any) => ({ id: inv.id, number: inv.number ?? inv.id, total: Number(inv.total ?? 0), status: inv.status ?? "" })))
+        } catch {
+            setProviderInvoices([])
+        } finally {
+            setLoadingProviderInvoices(false)
+        }
+    }
+
     useEffect(() => {
         if (open && provider.id) {
             loadTimeline()
@@ -226,6 +244,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
             loadTasks()
             loadFiles()
             loadInsights()
+            loadProviderInvoices()
         }
     }, [open, provider.id])
 
@@ -427,6 +446,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
             loadOrders()
             loadTimeline()
             loadFiles()
+            loadProviderInvoices()
             setShowFileDialog(false)
             setFileUploadContext(null)
         }
@@ -1057,6 +1077,26 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
                                                                     </div>
                                                                 )}
 
+                                                                {/* Factura asociada */}
+                                                                {order.invoice && (
+                                                                    <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
+                                                                        <div className="flex items-center justify-between gap-2">
+                                                                            <div className="flex items-center gap-2">
+                                                                                <FileText className="h-4 w-4 text-blue-400" />
+                                                                                <span className="text-sm font-medium text-blue-400">Factura asociada</span>
+                                                                            </div>
+                                                                            <a
+                                                                                href={`/dashboard/finance/billing?invoice=${order.invoice.id}`}
+                                                                                className="text-xs text-blue-300 hover:text-blue-200 flex items-center gap-1"
+                                                                            >
+                                                                                {order.invoice.number}
+                                                                                <ExternalLink className="h-3 w-3" />
+                                                                            </a>
+                                                                        </div>
+                                                                        <p className="text-[10px] text-white/50 mt-1">{order.invoice.status}</p>
+                                                                    </div>
+                                                                )}
+
                                                                 {/* Files */}
                                                                 <div className="space-y-2">
                                                                     <p className="text-[10px] text-white/40 uppercase tracking-wider">Archivos adjuntos</p>
@@ -1182,6 +1222,31 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
 
                         {activeTab === "files" && (
                             <div className="p-6 space-y-6">
+                                {/* Facturas recibidas (billing module) */}
+                                <div className="space-y-3">
+                                    <h4 className="text-xs font-bold text-green-400/80 uppercase tracking-widest flex items-center gap-2">
+                                        <FileText className="h-3.5 w-3.5" /> Facturas recibidas
+                                    </h4>
+                                    {loadingProviderInvoices ? (
+                                        <p className="text-xs text-white/40">Cargando…</p>
+                                    ) : providerInvoices.length === 0 ? (
+                                        <p className="text-xs text-white/40">Ninguna factura vinculada a este proveedor</p>
+                                    ) : (
+                                        <div className="space-y-2">
+                                            {providerInvoices.map((inv) => (
+                                                <a
+                                                    key={inv.id}
+                                                    href={`/dashboard/finance/billing?invoice=${inv.id}`}
+                                                    className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
+                                                >
+                                                    <span className="text-sm font-medium text-white">{inv.number}</span>
+                                                    <Badge variant="outline" className="text-[10px] border-white/20 text-white/70">{inv.status}</Badge>
+                                                    <ExternalLink className="h-3.5 w-3.5 text-white/40" />
+                                                </a>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                                 {loadingFiles ? (
                                     <div className="space-y-3">
                                         {[1, 2, 3].map(i => (

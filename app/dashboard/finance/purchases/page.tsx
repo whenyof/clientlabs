@@ -1,41 +1,154 @@
 import { getServerSession } from "next-auth"
 import { redirect } from "next/navigation"
 import { authOptions } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
+import { SalesDashboard } from "@/modules/sales/components/SalesView"
+import type { Sale } from "@/modules/sales/types"
+
+
+
+function toSaleRow(
+  id: string,
+  userId: string,
+  clientName: string,
+  product: string,
+  amount: number,
+  status: string,
+  date: Date
+): Sale {
+  return {
+    id,
+    userId,
+    clientId: null,
+    clientName,
+    clientEmail: null,
+    product,
+    category: null,
+    price: amount,
+    discount: 0,
+    tax: 0,
+    total: amount,
+    amount,
+    currency: "EUR",
+    provider: "",
+    paymentMethod: "",
+    status,
+    stripePaymentId: null,
+    stripeCustomerId: null,
+    metadata: {},
+    notes: null,
+    saleDate: date,
+    invoiceUrl: null,
+    createdAt: date,
+    updatedAt: date,
+    Client: null,
+  }
+}
 
 export default async function PurchasesPage() {
   const session = await getServerSession(authOptions)
 
-  if (!session?.user?.id) {
+  const userId = session?.user?.id
+  if (!userId) {
     redirect("/auth")
   }
 
-  return (
-    <div className="space-y-6">
-      <header className="space-y-1">
-        <h1 className="text-2xl font-bold text-white tracking-tight">
-          Compras
-        </h1>
-        <p className="text-sm text-white/60 max-w-xl">
-          Módulo de compras y gastos recurrentes. Aquí verás proveedores, facturas por pagar y el
-          calendario de pagos cuando se active este módulo.
-        </p>
-      </header>
+  const [payments, orders, expenses] = await Promise.all([
+    prisma.providerPayment.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        amount: true,
+        paymentDate: true,
+        concept: true,
+        status: true,
+        orderId: true,
+        Provider: { select: { name: true } },
+      },
+      orderBy: { paymentDate: "desc" },
+      take: 200,
+    }),
+    prisma.providerOrder.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        amount: true,
+        orderDate: true,
+        description: true,
+        status: true,
+        Provider: { select: { name: true } },
+        payment: { select: { id: true } },
+      },
+      orderBy: { orderDate: "desc" },
+      take: 200,
+    }),
+    prisma.transaction.findMany({
+      where: { userId, type: "EXPENSE" },
+      select: {
+        id: true,
+        amount: true,
+        date: true,
+        concept: true,
+        status: true,
+        Client: { select: { name: true } },
+      },
+      orderBy: { date: "desc" },
+      take: 100,
+    }),
+  ])
 
-      <section className="rounded-xl border border-white/10 bg-white/[0.03] p-6">
-        <div className="flex flex-col items-center justify-center py-10 text-center space-y-3">
-          <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-amber-500/10 text-amber-300 text-lg">
-            ₍₍ (ง˘ω˘)ว ⁾⁾
-          </span>
-          <h2 className="text-sm font-semibold text-white">
-            Aún no hay módulo de Compras conectado
-          </h2>
-          <p className="text-xs text-white/50 max-w-sm">
-            Cuando conectes tus proveedores o registres gastos de proveedor, aquí aparecerán tus
-            órdenes de compra, estados de pago (pagado / pendiente) y próximas fechas de vencimiento.
-          </p>
-        </div>
-      </section>
-    </div>
+
+
+  const paymentByOrderId = new Set(payments.map((p) => p.orderId).filter(Boolean) as string[])
+  const ordersAsSales: Sale[] = orders.map((o) => {
+    const hasPayment = paymentByOrderId.has(o.id) || (o as { payment?: { id: string } | null }).payment != null
+    const status = hasPayment ? "PAID" : String(o.status)
+    const label = o.description ?? "Orden proveedor"
+    return toSaleRow(
+      `order-${o.id}`,
+      userId,
+      o.Provider?.name ?? "",
+      hasPayment ? `${label} ✓ Pagada` : label,
+      Number(o.amount),
+      status,
+      o.orderDate
+    )
+  })
+  const standalonePayments = payments.filter((p) => !p.orderId)
+  const paymentsAsSales: Sale[] = standalonePayments.map((p) =>
+    toSaleRow(
+      `payment-${p.id}`,
+      userId,
+      p.Provider?.name ?? "",
+      p.concept ?? "Pago proveedor",
+      Number(p.amount),
+      p.status,
+      p.paymentDate
+    )
+  )
+  const expensesAsSales: Sale[] = expenses.map((t) =>
+    toSaleRow(
+      `tx-${t.id}`,
+      userId,
+      t.Client?.name ?? "",
+      t.concept ?? "Gasto",
+      Number(t.amount),
+      t.status,
+      t.date
+    )
+  )
+
+  // Trust the finance engine deduplication logic:
+  // Orders (primary expense source) + Standalone Payments (direct) + Expenses (transactions)
+  const purchasesAsSales: Sale[] = [...ordersAsSales, ...paymentsAsSales, ...expensesAsSales]
+
+  console.log("PURCHASE KPI SOURCE:", purchasesAsSales.length)
+
+  return (
+    <SalesDashboard
+      mode="purchases"
+      initialSales={purchasesAsSales}
+    />
   )
 }
 

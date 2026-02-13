@@ -4,13 +4,15 @@ import { authOptions } from "@/lib/auth"
 import { writeFile, mkdir } from "fs/promises"
 import path from "path"
 import { prisma } from "@/lib/prisma"
+import { createInvoiceFromSale } from "@/modules/invoicing/services/invoice.service"
 
 const UPLOAD_DIR = "public/uploads/sales"
 const MAX_SIZE = 10 * 1024 * 1024 // 10MB
 
 /**
  * POST /api/sales/[id]/invoice
- * Upload invoice file for a sale. Saves to public/uploads/sales and sets sale.invoiceUrl.
+ * Upload invoice file for a sale. Saves to public/uploads/sales, sets sale.invoiceUrl,
+ * and creates/links the billing Invoice (single source of truth) so it appears in facturación, cliente and pedido.
  */
 export async function POST(
   request: NextRequest,
@@ -52,6 +54,9 @@ export async function POST(
       where: { id },
       data: { invoiceUrl: url, updatedAt: new Date() },
     })
+
+    // Create or link billing Invoice so it appears in facturación, cliente and pedido (no duplicate)
+    await createInvoiceFromSale(id, session.user.id)
 
     return NextResponse.json({ url })
   } catch (err) {

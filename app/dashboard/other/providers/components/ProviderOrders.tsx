@@ -148,12 +148,9 @@ export function ProviderOrders({ providerId, isCompact = false }: ProviderOrders
         }
     }
 
-    // 🔥 DEBUG: Log when these actions are called
     const handleCompleteOrder = async (orderId: string, newStatus: "COMPLETED" | "RECEIVED") => {
-        console.log("🔥🔥🔥 PROVIDER_ORDERS - handleCompleteOrder CALLED 🔥🔥🔥", { orderId, newStatus })
         try {
             const result = await completeProviderOrder(orderId, newStatus)
-            console.log("🔥 completeProviderOrder RESULT:", result)
             if (result.success) {
                 toast.success(newStatus === "RECEIVED" ? "Pedido marcado como recibido" : "Pedido marcado como pagado")
                 loadOrders() // Refresh the list
@@ -167,10 +164,8 @@ export function ProviderOrders({ providerId, isCompact = false }: ProviderOrders
     }
 
     const handleCancelOrder = async (orderId: string) => {
-        console.log("🔥🔥🔥 PROVIDER_ORDERS - handleCancelOrder CALLED 🔥🔥🔥", { orderId })
         try {
             const result = await cancelProviderOrder(orderId)
-            console.log("🔥 cancelProviderOrder RESULT:", result)
             if (result.success) {
                 toast.success("Pedido cancelado")
                 loadOrders()

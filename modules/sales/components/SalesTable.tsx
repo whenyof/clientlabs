@@ -1,5 +1,6 @@
 "use client"
 
+import React, { memo } from "react"
 import { useSectorConfig } from "@/hooks/useSectorConfig"
 import { formatSaleCurrency, getPaymentStatusLabel, formatSaleDateDisplay } from "../utils"
 import type { Sale } from "../types"
@@ -9,7 +10,7 @@ type Props = {
   onSelectSale: (sale: Sale) => void
 }
 
-export function SalesTable({ sales, onSelectSale }: Props) {
+function SalesTableComponent({ sales, onSelectSale }: Props) {
   const { labels } = useSectorConfig()
   const sl = labels.sales
 
@@ -87,3 +88,5 @@ export function SalesTable({ sales, onSelectSale }: Props) {
     </div>
   )
 }
+
+export const SalesTable = memo(SalesTableComponent)

@@ -16,7 +16,10 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 
+type Mode = "sales" | "purchases"
+
 type Props = {
+  mode?: Mode
   target?: number
   /** Analytics from GET /api/sales/monthly-goal (single source of truth). */
   analytics?: MonthlyGoalAnalytics | null
@@ -26,15 +29,20 @@ type Props = {
   onGoalSaved?: (targetRevenue: number) => void
   /** Optional refetch callback so parent can reload goal from server after save. */
   onRefetch?: () => void
+  /** When mode=purchases and no goal, show this as current month spend. */
+  currentMonthAmount?: number
 }
 
 export function SalesGoalCard({
+  mode = "sales",
   target = 0,
   analytics,
   daysRemaining,
   onGoalSaved,
   onRefetch,
+  currentMonthAmount,
 }: Props) {
+  const isPurchases = mode === "purchases"
   const [editOpen, setEditOpen] = useState(false)
   const [inputValue, setInputValue] = useState("")
   const [saving, setSaving] = useState(false)
@@ -102,18 +110,22 @@ export function SalesGoalCard({
     <>
       <div className="rounded-xl border border-white/10 bg-white/5 p-5 backdrop-blur">
         <div className="flex items-center justify-between gap-2 mb-3">
-          <h3 className="text-sm font-medium text-white/80">Objetivo mensual</h3>
-          <button
-            type="button"
-            onClick={openEdit}
-            className="p-1.5 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-colors"
-            title={hasGoal ? "Editar objetivo" : "Definir objetivo"}
-          >
-            <Pencil className="h-4 w-4" />
-          </button>
+          <h3 className="text-sm font-medium text-white/80">
+            {isPurchases ? "Presupuesto mensual" : "Objetivo mensual"}
+          </h3>
+          {!isPurchases && (
+            <button
+              type="button"
+              onClick={openEdit}
+              className="p-1.5 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-colors"
+              title={hasGoal ? "Editar objetivo" : "Definir objetivo"}
+            >
+              <Pencil className="h-4 w-4" />
+            </button>
+          )}
         </div>
 
-        {!hasGoal && (
+        {!hasGoal && !isPurchases && (
           <button
             type="button"
             onClick={openEdit}
@@ -121,6 +133,11 @@ export function SalesGoalCard({
           >
             Define tu objetivo mensual
           </button>
+        )}
+        {!hasGoal && isPurchases && (
+          <p className="text-sm text-white/70">
+            Gasto del mes: <span className="font-semibold text-white tabular-nums">{formatSaleCurrency(currentMonthAmount ?? 0)}</span>
+          </p>
         )}
 
         {hasGoal && (
@@ -142,7 +159,7 @@ export function SalesGoalCard({
 
             <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3 space-y-2">
               <div className="flex justify-between items-baseline gap-2">
-                <span className="text-xs text-white/50">Faltan</span>
+                <span className="text-xs text-white/50">{isPurchases ? "Restante" : "Faltan"}</span>
                 <span className="text-base font-semibold text-white tabular-nums">
                   {formatSaleCurrency(Math.round(remaining))}
                 </span>
@@ -168,7 +185,7 @@ export function SalesGoalCard({
 
             <div className="mt-3 text-sm text-white/50">
               {isComplete ? (
-                <span className="text-violet-400 font-medium">Objetivo cumplido</span>
+                <span className="text-violet-400 font-medium">{isPurchases ? "Dentro del presupuesto" : "Objetivo cumplido"}</span>
               ) : isMonthEnd ? (
                 <span>Fin de mes</span>
               ) : (
@@ -185,12 +202,14 @@ export function SalesGoalCard({
         <DialogContent className="sm:max-w-md bg-zinc-900 border-white/10 text-white">
           <DialogHeader>
             <DialogTitle className="text-lg">
-              {hasGoal ? "Editar objetivo mensual" : "Definir objetivo mensual"}
+              {hasGoal
+                ? (isPurchases ? "Editar presupuesto mensual" : "Editar objetivo mensual")
+                : (isPurchases ? "Definir presupuesto de gastos" : "Definir objetivo mensual")}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <div>
-              <Label className="text-white/80">Objetivo de ingresos (€)</Label>
+              <Label className="text-white/80">{isPurchases ? "Presupuesto de gastos (€)" : "Objetivo de ingresos (€)"}</Label>
               <Input
                 type="number"
                 min={0}

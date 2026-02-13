@@ -39,6 +39,9 @@ export function FilterDropdown({
   placeholder = "Todos",
   className,
 }: FilterDropdownProps) {
+  const [mounted, setMounted] = React.useState(false)
+  React.useEffect(() => setMounted(true), [])
+
   const [open, setOpen] = React.useState(false)
   const displayLabel = value ? options.find((o) => o.value === value)?.label ?? value : placeholder
 
@@ -46,6 +49,8 @@ export function FilterDropdown({
     onChange(v)
     setOpen(false)
   }
+
+  if (!mounted) return null
 
   return (
     <DropdownMenuPrimitive.Root open={open} onOpenChange={setOpen}>

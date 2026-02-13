@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
+import { generateInvoiceFromSale } from '@/modules/billing/services/invoice-generator.service'
+import { createInvoiceFromSale } from '@/modules/billing/services/finance-invoice'
 
 /**
- * GET /api/sales - List sales for current user. Real data from DB.
+ * GET /api/sales - List sales for current user. Optional ?clientId= to filter by client (e.g. for invoice creation).
  */
 export async function GET(request: NextRequest) {
   try {
@@ -12,11 +14,66 @@ export async function GET(request: NextRequest) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    const sales = await prisma.sale.findMany({
-      where: { userId: session.user.id },
-      orderBy: { saleDate: 'desc' },
-      take: 200,
+    const userId = session.user.id
+    const { searchParams } = new URL(request.url)
+    const clientId = searchParams.get('clientId') ?? undefined
+
+    console.log('FETCH SALES FOR CLIENT:', clientId, 'USER:', userId)
+
+    // STEP 3 — Hard DB check before any transformation
+    const raw = await prisma.sale.findMany({
+      where: {
+        userId,
+        ...(clientId ? { clientId } : {}),
+      },
     })
+    console.log('RAW SALES FOUND:', raw.length)
+    console.log(raw.map((s) => ({ id: s.id, clientId: s.clientId, total: s.total })))
+
+    // STEP 4 — If no sales by clientId, check if any sales exist for user (field name / relation check)
+    if (clientId && raw.length === 0) {
+      const allForUser = await prisma.sale.findMany({
+        where: { userId },
+        take: 5,
+      })
+      console.log('ALL SALES (user):', allForUser.length)
+      if (allForUser.length > 0) {
+        console.log('Sample sale clientId:', allForUser[0].clientId, 'clientName:', allForUser[0].clientName)
+      }
+    }
+
+    // STEP 7 — Fix: use sales by clientId; if none, include sales with clientId null but clientName matching selected client
+    let sales: Awaited<ReturnType<typeof prisma.sale.findMany>>
+    if (clientId) {
+      sales = await prisma.sale.findMany({
+        where: { userId, clientId },
+        orderBy: { saleDate: 'desc' },
+        take: 200,
+      })
+      if (sales.length === 0) {
+        const client = await prisma.client.findUnique({
+          where: { id: clientId, userId },
+          select: { name: true },
+        })
+        const clientName = client?.name?.trim() ?? null
+        if (clientName) {
+          const byName = await prisma.sale.findMany({
+            where: { userId, clientId: null, clientName },
+            orderBy: { saleDate: 'desc' },
+            take: 200,
+          })
+          console.log('SALES BY CLIENT NAME (clientId null):', byName.length)
+          sales = byName
+        }
+      }
+    } else {
+      sales = await prisma.sale.findMany({
+        where: { userId },
+        orderBy: { saleDate: 'desc' },
+        take: 200,
+      })
+    }
+
     return NextResponse.json({ sales })
   } catch (error) {
     console.error('Sales list error:', error)
@@ -74,6 +131,18 @@ export async function POST(request: NextRequest) {
         updatedAt: new Date(),
       },
     })
+    console.log("SALE CREATED:", sale.id)
+    console.log("CALLING createInvoiceFromSale")
+    try {
+      void generateInvoiceFromSale(sale.id).catch((err) => {
+        console.error('Auto invoice from sale failed', sale.id, err)
+      })
+      void createInvoiceFromSale(sale.id, session.user.id).catch((err) => {
+        console.error('Invoicing draft from sale failed', sale.id, err)
+      })
+    } catch (_) {
+      // non-blocking
+    }
     revalidatePath('/dashboard/other')
     revalidatePath('/dashboard/other/sales')
     return NextResponse.json({ sale })

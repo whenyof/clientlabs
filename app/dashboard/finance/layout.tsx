@@ -1,6 +1,9 @@
+import { FinanceHubTabs } from "@/app/dashboard/other/finance/components/FinanceNavTabs"
+
 /**
  * Finance module layout at /dashboard/finance.
  * Reuses the full-bleed layout from the legacy finance route.
+ * Hub tabs shown on all finance routes (overview, movements, billing, etc.).
  */
 export default function FinanceLayout({
   children,
@@ -15,7 +18,12 @@ export default function FinanceLayout({
         w-[calc(100%+3rem)] lg:w-[calc(100%+4rem)] xl:w-[calc(100%+5rem)]
       "
     >
-      {children}
+      <div className="shrink-0 px-4 pt-5 pb-3">
+        <FinanceHubTabs />
+      </div>
+      <div className="flex-1 min-h-0 w-full px-4 pb-10 overflow-auto">
+        {children}
+      </div>
     </div>
   )
 }

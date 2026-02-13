@@ -1,5 +1,6 @@
 "use client"
 
+import React, { memo } from "react"
 import { useSectorConfig } from "@/hooks/useSectorConfig"
 import { formatReportingCurrency } from "../utils"
 import type { ReportingKPIs as KPIType } from "../types"
@@ -9,7 +10,7 @@ type Props = {
   kpis: KPIType
 }
 
-export function ReportingKPIs({ kpis }: Props) {
+function ReportingKPIsComponent({ kpis }: Props) {
   const { labels } = useSectorConfig()
   const r = labels.reporting
 
@@ -46,3 +47,5 @@ export function ReportingKPIs({ kpis }: Props) {
     </div>
   )
 }
+
+export const ReportingKPIs = memo(ReportingKPIsComponent)

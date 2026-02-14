@@ -7,6 +7,7 @@
  * - When an invoice becomes PAID: TODO trigger automation / AI risk analysis
  */
 
+import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import * as repo from "../repositories/invoice.repository"
 import * as engine from "../engine/invoice.engine"
@@ -397,10 +398,10 @@ export async function issueInvoice(invoiceId: string, userId: string): Promise<I
     number,
     status: INVOICE_STATUS.SENT,
     issuedAt,
-    issuedCompanySnapshot,
-    issuedClientSnapshot,
-    issuedItemsSnapshot,
-    issuedTotalsSnapshot,
+    issuedCompanySnapshot: issuedCompanySnapshot as Prisma.InputJsonValue,
+    issuedClientSnapshot: issuedClientSnapshot as Prisma.InputJsonValue,
+    issuedItemsSnapshot: issuedItemsSnapshot as Prisma.InputJsonValue,
+    issuedTotalsSnapshot: issuedTotalsSnapshot as Prisma.InputJsonValue,
   })
   await repo.addEvent(invoiceId, "SENT", {
     at: issuedAt.toISOString(),
@@ -566,7 +567,7 @@ export async function createRectification(
       iban: original.iban ?? null,
       bic: original.bic ?? null,
       paymentReference: original.paymentReference ?? null,
-      issuedClientSnapshot: clientSnap,
+      issuedClientSnapshot: clientSnap as Prisma.InputJsonValue,
       isRectification: true,
       rectifiesInvoiceId: originalInvoiceId,
       rectificationReason: reason,
@@ -612,7 +613,7 @@ export async function createRectification(
     iban: original.iban ?? null,
     bic: original.bic ?? null,
     paymentReference: original.paymentReference ?? null,
-    issuedClientSnapshot: clientSnap,
+    issuedClientSnapshot: clientSnap as Prisma.InputJsonValue,
     isRectification: true,
     rectifiesInvoiceId: originalInvoiceId,
     rectificationReason: reason,

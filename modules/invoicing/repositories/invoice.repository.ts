@@ -2,7 +2,7 @@
  * Invoicing — repository layer. Database access only, no business logic.
  */
 
-import type { Prisma } from "@prisma/client"
+import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import type { InvoiceStatus } from "../types"
 import type { Decimal } from "@prisma/client/runtime/library"
@@ -269,15 +269,16 @@ type UpdateDraftPayload = {
 }
 
 export async function updateDraft(id: string, userId: string, payload: UpdateDraftPayload) {
-  const { lines, ...rest } = payload
+  const { lines, issuedClientSnapshot, ...rest } = payload
   const updateData: Prisma.InvoiceUncheckedUpdateManyInput = {
     ...rest,
     pdfUrl: null,
     pdfGeneratedAt: null,
     updatedAt: new Date(),
   }
-  if (payload.issuedClientSnapshot !== undefined) {
-    updateData.issuedClientSnapshot = payload.issuedClientSnapshot
+  if (issuedClientSnapshot !== undefined) {
+    updateData.issuedClientSnapshot =
+      issuedClientSnapshot === null ? Prisma.DbNull : issuedClientSnapshot
   }
   await prisma.$transaction(async (tx) => {
     await tx.invoiceLine.deleteMany({ where: { invoiceId: id } })

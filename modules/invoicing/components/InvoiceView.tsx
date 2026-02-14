@@ -98,6 +98,25 @@ export function InvoiceView() {
     notes: string | null
     terms: string | null
     currency: string
+
+    // ✅ nuevos campos de pago
+    paymentMethod?: string
+    iban?: string
+    bic?: string
+    paymentReference?: string
+
+    // ✅ snapshot fiscal
+    clientSnapshot?: {
+      name?: string | null
+      legalName?: string | null
+      taxId?: string | null
+      address?: string | null
+      city?: string | null
+      postalCode?: string | null
+      country?: string | null
+      email?: string | null
+    } | null
+
     lines: InvoiceLineInput[]
   } | null>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)

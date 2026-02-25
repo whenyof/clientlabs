@@ -31,7 +31,7 @@ export function BackupList({ backups, loading }: BackupListProps) {
       case 'unencrypted':
         return <LockOpenIcon className="w-4 h-4 text-yellow-400" />
       default:
-        return <ClockIcon className="w-4 h-4 text-gray-400" />
+        return <ClockIcon className="w-4 h-4 text-[var(--text-secondary)]" />
     }
   }
 
@@ -42,7 +42,7 @@ export function BackupList({ backups, loading }: BackupListProps) {
       case 'unencrypted':
         return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/20'
       default:
-        return 'bg-gray-500/20 text-gray-400 border-gray-500/20'
+        return 'bg-[var(--bg-main)]0/20 text-[var(--text-secondary)] border-[var(--border-subtle)]'
     }
   }
 
@@ -50,18 +50,18 @@ export function BackupList({ backups, loading }: BackupListProps) {
     return (
       <div className="space-y-4">
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="bg-gray-800/30 rounded-xl p-6">
+          <div key={i} className="bg-[var(--bg-main)] rounded-xl p-6">
             <div className="animate-pulse space-y-4">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-gray-700 rounded-lg"></div>
+                <div className="w-10 h-10 bg-[var(--bg-surface)] rounded-lg"></div>
                 <div className="space-y-2 flex-1">
-                  <div className="h-4 bg-gray-700 rounded w-1/4"></div>
-                  <div className="h-3 bg-gray-700 rounded w-1/3"></div>
+                  <div className="h-4 bg-[var(--bg-surface)] rounded w-1/4"></div>
+                  <div className="h-3 bg-[var(--bg-surface)] rounded w-1/3"></div>
                 </div>
               </div>
               <div className="flex gap-4">
-                <div className="h-8 bg-gray-700 rounded w-20"></div>
-                <div className="h-8 bg-gray-700 rounded w-16"></div>
+                <div className="h-8 bg-[var(--bg-surface)] rounded w-20"></div>
+                <div className="h-8 bg-[var(--bg-surface)] rounded w-16"></div>
               </div>
             </div>
           </div>
@@ -73,16 +73,16 @@ export function BackupList({ backups, loading }: BackupListProps) {
   if (backups.length === 0) {
     return (
       <motion.div
-        className="text-center py-16 bg-gray-800/30 backdrop-blur-sm border border-gray-700/30 rounded-2xl"
+        className="text-center py-16 bg-[var(--bg-main)] backdrop-blur-sm border border-[var(--border-subtle)] rounded-2xl"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <ServerIcon className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-        <h3 className="text-xl font-semibold text-white mb-2">
+        <ServerIcon className="w-16 h-16 text-[var(--text-primary)] mx-auto mb-4" />
+        <h3 className="text-xl font-semibold text-[var(--text-primary)] mb-2">
           No hay backups
         </h3>
-        <p className="text-gray-400 mb-6 max-w-md mx-auto">
+        <p className="text-[var(--text-secondary)] mb-6 max-w-md mx-auto">
           No se han creado backups todavía. Crea tu primer backup para asegurar tus datos.
         </p>
       </motion.div>
@@ -98,8 +98,8 @@ export function BackupList({ backups, loading }: BackupListProps) {
     >
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-white mb-1">Lista de Backups</h3>
-          <p className="text-sm text-gray-400">
+          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-1">Lista de Backups</h3>
+          <p className="text-sm text-[var(--text-secondary)]">
             {backups.length} backup{backups.length !== 1 ? 's' : ''} disponible{backups.length !== 1 ? 's' : ''}
           </p>
         </div>
@@ -109,7 +109,7 @@ export function BackupList({ backups, loading }: BackupListProps) {
         {backups.map((backup, index) => (
           <motion.div
             key={backup.id}
-            className="bg-gray-800/30 backdrop-blur-sm border border-gray-700/30 rounded-xl p-6 hover:bg-gray-800/50 transition-colors"
+            className="bg-[var(--bg-main)] backdrop-blur-sm border border-[var(--border-subtle)] rounded-xl p-6 hover:bg-[var(--bg-main)] transition-colors"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 * index, duration: 0.3 }}
@@ -123,17 +123,17 @@ export function BackupList({ backups, loading }: BackupListProps) {
 
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <h4 className="text-white font-medium">
+                    <h4 className="text-[var(--text-primary)] font-medium">
                       Backup {backup.id.split('_')[0]}
                     </h4>
                     <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(backup.status)}`}>
                       {backup.status === 'encrypted' ? 'Cifrado' : 'Sin cifrar'}
                     </div>
                   </div>
-                  <div className="text-sm text-gray-400">
+                  <div className="text-sm text-[var(--text-secondary)]">
                     {new Date(backup.timestamp).toLocaleString('es-ES')}
                   </div>
-                  <div className="text-xs text-gray-500 mt-1">
+                  <div className="text-xs text-[var(--text-secondary)] mt-1">
                     {formatSize(backup.size)} • {backup.metadata.environment} • {backup.metadata.database_type}
                   </div>
                 </div>
@@ -141,7 +141,7 @@ export function BackupList({ backups, loading }: BackupListProps) {
 
               <div className="flex items-center gap-3">
                 <motion.button
-                  className="p-2 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-lg transition-colors"
+                  className="p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] rounded-lg transition-colors"
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                 >
@@ -149,7 +149,7 @@ export function BackupList({ backups, loading }: BackupListProps) {
                 </motion.button>
 
                 <motion.button
-                  className="p-2 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-lg transition-colors"
+                  className="p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] rounded-lg transition-colors"
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                 >

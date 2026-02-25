@@ -69,7 +69,7 @@ export default async function Client360Page({
             <div className="mb-2">
                 <a
                     href="/dashboard/clients"
-                    className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors duration-200"
+                    className="inline-flex items-center gap-1.5 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-200"
                 >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />

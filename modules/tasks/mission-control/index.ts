@@ -6,9 +6,9 @@ export { MissionIntelligence } from "./MissionIntelligence"
 export { MissionActivityDock } from "./MissionActivityDock"
 export { default as CalendarView } from "./ClientCalendar"
 export {
-  getCalendarLabel,
-  getNextDate,
-  getPrevDate,
-  type CalendarViewMode,
+ getCalendarLabel,
+ getNextDate,
+ getPrevDate,
+ type CalendarViewMode,
 } from "./CalendarView"
 export type { MissionControlTask, MissionControlCalendarItem, CalendarItemKind } from "./types"

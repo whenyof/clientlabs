@@ -8,25 +8,25 @@ import { useEffect, useState } from "react"
  * and formatted number only after client mount
  */
 export function ClientNumber({
-    value,
-    locale = "es-ES",
-    options
+ value,
+ locale = "es-ES",
+ options
 }: {
-    value: number
-    locale?: string
-    options?: Intl.NumberFormatOptions
+ value: number
+ locale?: string
+ options?: Intl.NumberFormatOptions
 }) {
-    const [mounted, setMounted] = useState(false)
+ const [mounted, setMounted] = useState(false)
 
-    useEffect(() => {
-        setMounted(true)
-    }, [])
+ useEffect(() => {
+ setMounted(true)
+ }, [])
 
-    if (!mounted) {
-        return <>{value}</>
-    }
+ if (!mounted) {
+ return <>{value}</>
+ }
 
-    return <>{value.toLocaleString(locale, options)}</>
+ return <>{value.toLocaleString(locale, options)}</>
 }
 
 /**
@@ -35,61 +35,61 @@ export function ClientNumber({
  * and formatted date only after client mount
  */
 export function ClientDate({
-    date,
-    locale = "es-ES",
-    options
+ date,
+ locale = "es-ES",
+ options
 }: {
-    date: Date | string
-    locale?: string
-    options?: Intl.DateTimeFormatOptions
+ date: Date | string
+ locale?: string
+ options?: Intl.DateTimeFormatOptions
 }) {
-    const [mounted, setMounted] = useState(false)
+ const [mounted, setMounted] = useState(false)
 
-    useEffect(() => {
-        setMounted(true)
-    }, [])
+ useEffect(() => {
+ setMounted(true)
+ }, [])
 
-    const dateObj = typeof date === "string" ? new Date(date) : date
+ const dateObj = typeof date === "string" ? new Date(date) : date
 
-    if (!mounted) {
-        return <>{dateObj.toISOString()}</>
-    }
+ if (!mounted) {
+ return <>{dateObj.toISOString()}</>
+ }
 
-    return <>{dateObj.toLocaleString(locale, options)}</>
+ return <>{dateObj.toLocaleString(locale, options)}</>
 }
 
 /**
  * Hook version for use in non-JSX contexts
  */
 export function useClientNumber(value: number, locale = "es-ES", options?: Intl.NumberFormatOptions) {
-    const [mounted, setMounted] = useState(false)
+ const [mounted, setMounted] = useState(false)
 
-    useEffect(() => {
-        setMounted(true)
-    }, [])
+ useEffect(() => {
+ setMounted(true)
+ }, [])
 
-    if (!mounted) {
-        return value.toString()
-    }
+ if (!mounted) {
+ return value.toString()
+ }
 
-    return value.toLocaleString(locale, options)
+ return value.toLocaleString(locale, options)
 }
 
 /**
  * Hook version for dates
  */
 export function useClientDate(date: Date | string, locale = "es-ES", options?: Intl.DateTimeFormatOptions) {
-    const [mounted, setMounted] = useState(false)
+ const [mounted, setMounted] = useState(false)
 
-    useEffect(() => {
-        setMounted(true)
-    }, [])
+ useEffect(() => {
+ setMounted(true)
+ }, [])
 
-    const dateObj = typeof date === "string" ? new Date(date) : date
+ const dateObj = typeof date === "string" ? new Date(date) : date
 
-    if (!mounted) {
-        return dateObj.toISOString()
-    }
+ if (!mounted) {
+ return dateObj.toISOString()
+ }
 
-    return dateObj.toLocaleString(locale, options)
+ return dateObj.toLocaleString(locale, options)
 }

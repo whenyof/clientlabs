@@ -16,7 +16,7 @@ export function AddTaskButton({ className }: { className?: string }) {
         <>
             <Button
                 onClick={() => setOpen(true)}
-                className={className ?? "bg-blue-600 hover:bg-blue-700 text-white"}
+                className={className ?? "bg-blue-600 hover:bg-blue-700 text-[var(--text-primary)]"}
             >
                 <Plus className="h-4 w-4 mr-2" />
                 {labels.tasks.newButton}

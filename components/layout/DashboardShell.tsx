@@ -1,50 +1,47 @@
 "use client"
 
 import { useState } from "react"
-import Sidebar from "@/app/dashboard/other/components/Sidebar"
+import Sidebar from "@/app/dashboard/components/Sidebar"
+import { DashboardHeader } from "@/components/layout/DashboardHeader"
 
 /**
  * DashboardShell — persistent sidebar + main content area.
  * Used by app/dashboard/layout.tsx so ALL dashboard routes inherit the sidebar.
  */
 export default function DashboardShell({
-  children,
+    children,
 }: {
-  children: React.ReactNode
+    children: React.ReactNode
 }) {
-  const [isCollapsed, setIsCollapsed] = useState(false)
+    const [isCollapsed, setIsCollapsed] = useState(false)
 
-  return (
-    <div
-      className="flex min-h-screen w-screen bg-[#0e1424]"
-      data-debug="shell"
-    >
-      {/* Sidebar */}
-      <div
-        className="sticky top-0 h-screen shrink-0 transition-all duration-300"
-        style={{ width: isCollapsed ? 72 : 240 }}
-      >
-        <Sidebar
-          isCollapsed={isCollapsed}
-          onToggleCollapsed={() => setIsCollapsed(!isCollapsed)}
-        />
-      </div>
+    return (
+        <div className="flex h-screen w-screen overflow-hidden bg-[var(--bg-main)] text-[var(--text-primary)]" data-debug="shell">
+            {/* Sidebar Column */}
+            <div
+                className="flex-shrink-0 transition-all duration-300 z-20 bg-[var(--bg-card)] border-r border-[var(--border-subtle)] h-full overflow-hidden"
+                style={{ width: isCollapsed ? 72 : 240 }}
+            >
+                <Sidebar
+                    isCollapsed={isCollapsed}
+                    onToggleCollapsed={() => setIsCollapsed(!isCollapsed)}
+                />
+            </div>
 
-      {/* Main Content — flex column so child can get flex-1 and real height */}
-      <main
-        className="
-          flex flex-col flex-1 min-w-0 min-h-0
-          overflow-y-auto overflow-x-hidden
-          bg-gradient-to-br from-[#1E1F2B] to-[#242538]
-          text-gray-200
-          px-6 py-6 lg:px-8 xl:px-10
-        "
-        data-debug="shell-main"
-      >
-        <div className="flex-1 min-h-0 w-full flex flex-col">
-          {children}
+            {/* Main Content Column */}
+            <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+                {/* Global Topbar inside Main */}
+                <DashboardHeader />
+
+                <main
+                    className="flex-1 overflow-y-auto overflow-x-hidden bg-[var(--bg-surface)] text-[var(--text-primary)]"
+                    data-debug="shell-main"
+                >
+                    <div className="mx-auto w-full max-w-[1400px] flex-1 flex flex-col px-4 py-6 sm:px-6 lg:px-8">
+                        {children}
+                    </div>
+                </main>
+            </div>
         </div>
-      </main>
-    </div>
-  )
+    )
 }

@@ -2,44 +2,50 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { createCustomerPortalSession } from '@/app/dashboard/other/settings/lib/stripe'
+import { authOptions } from '@/lib/auth'
+import { createCustomerPortalSession } from '@/app/dashboard/settings/lib/stripe'
+import { prisma } from '@/lib/prisma'
 
 export async function POST(request: NextRequest) {
-  try {
-    // TODO: Add session validation
-    // const session = await getServerSession()
-    // if (!session?.user?.id) {
-    //   return NextResponse.json(
-    //     { success: false, error: 'Unauthorized' },
-    //     { status: 401 }
-    //   )
-    // }
+ try {
+ const session = await getServerSession(authOptions)
+ if (!session?.user?.id) {
+ return NextResponse.json(
+ { success: false, error: 'Unauthorized' },
+ { status: 401 }
+ )
+ }
 
-    // Mock user data - replace with real session data
-    const customerId = 'cus_mock_customer_id' // Get from user record
+ // Get the Stripe customer ID from the authenticated user
+ const user = await prisma.user.findUnique({
+ where: { id: session.user.id },
+ select: { stripeCustomerId: true },
+ })
 
-    if (!customerId) {
-      return NextResponse.json(
-        { success: false, error: 'Customer not found' },
-        { status: 404 }
-      )
-    }
+ const customerId = user?.stripeCustomerId
 
-    const result = await createCustomerPortalSession({
-      customerId,
-      returnUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/other/settings`
-    })
+ if (!customerId) {
+ return NextResponse.json(
+ { success: false, error: 'Customer not found' },
+ { status: 404 }
+ )
+ }
 
-    return NextResponse.json({
-      success: true,
-      url: result.url
-    })
+ const result = await createCustomerPortalSession({
+ customerId,
+ returnUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/other/settings`
+ })
 
-  } catch (error) {
-    console.error('Error creating customer portal session:', error)
-    return NextResponse.json(
-      { success: false, error: 'Failed to create customer portal session' },
-      { status: 500 }
-    )
-  }
+ return NextResponse.json({
+ success: true,
+ url: result.url
+ })
+
+ } catch (error) {
+ console.error('Error creating customer portal session:', error)
+ return NextResponse.json(
+ { success: false, error: 'Failed to create customer portal session' },
+ { status: 500 }
+ )
+ }
 }

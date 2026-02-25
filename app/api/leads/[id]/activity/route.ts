@@ -1,61 +1,60 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 
 export async function POST(
-  request: NextRequest,
-  props: { params: Promise<{ id: string }> }
+ request: NextRequest,
+ props: { params: Promise<{ id: string }> }
 ) {
-  const params = await props.params;
-  try {
-    const session = await getServerSession()
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+ const params = await props.params;
+ try {
+ const session = await getServerSession(authOptions)
+ if (!session?.user?.id) {
+ return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+ }
 
-    const body = await request.json()
-    const { type, title, description, metadata } = body
+ const body = await request.json()
+ const { type, title, description, metadata } = body
 
-    // Verify lead belongs to user
-    const lead = await prisma.lead.findFirst({
-      where: {
-        id: params.id,
-        userId: session.user.id
-      }
-    })
+ // Verify lead belongs to user
+ const lead = await prisma.lead.findFirst({
+ where: {
+ id: params.id,
+ userId: session.user.id
+ }
+ })
 
-    if (!lead) {
-      return NextResponse.json({ error: 'Lead not found' }, { status: 404 })
-    }
+ if (!lead) {
+ return NextResponse.json({ error: 'Lead not found' }, { status: 404 })
+ }
 
-    // Create activity
-    const activity = await prisma.activity.create({
-      data: {
-        userId: session.user.id,
-        leadId: params.id,
-        type,
-        title,
-        description,
-        metadata
-      }
-    })
+ // Create activity
+ const activity = await prisma.activity.create({
+ data: {
+ userId: session.user.id,
+ leadId: params.id,
+ type,
+ title,
+ description,
+ metadata
+ }
+ })
 
 
 
-    // Recalculate lead score if relevant activity
-    if (['email_open', 'page_view', 'meeting_booked'].includes(type)) {
-      const { LeadScoringService } = await import('@/lib/services/leadScoring')
-      await LeadScoringService.calculateLeadScore(params.id)
-    }
+ // Recalculate lead score if relevant activity
+ if (['email_open', 'page_view', 'meeting_booked'].includes(type)) {
+ const { LeadScoringService } = await import('@/lib/services/leadScoring')
+ await LeadScoringService.calculateLeadScore(params.id)
+ }
 
-    return NextResponse.json(activity, { status: 201 })
-  } catch (error) {
-    console.error('Error creating activity:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
+ return NextResponse.json(activity, { status: 201 })
+ } catch (error) {
+ console.error('Error creating activity:', error)
+ return NextResponse.json(
+ { error: 'Internal server error' },
+ { status: 500 }
+ )
+ }
 }

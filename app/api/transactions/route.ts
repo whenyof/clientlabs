@@ -1,1 +1,1 @@
-export { GET } from '@/app/dashboard/other/finance/api/listTransactions'
+export { GET } from '@/app/dashboard/finance/api/listTransactions'

@@ -7,28 +7,28 @@ import { AutomationsPanel } from "./AutomationsPanel"
 import type { Lead } from "@prisma/client"
 
 type AutomationsButtonProps = {
-    selectedLead?: Lead | null
+ selectedLead?: Lead | null
 }
 
 export function AutomationsButton({ selectedLead }: AutomationsButtonProps) {
-    const [open, setOpen] = useState(false)
+ const [open, setOpen] = useState(false)
 
-    return (
-        <>
-            <Button
-                variant="outline"
-                className="gap-2 bg-purple-500/10 border-purple-500/30 text-purple-400 hover:bg-purple-500/20 hover:border-purple-500/50 transition-all"
-                onClick={() => setOpen(true)}
-            >
-                <Zap className="h-4 w-4" />
-                <span>Automatizar</span>
-            </Button>
+ return (
+ <>
+ <Button
+ variant="outline"
+ className="gap-2 bg-[var(--accent-soft)]-primary/15 border-[var(--accent)]-primary/30 text-[var(--accent)]-hover hover:bg-[var(--accent-soft)]-primary/20 hover:border-[var(--accent)]-primary/50 transition-all"
+ onClick={() => setOpen(true)}
+ >
+ <Zap className="h-4 w-4" />
+ <span>Automatizar</span>
+ </Button>
 
-            <AutomationsPanel
-                open={open}
-                onClose={() => setOpen(false)}
-                selectedLead={selectedLead || null}
-            />
-        </>
-    )
+ <AutomationsPanel
+ open={open}
+ onClose={() => setOpen(false)}
+ selectedLead={selectedLead || null}
+ />
+ </>
+ )
 }

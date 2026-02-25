@@ -7,6 +7,6 @@ import { useSectorConfig } from "@/hooks/useSectorConfig"
  * Devuelve labels.tasks del sector actual.
  */
 export function useTasksLabels() {
-    const { labels } = useSectorConfig()
-    return labels.tasks
+ const { labels } = useSectorConfig()
+ return labels.tasks
 }

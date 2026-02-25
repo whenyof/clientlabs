@@ -3,32 +3,32 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(
-  request: NextRequest,
-  props: { params: Promise<{ id: string }> }
+ request: NextRequest,
+ props: { params: Promise<{ id: string }> }
 ) {
-  const params = await props.params;
-  try {
-    const body = await request.json()
-    const { action, config } = body
-    const integrationId = params.id
+ const params = await props.params;
+ try {
+ const body = await request.json()
+ const { action, config } = body
+ const integrationId = params.id
 
-    // TODO: Implement real connection logic
-    console.log(`Connecting integration ${integrationId} with config:`, config)
+ // TODO: Implement real connection logic
+ console.log(`Connecting integration ${integrationId} with config:`, config)
 
-    // Mock response
-    const response = {
-      success: true,
-      integrationId,
-      status: action === 'connect' ? 'connected' : 'disconnected',
-      timestamp: new Date().toISOString()
-    }
+ // Mock response
+ const response = {
+ success: true,
+ integrationId,
+ status: action === 'connect' ? 'connected' : 'disconnected',
+ timestamp: new Date().toISOString()
+ }
 
-    return NextResponse.json(response)
-  } catch (error) {
-    console.error('Error connecting integration:', error)
-    return NextResponse.json(
-      { success: false, error: 'Failed to connect integration' },
-      { status: 500 }
-    )
-  }
+ return NextResponse.json(response)
+ } catch (error) {
+ console.error('Error connecting integration:', error)
+ return NextResponse.json(
+ { success: false, error: 'Failed to connect integration' },
+ { status: 500 }
+ )
+ }
 }

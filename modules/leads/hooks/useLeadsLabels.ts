@@ -7,6 +7,6 @@ import { useSectorConfig } from "@/hooks/useSectorConfig"
  * Devuelve labels.leads del sector actual.
  */
 export function useLeadsLabels() {
-    const { labels } = useSectorConfig()
-    return labels.leads
+ const { labels } = useSectorConfig()
+ return labels.leads
 }

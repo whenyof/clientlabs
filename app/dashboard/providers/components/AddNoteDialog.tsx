@@ -53,21 +53,21 @@ export function AddNoteDialog({ providerId, providerName, open, onOpenChange, on
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="bg-zinc-900 border-white/10 max-w-md">
+            <DialogContent className="bg-[var(--bg-card)] border-[var(--border-subtle)] max-w-md">
                 <DialogHeader>
-                    <DialogTitle className="text-white">Añadir nota</DialogTitle>
-                    <p className="text-sm text-white/60">{providerName}</p>
+                    <DialogTitle className="text-[var(--text-primary)]">Añadir nota</DialogTitle>
+                    <p className="text-sm text-[var(--text-secondary)]">{providerName}</p>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Content */}
                     <div>
-                        <Label htmlFor="content" className="text-white/80">Nota *</Label>
+                        <Label htmlFor="content" className="text-[var(--text-secondary)]">Nota *</Label>
                         <Textarea
                             id="content"
                             value={content}
                             onChange={(e) => setContent(e.target.value)}
-                            className="bg-white/5 border-white/10 text-white resize-none"
+                            className="bg-[var(--bg-main)] border-[var(--border-subtle)] text-[var(--text-primary)] resize-none"
                             placeholder="Escribe tu nota aquí..."
                             rows={5}
                             required
@@ -80,14 +80,14 @@ export function AddNoteDialog({ providerId, providerName, open, onOpenChange, on
                             type="button"
                             variant="ghost"
                             onClick={() => onOpenChange(false)}
-                            className="text-white/60 hover:text-white hover:bg-white/10"
+                            className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
                         >
                             Cancelar
                         </Button>
                         <Button
                             type="submit"
                             disabled={loading}
-                            className="bg-blue-500 hover:bg-blue-600 text-white"
+                            className="bg-blue-500 hover:bg-blue-600 text-[var(--text-primary)]"
                         >
                             {loading ? "Añadiendo..." : "Añadir nota"}
                         </Button>

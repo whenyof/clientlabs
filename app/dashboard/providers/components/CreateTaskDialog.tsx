@@ -72,21 +72,21 @@ export function CreateTaskDialog({ providerId, providerName, open, onOpenChange,
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="bg-zinc-900 border-white/10 max-w-md">
+            <DialogContent className="bg-[var(--bg-card)] border-[var(--border-subtle)] max-w-md">
                 <DialogHeader>
-                    <DialogTitle className="text-white">Crear tarea</DialogTitle>
-                    <p className="text-sm text-white/60">{providerName}</p>
+                    <DialogTitle className="text-[var(--text-primary)]">Crear tarea</DialogTitle>
+                    <p className="text-sm text-[var(--text-secondary)]">{providerName}</p>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Title */}
                     <div>
-                        <Label htmlFor="title" className="text-white/80">Título *</Label>
+                        <Label htmlFor="title" className="text-[var(--text-secondary)]">Título *</Label>
                         <Input
                             id="title"
                             value={formData.title}
                             onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                            className="bg-white/5 border-white/10 text-white"
+                            className="bg-[var(--bg-main)] border-[var(--border-subtle)] text-[var(--text-primary)]"
                             placeholder="Ej: Renovar contrato"
                             required
                         />
@@ -94,12 +94,12 @@ export function CreateTaskDialog({ providerId, providerName, open, onOpenChange,
 
                     {/* Description */}
                     <div>
-                        <Label htmlFor="description" className="text-white/80">Descripción</Label>
+                        <Label htmlFor="description" className="text-[var(--text-secondary)]">Descripción</Label>
                         <Textarea
                             id="description"
                             value={formData.description}
                             onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                            className="bg-white/5 border-white/10 text-white resize-none"
+                            className="bg-[var(--bg-main)] border-[var(--border-subtle)] text-[var(--text-primary)] resize-none"
                             placeholder="Detalles de la tarea..."
                             rows={3}
                         />
@@ -108,15 +108,15 @@ export function CreateTaskDialog({ providerId, providerName, open, onOpenChange,
                     <div className="grid grid-cols-2 gap-4">
                         {/* Priority */}
                         <div>
-                            <Label htmlFor="priority" className="text-white/80">Prioridad</Label>
+                            <Label htmlFor="priority" className="text-[var(--text-secondary)]">Prioridad</Label>
                             <Select
                                 value={formData.priority}
                                 onValueChange={(value: any) => setFormData(prev => ({ ...prev, priority: value }))}
                             >
-                                <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                                <SelectTrigger className="bg-[var(--bg-main)] border-[var(--border-subtle)] text-[var(--text-primary)]">
                                     <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent className="bg-zinc-900 border-white/10">
+                                <SelectContent className="bg-[var(--bg-card)] border-[var(--border-subtle)]">
                                     <SelectItem value="LOW">Baja</SelectItem>
                                     <SelectItem value="MEDIUM">Media</SelectItem>
                                     <SelectItem value="HIGH">Alta</SelectItem>
@@ -126,13 +126,13 @@ export function CreateTaskDialog({ providerId, providerName, open, onOpenChange,
 
                         {/* Due Date */}
                         <div>
-                            <Label htmlFor="dueDate" className="text-white/80">Fecha límite</Label>
+                            <Label htmlFor="dueDate" className="text-[var(--text-secondary)]">Fecha límite</Label>
                             <Input
                                 id="dueDate"
                                 type="date"
                                 value={formData.dueDate}
                                 onChange={(e) => setFormData(prev => ({ ...prev, dueDate: e.target.value }))}
-                                className="bg-white/5 border-white/10 text-white"
+                                className="bg-[var(--bg-main)] border-[var(--border-subtle)] text-[var(--text-primary)]"
                             />
                         </div>
                     </div>
@@ -143,14 +143,14 @@ export function CreateTaskDialog({ providerId, providerName, open, onOpenChange,
                             type="button"
                             variant="ghost"
                             onClick={() => onOpenChange(false)}
-                            className="text-white/60 hover:text-white hover:bg-white/10"
+                            className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
                         >
                             Cancelar
                         </Button>
                         <Button
                             type="submit"
                             disabled={loading}
-                            className="bg-blue-500 hover:bg-blue-600 text-white"
+                            className="bg-blue-500 hover:bg-blue-600 text-[var(--text-primary)]"
                         >
                             {loading ? "Creando..." : "Crear tarea"}
                         </Button>

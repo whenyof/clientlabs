@@ -7,8 +7,8 @@ import { prisma } from "@/lib/prisma"
  * React cache() deduplicates calls with the same userId within the same request tree.
  */
 export const getDbUserForSession = cache(async (userId: string) => {
-  return prisma.user.findUnique({
-    where: { id: userId },
-    select: { id: true, onboardingCompleted: true },
-  })
+ return prisma.user.findUnique({
+ where: { id: userId },
+ select: { id: true, onboardingCompleted: true },
+ })
 })

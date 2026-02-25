@@ -101,9 +101,9 @@ export default function AdminBackupsPage() {
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
           <KeyIcon className="w-6 h-6 text-purple-400" />
-          <h1 className="text-2xl font-semibold text-white">Administración de Backups</h1>
+          <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Administración de Backups</h1>
         </div>
-        <p className="text-sm text-white/60">
+        <p className="text-sm text-[var(--text-secondary)]">
           Gestiona backups cifrados y recuperación de datos
         </p>
       </div>
@@ -114,7 +114,7 @@ export default function AdminBackupsPage() {
           <ShieldCheckIcon className="w-5 h-5 text-purple-400" />
           <div>
             <h3 className="text-sm font-medium text-purple-400">Área de Administración Segura</h3>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-[var(--text-secondary)]">
               Solo administradores pueden acceder a esta sección. Los backups están cifrados con AES-256.
             </p>
           </div>
@@ -123,7 +123,7 @@ export default function AdminBackupsPage() {
 
       {/* Navigation Tabs */}
       <div className="mb-8">
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-gray-700/50 p-2">
+        <div className="bg-[var(--bg-main)] backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)] p-2">
           <div className="flex flex-wrap gap-2">
             {tabs.map((tab) => {
               const Icon = tab.icon
@@ -136,7 +136,7 @@ export default function AdminBackupsPage() {
                   className={`flex items-center gap-3 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
                     isActive
                       ? 'bg-purple-600/20 text-purple-400 border border-purple-500/30 shadow-lg shadow-purple-500/10'
-                      : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50 hover:text-white border border-gray-700/50'
+                      : 'bg-[var(--bg-main)] text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)]'
                   }`}
                 >
                   <Icon className="w-5 h-5" />

@@ -65,7 +65,7 @@ export function ProvidersTable({ providers, onProviderClick, onProviderUpdate }:
     }
 
     const DEPENDENCY_CONFIG = {
-        LOW: { label: labels.providers.dependency.LOW, color: "bg-gray-500/20 text-gray-400" },
+        LOW: { label: labels.providers.dependency.LOW, color: "bg-[var(--bg-main)]0/20 text-[var(--text-secondary)]" },
         MEDIUM: { label: labels.providers.dependency.MEDIUM, color: "bg-blue-500/20 text-blue-400" },
         HIGH: { label: labels.providers.dependency.HIGH, color: "bg-red-500/20 text-red-400" },
         CRITICAL: { label: labels.providers.dependency.CRITICAL, color: "bg-red-600/30 text-red-500 border-red-500/30" }
@@ -86,10 +86,10 @@ export function ProvidersTable({ providers, onProviderClick, onProviderUpdate }:
 
     if (providers.length === 0) {
         return (
-            <div className="rounded-xl border border-white/10 bg-white/5 p-12 text-center backdrop-blur">
-                <Package className="h-12 w-12 mx-auto text-white/20 mb-4" />
-                <p className="text-white/60 text-lg mb-2">{labels.providers.emptyState}</p>
-                <p className="text-white/40 text-sm">
+            <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-main)] p-12 text-center backdrop-blur">
+                <Package className="h-12 w-12 mx-auto text-[var(--text-secondary)] mb-4" />
+                <p className="text-[var(--text-secondary)] text-lg mb-2">{labels.providers.emptyState}</p>
+                <p className="text-[var(--text-secondary)] text-sm">
                     {labels.common.noResults}
                 </p>
             </div>
@@ -98,17 +98,17 @@ export function ProvidersTable({ providers, onProviderClick, onProviderUpdate }:
 
     return (
         <>
-            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur overflow-hidden">
+            <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-main)] backdrop-blur overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead>
-                            <tr className="border-b border-white/10">
-                                <th className="text-left p-4 text-sm font-medium text-white/80">{labels.providers.singular}</th>
-                                <th className="text-left p-4 text-sm font-medium text-white/80">{labels.providers.fields.monthlyCost}</th>
-                                <th className="text-left p-4 text-sm font-medium text-white/80">{labels.providers.fields.status}</th>
-                                <th className="text-left p-4 text-sm font-medium text-white/80">{labels.providers.fields.dependencyLevel}</th>
-                                <th className="text-left p-4 text-sm font-medium text-white/80">Última acción</th>
-                                <th className="text-right p-4 text-sm font-medium text-white/80">Acciones</th>
+                            <tr className="border-b border-[var(--border-subtle)]">
+                                <th className="text-left p-4 text-sm font-medium text-[var(--text-secondary)]">{labels.providers.singular}</th>
+                                <th className="text-left p-4 text-sm font-medium text-[var(--text-secondary)]">{labels.providers.fields.monthlyCost}</th>
+                                <th className="text-left p-4 text-sm font-medium text-[var(--text-secondary)]">{labels.providers.fields.status}</th>
+                                <th className="text-left p-4 text-sm font-medium text-[var(--text-secondary)]">{labels.providers.fields.dependencyLevel}</th>
+                                <th className="text-left p-4 text-sm font-medium text-[var(--text-secondary)]">Última acción</th>
+                                <th className="text-right p-4 text-sm font-medium text-[var(--text-secondary)]">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -120,18 +120,18 @@ export function ProvidersTable({ providers, onProviderClick, onProviderUpdate }:
                                 return (
                                     <tr
                                         key={provider.id}
-                                        className="border-b border-white/5 hover:bg-white/[0.08] transition-all duration-200 ease-out cursor-pointer group"
+                                        className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-card)]/[0.08] transition-all duration-200 ease-out cursor-pointer group"
                                         onClick={() => onProviderClick(provider)}
                                     >
                                         {/* Provider Name */}
                                         <td className="p-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="h-10 w-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
-                                                    <TypeIcon className="h-5 w-5 text-white/60" />
+                                                <div className="h-10 w-10 rounded-lg bg-[var(--bg-main)] border border-[var(--border-subtle)] flex items-center justify-center">
+                                                    <TypeIcon className="h-5 w-5 text-[var(--text-secondary)]" />
                                                 </div>
                                                 <div>
-                                                    <p className="text-white font-semibold">{provider.name}</p>
-                                                    <p className="text-xs text-white/40">
+                                                    <p className="text-[var(--text-primary)] font-semibold">{provider.name}</p>
+                                                    <p className="text-xs text-[var(--text-secondary)]">
                                                         {TYPE_LABELS[provider.type as keyof typeof TYPE_LABELS]}
                                                     </p>
                                                 </div>
@@ -142,15 +142,15 @@ export function ProvidersTable({ providers, onProviderClick, onProviderUpdate }:
                                         <td className="p-4">
                                             {provider.monthlyCost ? (
                                                 <div>
-                                                    <p className="text-white font-semibold">
+                                                    <p className="text-[var(--text-primary)] font-semibold">
                                                         {formatCurrency(provider.monthlyCost)}
                                                     </p>
-                                                    <p className="text-xs text-white/40">
+                                                    <p className="text-xs text-[var(--text-secondary)]">
                                                         {formatCurrency(provider.monthlyCost * 12)}/año
                                                     </p>
                                                 </div>
                                             ) : (
-                                                <span className="text-white/40 text-sm">Sin definir</span>
+                                                <span className="text-[var(--text-secondary)] text-sm">Sin definir</span>
                                             )}
                                         </td>
 
@@ -170,7 +170,7 @@ export function ProvidersTable({ providers, onProviderClick, onProviderUpdate }:
 
                                         {/* Last Activity */}
                                         <td className="p-4">
-                                            <span className="text-sm text-white/60">
+                                            <span className="text-sm text-[var(--text-secondary)]">
                                                 {formatDistanceToNow(new Date(provider.updatedAt), {
                                                     addSuffix: true,
                                                     locale: es
@@ -184,7 +184,7 @@ export function ProvidersTable({ providers, onProviderClick, onProviderUpdate }:
                                                 <Button
                                                     size="sm"
                                                     variant="ghost"
-                                                    className="h-8 px-2 text-white/60 hover:text-white hover:bg-white/10"
+                                                    className="h-8 px-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
                                                     title="Registrar pedido"
                                                     onClick={() => setOrderDialogProvider(provider)}
                                                 >
@@ -193,7 +193,7 @@ export function ProvidersTable({ providers, onProviderClick, onProviderUpdate }:
                                                 <Button
                                                     size="sm"
                                                     variant="ghost"
-                                                    className="h-8 px-2 text-white/60 hover:text-white hover:bg-white/10"
+                                                    className="h-8 px-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
                                                     title="Añadir tarea"
                                                     onClick={() => setTaskDialogProvider(provider)}
                                                 >
@@ -202,7 +202,7 @@ export function ProvidersTable({ providers, onProviderClick, onProviderUpdate }:
                                                 <Button
                                                     size="sm"
                                                     variant="ghost"
-                                                    className="h-8 px-2 text-white/60 hover:text-white hover:bg-white/10"
+                                                    className="h-8 px-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
                                                     title="Añadir nota"
                                                     onClick={() => setNoteDialogProvider(provider)}
                                                 >
@@ -211,7 +211,7 @@ export function ProvidersTable({ providers, onProviderClick, onProviderUpdate }:
                                                 <Button
                                                     size="sm"
                                                     variant="ghost"
-                                                    className="h-8 px-2 text-white/60 hover:text-white hover:bg-white/10"
+                                                    className="h-8 px-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
                                                     onClick={() => onProviderClick(provider)}
                                                 >
                                                     <ChevronRight className="h-4 w-4" />
@@ -226,7 +226,7 @@ export function ProvidersTable({ providers, onProviderClick, onProviderUpdate }:
                 </div>
 
                 {/* Results count */}
-                <div className="text-sm text-white/60 text-center p-4 border-t border-white/5">
+                <div className="text-sm text-[var(--text-secondary)] text-center p-4 border-t border-[var(--border-subtle)]">
                     Mostrando {providers.length} proveedor{providers.length !== 1 ? 'es' : ''}
                 </div>
             </div>

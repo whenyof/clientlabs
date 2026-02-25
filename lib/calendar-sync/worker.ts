@@ -9,123 +9,123 @@ import type { CalendarSyncJob, CalendarSyncProvider, CalendarSyncOperation } fro
 const RETRY_DELAY_MINUTES = 5
 
 export async function processCalendarSyncJob(
-  job: CalendarSyncJob
+ job: CalendarSyncJob
 ): Promise<{ success: boolean; errorMessage?: string }> {
-  const { taskId, userId, provider, operation } = job
+ const { taskId, userId, provider, operation } = job
 
-  try {
-    if (provider === "GOOGLE") {
-      await processGoogleJob(job)
-    } else if (provider === "APPLE") {
-      await processAppleJob(job)
-    } else {
-      return { success: false, errorMessage: `Unknown provider: ${provider}` }
-    }
-    return { success: true }
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err)
-    console.error("[calendar-sync] job failed:", job.id, message)
-    return { success: false, errorMessage: message }
-  }
+ try {
+ if (provider === "GOOGLE") {
+ await processGoogleJob(job)
+ } else if (provider === "APPLE") {
+ await processAppleJob(job)
+ } else {
+ return { success: false, errorMessage: `Unknown provider: ${provider}` }
+ }
+ return { success: true }
+ } catch (err) {
+ const message = err instanceof Error ? err.message : String(err)
+ console.error("[calendar-sync] job failed:", job.id, message)
+ return { success: false, errorMessage: message }
+ }
 }
 
 async function processGoogleJob(
-  job: CalendarSyncJob
+ job: CalendarSyncJob
 ): Promise<void> {
-  const { taskId, userId, operation } = job
+ const { taskId, userId, operation } = job
 
-  const task = await prisma.task.findUnique({
-    where: { id: taskId, userId },
-    select: { id: true, title: true, description: true, dueDate: true, status: true },
-  })
-  if (!task) {
-    throw new Error("Task not found")
-  }
-  const taskPayload = {
-    id: task.id,
-    title: task.title,
-    description: task.description,
-    dueDate: task.dueDate?.toISOString() ?? null,
-    status: task.status ?? undefined,
-  }
+ const task = await prisma.task.findUnique({
+ where: { id: taskId, userId },
+ select: { id: true, title: true, description: true, dueDate: true, status: true },
+ })
+ if (!task) {
+ throw new Error("Task not found")
+ }
+ const taskPayload = {
+ id: task.id,
+ title: task.title,
+ description: task.description,
+ dueDate: task.dueDate?.toISOString() ?? null,
+ status: task.status ?? undefined,
+ }
 
-  const sync = await prisma.taskCalendarSync.findUnique({
-    where: { taskId_provider: { taskId, provider: "GOOGLE" } },
-  })
+ const sync = await prisma.taskCalendarSync.findUnique({
+ where: { taskId_provider: { taskId, provider: "GOOGLE" } },
+ })
 
-  if (operation === "CREATE") {
-    if (sync?.externalEventId) {
-      await googleCalendarSync.update(userId, sync.externalEventId, taskPayload)
-      await prisma.taskCalendarSync.update({
-        where: { id: sync.id },
-        data: { lastSyncedAt: new Date(), updatedAt: new Date() },
-      })
-    } else {
-      const externalEventId = await googleCalendarSync.create(userId, taskPayload)
-      await prisma.taskCalendarSync.upsert({
-        where: { taskId_provider: { taskId, provider: "GOOGLE" } },
-        create: { taskId, userId, provider: "GOOGLE", externalEventId },
-        update: { externalEventId, lastSyncedAt: new Date(), updatedAt: new Date() },
-      })
-    }
-    return
-  }
+ if (operation === "CREATE") {
+ if (sync?.externalEventId) {
+ await googleCalendarSync.update(userId, sync.externalEventId, taskPayload)
+ await prisma.taskCalendarSync.update({
+ where: { id: sync.id },
+ data: { lastSyncedAt: new Date(), updatedAt: new Date() },
+ })
+ } else {
+ const externalEventId = await googleCalendarSync.create(userId, taskPayload)
+ await prisma.taskCalendarSync.upsert({
+ where: { taskId_provider: { taskId, provider: "GOOGLE" } },
+ create: { taskId, userId, provider: "GOOGLE", externalEventId },
+ update: { externalEventId, lastSyncedAt: new Date(), updatedAt: new Date() },
+ })
+ }
+ return
+ }
 
-  if (operation === "UPDATE") {
-    if (sync?.externalEventId) {
-      await googleCalendarSync.update(userId, sync.externalEventId, taskPayload)
-      await prisma.taskCalendarSync.update({
-        where: { id: sync.id },
-        data: { lastSyncedAt: new Date(), updatedAt: new Date() },
-      })
-    } else {
-      const externalEventId = await googleCalendarSync.create(userId, taskPayload)
-      await prisma.taskCalendarSync.upsert({
-        where: { taskId_provider: { taskId, provider: "GOOGLE" } },
-        create: { taskId, userId, provider: "GOOGLE", externalEventId },
-        update: { externalEventId, lastSyncedAt: new Date(), updatedAt: new Date() },
-      })
-    }
-    return
-  }
+ if (operation === "UPDATE") {
+ if (sync?.externalEventId) {
+ await googleCalendarSync.update(userId, sync.externalEventId, taskPayload)
+ await prisma.taskCalendarSync.update({
+ where: { id: sync.id },
+ data: { lastSyncedAt: new Date(), updatedAt: new Date() },
+ })
+ } else {
+ const externalEventId = await googleCalendarSync.create(userId, taskPayload)
+ await prisma.taskCalendarSync.upsert({
+ where: { taskId_provider: { taskId, provider: "GOOGLE" } },
+ create: { taskId, userId, provider: "GOOGLE", externalEventId },
+ update: { externalEventId, lastSyncedAt: new Date(), updatedAt: new Date() },
+ })
+ }
+ return
+ }
 
-  if (operation === "DELETE") {
-    const externalId =
-      (job.payload as { externalEventId?: string } | null)?.externalEventId ??
-      sync?.externalEventId
-    if (externalId) {
-      await googleCalendarSync.delete(userId, externalId)
-    }
-    return
-  }
+ if (operation === "DELETE") {
+ const externalId =
+ (job.payload as { externalEventId?: string } | null)?.externalEventId ??
+ sync?.externalEventId
+ if (externalId) {
+ await googleCalendarSync.delete(userId, externalId)
+ }
+ return
+ }
 
-  throw new Error(`Unknown operation: ${operation}`)
+ throw new Error(`Unknown operation: ${operation}`)
 }
 
 async function processAppleJob(_job: CalendarSyncJob): Promise<void> {
-  // CalDAV / ICS ready: no-op for now; structure supports adding Apple later.
+ // CalDAV / ICS ready: no-op for now; structure supports adding Apple later.
 }
 
 export async function markJobDone(
-  jobId: string,
-  errorMessage?: string | null
+ jobId: string,
+ errorMessage?: string | null
 ): Promise<void> {
-  const nextRetryAt = errorMessage ? new Date(Date.now() + RETRY_DELAY_MINUTES * 60 * 1000) : null
-  await prisma.calendarSyncJob.update({
-    where: { id: jobId },
-    data: {
-      status: errorMessage ? "FAILED" : "DONE",
-      errorMessage: errorMessage ?? undefined,
-      processedAt: new Date(),
-      attempts: { increment: 1 },
-      nextRetryAt,
-    },
-  })
+ const nextRetryAt = errorMessage ? new Date(Date.now() + RETRY_DELAY_MINUTES * 60 * 1000) : null
+ await prisma.calendarSyncJob.update({
+ where: { id: jobId },
+ data: {
+ status: errorMessage ? "FAILED" : "DONE",
+ errorMessage: errorMessage ?? undefined,
+ processedAt: new Date(),
+ attempts: { increment: 1 },
+ nextRetryAt,
+ },
+ })
 }
 
 export async function markJobProcessing(jobId: string): Promise<void> {
-  await prisma.calendarSyncJob.update({
-    where: { id: jobId },
-    data: { status: "PROCESSING" },
-  })
+ await prisma.calendarSyncJob.update({
+ where: { id: jobId },
+ data: { status: "PROCESSING" },
+ })
 }

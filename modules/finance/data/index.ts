@@ -4,33 +4,33 @@
  */
 
 export {
-  getSalesInRange,
-  getSalesByClient,
-  getAverageTicket,
-  type SaleRow,
+ getSalesInRange,
+ getSalesByClient,
+ getAverageTicket,
+ type SaleRow,
 } from "./sales.data"
 
 export {
-  getExpensesInRange,
-  getExpensesByCategory,
-  type ExpenseRow,
+ getExpensesInRange,
+ getExpensesByCategory,
+ type ExpenseRow,
 } from "./expenses.data"
 
 export {
-  getProviderPaymentsInRange,
-  type ProviderPaymentRow,
+ getProviderPaymentsInRange,
+ type ProviderPaymentRow,
 } from "./providers.data"
 
 export {
-  getActiveClients,
-  getClientRevenue,
-  type ClientRow,
-  type ClientRevenueRow,
+ getActiveClients,
+ getClientRevenue,
+ type ClientRow,
+ type ClientRevenueRow,
 } from "./clients.data"
 
 export {
-  getMoneyIn,
-  getMoneyOut,
-  type MoneyInRow,
-  type MoneyOutRow,
+ getMoneyIn,
+ getMoneyOut,
+ type MoneyInRow,
+ type MoneyOutRow,
 } from "./cashflow.data"

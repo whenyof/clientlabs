@@ -1,36 +1,56 @@
-"use server"
-
 import { NextResponse } from "next/server"
+import Stripe from "stripe"
 
-// Estructura base para webhook de Stripe.
-// TODO: validar firma del webhook con Stripe-Signature.
-// TODO: mapear evento de pago a venta automática.
-// TODO: persistir venta en la base de datos cuando exista.
-
+/**
+ * POST /api/webhooks/stripe
+ * Validates Stripe webhook signature before processing events.
+ * If STRIPE_WEBHOOK_SECRET is not configured, returns 200 (noop safe mode).
+ */
 export async function POST(request: Request) {
-  try {
-    const payload = await request.json()
+ const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+ if (!webhookSecret) {
+ // Safe mode: Stripe integration not configured yet — acknowledge and skip
+ return NextResponse.json(
+ { ok: true, received: true, mode: "noop" },
+ { status: 200 },
+ )
+ }
 
-    // Ejemplo de estructura (placeholder):
-    // const sale = {
-    //   cliente: payload?.data?.object?.customer_details?.name ?? "Cliente Stripe",
-    //   producto: payload?.data?.object?.description ?? "Pago Stripe",
-    //   importe: payload?.data?.object?.amount_total ?? 0,
-    //   canal: "Stripe",
-    //   comercial: "Automatizado",
-    //   estado: "ganada",
-    //   fecha: new Date().toISOString().split("T")[0],
-    //   origen: "automático",
-    // }
+ const signature = request.headers.get("stripe-signature")
+ if (!signature) {
+ return NextResponse.json(
+ { ok: false, error: "Missing Stripe-Signature header" },
+ { status: 400 },
+ )
+ }
 
-    return NextResponse.json(
-      { ok: true, received: true, eventType: payload?.type ?? "unknown" },
-      { status: 200 },
-    )
-  } catch (error) {
-    return NextResponse.json(
-      { ok: false, error: "Payload inválido" },
-      { status: 400 },
-    )
-  }
+ let event: Stripe.Event
+ try {
+ const body = await request.text()
+
+ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
+ apiVersion: "2025-12-15.clover",
+ })
+
+ event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
+ } catch (err) {
+ const message = err instanceof Error ? err.message : "Signature verification failed"
+ console.error("[webhooks/stripe] Signature verification failed:", message)
+ return NextResponse.json(
+ { ok: false, error: "Invalid signature" },
+ { status: 400 },
+ )
+ }
+
+ // Event verified — process based on type
+ // TODO: Map payment events to sales/subscriptions when Stripe integration is active
+ // Example handlers:
+ // - checkout.session.completed → create sale
+ // - invoice.payment_succeeded → update subscription
+ // - customer.subscription.deleted → downgrade plan
+
+ return NextResponse.json(
+ { ok: true, received: true, eventType: event.type },
+ { status: 200 },
+ )
 }

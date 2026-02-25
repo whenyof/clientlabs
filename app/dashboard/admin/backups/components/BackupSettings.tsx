@@ -62,19 +62,19 @@ export function BackupSettings() {
       transition={{ duration: 0.5 }}
     >
       <div>
-        <h3 className="text-lg font-semibold text-white mb-2">Configuración de Backups</h3>
-        <p className="text-gray-400 text-sm">
+        <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">Configuración de Backups</h3>
+        <p className="text-[var(--text-secondary)] text-sm">
           Configura la seguridad y automatización de tus backups
         </p>
       </div>
 
       {/* Encryption Key */}
-      <div className="bg-gray-800/30 backdrop-blur-sm border border-gray-700/30 rounded-2xl p-8">
+      <div className="bg-[var(--bg-main)] backdrop-blur-sm border border-[var(--border-subtle)] rounded-2xl p-8">
         <div className="flex items-center gap-3 mb-6">
           <KeyIcon className="w-6 h-6 text-purple-400" />
           <div>
-            <h4 className="text-lg font-semibold text-white">Clave de Cifrado</h4>
-            <p className="text-gray-400 text-sm">
+            <h4 className="text-lg font-semibold text-[var(--text-primary)]">Clave de Cifrado</h4>
+            <p className="text-[var(--text-secondary)] text-sm">
               Clave AES-256 para cifrar tus backups. Mantén esta clave segura y respaldada.
             </p>
           </div>
@@ -82,7 +82,7 @@ export function BackupSettings() {
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
               BACKUP_SECRET (64 caracteres hexadecimales)
             </label>
             <div className="relative">
@@ -91,19 +91,19 @@ export function BackupSettings() {
                 value={backupSecret}
                 onChange={(e) => handleSecretChange(e.target.value)}
                 placeholder="Ingresa o genera una clave secreta"
-                className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 pr-24"
+                className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 pr-24"
               />
               <div className="absolute right-2 top-2 flex gap-1">
                 <button
                   onClick={() => setShowSecret(!showSecret)}
-                  className="p-1 text-gray-400 hover:text-white transition-colors"
+                  className="p-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                 >
                   {showSecret ? <EyeSlashIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
                 </button>
                 <button
                   onClick={handleGenerateSecret}
                   disabled={generatingSecret}
-                  className="p-1 text-gray-400 hover:text-purple-400 transition-colors disabled:opacity-50"
+                  className="p-1 text-[var(--text-secondary)] hover:text-purple-400 transition-colors disabled:opacity-50"
                 >
                   <ArrowPathIcon className={`w-4 h-4 ${generatingSecret ? 'animate-spin' : ''}`} />
                 </button>
@@ -131,9 +131,9 @@ export function BackupSettings() {
 
           <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
             <h5 className="text-blue-400 font-medium mb-2">Cómo configurar:</h5>
-            <ol className="text-sm text-gray-400 space-y-1">
+            <ol className="text-sm text-[var(--text-secondary)] space-y-1">
               <li>1. Copia la clave generada arriba</li>
-              <li>2. Agrega al archivo <code className="bg-gray-700 px-1 py-0.5 rounded">.env</code>: <code className="bg-gray-700 px-1 py-0.5 rounded">BACKUP_SECRET=tu_clave_aqui</code></li>
+              <li>2. Agrega al archivo <code className="bg-[var(--bg-surface)] px-1 py-0.5 rounded">.env</code>: <code className="bg-[var(--bg-surface)] px-1 py-0.5 rounded">BACKUP_SECRET=tu_clave_aqui</code></li>
               <li>3. Reinicia tu aplicación</li>
               <li>4. Guarda esta clave en un lugar seguro separado</li>
             </ol>
@@ -142,12 +142,12 @@ export function BackupSettings() {
       </div>
 
       {/* Automation Settings */}
-      <div className="bg-gray-800/30 backdrop-blur-sm border border-gray-700/30 rounded-2xl p-8">
+      <div className="bg-[var(--bg-main)] backdrop-blur-sm border border-[var(--border-subtle)] rounded-2xl p-8">
         <div className="flex items-center gap-3 mb-6">
           <CogIcon className="w-6 h-6 text-green-400" />
           <div>
-            <h4 className="text-lg font-semibold text-white">Automatización</h4>
-            <p className="text-gray-400 text-sm">
+            <h4 className="text-lg font-semibold text-[var(--text-primary)]">Automatización</h4>
+            <p className="text-[var(--text-secondary)] text-sm">
               Configura backups automáticos y limpieza
             </p>
           </div>
@@ -156,24 +156,24 @@ export function BackupSettings() {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-white font-medium">Backup diario automático</div>
-              <div className="text-sm text-gray-400">Ejecuta backup todos los días a las 3:00 AM</div>
+              <div className="text-[var(--text-primary)] font-medium">Backup diario automático</div>
+              <div className="text-sm text-[var(--text-secondary)]">Ejecuta backup todos los días a las 3:00 AM</div>
             </div>
             <div className="text-sm text-green-400 font-medium">Configurado</div>
           </div>
 
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-white font-medium">Limpieza automática</div>
-              <div className="text-sm text-gray-400">Elimina backups mayores a 30 días</div>
+              <div className="text-[var(--text-primary)] font-medium">Limpieza automática</div>
+              <div className="text-sm text-[var(--text-secondary)]">Elimina backups mayores a 30 días</div>
             </div>
             <div className="text-sm text-green-400 font-medium">Activado</div>
           </div>
 
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-white font-medium">Cifrado automático</div>
-              <div className="text-sm text-gray-400">Cifra todos los backups automáticamente</div>
+              <div className="text-[var(--text-primary)] font-medium">Cifrado automático</div>
+              <div className="text-sm text-[var(--text-secondary)]">Cifra todos los backups automáticamente</div>
             </div>
             <div className={`text-sm font-medium ${
               secretValidation?.valid ? 'text-green-400' : 'text-red-400'
@@ -185,12 +185,12 @@ export function BackupSettings() {
       </div>
 
       {/* Danger Zone */}
-      <div className="bg-gray-800/30 backdrop-blur-sm border border-red-500/20 rounded-2xl p-8">
+      <div className="bg-[var(--bg-main)] backdrop-blur-sm border border-red-500/20 rounded-2xl p-8">
         <div className="flex items-center gap-3 mb-6">
           <ExclamationTriangleIcon className="w-6 h-6 text-red-400" />
           <div>
-            <h4 className="text-lg font-semibold text-white">Zona de Peligro</h4>
-            <p className="text-gray-400 text-sm">
+            <h4 className="text-lg font-semibold text-[var(--text-primary)]">Zona de Peligro</h4>
+            <p className="text-[var(--text-secondary)] text-sm">
               Acciones que pueden afectar la integridad de tus backups
             </p>
           </div>
@@ -218,7 +218,7 @@ export function BackupSettings() {
         <motion.button
           onClick={handleSaveSettings}
           disabled={!secretValidation?.valid}
-          className="px-8 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors"
+          className="px-8 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-[var(--bg-surface)] disabled:cursor-not-allowed text-[var(--text-primary)] font-semibold rounded-lg transition-colors"
           whileHover={{ scale: secretValidation?.valid ? 1.05 : 1 }}
           whileTap={{ scale: secretValidation?.valid ? 0.95 : 1 }}
         >

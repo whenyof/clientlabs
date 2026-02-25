@@ -70,7 +70,7 @@ export function BackupStats({ backups }: BackupStatsProps) {
         return (
           <motion.div
             key={stat.label}
-            className="bg-gray-800/30 backdrop-blur-sm border border-gray-700/30 rounded-xl p-6 hover:bg-gray-800/50 transition-colors"
+            className="bg-[var(--bg-main)] backdrop-blur-sm border border-[var(--border-subtle)] rounded-xl p-6 hover:bg-[var(--bg-main)] transition-colors"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 * index, duration: 0.5 }}
@@ -83,13 +83,13 @@ export function BackupStats({ backups }: BackupStatsProps) {
             </div>
 
             <div>
-              <div className="text-2xl font-bold text-white mb-1">
+              <div className="text-2xl font-bold text-[var(--text-primary)] mb-1">
                 {stat.value}
               </div>
-              <div className="text-sm text-gray-400 mb-1">
+              <div className="text-sm text-[var(--text-secondary)] mb-1">
                 {stat.label}
               </div>
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-[var(--text-secondary)]">
                 {stat.description}
               </div>
             </div>

@@ -40,50 +40,50 @@ export function FileUploadDialog({ open, onOpenChange, onSuccess, providerId, en
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="bg-zinc-900 border-white/10 max-w-md">
+            <DialogContent className="bg-[var(--bg-card)] border-[var(--border-subtle)] max-w-md">
                 <DialogHeader>
-                    <DialogTitle className="text-white">Registrar archivo</DialogTitle>
-                    <p className="text-xs text-white/40">
+                    <DialogTitle className="text-[var(--text-primary)]">Registrar archivo</DialogTitle>
+                    <p className="text-xs text-[var(--text-secondary)]">
                         {entityType === 'ORDER' ? 'Vinculando a pedido' : 'Archivo general del proveedor'}
                     </p>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
-                        <Label className="text-zinc-400">Nombre del archivo</Label>
+                        <Label className="text-[var(--text-secondary)]">Nombre del archivo</Label>
                         <Input
                             value={formData.name}
                             onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                            className="bg-zinc-800 border-white/5 text-white"
+                            className="bg-[var(--bg-main)] border-[var(--border-subtle)] text-[var(--text-primary)]"
                             placeholder="Ej: Factura Enero.pdf"
                             required
                         />
                     </div>
 
                     <div className="space-y-2">
-                        <Label className="text-zinc-400">URL del archivo / Enlace</Label>
+                        <Label className="text-[var(--text-secondary)]">URL del archivo / Enlace</Label>
                         <div className="relative">
                             <Input
                                 value={formData.url}
                                 onChange={(e) => setFormData(prev => ({ ...prev, url: e.target.value }))}
-                                className="bg-zinc-800 border-white/5 text-white pl-9"
+                                className="bg-[var(--bg-main)] border-[var(--border-subtle)] text-[var(--text-primary)] pl-9"
                                 placeholder="https://..."
                                 required
                             />
-                            <Link className="h-4 w-4 text-white/20 absolute left-3 top-1/2 -translate-y-1/2" />
+                            <Link className="h-4 w-4 text-[var(--text-secondary)] absolute left-3 top-1/2 -translate-y-1/2" />
                         </div>
                     </div>
 
                     <div className="space-y-2">
-                        <Label className="text-zinc-400">Categoría</Label>
+                        <Label className="text-[var(--text-secondary)]">Categoría</Label>
                         <Select
                             value={formData.category}
                             onValueChange={(v) => setFormData(prev => ({ ...prev, category: v }))}
                         >
-                            <SelectTrigger className="bg-zinc-800 border-white/5 text-white">
+                            <SelectTrigger className="bg-[var(--bg-main)] border-[var(--border-subtle)] text-[var(--text-primary)]">
                                 <SelectValue />
                             </SelectTrigger>
-                            <SelectContent className="bg-zinc-900 border-white/10 text-white">
+                            <SelectContent className="bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-primary)]">
                                 <SelectItem value="INVOICE">Factura</SelectItem>
                                 <SelectItem value="ORDER">Pedido / Confirmación</SelectItem>
                                 <SelectItem value="CONTRACT">Contrato</SelectItem>
@@ -97,19 +97,19 @@ export function FileUploadDialog({ open, onOpenChange, onSuccess, providerId, en
                         <p>Por ahora, registra el enlace de tu gestor de archivos (Drive, S3, etc). La subida directa estará disponible pronto.</p>
                     </div>
 
-                    <DialogFooter className="pt-4 border-t border-white/5">
+                    <DialogFooter className="pt-4 border-t border-[var(--border-subtle)]">
                         <Button
                             type="button"
                             variant="ghost"
                             onClick={() => onOpenChange(false)}
-                            className="text-white/60 hover:text-white"
+                            className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                         >
                             Cancelar
                         </Button>
                         <Button
                             type="submit"
                             disabled={loading}
-                            className="bg-blue-500 hover:bg-blue-600 text-white"
+                            className="bg-blue-500 hover:bg-blue-600 text-[var(--text-primary)]"
                         >
                             {loading ? "Registrando..." : "Registrar archivo"}
                         </Button>

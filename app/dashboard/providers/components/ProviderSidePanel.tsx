@@ -94,7 +94,7 @@ const TYPE_ICONS = {
 }
 
 const DEPENDENCY_CONFIG = {
-    LOW: { label: "Baja", color: "bg-gray-500/20 text-gray-400" },
+    LOW: { label: "Baja", color: "bg-[var(--bg-main)]0/20 text-[var(--text-secondary)]" },
     MEDIUM: { label: "Media", color: "bg-blue-500/20 text-blue-400" },
     HIGH: { label: "Alta", color: "bg-red-500/20 text-red-400" },
     CRITICAL: { label: "Crítica", color: "bg-red-600/30 text-red-500 border-red-500/30" }
@@ -309,17 +309,17 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
             <Sheet open={open} onOpenChange={onClose}>
                 <SheetContent
                     side="right"
-                    className="w-full sm:max-w-2xl bg-zinc-950 border-l border-white/10 p-0 flex flex-col focus:outline-none"
+                    className="w-full sm:max-w-2xl bg-[var(--bg-surface)] border-l border-[var(--border-subtle)] p-0 flex flex-col focus:outline-none"
                 >
                     {/* Header */}
-                    <SheetHeader className="z-10 bg-zinc-950 border-b border-white/10 p-6">
+                    <SheetHeader className="z-10 bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] p-6">
                         <div className="flex items-start justify-between">
                             <div className="flex items-start gap-4">
-                                <div className="h-12 w-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
-                                    <TypeIcon className="h-6 w-6 text-white/60" />
+                                <div className="h-12 w-12 rounded-lg bg-[var(--bg-main)] border border-[var(--border-subtle)] flex items-center justify-center">
+                                    <TypeIcon className="h-6 w-6 text-[var(--text-secondary)]" />
                                 </div>
                                 <div>
-                                    <SheetTitle className="text-white text-xl">{provider.name}</SheetTitle>
+                                    <SheetTitle className="text-[var(--text-primary)] text-xl">{provider.name}</SheetTitle>
                                     <div className="flex items-center gap-2 mt-2">
                                         <Badge className={cn("text-[10px] h-5", statusConfig.color)}>
                                             {statusConfig.label}
@@ -339,7 +339,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                                 variant="ghost"
                                 size="icon"
                                 onClick={onClose}
-                                className="text-white/60 hover:text-white hover:bg-white/10"
+                                className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
                             >
                                 <X className="h-5 w-5" />
                             </Button>
@@ -347,7 +347,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                     </SheetHeader>
 
                     {/* Tabs */}
-                    <div className="border-b border-white/10 px-6 bg-zinc-950">
+                    <div className="border-b border-[var(--border-subtle)] px-6 bg-[var(--bg-surface)]">
                         <div className="flex gap-4">
                             {[
                                 { id: "summary", label: "Resumen" },
@@ -361,8 +361,8 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                                     className={cn(
                                         "px-4 py-3 text-sm font-medium border-b-2 transition-colors",
                                         activeTab === tab.id
-                                            ? "border-blue-500 text-white"
-                                            : "border-transparent text-white/60 hover:text-white"
+                                            ? "border-blue-500 text-[var(--text-primary)]"
+                                            : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                                     )}
                                 >
                                     {tab.label}
@@ -377,28 +377,28 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                             <div className="p-6 space-y-6">
                                 {/* PROVIDER INFO SECTION - Now at the top */}
                                 {(provider.contactEmail || provider.contactPhone || provider.website) && (
-                                    <div className="rounded-lg border border-white/10 bg-white/5 p-4">
-                                        <h3 className="text-sm font-medium text-white/60 mb-3">Contacto</h3>
+                                    <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-main)] p-4">
+                                        <h3 className="text-sm font-medium text-[var(--text-secondary)] mb-3">Contacto</h3>
                                         <div className="space-y-2">
                                             {provider.contactEmail && (
                                                 <div className="flex items-center gap-2">
-                                                    <Mail className="h-4 w-4 text-white/40" />
-                                                    <a href={`mailto:${provider.contactEmail}`} className="text-white hover:text-blue-400 transition-colors">
+                                                    <Mail className="h-4 w-4 text-[var(--text-secondary)]" />
+                                                    <a href={`mailto:${provider.contactEmail}`} className="text-[var(--text-primary)] hover:text-blue-400 transition-colors">
                                                         {provider.contactEmail}
                                                     </a>
                                                 </div>
                                             )}
                                             {provider.contactPhone && (
                                                 <div className="flex items-center gap-2">
-                                                    <Phone className="h-4 w-4 text-white/40" />
-                                                    <a href={`tel:${provider.contactPhone}`} className="text-white hover:text-blue-400 transition-colors">
+                                                    <Phone className="h-4 w-4 text-[var(--text-secondary)]" />
+                                                    <a href={`tel:${provider.contactPhone}`} className="text-[var(--text-primary)] hover:text-blue-400 transition-colors">
                                                         {provider.contactPhone}
                                                     </a>
                                                 </div>
                                             )}
                                             {provider.website && (
                                                 <div className="flex items-center gap-2">
-                                                    <Globe className="h-4 w-4 text-white/40" />
+                                                    <Globe className="h-4 w-4 text-[var(--text-secondary)]" />
                                                     <a
                                                         href={provider.website}
                                                         target="_blank"
@@ -416,36 +416,36 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
 
                                 {/* Key Metrics - Dependency, Last Payment, Pending */}
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                    <div className="bg-white/5 border border-white/10 rounded-lg p-3">
-                                        <p className="text-[10px] text-white/40 uppercase mb-1">Dependencia</p>
+                                    <div className="bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg p-3">
+                                        <p className="text-[10px] text-[var(--text-secondary)] uppercase mb-1">Dependencia</p>
                                         <p className={cn("text-lg font-bold",
                                             provider.dependencyLevel === 'HIGH' || provider.dependencyLevel === 'CRITICAL'
                                                 ? "text-red-400"
                                                 : provider.dependencyLevel === 'MEDIUM'
                                                     ? "text-blue-400"
-                                                    : "text-white/60"
+                                                    : "text-[var(--text-secondary)]"
                                         )}>
                                             {dependencyConfig.label}
                                         </p>
                                     </div>
-                                    <div className="bg-white/5 border border-white/10 rounded-lg p-3">
-                                        <p className="text-[10px] text-white/40 uppercase mb-1">Último pago</p>
-                                        <p className="text-sm font-semibold text-white truncate">
+                                    <div className="bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg p-3">
+                                        <p className="text-[10px] text-[var(--text-secondary)] uppercase mb-1">Último pago</p>
+                                        <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
                                             {lastPayment
                                                 ? format(new Date(lastPayment.paymentDate), 'dd/MM/yy', { locale: es })
                                                 : 'Sin pagos'}
                                         </p>
                                     </div>
-                                    <div className="bg-white/5 border border-white/10 rounded-lg p-3">
-                                        <p className="text-[10px] text-white/40 uppercase mb-1">Pendientes</p>
+                                    <div className="bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg p-3">
+                                        <p className="text-[10px] text-[var(--text-secondary)] uppercase mb-1">Pendientes</p>
                                         <p className={cn("text-lg font-bold",
                                             pendingOrdersCount > 0 ? "text-amber-400" : "text-green-400"
                                         )}>
                                             {pendingOrdersCount} pedidos
                                         </p>
                                     </div>
-                                    <div className="bg-white/5 border border-white/10 rounded-lg p-3">
-                                        <p className="text-[10px] text-white/40 uppercase mb-1">Tareas</p>
+                                    <div className="bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg p-3">
+                                        <p className="text-[10px] text-[var(--text-secondary)] uppercase mb-1">Tareas</p>
                                         <p className={cn("text-lg font-bold",
                                             pendingTasksCount > 0 ? "text-amber-400" : "text-green-400"
                                         )}>
@@ -456,12 +456,12 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
 
                                 {/* Quick Actions - Moved up */}
                                 <div className="space-y-3">
-                                    <h3 className="text-xs font-bold text-white/30 uppercase tracking-widest px-1">Acciones Rápidas</h3>
+                                    <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest px-1">Acciones Rápidas</h3>
                                     <div className="grid grid-cols-2 gap-3">
                                         <Button
                                             onClick={() => setShowOrderDialog(true)}
                                             variant="outline"
-                                            className="bg-white/5 border-white/10 text-white hover:bg-white/10 justify-start gap-2 h-12"
+                                            className="bg-[var(--bg-main)] border-[var(--border-subtle)] text-[var(--text-primary)] hover:bg-[var(--bg-surface)] justify-start gap-2 h-12"
                                         >
                                             <ShoppingBag className="h-4 w-4 text-blue-400" />
                                             Nuevo Pedido
@@ -469,7 +469,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                                         <Button
                                             onClick={() => setShowTaskDialog(true)}
                                             variant="outline"
-                                            className="bg-white/5 border-white/10 text-white hover:bg-white/10 justify-start gap-2 h-12"
+                                            className="bg-[var(--bg-main)] border-[var(--border-subtle)] text-[var(--text-primary)] hover:bg-[var(--bg-surface)] justify-start gap-2 h-12"
                                         >
                                             <CheckCircle2 className="h-4 w-4 text-amber-400" />
                                             Nueva Tarea
@@ -477,7 +477,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                                         <Button
                                             onClick={() => setShowNoteDialog(true)}
                                             variant="outline"
-                                            className="bg-white/5 border-white/10 text-white hover:bg-white/10 justify-start gap-2 h-12"
+                                            className="bg-[var(--bg-main)] border-[var(--border-subtle)] text-[var(--text-primary)] hover:bg-[var(--bg-surface)] justify-start gap-2 h-12"
                                         >
                                             <MessageSquare className="h-4 w-4 text-purple-400" />
                                             Añadir Nota
@@ -488,7 +488,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                                                 setShowFileDialog(true)
                                             }}
                                             variant="outline"
-                                            className="bg-white/5 border-white/10 text-white hover:bg-white/10 justify-start gap-2 h-12"
+                                            className="bg-[var(--bg-main)] border-[var(--border-subtle)] text-[var(--text-primary)] hover:bg-[var(--bg-surface)] justify-start gap-2 h-12"
                                         >
                                             <Upload className="h-4 w-4 text-green-400" />
                                             Subir Archivo
@@ -497,19 +497,19 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                                 </div>
 
                                 {/* Cost Summary */}
-                                <div className="rounded-lg border border-white/10 bg-white/5 p-4">
-                                    <h3 className="text-sm font-medium text-white/60 mb-3">Costes</h3>
+                                <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-main)] p-4">
+                                    <h3 className="text-sm font-medium text-[var(--text-secondary)] mb-3">Costes</h3>
                                     <div className="space-y-2">
                                         <div className="flex justify-between items-center">
-                                            <span className="text-white/60 text-sm">Mensual</span>
-                                            <span className="text-white font-bold text-lg">
+                                            <span className="text-[var(--text-secondary)] text-sm">Mensual</span>
+                                            <span className="text-[var(--text-primary)] font-bold text-lg">
                                                 {provider.monthlyCost ? formatCurrency(provider.monthlyCost) : "—"}
                                             </span>
                                         </div>
                                         {provider.monthlyCost && (
-                                            <div className="flex justify-between items-center pt-2 border-t border-white/5">
-                                                <span className="text-white/40 text-xs text-uppercase tracking-wider">ANUAL ESTIMADO</span>
-                                                <span className="text-white/60 font-medium">
+                                            <div className="flex justify-between items-center pt-2 border-t border-[var(--border-subtle)]">
+                                                <span className="text-[var(--text-secondary)] text-xs text-uppercase tracking-wider">ANUAL ESTIMADO</span>
+                                                <span className="text-[var(--text-secondary)] font-medium">
                                                     {formatCurrency(provider.monthlyCost * 12)}
                                                 </span>
                                             </div>
@@ -519,9 +519,9 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
 
                                 {/* Notes */}
                                 {provider.notes && (
-                                    <div className="rounded-lg border border-white/10 bg-white/5 p-4">
-                                        <h3 className="text-sm font-medium text-white/60 mb-3">Notas maestras</h3>
-                                        <p className="text-white/80 text-sm whitespace-pre-wrap">{provider.notes}</p>
+                                    <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-main)] p-4">
+                                        <h3 className="text-sm font-medium text-[var(--text-secondary)] mb-3">Notas maestras</h3>
+                                        <p className="text-[var(--text-secondary)] text-sm whitespace-pre-wrap">{provider.notes}</p>
                                     </div>
                                 )}
                             </div>
@@ -532,13 +532,13 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                                 {loadingOrders ? (
                                     <div className="space-y-3">
                                         {[1, 2, 3].map(i => (
-                                            <div key={i} className="h-[100px] w-full bg-white/5 border border-white/10 rounded-lg animate-pulse" />
+                                            <div key={i} className="h-[100px] w-full bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg animate-pulse" />
                                         ))}
                                     </div>
                                 ) : (
                                     <>
                                         <div className="flex justify-between items-center mb-4">
-                                            <h3 className="text-white font-medium">Historial de Pedidos</h3>
+                                            <h3 className="text-[var(--text-primary)] font-medium">Historial de Pedidos</h3>
                                         </div>
                                         {/* Action Buttons based on Contract */}
                                         <div className="flex flex-wrap gap-2 mb-6">
@@ -547,7 +547,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                                                     key={action.id}
                                                     size="sm"
                                                     className={cn(
-                                                        "bg-white/5 text-white border-white/10 hover:bg-white/10 flex-1",
+                                                        "bg-[var(--bg-main)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:bg-[var(--bg-surface)] flex-1",
                                                         action.critical ? "hover:border-red-500/50 hover:bg-red-500/10" : "hover:border-blue-500/50 hover:bg-blue-500/10"
                                                     )}
                                                     onClick={() => {
@@ -569,7 +569,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                                             ))}
                                         </div>
                                         {orders.length === 0 ? (
-                                            <div className="text-center py-12 text-white/20 border-2 border-dashed border-white/5 rounded-xl">
+                                            <div className="text-center py-12 text-[var(--text-secondary)] border-2 border-dashed border-[var(--border-subtle)] rounded-xl">
                                                 <ShoppingBag className="h-12 w-12 mx-auto mb-3 opacity-20" />
                                                 <p>No hay pedidos registrados</p>
                                             </div>
@@ -579,10 +579,10 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                                                     <div
                                                         key={order.id}
                                                         className={cn(
-                                                            "rounded-lg border bg-white/5 overflow-hidden transition-all",
+                                                            "rounded-lg border bg-[var(--bg-main)] overflow-hidden transition-all",
                                                             expandedOrderId === order.id
                                                                 ? "border-blue-500/30"
-                                                                : "border-white/10 hover:border-white/20"
+                                                                : "border-[var(--border-subtle)] hover:border-[var(--border-subtle)]"
                                                         )}
                                                     >
                                                         {/* Order Header - Clickable */}
@@ -592,14 +592,14 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                                                         >
                                                             <div className="flex justify-between items-start">
                                                                 <div className="flex-1">
-                                                                    <span className="text-[10px] text-white/40 uppercase tracking-wider">
+                                                                    <span className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider">
                                                                         {format(new Date(order.orderDate), 'PPP', { locale: es })}
                                                                     </span>
-                                                                    <h4 className="text-white font-medium mt-0.5">{order.description || "Pedido sin descripción"}</h4>
+                                                                    <h4 className="text-[var(--text-primary)] font-medium mt-0.5">{order.description || "Pedido sin descripción"}</h4>
                                                                 </div>
                                                                 <div className="text-right flex items-start gap-2">
                                                                     <div>
-                                                                        <p className="text-white font-bold">{formatCurrency(order.amount)}</p>
+                                                                        <p className="text-[var(--text-primary)] font-bold">{formatCurrency(order.amount)}</p>
                                                                         <Badge className={cn(
                                                                             "text-[10px] py-0 px-1.5",
                                                                             order.status === 'COMPLETED' ? "bg-green-500/20 text-green-400 border-green-500/30" :
@@ -613,8 +613,8 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                                                                         </Badge>
                                                                     </div>
                                                                     {expandedOrderId === order.id
-                                                                        ? <ChevronUp className="h-4 w-4 text-white/40" />
-                                                                        : <ChevronDown className="h-4 w-4 text-white/40" />
+                                                                        ? <ChevronUp className="h-4 w-4 text-[var(--text-secondary)]" />
+                                                                        : <ChevronDown className="h-4 w-4 text-[var(--text-secondary)]" />
                                                                     }
                                                                 </div>
                                                             </div>
@@ -622,16 +622,16 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
 
                                                         {/* Expanded Order Details */}
                                                         {expandedOrderId === order.id && (
-                                                            <div className="px-4 pb-4 space-y-4 border-t border-white/5 pt-4">
+                                                            <div className="px-4 pb-4 space-y-4 border-t border-[var(--border-subtle)] pt-4">
                                                                 {/* Order Info Grid */}
                                                                 <div className="grid grid-cols-2 gap-3">
-                                                                    <div className="bg-white/5 rounded-lg p-3">
-                                                                        <p className="text-[10px] text-white/40 uppercase mb-1">Tipo</p>
-                                                                        <p className="text-white text-sm">{order.type === 'RECURRING' ? 'Recurrente' : 'Puntual'}</p>
+                                                                    <div className="bg-[var(--bg-main)] rounded-lg p-3">
+                                                                        <p className="text-[10px] text-[var(--text-secondary)] uppercase mb-1">Tipo</p>
+                                                                        <p className="text-[var(--text-primary)] text-sm">{order.type === 'RECURRING' ? 'Recurrente' : 'Puntual'}</p>
                                                                     </div>
-                                                                    <div className="bg-white/5 rounded-lg p-3">
-                                                                        <p className="text-[10px] text-white/40 uppercase mb-1">ID Pedido</p>
-                                                                        <p className="text-white text-sm font-mono">{order.id.slice(-8).toUpperCase()}</p>
+                                                                    <div className="bg-[var(--bg-main)] rounded-lg p-3">
+                                                                        <p className="text-[10px] text-[var(--text-secondary)] uppercase mb-1">ID Pedido</p>
+                                                                        <p className="text-[var(--text-primary)] text-sm font-mono">{order.id.slice(-8).toUpperCase()}</p>
                                                                     </div>
                                                                 </div>
 
@@ -644,12 +644,12 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                                                                         </div>
                                                                         <div className="grid grid-cols-2 gap-2 text-sm">
                                                                             <div>
-                                                                                <p className="text-white/40 text-xs">Importe</p>
-                                                                                <p className="text-white font-bold">{formatCurrency(order.payment.amount)}</p>
+                                                                                <p className="text-[var(--text-secondary)] text-xs">Importe</p>
+                                                                                <p className="text-[var(--text-primary)] font-bold">{formatCurrency(order.payment.amount)}</p>
                                                                             </div>
                                                                             <div>
-                                                                                <p className="text-white/40 text-xs">Fecha</p>
-                                                                                <p className="text-white">{format(new Date(order.payment.paymentDate), 'dd/MM/yyyy', { locale: es })}</p>
+                                                                                <p className="text-[var(--text-secondary)] text-xs">Fecha</p>
+                                                                                <p className="text-[var(--text-primary)]">{format(new Date(order.payment.paymentDate), 'dd/MM/yyyy', { locale: es })}</p>
                                                                             </div>
                                                                         </div>
                                                                     </div>
@@ -657,20 +657,20 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
 
                                                                 {/* Files */}
                                                                 <div className="space-y-2">
-                                                                    <p className="text-[10px] text-white/40 uppercase tracking-wider">Archivos adjuntos</p>
+                                                                    <p className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider">Archivos adjuntos</p>
                                                                     <div className="flex flex-wrap gap-2">
                                                                         {order.files && order.files.map((file) => (
                                                                             <button
                                                                                 key={file.id}
                                                                                 onClick={() => setSelectedFile(file)}
-                                                                                className="flex items-center gap-2 bg-white/5 border border-white/10 rounded px-2 py-1 text-[10px] text-white/60 hover:text-white hover:border-white/30 transition-colors"
+                                                                                className="flex items-center gap-2 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded px-2 py-1 text-[10px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-subtle)] transition-colors"
                                                                             >
                                                                                 <FileText className="h-3 w-3" />
                                                                                 {file.name}
                                                                             </button>
                                                                         ))}
                                                                         <button
-                                                                            className="flex items-center gap-1 text-[10px] text-white/40 hover:text-white px-2 py-1 border border-dashed border-white/10 rounded"
+                                                                            className="flex items-center gap-1 text-[10px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] px-2 py-1 border border-dashed border-[var(--border-subtle)] rounded"
                                                                             onClick={() => {
                                                                                 setFileUploadContext({ entityType: 'ORDER', entityId: order.id })
                                                                                 setShowFileDialog(true)
@@ -747,17 +747,17 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                                 {loadingTasks ? (
                                     <div className="space-y-2">
                                         {[1, 2, 3, 4].map(i => (
-                                            <div key={i} className="h-[60px] w-full bg-white/5 border border-white/10 rounded-lg animate-pulse" />
+                                            <div key={i} className="h-[60px] w-full bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg animate-pulse" />
                                         ))}
                                     </div>
                                 ) : (
                                     <>
                                         <div className="flex justify-between items-center mb-4">
-                                            <h3 className="text-white font-medium">Tareas y Seguimiento</h3>
+                                            <h3 className="text-[var(--text-primary)] font-medium">Tareas y Seguimiento</h3>
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                className="bg-white/5 text-white border-white/10 hover:bg-white/10"
+                                                className="bg-[var(--bg-main)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:bg-[var(--bg-surface)]"
                                                 onClick={() => setShowTaskDialog(true)}
                                             >
                                                 <Plus className="h-4 w-4 mr-2" /> Nueva Tarea
@@ -765,7 +765,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                                         </div>
 
                                         {optimisticTasks.length === 0 ? (
-                                            <div className="text-center py-12 text-white/20 border-2 border-dashed border-white/5 rounded-xl">
+                                            <div className="text-center py-12 text-[var(--text-secondary)] border-2 border-dashed border-[var(--border-subtle)] rounded-xl">
                                                 <CheckCircle2 className="h-12 w-12 mx-auto mb-3 opacity-20" />
                                                 <p>No hay tareas registradas</p>
                                             </div>
@@ -775,10 +775,10 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                                                     <div
                                                         key={task.id}
                                                         className={cn(
-                                                            "flex items-center gap-3 p-3 rounded-lg bg-white/5 border group transition-all",
+                                                            "flex items-center gap-3 p-3 rounded-lg bg-[var(--bg-main)] border group transition-all",
                                                             task.status === 'DONE'
                                                                 ? "border-green-500/20 bg-green-500/5"
-                                                                : "border-white/10 hover:border-white/20"
+                                                                : "border-[var(--border-subtle)] hover:border-[var(--border-subtle)]"
                                                         )}
                                                     >
                                                         <button
@@ -789,21 +789,21 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                                                             {task.status === 'DONE' ? (
                                                                 <CheckCircle2 className="h-5 w-5 text-green-500 shadow-[0_0_8px_rgba(34,197,94,0.3)]" />
                                                             ) : (
-                                                                <Circle className="h-5 w-5 text-white/20 hover:text-white/40" />
+                                                                <Circle className="h-5 w-5 text-[var(--text-secondary)] hover:text-[var(--text-secondary)]" />
                                                             )}
                                                         </button>
                                                         <div className="flex-1 min-w-0">
                                                             <h4 className={cn(
                                                                 "text-sm font-medium truncate transition-all",
                                                                 task.status === 'DONE'
-                                                                    ? "line-through text-white/30"
-                                                                    : "text-white"
+                                                                    ? "line-through text-[var(--text-secondary)]"
+                                                                    : "text-[var(--text-primary)]"
                                                             )}>
                                                                 {task.title}
                                                             </h4>
                                                             <div className="flex items-center gap-2 mt-0.5">
                                                                 {task.dueDate && (
-                                                                    <p className="text-[10px] text-white/40">Vence: {format(new Date(task.dueDate), 'd MMM')}</p>
+                                                                    <p className="text-[10px] text-[var(--text-secondary)]">Vence: {format(new Date(task.dueDate), 'd MMM')}</p>
                                                                 )}
                                                                 <Badge variant="outline" className={cn(
                                                                     "text-[9px] py-0 px-1 leading-none h-4",
@@ -827,20 +827,20 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                         {activeTab === "timeline" && (
                             <div className="p-6 space-y-6">
                                 {loadingTimeline ? (
-                                    <div className="space-y-6 pl-6 border-l border-white/10 ml-3">
+                                    <div className="space-y-6 pl-6 border-l border-[var(--border-subtle)] ml-3">
                                         {[1, 2, 3].map(i => (
-                                            <div key={i} className="h-[80px] w-full bg-white/5 border border-white/10 rounded-lg animate-pulse" />
+                                            <div key={i} className="h-[80px] w-full bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg animate-pulse" />
                                         ))}
                                     </div>
                                 ) : (
                                     <>
                                         <div className="flex justify-between items-center mb-4">
-                                            <h3 className="text-white font-medium">Timeline de Actividad</h3>
+                                            <h3 className="text-[var(--text-primary)] font-medium">Timeline de Actividad</h3>
                                             <div className="flex gap-2">
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    className="text-white/40 hover:text-white text-xs"
+                                                    className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs"
                                                     onClick={() => setShowNoteDialog(true)}
                                                 >
                                                     <MessageSquare className="h-3.5 w-3.5 mr-1" /> Nota
@@ -848,7 +848,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    className="text-white/40 hover:text-white text-xs"
+                                                    className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs"
                                                     onClick={() => {
                                                         setFileUploadContext({ entityType: 'PROVIDER', entityId: provider.id })
                                                         setShowFileDialog(true)
@@ -860,34 +860,34 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                                         </div>
 
                                         {timeline.length === 0 ? (
-                                            <div className="text-center py-12 text-white/20 border-2 border-dashed border-white/5 rounded-xl">
+                                            <div className="text-center py-12 text-[var(--text-secondary)] border-2 border-dashed border-[var(--border-subtle)] rounded-xl">
                                                 <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-20" />
                                                 <p>Sin actividad reciente</p>
                                             </div>
                                         ) : (
-                                            <div className="relative pl-6 space-y-6 border-l border-white/10 ml-3">
+                                            <div className="relative pl-6 space-y-6 border-l border-[var(--border-subtle)] ml-3">
                                                 {timeline.map((event, idx) => (
                                                     <div key={event.id} className="relative group/item">
                                                         {/* Line connection */}
                                                         <div className={cn(
-                                                            "absolute -left-[31px] h-4 w-4 rounded-full border-2 bg-zinc-950 flex items-center justify-center z-10 transition-transform group-hover/item:scale-110",
+                                                            "absolute -left-[31px] h-4 w-4 rounded-full border-2 bg-[var(--bg-surface)] flex items-center justify-center z-10 transition-transform group-hover/item:scale-110",
                                                             event.type === 'ORDER' ? "border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" :
                                                                 event.type === 'PAYMENT' ? "border-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]" :
                                                                     event.type === 'TASK' ? "border-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]" :
                                                                         event.type === 'CONTACT_LOG' ? "border-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.5)]" :
                                                                             event.type === 'NOTE' ? "border-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]" :
-                                                                                "border-white/20"
+                                                                                "border-[var(--border-subtle)]"
                                                         )}>
                                                             {event.type === 'ORDER' && <ShoppingBag className="h-2 w-2 text-blue-500" />}
                                                             {event.type === 'PAYMENT' && <CreditCard className="h-2 w-2 text-green-500" />}
                                                             {event.type === 'TASK' && <CheckCircle2 className="h-2 w-2 text-amber-500" />}
                                                             {event.type === 'NOTE' && <MessageSquare className="h-2 w-2 text-indigo-500" />}
-                                                            {(event.type === 'FILE_ADDED' || event.type === 'FILE') && <FileText className="h-2 w-2 text-white/40" />}
+                                                            {(event.type === 'FILE_ADDED' || event.type === 'FILE') && <FileText className="h-2 w-2 text-[var(--text-secondary)]" />}
                                                             {event.type === 'CONTACT_LOG' && <MessageSquare className="h-2 w-2 text-purple-500" />}
                                                         </div>
 
                                                         <div className={cn(
-                                                            "bg-white/5 border border-white/10 rounded-lg p-3 hover:bg-white/[0.08] transition-all",
+                                                            "bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg p-3 hover:bg-[var(--bg-card)]/[0.08] transition-all",
                                                             event.severity === 'success' ? "border-green-500/20" :
                                                                 event.severity === 'warning' ? "border-amber-500/20" :
                                                                     event.severity === 'error' ? "border-red-500/20" :
@@ -896,10 +896,10 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                                                             <div className="flex justify-between items-start">
                                                                 <div className="flex-1 min-w-0">
                                                                     <div className="flex items-center gap-2 mb-1">
-                                                                        <h4 className="text-xs font-semibold text-white/90 truncate">{event.title}</h4>
+                                                                        <h4 className="text-xs font-semibold text-[var(--text-secondary)] truncate">{event.title}</h4>
                                                                         {event.statusLabel && (
                                                                             <Badge className={cn(
-                                                                                "text-[10px] px-1 py-0 h-4 border-white/5",
+                                                                                "text-[10px] px-1 py-0 h-4 border-[var(--border-subtle)]",
                                                                                 event.status === 'COMPLETED' ? "bg-green-500/20 text-green-400" :
                                                                                     event.status === 'RECEIVED' ? "bg-blue-500/20 text-blue-400" :
                                                                                         event.status === 'CANCELLED' ? "bg-red-500/20 text-red-400" :
@@ -910,7 +910,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                                                                         )}
                                                                         {event.type === 'TASK' && (
                                                                             <Badge className={cn(
-                                                                                "text-[10px] px-1 py-0 h-4 border-white/5",
+                                                                                "text-[10px] px-1 py-0 h-4 border-[var(--border-subtle)]",
                                                                                 event.status === 'DONE' ? "bg-green-500/20 text-green-400" : "bg-amber-500/20 text-amber-400"
                                                                             )}>
                                                                                 {event.status === 'DONE' ? "Completada" : "Pendiente"}
@@ -921,19 +921,19 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                                                                     {/* NOTE: Show full content */}
                                                                     {event.type === 'NOTE' && event.content ? (
                                                                         <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-md p-2 mt-2">
-                                                                            <p className="text-sm text-white/80 whitespace-pre-wrap">{event.content}</p>
+                                                                            <p className="text-sm text-[var(--text-secondary)] whitespace-pre-wrap">{event.content}</p>
                                                                         </div>
                                                                     ) : (
-                                                                        <p className="text-sm text-white/60 line-clamp-2">{event.description}</p>
+                                                                        <p className="text-sm text-[var(--text-secondary)] line-clamp-2">{event.description}</p>
                                                                     )}
                                                                 </div>
-                                                                <span className="text-[10px] text-white/30 whitespace-nowrap ml-4">
+                                                                <span className="text-[10px] text-[var(--text-secondary)] whitespace-nowrap ml-4">
                                                                     {format(new Date(event.date), 'd MMM HH:mm', { locale: es })}
                                                                 </span>
                                                             </div>
 
                                                             {/* Direct Actions */}
-                                                            <div className="mt-3 pt-2 border-t border-white/5 flex flex-wrap gap-2">
+                                                            <div className="mt-3 pt-2 border-t border-[var(--border-subtle)] flex flex-wrap gap-2">
                                                                 {event.type === 'ORDER' && event.status === 'PENDING' && (
                                                                     <>
                                                                         <Button
@@ -983,7 +983,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                                                                         variant="outline"
                                                                         className={cn(
                                                                             "h-7 px-2 text-[10px]",
-                                                                            event.status === 'DONE' ? "border-white/20 text-white/60" : "border-blue-500/30 text-blue-400 hover:bg-blue-500/10"
+                                                                            event.status === 'DONE' ? "border-[var(--border-subtle)] text-[var(--text-secondary)]" : "border-blue-500/30 text-blue-400 hover:bg-blue-500/10"
                                                                         )}
                                                                     >
                                                                         {event.status === 'DONE' ? <Circle className="h-3 w-3 mr-1" /> : <CheckCircle2 className="h-3 w-3 mr-1" />}
@@ -1004,7 +1004,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                                                                         <a
                                                                             href={event.url}
                                                                             download
-                                                                            className="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-white/10 bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground h-7 px-2 text-[10px] text-white/40 hover:text-white"
+                                                                            className="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-[var(--border-subtle)] bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground h-7 px-2 text-[10px] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                                                                         >
                                                                             <Download className="h-3 w-3 mr-1" /> Descargar
                                                                         </a>
@@ -1019,7 +1019,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                                                                         }}
                                                                         size="sm"
                                                                         variant="ghost"
-                                                                        className="h-7 px-2 text-[10px] text-white/20 hover:text-white ml-auto"
+                                                                        className="h-7 px-2 text-[10px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] ml-auto"
                                                                     >
                                                                         <ExternalLink className="h-3 w-3 mr-1" /> Detalle
                                                                     </Button>

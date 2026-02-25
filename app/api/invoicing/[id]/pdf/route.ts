@@ -11,32 +11,32 @@ import path from "path"
  * ?regenerate=1 forces regeneration.
  */
 export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+ request: NextRequest,
+ { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions)
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-  const { id } = await params
-  const regenerate = request.nextUrl.searchParams.get("regenerate") === "1"
-  try {
-    const result = await generateInvoicePDF(id, session.user.id, { forceRegenerate: regenerate })
-    if (!result) return NextResponse.json({ error: "Not found" }, { status: 404 })
+ const session = await getServerSession(authOptions)
+ if (!session?.user?.id) {
+ return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+ }
+ const { id } = await params
+ const regenerate = request.nextUrl.searchParams.get("regenerate") === "1"
+ try {
+ const result = await generateInvoicePDF(id, session.user.id, { forceRegenerate: regenerate })
+ if (!result) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
-    const filePath = path.join(process.cwd(), result.url.replace(/^\//, "").split("/").join(path.sep))
-    const buf = await readFile(filePath)
-    const filename = `factura-${id}.pdf`
+ const filePath = path.join(process.cwd(), result.url.replace(/^\//, "").split("/").join(path.sep))
+ const buf = await readFile(filePath)
+ const filename = `factura-${id}.pdf`
 
-    return new NextResponse(buf, {
-      status: 200,
-      headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${filename}"`,
-      },
-    })
-  } catch (e) {
-    console.error("Invoicing PDF error:", e)
-    return NextResponse.json({ error: "Failed to generate PDF" }, { status: 500 })
-  }
+ return new NextResponse(buf, {
+ status: 200,
+ headers: {
+ "Content-Type": "application/pdf",
+ "Content-Disposition": `attachment; filename="${filename}"`,
+ },
+ })
+ } catch (e) {
+ console.error("Invoicing PDF error:", e)
+ return NextResponse.json({ error: "Failed to generate PDF" }, { status: 500 })
+ }
 }

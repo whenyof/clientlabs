@@ -21,7 +21,7 @@ export function CreateProviderButton() {
         <>
             <Button
                 onClick={() => setDialogOpen(true)}
-                className="bg-blue-500 hover:bg-blue-600 text-white"
+                className="bg-blue-500 hover:bg-blue-600 text-[var(--text-primary)]"
             >
                 <Plus className="h-4 w-4 mr-2" />
                 {labels.providers.newButton}

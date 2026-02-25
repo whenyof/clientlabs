@@ -92,49 +92,49 @@ export function ProvidersView({ initialProviders, initialKPIs }: ProvidersViewPr
             {/* KPIs */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* Total Monthly Cost */}
-                <div className="rounded-xl border border-white/10 bg-gradient-to-br from-blue-500/10 to-blue-600/5 p-6 backdrop-blur">
+                <div className="rounded-xl border border-[var(--border-subtle)] bg-gradient-to-br from-blue-500/10 to-blue-600/5 p-6 backdrop-blur">
                     <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-white/60">Coste mensual</span>
+                        <span className="text-sm text-[var(--text-secondary)]">Coste mensual</span>
                         <TrendingUp className="h-5 w-5 text-blue-400" />
                     </div>
-                    <p className="text-3xl font-bold text-white">{formatCurrency(kpis.totalMonthlyCost)}</p>
-                    <p className="text-xs text-white/40 mt-1">
+                    <p className="text-3xl font-bold text-[var(--text-primary)]">{formatCurrency(kpis.totalMonthlyCost)}</p>
+                    <p className="text-xs text-[var(--text-secondary)] mt-1">
                         {formatCurrency(kpis.totalAnnualCost)}/año
                     </p>
                 </div>
 
                 {/* Active Providers */}
-                <div className="rounded-xl border border-white/10 bg-gradient-to-br from-green-500/10 to-green-600/5 p-6 backdrop-blur">
+                <div className="rounded-xl border border-[var(--border-subtle)] bg-gradient-to-br from-green-500/10 to-green-600/5 p-6 backdrop-blur">
                     <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-white/60">Activos</span>
+                        <span className="text-sm text-[var(--text-secondary)]">Activos</span>
                         <CheckCircle2 className="h-5 w-5 text-green-400" />
                     </div>
-                    <p className="text-3xl font-bold text-white">{kpis.activeProviders}</p>
-                    <p className="text-xs text-white/40 mt-1">
+                    <p className="text-3xl font-bold text-[var(--text-primary)]">{kpis.activeProviders}</p>
+                    <p className="text-xs text-[var(--text-secondary)] mt-1">
                         de {kpis.totalProviders} {labels.providers.plural.toLowerCase()}
                     </p>
                 </div>
 
                 {/* Providers with Issues */}
-                <div className="rounded-xl border border-white/10 bg-gradient-to-br from-amber-500/10 to-amber-600/5 p-6 backdrop-blur">
+                <div className="rounded-xl border border-[var(--border-subtle)] bg-gradient-to-br from-amber-500/10 to-amber-600/5 p-6 backdrop-blur">
                     <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-white/60">Con incidencias</span>
+                        <span className="text-sm text-[var(--text-secondary)]">Con incidencias</span>
                         <AlertTriangle className="h-5 w-5 text-amber-400" />
                     </div>
-                    <p className="text-3xl font-bold text-white">{kpis.providersWithIssues}</p>
-                    <p className="text-xs text-white/40 mt-1">
+                    <p className="text-3xl font-bold text-[var(--text-primary)]">{kpis.providersWithIssues}</p>
+                    <p className="text-xs text-[var(--text-secondary)] mt-1">
                         requieren atención
                     </p>
                 </div>
 
                 {/* Critical Providers */}
-                <div className="rounded-xl border border-white/10 bg-gradient-to-br from-red-500/10 to-red-600/5 p-6 backdrop-blur">
+                <div className="rounded-xl border border-[var(--border-subtle)] bg-gradient-to-br from-red-500/10 to-red-600/5 p-6 backdrop-blur">
                     <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-white/60">Críticos</span>
+                        <span className="text-sm text-[var(--text-secondary)]">Críticos</span>
                         <AlertCircle className="h-5 w-5 text-red-400" />
                     </div>
-                    <p className="text-3xl font-bold text-white">{kpis.criticalProviders}</p>
-                    <p className="text-xs text-white/40 mt-1">
+                    <p className="text-3xl font-bold text-[var(--text-primary)]">{kpis.criticalProviders}</p>
+                    <p className="text-xs text-[var(--text-secondary)] mt-1">
                         alta dependencia
                     </p>
                 </div>

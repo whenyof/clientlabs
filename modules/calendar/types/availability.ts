@@ -6,24 +6,24 @@
 export type AvailabilityBlockType = "FREE" | "TASK" | "BLOCK" | "TIME_OFF"
 
 export type CalendarAvailabilityBlock = {
-  start: Date
-  end: Date
-  type: AvailabilityBlockType
-  /** Present when type === "TASK" */
-  taskId?: string
-  /** Present when type === "BLOCK" or "TIME_OFF" */
-  reason?: string | null
+ start: Date
+ end: Date
+ type: AvailabilityBlockType
+ /** Present when type === "TASK" */
+ taskId?: string
+ /** Present when type === "BLOCK" or "TIME_OFF" */
+ reason?: string | null
 }
 
 export type AvailabilityResponse = {
-  userId: string
-  date: string
-  blocks: CalendarAvailabilityBlock[]
+ userId: string
+ date: string
+ blocks: CalendarAvailabilityBlock[]
 }
 
 /** Resultado de un hueco inteligente: momento sugerido para colocar una tarea. */
 export type SmartSlot = {
-  start: Date
-  end: Date
-  score: number
+ start: Date
+ end: Date
+ score: number
 }

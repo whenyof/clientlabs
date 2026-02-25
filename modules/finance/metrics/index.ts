@@ -4,28 +4,28 @@
  */
 
 export {
-  getTotalRevenue,
-  getRevenueGrowth,
-  getAverageTicket,
+ getTotalRevenue,
+ getRevenueGrowth,
+ getAverageTicket,
 } from "./revenue.metrics"
 
 export {
-  getTotalExpenses,
-  getExpenseDistribution,
+ getTotalExpenses,
+ getExpenseDistribution,
 } from "./expense.metrics"
 
 export {
-  getNetProfit,
-  getProfitMargin,
+ getNetProfit,
+ getProfitMargin,
 } from "./profit.metrics"
 
 export {
-  getTopClients,
-  getClientConcentration,
-  type TopClientEntry,
+ getTopClients,
+ getClientConcentration,
+ type TopClientEntry,
 } from "./client.metrics"
 
 export {
-  getBurnRate,
-  getRunwayEstimate,
+ getBurnRate,
+ getRunwayEstimate,
 } from "./health.metrics"

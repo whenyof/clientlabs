@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import { authOptions } from "@/lib/auth"
 import { getDbUserForSession } from "@/lib/get-db-user"
 import DashboardShell from "@/components/layout/DashboardShell"
+import GlobalBackground from "@/components/layout/GlobalBackground"
 
 /**
  * Single source of truth for dashboard access (SERVER ONLY).
@@ -31,5 +32,9 @@ export default async function DashboardLayout({
     redirect("/onboarding/sector")
   }
 
-  return <DashboardShell>{children}</DashboardShell>
+  return (
+    <div className="bg-[var(--bg-main)] text-[var(--text-primary)] min-h-screen">
+      <DashboardShell>{children}</DashboardShell>
+    </div>
+  )
 }

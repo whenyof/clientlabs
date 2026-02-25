@@ -1,39 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { PipelineService } from '@/lib/services/pipelineService'
 
 export async function PATCH(
-  request: NextRequest,
-  props: { params: Promise<{ id: string }> }
+ request: NextRequest,
+ props: { params: Promise<{ id: string }> }
 ) {
-  const params = await props.params;
-  try {
-    const session = await getServerSession()
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+ const params = await props.params;
+ try {
+ const session = await getServerSession(authOptions)
+ if (!session?.user?.id) {
+ return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+ }
 
-    const { stageId } = await request.json()
+ const { stageId } = await request.json()
 
-    if (!stageId) {
-      return NextResponse.json(
-        { error: 'Stage ID is required' },
-        { status: 400 }
-      )
-    }
+ if (!stageId) {
+ return NextResponse.json(
+ { error: 'Stage ID is required' },
+ { status: 400 }
+ )
+ }
 
-    const updatedLead = await PipelineService.updateLeadStage(
-      params.id,
-      stageId,
-      session.user.id
-    )
+ const updatedLead = await PipelineService.updateLeadStage(
+ params.id,
+ stageId,
+ session.user.id
+ )
 
-    return NextResponse.json(updatedLead)
-  } catch (error) {
-    console.error('Error updating lead stage:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
+ return NextResponse.json(updatedLead)
+ } catch (error) {
+ console.error('Error updating lead stage:', error)
+ return NextResponse.json(
+ { error: 'Internal server error' },
+ { status: 500 }
+ )
+ }
 }

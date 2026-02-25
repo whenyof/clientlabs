@@ -5,51 +5,51 @@ import { prisma, safePrismaQuery } from "@/lib/prisma"
  * Optimized for production stability.
  */
 export async function ensureUserExists(sessionUser: {
-    id: string
-    email?: string | null
-    name?: string | null
+ id: string
+ email?: string | null
+ name?: string | null
 }) {
-    // 🛡️ Guard: Valid session info
-    if (!sessionUser.id) return null
+ // 🛡️ Guard: Valid session info
+ if (!sessionUser.id) return null
 
-    try {
-        // 1. Try to find the user using the retry-capable wrapper
-        const user = await safePrismaQuery(() =>
-            prisma.user.findUnique({
-                where: { id: sessionUser.id },
-            })
-        )
+ try {
+ // 1. Try to find the user using the retry-capable wrapper
+ const user = await safePrismaQuery(() =>
+ prisma.user.findUnique({
+ where: { id: sessionUser.id },
+ })
+ )
 
-        // 2. If user exists, we are done
-        if (user) return user
+ // 2. If user exists, we are done
+ if (user) return user
 
-        // 3. Create user if not found
-        console.log(`[ensureUserExists] User ${sessionUser.id} not found. Creating...`)
+ // 3. Create user if not found
+ console.log(`[ensureUserExists] User ${sessionUser.id} not found. Creating...`)
 
-        return await safePrismaQuery(() =>
-            prisma.user.create({
-                data: {
-                    id: sessionUser.id,
-                    email: sessionUser.email ?? "",
-                    name: sessionUser.name ?? null,
-                    image: (sessionUser as { image?: string | null }).image ?? null,
-                    role: "USER",
-                    plan: "FREE",
-                    onboardingCompleted: false,
-                    selectedSector: null,
-                },
-            })
-        )
-    } catch (error) {
-        // 🚨 FAIL-SAFE LOGIC
-        console.error("[ensureUserExists] critical failure:", error)
+ return await safePrismaQuery(() =>
+ prisma.user.create({
+ data: {
+ id: sessionUser.id,
+ email: sessionUser.email ?? "",
+ name: sessionUser.name ?? null,
+ image: (sessionUser as { image?: string | null }).image ?? null,
+ role: "USER",
+ plan: "FREE",
+ onboardingCompleted: false,
+ selectedSector: null,
+ },
+ })
+ )
+ } catch (error) {
+ // 🚨 FAIL-SAFE LOGIC
+ console.error("[ensureUserExists] critical failure:", error)
 
-        if (process.env.NODE_ENV === "development") {
-            console.warn("⚠️ [Development Mode] Ignoring ensureUserExists failure to allow app startup.")
-            return { id: sessionUser.id, onboardingCompleted: true } // Mock user to allow bypass
-        }
+ if (process.env.NODE_ENV === "development") {
+ console.warn("⚠️ [Development Mode] Ignoring ensureUserExists failure to allow app startup.")
+ return { id: sessionUser.id, onboardingCompleted: true } // Mock user to allow bypass
+ }
 
-        // In production, we throw so the action fails clearly
-        throw new Error("Unable to verify user account. Please check database connection.")
-    }
+ // In production, we throw so the action fails clearly
+ throw new Error("Unable to verify user account. Please check database connection.")
+ }
 }

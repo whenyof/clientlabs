@@ -2,12 +2,12 @@
 
 import { useState } from "react"
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
+ Dialog,
+ DialogContent,
+ DialogDescription,
+ DialogFooter,
+ DialogHeader,
+ DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -16,110 +16,110 @@ import { Ban, Loader2 } from "lucide-react"
 import { blockUser } from "../actions"
 
 type UserData = {
-    id: string
-    email: string
-    name: string | null
+ id: string
+ email: string
+ name: string | null
 }
 
 export function BlockUserDialog({
-    open,
-    onOpenChange,
-    user,
-    onSuccess,
+ open,
+ onOpenChange,
+ user,
+ onSuccess,
 }: {
-    open: boolean
-    onOpenChange: (open: boolean) => void
-    user: UserData
-    onSuccess: () => void
+ open: boolean
+ onOpenChange: (open: boolean) => void
+ user: UserData
+ onSuccess: () => void
 }) {
-    const [loading, setLoading] = useState(false)
-    const [reason, setReason] = useState("")
+ const [loading, setLoading] = useState(false)
+ const [reason, setReason] = useState("")
 
-    const handleBlock = async () => {
-        if (!reason.trim()) {
-            alert("Please provide a reason for blocking this user")
-            return
-        }
+ const handleBlock = async () => {
+ if (!reason.trim()) {
+ alert("Please provide a reason for blocking this user")
+ return
+ }
 
-        setLoading(true)
-        try {
-            await blockUser(user.id, reason)
-            onOpenChange(false)
-            setReason("")
-            onSuccess()
-        } catch (error: any) {
-            alert(error.message || "Failed to block user")
-        } finally {
-            setLoading(false)
-        }
-    }
+ setLoading(true)
+ try {
+ await blockUser(user.id, reason)
+ onOpenChange(false)
+ setReason("")
+ onSuccess()
+ } catch (error: any) {
+ alert(error.message || "Failed to block user")
+ } finally {
+ setLoading(false)
+ }
+ }
 
-    return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="bg-[#0e1424] border-white/10">
-                <DialogHeader>
-                    <DialogTitle className="text-white flex items-center gap-2">
-                        <Ban className="h-5 w-5 text-red-400" />
-                        Block User
-                    </DialogTitle>
-                    <DialogDescription className="text-white/60">
-                        Block this user from accessing the platform. They will not be able to
-                        log in.
-                    </DialogDescription>
-                </DialogHeader>
+ return (
+ <Dialog open={open} onOpenChange={onOpenChange}>
+ <DialogContent className="bg-[var(--bg-main)] border-[var(--border-subtle)]">
+ <DialogHeader>
+ <DialogTitle className="text-[var(--text-primary)] flex items-center gap-2">
+ <Ban className="h-5 w-5 text-[var(--critical)]" />
+ Block User
+ </DialogTitle>
+ <DialogDescription className="text-[var(--text-secondary)]">
+ Block this user from accessing the platform. They will not be able to
+ log in.
+ </DialogDescription>
+ </DialogHeader>
 
-                <div className="space-y-4 py-4">
-                    <div className="bg-white/5 rounded-lg p-4 space-y-2">
-                        <p className="text-white/60 text-sm">User:</p>
-                        <p className="text-white font-medium">{user.name || "No name"}</p>
-                        <p className="text-white/60 text-sm">{user.email}</p>
-                    </div>
+ <div className="space-y-4 py-4">
+ <div className="bg-[var(--bg-card)] rounded-lg p-4 space-y-2">
+ <p className="text-[var(--text-secondary)] text-sm">User:</p>
+ <p className="text-[var(--text-primary)] font-medium">{user.name || "No name"}</p>
+ <p className="text-[var(--text-secondary)] text-sm">{user.email}</p>
+ </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="reason" className="text-white">
-                            Reason for blocking *
-                        </Label>
-                        <Input
-                            id="reason"
-                            value={reason}
-                            onChange={(e) => setReason(e.target.value)}
-                            placeholder="e.g., Violation of terms of service"
-                            className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
-                        />
-                    </div>
-                </div>
+ <div className="space-y-2">
+ <Label htmlFor="reason" className="text-[var(--text-primary)]">
+ Reason for blocking *
+ </Label>
+ <Input
+ id="reason"
+ value={reason}
+ onChange={(e) => setReason(e.target.value)}
+ placeholder="e.g., Violation of terms of service"
+ className="bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]"
+ />
+ </div>
+ </div>
 
-                <DialogFooter>
-                    <Button
-                        variant="outline"
-                        onClick={() => {
-                            onOpenChange(false)
-                            setReason("")
-                        }}
-                        disabled={loading}
-                        className="bg-white/5 border-white/10 text-white hover:bg-white/10"
-                    >
-                        Cancel
-                    </Button>
-                    <Button
-                        onClick={handleBlock}
-                        disabled={loading}
-                        className="bg-red-600 hover:bg-red-700 text-white"
-                    >
-                        {loading ? (
-                            <>
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                Blocking...
-                            </>
-                        ) : (
-                            <>
-                                <Ban className="h-4 w-4 mr-2" />
-                                Block User
-                            </>
-                        )}
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    )
+ <DialogFooter>
+ <Button
+ variant="outline"
+ onClick={() => {
+ onOpenChange(false)
+ setReason("")
+ }}
+ disabled={loading}
+ className="bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-primary)] hover:bg-[var(--bg-card)]"
+ >
+ Cancel
+ </Button>
+ <Button
+ onClick={handleBlock}
+ disabled={loading}
+ className="bg-[var(--bg-card)] hover:bg-[var(--bg-card)] text-[var(--text-primary)]"
+ >
+ {loading ? (
+ <>
+ <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+ Blocking...
+ </>
+ ) : (
+ <>
+ <Ban className="h-4 w-4 mr-2" />
+ Block User
+ </>
+ )}
+ </Button>
+ </DialogFooter>
+ </DialogContent>
+ </Dialog>
+ )
 }

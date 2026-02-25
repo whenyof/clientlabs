@@ -79,20 +79,20 @@ export function CreateProviderDialog({ open, onOpenChange, onProviderCreated }: 
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="bg-zinc-900 border-white/10 max-w-2xl">
+            <DialogContent className="bg-[var(--bg-card)] border-[var(--border-subtle)] max-w-2xl">
                 <DialogHeader>
-                    <DialogTitle className="text-white">Nuevo proveedor</DialogTitle>
+                    <DialogTitle className="text-[var(--text-primary)]">Nuevo proveedor</DialogTitle>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Name */}
                     <div>
-                        <Label htmlFor="name" className="text-white/80">Nombre *</Label>
+                        <Label htmlFor="name" className="text-[var(--text-secondary)]">Nombre *</Label>
                         <Input
                             id="name"
                             value={formData.name}
                             onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                            className="bg-white/5 border-white/10 text-white"
+                            className="bg-[var(--bg-main)] border-[var(--border-subtle)] text-[var(--text-primary)]"
                             placeholder="Ej: AWS, Google Workspace, etc."
                             required
                         />
@@ -101,15 +101,15 @@ export function CreateProviderDialog({ open, onOpenChange, onProviderCreated }: 
                     <div className="grid grid-cols-2 gap-4">
                         {/* Type */}
                         <div>
-                            <Label htmlFor="type" className="text-white/80">Tipo</Label>
+                            <Label htmlFor="type" className="text-[var(--text-secondary)]">Tipo</Label>
                             <Select
                                 value={formData.type}
                                 onValueChange={(value: any) => setFormData(prev => ({ ...prev, type: value }))}
                             >
-                                <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                                <SelectTrigger className="bg-[var(--bg-main)] border-[var(--border-subtle)] text-[var(--text-primary)]">
                                     <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent className="bg-zinc-900 border-white/10">
+                                <SelectContent className="bg-[var(--bg-card)] border-[var(--border-subtle)]">
                                     <SelectItem value="SERVICE">Servicio</SelectItem>
                                     <SelectItem value="PRODUCT">Producto</SelectItem>
                                     <SelectItem value="SOFTWARE">Software</SelectItem>
@@ -120,14 +120,14 @@ export function CreateProviderDialog({ open, onOpenChange, onProviderCreated }: 
 
                         {/* Monthly Cost */}
                         <div>
-                            <Label htmlFor="monthlyCost" className="text-white/80">Coste mensual (€)</Label>
+                            <Label htmlFor="monthlyCost" className="text-[var(--text-secondary)]">Coste mensual (€)</Label>
                             <Input
                                 id="monthlyCost"
                                 type="number"
                                 step="0.01"
                                 value={formData.monthlyCost}
                                 onChange={(e) => setFormData(prev => ({ ...prev, monthlyCost: e.target.value }))}
-                                className="bg-white/5 border-white/10 text-white"
+                                className="bg-[var(--bg-main)] border-[var(--border-subtle)] text-[var(--text-primary)]"
                                 placeholder="0.00"
                             />
                         </div>
@@ -135,15 +135,15 @@ export function CreateProviderDialog({ open, onOpenChange, onProviderCreated }: 
 
                     {/* Dependency */}
                     <div>
-                        <Label htmlFor="dependency" className="text-white/80">Dependencia del negocio</Label>
+                        <Label htmlFor="dependency" className="text-[var(--text-secondary)]">Dependencia del negocio</Label>
                         <Select
                             value={formData.dependency}
                             onValueChange={(value: any) => setFormData(prev => ({ ...prev, dependency: value }))}
                         >
-                            <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                            <SelectTrigger className="bg-[var(--bg-main)] border-[var(--border-subtle)] text-[var(--text-primary)]">
                                 <SelectValue />
                             </SelectTrigger>
-                            <SelectContent className="bg-zinc-900 border-white/10">
+                            <SelectContent className="bg-[var(--bg-card)] border-[var(--border-subtle)]">
                                 <SelectItem value="LOW">Baja - Opcional</SelectItem>
                                 <SelectItem value="MEDIUM">Media - Importante</SelectItem>
                                 <SelectItem value="HIGH">Alta - Muy importante</SelectItem>
@@ -155,25 +155,25 @@ export function CreateProviderDialog({ open, onOpenChange, onProviderCreated }: 
                     <div className="grid grid-cols-2 gap-4">
                         {/* Contact Email */}
                         <div>
-                            <Label htmlFor="contactEmail" className="text-white/80">Email de contacto</Label>
+                            <Label htmlFor="contactEmail" className="text-[var(--text-secondary)]">Email de contacto</Label>
                             <Input
                                 id="contactEmail"
                                 type="email"
                                 value={formData.contactEmail}
                                 onChange={(e) => setFormData(prev => ({ ...prev, contactEmail: e.target.value }))}
-                                className="bg-white/5 border-white/10 text-white"
+                                className="bg-[var(--bg-main)] border-[var(--border-subtle)] text-[var(--text-primary)]"
                                 placeholder="soporte@proveedor.com"
                             />
                         </div>
 
                         {/* Contact Phone */}
                         <div>
-                            <Label htmlFor="contactPhone" className="text-white/80">Teléfono</Label>
+                            <Label htmlFor="contactPhone" className="text-[var(--text-secondary)]">Teléfono</Label>
                             <Input
                                 id="contactPhone"
                                 value={formData.contactPhone}
                                 onChange={(e) => setFormData(prev => ({ ...prev, contactPhone: e.target.value }))}
-                                className="bg-white/5 border-white/10 text-white"
+                                className="bg-[var(--bg-main)] border-[var(--border-subtle)] text-[var(--text-primary)]"
                                 placeholder="+34 600 000 000"
                             />
                         </div>
@@ -181,25 +181,25 @@ export function CreateProviderDialog({ open, onOpenChange, onProviderCreated }: 
 
                     {/* Website */}
                     <div>
-                        <Label htmlFor="website" className="text-white/80">Sitio web</Label>
+                        <Label htmlFor="website" className="text-[var(--text-secondary)]">Sitio web</Label>
                         <Input
                             id="website"
                             type="url"
                             value={formData.website}
                             onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
-                            className="bg-white/5 border-white/10 text-white"
+                            className="bg-[var(--bg-main)] border-[var(--border-subtle)] text-[var(--text-primary)]"
                             placeholder="https://proveedor.com"
                         />
                     </div>
 
                     {/* Notes */}
                     <div>
-                        <Label htmlFor="notes" className="text-white/80">Notas</Label>
+                        <Label htmlFor="notes" className="text-[var(--text-secondary)]">Notas</Label>
                         <Textarea
                             id="notes"
                             value={formData.notes}
                             onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                            className="bg-white/5 border-white/10 text-white resize-none"
+                            className="bg-[var(--bg-main)] border-[var(--border-subtle)] text-[var(--text-primary)] resize-none"
                             placeholder="Información adicional sobre el proveedor..."
                             rows={3}
                         />
@@ -211,14 +211,14 @@ export function CreateProviderDialog({ open, onOpenChange, onProviderCreated }: 
                             type="button"
                             variant="ghost"
                             onClick={() => onOpenChange(false)}
-                            className="text-white/60 hover:text-white hover:bg-white/10"
+                            className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
                         >
                             Cancelar
                         </Button>
                         <Button
                             type="submit"
                             disabled={loading}
-                            className="bg-blue-500 hover:bg-blue-600 text-white"
+                            className="bg-blue-500 hover:bg-blue-600 text-[var(--text-primary)]"
                         >
                             {loading ? "Creando..." : "Crear proveedor"}
                         </Button>

@@ -13,26 +13,26 @@ export type { CalendarSyncProvider, CalendarSyncOperation }
  * Does not await external API; returns immediately. Never blocks UI.
  */
 export async function enqueueTaskCalendarSync(
-  taskId: string,
-  userId: string,
-  provider: CalendarSyncProvider,
-  operation: CalendarSyncOperation,
-  payload?: Record<string, unknown>
+ taskId: string,
+ userId: string,
+ provider: CalendarSyncProvider,
+ operation: CalendarSyncOperation,
+ payload?: Record<string, unknown>
 ): Promise<void> {
-  try {
-    await prisma.calendarSyncJob.create({
-      data: {
-        taskId,
-        userId,
-        provider,
-        operation,
-        payload: (payload ?? undefined) as import("@prisma/client").Prisma.InputJsonValue | undefined,
-        status: "PENDING",
-      },
-    })
-  } catch (err) {
-    console.error("[calendar-sync] enqueue failed:", err)
-  }
+ try {
+ await prisma.calendarSyncJob.create({
+ data: {
+ taskId,
+ userId,
+ provider,
+ operation,
+ payload: (payload ?? undefined) as import("@prisma/client").Prisma.InputJsonValue | undefined,
+ status: "PENDING",
+ },
+ })
+ } catch (err) {
+ console.error("[calendar-sync] enqueue failed:", err)
+ }
 }
 
 /**
@@ -40,14 +40,14 @@ export async function enqueueTaskCalendarSync(
  * Call this from task API after DB write; do not await sync completion.
  */
 export async function enqueueTaskSyncForAllProviders(
-  taskId: string,
-  userId: string,
-  operation: CalendarSyncOperation
+ taskId: string,
+ userId: string,
+ operation: CalendarSyncOperation
 ): Promise<void> {
-  const providers: CalendarSyncProvider[] = ["GOOGLE"]
-  await Promise.all(
-    providers.map((provider) =>
-      enqueueTaskCalendarSync(taskId, userId, provider, operation)
-    )
-  )
+ const providers: CalendarSyncProvider[] = ["GOOGLE"]
+ await Promise.all(
+ providers.map((provider) =>
+ enqueueTaskCalendarSync(taskId, userId, provider, operation)
+ )
+ )
 }

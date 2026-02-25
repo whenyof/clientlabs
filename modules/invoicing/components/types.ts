@@ -13,93 +13,93 @@ export type InvoiceType = "CUSTOMER" | "VENDOR"
  * ================================
  */
 export type InvoiceListItem = {
-  id: string
-  userId: string
+ id: string
+ userId: string
 
-  type: InvoiceType
+ type: InvoiceType
 
-  number: string
-  series: string
+ number: string
+ series: string
 
-  clientId: string | null
-  providerId: string | null
-  saleId: string | null
+ clientId: string | null
+ providerId: string | null
+ saleId: string | null
 
-  issueDate: string
-  dueDate: string
-  serviceDate: string | null
+ issueDate: string
+ dueDate: string
+ serviceDate: string | null
 
-  currency: string
+ currency: string
 
-  subtotal: number
-  taxAmount: number
-  total: number
+ subtotal: number
+ taxAmount: number
+ total: number
 
-  status: InvoiceStatus
+ status: InvoiceStatus
 
-  notes: string | null
-  terms: string | null
+ notes: string | null
+ terms: string | null
 
-  /** Payment data */
-  paymentMethod?: string | null
-  iban?: string | null
-  bic?: string | null
-  paymentReference?: string | null
+ /** Payment data */
+ paymentMethod?: string | null
+ iban?: string | null
+ bic?: string | null
+ paymentReference?: string | null
 
-  paidAt: string | null
+ paidAt: string | null
 
-  pdfUrl?: string | null
-  pdfGeneratedAt?: string | null
+ pdfUrl?: string | null
+ pdfGeneratedAt?: string | null
 
-  createdAt: string
-  updatedAt: string
+ createdAt: string
+ updatedAt: string
 
-  Client:
-  | {
-    id: string
-    name: string | null
-    email: string | null
-    isFiscalComplete?: boolean | null
-  }
-  | null
+ Client:
+ | {
+ id: string
+ name: string | null
+ email: string | null
+ isFiscalComplete?: boolean | null
+ }
+ | null
 
-  Provider:
-  | {
-    name: string
-  }
-  | null
+ Provider:
+ | {
+ name: string
+ }
+ | null
 
-  lines: Array<{
-    id: string
-    description: string
-    quantity: number
-    unitPrice: number
-    discountPercent: number | null
-    taxPercent: number
-    subtotal: number
-    taxAmount: number
-    total: number
-  }>
+ lines: Array<{
+ id: string
+ description: string
+ quantity: number
+ unitPrice: number
+ discountPercent: number | null
+ taxPercent: number
+ subtotal: number
+ taxAmount: number
+ total: number
+ }>
 
-  payments: Array<{
-    id: string
-    amount: number
-    method: string
-    reference: string | null
-    notes: string | null
-    paidAt: string
-  }>
+ payments: Array<{
+ id: string
+ amount: number
+ method: string
+ reference: string | null
+ notes: string | null
+ paidAt: string
+ }>
 
-  /** Attached by list API from due-engine. */
-  dueInfo?: InvoiceDueInfo
+ /** Attached by list API from due-engine. */
+ dueInfo?: InvoiceDueInfo
 
-  /** Billing snapshot (for draft edit pre-fill). */
-  issuedClientSnapshot?: ClientSnapshot | null
+ /** Billing snapshot (for draft edit pre-fill). */
+ issuedClientSnapshot?: ClientSnapshot | null
 
-  /** Rectifying (credit) invoice. */
-  isRectification?: boolean
-  rectifiesInvoiceId?: string | null
-  rectificationReason?: string | null
+ /** Rectifying (credit) invoice. */
+ isRectification?: boolean
+ rectifiesInvoiceId?: string | null
+ rectificationReason?: string | null
 }
 
 /**
@@ -108,12 +108,12 @@ export type InvoiceListItem = {
  * ================================
  */
 export type InvoiceDetail = InvoiceListItem & {
-  events: Array<{
-    id: string
-    type: string
-    metadata: unknown
-    createdAt: string
-  }>
+ events: Array<{
+ id: string
+ type: string
+ metadata: unknown
+ createdAt: string
+ }>
 }
 
 /**
@@ -122,10 +122,10 @@ export type InvoiceDetail = InvoiceListItem & {
  * ================================
  */
 export type InvoiceKPIsResponse = {
-  outstanding: number
-  paidThisMonth: number
-  overdueCount: number
-  averagePaymentDays: number | null
+ outstanding: number
+ paidThisMonth: number
+ overdueCount: number
+ averagePaymentDays: number | null
 }
 
 /**
@@ -134,18 +134,18 @@ export type InvoiceKPIsResponse = {
  * ================================
  */
 export type ClientOption = {
-  id: string
-  name: string | null
-  email: string | null
+ id: string
+ name: string | null
+ email: string | null
 
-  isFiscalComplete?: boolean | null
+ isFiscalComplete?: boolean | null
 
-  legalName?: string | null
-  taxId?: string | null
-  address?: string | null
-  city?: string | null
-  postalCode?: string | null
-  country?: string | null
+ legalName?: string | null
+ taxId?: string | null
+ address?: string | null
+ city?: string | null
+ postalCode?: string | null
+ country?: string | null
 }
 
 /**
@@ -155,12 +155,12 @@ export type ClientOption = {
  * Immutable copy once invoice is issued.
  */
 export type ClientSnapshot = {
-  name?: string | null
-  legalName?: string | null
-  taxId?: string | null
-  address?: string | null
-  city?: string | null
-  postalCode?: string | null
-  country?: string | null
-  email?: string | null
+ name?: string | null
+ legalName?: string | null
+ taxId?: string | null
+ address?: string | null
+ city?: string | null
+ postalCode?: string | null
+ country?: string | null
+ email?: string | null
 }

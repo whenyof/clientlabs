@@ -80,21 +80,21 @@ export function RegisterOrderDialog({ providerId, providerName, open, onOpenChan
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="bg-zinc-900 border-white/10 max-w-md">
+            <DialogContent className="bg-[var(--bg-card)] border-[var(--border-subtle)] max-w-md">
                 <DialogHeader>
-                    <DialogTitle className="text-white">Registrar pedido</DialogTitle>
-                    <p className="text-sm text-white/60">{providerName}</p>
+                    <DialogTitle className="text-[var(--text-primary)]">Registrar pedido</DialogTitle>
+                    <p className="text-sm text-[var(--text-secondary)]">{providerName}</p>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Concept */}
                     <div className="space-y-2">
-                        <Label htmlFor="description" className="text-zinc-400">Concepto / Nombre</Label>
+                        <Label htmlFor="description" className="text-[var(--text-secondary)]">Concepto / Nombre</Label>
                         <Input
                             id="description"
                             value={formData.description}
                             onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                            className="bg-zinc-800 border-white/5 text-white"
+                            className="bg-[var(--bg-main)] border-[var(--border-subtle)] text-[var(--text-primary)]"
                             placeholder="Ej: Licencias SaaS Anuales"
                             required
                         />
@@ -103,14 +103,14 @@ export function RegisterOrderDialog({ providerId, providerName, open, onOpenChan
                     <div className="grid grid-cols-2 gap-4">
                         {/* Amount */}
                         <div className="space-y-2">
-                            <Label htmlFor="amount" className="text-zinc-400">Importe (€)</Label>
+                            <Label htmlFor="amount" className="text-[var(--text-secondary)]">Importe (€)</Label>
                             <Input
                                 id="amount"
                                 type="number"
                                 step="0.01"
                                 value={formData.amount}
                                 onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
-                                className="bg-zinc-800 border-white/5 text-white"
+                                className="bg-[var(--bg-main)] border-[var(--border-subtle)] text-[var(--text-primary)]"
                                 placeholder="0.00"
                                 required
                             />
@@ -118,13 +118,13 @@ export function RegisterOrderDialog({ providerId, providerName, open, onOpenChan
 
                         {/* Date */}
                         <div className="space-y-2">
-                            <Label htmlFor="orderDate" className="text-zinc-400">Fecha</Label>
+                            <Label htmlFor="orderDate" className="text-[var(--text-secondary)]">Fecha</Label>
                             <Input
                                 id="orderDate"
                                 type="date"
                                 value={formData.orderDate}
                                 onChange={(e) => setFormData(prev => ({ ...prev, orderDate: e.target.value }))}
-                                className="bg-zinc-800 border-white/5 text-white"
+                                className="bg-[var(--bg-main)] border-[var(--border-subtle)] text-[var(--text-primary)]"
                                 required
                             />
                         </div>
@@ -133,15 +133,15 @@ export function RegisterOrderDialog({ providerId, providerName, open, onOpenChan
                     <div className="grid grid-cols-2 gap-4">
                         {/* Type */}
                         <div className="space-y-2">
-                            <Label className="text-zinc-400">Tipo</Label>
+                            <Label className="text-[var(--text-secondary)]">Tipo</Label>
                             <Select
                                 value={formData.type}
                                 onValueChange={(v) => setFormData(prev => ({ ...prev, type: v }))}
                             >
-                                <SelectTrigger className="bg-zinc-800 border-white/5 text-white">
+                                <SelectTrigger className="bg-[var(--bg-main)] border-[var(--border-subtle)] text-[var(--text-primary)]">
                                     <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent className="bg-zinc-900 border-white/10 text-white">
+                                <SelectContent className="bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-primary)]">
                                     <SelectItem value="ONE_TIME">Puntual</SelectItem>
                                     <SelectItem value="RECURRING">Recurrente</SelectItem>
                                 </SelectContent>
@@ -150,15 +150,15 @@ export function RegisterOrderDialog({ providerId, providerName, open, onOpenChan
 
                         {/* Status */}
                         <div className="space-y-2">
-                            <Label className="text-zinc-400">Estado</Label>
+                            <Label className="text-[var(--text-secondary)]">Estado</Label>
                             <Select
                                 value={formData.status}
                                 onValueChange={(v) => setFormData(prev => ({ ...prev, status: v }))}
                             >
-                                <SelectTrigger className="bg-zinc-800 border-white/5 text-white">
+                                <SelectTrigger className="bg-[var(--bg-main)] border-[var(--border-subtle)] text-[var(--text-primary)]">
                                     <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent className="bg-zinc-900 border-white/10 text-white">
+                                <SelectContent className="bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-primary)]">
                                     <SelectItem value="PENDING">Pendiente</SelectItem>
                                     <SelectItem value="COMPLETED">Pagado/Completado</SelectItem>
                                 </SelectContent>
@@ -173,30 +173,30 @@ export function RegisterOrderDialog({ providerId, providerName, open, onOpenChan
                                 id="createPayment"
                                 checked={formData.createPayment}
                                 onCheckedChange={(checked) => setFormData(prev => ({ ...prev, createPayment: checked as boolean }))}
-                                className="border-white/20 data-[state=checked]:bg-blue-500"
+                                className="border-[var(--border-subtle)] data-[state=checked]:bg-blue-500"
                             />
                             <Label
                                 htmlFor="createPayment"
-                                className="text-sm font-medium leading-none text-white/80 cursor-pointer"
+                                className="text-sm font-medium leading-none text-[var(--text-secondary)] cursor-pointer"
                             >
                                 Generar pago automáticamente
                             </Label>
                         </div>
                     )}
 
-                    <DialogFooter className="pt-4 border-t border-white/5">
+                    <DialogFooter className="pt-4 border-t border-[var(--border-subtle)]">
                         <Button
                             type="button"
                             variant="ghost"
                             onClick={() => onOpenChange(false)}
-                            className="text-white/60 hover:text-white"
+                            className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                         >
                             Cancelar
                         </Button>
                         <Button
                             type="submit"
                             disabled={loading}
-                            className="bg-blue-500 hover:bg-blue-600 text-white"
+                            className="bg-blue-500 hover:bg-blue-600 text-[var(--text-primary)]"
                         >
                             {loading ? "Registrando..." : "Registrar pedido"}
                         </Button>

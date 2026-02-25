@@ -3,9 +3,9 @@ import { getSessionUserId } from "@/app/api/tasks/utils"
 import { getMoneyOpportunity } from "@/modules/tasks/services/money-opportunity.service"
 
 function addDays(d: Date, days: number): Date {
-  const out = new Date(d)
-  out.setDate(out.getDate() + days)
-  return out
+ const out = new Date(d)
+ out.setDate(out.getDate() + days)
+ return out
 }
 
 /**
@@ -14,34 +14,34 @@ function addDays(d: Date, days: number): Date {
  * Default range: next 7 days. Read-only.
  */
 export async function GET(request: NextRequest) {
-  try {
-    const userId = await getSessionUserId()
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
+ try {
+ const userId = await getSessionUserId()
+ if (!userId) {
+ return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+ }
 
-    const { searchParams } = new URL(request.url)
-    const fromParam = searchParams.get("from")
-    const toParam = searchParams.get("to")
+ const { searchParams } = new URL(request.url)
+ const fromParam = searchParams.get("from")
+ const toParam = searchParams.get("to")
 
-    const now = new Date()
-    const from = fromParam ? new Date(fromParam) : now
-    const to = toParam ? new Date(toParam) : addDays(now, 7)
+ const now = new Date()
+ const from = fromParam ? new Date(fromParam) : now
+ const to = toParam ? new Date(toParam) : addDays(now, 7)
 
-    if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime()) || from > to) {
-      return NextResponse.json(
-        { error: "Invalid from/to (use ISO dates, from <= to)" },
-        { status: 400 }
-      )
-    }
+ if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime()) || from > to) {
+ return NextResponse.json(
+ { error: "Invalid from/to (use ISO dates, from <= to)" },
+ { status: 400 }
+ )
+ }
 
-    const result = await getMoneyOpportunity(userId, from, to)
-    return NextResponse.json(result)
-  } catch (error) {
-    console.error("[GET /api/tasks/money-opportunity]:", error)
-    return NextResponse.json(
-      { error: "Failed to compute money opportunity" },
-      { status: 500 }
-    )
-  }
+ const result = await getMoneyOpportunity(userId, from, to)
+ return NextResponse.json(result)
+ } catch (error) {
+ console.error("[GET /api/tasks/money-opportunity]:", error)
+ return NextResponse.json(
+ { error: "Failed to compute money opportunity" },
+ { status: 500 }
+ )
+ }
 }

@@ -1,6 +1,7 @@
 "use client"
 
 import { useSectorConfig } from "@/hooks/useSectorConfig"
+import { useLeads } from "@/lib/hooks/useLeads"
 
 import { useState, useEffect } from "react"
 import type { Lead } from "@prisma/client"
@@ -59,15 +60,10 @@ function EmptyState() {
     )
 }
 
-export function LeadsTable({
-    leads,
-    currentSort,
-}: {
-    leads: Lead[]
-    currentSort?: { sortBy: string; sortOrder: "asc" | "desc" }
-}) {
+export function LeadsTable() {
     const { labels } = useSectorConfig()
     const router = useRouter()
+    const { leads, isLoading } = useLeads()
     const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
     const [isPanelOpen, setIsPanelOpen] = useState(false)
     const [selectedLeads, setSelectedLeads] = useState<string[]>([])
@@ -108,6 +104,14 @@ export function LeadsTable({
 
     const handleClearSelection = () => {
         setSelectedLeads([])
+    }
+
+    if (isLoading) {
+        return (
+            <div className="p-4 text-sm text-[var(--text-secondary)]">
+                Loading leads...
+            </div>
+        )
     }
 
     if (leads.length === 0) {

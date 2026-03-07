@@ -44,25 +44,7 @@ export default async function LeadsPage({
     redirect("/auth")
   }
 
-  /* ---------------- WHERE (simplified) ---------------- */
-  const where: any = {
-    userId: session.user.id,
-  }
-
-  /* ---------------- SORT (simplified) ---------------- */
-  const orderBy: any = { createdAt: "desc" }
-
-  /* ---------------- DATA ---------------- */
-  const leads = await prisma.lead.findMany({
-    orderBy: { createdAt: "desc" }
-  })
-  
-  console.log("DEBUG ALL LEADS:", leads.length)
-  console.log("DEBUG ALL LEADS DATA:", leads)
-
-  console.log("[dashboard] user:", session.user.id)
-  console.log("[dashboard] leads:", leads.length)
-
+  /* ---------------- DATA (table uses client-side SWR; KPIs/filters use server) ---------------- */
   const allLeads = await prisma.lead.findMany({
     where: { userId: session.user.id },
     select: { leadStatus: true, temperature: true, lastActionAt: true, metadata: true, tags: true, createdAt: true },
@@ -208,13 +190,7 @@ export default async function LeadsPage({
         sources={sources.map((s) => s.source).filter(Boolean) as string[]}
       />
 
-      <LeadsTable
-        leads={leads}
-        currentSort={{
-          sortBy: searchParams.sortBy || "score",
-          sortOrder: (searchParams.sortOrder || "desc") as "asc" | "desc",
-        }}
-      />
+      <LeadsTable />
     </div>
   )
 }

@@ -30,21 +30,39 @@ const PERSONAL_DOMAINS = [
 
 function extractEmail(event: QueuedEvent): string | null {
   const raw = event.payload?.email as string | undefined
-  if (typeof raw !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw)) return null
-  return raw.trim().toLowerCase()
+  if (typeof raw !== "string") return null
+
+  const email = raw.trim().toLowerCase()
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return null
+  }
+
+  return email
 }
 
 function classifyLeadDomain(email: string): { emailDomain: string; leadType: "personal" | "company" } {
   const domain = email.split("@")[1] ?? ""
   const leadType = PERSONAL_DOMAINS.includes(domain) ? "personal" : "company"
-  return { emailDomain: domain, leadType }
+
+  return {
+    emailDomain: domain,
+    leadType,
+  }
 }
 
 export async function detectLead(event: QueuedEvent): Promise<void> {
+
   const email = extractEmail(event)
   if (!email) return
+
   const ts = new Date()
-  const name = typeof event.payload?.name === "string" ? event.payload.name : undefined
+
+  const name =
+    typeof event.payload?.name === "string"
+      ? event.payload.name
+      : undefined
+
   const { emailDomain, leadType } = classifyLeadDomain(email)
 
   const existing = await prisma.lead.findFirst({
@@ -55,6 +73,7 @@ export async function detectLead(event: QueuedEvent): Promise<void> {
   })
 
   if (existing) {
+
     await prisma.lead.update({
       where: { id: existing.id },
       data: {
@@ -65,18 +84,11 @@ export async function detectLead(event: QueuedEvent): Promise<void> {
         score: { increment: 5 },
       },
     })
-    console.log("[lead] updated:", email)
-    return
-  }
 
-  const existing = await prisma.lead.findFirst({
-    where: {
-      userId: event.userId,
-      email,
-    },
-  })
-  
-  if (!existing) {
+    console.log("[lead] updated:", email)
+
+  } else {
+
     await prisma.lead.create({
       data: {
         userId: event.userId,
@@ -96,43 +108,46 @@ export async function detectLead(event: QueuedEvent): Promise<void> {
         },
       },
     })
-  
+
     console.log("[lead] created:", email)
-  } else {
-    await prisma.lead.update({
-      where: { id: existing.id },
-      data: {
-        lastActionAt: ts,
-        lastAction: event.type,
-        score: { increment: 5 },
+
+    const day = startOfDay(ts)
+
+    const row = await prisma.dailyStats.findUnique({
+      where: {
+        userId_domain_day: {
+          userId: event.userId,
+          domain: event.domain,
+          day,
+        },
       },
     })
-  
-    console.log("[lead] updated:", email)
+
+    if (row) {
+
+      await prisma.dailyStats.update({
+        where: { id: row.id },
+        data: {
+          leads: { increment: 1 },
+        },
+      })
+
+    } else {
+
+      await prisma.dailyStats.create({
+        data: {
+          userId: event.userId,
+          domain: event.domain,
+          day,
+          pageviews: 0,
+          visitors: 0,
+          sessions: 0,
+          leads: 1,
+        },
+      })
+
+    }
+
   }
 
-  const day = startOfDay(ts)
-  const row = await prisma.dailyStats.findUnique({
-    where: {
-      userId_domain_day: { userId: event.userId, domain: event.domain, day },
-    },
-  })
-  if (row) {
-    await prisma.dailyStats.update({
-      where: { id: row.id },
-      data: { leads: { increment: 1 } },
-    })
-  } else {
-    await prisma.dailyStats.create({
-      data: {
-        userId: event.userId,
-        domain: event.domain,
-        day,
-        pageviews: 0,
-        visitors: 0,
-        sessions: 0,
-        leads: 1,
-      },
-    })
-  }
 }

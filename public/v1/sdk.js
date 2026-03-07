@@ -28,26 +28,27 @@
   }
 
   function generateFallbackUUID() {
-    try {
-      var bytes = new Uint8Array(16);
-      if (typeof crypto !== "undefined" && crypto.getRandomValues) {
-        crypto.getRandomValues(bytes);
-      } else {
-        for (var i = 0; i < 16; i++) bytes[i] = Math.floor(Math.random() * 256);
-      }
-      bytes[6] = (bytes[6] & 0x0f) | 0x40;
-      bytes[8] = (bytes[8] & 0x3f) | 0x80;
-      var hex = Array.prototype.map.call(bytes, function (b) {
-        return ("0" + (b & 0xff).toString(16)).slice(-2);
-      }).join("");
-      return hex.slice(0, 8) + "-" + hex.slice(8, 12) + "-" + hex.slice(12, 16) + "-" + hex.slice(16, 20) + "-" + hex.slice(20);
-    } catch (e) {
+    if (!window.crypto || !window.crypto.getRandomValues) {
       return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
         var r = (Math.random() * 16) | 0;
         var v = c === "x" ? r : (r & 0x3) | 0x8;
         return v.toString(16);
       });
     }
+    var bytes = new Uint8Array(16);
+    window.crypto.getRandomValues(bytes);
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    var hex = Array.prototype.map.call(bytes, function (b) {
+      return b.toString(16).padStart(2, "0");
+    }).join("");
+    return (
+      hex.slice(0, 8) + "-" +
+      hex.slice(8, 12) + "-" +
+      hex.slice(12, 16) + "-" +
+      hex.slice(16, 20) + "-" +
+      hex.slice(20)
+    );
   }
 
   function getVisitorId() {
@@ -57,16 +58,23 @@
         id = localStorage.getItem("cl_vid");
       }
       if (!id) {
-        id = (typeof crypto !== "undefined" && crypto.randomUUID) ? crypto.randomUUID() : generateFallbackUUID();
+        id = (typeof window.crypto !== "undefined" && window.crypto.randomUUID)
+          ? window.crypto.randomUUID()
+          : generateFallbackUUID();
         try {
           if (typeof localStorage !== "undefined") {
             localStorage.setItem("cl_vid", id);
           }
         } catch (e) {}
       }
+      if (debug && typeof console !== "undefined") {
+        console.log("ClientLabs visitorId:", id);
+      }
       return id;
     } catch (e) {
-      return (typeof crypto !== "undefined" && crypto.randomUUID) ? crypto.randomUUID() : generateFallbackUUID();
+      return (typeof window.crypto !== "undefined" && window.crypto.randomUUID)
+        ? window.crypto.randomUUID()
+        : generateFallbackUUID();
     }
   }
 

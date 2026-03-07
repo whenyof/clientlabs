@@ -81,7 +81,7 @@ export function LeadsTable() {
     // Sync selected lead when leads list updates
     useEffect(() => {
         if (!selectedLead) return
-        const updated = leads.find((l) => l.id === selectedLead.id)
+        const updated = leads.find((l: Lead) => l.id === selectedLead.id)
         if (updated) setSelectedLead(updated)
     }, [leads])
 

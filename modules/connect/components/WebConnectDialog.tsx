@@ -218,7 +218,7 @@ export function WebConnectDialog({ open, onOpenChange }: WebConnectDialogProps) 
 
         setIsChecking(true)
         toast.info("Comprobando instalación...", {
-            description: `Escaneando ${selectedKey.domain}...`
+            description: `Escaneando ${selectedKey?.domain ?? "dominio"}...`
         })
 
         try {

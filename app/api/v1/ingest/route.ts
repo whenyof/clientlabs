@@ -137,6 +137,8 @@ export async function POST(request: NextRequest) {
     return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }), corsHeaders)
   }
 
+  console.log("[ingest] received apiKey:", api_key)
+
   const { events } = payload
 
   if (!Array.isArray(events) || events.length === 0) {
@@ -159,23 +161,42 @@ export async function POST(request: NextRequest) {
   }
 
   const hash = crypto.createHash("sha256").update(api_key).digest("hex")
-  const apiKey = await prisma.apiKey.findUnique({
+  const keyRecord = await prisma.apiKey.findUnique({
     where: { keyHash: hash },
   })
+  console.log("[ingest] keyRecord:", keyRecord ? { id: keyRecord.id, type: keyRecord.type, revoked: keyRecord.revoked, domain: keyRecord.domain, expiryDate: keyRecord.expiryDate } : null)
+
+  if (!keyRecord) {
+    return withCors(
+      NextResponse.json({ error: "API key not found", apiKey: api_key }, { status: 401 }),
+      corsHeaders
+    )
+  }
+
   const now = Date.now()
-
-  if (
-    !apiKey ||
-    apiKey.type !== ApiKeyType.public ||
-    apiKey.revoked ||
-    (apiKey.expiryDate && apiKey.expiryDate.getTime() <= now)
-  ) {
-    return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }), corsHeaders)
+  const isInactive =
+    keyRecord.type !== ApiKeyType.public ||
+    keyRecord.revoked ||
+    (keyRecord.expiryDate != null && keyRecord.expiryDate.getTime() <= now)
+  if (isInactive) {
+    return withCors(
+      NextResponse.json({ error: "API key inactive", apiKey: api_key }, { status: 401 }),
+      corsHeaders
+    )
   }
 
-  if (apiKey.domain && hostname !== apiKey.domain) {
-    return withCors(NextResponse.json({ error: "Forbidden" }, { status: 403 }), corsHeaders)
+  if (keyRecord.domain && hostname !== keyRecord.domain) {
+    return withCors(
+      NextResponse.json({
+        error: "Domain not allowed",
+        origin: request.headers.get("origin"),
+        allowedDomain: keyRecord.domain,
+      }, { status: 401 }),
+      corsHeaders
+    )
   }
+
+  const apiKey = keyRecord
 
   corsHeaders = buildCorsHeaders(apiKey.domain, origin)
 

@@ -15,6 +15,8 @@ import { Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { LeadStatus, LeadTemp } from "@prisma/client"
 
+export const dynamic = "force-dynamic"
+
 type SearchParams = Promise<{
   status?: string
   temperature?: string
@@ -42,119 +44,24 @@ export default async function LeadsPage({
     redirect("/auth")
   }
 
-  /* ---------------- WHERE ---------------- */
+  /* ---------------- WHERE (simplified) ---------------- */
   const where: any = {
     userId: session.user.id,
   }
 
-  // Build leadStatus filter conditions
-  const leadStatusConditions: any[] = []
-
-  // Add explicit status filter if provided
-  if (searchParams.status && searchParams.status !== "all") {
-    leadStatusConditions.push({ leadStatus: searchParams.status as LeadStatus })
-  }
-
-  // Add exclusion filter for CONVERTED/LOST
-  const excludeStatuses: LeadStatus[] = []
-  if (searchParams.showConverted !== "true") excludeStatuses.push("CONVERTED")
-  if (searchParams.showLost !== "true") excludeStatuses.push("LOST")
-
-  if (excludeStatuses.length > 0) {
-    leadStatusConditions.push({ leadStatus: { notIn: excludeStatuses } })
-  }
-
-  // Combine leadStatus conditions with AND
-  if (leadStatusConditions.length > 0) {
-    if (leadStatusConditions.length === 1) {
-      // Single condition: apply directly
-      Object.assign(where, leadStatusConditions[0])
-    } else {
-      // Multiple conditions: use AND
-      where.AND = leadStatusConditions
-    }
-  }
-
-  if (searchParams.temperature && searchParams.temperature !== "all") {
-    where.temperature = searchParams.temperature as LeadTemp
-  }
-
-  if (searchParams.source && searchParams.source !== "all") {
-    where.source = searchParams.source
-  }
-
-  if (searchParams.search) {
-    where.OR = [
-      { name: { contains: searchParams.search, mode: "insensitive" } },
-      { email: { contains: searchParams.search, mode: "insensitive" } },
-      { phone: { contains: searchParams.search, mode: "insensitive" } },
-    ]
-  }
-
-  // Stale leads filter (>14 days without action)
-  if (searchParams.stale === "true") {
-    const fourteenDaysAgo = new Date()
-    fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14)
-    where.lastActionAt = { lt: fourteenDaysAgo }
-    where.leadStatus = { notIn: ["CONVERTED", "LOST"] }
-  }
-
-  // Tags filter (multi-select)
-  if (searchParams.tags) {
-    const selectedTags = searchParams.tags.split(",").filter(Boolean)
-    if (selectedTags.length > 0) {
-      where.tags = { hasEvery: selectedTags }
-    }
-  }
-
-  // Date filters (Hoy / Esta semana)
-  if (searchParams.dateFilter) {
-    const now = new Date()
-
-    if (searchParams.dateFilter === "today") {
-      // Today: from 00:00:00 to 23:59:59
-      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0)
-      const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59)
-
-      where.createdAt = {
-        gte: startOfDay,
-        lte: endOfDay,
-      }
-    } else if (searchParams.dateFilter === "week") {
-      // This week: from Monday 00:00 to Sunday 23:59:59
-      const dayOfWeek = now.getDay()
-      const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek // Monday is 1
-      const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diff, 0, 0, 0)
-      const sunday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6, 23, 59, 59)
-
-      where.createdAt = {
-        gte: monday,
-        lte: sunday,
-      }
-    }
-  }
-
-  /* ---------------- SORT ---------------- */
-  const sortBy = searchParams.sortBy || "score"
-  const sortOrder = (searchParams.sortOrder || "desc") as "asc" | "desc"
-
-  let orderBy: any = [{ lastActionAt: "desc" }, { score: "desc" }]
-  if (sortBy === "temperature") {
-    orderBy = [{ temperature: sortOrder }, { score: "desc" }]
-  } else if (sortBy === "score") {
-    orderBy = { score: sortOrder }
-  } else if (sortBy === "lastActionAt") {
-    orderBy = { lastActionAt: sortOrder }
-  } else if (sortBy === "createdAt") {
-    orderBy = { createdAt: sortOrder }
-  }
+  /* ---------------- SORT (simplified) ---------------- */
+  const orderBy: any = { createdAt: "desc" }
 
   /* ---------------- DATA ---------------- */
-  let leads = await prisma.lead.findMany({
-    where,
-    orderBy,
-    take: 100,
+  const leads = await prisma.lead.findMany({
+    orderBy: { createdAt: "desc" }
   })
+  
+  console.log("DEBUG ALL LEADS:", leads.length)
+  console.log("DEBUG ALL LEADS DATA:", leads)
+
+  console.log("[dashboard] user:", session.user.id)
+  console.log("[dashboard] leads:", leads.length)
 
   const allLeads = await prisma.lead.findMany({
     where: { userId: session.user.id },

@@ -38,8 +38,14 @@ export async function processEvent(event: QueuedEvent): Promise<void> {
   await Promise.all([
     skipAnalytics ? Promise.resolve() : updateVisitor(event),
     skipAnalytics ? Promise.resolve() : updateSession(event),
-    skipAnalytics ? Promise.resolve() : updateDailyStats(event),
+    skipAnalytics
+      ? Promise.resolve()
+      : updateDailyStats(event).catch((err) => {
+          console.error("[stats] failed:", err)
+        }),
   ])
 
-  await detectLead(event)
+  await detectLead(event).catch((err) => {
+    console.error("[lead] detect error:", err)
+  })
 }

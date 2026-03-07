@@ -3,7 +3,6 @@
  * Safe queue: RPOPLPUSH (lmove) moves events to events_processing; ack on success, retry/DLQ on failure.
  */
 
-import * as crypto from "node:crypto"
 import { redis } from "@/lib/security/redis"
 import type { QueuedEvent, QueuedEventEnvelope } from "@/lib/events/types"
 import {
@@ -14,7 +13,9 @@ import {
   PROCESSED_EVENTS_TTL_SEC,
 } from "@/lib/events/constants"
 
-const EVENTS_QUEUE_KEY = "events_queue"
+/** Single queue key — shared by ingest (RPUSH) and worker (LMOVE). */
+export const EVENTS_QUEUE_KEY = "clientlabs:events"
+
 const EVENTS_PROCESSING_KEY = "events_processing"
 const EVENTS_RETRY_QUEUE_KEY = "events_retry_queue"
 const EVENTS_DEAD_LETTER_KEY = "events_dead_letter"
@@ -22,40 +23,42 @@ const PROCESSED_EVENTS_KEY = "processed_events"
 
 export type ProcessingItem = { envelope: QueuedEventEnvelope; raw: string }
 
-/** Retry backoff delays (ms): retry 1→10s, 2→30s, 3→2m, 4→10m, 5→DLQ. */
+/** Retry backoff delays */
 const RETRY_DELAYS_MS = [10_000, 30_000, 2 * 60_000, 10 * 60_000]
 
 /**
- * Enqueue events to the main queue. Each is stored as an envelope with eventId, retries: 0.
- * Rejects (returns 0) and logs if queue length would exceed MAX_QUEUE_LENGTH.
+ * Enqueue events to Redis queue
  */
 export async function enqueueEvents(events: QueuedEvent[]): Promise<number> {
-  if (events.length === 0) return 0
-  const len = await getQueueLength()
-  if (len >= MAX_QUEUE_LENGTH) {
+  if (!events?.length) return 0
+
+  const currentLength = await getQueueLength()
+
+  if (currentLength >= MAX_QUEUE_LENGTH) {
     console.error("[queue] max queue size exceeded")
     return 0
   }
-  const now = Date.now()
-  const serialized = events.map((e) =>
-    JSON.stringify({
-      eventId: crypto.randomUUID(),
-      event: e,
-      retries: 0,
-      createdAt: now,
-    } as QueuedEventEnvelope)
-  )
-  const length = await redis.lpush(EVENTS_QUEUE_KEY, ...serialized)
-  return length as number
+
+  console.log("[queue] pushing to key:", EVENTS_QUEUE_KEY)
+
+  for (const event of events) {
+    await redis.rpush(EVENTS_QUEUE_KEY, JSON.stringify(event))
+  }
+
+  const queueLength = await redis.llen(EVENTS_QUEUE_KEY)
+
+  console.log("[queue] redis length after push:", queueLength)
+  console.log("[queue] pushed events:", events.length)
+
+  return events.length
 }
 
 /**
- * Move up to `limit` events from events_queue to events_processing (atomic RPOPLPUSH via lmove).
- * Returns items with parsed envelope and raw string for ack.
- * Corrupt JSON: move raw to events_dead_letter (never crash worker).
+ * Move events from queue → processing (safe queue pattern)
  */
 export async function dequeueToProcessing(limit: number): Promise<ProcessingItem[]> {
   const out: ProcessingItem[] = []
+
   for (let i = 0; i < limit; i++) {
     const raw = await redis.lmove(
       EVENTS_QUEUE_KEY,
@@ -63,47 +66,65 @@ export async function dequeueToProcessing(limit: number): Promise<ProcessingItem
       "right",
       "left"
     )
-    if (raw == null) break
-    const str = raw as string
+
+    if (!raw) break
+
+    const rawString = raw as string
+
     try {
-      const envelope = JSON.parse(str) as QueuedEventEnvelope
-      out.push({ envelope, raw: str })
+      const envelope = JSON.parse(rawString) as QueuedEventEnvelope
+      out.push({ envelope, raw: rawString })
     } catch {
-      await redis.lrem(EVENTS_PROCESSING_KEY, 1, str)
-      await redis.lpush(EVENTS_DEAD_LETTER_KEY, str)
+      console.error("[queue] corrupt event → DLQ")
+
+      await redis.lrem(EVENTS_PROCESSING_KEY, 1, rawString)
+      await redis.lpush(EVENTS_DEAD_LETTER_KEY, rawString)
     }
   }
+
   return out
 }
 
 /**
- * Remove a processed event from events_processing (on success).
+ * ACK processed event
  */
 export async function ackProcessedEvent(raw: string): Promise<void> {
   await redis.lrem(EVENTS_PROCESSING_KEY, 1, raw)
 }
 
-/** Idempotency: check if eventId was already processed. */
+/**
+ * Idempotency check
+ */
 export async function isEventProcessed(eventId: string): Promise<boolean> {
-  const v = await redis.sismember(PROCESSED_EVENTS_KEY, eventId)
-  return v === 1
+  const result = await redis.sismember(PROCESSED_EVENTS_KEY, eventId)
+  return result === 1
 }
 
-/** Idempotency: mark event as processed; SET TTL 24h. */
+/**
+ * Mark event processed
+ */
 export async function markEventProcessed(eventId: string): Promise<void> {
   await redis.sadd(PROCESSED_EVENTS_KEY, eventId)
   await redis.expire(PROCESSED_EVENTS_KEY, PROCESSED_EVENTS_TTL_SEC)
 }
 
 /**
- * On failure: remove from processing and push to retry queue (with backoff) or dead letter.
+ * Retry or DLQ logic
  */
-export async function pushToRetryOrDeadLetter(envelope: QueuedEventEnvelope): Promise<void> {
+export async function pushToRetryOrDeadLetter(
+  envelope: QueuedEventEnvelope
+): Promise<void> {
   const nextRetries = envelope.retries + 1
   const delayMs = RETRY_DELAYS_MS[nextRetries - 1] ?? 0
-  const nextRetryAt = Date.now() + delayMs
-  const payload: QueuedEventEnvelope = { ...envelope, retries: nextRetries, nextRetryAt }
+
+  const payload: QueuedEventEnvelope = {
+    ...envelope,
+    retries: nextRetries,
+    nextRetryAt: Date.now() + delayMs,
+  }
+
   const serialized = JSON.stringify(payload)
+
   if (nextRetries <= MAX_RETRIES) {
     await redis.lpush(EVENTS_RETRY_QUEUE_KEY, serialized)
   } else {
@@ -112,7 +133,7 @@ export async function pushToRetryOrDeadLetter(envelope: QueuedEventEnvelope): Pr
 }
 
 /**
- * Remove from processing and push to retry or DLQ. Call after ack (remove from processing).
+ * NACK logic
  */
 export async function nackAndRetryOrDeadLetter(
   raw: string,
@@ -122,25 +143,25 @@ export async function nackAndRetryOrDeadLetter(
   await pushToRetryOrDeadLetter(envelope)
 }
 
-/** Main queue length (LLEN). */
+/**
+ * Queue lengths
+ */
+
 export async function getQueueLength(): Promise<number> {
   const n = await redis.llen(EVENTS_QUEUE_KEY)
   return typeof n === "number" ? n : Number(n)
 }
 
-/** Processing list length (LLEN). */
 export async function getProcessingQueueLength(): Promise<number> {
   const n = await redis.llen(EVENTS_PROCESSING_KEY)
   return typeof n === "number" ? n : Number(n)
 }
 
-/** Retry queue length (LLEN). */
 export async function getRetryQueueLength(): Promise<number> {
   const n = await redis.llen(EVENTS_RETRY_QUEUE_KEY)
   return typeof n === "number" ? n : Number(n)
 }
 
-/** Dead letter queue length (LLEN). */
 export async function getDeadLetterQueueLength(): Promise<number> {
   const n = await redis.llen(EVENTS_DEAD_LETTER_KEY)
   return typeof n === "number" ? n : Number(n)
@@ -150,31 +171,37 @@ const BLOCKING_POLL_INTERVAL_MS = 1000
 const BLOCKING_POLL_TIMEOUT_MS = 5000
 
 /**
- * Blocking dequeue: wait up to ~5s for events, then return batch.
- * Uses polling (Upstash REST has no true BRPOP); worker wakes when events exist.
+ * Poll queue until events appear
  */
 export async function blockingDequeueToProcessing(
   limit: number
 ): Promise<ProcessingItem[]> {
   const deadline = Date.now() + BLOCKING_POLL_TIMEOUT_MS
+
   while (Date.now() < deadline) {
     const batch = await dequeueToProcessing(limit)
-    if (batch.length > 0) return batch
+
+    if (batch.length > 0) {
+      return batch
+    }
+
     await new Promise((r) => setTimeout(r, BLOCKING_POLL_INTERVAL_MS))
   }
+
   return []
 }
 
 /**
- * Pop one envelope from the retry queue (for retry worker). Simple RPOP.
- * Caller should push back if nextRetryAt > now (use pushBackToRetryQueue).
+ * Retry worker dequeue
  */
 export async function dequeueOneRetryEvent(): Promise<{
   envelope: QueuedEventEnvelope
   raw: string
 } | null> {
   const raw = await redis.rpop(EVENTS_RETRY_QUEUE_KEY)
-  if (raw == null) return null
+
+  if (!raw) return null
+
   try {
     const envelope = JSON.parse(raw as string) as QueuedEventEnvelope
     return { envelope, raw: raw as string }
@@ -184,42 +211,50 @@ export async function dequeueOneRetryEvent(): Promise<{
   }
 }
 
-/** Push raw envelope back to the end of retry queue (for backoff: not yet time to retry). */
+/**
+ * Push back to retry queue
+ */
 export async function pushBackToRetryQueue(raw: string): Promise<void> {
   await redis.rpush(EVENTS_RETRY_QUEUE_KEY, raw)
 }
 
 /**
- * Recovery: move events stuck in events_processing (older than PROCESSING_TIMEOUT_MS) back to events_queue.
- * Worker should call once every 60s.
+ * Recover stuck events
  */
 export async function recoverStuckProcessingEvents(): Promise<number> {
   const rawItems = await redis.lrange(EVENTS_PROCESSING_KEY, 0, -1)
+
   const now = Date.now()
   let recovered = 0
+
   for (const raw of rawItems) {
     try {
       const envelope = JSON.parse(raw as string) as QueuedEventEnvelope
+
       if (now - envelope.createdAt > PROCESSING_TIMEOUT_MS) {
         await redis.lrem(EVENTS_PROCESSING_KEY, 1, raw)
         await redis.rpush(EVENTS_QUEUE_KEY, raw)
-        recovered += 1
+
+        recovered++
       }
     } catch {
-      // corrupt: move to DLQ
       await redis.lrem(EVENTS_PROCESSING_KEY, 1, raw)
       await redis.lpush(EVENTS_DEAD_LETTER_KEY, raw)
     }
   }
+
   return recovered
 }
 
 /**
- * If DLQ length > MAX_DLQ_LENGTH, trim oldest (keep newest 100k).
+ * Trim dead letter queue
  */
 export async function cleanupDeadLetterQueue(): Promise<number> {
   const len = await getDeadLetterQueueLength()
+
   if (len <= MAX_DLQ_LENGTH) return 0
+
   await redis.ltrim(EVENTS_DEAD_LETTER_KEY, 0, MAX_DLQ_LENGTH - 1)
+
   return len - MAX_DLQ_LENGTH
 }

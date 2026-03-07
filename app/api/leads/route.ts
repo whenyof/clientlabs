@@ -3,81 +3,67 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
-// GET /api/leads - List leads with filtering
+export const dynamic = 'force-dynamic'
+
+// GET /api/leads - List leads with minimal filtering (userId only) for debugging/read consistency
 export async function GET(request: NextRequest) {
- try {
- const session = await getServerSession(authOptions)
- if (!session?.user?.id) {
- return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
- }
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
- const { searchParams } = new URL(request.url)
- const page = parseInt(searchParams.get('page') || '1')
- const limit = parseInt(searchParams.get('limit') || '20')
- const search = searchParams.get('search') || ''
- const status = searchParams.get('status')
- const stageId = searchParams.get('stageId')
- const sortBy = searchParams.get('sortBy') || 'createdAt'
- const sortOrder = searchParams.get('sortOrder') || 'desc'
+    const { searchParams } = new URL(request.url)
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '20')
+    const offset = (page - 1) * limit
 
- const where: any = {
- userId: session.user.id
- }
+    const where = {
+      userId: session.user.id,
+    } as const
 
- // Search filter
- if (search) {
- where.OR = [
- { name: { contains: search, mode: 'insensitive' } },
- { email: { contains: search, mode: 'insensitive' } },
- { email: { contains: search, mode: 'insensitive' } }
- ]
- }
+    console.log('[api/leads] session user:', session.user.id)
 
- // Status filter
- if (status && status !== 'all') {
- where.status = status
- }
+    const [leads, total] = await Promise.all([
+      prisma.lead.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: offset,
+        take: limit,
+      }),
+      prisma.lead.count({ where }),
+    ])
 
- // Stage filter
- if (stageId) {
- where.stageId = stageId
- }
+    console.log('[api/leads] leads returned:', leads.length)
+    if (leads.length > 0) {
+      const first = leads[0]
+      console.log('[api/leads] first lead:', {
+        id: first.id,
+        email: first.email,
+        userId: first.userId,
+        createdAt: first.createdAt,
+      })
+    }
 
- const [leads, total] = await Promise.all([
- prisma.lead.findMany({
- where,
- include: {
- stage: true,
- activities: {
- orderBy: { createdAt: 'desc' },
- take: 1
- }
- },
- orderBy: {
- [sortBy]: sortOrder
- },
- skip: (page - 1) * limit,
- take: limit
- }),
- prisma.lead.count({ where })
- ])
-
- return NextResponse.json({
- leads,
- pagination: {
- page,
- limit,
- total,
- pages: Math.ceil(total / limit)
- }
- })
- } catch (error) {
- console.error('Error fetching leads:', error)
- return NextResponse.json(
- { error: 'Internal server error' },
- { status: 500 }
- )
- }
+    return NextResponse.json({
+      debug: true,
+      sessionUser: session.user.id,
+      count: leads.length,
+      leads,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    })
+  } catch (error) {
+    console.error('Error fetching leads:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 },
+    )
+  }
 }
 
 // POST /api/leads - Create new lead

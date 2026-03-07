@@ -46,18 +46,22 @@ export async function updateDailyStats(event: QueuedEvent): Promise<void> {
       })
     }
 
-    const visitorInsert = await tx.dailyStatsVisitor
-      .create({
-        data: {
-          userId: event.userId,
-          domain: event.domain,
-          day,
-          visitorId: event.visitor_id,
-        },
+    // Idempotent per (user, domain, day, visitorId)
+    const visitorKey = {
+      userId: event.userId,
+      domain: event.domain,
+      day,
+      visitorId: event.visitor_id,
+    }
+    const existingVisitor = await tx.dailyStatsVisitor.findUnique({
+      where: { userId_domain_day_visitorId: visitorKey },
+    })
+    if (!existingVisitor) {
+      await tx.dailyStatsVisitor.upsert({
+        where: { userId_domain_day_visitorId: visitorKey },
+        update: {},
+        create: visitorKey,
       })
-      .catch(() => null)
-
-    if (visitorInsert) {
       await tx.dailyStats.update({
         where: {
           userId_domain_day: {
@@ -70,18 +74,22 @@ export async function updateDailyStats(event: QueuedEvent): Promise<void> {
       })
     }
 
-    const sessionInsert = await tx.dailyStatsSession
-      .create({
-        data: {
-          userId: event.userId,
-          domain: event.domain,
-          day,
-          sessionId: event.session_id,
-        },
+    // Idempotent per (user, domain, day, sessionId)
+    const sessionKey = {
+      userId: event.userId,
+      domain: event.domain,
+      day,
+      sessionId: event.session_id,
+    }
+    const existingSession = await tx.dailyStatsSession.findUnique({
+      where: { userId_domain_day_sessionId: sessionKey },
+    })
+    if (!existingSession) {
+      await tx.dailyStatsSession.upsert({
+        where: { userId_domain_day_sessionId: sessionKey },
+        update: {},
+        create: sessionKey,
       })
-      .catch(() => null)
-
-    if (sessionInsert) {
       await tx.dailyStats.update({
         where: {
           userId_domain_day: {

@@ -64,6 +64,10 @@ export const ALLOWED_INGEST_EVENTS = new Set<string>([
   "sdk_loaded",
   "sdk_heartbeat",
   "email_detected",
+  "email_capture",
+  "identify",
+  "contact",
+  "signup",
   "scroll_depth",
   "rage_click",
   "session_end",
@@ -73,6 +77,7 @@ export const ALLOWED_INGEST_EVENTS = new Set<string>([
   "first_visit",
   "page_hidden",
   "page_visible",
+  "test_event",
 ])
 
 export function isAllowedTrackEvent(eventType: string): boolean {

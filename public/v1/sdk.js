@@ -159,12 +159,16 @@
       if (isNaN(tsMs)) tsMs = now;
       return {
         type: e.type,
-        visitor_id: e.visitorId,
-        session_id: e.sessionId,
+        visitor_id: e.visitor_id != null ? e.visitor_id : e.visitorId,
+        session_id: e.session_id != null ? e.session_id : e.sessionId,
         timestamp: tsMs,
-        properties: e.properties,
+        properties: e.properties != null ? e.properties : {},
       };
     });
+    if (events.length === 0) return;
+    if (debug && typeof console !== "undefined") {
+      console.log("ClientLabs sending events:", events);
+    }
     var payload = { events: events };
     sendBatch(payload, 0);
   }
@@ -177,9 +181,9 @@
     }, FLUSH_INTERVAL_MS);
   }
 
-  function track(eventType, properties) {
+  function track(type, properties) {
     try {
-      if (!eventType || typeof eventType !== "string") return;
+      if (!type || typeof type !== "string") return;
       if (!key) {
         if (debug && typeof console !== "undefined") {
           console.warn("[ClientLabs] No key in clientlabsConfig; event dropped.");
@@ -187,11 +191,13 @@
         return;
       }
       var props = (properties != null && typeof properties === "object" && !Array.isArray(properties)) ? properties : {};
+      var visitorId = getVisitorId();
+      var sessionId = getSessionId();
       var event = {
-        type: eventType,
-        visitorId: getVisitorId(),
-        sessionId: getSessionId(),
-        timestamp: new Date().toISOString(),
+        type: type,
+        visitor_id: visitorId,
+        session_id: sessionId,
+        timestamp: Date.now(),
         properties: props,
       };
       if (debug && typeof console !== "undefined") {

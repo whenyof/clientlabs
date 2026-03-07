@@ -1,15 +1,22 @@
 /**
- * Lead detection — on lead_identified, email_detected, or form_submit (with email).
- * Find lead by userId + normalized email; create or update with lastSeen and score.
+ * Lead detection — on lead-type events or any event with event.payload.email.
+ * Find lead by userId + normalized email; create or update with lastSeenAt, name, visitorId.
  * New leads increment DailyStats.leads for the day.
- * Emails are normalized (trim, lowercase). Lead metadata includes emailDomain and leadType (personal | company).
  */
 
 import { startOfDay } from "date-fns"
 import { prisma } from "@/lib/prisma"
 import type { QueuedEvent } from "./types"
 
-const LEAD_EVENT_TYPES = new Set(["lead_identified", "email_detected", "form_submit"])
+const LEAD_EVENT_TYPES = new Set([
+  "lead_identified",
+  "email_detected",
+  "form_submit",
+  "email_capture",
+  "identify",
+  "contact",
+  "signup",
+])
 
 const PERSONAL_DOMAINS = [
   "gmail.com",
@@ -22,12 +29,7 @@ const PERSONAL_DOMAINS = [
 ]
 
 function extractEmail(event: QueuedEvent): string | null {
-  let raw: string | undefined
-  if (event.type === "lead_identified" || event.type === "email_detected") {
-    raw = event.payload?.email as string | undefined
-  } else if (event.type === "form_submit") {
-    raw = event.payload?.email as string | undefined
-  }
+  const raw = event.payload?.email as string | undefined
   if (typeof raw !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw)) return null
   return raw.trim().toLowerCase()
 }
@@ -39,12 +41,10 @@ function classifyLeadDomain(email: string): { emailDomain: string; leadType: "pe
 }
 
 export async function detectLead(event: QueuedEvent): Promise<void> {
-  if (!LEAD_EVENT_TYPES.has(event.type)) return
-
   const email = extractEmail(event)
   if (!email) return
-
-  const ts = new Date(event.timestamp)
+  const ts = new Date()
+  const name = typeof event.payload?.name === "string" ? event.payload.name : undefined
   const { emailDomain, leadType } = classifyLeadDomain(email)
 
   const existing = await prisma.lead.findFirst({
@@ -60,27 +60,56 @@ export async function detectLead(event: QueuedEvent): Promise<void> {
       data: {
         lastActionAt: ts,
         updatedAt: ts,
+        lastAction: event.type,
+        ...(name != null && { name }),
         score: { increment: 5 },
       },
     })
+    console.log("[lead] updated:", email)
     return
   }
 
-  await prisma.lead.create({
-    data: {
+  const existing = await prisma.lead.findFirst({
+    where: {
       userId: event.userId,
       email,
-      source: "WEB",
-      lastActionAt: ts,
-      allowedDomain: event.domain,
-      score: 10,
-      metadata: {
-        visitorId: event.visitor_id,
-        emailDomain,
-        leadType,
-      },
     },
   })
+  
+  if (!existing) {
+    await prisma.lead.create({
+      data: {
+        userId: event.userId,
+        email,
+        name: name ?? null,
+        source: "sdk",
+        status: "NEW",
+        temperature: "COLD",
+        lastActionAt: ts,
+        lastAction: event.type,
+        allowedDomain: event.domain,
+        score: 10,
+        metadata: {
+          visitorId: event.visitor_id,
+          emailDomain,
+          leadType,
+        },
+      },
+    })
+  
+    console.log("[lead] created:", email)
+  } else {
+    await prisma.lead.update({
+      where: { id: existing.id },
+      data: {
+        lastActionAt: ts,
+        lastAction: event.type,
+        score: { increment: 5 },
+      },
+    })
+  
+    console.log("[lead] updated:", email)
+  }
 
   const day = startOfDay(ts)
   const row = await prisma.dailyStats.findUnique({

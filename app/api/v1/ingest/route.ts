@@ -1,4 +1,11 @@
+export const runtime = "nodejs"
+export const dynamic = "force-dynamic"
+
 import { NextRequest, NextResponse } from "next/server"
+
+if (typeof process !== "undefined") {
+  console.log("INGEST REDIS URL:", process.env.UPSTASH_REDIS_REST_URL ?? "(missing)")
+}
 import { prisma } from "@/lib/prisma"
 import { ApiKeyType } from "@prisma/client"
 import { buildCorsHeaders } from "@/lib/track/originValidator"
@@ -226,12 +233,23 @@ export async function POST(request: NextRequest) {
   corsHeaders = buildCorsHeaders(apiKey.domain, origin)
 
   const clientIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
-  const rateCheck = await checkDistributedRateLimit(
-    `v1ingest:${apiKey.userId}:${clientIp}`,
-    RATE_LIMIT_REQUESTS,
-    RATE_LIMIT_WINDOW_SECONDS
-  )
-  if (!rateCheck.allowed) {
+  let rateLimitAllowed = true
+  try {
+    const redisConfigured =
+      process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+    if (redisConfigured && process.env.NODE_ENV === "production") {
+      const rateCheck = await checkDistributedRateLimit(
+        `v1ingest:${apiKey.userId}:${clientIp}`,
+        RATE_LIMIT_REQUESTS,
+        RATE_LIMIT_WINDOW_SECONDS
+      )
+      rateLimitAllowed = rateCheck.allowed
+    }
+  } catch (err) {
+    console.error("[rate-limit] redis failure, failing open", err)
+    rateLimitAllowed = true
+  }
+  if (!rateLimitAllowed) {
     return withCors(
       NextResponse.json({ error: "Too Many Requests" }, { status: 429 }),
       corsHeaders
@@ -272,6 +290,7 @@ export async function POST(request: NextRequest) {
     })
   }
 
+  console.log("[ingest] enqueueing events:", validEvents.length)
   await enqueueEvents(validEvents)
 
   return withCors(

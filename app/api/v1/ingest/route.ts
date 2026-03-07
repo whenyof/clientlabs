@@ -88,7 +88,7 @@ export async function OPTIONS(request: NextRequest) {
 
 /**
  * POST /api/v1/ingest
- * Auth: x-api-key header or api_key query param (for sendBeacon).
+ * Auth: x-api-key header, Authorization: Bearer <key>, body api_key/apiKey, or query api_key.
  * Body: { events: [{ type, visitorId, properties?, timestamp? }] }
  * Rate limited, 50KB max body, max 20 events, allowlisted types, UUID v4 visitorId.
  */
@@ -101,13 +101,12 @@ export async function POST(request: NextRequest) {
     return withCors(NextResponse.json({ error: "Payload too large" }, { status: 413 }), corsHeaders)
   }
 
-  let payload: SdkIngestPayload
-  try {
-    const body = await request.json()
-    payload = body as SdkIngestPayload
-  } catch {
+  const body = await request.json().catch(() => null)
+  if (body == null || typeof body !== "object" || Array.isArray(body)) {
     return withCors(NextResponse.json({ error: "Invalid JSON" }, { status: 400 }), corsHeaders)
   }
+
+  const payload = body as SdkIngestPayload & { api_key?: string; apiKey?: string }
 
   if (contentLength <= 0) {
     const bodyBytes = safeByteLength(payload)
@@ -116,10 +115,23 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const api_key =
+  const headerKey =
     request.headers.get("x-api-key")?.trim() ||
-    request.nextUrl.searchParams.get("api_key")?.trim() ||
+    request.headers.get("authorization")?.replace(/^Bearer\s+/i, "").trim() ||
     ""
+  const queryKey = request.nextUrl.searchParams.get("api_key")?.trim() || ""
+  const bodyKey = (
+    typeof payload.api_key === "string" ? payload.api_key : typeof payload.apiKey === "string" ? payload.apiKey : ""
+  ).trim()
+  const api_key = headerKey || queryKey || bodyKey
+
+  if (process.env.NODE_ENV !== "production") {
+    console.log("[ingest] apiKey source:", {
+      header: !!headerKey,
+      query: !!queryKey,
+      body: !!bodyKey,
+    })
+  }
 
   if (!api_key) {
     return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }), corsHeaders)

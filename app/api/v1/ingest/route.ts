@@ -37,7 +37,6 @@ type IngestEventItem = {
 }
 
 type SdkIngestPayload = {
-  api_key: string
   events: IngestEventItem[]
 }
 
@@ -89,7 +88,8 @@ export async function OPTIONS(request: NextRequest) {
 
 /**
  * POST /api/v1/ingest
- * Batched SDK events: { api_key, events: [{ type, visitorId, properties?, timestamp? }] }
+ * Auth: x-api-key header or api_key query param (for sendBeacon).
+ * Body: { events: [{ type, visitorId, properties?, timestamp? }] }
  * Rate limited, 50KB max body, max 20 events, allowlisted types, UUID v4 visitorId.
  */
 export async function POST(request: NextRequest) {
@@ -116,11 +116,16 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const { api_key, events } = payload
+  const api_key =
+    request.headers.get("x-api-key")?.trim() ||
+    request.nextUrl.searchParams.get("api_key")?.trim() ||
+    ""
 
-  if (!api_key || typeof api_key !== "string") {
-    return withCors(NextResponse.json({ error: "Bad Request" }, { status: 400 }), corsHeaders)
+  if (!api_key) {
+    return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }), corsHeaders)
   }
+
+  const { events } = payload
 
   if (!Array.isArray(events) || events.length === 0) {
     return withCors(NextResponse.json({ error: "Bad Request: events must be a non-empty array" }, { status: 400 }), corsHeaders)

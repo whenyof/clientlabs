@@ -101,6 +101,12 @@
 
   function sendBatch(payload, retryCount) {
     retryCount = retryCount || 0;
+    if (!key) {
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn("[ClientLabs] No API key; batch not sent.");
+      }
+      return;
+    }
     var url = "";
     try {
       url = (typeof window !== "undefined" && window.location && window.location.origin) ? window.location.origin + ENDPOINT : ENDPOINT;
@@ -113,15 +119,17 @@
     } catch (e) {
       return;
     }
+    var headers = { "Content-Type": "application/json", "x-api-key": key };
     try {
       if (retryCount === 0 && typeof navigator !== "undefined" && navigator.sendBeacon) {
+        var beaconUrl = url + "?api_key=" + encodeURIComponent(key);
         var blob = new Blob([body], { type: "application/json" });
-        if (navigator.sendBeacon(url, blob)) return;
+        if (navigator.sendBeacon(beaconUrl, blob)) return;
       }
     } catch (e) {}
     fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: headers,
       body: body,
       keepalive: true,
     }).then(function (res) {
@@ -142,7 +150,7 @@
   }
 
   function flush() {
-    if (queue.length === 0) return;
+    if (queue.length === 0 || !key) return;
     var batch = queue.splice(0, MAX_QUEUE_BATCH);
     var now = Date.now();
     var events = batch.map(function (e) {
@@ -157,7 +165,7 @@
         properties: e.properties,
       };
     });
-    var payload = { api_key: key, events: events };
+    var payload = { events: events };
     sendBatch(payload, 0);
   }
 

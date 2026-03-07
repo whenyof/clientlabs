@@ -46,7 +46,7 @@ export async function triggerEnrichment(
                 userId: true,
                 email: true,
                 score: true,
-                priorityLevel: true,
+                priority: true,
                 status: true,
                 leadStatus: true,
                 source: true,
@@ -56,12 +56,8 @@ export async function triggerEnrichment(
                 category: true,
                 temperature: true,
                 converted: true,
-                companyName: true,
-                companyDomain: true,
-                companySize: true,
-                industry: true,
-                jobTitle: true,
-                enrichmentStatus: true,
+                validationStatus: true,
+                metadata: true,
             },
         })
 
@@ -74,12 +70,12 @@ export async function triggerEnrichment(
         if (!lead.email) return null
 
         // Already enriched = skip
-        if (lead.enrichmentStatus === 'COMPLETED') return null
+        if (lead.validationStatus === 'COMPLETED') return null
 
         // ── 2. Mark as PROCESSING ────────────────────────
         await prisma.lead.update({
             where: { id: leadId },
-            data: { enrichmentStatus: 'PROCESSING' },
+            data: { validationStatus: 'PROCESSING' },
         })
 
         // ── 3. Run internal enrichment ───────────────────
@@ -89,32 +85,21 @@ export async function triggerEnrichment(
         const scoreAdjustments = calculateEnrichmentScore(lead.email, enrichedData)
         const totalScoreDelta = scoreAdjustments.reduce((sum, adj) => sum + adj.delta, 0)
 
-        // ── 5. Build update payload (never overwrite existing values) ──
+        // ── 5. Build update payload (Lead has no company* fields; store in metadata if needed) ──
         const fieldsUpdated: string[] = []
         const updateData: Record<string, unknown> = {}
-
-        if (enrichedData.companyName && !lead.companyName) {
-            updateData.companyName = enrichedData.companyName
+        const metadata = (lead.metadata as Record<string, unknown>) ?? {}
+        if (enrichedData.companyName) {
+            updateData.metadata = { ...metadata, companyName: enrichedData.companyName } as Prisma.InputJsonValue
             fieldsUpdated.push('companyName')
         }
-        if (enrichedData.companyDomain && !lead.companyDomain) {
-            updateData.companyDomain = enrichedData.companyDomain
+        if (enrichedData.companyDomain) {
+            const m = (updateData.metadata as Record<string, unknown>) ?? metadata
+            updateData.metadata = { ...m, companyDomain: enrichedData.companyDomain } as Prisma.InputJsonValue
             fieldsUpdated.push('companyDomain')
         }
-        if (enrichedData.companySize && !lead.companySize) {
-            updateData.companySize = enrichedData.companySize
-            fieldsUpdated.push('companySize')
-        }
-        if (enrichedData.industry && !lead.industry) {
-            updateData.industry = enrichedData.industry
-            fieldsUpdated.push('industry')
-        }
-        if (enrichedData.jobTitle && !lead.jobTitle) {
-            updateData.jobTitle = enrichedData.jobTitle
-            fieldsUpdated.push('jobTitle')
-        }
 
-        // ── 6. Apply score + enrichment fields atomically ─
+        // ── 6. Apply score + priority atomically ─
         const previousScore = lead.score
         const newRawScore = previousScore + totalScoreDelta
         const newScore = clampScore(newRawScore)
@@ -125,24 +110,12 @@ export async function triggerEnrichment(
             data: {
                 ...updateData,
                 score: newScore,
-                priorityLevel: newPriority,
-                enrichmentStatus: 'COMPLETED',
-                enrichmentSource: 'internal',
-                enrichedAt: new Date(),
+                priority: String(newPriority),
+                validationStatus: 'COMPLETED',
             },
         })
 
-        // ── 7. Log enrichment result ─────────────────────
-        await prisma.leadEnrichmentLog.create({
-            data: {
-                leadId,
-                userId,
-                source: 'INTERNAL',
-                rawResponse: enrichedData as Prisma.InputJsonValue,
-                status: 'SUCCESS',
-                fieldsUpdated,
-            },
-        })
+        // ── 7. Log enrichment result (LeadEnrichmentLog model removed; skip) ──
 
         // ── 8. Trigger automations if score changed ──────
         if (totalScoreDelta > 0) {
@@ -155,10 +128,10 @@ export async function triggerEnrichment(
                 leadStatus: lead.leadStatus ?? 'NEW',
                 source: lead.source,
                 tags: lead.tags,
-                email: lead.email,
-                name: lead.name,
-                phone: lead.phone,
-                category: lead.category,
+                email: lead.email ?? null,
+                name: lead.name ?? null,
+                phone: lead.phone ?? null,
+                category: lead.category ?? null,
                 temperature: lead.temperature ?? null,
                 converted: lead.converted,
             }
@@ -189,17 +162,7 @@ export async function triggerEnrichment(
         try {
             await prisma.lead.update({
                 where: { id: leadId },
-                data: { enrichmentStatus: 'FAILED' },
-            })
-
-            await prisma.leadEnrichmentLog.create({
-                data: {
-                    leadId,
-                    userId,
-                    source: 'INTERNAL',
-                    status: 'FAILED',
-                    errorMessage: error.message,
-                },
+                data: { validationStatus: 'FAILED' },
             })
         } catch {
             // If even logging fails, just return

@@ -1,9 +1,9 @@
 "use client"
 
 import { useState, useCallback, useEffect, useRef } from "react"
-import { MovementsHeader } from "./MovementsHeader"
-import { MovementsTable } from "./MovementsTable"
-import { MovementDetailsDrawer } from "./MovementDetailsDrawer"
+import { MovementsHeader } from "@/app/dashboard/finance/components/movements/MovementsHeader"
+import { MovementsTable } from "@/app/dashboard/finance/components/movements/MovementsTable"
+import { MovementDetailsDrawer } from "@/app/dashboard/finance/components/movements/MovementDetailsDrawer"
 import type { Movement, MovementSortField, MovementSortDir } from "@/modules/finance/movements"
 
 type PeriodValue = "week" | "month" | "quarter" | "year"

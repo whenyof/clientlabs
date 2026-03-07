@@ -144,21 +144,27 @@ export async function POST(req: NextRequest) {
                 if (!email) return { status: "ignored", reason: "missing_email" }
 
                 const metadata = (l.metadata as Record<string, unknown> | null) || {}
-
-                return prisma.lead.upsert({
-                    where: { userId_email: { userId, email } },
-                    update: {
-                        name: typeof l.name === 'string' ? l.name : undefined,
-                        phone: typeof l.phone === 'string' ? l.phone : undefined,
-                        metadata: { ...metadata, ingestedAt: new Date().toISOString() } as Prisma.InputJsonValue
-                    },
-                    create: {
+                const existing = await prisma.lead.findFirst({
+                    where: { userId, email },
+                    select: { id: true },
+                })
+                if (existing) {
+                    return prisma.lead.update({
+                        where: { id: existing.id },
+                        data: {
+                            name: typeof l.name === 'string' ? l.name : undefined,
+                            phone: typeof l.phone === 'string' ? l.phone : undefined,
+                            metadata: { ...metadata, ingestedAt: new Date().toISOString() } as Prisma.InputJsonValue
+                        }
+                    })
+                }
+                return prisma.lead.create({
+                    data: {
                         userId,
                         email,
                         name: typeof l.name === 'string' ? l.name : null,
                         phone: typeof l.phone === 'string' ? l.phone : null,
                         source: "API",
-                        sourceType: "webhook",
                         metadata: metadata as Prisma.InputJsonValue
                     }
                 })

@@ -2,7 +2,7 @@
 
 import { useSectorConfig } from "@/hooks/useSectorConfig"
 import { formatSaleCurrency } from "../utils"
-import { FinanceStatCard, KpiVariant } from "@/app/dashboard/other/finance/components/FinanceStatCard"
+import { FinanceStatCard, KpiVariant } from "@/app/dashboard/finance/components/FinanceStatCard"
 
 export type SalesKPIData = {
   revenue: number

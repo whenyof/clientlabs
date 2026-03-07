@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { formatCurrency } from "@/app/dashboard/other/finance/lib/formatters"
+import { formatCurrency } from "@/app/dashboard/finance/lib/formatters"
 import type { InvoiceKPIsResponse } from "./types"
 
 const CARD_TINT = [

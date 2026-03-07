@@ -108,7 +108,7 @@ export class LeadEventService {
                     // ── 1. Read lead (snapshot locked by Serializable) ──
                     const lead = await tx.lead.findUnique({
                         where: { id: leadId },
-                        select: { id: true, userId: true, score: true, priorityLevel: true },
+                        select: { id: true, userId: true, score: true, priority: true },
                     })
 
                     if (!lead) {
@@ -160,13 +160,16 @@ export class LeadEventService {
                     // ── 5. Create event ───────────────────────────────
                     const event = await tx.leadEvent.create({
                         data: {
+                            id: crypto.randomUUID(),
                             leadId,
                             userId,
                             type: eventType,
-                            eventSource,
-                            data: metadata as Prisma.InputJsonValue,
-                            scoreDelta: effectiveDelta,
-                            sessionId: input.sessionId,
+                            data: {
+                                ...(metadata as Record<string, unknown>),
+                                eventSource,
+                                scoreDelta: effectiveDelta,
+                                sessionId: input.sessionId,
+                            } as Prisma.InputJsonValue,
                         },
                     })
 
@@ -175,7 +178,7 @@ export class LeadEventService {
                         where: { id: leadId },
                         data: {
                             score: finalScore,
-                            priorityLevel: newPriorityLevel,
+                            priority: String(newPriorityLevel),
                         },
                     })
 
@@ -201,9 +204,9 @@ export class LeadEventService {
                         leadId: result.event.leadId,
                         userId: result.event.userId,
                         type: result.event.type,
-                        eventSource: result.event.eventSource,
+                        eventSource,
                         data: result.event.data,
-                        scoreDelta: result.event.scoreDelta,
+                        scoreDelta: result.scoreBreakdown.effectiveDelta,
                         timestamp: result.event.timestamp,
                     },
                     scoreBreakdown: result.scoreBreakdown,
@@ -300,11 +303,11 @@ export class LeadEventService {
     static async getLeadScoreSummary(leadId: string, userId: string) {
         const lead = await prisma.lead.findUnique({
             where: { id: leadId },
-            select: {
+                select: {
                 id: true,
                 userId: true,
                 score: true,
-                priorityLevel: true,
+                priority: true,
                 name: true,
                 email: true,
             },
@@ -329,8 +332,7 @@ export class LeadEventService {
             select: {
                 id: true,
                 type: true,
-                eventSource: true,
-                scoreDelta: true,
+                data: true,
                 timestamp: true,
             },
         })
@@ -341,7 +343,7 @@ export class LeadEventService {
                 name: lead.name,
                 email: lead.email,
                 score: lead.score,
-                priorityLevel: lead.priorityLevel,
+                priorityLevel: typeof lead.priority === 'number' ? lead.priority : (parseInt(String(lead.priority), 10) || 1),
             },
             recentEvents,
         }

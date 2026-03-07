@@ -706,7 +706,7 @@ export async function getAutomationSuggestions(leadId: string) {
     }
 
     // Import dynamically to avoid bundling OpenAI in client
-    const { generateAutomationSuggestions } = await import("./utils/openai")
+    const { generateAutomationSuggestions } = await import("@/app/dashboard/leads/utils/openai")
     const suggestions = await generateAutomationSuggestions(lead)
 
     return suggestions

@@ -31,7 +31,7 @@ export async function triggerAutomation(
                 id: true,
                 userId: true,
                 score: true,
-                priorityLevel: true,
+                priority: true,
                 status: true,
                 leadStatus: true,
                 source: true,
@@ -49,6 +49,7 @@ export async function triggerAutomation(
 
         const leadSnapshot: LeadSnapshot = {
             ...lead,
+            priorityLevel: typeof lead.priority === 'number' ? lead.priority : (parseInt(String(lead.priority), 10) || 1),
             leadStatus: lead.leadStatus ?? 'NEW',
             temperature: lead.temperature ?? null,
         }

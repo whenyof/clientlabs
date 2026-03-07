@@ -52,7 +52,7 @@ function getEventType(e: Record<string, unknown>): string {
 
 function isValidTrackEvent(event: unknown, now: number): event is TrackEvent {
     if (typeof event !== 'object' || event === null || Array.isArray(event)) return false
-    const e = event as Record<string, unknown>
+    const e = event as unknown as Record<string, unknown>
     const rawType = getEventType(e)
     if (!rawType) return false
     const eventType = normalizeEventType(rawType)
@@ -193,14 +193,14 @@ export async function POST(request: NextRequest) {
 
         // 6. Identity & Sessions
         const userAgent = request.headers.get('user-agent')
-        const firstNonIdentify = validEvents.find((e) => normalizeEventType(getEventType(e as Record<string, unknown>)) !== 'identify') as TrackEvent | undefined
+        const firstNonIdentify = validEvents.find((e) => normalizeEventType(getEventType(e as unknown as Record<string, unknown>)) !== 'identify') as TrackEvent | undefined
         const sessionCtx: SessionContext | null = firstNonIdentify ? {
-            firstEvent: { eventType: normalizeEventType(getEventType(firstNonIdentify as Record<string, unknown>)), metadata: firstNonIdentify.metadata },
+            firstEvent: { eventType: normalizeEventType(getEventType(firstNonIdentify as unknown as Record<string, unknown>)), metadata: firstNonIdentify.metadata },
             userAgent,
         } : null
 
         for (const event of validEvents) {
-            const normType = normalizeEventType(getEventType(event as Record<string, unknown>))
+            const normType = normalizeEventType(getEventType(event as unknown as Record<string, unknown>))
             if (normType === 'identify') {
                 await handleIdentify(userId, visitorId, (event as TrackEvent).metadata)
             } else if (normType === 'sdk_loaded' || normType === 'sdk_heartbeat') {
@@ -224,10 +224,8 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        const lead = await prisma.lead.findFirst({
-            where: { userId, visitorId },
-            select: { id: true },
-        })
+        // Lead model has no visitorId; visitor–lead link not available — treat as anonymous unless identified elsewhere
+        const lead = null as { id: string } | null
 
         let sessionId: string | undefined = undefined
         if (sessionCtx) {
@@ -241,17 +239,14 @@ export async function POST(request: NextRequest) {
 
         if (!lead) {
             const anonymousData = validEvents
-                .filter((e) => normalizeEventType(getEventType(e as Record<string, unknown>)) !== 'identify')
+                .filter((e) => normalizeEventType(getEventType(e as unknown as Record<string, unknown>)) !== 'identify')
                 .map((e) => ({
                     visitorId, accountId: userId,
-                    type: normalizeEventType(getEventType(e as Record<string, unknown>)),
+                    type: normalizeEventType(getEventType(e as unknown as Record<string, unknown>)),
                     data: { ...(e as TrackEvent).metadata, sdkTimestamp: (e as TrackEvent).timestamp } as Prisma.InputJsonValue,
                 }))
 
-            if (anonymousData.length > 0) {
-                await prisma.anonymousEvent.createMany({ data: anonymousData })
-            }
-
+            // anonymousEvent model removed from schema; skip persisting anonymous events
             return withCors(NextResponse.json({ matched: false, visitorId, processed: validEvents.length, skipped }), corsHeaders)
         }
 
@@ -261,7 +256,7 @@ export async function POST(request: NextRequest) {
         const results = []
 
         for (const event of validEvents) {
-            const normType = normalizeEventType(getEventType(event as Record<string, unknown>))
+            const normType = normalizeEventType(getEventType(event as unknown as Record<string, unknown>))
             if (normType === 'identify' || INTERNAL_EVENT_TYPES.has(normType)) continue
 
             try {
@@ -294,15 +289,24 @@ async function handleIdentify(userId: string, visitorId: string, metadata: Recor
     const sanitizedName = (metadata.name as string | undefined)?.substring(0, 100)
     const sanitizedPhone = (metadata.phone as string | undefined)?.substring(0, 30)
 
-    const lead = await prisma.lead.upsert({
-        where: { userId_email: { userId, email } },
-        update: { visitorId, name: sanitizedName, phone: sanitizedPhone },
-        create: {
-            userId, email, name: sanitizedName, phone: sanitizedPhone,
-            visitorId, source: "WEB", sourceType: "web",
-            sourceId: await resolveLeadSource(userId, "web", "Public API")
-        }
+    const existing = await prisma.lead.findFirst({
+        where: { userId, email },
+        select: { id: true },
     })
+    const lead = existing
+        ? await prisma.lead.update({
+            where: { id: existing.id },
+            data: { name: sanitizedName, phone: sanitizedPhone },
+        })
+        : await prisma.lead.create({
+            data: {
+                userId,
+                email,
+                name: sanitizedName,
+                phone: sanitizedPhone,
+                source: "WEB",
+            },
+        })
 
     await linkSessionsToLead(visitorId, userId, lead.id).catch(() => { })
 }

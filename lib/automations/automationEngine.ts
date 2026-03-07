@@ -38,10 +38,10 @@ export async function processAutomations(
 
     try {
         // ── 1. Fetch active rules for this tenant ────────
-        const rawRules = await prisma.automationRule.findMany({
+        const rawRules = await prisma.automation.findMany({
             where: {
                 userId: ctx.userId,
-                isActive: true,
+                active: true,
             },
             orderBy: { createdAt: 'asc' },
         })
@@ -65,11 +65,11 @@ export async function processAutomations(
                 // For ON_SCORE_THRESHOLD: prevent re-execution if already executed
                 // for this lead at this threshold
                 if (rule.triggerType === 'ON_SCORE_THRESHOLD') {
-                    const alreadyExecuted = await prisma.automationExecution.findFirst({
+                    const alreadyExecuted = await prisma.automationLog.findFirst({
                         where: {
                             automationId: rule.id,
                             leadId: ctx.lead.id,
-                            status: 'SUCCESS',
+                            result: 'SUCCESS',
                         },
                         select: { id: true },
                     })
@@ -91,12 +91,14 @@ export async function processAutomations(
                     .join('; ')
 
                 // ── 6. Record execution ──────────────────────
-                await prisma.automationExecution.create({
+                await prisma.automationLog.create({
                     data: {
+                        userId: ctx.userId,
                         automationId: rule.id,
                         leadId: ctx.lead.id,
-                        status: hasFailed ? 'FAILED' : 'SUCCESS',
-                        errorMessage: hasFailed ? failedMessages : null,
+                        action: 'run',
+                        result: hasFailed ? 'FAILED' : 'SUCCESS',
+                        error: hasFailed ? failedMessages : null,
                     },
                 })
 
@@ -113,12 +115,14 @@ export async function processAutomations(
                 console.error(`[AutomationEngine] Rule ${raw.id} failed:`, error.message)
 
                 try {
-                    await prisma.automationExecution.create({
+                    await prisma.automationLog.create({
                         data: {
+                            userId: ctx.userId,
                             automationId: raw.id,
                             leadId: ctx.lead.id,
-                            status: 'FAILED',
-                            errorMessage: error.message,
+                            action: 'run',
+                            result: 'FAILED',
+                            error: error.message,
                         },
                     })
                 } catch {
@@ -177,15 +181,16 @@ interface RawRule {
     isActive: boolean
 }
 
-function parseRule(raw: RawRule): AutomationRuleData {
+function parseRule(raw: { id: string; userId: string; name: string; trigger: unknown; actions: unknown; active: boolean }): AutomationRuleData {
+    const trigger = (raw.trigger || {}) as Record<string, unknown>
     return {
         id: raw.id,
         userId: raw.userId,
         name: raw.name,
-        triggerType: raw.triggerType as AutomationRuleData['triggerType'],
-        triggerValue: raw.triggerValue as AutomationRuleData['triggerValue'],
-        conditions: (Array.isArray(raw.conditions) ? raw.conditions : []) as Condition[],
+        triggerType: (trigger.triggerType as AutomationRuleData['triggerType']) ?? 'ON_EVENT',
+        triggerValue: trigger.triggerValue as AutomationRuleData['triggerValue'],
+        conditions: (Array.isArray(trigger.conditions) ? trigger.conditions : []) as Condition[],
         actions: (Array.isArray(raw.actions) ? raw.actions : []) as AutomationAction[],
-        isActive: raw.isActive,
+        isActive: raw.active,
     }
 }

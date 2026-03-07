@@ -1,32 +1,12 @@
 /**
  * Session Service — Visitor session management for /api/track (Production)
  *
- * Tracks visitor sessions with a 30-minute inactivity timeout.
- * Operates as a PARALLEL layer to scoring — never blocks LeadEventService.
- *
- * Session lifecycle:
- * 1. getOrCreateSession() — called once per batch, before event processing
- *    - Also lazily closes any expired sessions for this visitor
- * 2. Session updated with lastActivityAt, exitUrl, pageViews
- * 3. On close: endedAt, durationSeconds, isBounce computed
- *
- * Guarantees:
- * - No race conditions (upsert pattern with findFirst + create fallback)
- * - No duplicate sessions (composite check on visitorId + userId + activity window)
- * - Never blocks scoring pipeline
- * - Minimal writes (single update per batch, not per event)
- * - No infinite sessions (lazy close on every request)
+ * NOTE: VisitorSession table was removed from schema. This service now returns
+ * a deterministic sessionId from visitorId so /api/track and event pipeline
+ * continue to work; session persistence is no-op.
  */
 
-import { prisma } from '@/lib/prisma'
-
-/* ── Constants ──────────────────────────────────────── */
-
-/** Session timeout: 30 minutes of inactivity = new session */
-const SESSION_TIMEOUT_MS = 30 * 60 * 1000
-
-/** Bounce threshold: sessions < 15 seconds with 1 page view */
-const BOUNCE_THRESHOLD_S = 15
+import { randomUUID } from 'crypto'
 
 /* ── Types ──────────────────────────────────────────── */
 
@@ -45,148 +25,51 @@ export interface SessionResult {
     isNew: boolean
 }
 
-/* ── Main API ───────────────────────────────────────── */
+/* ── In-memory session key (no VisitorSession table) ─── */
+const sessionIdByVisitor = new Map<string, { sessionId: string; until: number }>()
+const SESSION_TTL_MS = 30 * 60 * 1000
 
 /**
  * Get an active session or create a new one.
- *
- * Also lazily closes any expired sessions for this visitor.
- *
- * Rules:
- * - Active session: visitorId match, endedAt IS NULL, lastActivityAt >= now - 30min
- * - If active: update lastActivityAt, exitUrl, pageViews (if page_view event)
- * - If none found: create new session with entry context
+ * Returns a sessionId for the event pipeline; no DB persistence.
  */
 export async function getOrCreateSession(
     userId: string,
     visitorId: string,
-    leadId: string | null,
-    ctx: SessionContext
+    _leadId: string | null,
+    _ctx: SessionContext
 ): Promise<SessionResult> {
-    const now = new Date()
-    const timeoutThreshold = new Date(now.getTime() - SESSION_TIMEOUT_MS)
-
-    // ── Lazy close expired sessions first ────────────────
-    // This runs on every request to ensure no sessions stay open forever.
-    // Uses raw SQL for atomic close + duration + bounce calculation.
-    await closeExpiredSessions(visitorId, userId)
-
-    // ── Try to find active session ───────────────────────
-    const activeSession = await prisma.visitorSession.findFirst({
-        where: {
-            visitorId,
-            userId,
-            endedAt: null,
-            lastActivityAt: { gte: timeoutThreshold },
-        },
-        select: { id: true },
-        orderBy: { lastActivityAt: 'desc' },
-    })
-
-    if (activeSession) {
-        // ── Update existing session ──────────────────────
-        const url = extractUrl(ctx.firstEvent.metadata)
-        const hasPageView = isPageViewEvent(ctx.firstEvent.eventType)
-
-        await prisma.visitorSession.update({
-            where: { id: activeSession.id },
-            data: {
-                lastActivityAt: now,
-                ...(url ? { exitUrl: url } : {}),
-                ...(hasPageView ? { pageViews: { increment: 1 } } : {}),
-                ...(leadId ? { leadId } : {}),
-            },
-        })
-
-        return { sessionId: activeSession.id, isNew: false }
+    const key = `${userId}:${visitorId}`
+    const now = Date.now()
+    const existing = sessionIdByVisitor.get(key)
+    if (existing && existing.until > now) {
+        existing.until = now + SESSION_TTL_MS
+        return { sessionId: existing.sessionId, isNew: false }
     }
-
-    // ── Create new session ───────────────────────────────
-    const url = extractUrl(ctx.firstEvent.metadata)
-    const referrer = ctx.firstEvent.metadata.referrer as string | undefined
-    const utm = extractUtm(ctx.firstEvent.metadata)
-    const deviceInfo = parseUserAgent(ctx.userAgent)
-    const isPageView = isPageViewEvent(ctx.firstEvent.eventType)
-
-    const session = await prisma.visitorSession.create({
-        data: {
-            userId,
-            visitorId,
-            leadId,
-            startedAt: now,
-            lastActivityAt: now,
-            entryUrl: url || null,
-            exitUrl: url || null,
-            referrer: referrer || null,
-            pageViews: isPageView ? 1 : 0,
-            ...utm,
-            ...deviceInfo,
-        },
-    })
-
-    return { sessionId: session.id, isNew: true }
+    const sessionId = randomUUID()
+    sessionIdByVisitor.set(key, { sessionId, until: now + SESSION_TTL_MS })
+    return { sessionId, isNew: true }
 }
 
 /**
- * Link all unlinked sessions for a visitorId to a Lead.
- *
- * Called during handleIdentify — updates sessions where leadId IS NULL.
- * Single bulk update — no per-session queries.
+ * No-op: VisitorSession table removed; link not persisted.
  */
 export async function linkSessionsToLead(
-    visitorId: string,
-    userId: string,
-    leadId: string
+    _visitorId: string,
+    _userId: string,
+    _leadId: string
 ): Promise<number> {
-    const result = await prisma.visitorSession.updateMany({
-        where: {
-            visitorId,
-            userId,
-            leadId: null,
-        },
-        data: {
-            leadId,
-        },
-    })
-
-    return result.count
+    return 0
 }
 
 /**
- * Close expired sessions with atomic duration + bounce calculation.
- *
- * Closes sessions where:
- * - endedAt IS NULL
- * - lastActivityAt < now - 30min
- *
- * Sets:
- * - endedAt = lastActivityAt
- * - durationSeconds = EPOCH difference
- * - isBounce = true if pageViews = 1 AND duration < 15 seconds
+ * No-op: VisitorSession table removed.
  */
 export async function closeExpiredSessions(
-    visitorId: string,
-    userId: string
+    _visitorId: string,
+    _userId: string
 ): Promise<number> {
-    const timeoutThreshold = new Date(Date.now() - SESSION_TIMEOUT_MS)
-
-    const affected = await prisma.$executeRaw`
-        UPDATE "VisitorSession"
-        SET
-            "endedAt" = "lastActivityAt",
-            "durationSeconds" = EXTRACT(EPOCH FROM ("lastActivityAt" - "startedAt"))::INT,
-            "isBounce" = (
-                "pageViews" <= 1
-                AND EXTRACT(EPOCH FROM ("lastActivityAt" - "startedAt"))::INT < ${BOUNCE_THRESHOLD_S}
-            ),
-            "updatedAt" = NOW()
-        WHERE "visitorId" = ${visitorId}
-          AND "userId" = ${userId}
-          AND "endedAt" IS NULL
-          AND "lastActivityAt" < ${timeoutThreshold}
-    `
-
-    return affected
+    return 0
 }
 
 /* ── Utilities ──────────────────────────────────────── */

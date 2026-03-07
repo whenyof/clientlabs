@@ -281,4 +281,4 @@ function persistOffline(events: IngestEvent[]): void {
   } catch {
     // ignore
   }
-
+}

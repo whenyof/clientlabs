@@ -16,7 +16,7 @@ import type { InvoiceListItem, InvoiceDetail, InvoiceKPIsResponse, ClientOption 
 import type { InvoiceLineInput } from "@/modules/invoicing/types"
 import { INVOICE_STATUS } from "@/modules/invoicing/types"
 import { isInvoiceEditable } from "@/modules/invoicing/utils/isInvoiceEditable"
-import { formatCurrency } from "@/app/dashboard/other/finance/lib/formatters"
+import { formatCurrency } from "@/app/dashboard/finance/lib/formatters"
 
 const defaultFilters: InvoiceFiltersState = {
   search: "",

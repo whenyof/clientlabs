@@ -24,7 +24,7 @@ export async function POST(
         // Multi-tenant: verify lead belongs to user
         const lead = await prisma.lead.findFirst({
             where: { id, userId: session.user.id },
-            select: { id: true, email: true, enrichmentStatus: true },
+            select: { id: true, email: true, validationStatus: true },
         })
 
         if (!lead) {
@@ -38,7 +38,7 @@ export async function POST(
         // Reset status so enrichment can re-run
         await prisma.lead.update({
             where: { id },
-            data: { enrichmentStatus: 'PENDING' },
+            data: { validationStatus: 'PENDING' },
         })
 
         // Fire in background, non-blocking

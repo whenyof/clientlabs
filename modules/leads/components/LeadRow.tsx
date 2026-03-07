@@ -91,9 +91,8 @@ export function LeadRow({ lead, isSelected, onSelect, onClick, onMouseEnter }: L
         >
             {/* 3px Priority Bar */}
             {(() => {
-                const priorityColor = lead.priorityLevel >= 3 ? "bg-red-500" :
-                    lead.priorityLevel === 2 ? "bg-amber-400" :
-                        "bg-blue-400"
+                const level = typeof lead.priority === 'number' ? lead.priority : (parseInt(String(lead.priority), 10) || 1)
+                const priorityColor = level >= 3 ? "bg-red-500" : level === 2 ? "bg-amber-400" : "bg-blue-400"
                 return <div className={`absolute left-0 top-0 bottom-0 w-[4px] opacity-80 ${priorityColor}`} />
             })()}
 

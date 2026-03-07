@@ -15,10 +15,10 @@ const ecommercePlugin: Plugin = {
             const button = target.closest('button, a');
             if (!button) return;
 
-            const text = button.innerText.toLowerCase();
+            const text = (button as HTMLElement).innerText.toLowerCase();
             if (text.includes('añadir al carrito') || text.includes('add to cart') || text.includes('agregar')) {
                 client.track('add_to_cart', {
-                    text: button.innerText.trim(),
+                    text: (button as HTMLElement).innerText.trim(),
                     url: window.location.href
                 });
             }

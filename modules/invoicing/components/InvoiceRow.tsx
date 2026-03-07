@@ -1,7 +1,7 @@
 "use client"
 
 import { memo } from "react"
-import { formatCurrency, formatDate } from "@/app/dashboard/other/finance/lib/formatters"
+import { formatCurrency, formatDate } from "@/app/dashboard/finance/lib/formatters"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {

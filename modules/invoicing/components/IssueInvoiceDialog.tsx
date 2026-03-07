@@ -9,7 +9,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { formatCurrency, formatDate } from "@/app/dashboard/other/finance/lib/formatters"
+import { formatCurrency, formatDate } from "@/app/dashboard/finance/lib/formatters"
 import type { InvoiceDetail } from "./types"
 import { INVOICE_STATUS } from "@/modules/invoicing/types"
 import { DRAFT_NUMBER_PLACEHOLDER } from "@/modules/invoicing/engine/invoice.engine"

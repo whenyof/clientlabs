@@ -11,8 +11,8 @@ import {
   ResponsiveContainer,
 } from "recharts"
 import { motion } from "framer-motion"
-import { formatCurrency } from "../lib/formatters"
-import { useFinanceData } from "../context/FinanceDataContext"
+import { formatCurrency } from "@/app/dashboard/finance/lib/formatters"
+import { useFinanceData } from "@/app/dashboard/finance/context/FinanceDataContext"
 import { ArrowTrendingUpIcon, ArrowTrendingDownIcon } from "@heroicons/react/24/outline"
 
 const RANGE_OPTIONS = [

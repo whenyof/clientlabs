@@ -15,7 +15,7 @@ import {
   LockClosedIcon,
   DocumentDuplicateIcon,
 } from "@heroicons/react/24/outline"
-import { formatCurrency, formatDate, formatDateTime } from "@/app/dashboard/other/finance/lib/formatters"
+import { formatCurrency, formatDate, formatDateTime } from "@/app/dashboard/finance/lib/formatters"
 import { cn } from "@/lib/utils"
 import type { InvoiceDetail } from "./types"
 import { INVOICE_STATUS } from "@/modules/invoicing/types"

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline"
-import { formatCurrency, formatDate } from "@/app/dashboard/other/finance/lib/formatters"
+import { formatCurrency, formatDate } from "@/app/dashboard/finance/lib/formatters"
 
 export type SaleForInvoice = {
   id: string

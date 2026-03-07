@@ -7,7 +7,7 @@ interface AnimatedCardProps {
   children: ReactNode
   className?: string
   delay?: number
-  bg-emerald-600?: boolean
+  enableHoverScale?: boolean
   scale?: number
 }
 
@@ -15,7 +15,7 @@ export function AnimatedCard({
   children,
   className = "",
   delay = 0,
-  bg-emerald-600 = true,
+  enableHoverScale = true,
   scale = 1.02
 }: AnimatedCardProps) {
   return (
@@ -28,7 +28,7 @@ export function AnimatedCard({
         delay,
         ease: "easeOut"
       }}
-      whileHover={bg-emerald-600 ? {
+      whileHover={enableHoverScale ? {
         scale,
         y: -2,
         transition: { type: "spring", stiffness: 300, damping: 20 }

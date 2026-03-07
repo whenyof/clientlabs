@@ -1,6 +1,6 @@
 "use client"
 
-import { formatCurrency, formatDate } from "@/app/dashboard/other/finance/lib/formatters"
+import { formatCurrency, formatDate } from "@/app/dashboard/finance/lib/formatters"
 import type { InvoiceDetail } from "./types"
 import { invoiceStatusLabel } from "@/modules/invoicing/utils/invoiceStatusLabel"
 import { DRAFT_NUMBER_PLACEHOLDER } from "@/modules/invoicing/engine/invoice.engine"

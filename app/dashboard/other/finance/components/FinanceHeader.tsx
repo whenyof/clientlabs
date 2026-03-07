@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useFinanceData } from "../context/FinanceDataContext"
+import { useFinanceData } from "@/app/dashboard/finance/context/FinanceDataContext"
 
 interface FinanceHeaderProps {
   onCreateTransaction: () => void

@@ -11,7 +11,7 @@ export interface SDKConfig {
 
 declare global {
     interface Window {
-        clientlabsConfig?: { key?: string; features?: Record<string, boolean> };
+        clientlabsConfig?: { key?: string; features?: Record<string, boolean>; debug?: boolean };
     }
 }
 

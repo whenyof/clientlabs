@@ -21,10 +21,10 @@ export async function GET(
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        const rule = await prisma.automationRule.findFirst({
+        const rule = await prisma.automation.findFirst({
             where: { id, userId: session.user.id },
             include: {
-                executions: {
+                logs: {
                     take: 20,
                     orderBy: { executedAt: 'desc' },
                 },
@@ -35,7 +35,27 @@ export async function GET(
             return NextResponse.json({ error: 'Automation not found' }, { status: 404 })
         }
 
-        return NextResponse.json({ data: rule })
+        const trigger = (rule.trigger || {}) as Record<string, unknown>
+        const data = {
+            id: rule.id,
+            name: rule.name,
+            triggerType: trigger.triggerType ?? 'ON_EVENT',
+            triggerValue: trigger.triggerValue,
+            conditions: trigger.conditions ?? [],
+            actions: rule.actions,
+            isActive: rule.active,
+            createdAt: rule.createdAt,
+            updatedAt: rule.updatedAt,
+            executions: rule.logs.map((l) => ({
+                id: l.id,
+                automationId: l.automationId,
+                leadId: l.leadId,
+                status: l.result,
+                errorMessage: l.error,
+                executedAt: l.executedAt,
+            })),
+        }
+        return NextResponse.json({ data })
     } catch (error) {
         console.error('[GET /api/automations/:id]', error)
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
@@ -54,9 +74,9 @@ export async function PUT(
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        const existing = await prisma.automationRule.findFirst({
+        const existing = await prisma.automation.findFirst({
             where: { id, userId: session.user.id },
-            select: { id: true },
+            select: { id: true, trigger: true },
         })
 
         if (!existing) {
@@ -65,20 +85,38 @@ export async function PUT(
 
         const body = await request.json()
         const { name, triggerType, triggerValue, conditions, actions, isActive } = body
-
-        const rule = await prisma.automationRule.update({
-            where: { id },
-            data: {
-                ...(name !== undefined && { name }),
+        const currentTrigger = (existing.trigger || {}) as Record<string, unknown>
+        const updateData: Parameters<typeof prisma.automation.update>[0]['data'] = {
+            ...(name !== undefined && { name }),
+            ...(actions !== undefined && { actions: actions as Prisma.InputJsonValue }),
+            ...(isActive !== undefined && { active: isActive }),
+        }
+        if (triggerType !== undefined || triggerValue !== undefined || conditions !== undefined) {
+            updateData.trigger = {
+                ...currentTrigger,
                 ...(triggerType !== undefined && { triggerType }),
-                ...(triggerValue !== undefined && { triggerValue: triggerValue as Prisma.InputJsonValue }),
-                ...(conditions !== undefined && { conditions: conditions as Prisma.InputJsonValue }),
-                ...(actions !== undefined && { actions: actions as Prisma.InputJsonValue }),
-                ...(isActive !== undefined && { isActive }),
-            },
-        })
+                ...(triggerValue !== undefined && { triggerValue }),
+                ...(conditions !== undefined && { conditions }),
+            } as Prisma.InputJsonValue
+        }
 
-        return NextResponse.json({ data: rule })
+        const rule = await prisma.automation.update({
+            where: { id },
+            data: updateData,
+        })
+        const trigger = (rule.trigger || {}) as Record<string, unknown>
+        const data = {
+            id: rule.id,
+            name: rule.name,
+            triggerType: trigger.triggerType ?? 'ON_EVENT',
+            triggerValue: trigger.triggerValue,
+            conditions: trigger.conditions ?? [],
+            actions: rule.actions,
+            isActive: rule.active,
+            createdAt: rule.createdAt,
+            updatedAt: rule.updatedAt,
+        }
+        return NextResponse.json({ data })
     } catch (error) {
         console.error('[PUT /api/automations/:id]', error)
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
@@ -97,7 +135,7 @@ export async function DELETE(
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        const existing = await prisma.automationRule.findFirst({
+        const existing = await prisma.automation.findFirst({
             where: { id, userId: session.user.id },
             select: { id: true },
         })
@@ -106,7 +144,7 @@ export async function DELETE(
             return NextResponse.json({ error: 'Automation not found' }, { status: 404 })
         }
 
-        await prisma.automationRule.delete({ where: { id } })
+        await prisma.automation.delete({ where: { id } })
 
         return NextResponse.json({ success: true })
     } catch (error) {

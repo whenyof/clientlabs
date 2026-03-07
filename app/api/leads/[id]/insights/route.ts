@@ -83,39 +83,27 @@ export async function GET(
         }
 
         // ── 2. Intelligence Queries (Round 1: Metrics & Paging) ──
+        // Using current schema: TrackingEvent (sessions), LeadEvent (events); no VisitorSession/RevenueTransaction
         const [
-            firstTouchRaw,
-            totalSessions,
-            totalRevenueAgg,
+            totalSessionsResult,
             lastActivityRaw,
             heatScoreRaw,
             stageChecksRaw,
-            sessions,
-            revenue,
-            sessionsPage
+            sessionsFromTracking,
+            sessionsPageFromTracking
         ] = await Promise.all([
-            // Paso 3: First Touch (SQL)
-            prisma.$queryRaw<FirstTouchRaw[]>`
-                SELECT "utmSource", "utmMedium", "utmCampaign"
-                FROM "VisitorSession"
-                WHERE "leadId" = ${leadId}
-                ORDER BY "startedAt" ASC
-                LIMIT 1
-            `,
-            // Paso A: Total Sessions Count
-            prisma.visitorSession.count({ where: { leadId } }),
-            // Paso 4b: Total Revenue
-            prisma.revenueTransaction.aggregate({
+            // Total sessions: distinct sessionIds from TrackingEvent for this lead
+            prisma.trackingEvent.groupBy({
+                by: ['sessionId'],
                 where: { leadId },
-                _sum: { amount: true }
             }),
-            // Paso 4c: Last Activity (SQL)
+            // Last Activity from LeadEvent
             prisma.$queryRaw<LastActivityRaw[]>`
                 SELECT MAX("timestamp") as last_activity
                 FROM "LeadEvent"
                 WHERE "leadId" = ${leadId}
             `,
-            // Paso 4d: Heat Score (SQL)
+            // Heat Score from LeadEvent
             prisma.$queryRaw<HeatScoreRaw[]>`
                 SELECT 
                     COALESCE(SUM(
@@ -132,7 +120,7 @@ export async function GET(
                 FROM "LeadEvent"
                 WHERE "leadId" = ${leadId}
             `,
-            // Paso 5: Stage Automatic (EXISTS check)
+            // Stage checks from LeadEvent
             prisma.$queryRaw<StageExistsRaw[]>`
                 SELECT 
                     EXISTS (SELECT 1 FROM "LeadEvent" WHERE "leadId" = ${leadId} AND "type" = 'payment_completed') as has_payment,
@@ -140,72 +128,57 @@ export async function GET(
                     EXISTS (SELECT 1 FROM "LeadEvent" WHERE "leadId" = ${leadId} AND "type" = 'demo_request') as has_demo,
                     EXISTS (SELECT 1 FROM "LeadEvent" WHERE "leadId" = ${leadId} AND "type" IN ('form_submit', 'contact_form_submit')) as has_form
             `,
-            // Paso 6: Sessions List (Backward compatibility)
-            prisma.visitorSession.findMany({
+            // Sessions list: aggregate TrackingEvent by sessionId (id = sessionId, startedAt = min createdAt)
+            prisma.trackingEvent.groupBy({
+                by: ['sessionId'],
                 where: { leadId },
-                orderBy: { startedAt: 'asc' },
-                select: {
-                    id: true,
-                    startedAt: true,
-                    durationSeconds: true,
-                    pageViews: true,
-                    isBounce: true,
-                    utmSource: true
-                }
+                _min: { createdAt: true },
             }),
-            // Paso 7: Revenue Detail
-            prisma.revenueTransaction.findMany({
+            // Paged sessions (same, with skip/take via raw or findMany then group in app - use findMany + group in memory for simplicity)
+            prisma.trackingEvent.findMany({
                 where: { leadId },
+                select: { sessionId: true, createdAt: true },
                 orderBy: { createdAt: 'desc' },
-                select: {
-                    orderId: true,
-                    amount: true,
-                    createdAt: true
-                }
             }),
-            // Paso B: Paged Sessions
-            prisma.visitorSession.findMany({
-                where: { leadId },
-                orderBy: { startedAt: 'desc' },
-                skip: (page - 1) * pageSize,
-                take: pageSize,
-                select: {
-                    id: true,
-                    startedAt: true,
-                    endedAt: true,
-                    lastActivityAt: true
-                }
-            })
         ])
 
-        // ── 3. Timeline Query (Round 2: Events for Paged Sessions) ──
-        let timeline: TimelineRaw[] = []
-        if (sessionsPage.length > 0) {
-            const sessionIds = sessionsPage.map((s: { id: string }) => s.id)
+        const totalSessions = totalSessionsResult.length
+        // Dedupe by sessionId for paged sessions and take pageSize
+        const sessionIdsSeen = new Set<string>()
+        const sessionsPageRaw: { sessionId: string; createdAt: Date }[] = []
+        for (const row of sessionsPageFromTracking) {
+            if (sessionIdsSeen.has(row.sessionId)) continue
+            sessionIdsSeen.add(row.sessionId)
+            sessionsPageRaw.push({ sessionId: row.sessionId, createdAt: row.createdAt })
+        }
+        const pagedSlice = sessionsPageRaw.slice((page - 1) * pageSize, page * pageSize)
 
-            /** 
-             * Paso C: Targeted Timeline (SQL JSON_AGG)
-             * Only fetches events for the specific session page IDs.
-             * Hardened with direct sessionId JOIN for 100% precision.
-             */
-            timeline = await prisma.$queryRaw<TimelineRaw[]>`
-                SELECT 
-                    vs."id" as "sessionId",
-                    COALESCE(
-                        json_agg(
-                            json_build_object(
-                                'type', le."type",
-                                'createdAt', le."timestamp"
-                            ) ORDER BY le."timestamp" ASC
-                        ),
-                        '[]'::json
-                    ) as events
-                FROM "VisitorSession" vs
-                LEFT JOIN "LeadEvent" le ON le."sessionId" = vs."id"
-                WHERE vs.id = ANY(${sessionIds})
-                GROUP BY vs.id
-                ORDER BY vs."startedAt" DESC
-            `
+        // Build sessions list compatible with previous shape (id, startedAt; no utmSource/duration in TrackingEvent)
+        const sessions = sessionsFromTracking.map((g) => ({
+            id: g.sessionId,
+            startedAt: g._min.createdAt,
+            durationSeconds: null as number | null,
+            pageViews: null as number | null,
+            isBounce: null as boolean | null,
+            utmSource: null as string | null,
+        }))
+        const revenue: Array<{ orderId: string; amount: number; createdAt: Date }> = []
+        const totalRevenueAgg = { _sum: { amount: null as number | null } }
+        const firstTouchRaw: FirstTouchRaw[] = [{ utmSource: 'direct', utmMedium: null, utmCampaign: null }]
+
+        // ── 3. Timeline: LeadEvent has no sessionId; return one segment of events for the lead (paged)
+        let timeline: TimelineRaw[] = []
+        if (pagedSlice.length > 0) {
+            const leadEvents = await prisma.leadEvent.findMany({
+                where: { leadId },
+                orderBy: { timestamp: 'asc' },
+                select: { type: true, timestamp: true },
+                take: 100,
+            })
+            timeline = [{
+                sessionId: pagedSlice[0]?.sessionId ?? 'lead',
+                events: leadEvents.map((e) => ({ type: e.type, createdAt: e.timestamp.toISOString() })),
+            }]
         }
 
         // ── 4. Data Processing ────────────────────────────
@@ -218,7 +191,7 @@ export async function GET(
         else if (checks.has_demo) stageAuto = 'SQL'
         else if (checks.has_form) stageAuto = 'MQL'
 
-        const totalPages = Math.ceil(totalSessions / pageSize)
+        const totalPages = Math.max(1, Math.ceil(totalSessions / pageSize))
 
         // Format result
         return NextResponse.json({

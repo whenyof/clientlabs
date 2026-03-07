@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react"
 import { XMarkIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline"
-import { formatCurrency } from "@/app/dashboard/other/finance/lib/formatters"
+import { formatCurrency } from "@/app/dashboard/finance/lib/formatters"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { updateClientData } from "@/modules/clients/actions"

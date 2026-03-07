@@ -24,22 +24,24 @@ export async function GET(
         }
         const userId = session.user.id
 
-        // 🔍 Data Retrieval: Multi-tenant scoped queries
-        const [lastSession, sessionsCount, eventsCount] = await Promise.all([
-            prisma.visitorSession.findFirst({
+        // 🔍 Data Retrieval: using TrackingEvent (no VisitorSession in schema)
+        const [lastTracking, sessionsGroup, eventsCount] = await Promise.all([
+            prisma.trackingEvent.findFirst({
                 where: { userId, leadId },
-                orderBy: { lastActivityAt: 'desc' },
-                select: { lastActivityAt: true }
+                orderBy: { createdAt: 'desc' },
+                select: { createdAt: true }
             }),
-            prisma.visitorSession.count({
-                where: { userId, leadId }
+            prisma.trackingEvent.groupBy({
+                by: ['sessionId'],
+                where: { userId, leadId },
             }),
             prisma.leadEvent.count({
                 where: { userId, leadId }
             })
         ])
 
-        const lastActivityAt = lastSession?.lastActivityAt ? new Date(lastSession.lastActivityAt) : null
+        const lastActivityAt = lastTracking?.createdAt ? new Date(lastTracking.createdAt) : null
+        const sessionsCount = sessionsGroup.length
         const now = new Date().getTime()
         const fiveMinutesAgo = now - 5 * 60 * 1000
         const twentyFourHoursAgo = now - 24 * 60 * 60 * 1000

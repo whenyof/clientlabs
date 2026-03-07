@@ -17,32 +17,35 @@ export async function GET() {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        const rules = await prisma.automationRule.findMany({
+        const rules = await prisma.automation.findMany({
             where: { userId: session.user.id },
             include: {
-                executions: {
+                logs: {
                     take: 1,
                     orderBy: { executedAt: 'desc' },
-                    select: { executedAt: true, status: true },
+                    select: { executedAt: true, result: true },
                 },
-                _count: { select: { executions: true } },
+                _count: { select: { logs: true } },
             },
             orderBy: { createdAt: 'desc' },
         })
 
-        const data = rules.map((r) => ({
-            id: r.id,
-            name: r.name,
-            triggerType: r.triggerType,
-            triggerValue: r.triggerValue,
-            conditions: r.conditions,
-            actions: r.actions,
-            isActive: r.isActive,
-            createdAt: r.createdAt,
-            updatedAt: r.updatedAt,
-            lastExecution: r.executions[0] || null,
-            totalExecutions: r._count.executions,
-        }))
+        const data = rules.map((r) => {
+            const trigger = (r.trigger || {}) as Record<string, unknown>
+            return {
+                id: r.id,
+                name: r.name,
+                triggerType: trigger.triggerType ?? 'ON_EVENT',
+                triggerValue: trigger.triggerValue,
+                conditions: trigger.conditions ?? [],
+                actions: r.actions,
+                isActive: r.active,
+                createdAt: r.createdAt,
+                updatedAt: r.updatedAt,
+                lastExecution: r.logs[0] ? { executedAt: r.logs[0].executedAt, status: r.logs[0].result } : null,
+                totalExecutions: r._count.logs,
+            }
+        })
 
         return NextResponse.json({ data })
     } catch (error) {
@@ -76,19 +79,33 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        const rule = await prisma.automationRule.create({
+        const rule = await prisma.automation.create({
             data: {
                 userId: session.user.id,
                 name,
-                triggerType,
-                triggerValue: triggerValue as Prisma.InputJsonValue,
-                conditions: (conditions || []) as Prisma.InputJsonValue,
+                trigger: {
+                    triggerType,
+                    triggerValue,
+                    conditions: conditions || [],
+                } as Prisma.InputJsonValue,
                 actions: actions as Prisma.InputJsonValue,
-                isActive: isActive ?? true,
+                active: isActive ?? true,
             },
         })
+        const trigger = (rule.trigger || {}) as Record<string, unknown>
+        const data = {
+            id: rule.id,
+            name: rule.name,
+            triggerType: trigger.triggerType ?? 'ON_EVENT',
+            triggerValue: trigger.triggerValue,
+            conditions: trigger.conditions ?? [],
+            actions: rule.actions,
+            isActive: rule.active,
+            createdAt: rule.createdAt,
+            updatedAt: rule.updatedAt,
+        }
 
-        return NextResponse.json({ data: rule }, { status: 201 })
+        return NextResponse.json({ data }, { status: 201 })
     } catch (error) {
         console.error('[POST /api/automations]', error)
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

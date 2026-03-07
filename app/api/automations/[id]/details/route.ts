@@ -21,7 +21,7 @@ export async function GET(
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        const rule = await prisma.automationRule.findFirst({
+        const rule = await prisma.automation.findFirst({
             where: { id, userId: session.user.id },
         })
 
@@ -29,15 +29,20 @@ export async function GET(
             return NextResponse.json({ error: 'Automation not found' }, { status: 404 })
         }
 
-        // Stats
+        const trigger = (rule.trigger || {}) as Record<string, unknown>
+        const triggerType = (trigger.triggerType as string) ?? 'ON_EVENT'
+        const triggerValue = trigger.triggerValue
+        const conditions = trigger.conditions ?? []
+
+        // Stats using AutomationLog (result = SUCCESS for success)
         const [totalExecutions, successCount, lastExecution] = await Promise.all([
-            prisma.automationExecution.count({
+            prisma.automationLog.count({
                 where: { automationId: id },
             }),
-            prisma.automationExecution.count({
-                where: { automationId: id, status: 'SUCCESS' },
+            prisma.automationLog.count({
+                where: { automationId: id, result: 'SUCCESS' },
             }),
-            prisma.automationExecution.findFirst({
+            prisma.automationLog.findFirst({
                 where: { automationId: id },
                 orderBy: { executedAt: 'desc' },
                 select: { executedAt: true },
@@ -50,21 +55,21 @@ export async function GET(
             : 0
 
         // Recent executions with lead info
-        const recentExecutions = await prisma.automationExecution.findMany({
+        const recentExecutions = await prisma.automationLog.findMany({
             where: { automationId: id },
             orderBy: { executedAt: 'desc' },
             take: 20,
             select: {
                 id: true,
                 leadId: true,
-                status: true,
-                errorMessage: true,
+                result: true,
+                error: true,
                 executedAt: true,
             },
         })
 
         // Fetch lead names for the executions
-        const leadIds = [...new Set(recentExecutions.map((e) => e.leadId))]
+        const leadIds = [...new Set(recentExecutions.map((e) => e.leadId).filter(Boolean))] as string[]
         const leads = await prisma.lead.findMany({
             where: { id: { in: leadIds }, userId: session.user.id },
             select: { id: true, name: true, email: true },
@@ -72,9 +77,13 @@ export async function GET(
         const leadMap = new Map(leads.map((l) => [l.id, l]))
 
         const enrichedExecutions = recentExecutions.map((e) => {
-            const lead = leadMap.get(e.leadId)
+            const lead = e.leadId ? leadMap.get(e.leadId) : undefined
             return {
-                ...e,
+                id: e.id,
+                leadId: e.leadId,
+                status: e.result,
+                errorMessage: e.error,
+                executedAt: e.executedAt,
                 leadName: lead?.name || lead?.email || 'Unknown',
                 leadEmail: lead?.email || null,
             }
@@ -84,11 +93,11 @@ export async function GET(
             rule: {
                 id: rule.id,
                 name: rule.name,
-                triggerType: rule.triggerType,
-                triggerValue: rule.triggerValue,
-                conditions: rule.conditions,
+                triggerType,
+                triggerValue,
+                conditions,
                 actions: rule.actions,
-                isActive: rule.isActive,
+                isActive: rule.active,
                 createdAt: rule.createdAt,
                 updatedAt: rule.updatedAt,
             },

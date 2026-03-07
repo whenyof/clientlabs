@@ -101,11 +101,12 @@ export class ClientLabs {
             };
             const origPush = window.history.pushState.bind(window.history);
             const origReplace = window.history.replaceState.bind(window.history);
-            window.history.pushState = (...args: unknown[]) => {
+            type HistoryStateArgs = Parameters<History['pushState']>;
+            window.history.pushState = (...args: HistoryStateArgs) => {
                 origPush(...args);
                 emitPageview();
             };
-            window.history.replaceState = (...args: unknown[]) => {
+            window.history.replaceState = (...args: HistoryStateArgs) => {
                 origReplace(...args);
                 emitPageview();
             };

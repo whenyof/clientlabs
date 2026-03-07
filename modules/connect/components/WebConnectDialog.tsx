@@ -28,6 +28,7 @@ type PublicApiKey = {
     lastUsed: string | null
     revoked: boolean
     rawKey?: string
+    apiKey?: string
     sdkStatus?: "not_installed" | "active" | "inactive"
     lastEventAt?: string | null
 }
@@ -167,7 +168,7 @@ export function WebConnectDialog({ open, onOpenChange }: WebConnectDialogProps) 
     }
 
     const scriptCode = useMemo(
-        () => getScriptCode(selectedKey?.rawKey, features),
+        () => getScriptCode(selectedKey?.apiKey ?? selectedKey?.rawKey, features),
         [selectedKey, features]
     )
 
@@ -209,7 +210,8 @@ export function WebConnectDialog({ open, onOpenChange }: WebConnectDialogProps) 
     }
 
     const handleCheckConnection = async () => {
-        if (!selectedKey?.rawKey) {
+        const keyForCheck = selectedKey?.apiKey ?? selectedKey?.rawKey
+        if (!keyForCheck) {
             toast.error("Llave de API no disponible para verificación")
             return
         }
@@ -223,7 +225,7 @@ export function WebConnectDialog({ open, onOpenChange }: WebConnectDialogProps) 
             // Wait a bit to simulate scanning feel
             await new Promise(r => setTimeout(r, 1500))
 
-            const res = await fetch(`/api/v1/sdk/status?key=${selectedKey.rawKey}`)
+            const res = await fetch(`/api/v1/sdk/status?key=${encodeURIComponent(keyForCheck)}`)
             if (res.ok) {
                 const data = await res.json()
                 setSdkConnected(Boolean(data.connected))
@@ -254,7 +256,9 @@ export function WebConnectDialog({ open, onOpenChange }: WebConnectDialogProps) 
 
         const checkOnce = async () => {
             try {
-                const res = await fetch(`/api/v1/sdk/status?key=${selectedKey.rawKey}`)
+                const k = selectedKey?.apiKey ?? selectedKey?.rawKey
+                if (!k) return
+                const res = await fetch(`/api/v1/sdk/status?key=${encodeURIComponent(k)}`)
                 if (!res.ok) return
                 const data = await res.json()
                 if (cancelled) return
@@ -619,7 +623,7 @@ export function WebConnectDialog({ open, onOpenChange }: WebConnectDialogProps) 
 
                                 <div className="flex gap-3 mt-4">
                                     <Button
-                                        onClick={() => handleCopyScript(selectedKey?.rawKey)}
+                                        onClick={() => handleCopyScript(selectedKey?.apiKey ?? selectedKey?.rawKey)}
                                         disabled={!selectedKey?.rawKey}
                                         className={cn(
                                             "flex-1 h-12 rounded-xl text-sm font-bold transition-all shadow-md active:scale-[0.98]",

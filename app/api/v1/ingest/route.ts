@@ -161,17 +161,42 @@ export async function POST(request: NextRequest) {
   }
 
   const hash = crypto.createHash("sha256").update(api_key).digest("hex")
-  const keyRecord = await prisma.apiKey.findUnique({
+  let keyRecord = await prisma.apiKey.findUnique({
     where: { keyHash: hash },
   })
-  console.log("[ingest] keyRecord:", keyRecord ? { id: keyRecord.id, type: keyRecord.type, revoked: keyRecord.revoked, domain: keyRecord.domain, expiryDate: keyRecord.expiryDate } : null)
 
   if (!keyRecord) {
-    return withCors(
-      NextResponse.json({ error: "API key not found", apiKey: api_key }, { status: 401 }),
-      corsHeaders
-    )
+    if (process.env.NODE_ENV === "development") {
+      console.log("[ingest] creating dev apiKey:", api_key)
+      const devUserId =
+        process.env.DEV_INGEST_USER_ID ??
+        (await prisma.user.findFirst({ select: { id: true } }))?.id
+      if (!devUserId) {
+        console.warn("[ingest] no user in DB; cannot auto-create dev key")
+        return withCors(
+          NextResponse.json({ error: "API key not found", apiKey: api_key }, { status: 401 }),
+          corsHeaders
+        )
+      }
+      keyRecord = await prisma.apiKey.create({
+        data: {
+          userId: devUserId,
+          keyHash: hash,
+          name: "Auto-created dev key",
+          type: ApiKeyType.public,
+          domain: hostname,
+          revoked: false,
+        },
+      })
+    } else {
+      return withCors(
+        NextResponse.json({ error: "API key not found", apiKey: api_key }, { status: 401 }),
+        corsHeaders
+      )
+    }
   }
+
+  console.log("[ingest] apiKeyRecord:", keyRecord ? { id: keyRecord.id, type: keyRecord.type, domain: keyRecord.domain } : null)
 
   const now = Date.now()
   const isInactive =

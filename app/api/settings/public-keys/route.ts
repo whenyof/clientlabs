@@ -138,7 +138,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Invalid domain format. Use 'example.com' without paths. IP addresses are not allowed." }, { status: 400 })
         }
 
-        // 🛡️ Edge Case Prevention: Buscar duplicado activo
+        // Reuse existing key for same user + domain so snippet works immediately
         const existing = await prisma.apiKey.findFirst({
             where: {
                 userId,
@@ -149,7 +149,23 @@ export async function POST(req: NextRequest) {
         })
 
         if (existing) {
-            return NextResponse.json({ error: "Conflict: This domain already has an active key." }, { status: 409 })
+            let rawKey: string | null = null
+            if (existing.encryptedKey) {
+                try {
+                    rawKey = decrypt(existing.encryptedKey)
+                } catch (e) {
+                    logger.error("public_keys_reuse", "decrypt_error", userId, { id: existing.id })
+                }
+            }
+            return NextResponse.json({
+                ok: true,
+                apiKey: rawKey ?? undefined,
+                rawKey: rawKey ?? undefined,
+                id: existing.id,
+                name: existing.name,
+                domain: existing.domain,
+                createdAt: existing.createdAt
+            })
         }
 
         const { rawKey, hash } = createPublicKeyPair()
@@ -167,10 +183,14 @@ export async function POST(req: NextRequest) {
             }
         })
 
+        console.log("[apikey] created:", rawKey)
+
         return NextResponse.json({
+            ok: true,
+            apiKey: rawKey,
             id: apiKey.id,
             name: apiKey.name,
-            rawKey, // Solo una vez
+            rawKey,
             domain: apiKey.domain,
             createdAt: apiKey.createdAt
         })

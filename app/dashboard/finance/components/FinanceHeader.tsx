@@ -90,7 +90,7 @@ export function FinanceHeader({ onCreateTransaction }: FinanceHeaderProps) {
             <ArrowDownTrayIcon className="w-4 h-4" />
             Exportar
           </button>
-          <div className="absolute right-0 top-full mt-1 w-40 bg-[#1E1F2B] border border-[var(--border-subtle)] rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-10 py-1">
+          <div className="absolute right-0 top-full mt-1 w-40 bg-[#1E1F2B] border border-[var(--border-subtle)] rounded-lg shadow-[var(--shadow-card)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-10 py-1">
             <button
               type="button"
               onClick={() => handleExport("pdf")}

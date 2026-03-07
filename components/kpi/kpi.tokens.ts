@@ -11,8 +11,8 @@ export const KPI_VARIANTS = {
  },
  profit: {
  bg: " ",
- border: "border-violet-500/30",
- icon: "bg-violet-500/20 text-violet-300",
+ border: "border-emerald-500/30",
+ icon: "bg-emerald-500/20 text-emerald-300",
  },
  growth: {
  bg: " ",

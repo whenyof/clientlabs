@@ -70,7 +70,7 @@ export function MovementDetailsDrawer({ movement, open, onClose }: MovementDetai
         className={`
           fixed top-0 right-0 z-50 h-full w-full max-w-md
           bg-[#0f0f12] border-l border-[var(--border-subtle)]
-          shadow-2xl flex flex-col
+          shadow-[var(--shadow-card)] flex flex-col
           transition-transform duration-200 ease-out
           ${open ? "translate-x-0" : "translate-x-full"}
         `}
@@ -126,7 +126,7 @@ export function MovementDetailsDrawer({ movement, open, onClose }: MovementDetai
               <button
                 type="button"
                 onClick={handleJumpToOrigin}
-                className="flex items-center gap-2 text-sm font-medium text-violet-400 hover:text-violet-300 transition-colors"
+                className="flex items-center gap-2 text-sm font-medium text-emerald-400 hover:text-violet-300 transition-colors"
               >
                 <ArrowTopRightOnSquareIcon className="w-4 h-4" />
                 Ir al {ORIGIN_LABELS[movement.originModule]}

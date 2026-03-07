@@ -29,7 +29,7 @@ function SalesTableComponent({ data, onSelect, onManualRegister }: SalesTablePro
   const headings = [t.client, t.product, t.amount, t.channel, t.commercial, t.state, t.date, t.origin]
 
   return (
-    <section className="rounded-3xl border border-[var(--border-subtle)] bg-gradient-to-br from-[#1A1B2F] via-[#14152A] to-[#0E0F1F] p-6 shadow-2xl">
+    <section className="rounded-3xl border border-[var(--border-subtle)] bg-gradient-to-br from-[#1A1B2F] via-[#14152A] to-[#0E0F1F] p-6 shadow-[var(--shadow-card)]">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div>
           <p className="text-xs uppercase tracking-[0.4em] text-[var(--text-secondary)]">{t.pipelineTitle}</p>
@@ -37,7 +37,7 @@ function SalesTableComponent({ data, onSelect, onManualRegister }: SalesTablePro
         </div>
         <button
           onClick={onManualRegister}
-          className="rounded-full border border-[var(--border-subtle)] bg-gradient-to-r from-purple-600 to-fuchsia-500 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-[var(--text-primary)] transition hover:brightness-110"
+          className="rounded-full border border-[var(--border-subtle)] bg-gradient-to-r from-emerald-600 to-emerald-500 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-[var(--text-primary)] transition hover:brightness-110"
         >
           {labels.sales.newButton}
         </button>

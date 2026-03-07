@@ -33,7 +33,7 @@ export function SaleDrawer({ sale, open, onClose, onUpdateStatus }: SaleDrawerPr
   return (
     <div className="fixed inset-0 z-40 flex">
       <div className="flex-1" onClick={onClose} />
-      <aside className="w-full max-w-[420px] border-l border-[var(--border-subtle)] bg-[#080B1B]/95 p-6 shadow-2xl">
+      <aside className="w-full max-w-[420px] border-l border-[var(--border-subtle)] bg-[#080B1B]/95 p-6 shadow-[var(--shadow-card)]">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.4em] text-[var(--text-secondary)]">{sl.ui.saleSelected}</p>
@@ -73,7 +73,7 @@ export function SaleDrawer({ sale, open, onClose, onUpdateStatus }: SaleDrawerPr
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-main)] p-4 text-sm text-[var(--text-secondary)]">
+          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-main)] p-4 text-sm text-[var(--text-secondary)]">
             <p className="text-[10px] uppercase text-[var(--text-secondary)]">{sl.ui.recentNotes}</p>
             <ul className="mt-2 space-y-2">
               {sale.notas.map((nota) => (
@@ -84,7 +84,7 @@ export function SaleDrawer({ sale, open, onClose, onUpdateStatus }: SaleDrawerPr
             </ul>
           </div>
 
-          <div className="rounded-2xl border border-[var(--border-subtle)] bg-gradient-to-br from-[#1f2357] to-[#141833] p-4 space-y-2 text-sm">
+          <div className="rounded-xl border border-[var(--border-subtle)] bg-gradient-to-br from-[#1f2357] to-[#141833] p-4 space-y-2 text-sm">
             <p className="text-[10px] uppercase text-[var(--text-secondary)]">{sl.ui.originLabel}</p>
             <p className="text-[var(--text-primary)]">{sale.origen === "manual" ? sl.ui.manualOrigin : sl.ui.webhookOrigin}</p>
             <p className="text-[10px] text-[var(--text-secondary)]">
@@ -94,7 +94,7 @@ export function SaleDrawer({ sale, open, onClose, onUpdateStatus }: SaleDrawerPr
             {nextStatus && (
               <button
                 onClick={() => onUpdateStatus?.(sale.id, nextStatus)}
-                className="mt-2 w-full rounded-full border border-[var(--border-subtle)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-[var(--text-primary)] transition hover:border-purple-500/40"
+                className="mt-2 w-full rounded-full border border-[var(--border-subtle)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-[var(--text-primary)] transition hover:border-emerald-500/40"
               >
                 {sl.ui.moveTo} {getStatusLabel(nextStatus, sl.status)}
               </button>

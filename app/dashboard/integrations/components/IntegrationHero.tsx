@@ -11,13 +11,13 @@ interface IntegrationHeroProps {
 export function IntegrationHero({ onAddIntegration }: IntegrationHeroProps) {
   return (
     <motion.div
-      className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-green-600/10 border border-blue-500/20 backdrop-blur-sm"
+      className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600/10 via-emerald-600/10 to-green-600/10 border border-blue-500/20 backdrop-blur-sm"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1, duration: 0.5 }}
     >
       {/* Background Effects */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-purple-600/5" />
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-teal-600/5" />
       <div className="absolute -top-20 -right-20 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl" />
       <div className="absolute -bottom-20 -left-20 w-32 h-32 bg-green-500/20 rounded-full blur-3xl" />
 
@@ -31,7 +31,7 @@ export function IntegrationHero({ onAddIntegration }: IntegrationHeroProps) {
             transition={{ delay: 0.3, duration: 0.5 }}
           >
             <div className="relative">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-teal-600 rounded-xl flex items-center justify-center shadow-[var(--shadow-card)]">
                 <span className="text-2xl">🔗</span>
               </div>
               {/* Pulsing indicator */}
@@ -51,7 +51,7 @@ export function IntegrationHero({ onAddIntegration }: IntegrationHeroProps) {
 
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-emerald-200 bg-clip-text text-transparent">
                   Integraciones Empresariales
                 </h1>
                 <div className="flex items-center gap-2 px-3 py-1 bg-green-500/20 rounded-full border border-green-500/30">
@@ -80,9 +80,9 @@ export function IntegrationHero({ onAddIntegration }: IntegrationHeroProps) {
                 <CheckCircleIcon className="w-4 h-4 text-green-400" />
                 <span className="text-sm text-green-400 font-medium">6 Activas</span>
               </div>
-              <div className="flex items-center gap-2 px-3 py-2 bg-purple-500/10 border border-purple-500/20 rounded-lg">
-                <SparklesIcon className="w-4 h-4 text-purple-400" />
-                <span className="text-sm text-purple-400 font-medium">Recomendadas</span>
+              <div className="flex items-center gap-2 px-3 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                <SparklesIcon className="w-4 h-4 text-emerald-400" />
+                <span className="text-sm text-emerald-400 font-medium">Recomendadas</span>
               </div>
             </div>
 
@@ -100,7 +100,7 @@ export function IntegrationHero({ onAddIntegration }: IntegrationHeroProps) {
 
               <motion.button
                 onClick={onAddIntegration}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-[var(--text-primary)] font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-purple-500/25"
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 text-[var(--text-primary)] font-semibold rounded-xl transition-all duration-300 shadow-[var(--shadow-card)] hover:shadow-emerald-500/25"
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -131,7 +131,7 @@ export function IntegrationHero({ onAddIntegration }: IntegrationHeroProps) {
             <div className="text-sm text-[var(--text-secondary)]">Total requests</div>
           </div>
           <div className="bg-[var(--bg-main)] rounded-xl p-4 text-center">
-            <div className="text-2xl font-bold text-purple-400 mb-1">
+            <div className="text-2xl font-bold text-emerald-400 mb-1">
               {mockIntegrationStats.avgSuccessRate}%
             </div>
             <div className="text-sm text-[var(--text-secondary)]">Tasa éxito</div>

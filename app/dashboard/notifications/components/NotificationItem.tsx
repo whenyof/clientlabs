@@ -68,7 +68,7 @@ export function NotificationItem({ notification, onMarkAsRead }: NotificationIte
             {!notification.read && (
               <button
                 onClick={onMarkAsRead}
-                className="ml-4 p-1 text-[var(--text-secondary)] hover:text-purple-400 transition-colors"
+                className="ml-4 p-1 text-[var(--text-secondary)] hover:text-emerald-400 transition-colors"
                 title="Marcar como leída"
               >
                 <CheckCircle className="w-4 h-4" />
@@ -80,7 +80,7 @@ export function NotificationItem({ notification, onMarkAsRead }: NotificationIte
             <Clock className="w-3 h-3 text-[var(--text-secondary)]" />
             <span className="text-xs text-[var(--text-secondary)]">{notification.time}</span>
             {!notification.read && (
-              <span className="inline-block w-2 h-2 bg-purple-500 rounded-full"></span>
+              <span className="inline-block w-2 h-2 bg-emerald-500 rounded-full"></span>
             )}
           </div>
         </div>

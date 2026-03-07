@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import { motion } from "framer-motion"
 import { toast } from "sonner"
 import {
   BuildingOfficeIcon,
@@ -24,6 +23,8 @@ const defaultData = {
   sector: "servicios",
   logoUrl: null as string | null,
 }
+
+const inputClasses = "w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-[#0B1F2A] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] focus:border-[var(--accent)] disabled:bg-slate-50 disabled:text-slate-400 transition-colors"
 
 export function CompanySettings() {
   const [isEditing, setIsEditing] = useState(false)
@@ -52,11 +53,9 @@ export function CompanySettings() {
       headers: { "Cache-Control": "no-store" },
     })
     const data = await res.json().catch(() => ({ success: false, profile: null }))
-    const profile = data.success ? data.profile : null
-    console.log("PROFILE LOADED:", profile)
     if (data.success && data.profile) {
       const p = data.profile
-      const formData = {
+      setCompanyData({
         name: p.name ?? p.companyName ?? "",
         companyName: p.companyName ?? p.name ?? "",
         taxId: p.taxId ?? "",
@@ -68,9 +67,7 @@ export function CompanySettings() {
         website: p.website ?? "",
         sector: p.sector ?? "servicios",
         logoUrl: p.logoUrl ?? null,
-      }
-      console.log("FORM STATE AFTER LOAD:", formData)
-      setCompanyData(formData)
+      })
     }
   }, [])
 
@@ -79,8 +76,6 @@ export function CompanySettings() {
   }, [loadProfile])
 
   const handleSave = async () => {
-    console.log("SAVE CLICKED")
-    console.log("FORM DATA:", companyData)
     setSaving(true)
     try {
       const payload = {
@@ -97,16 +92,13 @@ export function CompanySettings() {
         sector: companyData.sector || "servicios",
         logoUrl: companyData.logoUrl || null,
       }
-      console.log("SENDING DATA:", payload)
       const res = await fetch("/api/settings/business-profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify(payload),
       })
-      console.log("RESPONSE STATUS:", res.status)
       const data = await res.json().catch(() => ({}))
-      console.log("RESPONSE DATA:", data)
       if (res.ok && data.success && data.profile) {
         const p = data.profile
         setCompanyData({
@@ -151,7 +143,6 @@ export function CompanySettings() {
       const data = await res.json().catch(() => ({}))
       if (res.ok && data.url) {
         const url = data.url as string
-        console.log("LOGO URL SAVED", url)
         setCompanyData((prev) => ({ ...prev, logoUrl: url }))
         const payload = {
           name: companyData.name || companyData.companyName || null,
@@ -200,17 +191,11 @@ export function CompanySettings() {
   }
 
   if (loading) {
-    return (
-      <div className="text-[var(--text-secondary)] py-8">Cargando información de la empresa…</div>
-    )
+    return <div className="text-slate-400 py-8 text-sm">Cargando información de la empresa…</div>
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
+    <div className="space-y-6">
       <input
         ref={fileInputRef}
         type="file"
@@ -218,241 +203,210 @@ export function CompanySettings() {
         className="hidden"
         onChange={handleLogoFile}
       />
-      <div className="flex items-center justify-between mb-8">
+
+      {/* Section Header */}
+      <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">Información de la Empresa</h2>
-          <p className="text-[var(--text-secondary)]">Gestiona los datos de tu empresa y configuración general</p>
+          <h2 className="text-lg font-semibold text-[#0B1F2A]">Perfil de empresa</h2>
+          <p className="text-sm text-slate-500 mt-0.5">Datos fiscales, localización y configuración de la entidad.</p>
         </div>
 
         {!isEditing ? (
-          <motion.button
+          <button
             onClick={() => setIsEditing(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-[var(--text-primary)] rounded-lg transition-colors"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
           >
-            <PencilIcon className="w-4 h-4" />
+            <PencilIcon className="w-3.5 h-3.5" />
             Editar
-          </motion.button>
+          </button>
         ) : (
-          <div className="flex gap-3">
-            <motion.button
+          <div className="flex gap-2">
+            <button
               type="button"
               onClick={handleSave}
               disabled={saving}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-[var(--text-primary)] rounded-lg transition-colors disabled:opacity-50"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[var(--accent)] rounded-lg hover:opacity-90 disabled:opacity-50 transition-colors"
             >
-              <CheckIcon className="w-4 h-4" />
+              <CheckIcon className="w-3.5 h-3.5" />
               {saving ? "Guardando…" : "Guardar"}
-            </motion.button>
-            <motion.button
+            </button>
+            <button
               onClick={handleCancel}
-              className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-surface)] hover:bg-[var(--bg-surface)] text-[var(--text-primary)] rounded-lg transition-colors"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-500 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
             >
-              <XMarkIcon className="w-4 h-4" />
+              <XMarkIcon className="w-3.5 h-3.5" />
               Cancelar
-            </motion.button>
+            </button>
           </div>
         )}
       </div>
 
-      <div className="space-y-8">
-        {/* Company Logo */}
-        <div className="bg-[var(--bg-card)] rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Logo de la empresa</h3>
-          <div className="flex items-center gap-6">
-            <div className="relative">
-              <button
-                type="button"
-                onClick={isEditing ? handleLogoClick : undefined}
-                disabled={!isEditing || uploadingLogo}
-                className="w-20 h-20 rounded-xl overflow-hidden bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:cursor-default"
-              >
-                {companyData.logoUrl ? (
-                  <img src={companyData.logoUrl} alt="Logo" className="w-full h-full object-contain" />
-                ) : (
-                  <BuildingOfficeIcon className="w-10 h-10 text-[var(--text-primary)]" />
-                )}
-              </button>
-              {isEditing && (
-                <span className="absolute -bottom-2 -right-2 w-8 h-8 bg-purple-600 hover:bg-purple-700 text-[var(--text-primary)] rounded-full flex items-center justify-center transition-colors pointer-events-none">
-                  <PhotoIcon className="w-4 h-4" />
-                </span>
-              )}
-            </div>
-            <div>
-              <p className="text-[var(--text-primary)] font-medium">{companyData.companyName || companyData.name || "Empresa"}</p>
-              <p className="text-[var(--text-secondary)] text-sm">Logo actual de la empresa</p>
-              {isEditing && (
-                <p className="text-purple-400 text-sm mt-2">
-                  {uploadingLogo ? "Subiendo…" : "Haz clic en el logo para cambiar"}
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Company Information */}
-        <div className="bg-[var(--bg-card)] rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-6">Datos de la empresa</h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
-                Nombre de la empresa
-              </label>
-              <input
-                type="text"
-                value={companyData.companyName || companyData.name}
-                onChange={(e) => setCompanyData({ ...companyData, companyName: e.target.value, name: e.target.value })}
-                disabled={!isEditing}
-                className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
-                CIF/NIF
-              </label>
-              <input
-                type="text"
-                value={companyData.taxId}
-                onChange={(e) => setCompanyData({ ...companyData, taxId: e.target.value })}
-                disabled={!isEditing}
-                className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
-                Dirección
-              </label>
-              <input
-                type="text"
-                value={companyData.address}
-                onChange={(e) => setCompanyData({ ...companyData, address: e.target.value })}
-                disabled={!isEditing}
-                className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
-                Código postal
-              </label>
-              <input
-                type="text"
-                value={companyData.postalCode}
-                onChange={(e) => setCompanyData({ ...companyData, postalCode: e.target.value })}
-                disabled={!isEditing}
-                className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
-                Ciudad
-              </label>
-              <input
-                type="text"
-                value={companyData.city}
-                onChange={(e) => setCompanyData({ ...companyData, city: e.target.value })}
-                disabled={!isEditing}
-                className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
-                País
-              </label>
-              <select
-                value={companyData.country}
-                onChange={(e) => setCompanyData({ ...companyData, country: e.target.value })}
-                disabled={!isEditing}
-                className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <option value="España">España</option>
-                <option value="México">México</option>
-                <option value="Argentina">Argentina</option>
-                <option value="Colombia">Colombia</option>
-                <option value="Chile">Chile</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
-                Teléfono
-              </label>
-              <input
-                type="tel"
-                value={companyData.phone}
-                onChange={(e) => setCompanyData({ ...companyData, phone: e.target.value })}
-                disabled={!isEditing}
-                className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
-                Sitio web
-              </label>
-              <input
-                type="url"
-                value={companyData.website}
-                onChange={(e) => setCompanyData({ ...companyData, website: e.target.value })}
-                disabled={!isEditing}
-                className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
-                Sector
-              </label>
-              <select
-                value={companyData.sector}
-                onChange={(e) => setCompanyData({ ...companyData, sector: e.target.value })}
-                disabled={!isEditing}
-                className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {sectors.map(sector => (
-                  <option key={sector.value} value={sector.value}>
-                    {sector.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Company Stats */}
-        <div className="bg-[var(--bg-card)] rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Estadísticas de la empresa</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-400 mb-1">2 años</div>
-              <div className="text-sm text-[var(--text-secondary)]">En plataforma</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-400 mb-1">€45K</div>
-              <div className="text-sm text-[var(--text-secondary)]">Ingresos totales</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-purple-400 mb-1">1,247</div>
-              <div className="text-sm text-[var(--text-secondary)]">Clientes activos</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-orange-400 mb-1">98.5%</div>
-              <div className="text-sm text-[var(--text-secondary)]">Satisfacción</div>
-            </div>
+      {/* Logo Card */}
+      <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <h3 className="text-sm font-medium text-slate-500 mb-4">Logo de empresa</h3>
+        <div className="flex items-center gap-5">
+          <button
+            type="button"
+            onClick={isEditing ? handleLogoClick : undefined}
+            disabled={!isEditing || uploadingLogo}
+            className="w-16 h-16 rounded-xl overflow-hidden bg-slate-50 border border-slate-200 flex items-center justify-center disabled:cursor-default transition-colors"
+          >
+            {companyData.logoUrl ? (
+              <img src={companyData.logoUrl} alt="Logo" className="w-full h-full object-contain p-1.5" />
+            ) : (
+              <BuildingOfficeIcon className="w-7 h-7 text-slate-300" />
+            )}
+          </button>
+          <div>
+            <p className="text-base font-semibold text-[#0B1F2A]">{companyData.companyName || companyData.name || "Sin nombre"}</p>
+            <p className="text-xs text-slate-500 mt-0.5">Perfil de facturación principal.</p>
+            {isEditing && (
+              <p className="text-xs text-[var(--accent)] font-medium mt-1.5">
+                {uploadingLogo ? "Subiendo…" : "Haz click en el logo para cambiar"}
+              </p>
+            )}
           </div>
         </div>
       </div>
-    </motion.div>
+
+      {/* Form Fields */}
+      <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <h3 className="text-sm font-medium text-slate-500 mb-4">Datos fiscales y operativos</h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-slate-700">Razón Social</label>
+            <input
+              type="text"
+              value={companyData.companyName || companyData.name}
+              onChange={(e) => setCompanyData({ ...companyData, companyName: e.target.value, name: e.target.value })}
+              disabled={!isEditing}
+              className={inputClasses}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-slate-700">NIF / CIF</label>
+            <input
+              type="text"
+              value={companyData.taxId}
+              onChange={(e) => setCompanyData({ ...companyData, taxId: e.target.value })}
+              disabled={!isEditing}
+              className={inputClasses}
+            />
+          </div>
+
+          <div className="md:col-span-2 space-y-1.5">
+            <label className="text-sm font-medium text-slate-700">Dirección</label>
+            <input
+              type="text"
+              value={companyData.address}
+              onChange={(e) => setCompanyData({ ...companyData, address: e.target.value })}
+              disabled={!isEditing}
+              className={inputClasses}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-slate-700">Código Postal</label>
+            <input
+              type="text"
+              value={companyData.postalCode}
+              onChange={(e) => setCompanyData({ ...companyData, postalCode: e.target.value })}
+              disabled={!isEditing}
+              className={inputClasses}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-slate-700">Ciudad</label>
+            <input
+              type="text"
+              value={companyData.city}
+              onChange={(e) => setCompanyData({ ...companyData, city: e.target.value })}
+              disabled={!isEditing}
+              className={inputClasses}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-slate-700">País</label>
+            <select
+              value={companyData.country}
+              onChange={(e) => setCompanyData({ ...companyData, country: e.target.value })}
+              disabled={!isEditing}
+              className={inputClasses}
+            >
+              <option value="España">España</option>
+              <option value="México">México</option>
+              <option value="Argentina">Argentina</option>
+              <option value="Colombia">Colombia</option>
+              <option value="Chile">Chile</option>
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-slate-700">Teléfono</label>
+            <input
+              type="tel"
+              value={companyData.phone}
+              onChange={(e) => setCompanyData({ ...companyData, phone: e.target.value })}
+              disabled={!isEditing}
+              className={inputClasses}
+            />
+          </div>
+
+          <div className="md:col-span-2 space-y-1.5">
+            <label className="text-sm font-medium text-slate-700">Website</label>
+            <input
+              type="url"
+              value={companyData.website}
+              onChange={(e) => setCompanyData({ ...companyData, website: e.target.value })}
+              disabled={!isEditing}
+              className={inputClasses}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-slate-700">Sector</label>
+            <select
+              value={companyData.sector}
+              onChange={(e) => setCompanyData({ ...companyData, sector: e.target.value })}
+              disabled={!isEditing}
+              className={inputClasses}
+            >
+              {sectors.map(sector => (
+                <option key={sector.value} value={sector.value}>
+                  {sector.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Card */}
+      <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <h3 className="text-sm font-medium text-slate-500 mb-4">Indicadores</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="text-center p-3 bg-slate-50 rounded-lg">
+            <div className="text-sm font-bold text-[var(--accent)]">2 AÑOS</div>
+            <div className="text-xs text-slate-500 mt-0.5">En sistema</div>
+          </div>
+          <div className="text-center p-3 bg-slate-50 rounded-lg">
+            <div className="text-sm font-bold text-[#0B1F2A]">€45K</div>
+            <div className="text-xs text-slate-500 mt-0.5">Volumen</div>
+          </div>
+          <div className="text-center p-3 bg-slate-50 rounded-lg">
+            <div className="text-sm font-bold text-[#0B1F2A]">1,247</div>
+            <div className="text-xs text-slate-500 mt-0.5">Entidades</div>
+          </div>
+          <div className="text-center p-3 bg-slate-50 rounded-lg">
+            <div className="text-sm font-bold text-[var(--accent)]">98.5%</div>
+            <div className="text-xs text-slate-500 mt-0.5">Score</div>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }

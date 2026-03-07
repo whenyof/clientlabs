@@ -135,7 +135,7 @@ export function ClientRowActions({ client }: { client: Client }) {
  <Button
  size="sm"
  variant="ghost"
- className="h-8 w-8 p-0 text-[var(--text-secondary)] hover:text-violet-400 hover:bg-violet-500/10"
+ className="h-8 w-8 p-0 text-[var(--text-secondary)] hover:text-emerald-400 hover:bg-emerald-500/10"
  onClick={() => setInteractionDialog(true)}
  title="Registrar Interacción"
  >

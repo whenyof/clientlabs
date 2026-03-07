@@ -65,8 +65,8 @@ const EVENT_CONFIG: Record<
  payment: {
  icon: BanknotesIcon,
  gradient: " ",
- lineColor: "bg-violet-500/30",
- dotColor: "bg-violet-500",
+ lineColor: "bg-emerald-500/30",
+ dotColor: "bg-emerald-500",
  label: "Pago",
  },
 }

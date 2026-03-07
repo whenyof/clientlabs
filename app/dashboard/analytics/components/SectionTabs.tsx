@@ -25,7 +25,7 @@ export function SectionTabs({ selectedRange }: SectionTabsProps) {
   const ActiveComponent = tabs.find(tab => tab.id === activeTab)?.component
 
   return (
-    <div className="bg-[var(--bg-main)] backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)] overflow-hidden">
+    <div className="bg-[var(--bg-main)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)] overflow-hidden">
       <div className="flex border-b border-[var(--border-subtle)]">
         {tabs.map((tab) => (
           <button
@@ -33,11 +33,11 @@ export function SectionTabs({ selectedRange }: SectionTabsProps) {
             onClick={() => setActiveTab(tab.id)}
             className={`flex-1 px-6 py-4 text-center transition-colors ${
               activeTab === tab.id
-                ? 'bg-purple-600/20 border-b-2 border-purple-500'
+                ? 'bg-emerald-500/20 border-b-2 border-emerald-500'
                 : 'hover:bg-[var(--bg-surface)]'
             }`}
           >
-            <div className={`text-sm font-medium ${activeTab === tab.id ? 'text-purple-400' : 'text-[var(--text-secondary)]'}`}>
+            <div className={`text-sm font-medium ${activeTab === tab.id ? 'text-emerald-500' : 'text-[var(--text-secondary)]'}`}>
               {tab.label}
             </div>
             <div className={`text-lg font-bold mt-1 ${activeTab === tab.id ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>

@@ -7,7 +7,7 @@ export function PredictionsChart() {
   return (
     <div className="space-y-8">
       <motion.div
-        className="bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-green-500/10 border border-blue-500/20 rounded-2xl p-6"
+        className="bg-gradient-to-r from-blue-500/10 via-emerald-500/10 to-green-500/10 border border-blue-500/20 rounded-xl p-6"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1, duration: 0.5 }}
@@ -27,7 +27,7 @@ export function PredictionsChart() {
             <div className="text-sm text-[var(--text-secondary)]">Confianza IA</div>
           </div>
           <div className="bg-[var(--bg-main)] rounded-xl p-4 text-center">
-            <div className="text-2xl font-bold text-purple-400 mb-1">
+            <div className="text-2xl font-bold text-emerald-400 mb-1">
               ↗️ Alcista
             </div>
             <div className="text-sm text-[var(--text-secondary)]">Tendencia</div>

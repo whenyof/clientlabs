@@ -38,7 +38,7 @@ const DialogContent = React.forwardRef<
  <DialogPrimitive.Content
  ref={ref}
  className={cn(
- "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-sm duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out- data-[state=closed]:slide-out- data-[state=open]:slide-in- data-[state=open]:slide-in- sm:rounded-lg",
+ "fixed left-[50%] top-[50%] z-50 grid w-full max-w-[900px] translate-x-[-50%] translate-y-[-50%] gap-0 border border-neutral-200 bg-white shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 rounded-xl",
  className
  )}
  {...props}
@@ -59,7 +59,7 @@ const DialogHeader = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
  <div
  className={cn(
- "flex flex-col space-y-1.5 text-center sm:text-left",
+ "flex flex-col space-y-1.5 px-6 py-4 border-b border-neutral-200 text-left",
  className
  )}
  {...props}
@@ -67,13 +67,24 @@ const DialogHeader = ({
 )
 DialogHeader.displayName = "DialogHeader"
 
+const DialogBody = ({
+ className,
+ ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+ <div
+ className={cn("overflow-auto px-6 py-6", className)}
+ {...props}
+ />
+)
+DialogBody.displayName = "DialogBody"
+
 const DialogFooter = ({
  className,
  ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
  <div
  className={cn(
- "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
+ "flex flex-col-reverse gap-2 px-6 py-4 border-t border-neutral-200 sm:flex-row sm:justify-end",
  className
  )}
  {...props}
@@ -116,6 +127,7 @@ export {
  DialogTrigger,
  DialogContent,
  DialogHeader,
+ DialogBody,
  DialogFooter,
  DialogTitle,
  DialogDescription,

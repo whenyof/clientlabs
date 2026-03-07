@@ -47,7 +47,7 @@ const triggers = [
     name: 'Llamada Completada',
     description: 'Después de finalizar una llamada',
     icon: PhoneIcon,
-    color: 'from-purple-500 to-indigo-600',
+    color: 'from-emerald-500 to-indigo-600',
     category: 'ai'
   },
   {
@@ -79,7 +79,7 @@ const triggers = [
     name: 'Webhook',
     description: 'Activado por llamadas API externas',
     icon: GlobeAltIcon,
-    color: 'from-indigo-500 to-purple-600',
+    color: 'from-teal-500 to-teal-600',
     category: 'api'
   }
 ]
@@ -107,7 +107,7 @@ export function TriggerSelector({ selectedTrigger, onTriggerChange }: TriggerSel
               onClick={() => onTriggerChange(trigger.id, {})}
               className={`relative p-4 rounded-xl border transition-all duration-300 ${
                 isSelected
-                  ? 'bg-purple-600/20 border-purple-500/50 shadow-lg shadow-purple-500/20'
+                  ? 'bg-emerald-600/20 border-emerald-500/50 shadow-[var(--shadow-card)] shadow-emerald-500/20'
                   : 'bg-[var(--bg-main)] border-[var(--border-subtle)] hover:bg-[var(--bg-surface)] hover:border-[var(--border-subtle)]'
               }`}
               whileHover={{ scale: 1.02 }}
@@ -120,7 +120,7 @@ export function TriggerSelector({ selectedTrigger, onTriggerChange }: TriggerSel
 
                 <div className="text-left flex-1">
                   <h4 className={`font-medium mb-1 ${
-                    isSelected ? 'text-purple-400' : 'text-[var(--text-primary)]'
+                    isSelected ? 'text-emerald-400' : 'text-[var(--text-primary)]'
                   }`}>
                     {trigger.name}
                   </h4>
@@ -132,7 +132,7 @@ export function TriggerSelector({ selectedTrigger, onTriggerChange }: TriggerSel
 
               {isSelected && (
                 <motion.div
-                  className="absolute top-2 right-2 w-2 h-2 bg-purple-400 rounded-full"
+                  className="absolute top-2 right-2 w-2 h-2 bg-emerald-400 rounded-full"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: "spring", stiffness: 500 }}
@@ -145,13 +145,13 @@ export function TriggerSelector({ selectedTrigger, onTriggerChange }: TriggerSel
 
       {selectedTrigger && (
         <motion.div
-          className="mt-6 p-4 bg-purple-600/10 border border-purple-500/20 rounded-lg"
+          className="mt-6 p-4 bg-emerald-600/10 border border-emerald-500/20 rounded-lg"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
         >
           <div className="flex items-center gap-2">
-            <BoltIcon className="w-4 h-4 text-purple-400" />
-            <span className="text-purple-400 font-medium text-sm">
+            <BoltIcon className="w-4 h-4 text-emerald-400" />
+            <span className="text-emerald-400 font-medium text-sm">
               Trigger seleccionado: {triggers.find(t => t.id === selectedTrigger)?.name}
             </span>
           </div>

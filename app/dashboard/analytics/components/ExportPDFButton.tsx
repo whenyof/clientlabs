@@ -89,7 +89,7 @@ export function ExportPDFButton({ selectedRange, onExport }: ExportPDFButtonProp
     <motion.button
       onClick={generatePDF}
       disabled={isExporting}
-      className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-800 text-[var(--text-primary)] font-medium rounded-lg transition-colors disabled:cursor-not-allowed"
+      className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-600 disabled:bg-purple-800 text-[var(--text-primary)] font-medium rounded-lg transition-colors disabled:cursor-not-allowed"
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
     >

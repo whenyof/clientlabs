@@ -144,7 +144,7 @@ export function PredictionsOperativasSection({
  )}
  >
  <div className="px-4 py-3 border-b border-border/60 flex items-center gap-2">
- <TrendingUp className="w-4 h-4 text-violet-500" />
+ <TrendingUp className="w-4 h-4 text-emerald-500" />
  <h3 className="text-sm font-semibold text-foreground">Predicciones operativas</h3>
  <span className="text-xs text-muted-foreground ml-1">
  {predictions.length} alerta{predictions.length !== 1 ? "s" : ""}

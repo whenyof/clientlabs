@@ -47,7 +47,7 @@ const actionTypes = [
     name: 'Generar Factura',
     description: 'Crea factura automáticamente',
     icon: DocumentTextIcon,
-    color: 'from-purple-500 to-indigo-600',
+    color: 'from-emerald-500 to-indigo-600',
     category: 'business'
   },
   {
@@ -71,7 +71,7 @@ const actionTypes = [
     name: 'Llamada API',
     description: 'Hace llamada a API externa',
     icon: BoltIcon,
-    color: 'from-indigo-500 to-purple-600',
+    color: 'from-teal-500 to-teal-600',
     category: 'integration'
   }
 ]
@@ -200,7 +200,7 @@ export function ActionBuilder({ actions, onActionsChange }: ActionBuilderProps) 
                         type="text"
                         value={action.config.subject || ''}
                         onChange={(e) => updateActionConfig(action.id, { subject: e.target.value })}
-                        className="w-full px-2 py-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+                        className="w-full px-2 py-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
                       />
                     </div>
                     <div>
@@ -209,7 +209,7 @@ export function ActionBuilder({ actions, onActionsChange }: ActionBuilderProps) 
                         type="number"
                         value={action.config.delay || 0}
                         onChange={(e) => updateActionConfig(action.id, { delay: parseInt(e.target.value) })}
-                        className="w-full px-2 py-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+                        className="w-full px-2 py-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
                       />
                     </div>
                   </div>
@@ -222,7 +222,7 @@ export function ActionBuilder({ actions, onActionsChange }: ActionBuilderProps) 
                       value={action.config.message || ''}
                       onChange={(e) => updateActionConfig(action.id, { message: e.target.value })}
                       rows={2}
-                      className="w-full px-2 py-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-purple-500 resize-none"
+                      className="w-full px-2 py-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 resize-none"
                     />
                   </div>
                 )}
@@ -236,7 +236,7 @@ export function ActionBuilder({ actions, onActionsChange }: ActionBuilderProps) 
                         value={action.config.channel || ''}
                         onChange={(e) => updateActionConfig(action.id, { channel: e.target.value })}
                         placeholder="#general"
-                        className="w-full px-2 py-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+                        className="w-full px-2 py-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
                       />
                     </div>
                     <div>
@@ -245,7 +245,7 @@ export function ActionBuilder({ actions, onActionsChange }: ActionBuilderProps) 
                         type="text"
                         value={action.config.message || ''}
                         onChange={(e) => updateActionConfig(action.id, { message: e.target.value })}
-                        className="w-full px-2 py-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+                        className="w-full px-2 py-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
                       />
                     </div>
                   </div>
@@ -260,7 +260,7 @@ export function ActionBuilder({ actions, onActionsChange }: ActionBuilderProps) 
                         value={action.config.url || ''}
                         onChange={(e) => updateActionConfig(action.id, { url: e.target.value })}
                         placeholder="https://api.example.com/webhook"
-                        className="w-full px-2 py-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+                        className="w-full px-2 py-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
                       />
                     </div>
                     <div>
@@ -268,7 +268,7 @@ export function ActionBuilder({ actions, onActionsChange }: ActionBuilderProps) 
                       <select
                         value={action.config.method || 'POST'}
                         onChange={(e) => updateActionConfig(action.id, { method: e.target.value })}
-                        className="w-full px-2 py-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+                        className="w-full px-2 py-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
                       >
                         <option value="GET">GET</option>
                         <option value="POST">POST</option>
@@ -287,11 +287,11 @@ export function ActionBuilder({ actions, onActionsChange }: ActionBuilderProps) 
       {/* Add Action Button */}
       <motion.button
         onClick={() => setShowActionSelector(!showActionSelector)}
-        className="w-full flex items-center justify-center gap-3 p-4 bg-[var(--bg-main)] hover:bg-[var(--bg-surface)] border border-[var(--border-subtle)] hover:border-purple-500/50 rounded-xl transition-all duration-300 group"
+        className="w-full flex items-center justify-center gap-3 p-4 bg-[var(--bg-main)] hover:bg-[var(--bg-surface)] border border-[var(--border-subtle)] hover:border-emerald-500/50 rounded-xl transition-all duration-300 group"
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
-        <PlusIcon className="w-5 h-5 text-purple-400 group-hover:text-purple-300" />
+        <PlusIcon className="w-5 h-5 text-emerald-400 group-hover:text-emerald-300" />
         <span className="text-[var(--text-primary)] font-medium">Añadir Acción</span>
       </motion.button>
 
@@ -320,7 +320,7 @@ export function ActionBuilder({ actions, onActionsChange }: ActionBuilderProps) 
                   </div>
 
                   <div className="text-left">
-                    <h4 className="text-[var(--text-primary)] font-medium mb-1 group-hover:text-purple-400">
+                    <h4 className="text-[var(--text-primary)] font-medium mb-1 group-hover:text-emerald-400">
                       {actionType.name}
                     </h4>
                     <p className="text-[var(--text-secondary)] text-sm">

@@ -58,7 +58,7 @@ export function BackupActions({ onRunBackup, runningBackup }: BackupActionsProps
 
     switch (variant) {
       case 'primary':
-        return `${baseStyles} bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-[var(--text-primary)] shadow-lg hover:shadow-purple-500/25`
+        return `${baseStyles} bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700 text-[var(--text-primary)] shadow-[var(--shadow-card)] hover:shadow-emerald-500/25`
       case 'secondary':
         return `${baseStyles} bg-[var(--bg-main)] hover:bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]`
       case 'danger':
@@ -70,7 +70,7 @@ export function BackupActions({ onRunBackup, runningBackup }: BackupActionsProps
 
   return (
     <motion.div
-      className="bg-[var(--bg-main)] backdrop-blur-sm border border-[var(--border-subtle)] rounded-2xl p-8"
+      className="bg-[var(--bg-main)] backdrop-blur-sm border border-[var(--border-subtle)] rounded-xl p-8"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2, duration: 0.5 }}

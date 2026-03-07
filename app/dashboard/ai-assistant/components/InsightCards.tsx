@@ -83,7 +83,7 @@ export function InsightCards() {
           return (
             <motion.div
               key={insight.id}
-              className={`relative overflow-hidden rounded-2xl ${style.bg} backdrop-blur-sm border ${style.border} hover:shadow-lg ${style.glow} transition-all duration-300 group`}
+              className={`relative overflow-hidden rounded-xl ${style.bg} backdrop-blur-sm border ${style.border} hover:shadow-[var(--shadow-card)] ${style.glow} transition-all duration-300 group`}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1, duration: 0.5 }}
@@ -146,7 +146,7 @@ export function InsightCards() {
 
                     <motion.button
                       onClick={() => handleExecuteAction(insight.id)}
-                      className="flex items-center gap-1 px-3 py-1 text-xs bg-purple-600/20 hover:bg-purple-500/30 text-purple-400 hover:text-purple-300 rounded-lg transition-colors"
+                      className="flex items-center gap-1 px-3 py-1 text-xs bg-emerald-600/20 hover:bg-emerald-500/30 text-emerald-400 hover:text-emerald-300 rounded-lg transition-colors"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
@@ -159,7 +159,7 @@ export function InsightCards() {
 
               {/* Animated border */}
               <motion.div
-                className="absolute inset-0 rounded-2xl border-2 border-transparent bg-gradient-to-r from-purple-500/20 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                className="absolute inset-0 rounded-xl border-2 border-transparent bg-gradient-to-r from-emerald-500/20 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 initial={false}
                 animate={{ backgroundPosition: ['0% 50%', '100% 50%'] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "linear" }}

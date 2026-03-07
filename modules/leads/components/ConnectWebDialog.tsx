@@ -1,28 +1,22 @@
 "use client"
 
 import { useState } from "react"
-import { Link2, Code, Globe, Layout, FileSpreadsheet, Zap, Bot, Copy, CheckCircle2, X } from "lucide-react"
+import { Code, Globe, Layout, FileSpreadsheet, Zap, Bot, Copy, CheckCircle2, X, ChevronRight, MessageCircle, Share2, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import {
- Dialog,
- DialogContent,
- DialogHeader,
- DialogTitle,
- DialogDescription,
-} from "@/components/ui/dialog"
+import { Modal } from "@/components/ui/Modal"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 
 type ConnectWebDialogProps = {
- open: boolean
- onClose: () => void
+    open: boolean
+    onOpenChange: (open: boolean) => void
 }
 
-export function ConnectWebDialog({ open, onClose }: ConnectWebDialogProps) {
- const [scriptDialog, setScriptDialog] = useState(false)
- const [copied, setCopied] = useState(false)
+export function ConnectWebDialog({ open, onOpenChange }: ConnectWebDialogProps) {
+    const [step, setStep] = useState<"root" | "web" | "script" | "whatsapp" | "social" | "integrations">("root")
+    const [copied, setCopied] = useState(false)
 
- const scriptCode = `<!-- ClientLabs Lead Capture Script -->
+    const scriptCode = `<!-- ClientLabs Lead Capture Script -->
 <script>
  (function() {
  window.ClientLabs = window.ClientLabs || {};
@@ -38,196 +32,340 @@ export function ConnectWebDialog({ open, onClose }: ConnectWebDialogProps) {
  })();
 </script>`
 
- const handleCopyScript = () => {
- navigator.clipboard.writeText(scriptCode)
- setCopied(true)
- toast.success("Código copiado al portapapeles")
- setTimeout(() => setCopied(false), 2000)
- }
+    const handleCopyScript = () => {
+        navigator.clipboard.writeText(scriptCode)
+        setCopied(true)
+        toast.success("Código copiado al portapapeles")
+        setTimeout(() => setCopied(false), 2000)
+    }
 
- const connectionMethods = [
- {
- id: "script",
- icon: Code,
- title: "Script Universal",
- description: "Inserta un pequeño script en tu web y captura leads de cualquier formulario",
- status: "active" as const,
- badge: "Recomendado",
- badgeColor: "bg-green-500/20 border-green-500/30 text-green-400",
- onClick: () => setScriptDialog(true),
- },
- {
- id: "wordpress",
- icon: Globe,
- title: "WordPress Plugin",
- description: "Conecta tu web WordPress en 2 clics",
- status: "coming" as const,
- badge: "Próximamente",
- badgeColor: "bg-yellow-500/20 border-yellow-500/30 text-yellow-400",
- },
- {
- id: "webflow",
- icon: Layout,
- title: "Webflow",
- description: "Captura leads desde formularios de Webflow",
- status: "coming" as const,
- badge: "Próximamente",
- badgeColor: "bg-yellow-500/20 border-yellow-500/30 text-yellow-400",
- },
- {
- id: "google-forms",
- icon: FileSpreadsheet,
- title: "Google Forms",
- description: "Importa respuestas automáticamente",
- status: "coming" as const,
- badge: "Próximamente",
- badgeColor: "bg-yellow-500/20 border-yellow-500/30 text-yellow-400",
- },
- {
- id: "zapier",
- icon: Zap,
- title: "Zapier / Webhooks",
- description: "Conecta cualquier herramienta vía webhook",
- status: "coming" as const,
- badge: "Próximamente",
- badgeColor: "bg-yellow-500/20 border-yellow-500/30 text-yellow-400",
- },
- {
- id: "scraping",
- icon: Bot,
- title: "Scraping Inteligente",
- description: "Extrae leads de páginas públicas",
- status: "experimental" as const,
- badge: "Experimental",
- badgeColor: "bg-[var(--bg-card)] border-[var(--critical)] text-[var(--critical)]",
- },
- ]
+    const handleClose = () => {
+        setStep("root")
+        onOpenChange(false)
+    }
 
- return (
- <>
- <Dialog open={open} onOpenChange={onClose}>
- <DialogContent className="bg-zinc-900 border-[var(--border-subtle)] max-w-4xl">
- <DialogHeader>
- <DialogTitle className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
- <Link2 className="h-6 w-6 text-[var(--accent)]" />
- Conectar tu web
- </DialogTitle>
- <DialogDescription className="text-[var(--text-secondary)] text-base">
- Elige cómo quieres capturar leads automáticamente
- </DialogDescription>
- </DialogHeader>
+    const connectionMethods = [
+        {
+            id: "script",
+            icon: Code,
+            title: "Script Universal",
+            description: "Inserta un pequeño script en tu web y captura leads de cualquier formulario",
+            status: "active" as const,
+            badge: "Recomendado",
+            badgeColor: "bg-emerald-50 text-emerald-600 border-emerald-100",
+            onClick: () => setStep("script"),
+        },
+        {
+            id: "wordpress",
+            icon: Globe,
+            title: "WordPress Plugin",
+            description: "Conecta tu web WordPress en 2 clics",
+            status: "coming" as const,
+            badge: "Próximamente",
+            badgeColor: "bg-slate-100 text-slate-500 border-slate-200",
+        },
+        {
+            id: "webflow",
+            icon: Layout,
+            title: "Webflow",
+            description: "Captura leads desde formularios de Webflow",
+            status: "coming" as const,
+            badge: "Próximamente",
+            badgeColor: "bg-slate-100 text-slate-500 border-slate-200",
+        },
+        {
+            id: "google-forms",
+            icon: FileSpreadsheet,
+            title: "Google Forms",
+            description: "Importa respuestas automáticamente",
+            status: "coming" as const,
+            badge: "Próximamente",
+            badgeColor: "bg-slate-100 text-slate-500 border-slate-200",
+        },
+        {
+            id: "zapier",
+            icon: Zap,
+            title: "Zapier / Webhooks",
+            description: "Conecta cualquier herramienta vía webhook",
+            status: "coming" as const,
+            badge: "Próximamente",
+            badgeColor: "bg-slate-100 text-slate-500 border-slate-200",
+        },
+        {
+            id: "scraping",
+            icon: Bot,
+            title: "Scraping Inteligente",
+            description: "Extrae leads de páginas públicas automáticamente",
+            status: "experimental" as const,
+            badge: "Experimental",
+            badgeColor: "bg-orange-50 text-orange-600 border-orange-200",
+        },
+    ]
 
- {/* Connection Methods Grid */}
- <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
- {connectionMethods.map((method) => {
- const Icon = method.icon
- const isDisabled = method.status !== "active"
+    const renderRootStep = () => (
+        <>
+            <div className="sticky top-0 z-20 bg-white border-b border-slate-100 px-10 py-8 space-y-1">
+                <div className="flex items-start justify-between">
+                    <div>
+                        <h2 className="text-2xl font-semibold text-slate-900">
+                            Conectar
+                        </h2>
+                        <p className="text-sm text-slate-500">
+                            Elige el canal desde el que quieres captar leads
+                        </p>
+                    </div>
+                </div>
+            </div>
 
- return (
- <button
- key={method.id}
- onClick={method.onClick}
- disabled={isDisabled}
- className={`group relative rounded-xl border p-6 text-left transition-all ${isDisabled
- ? "border-[var(--border-subtle)] bg-[var(--bg-card)] opacity-60 cursor-not-allowed"
- : "border-blue-500/30 bg-[var(--bg-card)] hover:bg-[var(--bg-card)] hover:border-blue-500/50 cursor-pointer"
- }`}
- >
- {/* Badge */}
- <div className="absolute top-4 right-4">
- <Badge className={`text-xs ${method.badgeColor}`}>
- {method.badge}
- </Badge>
- </div>
+            <div className="p-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Web Channel */}
+                    <button
+                        onClick={() => setStep("web")}
+                        className="group relative rounded-2xl bg-white p-6 text-left transition-all duration-200 shadow-sm ring-1 ring-slate-200 hover:ring-emerald-400 hover:shadow-md flex items-center justify-between"
+                    >
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                                <Globe className="h-6 w-6" />
+                            </div>
+                            <div>
+                                <h3 className="text-base font-semibold text-slate-900 mb-0.5">
+                                    Sitio Web
+                                </h3>
+                                <p className="text-sm text-slate-500">
+                                    Formularios, WordPress, Webflow
+                                </p>
+                            </div>
+                        </div>
+                        <ChevronRight className="h-5 w-5 text-slate-400 group-hover:text-emerald-500 transition-colors" />
+                    </button>
 
- {/* Icon */}
- <div className={`p-3 rounded-lg w-fit mb-4 ${isDisabled
- ? "bg-[var(--bg-card)] border border-[var(--border-subtle)]"
- : "bg-[var(--bg-card)] border border-blue-500/40"
- }`}>
- <Icon className={`h-6 w-6 ${isDisabled ? "text-[var(--text-secondary)]" : "text-[var(--accent)]"}`} />
- </div>
+                    {/* WhatsApp Channel */}
+                    <button
+                        disabled
+                        className="group relative rounded-2xl bg-slate-50/50 p-6 text-left transition-all duration-200 shadow-sm ring-1 ring-slate-100 flex items-center justify-between opacity-80 cursor-not-allowed"
+                    >
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-slate-100 text-slate-400">
+                                <MessageCircle className="h-6 w-6" />
+                            </div>
+                            <div>
+                                <h3 className="text-base font-semibold text-slate-400 mb-0.5">
+                                    WhatsApp
+                                </h3>
+                                <p className="text-sm text-slate-400">
+                                    WhatsApp Business API
+                                </p>
+                            </div>
+                        </div>
+                        <Badge className="absolute top-4 right-4 bg-slate-100 text-slate-500 border-slate-200 text-[10px] uppercase font-bold tracking-wider">
+                            Próximamente
+                        </Badge>
+                    </button>
 
- {/* Content */}
- <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
- {method.title}
- </h3>
- <p className="text-sm text-[var(--text-secondary)]">
- {method.description}
- </p>
- </button>
- )
- })}
- </div>
+                    {/* Social Channel */}
+                    <button
+                        disabled
+                        className="group relative rounded-2xl bg-slate-50/50 p-6 text-left transition-all duration-200 shadow-sm ring-1 ring-slate-100 flex items-center justify-between opacity-80 cursor-not-allowed"
+                    >
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-slate-100 text-slate-400">
+                                <Share2 className="h-6 w-6" />
+                            </div>
+                            <div>
+                                <h3 className="text-base font-semibold text-slate-400 mb-0.5">
+                                    Redes Sociales
+                                </h3>
+                                <p className="text-sm text-slate-400">
+                                    Instagram, Facebook Lead Ads
+                                </p>
+                            </div>
+                        </div>
+                        <Badge className="absolute top-4 right-4 bg-slate-100 text-slate-500 border-slate-200 text-[10px] uppercase font-bold tracking-wider">
+                            Próximamente
+                        </Badge>
+                    </button>
 
- {/* Footer Info */}
- <div className="mt-6 p-4 rounded-lg bg-[var(--bg-card)] border border-blue-500/30">
- <p className="text-sm text-[var(--accent)]">
- 💡 Los leads capturados aparecerán automáticamente en tu panel de Leads con tags de origen
- </p>
- </div>
- </DialogContent>
- </Dialog>
+                    {/* Integrations Channel */}
+                    <button
+                        disabled
+                        className="group relative rounded-2xl bg-slate-50/50 p-6 text-left transition-all duration-200 shadow-sm ring-1 ring-slate-100 flex items-center justify-between opacity-80 cursor-not-allowed"
+                    >
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-slate-100 text-slate-400">
+                                <Zap className="h-6 w-6" />
+                            </div>
+                            <div>
+                                <h3 className="text-base font-semibold text-slate-400 mb-0.5">
+                                    Integraciones
+                                </h3>
+                                <p className="text-sm text-slate-400">
+                                    Webhooks, Zapier, Make
+                                </p>
+                            </div>
+                        </div>
+                        <Badge className="absolute top-4 right-4 bg-slate-100 text-slate-500 border-slate-200 text-[10px] uppercase font-bold tracking-wider">
+                            Próximamente
+                        </Badge>
+                    </button>
 
- {/* Script Dialog */}
- <Dialog open={scriptDialog} onOpenChange={setScriptDialog}>
- <DialogContent className="bg-zinc-900 border-[var(--border-subtle)] max-w-2xl">
- <DialogHeader>
- <DialogTitle className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2">
- <Code className="h-5 w-5 text-[var(--accent)]" />
- Script Universal
- </DialogTitle>
- <DialogDescription className="text-[var(--text-secondary)]">
- Compatible con cualquier web (HTML, React, Webflow, WordPress, etc.)
- </DialogDescription>
- </DialogHeader>
+                </div>
+            </div>
+        </>
+    )
 
- <div className="space-y-4">
- {/* Instructions */}
- <div className="space-y-2">
- <h4 className="text-sm font-semibold text-[var(--text-primary)]">Instrucciones:</h4>
- <ol className="text-sm text-[var(--text-secondary)] space-y-1 list-decimal list-inside">
- <li>Copia el código de abajo</li>
- <li>Pégalo antes del cierre del tag &lt;/body&gt; en tu web</li>
- <li>Los formularios se capturarán automáticamente</li>
- </ol>
- </div>
+    const renderWebStep = () => (
+        <>
+            <div className="sticky top-0 z-20 bg-white px-10 py-8 border-b border-slate-100 space-y-1">
+                <button
+                    onClick={() => setStep("root")}
+                    className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 transition-colors mb-4"
+                >
+                    <ArrowLeft className="h-4 w-4" /> Volver
+                </button>
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-600">
+                        <Globe className="h-5 w-5 text-emerald-600" />
+                    </div>
+                    <div>
+                        <h2 className="text-2xl font-semibold text-slate-900">
+                            Conectar Sitio Web
+                        </h2>
+                        <p className="text-sm text-slate-500 mt-1">
+                            Elige tu plataforma para empezar a sincronizar formularios automáticamente
+                        </p>
+                    </div>
+                </div>
+            </div>
 
- {/* Code Block */}
- <div className="relative">
- <pre className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg p-4 overflow-x-auto">
- <code className="text-sm text-green-400 font-mono">
- {scriptCode}
- </code>
- </pre>
- <Button
- onClick={handleCopyScript}
- size="sm"
- className="absolute top-2 right-2 bg-[var(--bg-card)] hover:bg-[var(--bg-card)]"
- >
- {copied ? (
- <>
- <CheckCircle2 className="h-4 w-4 mr-1" />
- Copiado
- </>
- ) : (
- <>
- <Copy className="h-4 w-4 mr-1" />
- Copiar
- </>
- )}
- </Button>
- </div>
+            <div className="p-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {connectionMethods.map((method) => {
+                        const Icon = method.icon
+                        const isDisabled = method.status !== "active"
 
- {/* Info */}
- <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
- <p className="text-xs text-yellow-400">
- ⚠️ Próximamente: Reemplaza YOUR_API_KEY con tu clave real desde Configuración
- </p>
- </div>
- </div>
- </DialogContent>
- </Dialog>
- </>
- )
+                        return (
+                            <button
+                                key={method.id}
+                                onClick={method.onClick}
+                                disabled={isDisabled}
+                                className={`group relative rounded-2xl p-6 text-left transition-all duration-200 ${isDisabled
+                                    ? "ring-1 ring-slate-100 bg-slate-50/50 opacity-80 cursor-not-allowed shadow-none"
+                                    : "bg-white ring-1 ring-slate-200 hover:ring-emerald-400 hover:shadow-md cursor-pointer shadow-sm"
+                                    }`}
+                            >
+                                {/* Badge */}
+                                <div className="absolute top-4 right-4">
+                                    <Badge variant="outline" className={`text-[10px] uppercase tracking-wider font-bold ${method.badgeColor}`}>
+                                        {method.badge}
+                                    </Badge>
+                                </div>
+
+                                {/* Icon */}
+                                <div className={`w-12 h-12 flex items-center justify-center rounded-xl mb-4 ${isDisabled
+                                    ? "bg-slate-100 text-slate-400"
+                                    : "bg-emerald-50 text-emerald-600 group-hover:bg-emerald-100 group-hover:text-emerald-700 transition-colors"
+                                    }`}>
+                                    <Icon className="h-6 w-6" />
+                                </div>
+
+                                {/* Content */}
+                                <h3 className={`text-base font-semibold mb-0.5 ${isDisabled ? "text-slate-400" : "text-slate-900"}`}>
+                                    {method.title}
+                                </h3>
+                                <p className={`text-sm ${isDisabled ? "text-slate-400" : "text-slate-500"}`}>
+                                    {method.description}
+                                </p>
+                            </button>
+                        )
+                    })}
+                </div>
+            </div>
+        </>
+    )
+
+    const renderScriptStep = () => (
+        <>
+            <div className="sticky top-0 z-20 bg-white px-10 py-8 border-b border-slate-100 space-y-1">
+                <button
+                    onClick={() => setStep("web")}
+                    className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 transition-colors mb-4"
+                >
+                    <ArrowLeft className="h-4 w-4" /> Volver
+                </button>
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-600">
+                        <Code className="h-5 w-5 text-emerald-600" />
+                    </div>
+                    <div>
+                        <h2 className="text-2xl font-semibold text-slate-900">
+                            Script Universal
+                        </h2>
+                        <p className="text-sm text-slate-500 mt-1">
+                            Añade tus formularios pegando este script en el código de tu web
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div className="p-10 space-y-8">
+                {/* Instructions */}
+                <div className="space-y-3">
+                    <h4 className="text-base font-semibold text-slate-900">Instrucciones de instalación:</h4>
+                    <ol className="text-sm text-slate-600 space-y-2 list-decimal list-inside bg-slate-50 border border-slate-200 p-6 rounded-2xl">
+                        <li>Copia el código que aparece a continuación.</li>
+                        <li>Entra al panel de administración de tu página web.</li>
+                        <li>Pega el código justo antes de la etiqueta de cierre <code className="bg-slate-200 px-1 py-0.5 rounded text-slate-800 font-mono">&lt;/body&gt;</code>.</li>
+                        <li>¡Listo! Los formularios de esta web se sincronizarán automáticamente con ClientLabs.</li>
+                    </ol>
+                </div>
+
+                {/* Code Block */}
+                <div className="relative">
+                    <pre className="bg-slate-900 border border-slate-800 rounded-2xl p-6 overflow-x-auto shadow-inner">
+                        <code className="text-sm text-emerald-400 font-mono">
+                            {scriptCode}
+                        </code>
+                    </pre>
+                    <Button
+                        onClick={handleCopyScript}
+                        size="sm"
+                        className="absolute top-4 right-4 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg shadow-md border border-slate-700 transition-all"
+                    >
+                        {copied ? (
+                            <>
+                                <CheckCircle2 className="h-4 w-4 mr-2 text-emerald-400" />
+                                Copiado
+                            </>
+                        ) : (
+                            <>
+                                <Copy className="h-4 w-4 mr-2" />
+                                Copiar Script
+                            </>
+                        )}
+                    </Button>
+                </div>
+
+                {/* Info */}
+                <div className="p-4 rounded-xl bg-orange-50 border border-orange-200 flex items-start gap-3">
+                    <Zap className="h-5 w-5 text-orange-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                        <h4 className="text-sm font-semibold text-orange-800">API Key requerida (Próximamente)</h4>
+                        <p className="text-xs text-orange-700 mt-1 leading-relaxed">
+                            Actualmente el script es una vista previa de la arquitectura final. Más adelante deberás reemplazar <code className="font-mono font-bold bg-orange-100 px-1 rounded">YOUR_API_KEY</code> con tu clave real obtenida desde la pestaña Configuración del ecosistema.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </>
+    )
+
+    return (
+        <Modal isOpen={open} onClose={handleClose} width="default">
+            {step === "root" && renderRootStep()}
+            {step === "web" && renderWebStep()}
+            {step === "script" && renderScriptStep()}
+            {/* Future steps: whatsapp, social, integrations */}
+        </Modal>
+    )
 }

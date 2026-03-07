@@ -38,7 +38,7 @@ function RadarCard({
 }) {
  const accentBorder =
  accent === "violet"
- ? "border-violet-500/30"
+ ? "border-emerald-500/30"
  : accent === "emerald"
  ? "border-[var(--accent)]"
  : accent === "amber"

@@ -117,12 +117,12 @@ export function FixedExpenses() {
               <div className="flex items-center gap-4">
                 <div
                   className={`p-3 rounded-lg ${
-                    expense.active ? "bg-purple-500/20" : "bg-[var(--bg-main)]0/20"
+                    expense.active ? "bg-emerald-500/20" : "bg-[var(--bg-main)]0/20"
                   }`}
                 >
                   <ClockIcon
                     className={`w-5 h-5 ${
-                      expense.active ? "text-purple-400" : "text-[var(--text-secondary)]"
+                      expense.active ? "text-emerald-400" : "text-[var(--text-secondary)]"
                     }`}
                   />
                 </div>
@@ -141,7 +141,7 @@ export function FixedExpenses() {
                           ? "bg-blue-500/20 text-blue-400"
                           : expense.frequency === "QUARTERLY"
                             ? "bg-green-500/20 text-green-400"
-                            : "bg-purple-500/20 text-purple-400"
+                            : "bg-emerald-500/20 text-emerald-400"
                       }`}
                     >
                       {formatExpenseFrequency(expense.frequency)}

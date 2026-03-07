@@ -138,7 +138,7 @@ export default async function LeadsPage({
   const sortBy = searchParams.sortBy || "score"
   const sortOrder = (searchParams.sortOrder || "desc") as "asc" | "desc"
 
-  let orderBy: any = { score: "desc" }
+  let orderBy: any = [{ lastActionAt: "desc" }, { score: "desc" }]
   if (sortBy === "temperature") {
     orderBy = [{ temperature: sortOrder }, { score: "desc" }]
   } else if (sortBy === "score") {

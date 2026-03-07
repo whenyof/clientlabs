@@ -3,79 +3,61 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
-// GET /api/integrations - List integrations for current user (real DB)
 export async function GET(request: NextRequest) {
- try {
- const session = await getServerSession(authOptions)
- if (!session?.user?.id) {
- return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
- }
- const integrations = await prisma.integration.findMany({
- where: { userId: session.user.id },
- orderBy: { createdAt: 'desc' },
- take: 100,
- })
- return NextResponse.json({
- success: true,
- data: integrations.map(i => ({
- id: i.id,
- name: i.name,
- provider: i.provider,
- status: i.status,
- category: i.category,
- lastSync: i.lastSync,
- createdAt: i.createdAt,
- })),
- })
- } catch (error) {
- console.error('Error fetching integrations:', error)
- return NextResponse.json(
- { success: false, error: 'Failed to fetch integrations' },
- { status: 500 }
- )
- }
-}
+    try {
+        const session = await getServerSession(authOptions)
+        if (!session?.user?.id) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        }
 
-// POST /api/integrations - Create new integration (real DB)
-export async function POST(request: NextRequest) {
- try {
- const session = await getServerSession(authOptions)
- if (!session?.user?.id) {
- return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
- }
- const body = await request.json()
- const { name, provider, category = 'CRM' } = body
- if (!name || !provider) {
- return NextResponse.json(
- { success: false, error: 'name and provider required' },
- { status: 400 }
- )
- }
- const integration = await prisma.integration.create({
- data: {
- userId: session.user.id,
- name: String(name),
- provider: String(provider),
- category: ['CRM', 'BILLING', 'COMMS', 'ANALYTICS', 'OTHER'].includes(category) ? category : 'OTHER',
- status: 'DISCONNECTED',
- },
- })
- return NextResponse.json({
- success: true,
- data: {
- id: integration.id,
- name: integration.name,
- provider: integration.provider,
- status: integration.status,
- category: integration.category,
- createdAt: integration.createdAt,
- },
- })
- } catch (error) {
- console.error('Error creating integration:', error)
- return NextResponse.json(
- { success: false, error: 'Failed to create integration' },
- { status: 500 }
- )
- }
+        const userId = session.user.id
+
+        // Check DB for Integrations (WhatsApp, Facebook)
+        const integrations = await prisma.integration.findMany({
+            where: { userId },
+            select: { id: true, category: true, provider: true, status: true, lastSync: true, config: true }
+        })
+
+        // Web tracking: no LeadSource/VisitorSession models in schema; use SdkInstallation as proxy for "web connected"
+        let webLastSync: string | null = null
+        try {
+            const sdk = await prisma.sdkInstallation.findFirst({
+                where: { userId },
+                orderBy: { lastSeenAt: 'desc' },
+                select: { lastSeenAt: true },
+            })
+            if (sdk?.lastSeenAt) webLastSync = sdk.lastSeenAt.toISOString()
+        } catch {
+            // ignore
+        }
+        const hasWebConnection = webLastSync !== null
+
+        const isConnected = (provider: string) => {
+            const ints = integrations.filter((i) => i.provider.toLowerCase() === provider.toLowerCase())
+            return ints.some((i) => i.status === 'CONNECTED')
+        }
+
+        // Build the expected response format exactly as requested:
+        const data = {
+            web: {
+                connected: hasWebConnection,
+                lastSync: webLastSync
+            },
+            whatsapp: {
+                connected: isConnected('whatsapp')
+            },
+            facebook: {
+                connected: isConnected('facebook')
+            },
+            items: integrations.map((i) => ({ ...i, type: i.category }))
+        }
+
+        return NextResponse.json(data)
+    } catch (error) {
+        console.error('Error fetching integrations:', error)
+        return NextResponse.json(
+            { error: 'Failed to fetch integrations' },
+            { status: 500 }
+        )
+    }
 }

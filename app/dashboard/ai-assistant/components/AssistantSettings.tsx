@@ -62,7 +62,7 @@ export function AssistantSettings() {
 
       {/* General Settings */}
       <motion.div
-        className="bg-[var(--bg-main)] backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)] p-6"
+        className="bg-[var(--bg-main)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)] p-6"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1, duration: 0.5 }}
@@ -93,7 +93,7 @@ export function AssistantSettings() {
               />
               <div className="flex justify-between text-xs text-[var(--text-secondary)]">
                 <span>Conservador</span>
-                <span className="text-purple-400 font-semibold">
+                <span className="text-emerald-400 font-semibold">
                   Nivel {settings.aggressiveness}
                 </span>
                 <span>Agresivo</span>
@@ -105,7 +105,7 @@ export function AssistantSettings() {
 
       {/* Notifications */}
       <motion.div
-        className="bg-[var(--bg-main)] backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)] p-6"
+        className="bg-[var(--bg-main)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)] p-6"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.5 }}
@@ -136,7 +136,7 @@ export function AssistantSettings() {
                 onChange={(e) => handleNotificationChange('urgentRecommendations', e.target.checked)}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-[var(--bg-surface)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-[var(--border-subtle)] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[var(--bg-card)] after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+              <div className="w-11 h-6 bg-[var(--bg-surface)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-[var(--border-subtle)] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[var(--bg-card)] after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
             </label>
           </div>
 
@@ -155,13 +155,13 @@ export function AssistantSettings() {
                 onChange={(e) => handleNotificationChange('dailySummary', e.target.checked)}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-[var(--bg-surface)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-[var(--border-subtle)] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[var(--bg-card)] after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+              <div className="w-11 h-6 bg-[var(--bg-surface)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-[var(--border-subtle)] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[var(--bg-card)] after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
             </label>
           </div>
 
           <div className="flex items-center justify-between p-4 bg-[var(--bg-card)] rounded-lg">
             <div className="flex items-center gap-3">
-              <CalendarIcon className="w-5 h-5 text-purple-400" />
+              <CalendarIcon className="w-5 h-5 text-emerald-400" />
               <div>
                 <div className="text-[var(--text-primary)] font-medium">Reportes semanales</div>
                 <div className="text-[var(--text-secondary)] text-sm">Análisis detallado semanal</div>
@@ -174,7 +174,7 @@ export function AssistantSettings() {
                 onChange={(e) => handleNotificationChange('weeklyReport', e.target.checked)}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-[var(--bg-surface)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-[var(--border-subtle)] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[var(--bg-card)] after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+              <div className="w-11 h-6 bg-[var(--bg-surface)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-[var(--border-subtle)] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[var(--bg-card)] after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
             </label>
           </div>
 
@@ -193,7 +193,7 @@ export function AssistantSettings() {
                 onChange={(e) => handleNotificationChange('riskAlerts', e.target.checked)}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-[var(--bg-surface)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-[var(--border-subtle)] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[var(--bg-card)] after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+              <div className="w-11 h-6 bg-[var(--bg-surface)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-[var(--border-subtle)] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[var(--bg-card)] after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
             </label>
           </div>
         </div>
@@ -201,14 +201,14 @@ export function AssistantSettings() {
 
       {/* Automations */}
       <motion.div
-        className="bg-[var(--bg-main)] backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)] p-6"
+        className="bg-[var(--bg-main)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)] p-6"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.5 }}
       >
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 bg-purple-500/20 rounded-lg">
-            <CogIcon className="w-5 h-5 text-purple-400" />
+          <div className="p-2 bg-emerald-500/20 rounded-lg">
+            <CogIcon className="w-5 h-5 text-emerald-400" />
           </div>
           <div>
             <h4 className="text-lg font-semibold text-[var(--text-primary)]">Automatizaciones</h4>
@@ -232,7 +232,7 @@ export function AssistantSettings() {
                 onChange={(e) => handleAutomationChange('autoEmailGeneration', e.target.checked)}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-[var(--bg-surface)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-[var(--border-subtle)] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[var(--bg-card)] after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+              <div className="w-11 h-6 bg-[var(--bg-surface)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-[var(--border-subtle)] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[var(--bg-card)] after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
             </label>
           </div>
 
@@ -251,7 +251,7 @@ export function AssistantSettings() {
                 onChange={(e) => handleAutomationChange('autoLeadScoring', e.target.checked)}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-[var(--bg-surface)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-[var(--border-subtle)] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[var(--bg-card)] after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+              <div className="w-11 h-6 bg-[var(--bg-surface)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-[var(--border-subtle)] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[var(--bg-card)] after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
             </label>
           </div>
         </div>
@@ -264,7 +264,7 @@ export function AssistantSettings() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5, duration: 0.5 }}
       >
-        <button className="px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-[var(--text-primary)] font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-purple-500/25">
+        <button className="px-6 py-3 bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700 text-[var(--text-primary)] font-semibold rounded-xl transition-all duration-300 shadow-[var(--shadow-card)] hover:shadow-emerald-500/25">
           Guardar Configuración
         </button>
       </motion.div>

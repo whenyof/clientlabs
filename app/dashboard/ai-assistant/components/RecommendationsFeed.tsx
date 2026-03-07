@@ -15,7 +15,7 @@ export function RecommendationsFeed() {
         {mockRecommendations.slice(0, 3).map((recommendation, index) => (
           <motion.div
             key={recommendation.id}
-            className="bg-[var(--bg-main)] backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)] p-6"
+            className="bg-[var(--bg-main)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)] p-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1, duration: 0.5 }}

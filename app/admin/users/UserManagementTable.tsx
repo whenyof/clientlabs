@@ -48,7 +48,7 @@ function RoleBadge({ role }: { role: string }) {
 function PlanBadge({ plan }: { plan: string }) {
  const colors = {
  FREE: "bg-gray-500/20 text-[var(--text-secondary)] border-gray-500/30",
- PRO: "bg-[var(--accent-soft)]-primary/15 text-[var(--accent)]-hover border-[var(--accent)]-primary/30",
+ PRO: "bg-[var(--accent-soft)]-primary/15 text-[var(--accent)]-bg-emerald-600 border-[var(--accent)]-primary/30",
  ENTERPRISE: "bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border-subtle)]"
  }
 

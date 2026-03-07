@@ -36,7 +36,7 @@ export function DayColumn({
  <div
  className={cn(
  "sticky top-0 z-10 border-b border-border/60 px-2 py-2 text-sm font-medium truncate",
- isToday ? "bg-violet-500/15 text-violet-600" : "bg-background/95 text-foreground"
+ isToday ? "bg-emerald-500/15 text-emerald-600" : "bg-background/95 text-foreground"
  )}
  style={{ height: CALENDAR_ROW_HEIGHT }}
  >

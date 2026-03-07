@@ -11,7 +11,7 @@ interface IntegrationCategoriesProps {
 export function IntegrationCategories({ selectedCategory, onCategoryChange }: IntegrationCategoriesProps) {
   return (
     <motion.div
-      className="bg-[var(--bg-main)] backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)] p-6"
+      className="bg-[var(--bg-main)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)] p-6"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1, duration: 0.5 }}
@@ -28,7 +28,7 @@ export function IntegrationCategories({ selectedCategory, onCategoryChange }: In
           className={`
             p-4 rounded-xl border transition-all duration-300 hover:scale-105
             ${selectedCategory === 'all'
-              ? 'bg-purple-600/20 border-purple-500/50 shadow-lg shadow-purple-500/10'
+              ? 'bg-emerald-600/20 border-emerald-500/50 shadow-[var(--shadow-card)] shadow-emerald-500/10'
               : 'bg-[var(--bg-card)] border-[var(--border-subtle)] hover:border-[var(--border-subtle)]'
             }
           `}
@@ -38,7 +38,7 @@ export function IntegrationCategories({ selectedCategory, onCategoryChange }: In
           <div className="text-center">
             <div className="text-3xl mb-2">🔗</div>
             <div className={`text-sm font-medium ${
-              selectedCategory === 'all' ? 'text-purple-400' : 'text-[var(--text-secondary)]'
+              selectedCategory === 'all' ? 'text-emerald-400' : 'text-[var(--text-secondary)]'
             }`}>
               Todas
             </div>
@@ -53,7 +53,7 @@ export function IntegrationCategories({ selectedCategory, onCategoryChange }: In
             className={`
               p-4 rounded-xl border transition-all duration-300 hover:scale-105
               ${selectedCategory === category.id
-                ? 'bg-purple-600/20 border-purple-500/50 shadow-lg shadow-purple-500/10'
+                ? 'bg-emerald-600/20 border-emerald-500/50 shadow-[var(--shadow-card)] shadow-emerald-500/10'
                 : 'bg-[var(--bg-card)] border-[var(--border-subtle)] hover:border-[var(--border-subtle)]'
             }
             `}
@@ -66,7 +66,7 @@ export function IntegrationCategories({ selectedCategory, onCategoryChange }: In
             <div className="text-center">
               <div className="text-3xl mb-2">{category.icon}</div>
               <div className={`text-sm font-medium ${
-                selectedCategory === category.id ? 'text-purple-400' : 'text-[var(--text-secondary)]'
+                selectedCategory === category.id ? 'text-emerald-400' : 'text-[var(--text-secondary)]'
               }`}>
                 {category.name}
               </div>
@@ -81,7 +81,7 @@ export function IntegrationCategories({ selectedCategory, onCategoryChange }: In
       {/* Category description */}
       {selectedCategory !== 'all' && (
         <motion.div
-          className="mt-6 p-4 bg-purple-500/10 border border-purple-500/20 rounded-xl"
+          className="mt-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
@@ -98,7 +98,7 @@ export function IntegrationCategories({ selectedCategory, onCategoryChange }: In
                   {category.integrations.map(integration => (
                     <span
                       key={integration}
-                      className="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs rounded-full"
+                      className="px-2 py-1 bg-emerald-500/20 text-emerald-400 text-xs rounded-full"
                     >
                       {integration}
                     </span>

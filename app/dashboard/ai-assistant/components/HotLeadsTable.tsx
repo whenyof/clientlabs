@@ -13,7 +13,7 @@ export function HotLeadsTable() {
         </div>
       </div>
 
-      <div className="bg-[var(--bg-main)] backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)] p-6">
+      <div className="bg-[var(--bg-main)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)] p-6">
         <div className="text-center py-8">
           <div className="text-[var(--text-secondary)]">
             Ranking de leads con {mockLeadScores.length} leads analizados
@@ -29,7 +29,7 @@ export function HotLeadsTable() {
               >
                 <div className="text-[var(--text-primary)] font-semibold">{lead.name}</div>
                 <div className="text-[var(--text-secondary)] text-sm">{lead.company}</div>
-                <div className="text-purple-400 font-bold mt-2">Score: {lead.score}</div>
+                <div className="text-emerald-400 font-bold mt-2">Score: {lead.score}</div>
                 <div className="text-green-400 text-sm">{formatCurrency(lead.predictedValue)}</div>
               </motion.div>
             ))}

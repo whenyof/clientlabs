@@ -1,6 +1,17 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* ClientLabs institutional theme (green / teal) */
+@theme {
+  --color-primary: #10B981;
+  --color-primary-dark: #059669;
+  --color-primary-soft: #34D399;
+  --color-background: #071A1F;
+  --color-surface: #0B2A2F;
+  --color-border: #134E4A;
+  --color-text: #E6FFFA;
+}
+
 /* GLOBAL RESET */
 html,
 body {
@@ -25,18 +36,19 @@ body {
 }
 
 :root {
-  --bg-main: #F3F6F9;
-  --bg-surface: #EEF2F6;
+  --bg-main: #F5F7F9;
+  --bg-surface: #F4F7FA;
   --bg-card: #FFFFFF;
 
-  --border-subtle: #E3E8EE;
+  --border-subtle: #E3E8EF;
 
   --text-primary: #111827;
   --text-secondary: #6B7280;
 
-  --accent: #0E7C66;
-  --accent-hover: #12A383;
-  --accent-soft: rgba(14, 124, 102, 0.08);
+  /* ClientLabs institutional green / teal */
+  --accent: #10B981;
+  --accent-bg-emerald-600: #059669;
+  --accent-soft: rgba(16, 185, 129, 0.08);
 
   --critical: #C95656;
   --warning: #D9A441;
@@ -46,18 +58,18 @@ body {
 }
 
 html[data-theme="dark"] {
-  --bg-main: #0F172A;
-  --bg-surface: #111827;
-  --bg-card: #1F2937;
+  --bg-main: #071A1F;
+  --bg-surface: #0B2A2F;
+  --bg-card: #0B2A2F;
 
-  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-subtle: #134E4A;
 
-  --text-primary: #E5E7EB;
-  --text-secondary: #9CA3AF;
+  --text-primary: #E6FFFA;
+  --text-secondary: #99F6E4;
 
-  --accent: #1FA97A;
-  --accent-hover: #2ED39C;
-  --accent-soft: rgba(31, 169, 122, 0.1);
+  --accent: #34D399;
+  --accent-bg-emerald-600: #10B981;
+  --accent-soft: rgba(52, 211, 153, 0.1);
 
   --critical: #C95656;
   --warning: #D9A441;
@@ -113,7 +125,7 @@ html[data-theme="dark"] {
 
   /* Hover lift */
   @media (prefers-reduced-motion: no-preference) {
-    .hover-lift:hover {
+    .bg-emerald-600-lift:hover {
       transform: translateY(-2px);
     }
   }

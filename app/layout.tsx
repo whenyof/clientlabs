@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
 
@@ -36,6 +37,25 @@ const themeScript = `
  })();
 `;
 
+const clientlabsConfig = {
+    key: process.env.NEXT_PUBLIC_CLIENTLABS_PUBLIC_KEY || "cl_pub_1005fd6d5b7da49b438d470f9ae23eea",
+    features: {
+        pageview: true,
+        forms: true,
+        intent: true,
+        ecommerce: true,
+        heartbeat: true,
+        utm: true,
+        email: true,
+        cta: true,
+        whatsapp: true,
+        cart: true,
+    },
+};
+const clientlabsConfigScript = `window.clientlabsConfig=${JSON.stringify(clientlabsConfig)};`;
+
+const clientlabsLoaderUrl = process.env.NEXT_PUBLIC_CLIENTLABS_CDN || "https://cdn.clientlabs.io/v1/loader.js";
+
 export default function RootLayout({
     children,
 }: {
@@ -45,6 +65,14 @@ export default function RootLayout({
         <html lang="es" suppressHydrationWarning>
             <head>
                 <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+                {/* ClientLabs Tracking — config before loader */}
+                <script dangerouslySetInnerHTML={{ __html: clientlabsConfigScript }} />
+                <Script
+                    id="clientlabs-loader"
+                    src={clientlabsLoaderUrl}
+                    strategy="afterInteractive"
+                    async
+                />
             </head>
             <body
                 className={`${geistSans.variable} ${geistMono.variable} antialiased transition-colors duration-300 min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)]`}

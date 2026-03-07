@@ -1,9 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { useSectorConfig } from "@/hooks/useSectorConfig"
-import { DashboardContainer } from "@/components/layout/DashboardContainer"
+import { useSearchParams } from "next/navigation"
+import { motion, AnimatePresence } from "framer-motion"
 import { ProfileForm } from "./components/ProfileForm"
 import { SecuritySettings } from "./components/SecuritySettings"
 import { CompanySettings } from "./components/CompanySettings"
@@ -15,108 +13,38 @@ import { BillingHistory } from "./components/BillingHistory"
 import { UsageLimits } from "./components/UsageLimits"
 import { AppearanceSettings } from "./components/AppearanceSettings"
 import { DangerZone } from "./components/DangerZone"
-import {
-  UserIcon,
-  ShieldCheckIcon,
-  BuildingOfficeIcon,
-  BellIcon,
-  UsersIcon,
-  KeyIcon,
-  CreditCardIcon,
-  ChartBarIcon,
-  PaintBrushIcon,
-  ExclamationTriangleIcon
-} from "@heroicons/react/24/outline"
 
 export default function SettingsPage() {
-  const { labels } = useSectorConfig()
-  const s = labels.settings
-  const [activeSection, setActiveSection] = useState('profile')
+  const searchParams = useSearchParams()
+  const activeSection = searchParams.get('section') || 'profile'
 
   const sections = [
-    { id: 'profile', label: s.profile, icon: UserIcon, component: ProfileForm },
-    { id: 'security', label: s.security, icon: ShieldCheckIcon, component: SecuritySettings },
-    { id: 'company', label: s.company, icon: BuildingOfficeIcon, component: CompanySettings },
-    { id: 'notifications', label: s.notifications, icon: BellIcon, component: NotificationSettings },
-    { id: 'team', label: s.team, icon: UsersIcon, component: TeamMembers },
-    { id: 'permissions', label: s.permissions, icon: KeyIcon, component: PermissionsPanel, pro: true },
-    { id: 'plans', label: s.plans, icon: CreditCardIcon, component: PlansSection },
-    { id: 'billing', label: s.billing, icon: ChartBarIcon, component: BillingHistory },
-    { id: 'usage', label: s.usage, icon: ChartBarIcon, component: UsageLimits },
-    { id: 'appearance', label: s.appearance, icon: PaintBrushIcon, component: AppearanceSettings },
-    { id: 'danger', label: s.dangerZone, icon: ExclamationTriangleIcon, component: DangerZone, danger: true },
+    { id: 'profile', component: ProfileForm },
+    { id: 'security', component: SecuritySettings },
+    { id: 'company', component: CompanySettings },
+    { id: 'notifications', component: NotificationSettings },
+    { id: 'team', component: TeamMembers },
+    { id: 'permissions', component: PermissionsPanel },
+    { id: 'plans', component: PlansSection },
+    { id: 'billing', component: BillingHistory },
+    { id: 'usage', component: UsageLimits },
+    { id: 'appearance', component: AppearanceSettings },
+    { id: 'danger', component: DangerZone },
   ]
 
   const ActiveComponent = sections.find(s => s.id === activeSection)?.component || ProfileForm
 
   return (
-    <DashboardContainer>
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-[var(--text-primary)]">{s.title}</h1>
-        <p className="text-sm text-[var(--text-secondary)]">
-          {s.pageSubtitle}
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {/* Sidebar */}
-        <motion.div
-          className="lg:col-span-1"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-        >
-          <div className="bg-[var(--bg-main)] backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)] p-4 sticky top-6">
-            <nav className="space-y-2">
-              {sections.map((section, index) => {
-                const Icon = section.icon
-                const isActive = activeSection === section.id
-
-                return (
-                  <motion.button
-                    key={section.id}
-                    onClick={() => setActiveSection(section.id)}
-                    className={`
-                      w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-300
-                      ${isActive
-                        ? 'bg-purple-600/20 text-purple-400 border border-purple-500/30'
-                        : 'text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]'
-                      }
-                      ${section.danger ? 'text-red-400 hover:text-red-300' : ''}
-                    `}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 * index, duration: 0.3 }}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <Icon className="w-5 h-5 flex-shrink-0" />
-                    <span className="text-sm font-medium">{section.label}</span>
-                    {section.pro && (
-                      <span className="ml-auto text-xs bg-purple-500/20 text-purple-400 px-2 py-1 rounded-full">
-                        PRO
-                      </span>
-                    )}
-                  </motion.button>
-                )
-              })}
-            </nav>
-          </div>
-        </motion.div>
-
-        {/* Content */}
-        <motion.div
-          className="lg:col-span-3"
-          key={activeSection}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <div className="bg-[var(--bg-main)] backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)] p-8">
-            <ActiveComponent />
-          </div>
-        </motion.div>
-      </div>
-    </DashboardContainer>
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={activeSection}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.2 }}
+      >
+        <ActiveComponent />
+      </motion.div>
+    </AnimatePresence>
   )
 }

@@ -1,9 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { motion } from "framer-motion"
 import { PLANS, formatPrice, canUpgrade } from "../lib/plans"
-import { CheckIcon, ArrowRightIcon, CreditCardIcon } from "@heroicons/react/24/outline"
+import { CheckIcon, CreditCardIcon } from "@heroicons/react/24/outline"
+import { cn } from "@/lib/utils"
 
 export function PlansSection() {
   const [currentPlan, setCurrentPlan] = useState('pro')
@@ -11,231 +11,130 @@ export function PlansSection() {
 
   const handleUpgrade = (planId: string) => {
     console.log('Upgrading to plan:', planId)
-    // TODO: Redirect to Stripe checkout
   }
 
   const handleManageBilling = () => {
     console.log('Opening Stripe customer portal')
-    // TODO: Redirect to Stripe customer portal
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">Planes y precios</h2>
-        <p className="text-[var(--text-secondary)]">Elige el plan que mejor se adapte a tu negocio</p>
+    <div className="space-y-6">
+      {/* Section Header */}
+      <div>
+        <h2 className="text-lg font-semibold text-[#0B1F2A]">Planes</h2>
+        <p className="text-sm text-slate-500 mt-0.5">Gestión de suscripción y niveles de servicio.</p>
       </div>
 
       {/* Billing Toggle */}
-      <div className="flex items-center justify-center mb-8">
-        <div className="bg-[var(--bg-card)] p-1 rounded-lg flex items-center">
+      <div className="flex items-center gap-1 bg-white rounded-xl border border-slate-200 p-1 w-fit">
+        <button
+          onClick={() => setBillingCycle('month')}
+          className={cn(
+            "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+            billingCycle === 'month'
+              ? "bg-slate-50 text-[#0B1F2A]"
+              : "text-slate-400 hover:text-slate-600"
+          )}
+        >
+          Mensual
+        </button>
+        <button
+          onClick={() => setBillingCycle('year')}
+          className={cn(
+            "px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2",
+            billingCycle === 'year'
+              ? "bg-slate-50 text-[#0B1F2A]"
+              : "text-slate-400 hover:text-slate-600"
+          )}
+        >
+          Anual
+          <span className="text-[10px] font-semibold text-[var(--accent)] bg-[var(--accent)]/10 px-1.5 py-0.5 rounded">-20%</span>
+        </button>
+      </div>
+
+      {/* Current Plan */}
+      <div className="bg-white rounded-xl border border-[var(--accent)]/20 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs text-slate-500 mb-0.5">Plan actual</p>
+            <p className="text-base font-bold text-[#0B1F2A]">{PLANS.find(p => p.id === currentPlan)?.name}</p>
+            <p className="text-xs text-slate-400 mt-0.5">Próxima facturación: 15 enero 2025</p>
+          </div>
           <button
-            onClick={() => setBillingCycle('month')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              billingCycle === 'month'
-                ? 'bg-purple-600 text-[var(--text-primary)]'
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-            }`}
+            onClick={handleManageBilling}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
           >
-            Mensual
-          </button>
-          <button
-            onClick={() => setBillingCycle('year')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              billingCycle === 'year'
-                ? 'bg-purple-600 text-[var(--text-primary)]'
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-            }`}
-          >
-            Anual
-            <span className="ml-2 text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">
-              -20%
-            </span>
+            <CreditCardIcon className="w-4 h-4" />
+            Facturación
           </button>
         </div>
       </div>
 
-      {/* Current Plan Banner */}
-      <motion.div
-        className="bg-gradient-to-r from-purple-600/10 to-blue-600/10 border border-purple-500/20 rounded-xl p-6 mb-8"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.5 }}
-      >
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-1">
-              Plan actual: {PLANS.find(p => p.id === currentPlan)?.name}
-            </h3>
-            <p className="text-[var(--text-secondary)] text-sm">
-              Próxima renovación: 15 de enero de 2025
-            </p>
-          </div>
-          <motion.button
-            onClick={handleManageBilling}
-            className="flex items-center gap-2 px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 text-purple-400 hover:text-purple-300 rounded-lg transition-colors"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <CreditCardIcon className="w-4 h-4" />
-            Gestionar facturación
-          </motion.button>
-        </div>
-      </motion.div>
-
       {/* Plans Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {PLANS.map((plan, index) => {
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {PLANS.map((plan) => {
           const isCurrentPlan = plan.id === currentPlan
           const canUpgradePlan = canUpgrade(currentPlan, plan.id)
 
           return (
-            <motion.div
+            <div
               key={plan.id}
-              className={`relative bg-[var(--bg-card)] backdrop-blur-sm rounded-2xl border p-6 transition-all duration-300 hover:scale-105 ${
+              className={cn(
+                "bg-white rounded-xl border p-6",
                 isCurrentPlan
-                  ? 'border-purple-500/50 shadow-lg shadow-purple-500/10'
-                  : plan.popular
-                  ? 'border-blue-500/50 shadow-lg shadow-blue-500/10'
-                  : 'border-[var(--border-subtle)] hover:border-[var(--border-subtle)]'
-              }`}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 + (index * 0.1), duration: 0.5 }}
+                  ? "border-[var(--accent)] ring-1 ring-[var(--accent)]/10"
+                  : "border-slate-200 hover:border-slate-300"
+              )}
             >
-              {/* Popular Badge */}
-              {plan.popular && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-[var(--text-primary)] text-xs font-bold px-3 py-1 rounded-full">
+              <div className="mb-5">
+                <p className="text-xs text-slate-500 mb-1">{plan.name}</p>
+                <div className="text-2xl font-bold text-[#0B1F2A]">
+                  {formatPrice(plan.price)}
+                  <span className="text-xs text-slate-400 font-normal ml-1">/{billingCycle === 'month' ? 'mes' : 'año'}</span>
+                </div>
+                {plan.badge && (
+                  <span className="inline-block mt-1.5 text-[10px] font-semibold text-[var(--accent)] bg-[var(--accent)]/10 px-1.5 py-0.5 rounded uppercase">
                     {plan.badge}
                   </span>
-                </div>
-              )}
-
-              {/* Current Plan Badge */}
-              {isCurrentPlan && (
-                <div className="absolute -top-3 right-4">
-                  <span className="bg-purple-600 text-[var(--text-primary)] text-xs font-bold px-3 py-1 rounded-full">
-                    Actual
-                  </span>
-                </div>
-              )}
-
-              <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-2">{plan.name}</h3>
-                <div className="text-4xl font-bold text-[var(--text-primary)] mb-1">
-                  {formatPrice(plan.price)}
-                  <span className="text-lg text-[var(--text-secondary)] font-normal">/{billingCycle === 'month' ? 'mes' : 'año'}</span>
-                </div>
-                <p className="text-sm text-[var(--text-secondary)]">{plan.badge}</p>
+                )}
               </div>
 
-              {/* Features */}
-              <div className="space-y-3 mb-6">
-                {plan.features.map((feature, featureIndex) => (
-                  <div key={featureIndex} className="flex items-center gap-3">
-                    <CheckIcon className="w-4 h-4 text-green-400 flex-shrink-0" />
-                    <span className="text-sm text-[var(--text-secondary)]">{feature}</span>
+              <div className="space-y-2.5 mb-5">
+                {plan.features.map((feature, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <CheckIcon className="w-4 h-4 text-[var(--accent)]" strokeWidth={2.5} />
+                    <span className="text-xs text-slate-600">{feature}</span>
                   </div>
                 ))}
               </div>
 
-              {/* Limits */}
-              <div className="bg-[var(--bg-main)] rounded-lg p-3 mb-6">
-                <h4 className="text-sm font-medium text-[var(--text-secondary)] mb-2">Límites del plan</h4>
-                <div className="space-y-1 text-xs text-[var(--text-secondary)]">
-                  <div>Clientes: {plan.limits.clients === -1 ? 'Ilimitados' : plan.limits.clients}</div>
-                  <div>Automatizaciones: {plan.limits.automations === -1 ? 'Ilimitadas' : plan.limits.automations}</div>
-                  <div>Integraciones: {plan.limits.integrations === -1 ? 'Ilimitadas' : plan.limits.integrations}</div>
-                  <div>IA: {plan.limits.aiRequests === -1 ? 'Ilimitada' : `${plan.limits.aiRequests}/mes`}</div>
+              <div className="bg-slate-50 border border-slate-100 rounded-lg p-3 mb-5">
+                <div className="space-y-1.5 text-xs">
+                  <div className="flex justify-between"><span className="text-slate-500">Clientes</span><span className="text-[#0B1F2A] font-medium">{plan.limits.clients === -1 ? '∞' : plan.limits.clients}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Automaciones</span><span className="text-[#0B1F2A] font-medium">{plan.limits.automations === -1 ? '∞' : plan.limits.automations}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Integraciones</span><span className="text-[#0B1F2A] font-medium">{plan.limits.integrations === -1 ? '∞' : plan.limits.integrations}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">IA Requests</span><span className="text-[#0B1F2A] font-medium">{plan.limits.aiRequests === -1 ? '∞' : `${plan.limits.aiRequests}/mes`}</span></div>
                 </div>
               </div>
 
-              {/* Action Button */}
-              <motion.button
+              <button
                 onClick={() => isCurrentPlan ? handleManageBilling() : handleUpgrade(plan.id)}
                 disabled={!canUpgradePlan && !isCurrentPlan}
-                className={`w-full py-3 px-4 rounded-lg font-semibold transition-all duration-300 ${
+                className={cn(
+                  "w-full py-2.5 rounded-lg text-sm font-medium transition-colors",
                   isCurrentPlan
-                    ? 'bg-purple-600/20 text-purple-400 hover:bg-purple-600/30'
+                    ? "bg-slate-50 text-slate-500 border border-slate-200"
                     : canUpgradePlan
-                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-[var(--text-primary)] shadow-lg hover:shadow-purple-500/25'
-                    : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] cursor-not-allowed'
-                }`}
-                whileHover={canUpgradePlan || isCurrentPlan ? { scale: 1.02 } : {}}
-                whileTap={canUpgradePlan || isCurrentPlan ? { scale: 0.98 } : {}}
+                      ? "bg-[var(--accent)] text-white hover:opacity-90"
+                      : "bg-slate-50 text-slate-300 cursor-not-allowed"
+                )}
               >
-                <div className="flex items-center justify-center gap-2">
-                  {isCurrentPlan ? (
-                    <>
-                      Gestionar plan
-                      <ArrowRightIcon className="w-4 h-4" />
-                    </>
-                  ) : canUpgradePlan ? (
-                    <>
-                      Actualizar a {plan.name}
-                      <ArrowRightIcon className="w-4 h-4" />
-                    </>
-                  ) : (
-                    'Plan actual'
-                  )}
-                </div>
-              </motion.button>
-            </motion.div>
+                {isCurrentPlan ? 'Plan actual' : canUpgradePlan ? `Cambiar a ${plan.name}` : 'No disponible'}
+              </button>
+            </div>
           )
         })}
       </div>
-
-      {/* Usage Stats */}
-      <motion.div
-        className="bg-[var(--bg-card)] rounded-xl p-6"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6, duration: 0.5 }}
-      >
-        <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Uso actual del plan</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div>
-            <div className="text-sm text-[var(--text-secondary)] mb-1">Clientes</div>
-            <div className="text-lg font-bold text-[var(--text-primary)]">187</div>
-            <div className="text-xs text-[var(--text-secondary)]">de 200</div>
-            <div className="w-full bg-[var(--bg-surface)] rounded-full h-2 mt-2">
-              <div className="bg-green-500 h-2 rounded-full" style={{ width: '93.5%' }}></div>
-            </div>
-          </div>
-
-          <div>
-            <div className="text-sm text-[var(--text-secondary)] mb-1">Automatizaciones</div>
-            <div className="text-lg font-bold text-[var(--text-primary)]">3</div>
-            <div className="text-xs text-[var(--text-secondary)]">de 5</div>
-            <div className="w-full bg-[var(--bg-surface)] rounded-full h-2 mt-2">
-              <div className="bg-blue-500 h-2 rounded-full" style={{ width: '60%' }}></div>
-            </div>
-          </div>
-
-          <div>
-            <div className="text-sm text-[var(--text-secondary)] mb-1">Integraciones</div>
-            <div className="text-lg font-bold text-[var(--text-primary)]">6</div>
-            <div className="text-xs text-[var(--text-secondary)]">de 10</div>
-            <div className="w-full bg-[var(--bg-surface)] rounded-full h-2 mt-2">
-              <div className="bg-purple-500 h-2 rounded-full" style={{ width: '60%' }}></div>
-            </div>
-          </div>
-
-          <div>
-            <div className="text-sm text-[var(--text-secondary)] mb-1">IA</div>
-            <div className="text-lg font-bold text-[var(--text-primary)]">487</div>
-            <div className="text-xs text-[var(--text-secondary)]">de 1000</div>
-            <div className="w-full bg-[var(--bg-surface)] rounded-full h-2 mt-2">
-              <div className="bg-orange-500 h-2 rounded-full" style={{ width: '48.7%' }}></div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-    </motion.div>
+    </div>
   )
 }

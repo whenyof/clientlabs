@@ -34,10 +34,10 @@ export default function DashboardShell({
                 <DashboardHeader />
 
                 <main
-                    className="flex-1 overflow-y-auto overflow-x-hidden bg-[var(--bg-surface)] text-[var(--text-primary)]"
+                    className="flex-1 overflow-y-auto overflow-x-hidden bg-[var(--bg-main)] text-[var(--text-primary)] relative"
                     data-debug="shell-main"
                 >
-                    <div className="mx-auto w-full max-w-[1400px] flex-1 flex flex-col px-4 py-6 sm:px-6 lg:px-8">
+                    <div className="mx-auto w-full max-w-[1400px] flex-1 flex flex-col px-6 py-8">
                         {children}
                     </div>
                 </main>

@@ -89,7 +89,7 @@ export function AutomationFinance() {
       case 'reporting':
         return 'text-green-400 bg-green-500/10 border-green-500/20'
       case 'classification':
-        return 'text-purple-400 bg-purple-500/10 border-purple-500/20'
+        return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
       default:
         return 'text-[var(--text-secondary)] bg-[var(--bg-main)]0/10 border-[var(--border-subtle)]'
     }
@@ -97,7 +97,7 @@ export function AutomationFinance() {
 
   return (
     <motion.div
-      className="bg-[var(--bg-main)] backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)] p-6"
+      className="bg-[var(--bg-main)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)] p-6"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.9, duration: 0.5 }}
@@ -110,7 +110,7 @@ export function AutomationFinance() {
 
         <motion.button
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-[var(--text-primary)] font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-purple-500/25"
+          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700 text-[var(--text-primary)] font-semibold rounded-xl transition-all duration-300 shadow-[var(--shadow-card)] hover:shadow-emerald-500/25"
           whileHover={{ scale: 1.05, y: -2 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -134,7 +134,7 @@ export function AutomationFinance() {
           <div className="text-sm text-[var(--text-secondary)]">Triggers</div>
         </motion.div>
         <motion.div className="p-4 bg-[var(--bg-card)] rounded-xl text-center">
-          <div className="text-2xl font-bold text-purple-400 mb-1">
+          <div className="text-2xl font-bold text-emerald-400 mb-1">
             {automations.reduce((sum, a) => sum + a.actions.length, 0)}
           </div>
           <div className="text-sm text-[var(--text-secondary)]">Acciones</div>
@@ -252,21 +252,21 @@ export function AutomationFinance() {
 
       {/* AI Insights */}
       <motion.div
-        className="mt-6 p-4 bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-xl"
+        className="mt-6 p-4 bg-gradient-to-r from-emerald-500/10 to-blue-500/10 border border-emerald-500/20 rounded-xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1.2, duration: 0.5 }}
       >
         <div className="flex items-center gap-3 mb-3">
-          <CurrencyEuroIcon className="w-5 h-5 text-purple-400" />
-          <span className="text-purple-400 font-semibold">Recomendación IA</span>
+          <CurrencyEuroIcon className="w-5 h-5 text-emerald-400" />
+          <span className="text-emerald-400 font-semibold">Recomendación IA</span>
         </div>
         <p className="text-[var(--text-secondary)] text-sm">
           Basándome en tus patrones, recomiendo crear una automatización para categorizar gastos de "Viajes y representación"
           automáticamente. Esto reduciría el tiempo de revisión manual en un 40%.
         </p>
         <div className="mt-3 flex gap-3">
-          <button className="px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 text-purple-400 hover:text-purple-300 text-sm rounded-lg transition-colors">
+          <button className="px-4 py-2 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 hover:text-emerald-300 text-sm rounded-lg transition-colors">
             Crear automatización
           </button>
           <button className="px-4 py-2 bg-[var(--border-subtle)] hover:bg-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-secondary)] text-sm rounded-lg transition-colors">
@@ -284,7 +284,7 @@ export function AutomationFinance() {
           exit={{ opacity: 0 }}
         >
           <motion.div
-            className="bg-[var(--bg-card)] rounded-2xl p-6 max-w-md w-full"
+            className="bg-[var(--bg-card)] rounded-xl p-6 max-w-md w-full"
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
@@ -302,7 +302,7 @@ export function AutomationFinance() {
               </button>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="flex-1 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-[var(--text-primary)] rounded-lg transition-colors"
+                className="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-600 text-[var(--text-primary)] rounded-lg transition-colors"
               >
                 Crear
               </button>

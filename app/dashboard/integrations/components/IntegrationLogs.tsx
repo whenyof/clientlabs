@@ -41,7 +41,7 @@ export function IntegrationLogs() {
       case 'sync':
         return 'text-blue-400 bg-blue-500/10 border-blue-500/20'
       case 'webhook':
-        return 'text-purple-400 bg-purple-500/10 border-purple-500/20'
+        return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
       case 'error':
         return 'text-orange-400 bg-orange-500/10 border-orange-500/20'
       default:
@@ -72,7 +72,7 @@ export function IntegrationLogs() {
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value as typeof filter)}
-            className="px-4 py-2 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="px-4 py-2 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
           >
             <option value="all">Todos</option>
             <option value="success">Exitosos</option>
@@ -81,7 +81,7 @@ export function IntegrationLogs() {
         </div>
       </div>
 
-      <div className="bg-[var(--bg-main)] backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)] overflow-hidden">
+      <div className="bg-[var(--bg-main)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)] overflow-hidden">
         <div className="p-6 space-y-4">
           {filteredLogs.map((log, index) => {
             const LogIcon = getLogIcon(log.type, log.success)

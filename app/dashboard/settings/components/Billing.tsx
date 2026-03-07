@@ -96,7 +96,7 @@ export function Billing() {
               key={plan.id}
               className={`relative p-6 rounded-lg border ${
                 plan.current
-                  ? 'border-purple-500 bg-purple-500/5'
+                  ? 'border-emerald-500 bg-emerald-500/5'
                   : plan.popular
                   ? 'border-yellow-500 bg-yellow-500/5'
                   : 'border-[var(--border-subtle)] bg-[var(--bg-main)]'
@@ -130,7 +130,7 @@ export function Billing() {
               <button
                 className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${
                   plan.current
-                    ? 'bg-purple-600 text-[var(--text-primary)] cursor-default'
+                    ? 'bg-emerald-600 text-[var(--text-primary)] cursor-default'
                     : 'bg-[var(--bg-surface)] hover:bg-[var(--bg-surface)] text-[var(--text-primary)]'
                 }`}
                 disabled={plan.current}
@@ -146,7 +146,7 @@ export function Billing() {
       <div className="bg-[var(--bg-card)] backdrop-blur-xl border border-[var(--border-subtle)] rounded-xl p-6">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold text-[var(--text-primary)]">Historial de Facturación</h3>
-          <button className="flex items-center gap-2 text-purple-400 hover:text-purple-300">
+          <button className="flex items-center gap-2 text-emerald-400 hover:text-emerald-300">
             <Download className="w-4 h-4" />
             Descargar todo
           </button>
@@ -174,7 +174,7 @@ export function Billing() {
                 }`}>
                   {invoice.status === 'paid' ? 'Pagada' : 'Pendiente'}
                 </span>
-                <button className="text-[var(--text-secondary)] hover:text-purple-400">
+                <button className="text-[var(--text-secondary)] hover:text-emerald-400">
                   <Download className="w-4 h-4" />
                 </button>
               </div>

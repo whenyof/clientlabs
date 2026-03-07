@@ -260,7 +260,7 @@ export function MissionTaskPanel({
  type="button"
  size="sm"
  variant="secondary"
- className="bg-violet-600 hover:bg-violet-700 text-[var(--text-primary)] shrink-0"
+ className="bg-emerald-600 hover:bg-violet-700 text-[var(--text-primary)] shrink-0"
  onClick={handleMove}
  disabled={moving}
  >
@@ -287,7 +287,7 @@ export function MissionTaskPanel({
  type="button"
  size="sm"
  variant="secondary"
- className="bg-violet-600 hover:bg-violet-700 text-[var(--text-primary)] shrink-0"
+ className="bg-emerald-600 hover:bg-violet-700 text-[var(--text-primary)] shrink-0"
  onClick={handleMove}
  disabled={moving}
  >
@@ -314,7 +314,7 @@ export function MissionTaskPanel({
  ) : (
  <Button
  type="button"
- className="w-full bg-violet-600 hover:bg-violet-700 text-[var(--text-primary)]"
+ className="w-full bg-emerald-600 hover:bg-violet-700 text-[var(--text-primary)]"
  onClick={handleSave}
  disabled={saving}
  >

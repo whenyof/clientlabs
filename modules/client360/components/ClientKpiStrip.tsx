@@ -93,8 +93,8 @@ const KPI_CARDS: KpiCardDef[] = [
  icon: ChartBarIcon,
  gradient: " ",
  bgGradient: " ",
- borderHover: "hover:border-violet-500/40",
- glowColor: "group-hover:shadow-violet-500/10",
+ borderHover: "hover:border-emerald-500/40",
+ glowColor: "group-hover:shadow-emerald-500/10",
  format: (k) => formatDays(k.avgPaymentDays),
  },
  {
@@ -103,8 +103,8 @@ const KPI_CARDS: KpiCardDef[] = [
  icon: ArrowTrendingUpIcon,
  gradient: " ",
  bgGradient: " ",
- borderHover: "hover:border-fuchsia-500/40",
- glowColor: "group-hover:shadow-fuchsia-500/10",
+ borderHover: "hover:border-emerald-500/40",
+ glowColor: "group-hover:shadow-emerald-500/10",
  format: (k) =>
  k.profitability !== null ? formatCurrency(k.profitability) : "—",
  },

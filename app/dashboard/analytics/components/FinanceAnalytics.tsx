@@ -34,7 +34,7 @@ export function FinanceAnalytics({ selectedRange }: FinanceAnalyticsProps) {
       value: "245%",
       change: "+15%",
       icon: ArrowTrendingDownIcon,
-      color: "text-purple-400"
+      color: "text-emerald-400"
     }
   ]
 
@@ -199,7 +199,7 @@ export function FinanceAnalytics({ selectedRange }: FinanceAnalyticsProps) {
           <div className="space-y-2">
             {[
               { label: "Rotación activos", value: "3.2x", color: "text-blue-400" },
-              { label: "Margen EBITDA", value: "28%", color: "text-purple-400" }
+              { label: "Margen EBITDA", value: "28%", color: "text-emerald-400" }
             ].map((metric, index) => (
               <motion.div
                 key={index}

@@ -62,7 +62,7 @@ export function FilePreviewModal({ file, open, onOpenChange }: FilePreviewModalP
                         <img
                             src={file.url}
                             alt={file.name}
-                            className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+                            className="max-w-full max-h-full object-contain rounded-lg shadow-[var(--shadow-card)]"
                         />
                     )}
                     {isPDF && (
@@ -74,7 +74,7 @@ export function FilePreviewModal({ file, open, onOpenChange }: FilePreviewModalP
                     )}
                     {!isImage && !isPDF && (
                         <div className="text-center space-y-4">
-                            <div className="h-20 w-20 rounded-2xl bg-[var(--bg-main)] border border-[var(--border-subtle)] flex items-center justify-center mx-auto">
+                            <div className="h-20 w-20 rounded-xl bg-[var(--bg-main)] border border-[var(--border-subtle)] flex items-center justify-center mx-auto">
                                 <FileText className="h-10 w-10 text-[var(--text-secondary)]" />
                             </div>
                             <p className="text-[var(--text-secondary)] text-sm">Previsualización no disponible para este tipo de archivo</p>

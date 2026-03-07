@@ -157,7 +157,7 @@ export function IntegrationGrid({ selectedCategory, onIntegrationAction, integra
           return (
             <motion.div
               key={integration.id}
-              className="bg-[var(--bg-main)] backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)] p-6 hover:border-[var(--border-subtle)] transition-all duration-300 group"
+              className="bg-[var(--bg-main)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)] p-6 hover:border-[var(--border-subtle)] transition-all duration-300 group"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 + (index * 0.1), duration: 0.5 }}
@@ -166,7 +166,7 @@ export function IntegrationGrid({ selectedCategory, onIntegrationAction, integra
               {/* Header */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl flex items-center justify-center text-xl shadow-lg">
+                  <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-xl flex items-center justify-center text-xl shadow-[var(--shadow-card)]">
                     {integration.logo}
                   </div>
                   <div>
@@ -190,7 +190,7 @@ export function IntegrationGrid({ selectedCategory, onIntegrationAction, integra
                   {integration.features.slice(0, 2).map((feature, featureIndex) => (
                     <span
                       key={featureIndex}
-                      className="px-2 py-1 bg-purple-500/10 text-purple-400 text-xs rounded-full"
+                      className="px-2 py-1 bg-emerald-500/10 text-emerald-400 text-xs rounded-full"
                     >
                       {feature}
                     </span>
@@ -247,7 +247,7 @@ export function IntegrationGrid({ selectedCategory, onIntegrationAction, integra
 
       {filteredIntegrations.length === 0 && (
         <motion.div
-          className="text-center py-12 bg-[var(--bg-main)] rounded-2xl border border-[var(--border-subtle)]"
+          className="text-center py-12 bg-[var(--bg-main)] rounded-xl border border-[var(--border-subtle)]"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}

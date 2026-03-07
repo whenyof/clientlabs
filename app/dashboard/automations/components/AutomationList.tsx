@@ -91,8 +91,8 @@ export function AutomationList() {
           >
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-purple-500/10 rounded-lg">
-                  <Zap className="w-5 h-5 text-purple-400" />
+                <div className="p-2 bg-emerald-500/10 rounded-lg">
+                  <Zap className="w-5 h-5 text-emerald-400" />
                 </div>
                 <div>
                   <h4 className="font-medium text-[var(--text-primary)]">{automation.name}</h4>
@@ -124,7 +124,7 @@ export function AutomationList() {
             <div className="flex items-center justify-between">
               <p className="text-xs text-[var(--text-secondary)]">Última ejecución: {automation.lastRun}</p>
               <div className="flex items-center gap-2">
-                <button className="p-1 text-[var(--text-secondary)] hover:text-purple-400">
+                <button className="p-1 text-[var(--text-secondary)] hover:text-emerald-400">
                   <Edit className="w-4 h-4" />
                 </button>
                 <button className="p-1 text-[var(--text-secondary)] hover:text-red-400">

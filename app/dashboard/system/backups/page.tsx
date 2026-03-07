@@ -237,7 +237,7 @@ export default function BackupManagementPage() {
     <DashboardContainer>
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
-          <ShieldCheckIcon className="w-6 h-6 text-purple-400" />
+          <ShieldCheckIcon className="w-6 h-6 text-emerald-400" />
           <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Gestión de Backups</h1>
         </div>
         <p className="text-sm text-[var(--text-secondary)]">
@@ -262,7 +262,7 @@ export default function BackupManagementPage() {
 
       {/* Navigation Tabs */}
       <div className="mb-8">
-        <div className="bg-[var(--bg-main)] backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)] p-2">
+        <div className="bg-[var(--bg-main)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)] p-2">
           <div className="flex flex-wrap gap-2">
             {tabs.map((tab) => {
               const Icon = tab.icon
@@ -274,7 +274,7 @@ export default function BackupManagementPage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-3 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
                     isActive
-                      ? 'bg-purple-600/20 text-purple-400 border border-purple-500/30 shadow-lg shadow-purple-500/10'
+                      ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 shadow-[var(--shadow-card)] shadow-emerald-500/10'
                       : 'bg-[var(--bg-main)] text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)]'
                   }`}
                 >

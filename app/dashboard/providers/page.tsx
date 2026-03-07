@@ -67,13 +67,13 @@ export default async function ProvidersPage() {
         <div className="space-y-6">
             {/* Header: título + contador */}
             <div>
-                <h1 className="text-4xl font-bold text-[var(--text-primary)] mb-2 tracking-tight">
+                <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">
                     {labels.providers.title}
-                    <span className="ml-3 text-2xl font-normal text-[var(--text-secondary)]">
+                    <span className="ml-3 text-2xl font-normal text-white/50">
                         ({kpis.totalProviders})
                     </span>
                 </h1>
-                <p className="text-base text-[var(--text-secondary)] max-w-2xl">
+                <p className="text-base text-white/60 max-w-2xl">
                     Control de costes, dependencias y riesgos operativos
                 </p>
             </div>

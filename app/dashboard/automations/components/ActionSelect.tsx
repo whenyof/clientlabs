@@ -26,7 +26,7 @@ export function ActionSelect({ value, onChange }: ActionSelectProps) {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-left text-[var(--text-primary)] hover:border-purple-500 transition-colors"
+        className="w-full flex items-center justify-between p-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-left text-[var(--text-primary)] hover:border-emerald-500 transition-colors"
       >
         <span className={value === "Seleccionar acción" ? "text-[var(--text-secondary)]" : "text-[var(--text-primary)]"}>
           {value}
@@ -35,7 +35,7 @@ export function ActionSelect({ value, onChange }: ActionSelectProps) {
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg shadow-lg z-10">
+        <div className="absolute top-full left-0 right-0 mt-1 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg shadow-[var(--shadow-card)] z-10">
           {ACTIONS.map((action) => (
             <button
               key={action}

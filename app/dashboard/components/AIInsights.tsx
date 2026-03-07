@@ -38,7 +38,7 @@ function InsightCard({ insight }: {
           <p className="text-[var(--text-secondary)] text-sm leading-relaxed mb-3">{insight.message}</p>
 
           <div className="flex items-center gap-3">
-            <button className="text-xs text-[var(--accent)] hover:text-[var(--accent-hover)] font-medium">
+            <button className="text-xs text-[var(--accent)] hover:text-[var(--accent-bg-emerald-600)] font-medium">
               {labels.aiAssistant.apply}
             </button>
             <button className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
@@ -85,29 +85,17 @@ export function AIInsights() {
       title: w.insightActionTitle,
       message: w.insightActionMessage,
       icon: Zap,
-      color: "text-[var(--accent-hover)]",
+      color: "text-[var(--accent-bg-emerald-600)]",
       priority: "high"
     }
   ]
 
   return (
     <div className="flex-1 flex flex-col min-h-[300px]">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-[var(--bg-main)] rounded-lg text-[var(--accent)]">
-            <Brain className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-[var(--text-primary)]">{labels.aiAssistant.title}</h3>
-            <p className="text-sm text-[var(--text-secondary)]">{labels.aiAssistant.subtitle}</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span className="px-3 py-1 bg-[var(--accent)]/10 text-[var(--accent)] text-sm rounded-full font-medium">
-            4 {labels.aiAssistant.newInsights}
-          </span>
-        </div>
+      <div className="flex justify-between items-center mb-6">
+        <span className="px-3 py-1 bg-[var(--accent)]/10 text-[var(--accent)] text-xs rounded-full font-medium uppercase tracking-wider">
+          4 {labels.aiAssistant.newInsights}
+        </span>
       </div>
 
       <div className="flex-1 flex flex-col justify-start grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -123,7 +111,7 @@ export function AIInsights() {
             <span className="text-[var(--text-secondary)]">{labels.aiAssistant.precision}: 94%</span>
           </div>
           <div className="flex items-center gap-1">
-            <Brain className="w-4 h-4 text-[var(--accent-hover)]" />
+            <Brain className="w-4 h-4 text-[var(--accent-bg-emerald-600)]" />
             <span className="text-[var(--text-secondary)]">{labels.aiAssistant.lastUpdate}: 5 min</span>
           </div>
         </div>

@@ -14,7 +14,7 @@ export function ChartSkeleton({
   showMetrics = true
 }: ChartSkeletonProps) {
   return (
-    <div className="bg-[var(--bg-main)] backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)] p-6">
+    <div className="bg-[var(--bg-main)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)] p-6">
       {/* Header skeleton */}
       {showTitle && (
         <div className="flex justify-between items-center mb-6">

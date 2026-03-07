@@ -52,7 +52,7 @@ function MiniBarChart({
  </span>
  {hasCostData && (
  <span className="flex items-center gap-1">
- <span className="w-2 h-2 rounded-sm bg-violet-500/50" />
+ <span className="w-2 h-2 rounded-sm bg-emerald-500/50" />
  Costes
  </span>
  )}
@@ -88,7 +88,7 @@ function MiniBarChart({
  {/* Cost overlay */}
  {costHeight > 0 && (
  <div
- className="w-full bg-violet-500/40 absolute bottom-0 rounded-t-sm group-hover/bar:bg-violet-400/50 transition-all duration-500"
+ className="w-full bg-emerald-500/40 absolute bottom-0 rounded-t-sm group-hover/bar:bg-violet-400/50 transition-all duration-500"
  style={{ height: `${costHeight}%` }}
  />
  )}
@@ -237,7 +237,7 @@ export function ClientProfitabilityCard({ profitability: p }: ClientProfitabilit
  bg-[var(--bg-card)] backdrop-
  border border-[var(--border-subtle)]
  transition-all duration-300
- hover:border-[var(--border-subtle)] hover:shadow-sm hover:shadow-fuchsia-500/5
+ hover:border-[var(--border-subtle)] hover:shadow-sm hover:shadow-emerald-500/5
  "
  >
  {/* Top gradient stripe */}
@@ -309,7 +309,7 @@ export function ClientProfitabilityCard({ profitability: p }: ClientProfitabilit
  </div>
 
  {/* Margin */}
- <div className="rounded-xl bg-[var(--bg-card)]/60 border border-[var(--border-subtle)] p-4 text-center group hover:border-fuchsia-500/30 transition-colors">
+ <div className="rounded-xl bg-[var(--bg-card)]/60 border border-[var(--border-subtle)] p-4 text-center group hover:border-emerald-500/30 transition-colors">
  <div className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider mb-1">
  {p.hasCostData ? "Margen" : "—"}
  </div>

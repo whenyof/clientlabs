@@ -56,7 +56,7 @@ export function CreateSaleModal({ open, onClose, onCreate }: CreateSaleModalProp
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--bg-card)]/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-2xl rounded-3xl border border-[var(--border-subtle)] bg-[#0B0D1A]/90 p-6 shadow-2xl text-[var(--text-primary)]">
+      <div className="w-full max-w-2xl rounded-3xl border border-[var(--border-subtle)] bg-[#0B0D1A]/90 p-6 shadow-[var(--shadow-card)] text-[var(--text-primary)]">
         <header className="flex items-center justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.4em] text-[var(--text-secondary)]">{sl.ui.createSale}</p>
@@ -73,7 +73,7 @@ export function CreateSaleModal({ open, onClose, onCreate }: CreateSaleModalProp
             <input
               value={cliente}
               onChange={(event) => setCliente(event.target.value)}
-              className="w-full rounded-2xl border border-[var(--border-subtle)] bg-transparent px-3 py-2 text-[var(--text-primary)] focus:border-purple-500 focus:outline-none"
+              className="w-full rounded-xl border border-[var(--border-subtle)] bg-transparent px-3 py-2 text-[var(--text-primary)] focus:border-emerald-500 focus:outline-none"
             />
           </label>
           <label className="space-y-1 text-sm text-[var(--text-secondary)]">
@@ -81,7 +81,7 @@ export function CreateSaleModal({ open, onClose, onCreate }: CreateSaleModalProp
             <input
               value={producto}
               onChange={(event) => setProducto(event.target.value)}
-              className="w-full rounded-2xl border border-[var(--border-subtle)] bg-transparent px-3 py-2 text-[var(--text-primary)] focus:border-purple-500 focus:outline-none"
+              className="w-full rounded-xl border border-[var(--border-subtle)] bg-transparent px-3 py-2 text-[var(--text-primary)] focus:border-emerald-500 focus:outline-none"
             />
           </label>
           <label className="space-y-1 text-sm text-[var(--text-secondary)]">
@@ -90,7 +90,7 @@ export function CreateSaleModal({ open, onClose, onCreate }: CreateSaleModalProp
               type="number"
               value={importe}
               onChange={(event) => setImporte(event.target.value)}
-              className="w-full rounded-2xl border border-[var(--border-subtle)] bg-transparent px-3 py-2 text-[var(--text-primary)] focus:border-purple-500 focus:outline-none"
+              className="w-full rounded-xl border border-[var(--border-subtle)] bg-transparent px-3 py-2 text-[var(--text-primary)] focus:border-emerald-500 focus:outline-none"
             />
           </label>
           <label className="space-y-1 text-sm text-[var(--text-secondary)]">
@@ -98,7 +98,7 @@ export function CreateSaleModal({ open, onClose, onCreate }: CreateSaleModalProp
             <input
               value={canal}
               onChange={(event) => setCanal(event.target.value)}
-              className="w-full rounded-2xl border border-[var(--border-subtle)] bg-transparent px-3 py-2 text-[var(--text-primary)] focus:border-purple-500 focus:outline-none"
+              className="w-full rounded-xl border border-[var(--border-subtle)] bg-transparent px-3 py-2 text-[var(--text-primary)] focus:border-emerald-500 focus:outline-none"
             />
           </label>
           <label className="space-y-1 text-sm text-[var(--text-secondary)]">
@@ -106,7 +106,7 @@ export function CreateSaleModal({ open, onClose, onCreate }: CreateSaleModalProp
             <input
               value={comercial}
               onChange={(event) => setComercial(event.target.value)}
-              className="w-full rounded-2xl border border-[var(--border-subtle)] bg-transparent px-3 py-2 text-[var(--text-primary)] focus:border-purple-500 focus:outline-none"
+              className="w-full rounded-xl border border-[var(--border-subtle)] bg-transparent px-3 py-2 text-[var(--text-primary)] focus:border-emerald-500 focus:outline-none"
             />
           </label>
           <label className="space-y-1 text-sm text-[var(--text-secondary)]">
@@ -114,7 +114,7 @@ export function CreateSaleModal({ open, onClose, onCreate }: CreateSaleModalProp
             <select
               value={estado}
               onChange={(event) => setEstado(event.target.value as SaleStatus)}
-              className="w-full rounded-2xl border border-[var(--border-subtle)] bg-transparent px-3 py-2 text-[var(--text-primary)] focus:border-purple-500 focus:outline-none"
+              className="w-full rounded-xl border border-[var(--border-subtle)] bg-transparent px-3 py-2 text-[var(--text-primary)] focus:border-emerald-500 focus:outline-none"
             >
               {STATUS_OPTIONS.map((status) => (
                 <option key={status} value={status}>
@@ -125,7 +125,7 @@ export function CreateSaleModal({ open, onClose, onCreate }: CreateSaleModalProp
           </label>
           <div className="space-y-1 text-sm text-[var(--text-secondary)]">
             {sl.table.origin}
-            <div className="w-full rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-main)] px-3 py-2 text-[var(--text-primary)]">
+            <div className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-main)] px-3 py-2 text-[var(--text-primary)]">
               manual
             </div>
           </div>
@@ -137,7 +137,7 @@ export function CreateSaleModal({ open, onClose, onCreate }: CreateSaleModalProp
             value={notas}
             onChange={(event) => setNotas(event.target.value)}
             rows={3}
-            className="mt-1 w-full rounded-2xl border border-[var(--border-subtle)] bg-transparent p-3 text-[var(--text-primary)] focus:border-purple-500 focus:outline-none"
+            className="mt-1 w-full rounded-xl border border-[var(--border-subtle)] bg-transparent p-3 text-[var(--text-primary)] focus:border-emerald-500 focus:outline-none"
             placeholder="Describe la automatización o contexto"
           />
         </label>
@@ -151,7 +151,7 @@ export function CreateSaleModal({ open, onClose, onCreate }: CreateSaleModalProp
           </button>
           <button
             onClick={handleSubmit}
-            className="rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-500 px-5 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-[var(--text-primary)] shadow-xl transition hover:brightness-110"
+            className="rounded-full bg-gradient-to-r from-emerald-600 to-emerald-500 px-5 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-[var(--text-primary)] shadow-[var(--shadow-card)] transition hover:brightness-110"
           >
             {sl.ui.saveSale}
           </button>

@@ -63,7 +63,7 @@ export const CalendarToolbar = memo(function CalendarToolbar({
  <Button
  variant="ghost"
  size="icon"
- className="h-8 w-8 text-muted-foreground hover:bg-violet-500/10 hover:text-violet-600"
+ className="h-8 w-8 text-muted-foreground hover:bg-emerald-500/10 hover:text-emerald-600"
  onClick={() => onCurrentDateChange(addViewDelta(view, currentDate, -1))}
  aria-label="Previous"
  >
@@ -72,7 +72,7 @@ export const CalendarToolbar = memo(function CalendarToolbar({
  <Button
  variant="ghost"
  size="icon"
- className="h-8 w-8 text-muted-foreground hover:bg-violet-500/10 hover:text-violet-600"
+ className="h-8 w-8 text-muted-foreground hover:bg-emerald-500/10 hover:text-emerald-600"
  onClick={() => onCurrentDateChange(addViewDelta(view, currentDate, 1))}
  aria-label="Next"
  >
@@ -84,8 +84,8 @@ export const CalendarToolbar = memo(function CalendarToolbar({
  className={cn(
  "gap-1.5 text-sm font-medium",
  isToday(currentDate)
- ? "bg-violet-500/15 text-violet-600"
- : "text-muted-foreground hover:bg-violet-500/10 hover:text-violet-600"
+ ? "bg-emerald-500/15 text-emerald-600"
+ : "text-muted-foreground hover:bg-emerald-500/10 hover:text-emerald-600"
  )}
  onClick={() => onCurrentDateChange(new Date())}
  >
@@ -105,7 +105,7 @@ export const CalendarToolbar = memo(function CalendarToolbar({
  className={cn(
  "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
  view === v
- ? "bg-violet-500 text-[white] shadow-sm"
+ ? "bg-emerald-500 text-[white] shadow-sm"
  : "text-muted-foreground hover:bg-muted hover:text-foreground"
  )}
  >

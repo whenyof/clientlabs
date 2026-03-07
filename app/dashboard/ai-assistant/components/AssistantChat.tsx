@@ -86,8 +86,8 @@ export function AssistantChat() {
     <AnimatedCard className="h-[600px] flex flex-col">
       <div className="p-6 border-b border-[var(--border-subtle)]">
         <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 bg-purple-600/20 rounded-lg">
-            <SparklesIcon className="w-5 h-5 text-purple-400" />
+          <div className="p-2 bg-emerald-600/20 rounded-lg">
+            <SparklesIcon className="w-5 h-5 text-emerald-400" />
           </div>
           <div>
             <h3 className="text-xl font-bold text-[var(--text-primary)]">
@@ -114,21 +114,21 @@ export function AssistantChat() {
               exit={{ opacity: 0, y: -20 }}
             >
               {message.role === 'assistant' && (
-                <div className="p-2 bg-purple-600/20 rounded-lg">
-                  <CpuChipIcon className="w-4 h-4 text-purple-400" />
+                <div className="p-2 bg-emerald-600/20 rounded-lg">
+                  <CpuChipIcon className="w-4 h-4 text-emerald-400" />
                 </div>
               )}
 
               <div
-                className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl ${
+                className={`max-w-xs lg:max-w-md px-4 py-3 rounded-xl ${
                   message.role === 'user'
-                    ? 'bg-purple-600 text-[var(--text-primary)]'
+                    ? 'bg-emerald-600 text-[var(--text-primary)]'
                     : 'bg-[var(--bg-main)] text-[var(--text-secondary)] border border-[var(--border-subtle)]'
                 }`}
               >
                 <p className="text-sm leading-relaxed">{message.content}</p>
                 <span className={`text-xs mt-2 block ${
-                  message.role === 'user' ? 'text-purple-200' : 'text-[var(--text-secondary)]'
+                  message.role === 'user' ? 'text-emerald-200' : 'text-[var(--text-secondary)]'
                 }`}>
                   {formatTime(message.timestamp)}
                 </span>
@@ -152,14 +152,14 @@ export function AssistantChat() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
             >
-              <div className="p-2 bg-purple-600/20 rounded-lg">
-                <CpuChipIcon className="w-4 h-4 text-purple-400" />
+              <div className="p-2 bg-emerald-600/20 rounded-lg">
+                <CpuChipIcon className="w-4 h-4 text-emerald-400" />
               </div>
-              <div className="bg-[var(--bg-main)] px-4 py-3 rounded-2xl border border-[var(--border-subtle)]">
+              <div className="bg-[var(--bg-main)] px-4 py-3 rounded-xl border border-[var(--border-subtle)]">
                 <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
               </div>
             </motion.div>
@@ -179,14 +179,14 @@ export function AssistantChat() {
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
               placeholder="Pregúntame sobre leads, predicciones, emails..."
-              className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-xl text-[var(--text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-xl text-[var(--text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
             />
           </div>
 
           <motion.button
             onClick={handleSendMessage}
             disabled={!inputMessage.trim() || isTyping}
-            className="p-3 bg-purple-600 hover:bg-purple-700 disabled:bg-[var(--bg-surface)] disabled:cursor-not-allowed rounded-xl transition-colors"
+            className="p-3 bg-emerald-600 hover:bg-emerald-600 disabled:bg-[var(--bg-surface)] disabled:cursor-not-allowed rounded-xl transition-colors"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >

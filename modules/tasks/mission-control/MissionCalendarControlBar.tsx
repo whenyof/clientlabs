@@ -127,7 +127,7 @@ export const MissionCalendarControlBar = memo(function MissionCalendarControlBar
  </SelectContent>
  </Select>
  <AddTaskButton
- className="h-8 px-3 rounded-xl border-0 bg-violet-600 hover:bg-violet-500 text-[var(--text-primary)] text-xs font-medium shrink-0"
+ className="h-8 px-3 rounded-xl border-0 bg-emerald-600 hover:bg-emerald-500 text-[var(--text-primary)] text-xs font-medium shrink-0"
  />
  </div>
  </div>

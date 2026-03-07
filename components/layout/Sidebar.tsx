@@ -246,7 +246,7 @@ export function Sidebar() {
  className="mt-4 flex items-center justify-between"
  >
  <span className="text-[10px] font-medium text-[var(--text-secondary)]/80 uppercase tracking-widest">Plan FREE</span>
- <button className="text-[11px] font-medium text-[var(--accent)] hover:text-[var(--accent)]-hover transition-colors">
+ <button className="text-[11px] font-medium text-[var(--accent)] hover:text-[var(--accent)]-bg-emerald-600 transition-colors">
  Cambiar
  </button>
  </motion.div>

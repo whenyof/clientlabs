@@ -31,7 +31,7 @@ export function AutomationAnalytics({ selectedRange }: AutomationAnalyticsProps)
       value: "94.2%",
       change: "+2.1%",
       icon: CheckCircleIcon,
-      color: "text-purple-400"
+      color: "text-emerald-400"
     }
   ]
 
@@ -150,21 +150,21 @@ export function AutomationAnalytics({ selectedRange }: AutomationAnalyticsProps)
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-[var(--bg-surface)] rounded-lg p-4">
           <div className="flex items-center gap-2 mb-3">
-            <CpuChipIcon className="w-5 h-5 text-purple-400" />
+            <CpuChipIcon className="w-5 h-5 text-emerald-400" />
             <h5 className="text-[var(--text-primary)] font-medium">Eficiencia operativa</h5>
           </div>
           <div className="space-y-2">
             <div className="flex justify-between">
               <span className="text-[var(--text-secondary)]">Tareas automatizadas</span>
-              <span className="text-purple-400">1,247</span>
+              <span className="text-emerald-400">1,247</span>
             </div>
             <div className="flex justify-between">
               <span className="text-[var(--text-secondary)]">Horas ahorradas</span>
-              <span className="text-purple-400">312h</span>
+              <span className="text-emerald-400">312h</span>
             </div>
             <div className="flex justify-between">
               <span className="text-[var(--text-secondary)]">Productividad</span>
-              <span className="text-purple-400">+45%</span>
+              <span className="text-emerald-400">+45%</span>
             </div>
           </div>
         </div>
@@ -192,18 +192,18 @@ export function AutomationAnalytics({ selectedRange }: AutomationAnalyticsProps)
       </div>
 
       {/* Próximas recomendaciones */}
-      <div className="bg-gradient-to-r from-purple-600/10 to-blue-600/10 border border-purple-500/20 rounded-lg p-4">
+      <div className="bg-gradient-to-r from-emerald-600/10 to-blue-600/10 border border-emerald-500/20 rounded-lg p-4">
         <h5 className="text-[var(--text-primary)] font-medium mb-3 flex items-center gap-2">
-          <CogIcon className="w-5 h-5 text-purple-400" />
+          <CogIcon className="w-5 h-5 text-emerald-400" />
           Recomendaciones de IA
         </h5>
         <div className="space-y-2 text-sm">
           <div className="flex items-start gap-2">
-            <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2"></div>
+            <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full mt-2"></div>
             <span className="text-[var(--text-secondary)]">Automatizar envío de recordatorios reduce impagos en un 25%</span>
           </div>
           <div className="flex items-start gap-2">
-            <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2"></div>
+            <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full mt-2"></div>
             <span className="text-[var(--text-secondary)]">Optimizar secuencia de emails podría aumentar conversiones en 18%</span>
           </div>
           <div className="flex items-start gap-2">

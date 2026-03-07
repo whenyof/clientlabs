@@ -64,7 +64,7 @@ export function AutomationStatus() {
     <div className="bg-[var(--bg-card)] backdrop-blur-xl border border-[var(--border-subtle)] rounded-xl p-6">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold text-[var(--text-primary)]">Automatizaciones</h3>
-        <button className="text-sm text-purple-400 hover:text-purple-300">
+        <button className="text-sm text-emerald-500 hover:text-emerald-400">
           Gestionar
         </button>
       </div>

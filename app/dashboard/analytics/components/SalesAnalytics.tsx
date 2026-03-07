@@ -34,7 +34,7 @@ export function SalesAnalytics({ selectedRange }: SalesAnalyticsProps) {
       value: formatPercentage(data.kpis.secondary),
       change: formatPercentage(data.kpis.secondary),
       icon: ArrowTrendingUpIcon,
-      color: "text-purple-400"
+      color: "text-emerald-400"
     }
   ]
 
@@ -110,7 +110,7 @@ export function SalesAnalytics({ selectedRange }: SalesAnalyticsProps) {
                 </div>
                 <div className="w-20 h-2 bg-[var(--bg-surface)] rounded-full overflow-hidden">
                   <motion.div
-                    className="h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full"
+                    className="h-full bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full"
                     initial={{ width: 0 }}
                     animate={{
                       width: `${(month.value / Math.max(...data.chartData.map(d => d.value))) * 100}%`
@@ -154,7 +154,7 @@ export function SalesAnalytics({ selectedRange }: SalesAnalyticsProps) {
           whileHover={{ scale: 1.02 }}
         >
           <h5 className="text-[var(--text-primary)] font-medium mb-2">Valor de Vida</h5>
-          <div className="text-2xl font-bold text-purple-400 mb-1">€2,340</div>
+          <div className="text-2xl font-bold text-emerald-400 mb-1">€2,340</div>
           <div className="text-sm text-[var(--text-secondary)]">Cliente promedio</div>
         </motion.div>
       </motion.div>

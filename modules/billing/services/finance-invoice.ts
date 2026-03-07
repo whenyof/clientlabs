@@ -3,6 +3,6 @@
  * Re-exports from invoicing implementation; billing is the single public API.
  */
 export {
- createInvoiceFromSale,
- backfillInvoicesFromSales,
+  createInvoiceFromSale,
+  backfillInvoicesFromSales,
 } from "@/modules/invoicing/services/invoice.service"

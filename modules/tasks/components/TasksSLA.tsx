@@ -42,7 +42,7 @@ function SLACard({
  ? "border-[var(--critical)]"
  : accent === "amber"
  ? "border-[var(--border-subtle)]"
- : "border-violet-500/20"
+ : "border-emerald-500/20"
 
  return (
  <div className={cn(SLA_CARD_BASE, accentBorder, "hover:bg-[var(--bg-card)]/[0.06]")}>

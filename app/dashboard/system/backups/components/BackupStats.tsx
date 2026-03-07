@@ -69,7 +69,7 @@ export function BackupStats({ status }: BackupStatsProps) {
       label: 'Backups en Nube',
       value: status.totalCloud.toString(),
       icon: CloudIcon,
-      color: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
+      color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
       description: 'Google Drive cifrado'
     },
     {

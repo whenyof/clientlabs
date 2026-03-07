@@ -1,4 +1,4 @@
-import { FinanceHubTabs } from "@/app/dashboard/finance/components/FinanceNavTabs"
+import { FinanceHubTabs } from "@/app/dashboard/other/finance/components/FinanceNavTabs"
 
 /**
  * Finance module layout at /dashboard/finance.

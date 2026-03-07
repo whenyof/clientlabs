@@ -95,10 +95,10 @@ export default async function ClientsPage({
         <div className="space-y-8">
             <div className="flex flex-wrap items-center gap-3">
                 <div className="min-w-0">
-                    <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight truncate">
+                    <h1 className="text-2xl font-bold text-white tracking-tight truncate">
                         {labels.clients.title}
                     </h1>
-                    <p className="text-sm text-[var(--text-secondary)] mt-0.5 truncate max-w-xl">
+                    <p className="text-sm text-white/60 mt-0.5 truncate max-w-xl">
                         Gestión de relaciones e ingresos para {labels.clients.plural.toLowerCase()}
                     </p>
                 </div>

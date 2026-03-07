@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { motion } from "framer-motion"
-import { ComputerDesktopIcon, MoonIcon, SunIcon, Bars3Icon } from "@heroicons/react/24/outline"
+import { ComputerDesktopIcon, MoonIcon, SunIcon } from "@heroicons/react/24/outline"
+import { cn } from "@/lib/utils"
 
 export function AppearanceSettings() {
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('dark')
@@ -12,214 +12,105 @@ export function AppearanceSettings() {
 
   const handleThemeChange = (newTheme: 'light' | 'dark' | 'system') => {
     setTheme(newTheme)
-    // TODO: Apply theme to app
     console.log('Theme changed to:', newTheme)
   }
 
-  const handleSettingChange = (setting: string, value: boolean) => {
-    console.log(`${setting} changed to:`, value)
-    // TODO: Save to user preferences
-  }
+  const themes = [
+    { id: 'light' as const, label: 'Claro', desc: 'Interfaz de alta luminosidad.', icon: SunIcon },
+    { id: 'dark' as const, label: 'Oscuro', desc: 'Configuración de bajo ruido visual.', icon: MoonIcon },
+    { id: 'system' as const, label: 'Sistema', desc: 'Sincronización automática con el OS.', icon: ComputerDesktopIcon },
+  ]
+
+  const toggleSettings = [
+    { label: 'Sidebar compacto', desc: 'Reducir ancho de la barra lateral.', value: sidebarCollapsed, onChange: () => setSidebarCollapsed(!sidebarCollapsed) },
+    { label: 'Modo densidad alta', desc: 'Optimizar espacio para vistas analíticas.', value: compactMode, onChange: () => setCompactMode(!compactMode) },
+    { label: 'Animaciones', desc: 'Transiciones fluidas de interfaz.', value: animationsEnabled, onChange: () => setAnimationsEnabled(!animationsEnabled) },
+  ]
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">Apariencia</h2>
-        <p className="text-[var(--text-secondary)]">Personaliza la apariencia de tu dashboard</p>
+    <div className="space-y-6">
+      {/* Section Header */}
+      <div>
+        <h2 className="text-lg font-semibold text-[#0B1F2A]">Apariencia</h2>
+        <p className="text-sm text-slate-500 mt-0.5">Configuración visual y preferencias de interfaz.</p>
       </div>
 
-      <div className="space-y-8">
-        {/* Theme Selection */}
-        <div className="bg-[var(--bg-card)] rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Tema</h3>
+      {/* Theme Selection */}
+      <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <h3 className="text-sm font-medium text-slate-500 mb-4">Tema</h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <motion.button
-              onClick={() => handleThemeChange('light')}
-              className={`p-4 rounded-xl border-2 transition-all ${
-                theme === 'light'
-                  ? 'border-purple-500 bg-purple-500/10'
-                  : 'border-[var(--border-subtle)] hover:border-[var(--border-subtle)] bg-[var(--bg-main)]'
-              }`}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <SunIcon className="w-6 h-6 text-yellow-400" />
-                <span className="text-[var(--text-primary)] font-medium">Claro</span>
-              </div>
-              <div className="text-sm text-[var(--text-secondary)]">
-                Interfaz clara y luminosa
-              </div>
-            </motion.button>
-
-            <motion.button
-              onClick={() => handleThemeChange('dark')}
-              className={`p-4 rounded-xl border-2 transition-all ${
-                theme === 'dark'
-                  ? 'border-purple-500 bg-purple-500/10'
-                  : 'border-[var(--border-subtle)] hover:border-[var(--border-subtle)] bg-[var(--bg-main)]'
-              }`}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <MoonIcon className="w-6 h-6 text-blue-400" />
-                <span className="text-[var(--text-primary)] font-medium">Oscuro</span>
-              </div>
-              <div className="text-sm text-[var(--text-secondary)]">
-                Tema oscuro profesional
-              </div>
-            </motion.button>
-
-            <motion.button
-              onClick={() => handleThemeChange('system')}
-              className={`p-4 rounded-xl border-2 transition-all ${
-                theme === 'system'
-                  ? 'border-purple-500 bg-purple-500/10'
-                  : 'border-[var(--border-subtle)] hover:border-[var(--border-subtle)] bg-[var(--bg-main)]'
-              }`}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <ComputerDesktopIcon className="w-6 h-6 text-purple-400" />
-                <span className="text-[var(--text-primary)] font-medium">Sistema</span>
-              </div>
-              <div className="text-sm text-[var(--text-secondary)]">
-                Sigue la configuración del sistema
-              </div>
-            </motion.button>
-          </div>
-        </div>
-
-        {/* Layout Settings */}
-        <div className="bg-[var(--bg-card)] rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Diseño</h3>
-
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-[var(--text-primary)] font-medium">Sidebar compacto</div>
-                <div className="text-sm text-[var(--text-secondary)]">Reduce el ancho de la barra lateral</div>
-              </div>
-              <motion.button
-                onClick={() => {
-                  setSidebarCollapsed(!sidebarCollapsed)
-                  handleSettingChange('sidebarCollapsed', !sidebarCollapsed)
-                }}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  sidebarCollapsed ? 'bg-purple-600' : 'bg-[var(--bg-surface)]'
-                }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {themes.map((t) => {
+            const Icon = t.icon
+            const isActive = theme === t.id
+            return (
+              <button
+                key={t.id}
+                onClick={() => handleThemeChange(t.id)}
+                className={cn(
+                  "p-4 rounded-lg border text-left transition-colors",
+                  isActive
+                    ? "border-[var(--accent)] bg-[var(--accent)]/5"
+                    : "border-slate-100 bg-slate-50 hover:bg-white hover:border-slate-200"
+                )}
               >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-[var(--bg-card)] transition-transform ${
-                    sidebarCollapsed ? 'translate-x-6' : 'translate-x-1'
-                  }`}
-                />
-              </motion.button>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-[var(--text-primary)] font-medium">Modo compacto</div>
-                <div className="text-sm text-[var(--text-secondary)]">Reduce el espaciado y tamaños de elementos</div>
-              </div>
-              <motion.button
-                onClick={() => {
-                  setCompactMode(!compactMode)
-                  handleSettingChange('compactMode', !compactMode)
-                }}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  compactMode ? 'bg-purple-600' : 'bg-[var(--bg-surface)]'
-                }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-[var(--bg-card)] transition-transform ${
-                    compactMode ? 'translate-x-6' : 'translate-x-1'
-                  }`}
-                />
-              </motion.button>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-[var(--text-primary)] font-medium">Animaciones</div>
-                <div className="text-sm text-[var(--text-secondary)]">Activa transiciones y animaciones suaves</div>
-              </div>
-              <motion.button
-                onClick={() => {
-                  setAnimationsEnabled(!animationsEnabled)
-                  handleSettingChange('animationsEnabled', !animationsEnabled)
-                }}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  animationsEnabled ? 'bg-purple-600' : 'bg-[var(--bg-surface)]'
-                }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-[var(--bg-card)] transition-transform ${
-                    animationsEnabled ? 'translate-x-6' : 'translate-x-1'
-                  }`}
-                />
-              </motion.button>
-            </div>
-          </div>
-        </div>
-
-        {/* Preview */}
-        <div className="bg-[var(--bg-card)] rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Vista previa</h3>
-
-          <div className="bg-[var(--bg-main)] rounded-lg p-4">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-8 h-8 bg-purple-600 rounded-lg"></div>
-              <div className="flex-1">
-                <div className="h-3 bg-[var(--bg-surface)] rounded mb-2"></div>
-                <div className="h-2 bg-[var(--bg-surface)] rounded w-3/4"></div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="h-16 bg-[var(--bg-surface)] rounded"></div>
-              <div className="h-16 bg-[var(--bg-surface)] rounded"></div>
-            </div>
-
-            {animationsEnabled && (
-              <motion.div
-                className="mt-4 h-2 bg-purple-500 rounded"
-                initial={{ width: 0 }}
-                animate={{ width: '100%' }}
-                transition={{ duration: 2, ease: "easeInOut" }}
-              />
-            )}
-          </div>
-
-          <div className="mt-4 text-sm text-[var(--text-secondary)]">
-            Esta es una vista previa de cómo se verán los cambios en tu interfaz.
-          </div>
-        </div>
-
-        {/* Save Button */}
-        <div className="flex justify-end">
-          <motion.button
-            className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-[var(--text-primary)] font-semibold rounded-lg transition-colors"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Guardar preferencias
-          </motion.button>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className={cn(
+                    "w-9 h-9 rounded-lg flex items-center justify-center border transition-colors",
+                    isActive
+                      ? "bg-[var(--accent)] border-[var(--accent)]"
+                      : "bg-white border-slate-200"
+                  )}>
+                    <Icon className={cn("w-5 h-5", isActive ? "text-white" : "text-slate-400")} />
+                  </div>
+                  <span className={cn(
+                    "text-sm font-semibold",
+                    isActive ? "text-[#0B1F2A]" : "text-slate-500"
+                  )}>
+                    {t.label}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500">{t.desc}</p>
+              </button>
+            )
+          })}
         </div>
       </div>
-    </motion.div>
+
+      {/* Layout Settings */}
+      <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <h3 className="text-sm font-medium text-slate-500 mb-4">Opciones de layout</h3>
+
+        <div className="space-y-4">
+          {toggleSettings.map((setting) => (
+            <div key={setting.label} className="flex items-center justify-between py-3 border-b border-slate-50 last:border-b-0">
+              <div>
+                <div className="text-sm font-semibold text-[#0B1F2A]">{setting.label}</div>
+                <div className="text-xs text-slate-500 mt-0.5">{setting.desc}</div>
+              </div>
+              <button
+                onClick={setting.onChange}
+                className={cn(
+                  "relative inline-flex h-6 w-11 items-center rounded-full transition-colors",
+                  setting.value ? "bg-[var(--accent)]" : "bg-slate-200"
+                )}
+              >
+                <span className={cn(
+                  "inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm",
+                  setting.value ? "translate-x-6" : "translate-x-1"
+                )} />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Save */}
+      <div className="flex justify-end">
+        <button className="px-5 py-2.5 text-sm font-medium text-white bg-[var(--accent)] rounded-lg hover:opacity-90 transition-colors">
+          Guardar preferencias
+        </button>
+      </div>
+    </div>
   )
 }

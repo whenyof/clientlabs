@@ -209,7 +209,7 @@ export default function SolucionesClient() {
  aria-label={`Ir a ${section.label}`}
  onClick={() => indicatorRef.current?.(index)}
  className={`h-2.5 w-2.5 rounded-full transition ${
- activeSection === section.id ? "bg-[var(--accent-soft)]-hover shadow-sm" : "bg-[var(--bg-card)]"
+ activeSection === section.id ? "bg-[var(--accent-soft)]-bg-emerald-600 shadow-sm" : "bg-[var(--bg-card)]"
  }`}
  />
  ))}
@@ -284,7 +284,7 @@ export default function SolucionesClient() {
  "Visibilidad por proyecto",
  ].map((item) => (
  <li key={item} className="flex items-center gap-2">
- <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-soft)]-hover" />
+ <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-soft)]-bg-emerald-600" />
  {item}
  </li>
  ))}
@@ -308,7 +308,7 @@ export default function SolucionesClient() {
  {["Retención", "Churn", "LTV", "MRR en tiempo real", "Health score por cliente"].map(
  (item) => (
  <li key={item} className="flex items-center gap-2">
- <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-soft)]-hover" />
+ <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-soft)]-bg-emerald-600" />
  {item}
  </li>
  )
@@ -337,7 +337,7 @@ export default function SolucionesClient() {
  "Campañas basadas en comportamiento",
  ].map((item) => (
  <li key={item} className="flex items-center gap-2">
- <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-soft)]-hover" />
+ <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-soft)]-bg-emerald-600" />
  {item}
  </li>
  ))}
@@ -367,7 +367,7 @@ export default function SolucionesClient() {
  "Automatizaciones de seguimiento",
  ].map((item) => (
  <li key={item} className="flex items-center gap-2">
- <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-soft)]-hover" />
+ <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-soft)]-bg-emerald-600" />
  {item}
  </li>
  ))}

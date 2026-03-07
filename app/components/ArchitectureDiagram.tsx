@@ -93,7 +93,7 @@ export const ArchitectureDiagram = memo(function ArchitectureDiagram() {
  whileInView={{ opacity: 1, y: 0 }}
  viewport={{ once: true }}
  transition={{ delay: idx * 0.05, duration: 0.4 }}
- className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-4 backdrop-blur hover:border-[var(--accent)]-primary/30 hover:bg-[var(--bg-card)] transition-all duration-300"
+ className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-4 backdrop-blur hover:border-[var(--accent)]/30 hover:bg-[var(--bg-card)] transition-all duration-300"
  >
  <div className="flex items-center gap-3">
  <span className="h-2.5 w-2.5 rounded-full bg-[var(--accent-soft)]-primary shadow-sm" />
@@ -137,7 +137,7 @@ export const ArchitectureDiagram = memo(function ArchitectureDiagram() {
  whileInView={{ opacity: 1, y: 0 }}
  viewport={{ once: true }}
  transition={{ delay: idx * 0.05, duration: 0.4 }}
- className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-4 backdrop-blur hover:border-[var(--accent)]-primary/30 hover:bg-[var(--bg-card)] transition-all duration-300"
+ className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-4 backdrop-blur hover:border-[var(--accent)]/30 hover:bg-[var(--bg-card)] transition-all duration-300"
  >
  <div className="flex items-center gap-3">
  <span className="h-2.5 w-2.5 rounded-full bg-[var(--accent-soft)]-primary shadow-sm" />
@@ -182,7 +182,7 @@ export const ArchitectureDiagram = memo(function ArchitectureDiagram() {
  viewport={{ once: true }}
  transition={{ delay: idx * 0.04, duration: 0.4 }}
  whileHover={{ y: -3, scale: 1.02 }}
- className="group relative rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-4 text-center backdrop-blur transition-all duration-300 hover:border-[var(--accent)]-primary/30 hover:bg-[var(--bg-card)] hover:shadow-sm"
+ className="group relative rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-4 text-center backdrop-blur transition-all duration-300 hover:border-[var(--accent)]/30 hover:bg-[var(--bg-card)] hover:shadow-sm"
  >
  <div className="mb-2 flex justify-center">
  <span className="h-2.5 w-2.5 rounded-full bg-[var(--accent-soft)]-primary shadow-sm group-hover:shadow-sm transition-shadow duration-300" />

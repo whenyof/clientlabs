@@ -8,91 +8,91 @@ import { prisma } from "@/lib/prisma"
  * Throws/redirects if user is missing or onboarding is incomplete
  */
 export async function requireAuthenticatedUser() {
- const session = await getServerSession(authOptions)
+  const session = await getServerSession(authOptions)
 
- if (!session?.user?.id) {
- redirect("/auth")
- }
+  if (!session?.user?.id) {
+    redirect("/auth")
+  }
 
- const dbUser = await prisma.user.findUnique({
- where: { id: session.user.id },
- select: {
- id: true,
- email: true,
- role: true,
- plan: true,
- onboardingCompleted: true,
- selectedSector: true
- }
- })
+  const dbUser = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      id: true,
+      email: true,
+      role: true,
+      plan: true,
+      onboardingCompleted: true,
+      selectedSector: true
+    }
+  })
 
- if (!dbUser) {
- console.error(`User ${session.user.id} authenticated but not found in DB`)
- redirect("/auth?error=user_missing")
- }
+  if (!dbUser) {
+    console.error(`User ${session.user.id} authenticated but not found in DB`)
+    redirect("/auth?error=user_missing")
+  }
 
- return {
- session,
- dbUser
- }
+  return {
+    session,
+    dbUser
+  }
 }
 
 /**
  * Server-side guard for dashboard access - requires DB user + completed onboarding
  */
 export async function requireOnboardedUser() {
- const { session, dbUser } = await requireAuthenticatedUser()
+  const { session, dbUser } = await requireAuthenticatedUser()
 
- if (!dbUser.onboardingCompleted) {
- redirect("/onboarding/sector")
- }
+  if (!dbUser.onboardingCompleted) {
+    redirect("/onboarding/sector")
+  }
 
- return {
- session,
- dbUser
- }
+  return {
+    session,
+    dbUser
+  }
 }
 
 /**
  * Server-side guard for admin access - requires DB user + ADMIN role
  */
 export async function requireAdminUser() {
- const { session, dbUser } = await requireAuthenticatedUser()
+  const { session, dbUser } = await requireAuthenticatedUser()
 
- if (dbUser.role !== "ADMIN") {
- redirect("/dashboard/other?error=admin_required")
- }
+  if (dbUser.role !== "ADMIN") {
+    redirect("/dashboard/other?error=admin_required")
+  }
 
- return {
- session,
- dbUser
- }
+  return {
+    session,
+    dbUser
+  }
 }
 
 /**
  * Check if user needs onboarding (helper function)
  */
 export async function checkOnboardingStatus(userId: string) {
- const user = await prisma.user.findUnique({
- where: { id: userId },
- select: {
- onboardingCompleted: true,
- selectedSector: true
- }
- })
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      onboardingCompleted: true,
+      selectedSector: true
+    }
+  })
 
- return user
+  return user
 }
 
 /**
  * Complete onboarding for a user
  */
 export async function completeOnboarding(userId: string, selectedSector: string) {
- await prisma.user.update({
- where: { id: userId },
- data: {
- onboardingCompleted: true,
- selectedSector: selectedSector
- }
- })
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      onboardingCompleted: true,
+      selectedSector: selectedSector
+    }
+  })
 }

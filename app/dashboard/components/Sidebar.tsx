@@ -22,7 +22,8 @@ import {
   ChevronRight,
   Building2,
   Sparkles,
-  Crown
+  Crown,
+  Link2
 } from "lucide-react"
 
 interface SidebarProps {
@@ -36,9 +37,9 @@ interface BadgeProps {
 
 function Badge({ variant }: BadgeProps) {
   const variants = {
-    pro: 'bg-gradient-to-r from-purple-500 to-pink-500 text-[var(--text-primary)]',
-    beta: 'bg-cyan-500 text-[var(--text-primary)]',
-    premium: 'bg-gradient-to-r from-amber-400 to-orange-500 text-[var(--text-primary)]'
+    pro: 'bg-gradient-to-r from-emerald-500 to-teal-500 text-[var(--text-primary)]',
+    beta: 'bg-teal-500 text-[var(--text-primary)]',
+    premium: 'bg-gradient-to-r from-emerald-400 to-teal-500 text-[var(--text-primary)]'
   }
 
   const labels = {
@@ -103,6 +104,7 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
       items: [
         { label: labels.automations.title, href: "/dashboard/automations", icon: Zap },
         { label: labels.aiAssistant.title, href: "/dashboard/ai-assistant", icon: Sparkles },
+        { label: "Conectar", href: "/dashboard/connect", icon: Link2 },
       ],
     },
     {
@@ -132,7 +134,7 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
     <motion.aside
       animate={{ width: isCollapsed ? 72 : 240 }}
       transition={{ duration: 0.25, ease: "easeInOut" }}
-      className="h-screen bg-[var(--bg-card)] border-r border-[var(--border-subtle)] shadow-[var(--shadow-sidebar)] flex flex-col shrink-0"
+      className="h-screen bg-[var(--bg-card)] border-r border-[var(--border-subtle)] flex flex-col shrink-0"
     >
 
       {/* HEADER */}
@@ -192,11 +194,11 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
                     key={`${group.title}-${item.href}`}
                     onClick={() => router.push(item.href)}
                     className={`
-                      w-full flex items-center gap-3 px-3 py-2 text-sm
+                      w-full flex items-center gap-3 px-3 py-2 text-sm rounded-r-md
                       transition-all
                       ${active
-                        ? "bg-[var(--accent-soft)] text-[var(--accent)] font-medium border-l-[3px] border-[var(--accent)]"
-                        : "text-[var(--text-secondary)] hover:bg-[var(--border-subtle)] hover:text-[var(--text-primary)] border-l-[3px] border-transparent"
+                        ? "bg-[var(--accent-soft)] text-[var(--accent)] font-medium border-l-[4px] border-[var(--accent)]"
+                        : "text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)] border-l-[4px] border-transparent"
                       }
                     `}
                   >
@@ -229,7 +231,7 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
         {/* USER */}
         <div className="flex items-center gap-3">
           {/* AVATAR */}
-          <div className="h-9 w-9 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-full flex items-center justify-center text-[var(--accent)] font-bold overflow-hidden">
+          <div className="h-9 w-9 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-full flex items-center justify-center text-[var(--accent)] font-bold overflow-hidden">
             {session?.user?.image ? (
               <img
                 src={session.user.image}
@@ -259,9 +261,9 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
         {!isCollapsed && session?.user?.plan && (
           <button
             onClick={() => router.push("/dashboard/finance/billing")}
-            className="w-full text-left text-xs text-[var(--accent)] hover:text-[var(--accent-hover)]"
+            className="w-full text-left text-xs text-[var(--accent)] hover:text-[var(--text-primary)] transition-colors"
           >
-            Plan: <b>{session.user.plan.toUpperCase()}</b> → Cambiar plan
+            Plan: <b>{session.user.plan.toUpperCase()}</b>
           </button>
         )}
 

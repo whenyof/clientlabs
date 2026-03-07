@@ -17,10 +17,10 @@ export function FunnelChart({ selectedRange: _selectedRange }: FunnelChartProps)
     <AnimatedCard className="p-6" delay={0.4}>
       <div className="flex items-center gap-3 mb-6">
         <motion.div
-          className="p-2 bg-purple-600/20 rounded-lg"
+          className="p-2 bg-emerald-600/20 rounded-lg"
           whileHover={{ scale: 1.1, rotate: 5 }}
         >
-          <FunnelIcon className="w-5 h-5 text-purple-400" />
+          <FunnelIcon className="w-5 h-5 text-emerald-400" />
         </motion.div>
 
         <div>

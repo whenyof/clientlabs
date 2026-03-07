@@ -42,8 +42,8 @@ export function AiKPIs() {
       value: formatCurrency(mockAiKPIs.revenuePredicted),
       subtitle: "este mes",
       icon: SparklesIcon,
-      color: "from-purple-500 to-indigo-600",
-      bgColor: "from-purple-500/10 to-indigo-600/10"
+      color: "from-emerald-500 to-indigo-600",
+      bgColor: "from-emerald-500/10 to-indigo-600/10"
     },
     {
       title: "Emails Generados",
@@ -70,7 +70,7 @@ export function AiKPIs() {
         return (
           <motion.div
             key={index}
-            className="relative overflow-hidden rounded-2xl bg-[var(--bg-main)] backdrop-blur-sm border border-[var(--border-subtle)] hover:border-[var(--border-subtle)] transition-all duration-300 hover:scale-105"
+            className="relative overflow-hidden rounded-xl bg-[var(--bg-main)] backdrop-blur-sm border border-[var(--border-subtle)] hover:border-[var(--border-subtle)] transition-all duration-300 hover:scale-105"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 + (index * 0.1), duration: 0.5 }}
@@ -82,7 +82,7 @@ export function AiKPIs() {
             {/* Content */}
             <div className="relative p-6">
               <div className="flex items-center justify-between mb-4">
-                <div className={`p-3 rounded-xl bg-gradient-to-br ${kpi.color} shadow-lg`}>
+                <div className={`p-3 rounded-xl bg-gradient-to-br ${kpi.color} shadow-[var(--shadow-card)]`}>
                   <Icon className="w-6 h-6 text-[var(--text-primary)]" />
                 </div>
               </div>
@@ -101,7 +101,7 @@ export function AiKPIs() {
             </div>
 
             {/* Hover effect */}
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-600/5 to-blue-600/5 opacity-0 hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-emerald-600/5 to-blue-600/5 opacity-0 hover:opacity-100 transition-opacity duration-300" />
           </motion.div>
         )
       })}

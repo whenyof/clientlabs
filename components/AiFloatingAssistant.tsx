@@ -118,7 +118,7 @@ export function AiFloatingAssistant() {
  "relative w-12 h-12 rounded-full shadow-sm flex items-center justify-center text-[var(--text-primary)] transition-all duration-500 border border-[var(--border-subtle)]",
  isOpen
  ? "bg-zinc-900 border-[var(--border-subtle)]"
- : "bg-[var(--bg-card)] hover:shadow-accent-primary/20"
+ : "bg-[var(--bg-card)] hover:shadow-[var(--accent)]/20"
  )}
  whileHover={{ scale: 1.05 }}
  whileTap={{ scale: 0.95 }}
@@ -181,7 +181,7 @@ export function AiFloatingAssistant() {
 
  {/* Header */}
  <div className="flex items-center gap-4 mb-6">
- <div className="h-10 w-10 bg-[var(--bg-card)] rounded-2xl flex items-center justify-center shadow-sm shadow-indigo-500/20">
+ <div className="h-10 w-10 bg-[var(--bg-card)] rounded-2xl flex items-center justify-center shadow-sm shadow-emerald-500/20">
  <CpuChipIcon className="w-6 h-6 text-[var(--text-primary)]" />
  </div>
  <div>
@@ -248,7 +248,7 @@ export function AiFloatingAssistant() {
  onClick={() => handleQuickAction('insights')}
  className="w-full flex items-center gap-4 p-4 bg-[var(--bg-card)] hover:bg-[var(--bg-card)] rounded-2xl transition-all border border-[var(--border-subtle)] group"
  >
- <SparklesIcon className="w-6 h-6 text-[var(--accent)]-hover group-hover:scale-110 transition-transform" />
+ <SparklesIcon className="w-6 h-6 text-[var(--accent)] group-hover:scale-110 transition-transform" />
  <div className="text-left">
  <div className="text-[var(--text-primary)] text-sm font-bold">Ver Insights</div>
  <div className="text-[var(--text-secondary)] text-xs">Análisis global de clientes</div>
@@ -269,7 +269,7 @@ export function AiFloatingAssistant() {
  router.push('/dashboard/other/ai-assistant');
  setIsOpen(false);
  }}
- className="text-xs font-bold text-[var(--accent)]-hover hover:text-[var(--accent)]-primary transition-colors"
+ className="text-xs font-bold text-[var(--accent)] hover:text-[var(--accent)]-primary transition-colors"
  >
  Ver todo →
  </button>

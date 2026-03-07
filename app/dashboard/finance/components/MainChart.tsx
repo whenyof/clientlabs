@@ -126,7 +126,7 @@ export function MainChart() {
         <div className="flex items-baseline gap-3 flex-wrap">
           <span
             className={`text-3xl font-bold tabular-nums tracking-tight ${
-              periodProfit >= 0 ? "text-violet-400" : "text-red-400"
+              periodProfit >= 0 ? "text-emerald-400" : "text-red-400"
             }`}
           >
             {formatCurrency(periodProfit)}
@@ -299,7 +299,7 @@ function ChartTooltip({
   const deltaProfit = prev != null && prev.profit !== 0 ? ((profit - prev.profit) / Math.abs(prev.profit)) * 100 : null
 
   return (
-    <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] shadow-2xl backdrop-blur-xl overflow-hidden min-w-[220px] ring-1 ring-white/10">
+    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] shadow-[var(--shadow-card)] backdrop-blur-xl overflow-hidden min-w-[220px] ring-1 ring-white/10">
       <div className="px-4 pt-3.5 pb-2.5 border-b border-[var(--border-subtle)]">
         <p className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">{label}</p>
       </div>
@@ -328,7 +328,7 @@ function ChartTooltip({
         )}
         <div className="flex justify-between items-baseline gap-6 pt-2 border-t border-[var(--border-subtle)]">
           <span className="text-sm text-[var(--text-secondary)]">Beneficio</span>
-          <span className="text-base font-semibold tabular-nums text-violet-400">
+          <span className="text-base font-semibold tabular-nums text-emerald-400">
             {formatCurrency(profit)}
           </span>
         </div>
@@ -346,7 +346,7 @@ function ChartTooltip({
               </span>
             )}
             {trends.profitGrowth != null && (
-              <span className={trends.profitGrowth >= 0 ? "text-violet-400" : "text-red-400"}>
+              <span className={trends.profitGrowth >= 0 ? "text-emerald-400" : "text-red-400"}>
                 Resultado {trends.profitGrowth >= 0 ? "+" : ""}{trends.profitGrowth.toFixed(1)}%
               </span>
             )}

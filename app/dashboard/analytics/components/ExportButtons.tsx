@@ -72,13 +72,13 @@ export function ExportButtons({ data, onExportStart, onExportEnd }: ExportButton
 
   return (
     <motion.div
-      className="bg-[var(--bg-main)] backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)] p-6"
+      className="bg-[var(--bg-main)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)] p-6"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.7, duration: 0.5 }}
     >
       <div className="flex items-center gap-3 mb-6">
-        <DocumentArrowDownIcon className="w-5 h-5 text-purple-400" />
+        <DocumentArrowDownIcon className="w-5 h-5 text-emerald-400" />
         <div>
           <h3 className="text-xl font-bold text-[var(--text-primary)]">Exportar Analytics</h3>
           <p className="text-[var(--text-secondary)] text-sm">

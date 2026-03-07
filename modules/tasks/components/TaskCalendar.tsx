@@ -23,8 +23,8 @@ export function TaskCalendar({ className }: TaskCalendarProps) {
  >
  <CardHeader className="border-b border-border/60 py-4">
  <div className="flex items-center gap-2">
- <div className="rounded-lg bg-violet-500/10 p-2">
- <Calendar className="h-5 w-5 text-violet-500" />
+ <div className="rounded-lg bg-emerald-500/10 p-2">
+ <Calendar className="h-5 w-5 text-emerald-500" />
  </div>
  <h2 className="text-lg font-semibold text-foreground">
  Calendario de tareas

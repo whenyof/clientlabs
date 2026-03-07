@@ -210,9 +210,9 @@ function DroppableDayColumn({
  e.key === "Enter" || e.key === " " ? onDayClick() : null
  }
  className={cn(
- "rounded-xl border p-4 flex flex-col gap-3 min-h-[120px] cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:ring-offset-2 focus:ring-offset-transparent",
+ "rounded-xl border p-4 flex flex-col gap-3 min-h-[120px] cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:ring-offset-2 focus:ring-offset-transparent",
  over
- ? "border-violet-500 bg-violet-500/15"
+ ? "border-emerald-500 bg-emerald-500/15"
  : "border-[var(--border-subtle)] bg-[var(--bg-card)]/[0.02] hover:bg-[var(--bg-card)]/[0.04]"
  )}
  >
@@ -221,7 +221,7 @@ function DroppableDayColumn({
  {label}
  </p>
  {over && (
- <p className="text-xs text-violet-300 font-medium animate-in fade-in duration-150">
+ <p className="text-xs text-emerald-300 font-medium animate-in fade-in duration-150">
  Soltar aquí · {label}
  </p>
  )}
@@ -259,7 +259,7 @@ function DraggableTaskCard({
  onClick={(e) => e.stopPropagation()}
  className={cn(
  "group rounded-xl border border-[var(--border-subtle)] px-3 py-2.5 text-[var(--text-primary)] transition-all flex items-start justify-between gap-2",
- dragging && "opacity-50 border-violet-400",
+ dragging && "opacity-50 border-emerald-400",
  !dragging &&
  "bg-[var(--bg-card)]/[0.03] hover:bg-[var(--bg-card)]/[0.06]",
  isSaving && "opacity-80"
@@ -285,14 +285,14 @@ function DraggableTaskCard({
  )}
  </button>
  {isSaving ? (
- <Loader2 className="w-4 h-4 shrink-0 animate-spin text-violet-300" />
+ <Loader2 className="w-4 h-4 shrink-0 animate-spin text-emerald-300" />
  ) : (
  <DropdownMenu>
  <DropdownMenuTrigger asChild>
  <Button
  variant="ghost"
  size="icon"
- className="h-7 w-7 shrink-0 opacity-70 hover:opacity-100 text-violet-200 hover:text-[var(--text-primary)] hover:bg-violet-500/20"
+ className="h-7 w-7 shrink-0 opacity-70 hover:opacity-100 text-violet-200 hover:text-[var(--text-primary)] hover:bg-emerald-500/20"
  onClick={(e) => e.stopPropagation()}
  >
  <MoreHorizontal className="w-4 h-4" />
@@ -322,7 +322,7 @@ function DraggableTaskCard({
 
 function TaskCardPreview({ task }: { task: MissionControlTask }) {
  return (
- <div className="rounded-lg border-2 border-violet-400 bg-violet-500/20 shadow-sm shadow-black/40 px-3 py-2.5 text-[var(--text-primary)] opacity-95 backdrop-">
+ <div className="rounded-lg border-2 border-emerald-400 bg-emerald-500/20 shadow-sm shadow-black/40 px-3 py-2.5 text-[var(--text-primary)] opacity-95 backdrop-">
  <p className="text-sm font-medium truncate max-w-[200px]">{task.title}</p>
  {task.startAt && (
  <p className="text-xs text-violet-200/90 mt-0.5">
@@ -914,7 +914,7 @@ export function MissionCalendar({
  Cancelar
  </Button>
  <Button
- className="bg-violet-600 hover:bg-violet-700 text-[var(--text-primary)]"
+ className="bg-emerald-600 hover:bg-emerald-600 text-[var(--text-primary)]"
  onClick={handleConfirmMove}
  disabled={moving || !moveDate}
  >

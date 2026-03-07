@@ -25,7 +25,7 @@ export function AnalyticsSecondaryMetrics({
  label: "Valor de Vida (LTV)",
  value: formatCurrency(data.ltv),
  description: "Ingreso medio por cliente pagador",
- color: "text-violet-400",
+ color: "text-emerald-400",
  },
  {
  label: "Crecimiento",

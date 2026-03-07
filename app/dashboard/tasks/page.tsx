@@ -35,12 +35,12 @@ export default async function TasksPage() {
     to: rangeEnd.toISOString(),
   }
 
-  // Single root for /dashboard/tasks: lateral layout (calendar | today column)
   return (
-    <TasksMissionControl
-      events={events}
-      initialRange={initialRange}
-      className="flex-1 min-h-0 flex flex-col w-full max-w-none h-full"
-    />
+    <div className="space-y-8">
+      <TasksMissionControl
+        events={events}
+        initialRange={initialRange}
+      />
+    </div>
   )
 }

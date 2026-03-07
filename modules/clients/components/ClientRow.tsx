@@ -74,7 +74,7 @@ export const ClientRow = memo(function ClientRow({
 
  {/* Cliente */}
  <td className="p-4">
- <div className="transition-all duration-200 group-hover:translate-x-1">
+ <div className="transition-all duration-200 group-hover:-translate-x-1">
  <div className="flex items-center gap-2 mb-1">
  <p className="text-[var(--text-primary)] font-semibold transition-colors duration-200 group-hover:text-[var(--text-secondary)]">{client.name || labels.common.noResults}</p>
  {client.riskLevel === "MEDIUM" && (
@@ -94,13 +94,13 @@ export const ClientRow = memo(function ClientRow({
  </div>
  <div className="flex items-center gap-3 text-xs text-[var(--text-secondary)] transition-colors duration-200 group-hover:text-[var(--text-secondary)]">
  {client.email && (
- <span className="flex items-center gap-1 transition-transform duration-200 hover:translate-x-0.5">
+ <span className="flex items-center gap-1 transition-transform duration-200 hover:-translate-x-0.5">
  <Mail className="h-3 w-3" />
  {client.email}
  </span>
  )}
  {client.phone && (
- <span className="flex items-center gap-1 transition-transform duration-200 hover:translate-x-0.5">
+ <span className="flex items-center gap-1 transition-transform duration-200 hover:-translate-x-0.5">
  <Phone className="h-3 w-3" />
  {client.phone}
  </span>

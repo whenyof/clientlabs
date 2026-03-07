@@ -45,7 +45,7 @@ export function AiFloatingAssistant() {
       >
         <motion.button
           onClick={() => setIsOpen(!isOpen)}
-          className="relative w-14 h-14 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 rounded-full shadow-lg hover:shadow-purple-500/25 flex items-center justify-center text-[var(--text-primary)] transition-all duration-300"
+          className="relative w-14 h-14 bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700 rounded-full shadow-[var(--shadow-card)] hover:shadow-emerald-500/25 flex items-center justify-center text-[var(--text-primary)] transition-all duration-300"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           animate={isOpen ? { rotate: 45 } : { rotate: 0 }}
@@ -69,11 +69,11 @@ export function AiFloatingAssistant() {
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
             transition={{ duration: 0.2 }}
           >
-            <div className="bg-[var(--bg-card)] backdrop-blur-xl border border-[var(--border-subtle)] rounded-2xl shadow-2xl min-w-[300px]">
+            <div className="bg-[var(--bg-card)] backdrop-blur-xl border border-[var(--border-subtle)] rounded-xl shadow-[var(--shadow-card)] min-w-[300px]">
               <div className="p-4 border-b border-[var(--border-subtle)]">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-purple-600/20 rounded-lg">
-                    <span className="text-purple-400 text-lg">⚡</span>
+                  <div className="p-2 bg-emerald-600/20 rounded-lg">
+                    <span className="text-emerald-400 text-lg">⚡</span>
                   </div>
                   <div className="flex-1">
                     <div className="text-[var(--text-primary)] font-semibold text-sm">Asistente IA</div>
@@ -95,7 +95,7 @@ export function AiFloatingAssistant() {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                     >
-                      <span className="text-purple-400">💡</span>
+                      <span className="text-emerald-400">💡</span>
                       <span className="text-[var(--text-primary)] text-sm">{action.label}</span>
                     </motion.button>
                   ))}
@@ -105,7 +105,7 @@ export function AiFloatingAssistant() {
               <div className="p-4 border-t border-[var(--border-subtle)] bg-[var(--bg-main)]">
                 <button
                   onClick={() => router.push('/dashboard/other/ai-assistant')}
-                  className="w-full text-center text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors"
+                  className="w-full text-center text-emerald-400 hover:text-emerald-300 text-sm font-medium transition-colors"
                 >
                   Abrir panel completo →
                 </button>

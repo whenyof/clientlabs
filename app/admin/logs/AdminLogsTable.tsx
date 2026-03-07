@@ -27,7 +27,7 @@ type AdminLog = {
 
 const actionColors: Record<AdminAction, string> = {
  ROLE_CHANGED: "bg-[var(--bg-card)] text-[var(--accent)] border-blue-500/30",
- PLAN_CHANGED: "bg-[var(--accent-soft)]-primary/15 text-[var(--accent)]-hover border-[var(--accent)]-primary/30",
+ PLAN_CHANGED: "bg-[var(--accent-soft)]-primary/15 text-[var(--accent)]-bg-emerald-600 border-[var(--accent)]-primary/30",
  USER_IMPERSONATED: "bg-orange-500/20 text-orange-400 border-orange-500/30",
  USER_FORCE_LOGOUT: "bg-[var(--bg-card)] text-[var(--critical)] border-[var(--critical)]",
  USER_BLOCKED: "bg-[var(--bg-card)] text-[var(--critical)] border-[var(--critical)]",
@@ -37,7 +37,7 @@ const actionColors: Record<AdminAction, string> = {
  ONBOARDING_RESET: "bg-gray-500/20 text-[var(--text-secondary)] border-gray-500/30",
  BACKUP_TRIGGERED: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
  BACKUP_RESTORED: "bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border-subtle)]",
- TELEGRAM_COMMAND_SENT: "bg-[var(--bg-card)] text-[var(--accent)] border-indigo-500/30",
+ TELEGRAM_COMMAND_SENT: "bg-[var(--bg-card)] text-[var(--accent)] border-teal-500/30",
 }
 
 function ActionBadge({ action }: { action: AdminAction }) {

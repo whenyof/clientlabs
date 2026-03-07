@@ -166,7 +166,7 @@ function statusToColor(status: string): string {
  const s = (status || "").toUpperCase()
  if (s === "DONE" || s === "COMPLETED") return "bg-[var(--accent-soft)] border-[var(--accent)] text-[var(--accent)]"
  if (s === "CANCELLED" || s === "CANCELED") return "bg-zinc-500/20 border-zinc-500/40 text-zinc-300"
- return "bg-violet-500/20 border-violet-500/40 text-violet-200"
+ return "bg-emerald-500/20 border-emerald-500/40 text-violet-200"
 }
 
 /** Container classes by status: DONE = premium completion style, CANCELLED = gray, PENDING = normal. */
@@ -548,7 +548,7 @@ const DroppableDay = memo(function DroppableDay({
  style={style}
  className={cn(
  "transition-colors duration-150",
- isOver && "ring-1 ring-violet-500/60 bg-violet-500/10 rounded-lg",
+ isOver && "ring-1 ring-emerald-500/60 bg-emerald-500/10 rounded-lg",
  className
  )}
  >
@@ -867,7 +867,7 @@ const DayView = memo(function DayView({
  role="separator"
  aria-label="Redimensionar duración"
  onPointerDown={getResizeStartHandler(task.id, getTaskDurationMinutes(task))}
- className="h-1.5 shrink-0 cursor-ns-resize bg-[var(--bg-card)] hover:bg-violet-500/40 transition-colors rounded-b flex items-center justify-center touch-none pointer-events-auto"
+ className="h-1.5 shrink-0 cursor-ns-resize bg-[var(--bg-card)] hover:bg-emerald-500/40 transition-colors rounded-b flex items-center justify-center touch-none pointer-events-auto"
  >
  <span className="w-8 border-t border-[var(--border-subtle)] rounded-full" />
  </div>
@@ -1047,7 +1047,7 @@ const WeekView = memo(function WeekView({
  <span
  className={cn(
  "text-base font-semibold tabular-nums block mt-0.5",
- isToday ? "text-violet-400" : "text-[var(--text-primary)]"
+ isToday ? "text-emerald-400" : "text-[var(--text-primary)]"
  )}
  >
  {format(d, "d")}
@@ -1255,8 +1255,8 @@ const MonthView = memo(function MonthView({
  className={cn(
  "min-h-0 h-full flex flex-col border-r border-[var(--border-subtle)] last:border-r-0 cursor-pointer transition-colors",
  inMonth ? "bg-[var(--bg-card)]/[0.02] hover:bg-[var(--bg-card)]/[0.04]" : "bg-[var(--bg-card)]/[0.01]",
- isToday && "ring-1 ring-violet-500/50 ring-inset",
- isSelected && "ring-1 ring-violet-400 ring-inset bg-violet-500/10"
+ isToday && "ring-1 ring-emerald-500/50 ring-inset",
+ isSelected && "ring-1 ring-violet-400 ring-inset bg-emerald-500/10"
  )}
  >
  <div
@@ -1269,7 +1269,7 @@ const MonthView = memo(function MonthView({
  <span
  className={cn(
  "text-xs tabular-nums shrink-0",
- inMonth ? (isToday ? "text-violet-400 font-semibold" : isSelected ? "text-violet-300 font-medium" : "text-zinc-400") : "text-zinc-600"
+ inMonth ? (isToday ? "text-emerald-400 font-semibold" : isSelected ? "text-emerald-300 font-medium" : "text-zinc-400") : "text-zinc-600"
  )}
  >
  {format(d, "d")}

@@ -58,7 +58,7 @@ const ACTIONS: ActionButton[] = [
  label: "Registrar pago",
  icon: BanknotesIcon,
  gradient: " ",
- hoverGlow: "hover:shadow-violet-500/25",
+ hoverGlow: "hover:shadow-emerald-500/25",
  },
  {
  id: "reminder",

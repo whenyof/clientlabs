@@ -12,7 +12,7 @@ type TaskBlockProps = {
 }
 
 const STATUS_STYLES: Record<CalendarTask["status"], string> = {
- PENDING: "bg-violet-500/90 hover:bg-violet-500 border-violet-400/50",
+ PENDING: "bg-emerald-500/90 hover:bg-emerald-500 border-emerald-400/50",
  DONE: "bg-[var(--accent-soft)] hover:bg-[var(--accent-soft)] border-[var(--accent)]",
  CANCELLED: "bg-zinc-500/60 hover:bg-zinc-500/70 border-zinc-400/40",
 }
@@ -52,7 +52,7 @@ export const TaskBlock = memo(function TaskBlock({
  }}
  className={cn(
  "absolute left-0.5 right-0.5 rounded-md border text-left shadow-sm transition-all duration-150",
- "focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-1",
+ "focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1",
  STATUS_STYLES[task.status],
  PRIORITY_BORDER[task.priority],
  className

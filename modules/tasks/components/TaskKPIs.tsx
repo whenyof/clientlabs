@@ -10,8 +10,8 @@ const KPI_ITEMS = [
  label: "Tareas hoy",
  value: "12",
  icon: Clock,
- className: "border-violet-500/30 bg-violet-500/5",
- iconClassName: "text-violet-500",
+ className: "border-emerald-500/30 bg-emerald-500/5",
+ iconClassName: "text-emerald-500",
  },
  {
  key: "overdue",
@@ -42,8 +42,8 @@ const KPI_ITEMS = [
  label: "Carga equipo",
  value: "78%",
  icon: Users,
- className: "border-violet-500/30 bg-violet-500/5",
- iconClassName: "text-violet-500",
+ className: "border-emerald-500/30 bg-emerald-500/5",
+ iconClassName: "text-emerald-500",
  },
 ] as const
 

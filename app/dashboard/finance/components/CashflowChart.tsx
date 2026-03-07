@@ -26,7 +26,7 @@ export function CashflowChart({
   return (
     <div className="
       bg-[var(--bg-main)] border border-[var(--border-subtle)]
-      rounded-2xl p-6
+      rounded-xl p-6
     ">
       <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">
         Flujo de caja

@@ -275,18 +275,18 @@ export interface SectorLabels {
             convertBullet2: string
             convertBullet3: string
             confirmConvert: string
-                toastNoteSaved: string
-                toastErrorNote: string
-                toastErrorStatus: string
-                toastDeleted: string
-                toastErrorDelete: string
-                deleteDialogTitle: string
-                deleteDialogDescription: string
-                deleteDialogConfirm: string
-                deleteDialogWarning: string
-                deleteButton: string
-                deleteButtonLoading: string
-                toastMarkedLost: string
+            toastNoteSaved: string
+            toastErrorNote: string
+            toastErrorStatus: string
+            toastDeleted: string
+            toastErrorDelete: string
+            deleteDialogTitle: string
+            deleteDialogDescription: string
+            deleteDialogConfirm: string
+            deleteDialogWarning: string
+            deleteButton: string
+            deleteButtonLoading: string
+            toastMarkedLost: string
             toastConverted: string
             toastConvertedLinked: string
             toastErrorConvert: string
@@ -297,8 +297,8 @@ export interface SectorLabels {
             toastReminderError: string
             toastReminderCompleted: string
             toastReminderCompleteError: string
-                toastTempChanged: string
-                toastTempChangeError: string
+            toastTempChanged: string
+            toastTempChangeError: string
             sidebarInfo: string
             sidebarSource: string
             sidebarCreated: string
@@ -733,6 +733,7 @@ export interface SectorLabels {
         plans: string
         usage: string
         appearance: string
+        api: string
         dangerZone: string
     }
 

@@ -46,7 +46,7 @@ export function AutomationBuilder() {
     <div className="bg-[var(--bg-card)] backdrop-blur-xl border border-[var(--border-subtle)] rounded-xl p-6">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold text-[var(--text-primary)]">Constructor</h3>
-        <button className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-[var(--text-primary)] text-sm rounded-lg transition-colors">
+        <button className="px-3 py-1 bg-emerald-600 hover:bg-emerald-600 text-[var(--text-primary)] text-sm rounded-lg transition-colors">
           Guardar
         </button>
       </div>
@@ -111,10 +111,10 @@ export function AutomationBuilder() {
         </div>
       </div>
 
-      <div className="mt-6 p-4 bg-purple-500/10 border border-purple-500/20 rounded-lg">
+      <div className="mt-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
         <div className="flex items-center gap-2 mb-2">
-          <Settings className="w-4 h-4 text-purple-400" />
-          <span className="text-sm font-medium text-purple-300">Configuración</span>
+          <Settings className="w-4 h-4 text-emerald-400" />
+          <span className="text-sm font-medium text-emerald-300">Configuración</span>
         </div>
         <p className="text-xs text-[var(--text-secondary)]">
           Esta automatización se ejecutará automáticamente cuando se cumplan las condiciones.

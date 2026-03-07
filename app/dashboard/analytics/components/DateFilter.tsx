@@ -20,7 +20,7 @@ export function DateFilter() {
       <div className="relative">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] hover:border-purple-500 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] hover:border-emerald-500 transition-colors"
         >
           <Calendar className="w-4 h-4" />
           <span className="text-sm">
@@ -30,7 +30,7 @@ export function DateFilter() {
         </button>
 
         {isOpen && (
-          <div className="absolute top-full right-0 mt-2 w-48 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg shadow-lg z-10">
+          <div className="absolute top-full right-0 mt-2 w-48 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg shadow-[var(--shadow-card)] z-10">
             {DATE_RANGES.map((range) => (
               <button
                 key={range.value}
@@ -47,7 +47,7 @@ export function DateFilter() {
         )}
       </div>
 
-      <button className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-[var(--text-primary)] rounded-lg text-sm font-medium transition-colors">
+      <button className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-[var(--text-primary)] rounded-lg text-sm font-medium transition-colors">
         Exportar Datos
       </button>
     </div>

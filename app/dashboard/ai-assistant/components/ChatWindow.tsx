@@ -9,7 +9,7 @@ export function ChatWindow() {
 
   return (
     <motion.div
-      className="bg-[var(--bg-main)] backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)] overflow-hidden"
+      className="bg-[var(--bg-main)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)] overflow-hidden"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2, duration: 0.5 }}
@@ -17,8 +17,8 @@ export function ChatWindow() {
       <div className="h-[500px] flex flex-col">
         <div className="p-4 border-b border-[var(--border-subtle)] bg-[var(--bg-card)]">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-600/20 rounded-lg">
-              <span className="text-purple-400 text-lg">🤖</span>
+            <div className="p-2 bg-emerald-600/20 rounded-lg">
+              <span className="text-emerald-400 text-lg">🤖</span>
             </div>
             <div>
               <h3 className="text-lg font-semibold text-[var(--text-primary)]">Chat con IA</h3>
@@ -34,9 +34,9 @@ export function ChatWindow() {
               className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-md px-4 py-3 rounded-2xl ${
+                className={`max-w-md px-4 py-3 rounded-xl ${
                   message.role === 'user'
-                    ? 'bg-purple-600 text-[var(--text-primary)]'
+                    ? 'bg-emerald-600 text-[var(--text-primary)]'
                     : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border border-[var(--border-subtle)]'
                 }`}
               >
@@ -62,15 +62,15 @@ export function ChatWindow() {
               <input
                 type="text"
                 placeholder="Pregúntame sobre leads, ventas, predicciones..."
-                className="w-full px-4 py-3 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl text-[var(--text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full px-4 py-3 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl text-[var(--text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 disabled
               />
             </div>
             <button
-              className="p-3 bg-purple-600/50 rounded-xl cursor-not-allowed"
+              className="p-3 bg-emerald-600/50 rounded-xl cursor-not-allowed"
               disabled
             >
-              <span className="text-purple-400">📤</span>
+              <span className="text-emerald-400">📤</span>
             </button>
           </div>
 

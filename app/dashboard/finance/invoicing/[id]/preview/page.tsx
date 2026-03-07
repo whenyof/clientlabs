@@ -57,20 +57,20 @@ export default function InvoicePreviewPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[var(--bg-surface)] flex items-center justify-center">
-        <p className="text-[var(--text-secondary)] text-sm">Cargando factura…</p>
+      <div className="min-h-screen bg-zinc-100 flex items-center justify-center">
+        <p className="text-zinc-500 text-sm">Cargando factura…</p>
       </div>
     )
   }
 
   if (error || !invoice) {
     return (
-      <div className="min-h-screen bg-[var(--bg-surface)] flex flex-col items-center justify-center gap-4 p-6">
-        <p className="text-[var(--text-primary)]">Factura no encontrada o sin acceso.</p>
+      <div className="min-h-screen bg-zinc-100 flex flex-col items-center justify-center gap-4 p-6">
+        <p className="text-zinc-600">Factura no encontrada o sin acceso.</p>
         <button
           type="button"
           onClick={handleBack}
-          className="text-sm text-[var(--text-primary)] hover:text-[var(--text-primary)] underline"
+          className="text-sm text-zinc-600 hover:text-zinc-900 underline"
         >
           ← Volver
         </button>
@@ -84,12 +84,12 @@ export default function InvoicePreviewPage() {
     !calculateFiscalCompleteness(invoice.Client)
 
   return (
-    <div className="min-h-screen bg-[var(--bg-surface)] py-6 px-4">
+    <div className="min-h-screen bg-zinc-200 py-6 px-4">
       <div className="max-w-3xl mx-auto">
         <button
           type="button"
           onClick={handleBack}
-          className="mb-4 text-sm text-[var(--text-primary)] hover:text-[var(--text-primary)] font-medium"
+          className="mb-4 text-sm text-zinc-600 hover:text-zinc-900 font-medium"
         >
           ← Volver a facturación
         </button>

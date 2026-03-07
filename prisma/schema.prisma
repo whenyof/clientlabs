@@ -107,20 +107,79 @@ model Alert {
   @@index([userId])
 }
 
-model ApiKey {
-  id        String    @id
-  userId    String
-  key       String    @unique
-  name      String?
-  active    Boolean   @default(true)
-  lastUsed  DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime
-  User      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+enum ApiKeyType {
+  public
+  secret
+  webhook
+}
 
-  @@index([active])
-  @@index([key])
+enum ApiKeyScope {
+  admin
+  ingest
+  read
+}
+
+model ApiKey {
+  id           String       @id @default(cuid())
+  userId       String
+  keyHash      String       @unique
+  name         String?
+  type         ApiKeyType   @default(secret)
+  scope        ApiKeyScope  @default(ingest)
+  domain       String?
+  encryptedKey String?
+  expiryDate   DateTime?
+  revoked      Boolean      @default(false)
+  lastUsed     DateTime?
+  lastUsedIp   String?
+  rotationOf   String?
+  rateLimit    Int?
+  createdAt    DateTime     @default(now())
+  User         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([keyHash])
   @@index([userId])
+  @@index([type])
+  @@index([domain])
+  @@index([expiryDate])
+}
+
+/// SDK connection heartbeat — used for real-time verification of script installation.
+model SdkConnection {
+  id        String   @id @default(cuid())
+  userId    String
+  apiKey    String
+  domain    String
+  lastSeen  DateTime @default(now())
+  createdAt DateTime @default(now())
+  @@unique([userId, domain, apiKey], name: "userId_domain_apiKey")
+  @@index([apiKey])
+  @@index([userId])
+  @@index([domain])
+}
+
+/// SDK installation verification — status per domain (NOT_INSTALLED | SCRIPT_DETECTED | SDK_ACTIVE | RECEIVING_EVENTS).
+model SdkInstallation {
+  id          String    @id @default(cuid())
+  userId      String
+  domain      String
+  apiKey      String
+  status      String    @default("NOT_INSTALLED")
+  firstSeenAt DateTime?
+  lastSeenAt  DateTime?
+  lastEventAt DateTime?
+  sdkVersion  String?
+  environment String?
+  eventCount  Int?      @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  User        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, domain])
+  @@index([apiKey])
+  @@index([userId])
+  @@index([domain])
+  @@index([userId, status])
 }
 
 model BusinessProfile {
@@ -368,25 +427,113 @@ model ClientPaymentProfile {
 }
 
 model Event {
-  id        String   @id
-  leadId    String?
-  userId    String
-  type      String
-  url       String
-  element   Json?
-  data      Json
-  sessionId String?
-  visitorId String?
-  createdAt DateTime @default(now())
-  Lead      Lead?    @relation(fields: [leadId], references: [id])
-  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id         String   @id
+  leadId     String?
+  userId     String
+  apiKey     String?
+  domain     String?
+  type       String
+  url        String
+  element    Json?
+  data       Json
+  sessionId  String?
+  visitorId  String?
+  createdAt  DateTime @default(now())
+  receivedAt DateTime
+  Lead       Lead?    @relation(fields: [leadId], references: [id])
+  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([createdAt])
+  @@index([domain])
   @@index([leadId])
   @@index([sessionId])
   @@index([type])
   @@index([userId])
+  @@index([userId, createdAt])
+  @@index([userId, domain, createdAt])
   @@index([visitorId])
+}
+
+/// Analytics visitor (userId + visitorId). Updated by event processor. sessionsCount incremented when a new session is created.
+model AnalyticsVisitor {
+  id            String   @id @default(cuid())
+  userId        String
+  visitorId     String
+  firstSeen     DateTime
+  lastSeen      DateTime
+  sessionsCount Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  User          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, visitorId])
+  @@index([userId])
+  @@index([visitorId])
+}
+
+/// Analytics session (userId + sessionId from SDK). Updated by event processor. durationSeconds set on update.
+model IngestSession {
+  id              String   @id @default(cuid())
+  userId          String
+  sessionId       String
+  startedAt       DateTime
+  lastSeen        DateTime
+  durationSeconds Int      @default(0)
+  pageviews       Int      @default(0)
+  eventsCount     Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  User            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, sessionId])
+  @@index([userId])
+  @@index([sessionId])
+}
+
+/// Daily aggregates per userId + domain. Updated by event processor.
+model DailyStats {
+  id        String   @id @default(cuid())
+  userId    String
+  domain    String
+  day       DateTime
+  pageviews Int      @default(0)
+  visitors  Int      @default(0)
+  sessions  Int      @default(0)
+  leads     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, domain, day])
+  @@index([userId])
+  @@index([domain])
+  @@index([day])
+}
+
+/// Tracks which visitors were counted for a given day (for daily stats).
+model DailyStatsVisitor {
+  id        String   @id @default(cuid())
+  userId    String
+  domain    String
+  day       DateTime
+  visitorId String
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, domain, day, visitorId])
+  @@index([userId])
+}
+
+/// Tracks which sessions were counted for a given day (for daily stats).
+model DailyStatsSession {
+  id        String   @id @default(cuid())
+  userId    String
+  domain    String
+  day       DateTime
+  sessionId String
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, domain, day, sessionId])
+  @@index([userId])
 }
 
 model FinancialRecord {
@@ -679,6 +826,7 @@ model User {
   blockedReason          String?
   lastLoginAt            DateTime?
   lastActiveAt           DateTime?
+  monthlyRevenueTarget   Int?     // DB: INTEGER (migration add_monthly_revenue_target_safe)
   AIInsight              AIInsight[]
   AIPrediction           AIPrediction[]
   accounts               Account[]
@@ -696,6 +844,11 @@ model User {
   cashflowForecasts      CashflowForecast[]
   Client                 Client[]
   Event                  Event[]
+  AnalyticsVisitor       AnalyticsVisitor[]
+  IngestSession          IngestSession[]
+  DailyStats             DailyStats[]
+  DailyStatsVisitor      DailyStatsVisitor[]
+  DailyStatsSession      DailyStatsSession[]
   eventMetrics           EventMetrics[]
   financeAlerts          FinanceAlert[]
   financialGoals         FinancialGoal[]
@@ -728,6 +881,7 @@ model User {
   restaurantMetrics      RestaurantMetrics[]
   retailMetrics          RetailMetrics[]
   Sale                   Sale[]
+  SdkInstallation        SdkInstallation[]
   Invoice                Invoice[]
   InvoiceSeries          InvoiceSeries[]
   BillingInvoice         BillingInvoice[]
@@ -1033,12 +1187,15 @@ model Payment {
   @@index([stripePaymentIntentId])
 }
 
+/// category = canonical enum; type = optional, used by connect/web (e.g. "web"); health = optional status.
 model Integration {
   id         String              @id @default(cuid())
   userId     String
   name       String
   provider   String
   category   IntegrationCategory
+  type       String?
+  health     String?
   status     IntegrationStatus   @default(DISCONNECTED)
   config     Json?
   apiKey     String?

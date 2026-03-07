@@ -24,7 +24,7 @@ export function RevenueChart() {
         <h3 className="text-lg font-semibold text-[var(--text-primary)]">Ingresos Mensuales</h3>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1 text-sm">
-            <div className="w-3 h-3 bg-purple-500 rounded"></div>
+            <div className="w-3 h-3 bg-emerald-500 rounded"></div>
             <span className="text-[var(--text-secondary)]">Actual</span>
           </div>
           <div className="flex items-center gap-1 text-sm">
@@ -61,7 +61,7 @@ export function RevenueChart() {
               />
               {/* Current month bar */}
               <div
-                className="bg-purple-500 rounded-t w-1/2"
+                className="bg-emerald-500 rounded-t w-1/2"
                 style={{ height: `${(data.value / maxValue) * 100}%` }}
               />
             </div>

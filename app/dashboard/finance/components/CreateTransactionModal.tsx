@@ -61,7 +61,7 @@ export function CreateTransactionModal({ isOpen, onClose }: CreateTransactionMod
 
           {/* Modal */}
           <motion.div
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-subtle)] shadow-2xl z-50 w-full max-w-md"
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[var(--bg-card)] rounded-xl border border-[var(--border-subtle)] shadow-[var(--shadow-card)] z-50 w-full max-w-md"
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
@@ -120,7 +120,7 @@ export function CreateTransactionModal({ isOpen, onClose }: CreateTransactionMod
                     step="0.01"
                     value={formData.amount}
                     onChange={(e) => handleInputChange('amount', e.target.value)}
-                    className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     placeholder="0.00"
                     required
                   />
@@ -135,7 +135,7 @@ export function CreateTransactionModal({ isOpen, onClose }: CreateTransactionMod
                     type="text"
                     value={formData.concept}
                     onChange={(e) => handleInputChange('concept', e.target.value)}
-                    className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     placeholder="Descripción del movimiento"
                     required
                   />
@@ -149,7 +149,7 @@ export function CreateTransactionModal({ isOpen, onClose }: CreateTransactionMod
                   <select
                     value={formData.category}
                     onChange={(e) => handleInputChange('category', e.target.value)}
-                    className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     required
                   >
                     <option value="">Seleccionar categoría</option>
@@ -167,7 +167,7 @@ export function CreateTransactionModal({ isOpen, onClose }: CreateTransactionMod
                   <select
                     value={formData.clientId}
                     onChange={(e) => handleInputChange('clientId', e.target.value)}
-                    className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   >
                     <option value="">Sin cliente asignado</option>
                     {clients.map(client => (
@@ -186,7 +186,7 @@ export function CreateTransactionModal({ isOpen, onClose }: CreateTransactionMod
                   <select
                     value={formData.paymentMethod}
                     onChange={(e) => handleInputChange('paymentMethod', e.target.value)}
-                    className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     required
                   >
                     <option value="">Seleccionar método</option>
@@ -205,7 +205,7 @@ export function CreateTransactionModal({ isOpen, onClose }: CreateTransactionMod
                     type="date"
                     value={formData.date}
                     onChange={(e) => handleInputChange('date', e.target.value)}
-                    className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     required
                   />
                 </div>
@@ -221,7 +221,7 @@ export function CreateTransactionModal({ isOpen, onClose }: CreateTransactionMod
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-4 py-3 bg-purple-600 hover:bg-purple-700 text-[var(--text-primary)] rounded-lg transition-colors"
+                    className="flex-1 px-4 py-3 bg-emerald-600 hover:bg-emerald-600 text-[var(--text-primary)] rounded-lg transition-colors"
                   >
                     Crear Movimiento
                   </button>

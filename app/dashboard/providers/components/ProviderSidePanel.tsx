@@ -479,7 +479,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                                             variant="outline"
                                             className="bg-[var(--bg-main)] border-[var(--border-subtle)] text-[var(--text-primary)] hover:bg-[var(--bg-surface)] justify-start gap-2 h-12"
                                         >
-                                            <MessageSquare className="h-4 w-4 text-purple-400" />
+                                            <MessageSquare className="h-4 w-4 text-emerald-400" />
                                             Añadir Nota
                                         </Button>
                                         <Button
@@ -870,20 +870,20 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                                                     <div key={event.id} className="relative group/item">
                                                         {/* Line connection */}
                                                         <div className={cn(
-                                                            "absolute -left-[31px] h-4 w-4 rounded-full border-2 bg-[var(--bg-surface)] flex items-center justify-center z-10 transition-transform group-hover/item:scale-110",
+                                                            "absolute -left-[31px] h-4 w-4 rounded-full border-2 bg-[var(--bg-surface)] flex items-center justify-center z-10 transition-transform group-bg-emerald-600/item:scale-110",
                                                             event.type === 'ORDER' ? "border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" :
                                                                 event.type === 'PAYMENT' ? "border-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]" :
                                                                     event.type === 'TASK' ? "border-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]" :
-                                                                        event.type === 'CONTACT_LOG' ? "border-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.5)]" :
-                                                                            event.type === 'NOTE' ? "border-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]" :
+                                                                        event.type === 'CONTACT_LOG' ? "border-emerald-500 shadow-[0_0_8px_rgba(168,85,247,0.5)]" :
+                                                                            event.type === 'NOTE' ? "border-teal-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]" :
                                                                                 "border-[var(--border-subtle)]"
                                                         )}>
                                                             {event.type === 'ORDER' && <ShoppingBag className="h-2 w-2 text-blue-500" />}
                                                             {event.type === 'PAYMENT' && <CreditCard className="h-2 w-2 text-green-500" />}
                                                             {event.type === 'TASK' && <CheckCircle2 className="h-2 w-2 text-amber-500" />}
-                                                            {event.type === 'NOTE' && <MessageSquare className="h-2 w-2 text-indigo-500" />}
+                                                            {event.type === 'NOTE' && <MessageSquare className="h-2 w-2 text-teal-500" />}
                                                             {(event.type === 'FILE_ADDED' || event.type === 'FILE') && <FileText className="h-2 w-2 text-[var(--text-secondary)]" />}
-                                                            {event.type === 'CONTACT_LOG' && <MessageSquare className="h-2 w-2 text-purple-500" />}
+                                                            {event.type === 'CONTACT_LOG' && <MessageSquare className="h-2 w-2 text-emerald-500" />}
                                                         </div>
 
                                                         <div className={cn(
@@ -920,7 +920,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
 
                                                                     {/* NOTE: Show full content */}
                                                                     {event.type === 'NOTE' && event.content ? (
-                                                                        <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-md p-2 mt-2">
+                                                                        <div className="bg-teal-500/10 border border-teal-500/20 rounded-md p-2 mt-2">
                                                                             <p className="text-sm text-[var(--text-secondary)] whitespace-pre-wrap">{event.content}</p>
                                                                         </div>
                                                                     ) : (

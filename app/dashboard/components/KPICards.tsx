@@ -42,8 +42,8 @@ export function KPICards() {
           className="bg-[var(--bg-card)] backdrop-blur-xl border border-[var(--border-subtle)] rounded-xl p-6 hover:bg-[var(--bg-main)] transition-all duration-200"
         >
           <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-purple-500/10 rounded-lg">
-              <kpi.icon className="w-6 h-6 text-purple-400" />
+            <div className="p-3 bg-emerald-500/10 rounded-lg">
+              <kpi.icon className="w-6 h-6 text-emerald-400" />
             </div>
             {kpi.change && (
               <div className={`flex items-center gap-1 text-sm px-2 py-1 rounded-full ${

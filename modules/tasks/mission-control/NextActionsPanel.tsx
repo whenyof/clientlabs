@@ -80,7 +80,7 @@ export function NextActionsPanel({
  className={cn(
  "w-full text-left rounded-lg border transition-all duration-200 px-3 py-2.5 flex items-start gap-3",
  index === 0
- ? "bg-violet-500/15 border-violet-400/50 ring-1 ring-violet-400/30 hover:bg-violet-500/20"
+ ? "bg-emerald-500/15 border-emerald-400/50 ring-1 ring-violet-400/30 hover:bg-emerald-500/20"
  : "border-[var(--border-subtle)] bg-[var(--bg-card)]/[0.03] hover:bg-[var(--bg-card)]/[0.06] hover:border-[var(--border-subtle)]"
  )}
  >
@@ -88,7 +88,7 @@ export function NextActionsPanel({
  className={cn(
  "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold tabular-nums",
  index === 0
- ? "bg-violet-500/40 text-violet-200 ring-1 ring-violet-400/50"
+ ? "bg-emerald-500/40 text-violet-200 ring-1 ring-violet-400/50"
  : "bg-[var(--bg-card)] text-zinc-400"
  )}
  >

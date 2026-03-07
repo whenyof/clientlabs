@@ -34,7 +34,7 @@ export function QuickActions() {
       description: w.newAutomationDesc,
       icon: Zap,
       action: () => { },
-      color: "bg-purple-500/10 text-purple-400"
+      color: "bg-emerald-500/10 text-emerald-400"
     },
     {
       label: labels.analytics.title || "Ver Analytics",
@@ -53,39 +53,41 @@ export function QuickActions() {
   ]
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-[var(--text-primary)]">{labels.common.actions} {w.quickActionsSuffix}</h3>
-        <span className="text-xs text-[var(--text-secondary)]">{ACTIONS.length} {w.quickActionsAvailable}</span>
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-neutral-900">
+          {labels.common.actions} {w.quickActionsSuffix}
+        </h3>
+        <span className="text-xs text-neutral-500">
+          {ACTIONS.length} {w.quickActionsAvailable}
+        </span>
       </div>
-
-      <div className="grid grid-cols-1 gap-3">
-        {ACTIONS.map((action, index) => (
+      <div className="grid grid-cols-1 gap-4">
+        {ACTIONS.map((action) => (
           <button
             key={action.label}
             onClick={action.action}
-            className="flex items-center gap-4 p-4 bg-[var(--bg-main)] hover:bg-[var(--bg-surface)] rounded-lg transition-all duration-200 text-left group border border-transparent hover:border-[var(--border-subtle)]"
+            type="button"
+            className="group flex items-center gap-4 rounded-lg border border-transparent p-4 text-left transition-colors hover:border-neutral-200 hover:bg-neutral-50"
           >
-            <div className={`p-2 rounded-lg transition-colors bg-[var(--bg-card)] shadow-sm text-[var(--accent)]`}>
-              <action.icon className="w-5 h-5" />
+            <div className={`rounded-lg p-2 shadow-sm ${action.color}`}>
+              <action.icon className="h-5 w-5" />
             </div>
-
-            <div className="flex-1">
-              <p className="font-medium text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">
+            <div className="min-w-0 flex-1">
+              <p className="font-medium text-neutral-900 transition-colors group-hover:text-neutral-700">
                 {action.label}
               </p>
-              <p className="text-sm text-[var(--text-secondary)]">{action.description}</p>
+              <p className="text-sm text-neutral-500">{action.description}</p>
             </div>
-
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-              <div className="w-2 h-2 bg-[var(--accent)] rounded-full"></div>
-            </div>
+            <div className="h-2 w-2 rounded-full bg-neutral-300 opacity-0 transition-opacity group-hover:opacity-100" />
           </button>
         ))}
       </div>
-
-      <div className="mt-6 pt-4 border-t border-[var(--border-subtle)]">
-        <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[var(--accent)]/10 hover:bg-[var(--accent)]/20 text-[var(--accent)] rounded-lg transition-colors">
-          <Plus className="w-4 h-4" />
+      <div className="mt-6 border-t border-neutral-200 pt-4">
+        <button
+          type="button"
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-neutral-300 px-4 py-3 text-sm text-neutral-700 transition-colors hover:bg-neutral-50"
+        >
+          <Plus className="h-4 w-4" />
           {labels.dashboard.widgets.quickActionsCustomize}
         </button>
       </div>

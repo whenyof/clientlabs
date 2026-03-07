@@ -36,8 +36,8 @@ const STATUS_CONFIG = {
  },
  VIP: {
  label: "VIP",
- color: "bg-[var(--accent-soft)]-primary/15 text-[var(--accent)]-hover border-[var(--accent)]-primary/30",
- hoverColor: "hover:bg-[var(--accent-soft)]-primary/30",
+ color: "bg-[var(--accent-soft)]/15 text-[var(--accent)] border-[var(--accent)]/30",
+ hoverColor: "hover:bg-[var(--accent-soft)]/30",
  },
 }
 

@@ -42,33 +42,30 @@ export function ActivityFeed() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-[var(--text-primary)]">{w.activityFeedTitle}</h3>
-      </div>
-
       {loading ? (
         <div className="flex justify-center py-8">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[var(--accent)]" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-neutral-200 border-t-neutral-900" />
         </div>
       ) : activities.length === 0 ? (
-        <div className="py-8 text-center text-[var(--text-secondary)] text-sm">
-          {labels.common.noResults}
-        </div>
+        <p className="py-8 text-center text-sm text-neutral-500">{labels.common.noResults}</p>
       ) : (
         <div className="space-y-4">
           {activities.map((activity) => (
-            <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-[var(--bg-surface)] transition-colors">
-              <div className="p-2 bg-[var(--bg-main)] rounded-lg">
-                <ActivityIcon className="w-4 h-4 text-[var(--accent)]" />
+            <div
+              key={activity.id}
+              className="flex items-start gap-3 rounded-lg p-3 transition-colors hover:bg-neutral-50"
+            >
+              <div className="rounded-lg bg-neutral-100 p-2">
+                <ActivityIcon className="h-4 w-4 text-neutral-600" />
               </div>
-              <div className="flex-1 min-w-0">
-                <h4 className="font-medium text-[var(--text-primary)] text-sm">{activity.title}</h4>
+              <div className="min-w-0 flex-1">
+                <h4 className="text-sm font-medium text-neutral-900">{activity.title}</h4>
                 {activity.description && (
-                  <p className="text-[var(--text-secondary)] text-sm">{activity.description}</p>
+                  <p className="text-sm text-neutral-600">{activity.description}</p>
                 )}
-                <div className="flex items-center gap-1 mt-2">
-                  <Clock className="w-3 h-3 text-[var(--text-secondary)]" />
-                  <span className="text-[var(--text-secondary)] text-xs">{formatTimeAgo(new Date(activity.createdAt))}</span>
+                <div className="mt-2 flex items-center gap-1 text-xs text-neutral-500">
+                  <Clock className="h-3 w-3" />
+                  <span>{formatTimeAgo(new Date(activity.createdAt))}</span>
                 </div>
               </div>
             </div>

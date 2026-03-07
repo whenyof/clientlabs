@@ -34,7 +34,7 @@ export function FinanceTabs({
               transition
               ${
                 isActive
-                  ? "bg-purple-600 text-[var(--text-primary)] shadow-lg"
+                  ? "bg-emerald-600 text-[var(--text-primary)] shadow-[var(--shadow-card)]"
                   : "bg-[var(--bg-main)] text-[var(--text-secondary)] hover:bg-[var(--bg-surface)]"
               }
             `}

@@ -75,7 +75,7 @@ export function MissionHeader({ className }: { className?: string }) {
  ))}
  </div>
  <div className="w-px h-5 bg-[var(--bg-card)]" aria-hidden />
- <AddTaskButton className="h-8 px-3 text-xs font-medium bg-violet-600 hover:bg-violet-500 text-[var(--text-primary)] border-0" />
+ <AddTaskButton className="h-8 px-3 text-xs font-medium bg-emerald-600 hover:bg-emerald-500 text-[var(--text-primary)] border-0" />
  </div>
  </header>
  )

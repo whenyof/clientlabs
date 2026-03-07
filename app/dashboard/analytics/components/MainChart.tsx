@@ -44,7 +44,7 @@ export function MainChart({ selectedRange: _selectedRange }: MainChartProps) {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg p-3 shadow-lg"
+          className="bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg p-3 shadow-[var(--shadow-card)]"
         >
           <p className="text-[var(--text-primary)] font-medium">{`Fecha: ${label}`}</p>
           {payload.map((entry: any, index: number) => (
@@ -63,7 +63,7 @@ export function MainChart({ selectedRange: _selectedRange }: MainChartProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="bg-[var(--bg-main)] backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)] p-6"
+      className="bg-[var(--bg-main)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)] p-6"
     >
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
         <div>
@@ -91,7 +91,7 @@ export function MainChart({ selectedRange: _selectedRange }: MainChartProps) {
                 onClick={() => setViewMode(key as any)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                   viewMode === key
-                    ? 'bg-purple-600 text-[var(--text-primary)]'
+                    ? 'bg-emerald-600 text-[var(--text-primary)]'
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--border-subtle)]'
                 }`}
                 whileHover={{ scale: 1.05 }}
@@ -118,7 +118,7 @@ export function MainChart({ selectedRange: _selectedRange }: MainChartProps) {
                 onClick={() => handleGranularityChange(key as Granularity)}
                 className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                   granularity === key
-                    ? 'bg-purple-600 text-[var(--text-primary)]'
+                    ? 'bg-emerald-600 text-[var(--text-primary)]'
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--border-subtle)]'
                 }`}
                 whileHover={{ scale: 1.05 }}
@@ -168,7 +168,7 @@ export function MainChart({ selectedRange: _selectedRange }: MainChartProps) {
           whileHover={{ scale: 1.02 }}
           transition={{ type: "spring", stiffness: 300 }}
         >
-          <div className="text-2xl font-bold text-purple-400 mb-1">
+          <div className="text-2xl font-bold text-emerald-400 mb-1">
             {avgConversion}
           </div>
           <div className="text-sm text-[var(--text-secondary)]">Conversión diaria</div>

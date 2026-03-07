@@ -1,238 +1,135 @@
 "use client"
 
 import { useState } from "react"
-import { motion } from "framer-motion"
-import {
-  ExclamationTriangleIcon,
-  TrashIcon,
-  ArrowDownTrayIcon,
-  EyeIcon,
-  EyeSlashIcon
-} from "@heroicons/react/24/outline"
+import { ExclamationTriangleIcon, TrashIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline"
 
 export function DangerZone() {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteConfirmation, setDeleteConfirmation] = useState('')
-  const [showExportModal, setShowExportModal] = useState(false)
 
   const handleExportData = () => {
     console.log('Exporting user data...')
-    // TODO: Trigger data export
-    setShowExportModal(false)
   }
 
   const handleDeleteAccount = () => {
     if (deleteConfirmation === 'ELIMINAR CUENTA') {
       console.log('Deleting account...')
-      // TODO: Delete account API call
       setShowDeleteModal(false)
     }
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <ExclamationTriangleIcon className="w-6 h-6 text-red-400" />
-          <h2 className="text-2xl font-bold text-[var(--text-primary)]">Zona de Peligro</h2>
+    <div className="space-y-6">
+      {/* Section Header */}
+      <div className="flex items-center gap-2">
+        <ExclamationTriangleIcon className="w-5 h-5 text-red-500" />
+        <div>
+          <h2 className="text-lg font-semibold text-[#0B1F2A]">Zona de peligro</h2>
+          <p className="text-sm text-slate-500 mt-0.5">Acciones irreversibles sobre tu cuenta y datos.</p>
         </div>
-        <p className="text-[var(--text-secondary)]">Acciones irreversibles que afectan tu cuenta</p>
       </div>
 
-      <div className="space-y-6">
-        {/* Export Data */}
-        <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-6">
-          <div className="flex items-start gap-4">
-            <div className="p-3 bg-blue-500/10 rounded-lg">
-              <ArrowDownTrayIcon className="w-6 h-6 text-blue-400" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">Exportar datos</h3>
-              <p className="text-[var(--text-secondary)] text-sm mb-4">
-                Descarga una copia completa de todos tus datos personales, clientes, ventas y configuraciones.
-                El archivo se generará en formato JSON y se enviará a tu email.
-              </p>
-
-              <div className="flex items-center gap-4 mb-4 text-sm text-[var(--text-secondary)]">
-                <div className="flex items-center gap-2">
-                  <EyeIcon className="w-4 h-4" />
-                  <span>Incluye datos sensibles</span>
-                </div>
-                <div>•</div>
-                <div>Formato: JSON</div>
-                <div>•</div>
-                <div>Tamaño aproximado: 2.4 MB</div>
-              </div>
-
-              <motion.button
-                onClick={() => setShowExportModal(true)}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-[var(--text-primary)] text-sm rounded-lg transition-colors"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Solicitar exportación
-              </motion.button>
-            </div>
+      {/* Export Data */}
+      <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <div className="flex items-start gap-4">
+          <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg">
+            <ArrowDownTrayIcon className="w-5 h-5 text-slate-500" />
           </div>
-        </div>
-
-        {/* Delete Account */}
-        <div className="bg-[var(--bg-card)] border border-red-500/20 rounded-xl p-6">
-          <div className="flex items-start gap-4">
-            <div className="p-3 bg-red-500/10 rounded-lg">
-              <TrashIcon className="w-6 h-6 text-red-400" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">Eliminar cuenta</h3>
-              <p className="text-[var(--text-secondary)] text-sm mb-4">
-                Esta acción eliminará permanentemente tu cuenta, todos tus datos, clientes, ventas,
-                integraciones y configuraciones. Esta acción no se puede deshacer.
-              </p>
-
-              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-4">
-                <h4 className="text-red-400 font-medium mb-2">¿Qué se eliminará?</h4>
-                <ul className="text-sm text-[var(--text-secondary)] space-y-1">
-                  <li>• Todos tus clientes y datos de contacto</li>
-                  <li>• Historial completo de ventas y transacciones</li>
-                  <li>• Todas las automatizaciones y workflows</li>
-                  <li>• Configuraciones de integraciones</li>
-                  <li>• Miembros del equipo y permisos</li>
-                  <li>• Historial de pagos y facturas</li>
-                </ul>
-              </div>
-
-              <motion.button
-                onClick={() => setShowDeleteModal(true)}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-[var(--text-primary)] text-sm rounded-lg transition-colors"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Eliminar cuenta
-              </motion.button>
-            </div>
+          <div className="flex-1">
+            <h3 className="text-sm font-semibold text-[#0B1F2A]">Exportar datos</h3>
+            <p className="text-sm text-slate-500 mt-0.5 mb-4 max-w-lg">
+              Genera un archivo con todos tus datos: clientes, transacciones y configuración.
+            </p>
+            <button
+              onClick={handleExportData}
+              className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+            >
+              Solicitar exportación
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Export Modal */}
-      {showExportModal && (
-        <motion.div
-          className="fixed inset-0 bg-[var(--bg-card)]/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
-          <motion.div
-            className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-subtle)] w-full max-w-md"
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-          >
-            <div className="p-6">
-              <div className="flex items-center gap-3 mb-6">
-                <ArrowDownTrayIcon className="w-6 h-6 text-blue-400" />
-                <h3 className="text-xl font-bold text-[var(--text-primary)]">Exportar datos</h3>
-              </div>
+      {/* Delete Account */}
+      <div className="bg-white rounded-xl border border-red-200 p-6">
+        <div className="flex items-start gap-4">
+          <div className="p-2.5 bg-red-50 border border-red-200 rounded-lg">
+            <TrashIcon className="w-5 h-5 text-red-500" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-sm font-semibold text-red-600">Eliminar cuenta</h3>
+            <p className="text-sm text-red-600/70 mt-0.5 mb-3 max-w-lg">
+              Esta acción eliminará todos tus datos de forma permanente. No se puede deshacer.
+            </p>
 
-              <div className="space-y-4 mb-6">
-                <p className="text-[var(--text-secondary)] text-sm">
-                  Recibirás un email con un enlace de descarga cuando la exportación esté lista.
-                  El proceso puede tardar hasta 24 horas.
-                </p>
-
-                <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-                  <div className="text-blue-400 font-medium mb-1">¿Qué incluye?</div>
-                  <div className="text-sm text-[var(--text-secondary)]">
-                    • Datos de perfil y empresa<br/>
-                    • Lista completa de clientes<br/>
-                    • Historial de ventas<br/>
-                    • Configuraciones y preferencias<br/>
-                    • Logs de actividad
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowExportModal(false)}
-                  className="flex-1 px-4 py-3 bg-[var(--bg-surface)] hover:bg-[var(--bg-surface)] text-[var(--text-primary)] rounded-lg transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleExportData}
-                  className="flex-1 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-[var(--text-primary)] rounded-lg transition-colors"
-                >
-                  Exportar datos
-                </button>
-              </div>
+            <div className="p-3 bg-red-50 border border-red-100 rounded-lg mb-4">
+              <p className="text-xs text-red-600 font-medium">Se eliminará:</p>
+              <ul className="text-xs text-slate-600 mt-1 space-y-0.5">
+                <li>• Todos los clientes y contactos</li>
+                <li>• Historial de transacciones</li>
+                <li>• Automatizaciones configuradas</li>
+                <li>• Credenciales API</li>
+                <li>• Datos del equipo</li>
+              </ul>
             </div>
-          </motion.div>
-        </motion.div>
-      )}
+
+            <button
+              onClick={() => setShowDeleteModal(true)}
+              className="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors"
+            >
+              Eliminar cuenta
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Delete Modal */}
       {showDeleteModal && (
-        <motion.div
-          className="fixed inset-0 bg-[var(--bg-card)]/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
-          <motion.div
-            className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-subtle)] w-full max-w-md"
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-          >
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+          <div
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+            onClick={() => setShowDeleteModal(false)}
+          />
+          <div className="relative bg-white border border-slate-200 rounded-xl w-full max-w-md overflow-hidden shadow-lg">
             <div className="p-6">
-              <div className="flex items-center gap-3 mb-6">
-                <ExclamationTriangleIcon className="w-6 h-6 text-red-400" />
-                <h3 className="text-xl font-bold text-[var(--text-primary)]">¿Eliminar cuenta?</h3>
-              </div>
-
-              <div className="space-y-4 mb-6">
-                <p className="text-[var(--text-secondary)] text-sm">
-                  Esta acción es irreversible. Todos tus datos serán eliminados permanentemente.
-                </p>
-
-                <div>
-                  <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
-                    Escribe "ELIMINAR CUENTA" para confirmar
-                  </label>
-                  <input
-                    type="text"
-                    value={deleteConfirmation}
-                    onChange={(e) => setDeleteConfirmation(e.target.value)}
-                    className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500"
-                    placeholder="ELIMINAR CUENTA"
-                  />
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-red-50 border border-red-200 rounded-lg flex items-center justify-center">
+                  <ExclamationTriangleIcon className="w-5 h-5 text-red-500" />
                 </div>
+                <h3 className="text-lg font-semibold text-[#0B1F2A]">Confirmar eliminación</h3>
               </div>
 
-              <div className="flex gap-3">
+              <p className="text-sm text-slate-500 mb-5">
+                Escribe <strong className="text-red-600">ELIMINAR CUENTA</strong> para confirmar.
+              </p>
+
+              <input
+                type="text"
+                value={deleteConfirmation}
+                onChange={(e) => setDeleteConfirmation(e.target.value)}
+                className="w-full px-3.5 py-2.5 bg-white border border-red-200 rounded-lg text-sm text-red-600 placeholder-slate-300 focus:outline-none focus:ring-1 focus:ring-red-300 transition-colors font-mono text-center"
+                placeholder="ELIMINAR CUENTA"
+              />
+
+              <div className="flex gap-3 mt-5">
                 <button
                   onClick={() => setShowDeleteModal(false)}
-                  className="flex-1 px-4 py-3 bg-[var(--bg-surface)] hover:bg-[var(--bg-surface)] text-[var(--text-primary)] rounded-lg transition-colors"
+                  className="flex-1 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleDeleteAccount}
                   disabled={deleteConfirmation !== 'ELIMINAR CUENTA'}
-                  className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 disabled:bg-[var(--bg-surface)] disabled:cursor-not-allowed text-[var(--text-primary)] rounded-lg transition-colors"
+                  className="flex-[2] py-2.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg transition-colors"
                 >
-                  Eliminar cuenta
+                  Eliminar permanentemente
                 </button>
               </div>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       )}
-    </motion.div>
+    </div>
   )
 }

@@ -26,7 +26,7 @@ export function CreateLeadButton() {
  const modes = [
  { id: "manual" as const, icon: UserPlus, title: ui.createManual, description: ui.createManualDesc, color: "blue" as const },
  { id: "import" as const, icon: FileSpreadsheet, title: ui.createImport, description: ui.createImportDesc, color: "cyan" as const },
- { id: "paste" as const, icon: ClipboardPaste, title: ui.createPaste, description: ui.createPasteDesc, color: "purple" as const },
+ { id: "paste" as const, icon: ClipboardPaste, title: ui.createPaste, description: ui.createPasteDesc, color: "emerald" as const },
  { id: "scraping" as const, icon: Globe, title: ui.createScraping, description: ui.createScrapingDesc, color: "emerald" as const, badge: ui.badgeComing },
  ]
 
@@ -39,7 +39,7 @@ export function CreateLeadButton() {
  <>
  <Button
  onClick={() => setModeSelectOpen(true)}
- className="gap-2 bg-[var(--bg-card)] border-blue-500/30 text-[var(--text-primary)] hover: hover: hover:border-blue-500/50 transition-all shadow-sm shadow-blue-500/10"
+ className="gap-2 bg-[var(--bg-card)] border-blue-500/30 text-[var(--text-primary)] hover:border-blue-500/50 transition-all shadow-sm shadow-blue-500/10"
  >
  <Plus className="h-4 w-4" />
  {labels.leads.newButton}
@@ -58,7 +58,6 @@ export function CreateLeadButton() {
  const colorClasses = {
  blue: "bg-[var(--bg-card)] border-blue-500/30 text-[var(--accent)] hover:bg-[var(--bg-card)] hover:border-blue-500/50",
  cyan: "bg-cyan-500/10 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 hover:border-cyan-500/50",
- purple: "bg-[var(--accent-soft)]-primary/15 border-[var(--accent)]-primary/30 text-[var(--accent)]-hover hover:bg-[var(--accent-soft)]-primary/20 hover:border-[var(--accent)]-primary/50",
  emerald: "bg-[var(--accent-soft)] border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent-soft)] hover:border-[var(--accent)]"
  }
 

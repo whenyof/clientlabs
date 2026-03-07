@@ -35,7 +35,7 @@ export function ActionRecommendations() {
       case 'email':
         return 'text-blue-400 bg-blue-500/10 border-blue-500/20'
       case 'meeting':
-        return 'text-purple-400 bg-purple-500/10 border-purple-500/20'
+        return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
       case 'follow_up':
         return 'text-orange-400 bg-orange-500/10 border-orange-500/20'
       default:
@@ -55,7 +55,7 @@ export function ActionRecommendations() {
 
         return (
           <AnimatedCard key={recommendation.id} delay={index * 0.1}>
-            <div className="p-6 bg-[var(--bg-main)] backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)]">
+            <div className="p-6 bg-[var(--bg-main)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)]">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className={`p-2 rounded-lg ${getActionColor(recommendation.type)}`}>
@@ -78,7 +78,7 @@ export function ActionRecommendations() {
 
                 <motion.button
                   onClick={() => handleExecuteAction(recommendation.id, recommendation.type)}
-                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-[var(--text-primary)] text-sm font-medium rounded-lg transition-colors"
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-600 text-[var(--text-primary)] text-sm font-medium rounded-lg transition-colors"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -98,7 +98,7 @@ export function ActionRecommendations() {
                   </div>
 
                   {recommendation.leadId && (
-                    <div className="flex items-center gap-2 text-purple-400">
+                    <div className="flex items-center gap-2 text-emerald-400">
                       <UserIcon className="w-4 h-4" />
                       <span>Lead #{recommendation.leadId}</span>
                     </div>

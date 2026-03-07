@@ -63,11 +63,11 @@ export function AiInsights() {
           transition={{ delay: 0.9, duration: 0.5 }}
         >
           <motion.div
-            className="p-2 bg-purple-600/20 rounded-lg"
+            className="p-2 bg-emerald-600/20 rounded-lg"
             whileHover={{ scale: 1.1, rotate: 5 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
-            <LightBulbIcon className="w-5 h-5 text-purple-400" />
+            <LightBulbIcon className="w-5 h-5 text-emerald-400" />
           </motion.div>
           <div>
             <h3 className="text-xl font-bold text-[var(--text-primary)]">
@@ -164,8 +164,8 @@ export function AiInsights() {
                     initial={{ y: 10 }}
                     whileHover={{ y: 0 }}
                   >
-                    <Icon className="w-4 h-4 text-purple-400" />
-                    <span className="text-xs text-purple-400 font-medium">
+                    <Icon className="w-4 h-4 text-emerald-400" />
+                    <span className="text-xs text-emerald-400 font-medium">
                       {insight.type === 'prediction' ? 'Ver predicción' :
                        insight.type === 'alert' ? 'Revisar ahora' :
                        'Implementar'}
@@ -208,7 +208,7 @@ export function AiInsights() {
 
         {/* AI Status */}
         <motion.div
-          className="mt-6 bg-gradient-to-r from-purple-600/10 to-blue-600/10 border border-purple-500/20 rounded-lg p-4"
+          className="mt-6 bg-gradient-to-r from-emerald-600/10 to-blue-600/10 border border-emerald-500/20 rounded-lg p-4"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 1.3, duration: 0.5 }}
@@ -239,7 +239,7 @@ export function AiInsights() {
               </div>
             </motion.div>
             <motion.button
-              className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-[var(--text-primary)] text-sm font-medium rounded-lg transition-colors"
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-600 text-[var(--text-primary)] text-sm font-medium rounded-lg transition-colors"
               whileHover={{ scale: 1.05, x: 2 }}
               whileTap={{ scale: 0.95 }}
               initial={{ opacity: 0, x: 10 }}

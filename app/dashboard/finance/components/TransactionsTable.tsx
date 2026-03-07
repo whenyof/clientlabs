@@ -71,7 +71,7 @@ export function TransactionsTable() {
 
   if (transactionsLoading) {
     return (
-      <div className="rounded-2xl bg-[var(--bg-main)] border border-[var(--border-subtle)] p-12 text-center text-[var(--text-secondary)]">
+      <div className="rounded-xl bg-[var(--bg-main)] border border-[var(--border-subtle)] p-12 text-center text-[var(--text-secondary)]">
         Cargando transacciones…
       </div>
     )
@@ -101,7 +101,7 @@ export function TransactionsTable() {
               placeholder="Buscar por concepto, categoría o cliente..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-xl text-[var(--text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full pl-10 pr-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-xl text-[var(--text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
         </div>
@@ -110,7 +110,7 @@ export function TransactionsTable() {
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value as typeof filterType)}
-            className="px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-xl text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-xl text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
           >
             <option value="all">Todos los tipos</option>
             <option value="INCOME">Ingresos</option>
@@ -120,7 +120,7 @@ export function TransactionsTable() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value as typeof filterStatus)}
-            className="px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-xl text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-xl text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
           >
             <option value="all">Todos los estados</option>
             <option value="PENDING">Pendientes</option>
@@ -130,7 +130,7 @@ export function TransactionsTable() {
       </div>
 
       {/* Table */}
-      <div className="bg-[var(--bg-main)] backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)] overflow-hidden">
+      <div className="bg-[var(--bg-main)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-[var(--bg-card)]">
@@ -268,7 +268,7 @@ export function TransactionsTable() {
 
                       <motion.button
                         onClick={() => handleAction('duplicate', index.toString())}
-                        className="p-1 text-[var(--text-secondary)] hover:text-purple-400 hover:bg-purple-600/20 rounded transition-colors"
+                        className="p-1 text-[var(--text-secondary)] hover:text-emerald-400 hover:bg-emerald-600/20 rounded transition-colors"
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                       >

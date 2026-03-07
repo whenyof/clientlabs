@@ -44,7 +44,7 @@ export function WorkflowPanel() {
 
         <motion.button
           onClick={handleCreateWorkflow}
-          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-[var(--text-primary)] font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-purple-500/25"
+          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700 text-[var(--text-primary)] font-semibold rounded-xl transition-all duration-300 shadow-[var(--shadow-card)] hover:shadow-emerald-500/25"
           whileHover={{ scale: 1.05, y: -2 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -57,7 +57,7 @@ export function WorkflowPanel() {
         {workflows.map((workflow, index) => (
           <motion.div
             key={workflow.id}
-            className="bg-[var(--bg-main)] backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)] p-6 hover:border-[var(--border-subtle)] transition-all duration-300"
+            className="bg-[var(--bg-main)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)] p-6 hover:border-[var(--border-subtle)] transition-all duration-300"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 + (index * 0.1), duration: 0.5 }}
@@ -158,7 +158,7 @@ export function WorkflowPanel() {
       {/* Empty State */}
       {workflows.length === 0 && (
         <motion.div
-          className="text-center py-12 bg-[var(--bg-main)] rounded-2xl border border-[var(--border-subtle)]"
+          className="text-center py-12 bg-[var(--bg-main)] rounded-xl border border-[var(--border-subtle)]"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
@@ -172,7 +172,7 @@ export function WorkflowPanel() {
           </p>
           <button
             onClick={handleCreateWorkflow}
-            className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-[var(--text-primary)] rounded-lg transition-colors"
+            className="px-6 py-3 bg-emerald-600 hover:bg-emerald-600 text-[var(--text-primary)] rounded-lg transition-colors"
           >
             Crear Primera Automatización
           </button>

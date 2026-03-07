@@ -47,8 +47,8 @@ export function AnalyticsKPIs({ selectedRange: _selectedRange }: AnalyticsKPIsPr
       value: "0%",
       change: 0,
       icon: ArrowPathIcon,
-      color: "from-purple-500 to-indigo-600",
-      bgColor: "from-purple-500/10 to-indigo-600/10"
+      color: "from-emerald-500 to-indigo-600",
+      bgColor: "from-emerald-500/10 to-indigo-600/10"
     },
     {
       title: "Ticket Medio",
@@ -90,7 +90,7 @@ export function AnalyticsKPIs({ selectedRange: _selectedRange }: AnalyticsKPIsPr
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.2 + (index * 0.1), duration: 0.3 }}
               >
-                <div className={`p-3 rounded-xl bg-gradient-to-br ${kpi.color} shadow-lg`}>
+                <div className={`p-3 rounded-xl bg-gradient-to-br ${kpi.color} shadow-[var(--shadow-card)]`}>
                   <Icon className="w-6 h-6 text-[var(--text-primary)]" />
                 </div>
                 <div className="text-right">
@@ -124,7 +124,7 @@ export function AnalyticsKPIs({ selectedRange: _selectedRange }: AnalyticsKPIsPr
             </div>
 
             {/* Hover effect */}
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-600/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-emerald-600/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </AnimatedCard>
         )
       })}

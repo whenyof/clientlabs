@@ -38,7 +38,7 @@ export function IntegrationModal({ integration, isOpen, onClose }: IntegrationMo
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-xl flex items-center justify-center text-2xl mx-auto mb-4">
                 {integration.logo}
               </div>
               <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">
@@ -60,7 +60,7 @@ export function IntegrationModal({ integration, isOpen, onClose }: IntegrationMo
                     type="password"
                     value={apiKey}
                     onChange={(e) => setApiKey(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full pl-10 pr-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     placeholder="Ingresa tu API key"
                   />
                 </div>
@@ -74,7 +74,7 @@ export function IntegrationModal({ integration, isOpen, onClose }: IntegrationMo
                   type="url"
                   value={webhookUrl}
                   onChange={(e) => setWebhookUrl(e.target.value)}
-                  className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   placeholder="https://tuapp.com/webhook"
                 />
               </div>
@@ -98,7 +98,7 @@ export function IntegrationModal({ integration, isOpen, onClose }: IntegrationMo
               </button>
               <button
                 onClick={handleConnect}
-                className="flex-1 px-4 py-3 bg-purple-600 hover:bg-purple-700 text-[var(--text-primary)] rounded-lg transition-colors"
+                className="flex-1 px-4 py-3 bg-emerald-600 hover:bg-emerald-600 text-[var(--text-primary)] rounded-lg transition-colors"
               >
                 {integration.action === 'connect' ? 'Conectar' : 'Añadir Integración'}
               </button>
@@ -110,7 +110,7 @@ export function IntegrationModal({ integration, isOpen, onClose }: IntegrationMo
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-xl flex items-center justify-center text-2xl mx-auto mb-4">
                 {integration.logo}
               </div>
               <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">
@@ -123,7 +123,7 @@ export function IntegrationModal({ integration, isOpen, onClose }: IntegrationMo
                 <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
                   Frecuencia de sincronización
                 </label>
-                <select className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-purple-500">
+                <select className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-emerald-500">
                   <option value="realtime">Tiempo real</option>
                   <option value="hourly">Cada hora</option>
                   <option value="daily">Diario</option>
@@ -161,7 +161,7 @@ export function IntegrationModal({ integration, isOpen, onClose }: IntegrationMo
               </button>
               <button
                 onClick={handleSaveConfig}
-                className="flex-1 px-4 py-3 bg-purple-600 hover:bg-purple-700 text-[var(--text-primary)] rounded-lg transition-colors"
+                className="flex-1 px-4 py-3 bg-emerald-600 hover:bg-emerald-600 text-[var(--text-primary)] rounded-lg transition-colors"
               >
                 Guardar Configuración
               </button>
@@ -173,7 +173,7 @@ export function IntegrationModal({ integration, isOpen, onClose }: IntegrationMo
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-xl flex items-center justify-center text-2xl mx-auto mb-4">
                 {integration.logo}
               </div>
               <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">
@@ -216,7 +216,7 @@ export function IntegrationModal({ integration, isOpen, onClose }: IntegrationMo
               </button>
               <button
                 onClick={onClose}
-                className="flex-1 px-4 py-3 bg-purple-600 hover:bg-purple-700 text-[var(--text-primary)] rounded-lg transition-colors"
+                className="flex-1 px-4 py-3 bg-emerald-600 hover:bg-emerald-600 text-[var(--text-primary)] rounded-lg transition-colors"
               >
                 Cerrar
               </button>
@@ -244,7 +244,7 @@ export function IntegrationModal({ integration, isOpen, onClose }: IntegrationMo
 
           {/* Modal */}
           <motion.div
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-subtle)] shadow-2xl z-50 w-full max-w-md"
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[var(--bg-card)] rounded-xl border border-[var(--border-subtle)] shadow-[var(--shadow-card)] z-50 w-full max-w-md"
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
@@ -256,7 +256,7 @@ export function IntegrationModal({ integration, isOpen, onClose }: IntegrationMo
                 <button
                   onClick={() => setActiveTab('connect')}
                   className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
-                    activeTab === 'connect' ? 'text-purple-400 border-b-2 border-purple-400' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    activeTab === 'connect' ? 'text-emerald-400 border-b-2 border-purple-400' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   }`}
                 >
                   Conectar
@@ -264,7 +264,7 @@ export function IntegrationModal({ integration, isOpen, onClose }: IntegrationMo
                 <button
                   onClick={() => setActiveTab('configure')}
                   className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
-                    activeTab === 'configure' ? 'text-purple-400 border-b-2 border-purple-400' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    activeTab === 'configure' ? 'text-emerald-400 border-b-2 border-purple-400' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   }`}
                 >
                   Configurar
@@ -272,7 +272,7 @@ export function IntegrationModal({ integration, isOpen, onClose }: IntegrationMo
                 <button
                   onClick={() => setActiveTab('logs')}
                   className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
-                    activeTab === 'logs' ? 'text-purple-400 border-b-2 border-purple-400' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    activeTab === 'logs' ? 'text-emerald-400 border-b-2 border-purple-400' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   }`}
                 >
                   Logs

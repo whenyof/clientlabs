@@ -73,7 +73,7 @@ function StatusBadge({ status }: { status: string }) {
 
 function TypeBadge({ type }: { type: string }) {
  const colors = {
- MANUAL: "bg-[var(--accent-soft)]-primary/15 text-[var(--accent)]-hover border-[var(--accent)]-primary/30",
+ MANUAL: "bg-[var(--accent-soft)]-primary/15 text-[var(--accent)]-bg-emerald-600 border-[var(--accent)]-primary/30",
  SCHEDULED: "bg-[var(--bg-card)] text-[var(--accent)] border-blue-500/30",
  PRE_RESTORE: "bg-orange-500/20 text-orange-400 border-orange-500/30",
  }

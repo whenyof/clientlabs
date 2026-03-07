@@ -49,7 +49,7 @@ export function CreateAutomationModal({ onClose }: CreateAutomationModalProps) {
 
           {/* Modal */}
           <motion.div
-            className="relative w-full max-w-2xl bg-[var(--bg-card)] rounded-2xl border border-[var(--border-subtle)] shadow-2xl max-h-[90vh] overflow-hidden"
+            className="relative w-full max-w-2xl bg-[var(--bg-card)] rounded-xl border border-[var(--border-subtle)] shadow-[var(--shadow-card)] max-h-[90vh] overflow-hidden"
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -84,7 +84,7 @@ export function CreateAutomationModal({ onClose }: CreateAutomationModalProps) {
                     type="text"
                     value={automation.name}
                     onChange={(e) => setAutomation(prev => ({ ...prev, name: e.target.value }))}
-                    className="w-full px-3 py-2 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-3 py-2 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                     placeholder="Ej: Lead → WhatsApp Automático"
                   />
                 </div>
@@ -97,7 +97,7 @@ export function CreateAutomationModal({ onClose }: CreateAutomationModalProps) {
                     value={automation.description}
                     onChange={(e) => setAutomation(prev => ({ ...prev, description: e.target.value }))}
                     rows={3}
-                    className="w-full px-3 py-2 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                    className="w-full px-3 py-2 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
                     placeholder="Describe qué hace esta automatización..."
                   />
                 </div>
@@ -109,7 +109,7 @@ export function CreateAutomationModal({ onClose }: CreateAutomationModalProps) {
                   <select
                     value={automation.triggerType}
                     onChange={(e) => setAutomation(prev => ({ ...prev, triggerType: e.target.value }))}
-                    className="w-full px-3 py-2 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-3 py-2 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   >
                     <option value="">Seleccionar trigger</option>
                     <option value="new_lead">Nuevo Lead</option>
@@ -132,7 +132,7 @@ export function CreateAutomationModal({ onClose }: CreateAutomationModalProps) {
               <button
                 onClick={handleSave}
                 disabled={!automation.name || !automation.triggerType}
-                className="px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:bg-[var(--bg-surface)] disabled:cursor-not-allowed text-[var(--text-primary)] font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-purple-500/25"
+                className="px-6 py-2 bg-emerald-500 hover:bg-emerald-600 disabled:bg-[var(--bg-surface)] disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all duration-300 shadow-[0_0_40px_rgba(16,185,129,0.25)]"
               >
                 Crear Automatización
               </button>

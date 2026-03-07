@@ -18,12 +18,12 @@ export function Forecast() {
   const nextCashFlow = pred?.nextMonthCashFlow ?? 0
 
   if (loading) {
-    return <div className="bg-[var(--bg-main)] rounded-2xl border border-[var(--border-subtle)] p-6 animate-pulse h-48" />
+    return <div className="bg-[var(--bg-main)] rounded-xl border border-[var(--border-subtle)] p-6 animate-pulse h-48" />
   }
 
   return (
     <motion.div
-      className="bg-[var(--bg-main)] backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)] p-6"
+      className="bg-[var(--bg-main)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)] p-6"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.6, duration: 0.5 }}
@@ -41,7 +41,7 @@ export function Forecast() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <motion.div
-          className="p-4 bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-xl"
+          className="p-4 bg-gradient-to-br from-blue-500/10 to-teal-500/10 border border-blue-500/20 rounded-xl"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.7, duration: 0.5 }}

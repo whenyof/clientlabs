@@ -65,14 +65,14 @@ export function IntegrationCard({
 
         <div className="flex gap-2">
           {connected ? (
-            <button className="p-2 text-[var(--text-secondary)] hover:text-purple-400 transition-colors">
+            <button className="p-2 text-[var(--text-secondary)] hover:text-emerald-400 transition-colors">
               <Settings className="w-4 h-4" />
             </button>
           ) : (
             <button
               onClick={handleConnect}
               disabled={isConnecting}
-              className="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-[var(--bg-surface)] text-[var(--text-primary)] text-sm rounded-lg font-medium transition-colors disabled:cursor-not-allowed"
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-600 disabled:bg-[var(--bg-surface)] text-[var(--text-primary)] text-sm rounded-lg font-medium transition-colors disabled:cursor-not-allowed"
             >
               {isConnecting ? "Conectando..." : "Conectar"}
             </button>

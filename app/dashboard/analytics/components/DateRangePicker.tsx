@@ -71,7 +71,7 @@ export function DateRangePicker({ selectedRange, onRangeChange }: DateRangePicke
 
             {/* Dropdown */}
             <motion.div
-              className="absolute top-full mt-2 w-64 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-xl shadow-2xl z-20"
+              className="absolute top-full mt-2 w-64 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-xl shadow-[var(--shadow-card)] z-20"
               initial={{ opacity: 0, scale: 0.95, y: -10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -10 }}
@@ -84,7 +84,7 @@ export function DateRangePicker({ selectedRange, onRangeChange }: DateRangePicke
                     onClick={() => handleRangeSelect(option.value)}
                     className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
                       selectedRange === option.value
-                        ? 'bg-purple-600 text-[var(--text-primary)]'
+                        ? 'bg-emerald-600 text-[var(--text-primary)]'
                         : 'text-[var(--text-secondary)] hover:bg-[var(--bg-surface)]'
                     }`}
                     whileHover={{ scale: 1.02 }}
@@ -111,7 +111,7 @@ export function DateRangePicker({ selectedRange, onRangeChange }: DateRangePicke
                         type="date"
                         value={customStartDate}
                         onChange={(e) => setCustomStartDate(e.target.value)}
-                        className="w-full px-2 py-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+                        className="w-full px-2 py-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
                       />
                     </div>
                     <div>
@@ -122,13 +122,13 @@ export function DateRangePicker({ selectedRange, onRangeChange }: DateRangePicke
                         type="date"
                         value={customEndDate}
                         onChange={(e) => setCustomEndDate(e.target.value)}
-                        className="w-full px-2 py-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+                        className="w-full px-2 py-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
                       />
                     </div>
                   </div>
                   <motion.button
                     onClick={handleCustomApply}
-                    className="w-full px-3 py-2 bg-purple-600 hover:bg-purple-700 text-[var(--text-primary)] text-sm font-medium rounded-lg transition-colors"
+                    className="w-full px-3 py-2 bg-emerald-600 hover:bg-emerald-600 text-[var(--text-primary)] text-sm font-medium rounded-lg transition-colors"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >

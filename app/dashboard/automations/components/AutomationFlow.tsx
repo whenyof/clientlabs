@@ -55,7 +55,7 @@ export function AutomationFlow({ automation }: AutomationFlowProps) {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.1 }}
           >
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-full flex items-center justify-center mb-3 shadow-lg">
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-full flex items-center justify-center mb-3 shadow-[var(--shadow-card)]">
               <span className="text-2xl">⚡</span>
             </div>
             <div className="text-center">
@@ -72,8 +72,8 @@ export function AutomationFlow({ automation }: AutomationFlowProps) {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.3 }}
           >
-            <ArrowRightIcon className="w-6 h-6 text-purple-400 hidden md:block" />
-            <div className="w-px h-8 bg-purple-400 md:hidden"></div>
+            <ArrowRightIcon className="w-6 h-6 text-emerald-400 hidden md:block" />
+            <div className="w-px h-8 bg-emerald-400 md:hidden"></div>
           </motion.div>
 
           {/* Actions */}
@@ -86,7 +86,7 @@ export function AutomationFlow({ automation }: AutomationFlowProps) {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ delay: 0.5 + (index * 0.1) }}
               >
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center mb-2 shadow-lg">
+                <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-indigo-600 rounded-lg flex items-center justify-center mb-2 shadow-[var(--shadow-card)]">
                   <span className="text-lg">
                     {actionLabels[action.type]?.split(' ')[0] || '⚙️'}
                   </span>

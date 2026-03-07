@@ -40,7 +40,7 @@ export function AIRecommendations() {
       transition={{ delay: 0.1, duration: 0.5 }}
     >
       <div className="text-center">
-        <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4">
+        <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-xl flex items-center justify-center text-2xl mx-auto mb-4">
           🤖
         </div>
         <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-2">Recomendaciones IA</h3>
@@ -57,7 +57,7 @@ export function AIRecommendations() {
           return (
             <motion.div
               key={rec.id}
-              className="bg-[var(--bg-main)] backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)] p-6 hover:border-[var(--border-subtle)] transition-all duration-300 group"
+              className="bg-[var(--bg-main)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)] p-6 hover:border-[var(--border-subtle)] transition-all duration-300 group"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 + (index * 0.1), duration: 0.5 }}
@@ -92,7 +92,7 @@ export function AIRecommendations() {
 
               <div className="flex gap-3">
                 <motion.button
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-[var(--text-primary)] text-sm font-medium rounded-lg transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-600 text-[var(--text-primary)] text-sm font-medium rounded-lg transition-colors"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -115,13 +115,13 @@ export function AIRecommendations() {
 
       {/* AI Insights Summary */}
       <motion.div
-        className="bg-gradient-to-r from-purple-600/10 via-blue-600/10 to-green-600/10 rounded-2xl border border-purple-500/20 p-6"
+        className="bg-gradient-to-r from-emerald-600/10 via-blue-600/10 to-green-600/10 rounded-xl border border-emerald-500/20 p-6"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6, duration: 0.5 }}
       >
         <div className="flex items-center gap-4 mb-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl flex items-center justify-center">
+          <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-xl flex items-center justify-center">
             <SparklesIcon className="w-6 h-6 text-[var(--text-primary)]" />
           </div>
           <div>
@@ -144,7 +144,7 @@ export function AIRecommendations() {
           </div>
 
           <div className="bg-[var(--bg-main)] rounded-xl p-4">
-            <div className="text-2xl font-bold text-purple-400 mb-1">€12K</div>
+            <div className="text-2xl font-bold text-emerald-400 mb-1">€12K</div>
             <div className="text-sm text-[var(--text-secondary)]">Revenue adicional</div>
             <div className="text-xs text-[var(--text-secondary)] mt-1">Con mejoras propuestas</div>
           </div>

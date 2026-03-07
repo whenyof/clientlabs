@@ -60,13 +60,13 @@ export function BackupHistory({
     <div className="space-y-8">
       {/* Cloud Backups */}
       <motion.div
-        className="bg-[var(--bg-main)] backdrop-blur-sm border border-[var(--border-subtle)] rounded-2xl p-8"
+        className="bg-[var(--bg-main)] backdrop-blur-sm border border-[var(--border-subtle)] rounded-xl p-8"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
         <div className="flex items-center gap-3 mb-6">
-          <CloudIcon className="w-6 h-6 text-purple-400" />
+          <CloudIcon className="w-6 h-6 text-emerald-400" />
           <div>
             <h3 className="text-lg font-semibold text-[var(--text-primary)]">Backups en Google Drive</h3>
             <p className="text-[var(--text-secondary)] text-sm">
@@ -92,8 +92,8 @@ export function BackupHistory({
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="p-2 bg-purple-500/20 rounded-lg">
-                      <CloudIcon className="w-5 h-5 text-purple-400" />
+                    <div className="p-2 bg-emerald-500/20 rounded-lg">
+                      <CloudIcon className="w-5 h-5 text-emerald-400" />
                     </div>
                     <div>
                       <div className="text-[var(--text-primary)] font-medium">{backup.name}</div>
@@ -124,7 +124,7 @@ export function BackupHistory({
 
       {/* Local Backups */}
       <motion.div
-        className="bg-[var(--bg-main)] backdrop-blur-sm border border-[var(--border-subtle)] rounded-2xl p-8"
+        className="bg-[var(--bg-main)] backdrop-blur-sm border border-[var(--border-subtle)] rounded-xl p-8"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.5 }}

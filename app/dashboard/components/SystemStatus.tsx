@@ -82,32 +82,37 @@ export function SystemStatus() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-[var(--text-primary)]">{w.systemStatusTitle}</h3>
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-neutral-900">{w.systemStatusTitle}</h3>
         <div className="text-right">
-          <div className="text-2xl font-bold text-[var(--text-primary)]">{onlineCount}/{totalCount}</div>
-          <div className="text-sm text-[var(--text-secondary)]">{w.systemStatusActiveServices}</div>
+          <div className="text-2xl font-semibold tracking-tight text-neutral-900">
+            {onlineCount}/{totalCount}
+          </div>
+          <p className="text-sm text-neutral-500">{w.systemStatusActiveServices}</p>
         </div>
       </div>
-
-      <div className="space-y-3">
+      <div className="space-y-4">
         {STATUS_ITEMS.map((item, index) => {
           const Icon = item.icon
           return (
-            <div key={index} className="flex items-center justify-between p-3 bg-[var(--bg-main)] rounded-lg border border-[var(--border-subtle)]">
+            <div
+              key={index}
+              className="flex items-center justify-between rounded-lg border border-neutral-200 bg-neutral-50/50 p-4"
+            >
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-[var(--bg-card)] shadow-sm rounded-lg">
-                  <Icon className="w-5 h-5 text-[var(--text-secondary)]" />
+                <div className="rounded-lg bg-white p-2 shadow-sm">
+                  <Icon className="h-5 w-5 text-neutral-500" />
                 </div>
                 <div>
-                  <p className="font-medium text-[var(--text-primary)] text-sm">{item.label}</p>
-                  <p className="text-[var(--text-secondary)] text-xs">{item.description}</p>
+                  <p className="text-sm font-medium text-neutral-900">{item.label}</p>
+                  <p className="text-xs text-neutral-500">{item.description}</p>
                 </div>
               </div>
-
               <div className="text-right">
                 <StatusBadge status={item.status} labels={statusLabels} />
-                <p className="text-[var(--text-secondary)] text-xs mt-1">{item.uptime} {w.uptime}</p>
+                <p className="mt-1 text-xs text-neutral-500">
+                  {item.uptime} {w.uptime}
+                </p>
               </div>
             </div>
           )

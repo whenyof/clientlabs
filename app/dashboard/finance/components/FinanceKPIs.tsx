@@ -10,14 +10,14 @@ type KpiId = "income" | "expenses" | "profit" | "growth"
 const CARD_TINT: Record<KpiId, string> = {
   income: "bg-emerald-500/10 border-emerald-500/20",
   expenses: "bg-red-500/10 border-red-500/20",
-  profit: "bg-violet-500/10 border-violet-500/20",
+  profit: "bg-emerald-500/10 border-emerald-500/20",
   growth: "bg-blue-500/10 border-blue-500/20",
 }
 
 const VALUE_COLOR: Record<KpiId, string> = {
   income: "text-emerald-400",
   expenses: "text-red-400",
-  profit: "text-violet-400",
+  profit: "text-emerald-400",
   growth: "text-blue-400",
 }
 

@@ -102,7 +102,7 @@ export default function AutomationsTable({
 
   return (
     <motion.div
-      className="bg-[var(--bg-main)] backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)] overflow-hidden"
+      className="bg-[var(--bg-main)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)] overflow-hidden"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.4, duration: 0.5 }}
@@ -210,7 +210,7 @@ export default function AutomationsTable({
 
                     <motion.button
                       onClick={() => handleAction('duplicate', automation.id)}
-                      className="p-1.5 text-[var(--text-secondary)] hover:text-purple-400 hover:bg-purple-600/20 rounded-lg transition-colors"
+                      className="p-1.5 text-[var(--text-secondary)] hover:text-emerald-400 hover:bg-emerald-600/20 rounded-lg transition-colors"
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                     >

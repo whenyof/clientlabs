@@ -99,7 +99,7 @@ export const TaskCard = memo(function TaskCard({ task, onUpdate, onDelete }: Tas
  <div
  className={cn(
  "group flex items-center gap-3 p-3 rounded-lg border transition-all duration-200 ease-out",
- // Micro-interaction: Scale slightly on hover
+ // Micro-interaction: Scale slightly on bg-emerald-600
  !isCompleted && "hover:scale-[1.01] hover:shadow-sm hover:shadow-black/20 hover:bg-[var(--bg-card)]/[0.02]",
  isCompleted
  ? "bg-[var(--bg-card)] border-transparent opacity-60 hover:opacity-100"
@@ -162,7 +162,7 @@ export const TaskCard = memo(function TaskCard({ task, onUpdate, onDelete }: Tas
  </div>
  )}
  {task.leadName && (
- <div className="flex items-center gap-1 text-[var(--accent)]-hover/80 hover:text-[var(--accent)]-hover transition-colors">
+ <div className="flex items-center gap-1 text-[var(--accent)]-bg-emerald-600/80 hover:text-[var(--accent)]-bg-emerald-600 transition-colors">
  <Users className="h-3 w-3" />
  {task.leadName}
  </div>

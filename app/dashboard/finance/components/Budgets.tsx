@@ -60,8 +60,8 @@ export function Budgets() {
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-purple-500/20 rounded-lg">
-                    <TagIcon className="w-5 h-5 text-purple-400" />
+                  <div className="p-2 bg-emerald-500/20 rounded-lg">
+                    <TagIcon className="w-5 h-5 text-emerald-400" />
                   </div>
                   <div>
                     <h4 className="text-[var(--text-primary)] font-semibold">{budget.category}</h4>

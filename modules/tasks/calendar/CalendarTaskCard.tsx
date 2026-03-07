@@ -10,7 +10,7 @@ import type { Violation } from "./rules/conflict-rules"
 const ROW_HEIGHT = 48
 
 const STATUS_STYLES: Record<string, string> = {
- PENDING: "bg-violet-500/90 hover:bg-violet-500 border-violet-400/50",
+ PENDING: "bg-emerald-500/90 hover:bg-emerald-500 border-emerald-400/50",
  DONE: "bg-[var(--accent-soft)] hover:bg-[var(--accent-soft)] border-[var(--accent)]",
  CANCELLED: "bg-zinc-500/60 hover:bg-zinc-500/70 border-zinc-400/40",
 }
@@ -172,7 +172,7 @@ export function CalendarTaskCard({
  title={tooltipText}
  className={cn(
  "absolute left-0.5 right-0.5 rounded-lg border text-left shadow-sm select-none touch-none",
- "transition-shadow duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 focus:ring-offset-background",
+ "transition-shadow duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-background",
  isDragging && "opacity-90 shadow-sm cursor-grabbing z-30",
  !isDragging && "cursor-grab hover:shadow-md",
  isSaving && "pointer-events-none opacity-70",

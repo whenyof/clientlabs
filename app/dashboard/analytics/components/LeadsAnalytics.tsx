@@ -33,7 +33,7 @@ export function LeadsAnalytics({ selectedRange }: LeadsAnalyticsProps) {
       value: "3.2 días",
       change: "-0.5 días",
       icon: ClockIcon,
-      color: "text-purple-400"
+      color: "text-emerald-400"
     }
   ]
 

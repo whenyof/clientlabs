@@ -26,16 +26,16 @@ const INSIGHTS_MOCK = [
  type: "info",
  message: "Capacidad disponible el jueves",
  icon: Calendar,
- className: "border-violet-500/30 bg-violet-500/5",
- iconClassName: "text-violet-500",
+ className: "border-emerald-500/30 bg-emerald-500/5",
+ iconClassName: "text-emerald-500",
  },
  {
  id: "4",
  type: "tip",
  message: "Recomendación: agrupar visitas en zona norte",
  icon: Lightbulb,
- className: "border-violet-500/30 bg-violet-500/5",
- iconClassName: "text-violet-500",
+ className: "border-emerald-500/30 bg-emerald-500/5",
+ iconClassName: "text-emerald-500",
  },
 ] as const
 

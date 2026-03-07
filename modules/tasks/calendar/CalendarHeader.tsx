@@ -49,7 +49,7 @@ export function CalendarHeader({
  <Button
  variant="ghost"
  size="icon"
- className="h-8 w-8 text-muted-foreground hover:bg-violet-500/10 hover:text-violet-600"
+ className="h-8 w-8 text-muted-foreground hover:bg-emerald-500/10 hover:text-emerald-600"
  onClick={goPrev}
  aria-label="Anterior"
  >
@@ -58,7 +58,7 @@ export function CalendarHeader({
  <Button
  variant="ghost"
  size="icon"
- className="h-8 w-8 text-muted-foreground hover:bg-violet-500/10 hover:text-violet-600"
+ className="h-8 w-8 text-muted-foreground hover:bg-emerald-500/10 hover:text-emerald-600"
  onClick={goNext}
  aria-label="Siguiente"
  >
@@ -67,7 +67,7 @@ export function CalendarHeader({
  <Button
  variant="ghost"
  size="sm"
- className="text-muted-foreground hover:bg-violet-500/10 hover:text-violet-600"
+ className="text-muted-foreground hover:bg-emerald-500/10 hover:text-emerald-600"
  onClick={goToday}
  >
  Hoy

@@ -40,7 +40,7 @@ const PLANS = [
  value: "PRO",
  label: "Pro",
  description: "Advanced features for growing businesses",
- color: "bg-[var(--accent-soft)]-primary/15 text-[var(--accent)]-hover border-[var(--accent)]-primary/30"
+ color: "bg-[var(--accent-soft)]-primary/15 text-[var(--accent)]-bg-emerald-600 border-[var(--accent)]-primary/30"
  },
  {
  value: "ENTERPRISE",

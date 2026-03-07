@@ -45,7 +45,7 @@ export function OptimizationSuggestionsSection({
  )}
  >
  <div className="px-4 py-3 border-b border-border/60 flex items-center gap-2">
- <Lightbulb className="w-4 h-4 text-violet-500" />
+ <Lightbulb className="w-4 h-4 text-emerald-500" />
  <h3 className="text-sm font-semibold text-foreground">
  Optimización sugerida
  </h3>
@@ -59,7 +59,7 @@ export function OptimizationSuggestionsSection({
  <button
  type="button"
  onClick={() => setExpandedId(isExpanded ? null : s.id)}
- className="flex items-center gap-1.5 text-left text-sm font-medium text-foreground hover:text-violet-600 transition-colors"
+ className="flex items-center gap-1.5 text-left text-sm font-medium text-foreground hover:text-emerald-600 transition-colors"
  >
  {isExpanded ? (
  <ChevronDown className="w-4 h-4 shrink-0" />
@@ -69,7 +69,7 @@ export function OptimizationSuggestionsSection({
  {s.title}
  </button>
  {s.timeSavedMinutes > 0 && (
- <span className="inline-flex items-center gap-1 rounded-md bg-violet-500/15 px-2 py-0.5 text-xs font-medium text-violet-600">
+ <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/15 px-2 py-0.5 text-xs font-medium text-emerald-600">
  <Clock className="w-3.5 h-3.5" />
  {s.timeSavedMinutes} min
  </span>
@@ -83,7 +83,7 @@ export function OptimizationSuggestionsSection({
  <Button
  variant="ghost"
  size="sm"
- className="ml-auto h-7 text-xs text-violet-600 hover:bg-violet-500/10"
+ className="ml-auto h-7 text-xs text-emerald-600 hover:bg-emerald-500/10"
  onClick={() => setExpandedId(isExpanded ? null : s.id)}
  >
  {isExpanded ? "Ocultar" : "Ver propuesta"}

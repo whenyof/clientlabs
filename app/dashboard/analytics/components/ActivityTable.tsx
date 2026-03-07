@@ -89,7 +89,7 @@ export function ActivityTable({ selectedRange: _selectedRange }: ActivityTablePr
     const colors: Record<string, string> = {
       venta: 'bg-green-500/20 text-green-400',
       lead: 'bg-blue-500/20 text-blue-400',
-      marketing: 'bg-purple-500/20 text-purple-400',
+      marketing: 'bg-emerald-500/20 text-emerald-400',
       facturacion: 'bg-orange-500/20 text-orange-400',
       cliente: 'bg-cyan-500/20 text-cyan-400',
       finanzas: 'bg-red-500/20 text-red-400',
@@ -145,7 +145,7 @@ export function ActivityTable({ selectedRange: _selectedRange }: ActivityTablePr
                 placeholder="Buscar actividad..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 pr-4 py-2 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                className="pl-9 pr-4 py-2 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                 whileFocus={{ scale: 1.02 }}
               />
             </motion.div>
@@ -165,7 +165,7 @@ export function ActivityTable({ selectedRange: _selectedRange }: ActivityTablePr
                   onClick={() => setFilterType(key as FilterType)}
                   className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                     filterType === key
-                      ? 'bg-purple-600 text-[var(--text-primary)]'
+                      ? 'bg-emerald-600 text-[var(--text-primary)]'
                       : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--border-subtle)]'
                   }`}
                   whileHover={{ scale: 1.05 }}
@@ -206,7 +206,7 @@ export function ActivityTable({ selectedRange: _selectedRange }: ActivityTablePr
                     {label}
                     {sortField === key && (
                       <motion.span
-                        className="text-purple-400"
+                        className="text-emerald-400"
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.2 }}
@@ -250,7 +250,7 @@ export function ActivityTable({ selectedRange: _selectedRange }: ActivityTablePr
                       {activity.type === 'manual' ? (
                         <UserIcon className="w-4 h-4 text-blue-400" />
                       ) : (
-                        <CpuChipIcon className="w-4 h-4 text-purple-400" />
+                        <CpuChipIcon className="w-4 h-4 text-emerald-400" />
                       )}
                       <span className="text-[var(--text-secondary)]">{activity.user}</span>
                     </div>
@@ -270,7 +270,7 @@ export function ActivityTable({ selectedRange: _selectedRange }: ActivityTablePr
                     <motion.span
                       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                         activity.type === 'bot'
-                          ? 'bg-purple-500/20 text-purple-400'
+                          ? 'bg-emerald-500/20 text-emerald-400'
                           : 'bg-blue-500/20 text-blue-400'
                       }`}
                       whileHover={{ scale: 1.05 }}
@@ -324,7 +324,7 @@ export function ActivityTable({ selectedRange: _selectedRange }: ActivityTablePr
                   onClick={() => setCurrentPage(pageNum)}
                   className={`px-3 py-1 rounded text-sm transition-colors ${
                     currentPage === pageNum
-                      ? 'bg-purple-600 text-[var(--text-primary)]'
+                      ? 'bg-emerald-600 text-[var(--text-primary)]'
                       : 'bg-[var(--bg-surface)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)]'
                   }`}
                   whileHover={{ scale: 1.05 }}

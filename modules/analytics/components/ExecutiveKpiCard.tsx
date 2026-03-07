@@ -70,10 +70,10 @@ export function ExecutiveKpiCard({
  const variantStyles: Record<KpiVariant, string> = {
  emerald: " border-[var(--accent)] text-[var(--accent)] group-hover:border-[var(--accent)]",
  cyan: " border-cyan-500/20 text-cyan-400 group-hover:border-cyan-500/40",
- indigo: " border-indigo-500/20 text-[var(--accent)] group-hover:border-indigo-500/40",
+ indigo: " border-teal-500/20 text-[var(--accent)] group-hover:border-teal-500/40",
  blue: " border-blue-500/20 text-[var(--accent)] group-hover:border-blue-500/40",
  teal: " border-teal-500/20 text-teal-400 group-hover:border-teal-500/40",
- violet: " border-violet-500/20 text-violet-400 group-hover:border-violet-500/40",
+ violet: " border-emerald-500/20 text-emerald-400 group-hover:border-emerald-500/40",
  }
 
  const subValueColors = {

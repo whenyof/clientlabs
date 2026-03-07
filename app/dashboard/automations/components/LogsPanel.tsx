@@ -77,7 +77,7 @@ export function LogsPanel({ onClose }: LogsPanelProps) {
 
           {/* Modal */}
           <motion.div
-            className="relative w-full max-w-6xl bg-[var(--bg-card)] rounded-2xl border border-[var(--border-subtle)] shadow-2xl max-h-[90vh] overflow-hidden"
+            className="relative w-full max-w-6xl bg-[var(--bg-card)] rounded-xl border border-[var(--border-subtle)] shadow-[var(--shadow-card)] max-h-[90vh] overflow-hidden"
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -86,7 +86,7 @@ export function LogsPanel({ onClose }: LogsPanelProps) {
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-[var(--border-subtle)]">
               <div className="flex items-center gap-3">
-                <FunnelIcon className="w-6 h-6 text-purple-400" />
+                <FunnelIcon className="w-6 h-6 text-emerald-400" />
                 <div>
                   <h2 className="text-xl font-bold text-[var(--text-primary)]">
                     Logs de Automatizaciones
@@ -115,7 +115,7 @@ export function LogsPanel({ onClose }: LogsPanelProps) {
                       placeholder="Buscar en logs..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-9 pr-4 py-2 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="w-full pl-9 pr-4 py-2 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                     />
                   </div>
                 </div>
@@ -124,7 +124,7 @@ export function LogsPanel({ onClose }: LogsPanelProps) {
                   <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
-                    className="px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   >
                     <option value="all">Todos los estados</option>
                     <option value="success">Éxito</option>
@@ -137,7 +137,7 @@ export function LogsPanel({ onClose }: LogsPanelProps) {
                   <select
                     value={automationFilter}
                     onChange={(e) => setAutomationFilter(e.target.value)}
-                    className="px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   >
                     <option value="all">Todas las automatizaciones</option>
                     <option value="lead-whatsapp-email">Lead → WhatsApp + Email</option>

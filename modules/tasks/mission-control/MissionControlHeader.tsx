@@ -114,7 +114,7 @@ export function MissionControlHeader({
  <SelectItem value="done" className="text-zinc-300 focus:bg-zinc-800">Hecho</SelectItem>
  </SelectContent>
  </Select>
- <AddTaskButton className="h-8 px-3 rounded-lg border-0 bg-violet-600 hover:bg-violet-500 text-[var(--text-primary)] text-xs font-medium shrink-0" />
+ <AddTaskButton className="h-8 px-3 rounded-lg border-0 bg-emerald-600 hover:bg-emerald-500 text-[var(--text-primary)] text-xs font-medium shrink-0" />
  </div>
  </div>
  </header>

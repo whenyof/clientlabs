@@ -662,6 +662,7 @@ export const defaultSectorConfig: SectorConfig = {
             plans: 'Planes',
             usage: 'Límites',
             appearance: 'Apariencia',
+            api: 'API & Integraciones',
             dangerZone: 'Zona Peligrosa',
         },
         orders: {

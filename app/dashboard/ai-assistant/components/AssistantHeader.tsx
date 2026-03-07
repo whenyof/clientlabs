@@ -21,14 +21,14 @@ export function AssistantHeader() {
 
   return (
     <motion.div
-      className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-purple-600/10 via-blue-600/10 to-purple-600/10 border border-purple-500/20 backdrop-blur-sm"
+      className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-600/10 via-blue-600/10 to-teal-600/10 border border-emerald-500/20 backdrop-blur-sm"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1, duration: 0.5 }}
     >
       {/* Background Effects */}
-      <div className="absolute inset-0 bg-gradient-to-r from-purple-600/5 to-blue-600/5" />
-      <div className="absolute -top-20 -right-20 w-40 h-40 bg-purple-500/20 rounded-full blur-3xl" />
+      <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/5 to-blue-600/5" />
+      <div className="absolute -top-20 -right-20 w-40 h-40 bg-emerald-500/20 rounded-full blur-3xl" />
       <div className="absolute -bottom-20 -left-20 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl" />
 
       <div className="relative p-8">
@@ -41,7 +41,7 @@ export function AssistantHeader() {
             transition={{ delay: 0.3, duration: 0.5 }}
           >
             <div className="relative">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-xl flex items-center justify-center shadow-[var(--shadow-card)]">
                 <CpuChipIcon className="w-8 h-8 text-[var(--text-primary)]" />
               </div>
               {/* Pulsing indicator */}
@@ -61,7 +61,7 @@ export function AssistantHeader() {
 
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-emerald-200 bg-clip-text text-transparent">
                   Asistente IA Avanzado
                 </h1>
                 <div className="flex items-center gap-2 px-3 py-1 bg-green-500/20 rounded-full border border-green-500/30">
@@ -114,7 +114,7 @@ export function AssistantHeader() {
 
               <motion.button
                 onClick={handleConfigure}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-[var(--text-primary)] font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-purple-500/25"
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700 text-[var(--text-primary)] font-semibold rounded-xl transition-all duration-300 shadow-[var(--shadow-card)] hover:shadow-emerald-500/25"
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
               >

@@ -99,7 +99,7 @@ const CalendarTaskChip = memo(function CalendarTaskChip({
  }}
  className={cn(
  "w-full rounded-r border-l-2 px-2 py-1 text-left text-xs transition-all duration-150",
- "hover:bg-violet-500/10 hover:border-l-violet-500",
+ "hover:bg-emerald-500/10 hover:border-l-violet-500",
  "truncate text-foreground cursor-grab active:cursor-grabbing",
  canDrag && "touch-none",
  isDragging && "opacity-40 scale-95 pointer-events-none",
@@ -217,14 +217,14 @@ function MonthGrid({
  className={cn(
  "min-h-[100px] bg-card p-1.5 transition-colors duration-150",
  !inMonth && "bg-muted/20 text-muted-foreground",
- isDropTarget && "ring-2 ring-violet-500 ring-inset bg-violet-500/10 rounded"
+ isDropTarget && "ring-2 ring-emerald-500 ring-inset bg-emerald-500/10 rounded"
  )}
  >
  <div className="mb-1 flex items-center justify-between gap-0.5">
  <div
  className={cn(
  "flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium",
- isToday(day) && "bg-violet-500 text-[var(--text-primary)]",
+ isToday(day) && "bg-emerald-500 text-[var(--text-primary)]",
  inMonth && !isToday(day) && "text-foreground",
  !inMonth && "text-muted-foreground"
  )}
@@ -338,13 +338,13 @@ function WeekGrid({
  onDrop={(e) => handleDrop(e, key)}
  className={cn(
  "flex min-h-[200px] flex-col border-r border-border/60 last:border-r-0 transition-colors duration-150",
- isDropTarget && "bg-violet-500/10 ring-2 ring-violet-500 ring-inset"
+ isDropTarget && "bg-emerald-500/10 ring-2 ring-emerald-500 ring-inset"
  )}
  >
  <div
  className={cn(
  "border-b border-border/60 px-2 py-2 text-center text-sm font-medium flex items-center justify-center gap-1",
- isToday(day) && "bg-violet-500/10 text-violet-600"
+ isToday(day) && "bg-emerald-500/10 text-emerald-600"
  )}
  >
  {format(day, "EEE", { locale: enUS })}
@@ -433,7 +433,7 @@ function DayGrid({
  onDrop={handleDrop}
  className={cn(
  "rounded-xl border border-border/80 bg-card p-4 transition-colors duration-150",
- isDropTarget && "ring-2 ring-violet-500 ring-inset bg-violet-500/10"
+ isDropTarget && "ring-2 ring-emerald-500 ring-inset bg-emerald-500/10"
  )}
  >
  <div className="mb-4 flex items-center justify-between border-b border-border/60 pb-2">

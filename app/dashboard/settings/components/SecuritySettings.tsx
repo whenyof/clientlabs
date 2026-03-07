@@ -1,15 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { motion } from "framer-motion"
 import {
   LockClosedIcon,
   KeyIcon,
   DevicePhoneMobileIcon,
   EyeIcon,
   EyeSlashIcon,
-  CheckCircleIcon
 } from "@heroicons/react/24/outline"
+import { cn } from "@/lib/utils"
 
 export function SecuritySettings() {
   const [showPassword, setShowPassword] = useState(false)
@@ -22,232 +21,170 @@ export function SecuritySettings() {
 
   const handlePasswordChange = () => {
     console.log('Changing password')
-    // TODO: API call
     setPasswordForm({ current: '', new: '', confirm: '' })
   }
 
   const handleToggle2FA = () => {
     setTwoFactorEnabled(!twoFactorEnabled)
-    // TODO: API call
   }
 
   const activeSessions = [
-    {
-      id: '1',
-      device: 'MacBook Pro',
-      location: 'Madrid, España',
-      ip: '192.168.1.1',
-      lastActive: 'Ahora mismo',
-      current: true
-    },
-    {
-      id: '2',
-      device: 'iPhone 15',
-      location: 'Madrid, España',
-      ip: '192.168.1.2',
-      lastActive: 'Hace 2 horas'
-    },
-    {
-      id: '3',
-      device: 'Chrome Desktop',
-      location: 'Barcelona, España',
-      ip: '10.0.0.1',
-      lastActive: 'Hace 1 día'
-    }
+    { id: '1', device: 'MacBook Pro', location: 'Madrid, España', ip: '192.168.1.1', lastActive: 'Ahora mismo', current: true },
+    { id: '2', device: 'iPhone 15', location: 'Madrid, España', ip: '192.168.1.2', lastActive: 'Hace 2 horas' },
+    { id: '3', device: 'Chrome Desktop', location: 'Barcelona, España', ip: '10.0.0.1', lastActive: 'Hace 1 día' }
   ]
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">Seguridad</h2>
-        <p className="text-[var(--text-secondary)]">Gestiona tu contraseña, autenticación y sesiones activas</p>
+    <div className="space-y-6">
+      {/* Section Header */}
+      <div>
+        <h2 className="text-lg font-semibold text-[#0B1F2A]">Centro de Seguridad</h2>
+        <p className="text-sm text-slate-500 mt-0.5">Configuración de autenticación, contraseñas y control de sesiones.</p>
       </div>
 
-      <div className="space-y-8">
-        {/* Change Password */}
-        <div className="bg-[var(--bg-card)] rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
-            <KeyIcon className="w-5 h-5" />
-            Cambiar contraseña
-          </h3>
+      {/* Change Password */}
+      <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <h3 className="text-sm font-medium text-slate-500 mb-4 flex items-center gap-2">
+          <KeyIcon className="w-4 h-4 text-[var(--accent)]" />
+          Cambiar contraseña
+        </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div>
-              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
-                Contraseña actual
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={passwordForm.current}
-                  onChange={(e) => setPasswordForm({ ...passwordForm, current: e.target.value })}
-                  className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="••••••••"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
-                Nueva contraseña
-              </label>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={passwordForm.new}
-                onChange={(e) => setPasswordForm({ ...passwordForm, new: e.target.value })}
-                className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                placeholder="••••••••"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
-                Confirmar contraseña
-              </label>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={passwordForm.confirm}
-                onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
-                className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                placeholder="••••••••"
-              />
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-slate-700">Actual</label>
+            <input
+              type={showPassword ? 'text' : 'password'}
+              value={passwordForm.current}
+              onChange={(e) => setPasswordForm({ ...passwordForm, current: e.target.value })}
+              className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-[#0B1F2A] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition-colors"
+              placeholder="••••••••"
+            />
           </div>
-
-          <div className="flex items-center justify-between">
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={showPassword}
-                onChange={() => setShowPassword(!showPassword)}
-                className="mr-2"
-              />
-              <span className="text-sm text-[var(--text-secondary)]">Mostrar contraseñas</span>
-            </label>
-
-            <motion.button
-              onClick={handlePasswordChange}
-              className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-[var(--text-primary)] rounded-lg transition-colors"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Cambiar contraseña
-            </motion.button>
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-slate-700">Nueva</label>
+            <input
+              type={showPassword ? 'text' : 'password'}
+              value={passwordForm.new}
+              onChange={(e) => setPasswordForm({ ...passwordForm, new: e.target.value })}
+              className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-[#0B1F2A] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition-colors"
+              placeholder="••••••••"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-slate-700">Confirmar</label>
+            <input
+              type={showPassword ? 'text' : 'password'}
+              value={passwordForm.confirm}
+              onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
+              className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-[#0B1F2A] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition-colors"
+              placeholder="••••••••"
+            />
           </div>
         </div>
 
-        {/* Two-Factor Authentication */}
-        <div className="bg-[var(--bg-card)] rounded-xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <DevicePhoneMobileIcon className="w-6 h-6 text-purple-400" />
-              <div>
-                <h3 className="text-lg font-semibold text-[var(--text-primary)]">Autenticación de dos factores</h3>
-                <p className="text-sm text-[var(--text-secondary)]">Añade una capa extra de seguridad</p>
-              </div>
-            </div>
+        <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+          <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-500 hover:text-slate-700 transition-colors">
+            <input
+              type="checkbox"
+              checked={showPassword}
+              onChange={() => setShowPassword(!showPassword)}
+              className="w-4 h-4 rounded border-slate-300 text-[var(--accent)] focus:ring-[var(--accent)]"
+            />
+            Mostrar contraseñas
+          </label>
 
-            <motion.button
-              onClick={handleToggle2FA}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                twoFactorEnabled ? 'bg-purple-600' : 'bg-[var(--bg-surface)]'
-              }`}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-[var(--bg-card)] transition-transform ${
-                  twoFactorEnabled ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </motion.button>
+          <button
+            onClick={handlePasswordChange}
+            className="px-4 py-2 text-sm font-medium text-white bg-[var(--accent)] rounded-lg hover:opacity-90 transition-colors"
+          >
+            Actualizar contraseña
+          </button>
+        </div>
+      </div>
+
+      {/* Two-Factor Authentication */}
+      <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center">
+              <DevicePhoneMobileIcon className="w-5 h-5 text-slate-500" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-[#0B1F2A]">Autenticación de Dos Factores</h3>
+              <p className="text-sm text-slate-500">Capa adicional de seguridad en cada inicio de sesión.</p>
+            </div>
           </div>
 
-          {twoFactorEnabled ? (
-            <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
-              <div className="flex items-center gap-2 text-green-400 mb-2">
-                <CheckCircleIcon className="w-4 h-4" />
-                <span className="text-sm font-medium">2FA activado</span>
-              </div>
-              <p className="text-sm text-[var(--text-secondary)]">
-                Tu cuenta está protegida con autenticación de dos factores.
-              </p>
-            </div>
-          ) : (
-            <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
-              <p className="text-sm text-[var(--text-secondary)] mb-3">
-                Activa la autenticación de dos factores para mayor seguridad.
-              </p>
-              <motion.button
-                onClick={handleToggle2FA}
-                className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-[var(--text-primary)] text-sm rounded-lg transition-colors"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Activar 2FA
-              </motion.button>
-            </div>
-          )}
+          <button
+            onClick={handleToggle2FA}
+            className={cn(
+              "relative inline-flex h-6 w-11 items-center rounded-full transition-colors",
+              twoFactorEnabled ? "bg-[var(--accent)]" : "bg-slate-200"
+            )}
+          >
+            <span className={cn(
+              "inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm",
+              twoFactorEnabled ? "translate-x-6" : "translate-x-1"
+            )} />
+          </button>
         </div>
 
-        {/* Active Sessions */}
-        <div className="bg-[var(--bg-card)] rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
-            <EyeIcon className="w-5 h-5" />
-            Sesiones activas
-          </h3>
+        {twoFactorEnabled ? (
+          <div className="mt-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center gap-3">
+            <div className="w-2 h-2 rounded-full bg-emerald-500" />
+            <p className="text-sm text-emerald-700 font-medium">2FA activo. Tu identidad está protegida.</p>
+          </div>
+        ) : (
+          <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+            <p className="text-sm text-amber-700 font-medium">Se recomienda activar 2FA para mayor seguridad.</p>
+          </div>
+        )}
+      </div>
 
-          <div className="space-y-4">
-            {activeSessions.map((session) => (
-              <div key={session.id} className="flex items-center justify-between p-4 bg-[var(--bg-main)] rounded-lg">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-[var(--bg-surface)] rounded-lg flex items-center justify-center">
-                    <LockClosedIcon className="w-5 h-5 text-[var(--text-secondary)]" />
+      {/* Active Sessions */}
+      <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <h3 className="text-sm font-medium text-slate-500 mb-4 flex items-center gap-2">
+          <EyeIcon className="w-4 h-4 text-[var(--accent)]" />
+          Sesiones activas
+        </h3>
+
+        <div className="space-y-3">
+          {activeSessions.map((session) => (
+            <div key={session.id} className="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-lg group hover:bg-white transition-colors">
+              <div className="flex items-center gap-4">
+                <div className="w-9 h-9 bg-white border border-slate-200 rounded-lg flex items-center justify-center">
+                  <LockClosedIcon className="w-4 h-4 text-slate-400" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-[#0B1F2A]">{session.device}</span>
+                    {session.current && (
+                      <span className="text-[10px] font-semibold bg-blue-50 text-blue-600 border border-blue-200 px-1.5 py-0.5 rounded uppercase">
+                        Actual
+                      </span>
+                    )}
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[var(--text-primary)] font-medium">{session.device}</span>
-                      {session.current && (
-                        <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full">
-                          Actual
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-sm text-[var(--text-secondary)]">
-                      {session.location} • {session.ip}
-                    </div>
-                    <div className="text-xs text-[var(--text-secondary)]">{session.lastActive}</div>
+                  <div className="text-xs text-slate-500 mt-0.5">
+                    {session.location} · {session.ip} · {session.lastActive}
                   </div>
                 </div>
-
-                {!session.current && (
-                  <motion.button
-                    className="px-3 py-1 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded transition-colors"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    Cerrar sesión
-                  </motion.button>
-                )}
               </div>
-            ))}
-          </div>
 
-          <div className="mt-6 pt-4 border-t border-[var(--border-subtle)]">
-            <motion.button
-              className="w-full px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 hover:text-red-300 rounded-lg transition-colors"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              Cerrar todas las sesiones
-            </motion.button>
-          </div>
+              {!session.current && (
+                <button className="px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 border border-red-200 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                  Revocar
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-5 pt-4 border-t border-slate-100">
+          <button className="w-full py-2.5 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-colors">
+            Cerrar todas las sesiones
+          </button>
         </div>
       </div>
-    </motion.div>
+    </div>
   )
 }

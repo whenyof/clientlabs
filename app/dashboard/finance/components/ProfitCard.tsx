@@ -37,7 +37,7 @@ export function ProfitCard() {
 
         <div className="flex items-center justify-between">
           <span className="text-[var(--text-secondary)]">Margen de Beneficio</span>
-          <span className="text-purple-400 font-medium">{profitMargin.toFixed(1)}%</span>
+          <span className="text-emerald-400 font-medium">{profitMargin.toFixed(1)}%</span>
         </div>
       </div>
     </div>

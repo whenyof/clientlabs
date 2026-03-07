@@ -78,7 +78,7 @@ export function BillingSettings() {
               key={plan.id}
               className={`relative p-4 rounded-lg border ${
                 plan.current
-                  ? 'border-purple-500 bg-purple-500/5'
+                  ? 'border-emerald-500 bg-emerald-500/5'
                   : plan.popular
                   ? 'border-yellow-500 bg-yellow-500/5'
                   : 'border-[var(--border-subtle)] bg-[var(--bg-main)]'
@@ -96,7 +96,7 @@ export function BillingSettings() {
                   <p className="text-2xl font-bold text-[var(--text-primary)]">{plan.price}<span className="text-sm text-[var(--text-secondary)]">/mes</span></p>
                 </div>
                 {plan.current && (
-                  <span className="px-3 py-1 bg-purple-600 text-[var(--text-primary)] text-sm rounded-full">
+                  <span className="px-3 py-1 bg-emerald-600 text-[var(--text-primary)] text-sm rounded-full">
                     Actual
                   </span>
                 )}
@@ -112,7 +112,7 @@ export function BillingSettings() {
               </ul>
 
               {!plan.current && (
-                <button className="w-full py-2 bg-purple-600 hover:bg-purple-700 text-[var(--text-primary)] rounded-lg font-medium transition-colors">
+                <button className="w-full py-2 bg-emerald-500 hover:bg-emerald-600 text-[var(--text-primary)] rounded-lg font-medium transition-colors">
                   {plan.popular ? 'Mejor Opción' : 'Seleccionar'}
                 </button>
               )}

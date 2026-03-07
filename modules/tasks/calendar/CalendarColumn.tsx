@@ -119,7 +119,7 @@ export function CalendarColumn({
  <div
  className={cn(
  "sticky top-0 z-10 border-b border-border/60 px-3 py-2.5 text-sm font-medium truncate backdrop-",
- isToday && "bg-violet-500/15 text-violet-600",
+ isToday && "bg-emerald-500/15 text-emerald-600",
  !isToday && "bg-background/95 text-foreground"
  )}
  style={{ height: CALENDAR_ROW_HEIGHT }}
@@ -143,7 +143,7 @@ export function CalendarColumn({
  />
  {selecting && selectHeight >= 4 && (
  <div
- className="absolute left-1 right-1 z-10 rounded-md bg-violet-500/30 border border-violet-400/50 pointer-events-none transition-none"
+ className="absolute left-1 right-1 z-10 rounded-md bg-emerald-500/30 border border-emerald-400/50 pointer-events-none transition-none"
  style={{
  top: selectTop,
  height: selectHeight,

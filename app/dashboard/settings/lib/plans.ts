@@ -102,7 +102,7 @@ export const PLAN_NAMES = {
 
 export const PLAN_COLORS = {
   starter: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-  pro: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+  pro: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
   business: 'bg-green-500/20 text-green-400 border-green-500/30',
   trial: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
   free: 'bg-[var(--bg-main)]0/20 text-[var(--text-secondary)] border-[var(--border-subtle)]'

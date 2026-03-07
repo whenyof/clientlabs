@@ -8,43 +8,43 @@ import { useSession } from "next-auth/react"
  * Used in the mobile menu with different styling
  */
 export function DashboardButtonMobile({ onClick }: { onClick?: () => void }) {
- const { data: session, status } = useSession()
+    const { data: session, status } = useSession()
 
- // Don't render during loading or if not authenticated
- if (status === "loading" || !session?.user) {
- return null
- }
+    // Don't render during loading or if not authenticated
+    if (status === "loading" || !session?.user) {
+        return null
+    }
 
- // Determine redirect URL based on user state
- const getDashboardUrl = () => {
- const user = session.user
+    // Determine redirect URL based on user state
+    const getDashboardUrl = () => {
+        const user = session.user
 
- // Safety check (TypeScript)
- if (!user) return "/dashboard"
+        // Safety check (TypeScript)
+        if (!user) return "/dashboard"
 
- // Admin users go to admin panel
- if (user.role === "ADMIN") {
- return "/admin"
- }
+        // Admin users go to admin panel
+        if (user.role === "ADMIN") {
+            return "/admin"
+        }
 
- // Users who haven't completed onboarding go to sector selection
- if (user.onboardingCompleted === false) {
- return "/onboarding/sector"
- }
+        // Users who haven't completed onboarding go to sector selection
+        if (user.onboardingCompleted === false) {
+            return "/onboarding/sector"
+        }
 
- // Regular users go to dashboard
- return "/dashboard"
- }
+        // Regular users go to dashboard
+        return "/dashboard"
+    }
 
- const dashboardUrl = getDashboardUrl()
+    const dashboardUrl = getDashboardUrl()
 
- return (
- <Link
- href={dashboardUrl}
- onClick={onClick}
- className="block px-6 py-3 font-semibold text-[var(--text-primary)] bg-[var(--bg-card)] "
- >
- Ir al dashboard
- </Link>
- )
+    return (
+        <Link
+            href={dashboardUrl}
+            onClick={onClick}
+            className="block px-6 py-3 font-semibold text-white bg-gradient-to-r from-emerald-500/90 via-teal-500/90 to-blue-500/90"
+        >
+            Ir al dashboard
+        </Link>
+    )
 }

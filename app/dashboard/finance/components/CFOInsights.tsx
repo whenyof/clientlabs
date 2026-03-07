@@ -59,10 +59,10 @@ const TYPE_STYLES: Record<InsightType, { bg: string; border: string; iconBg: str
     icon: "text-red-400",
   },
   opportunity: {
-    bg: "bg-violet-500/[0.08]",
-    border: "border-violet-500/15",
-    iconBg: "bg-violet-500/15",
-    icon: "text-violet-400",
+    bg: "bg-emerald-500/[0.08]",
+    border: "border-emerald-500/15",
+    iconBg: "bg-emerald-500/15",
+    icon: "text-emerald-400",
   },
 }
 

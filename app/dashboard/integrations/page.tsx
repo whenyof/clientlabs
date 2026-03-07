@@ -75,7 +75,7 @@ export default function IntegrationsPage() {
 
       {/* Navigation Tabs */}
       <motion.div
-        className="bg-[var(--bg-main)] backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)] overflow-hidden p-2"
+        className="bg-[var(--bg-main)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)] overflow-hidden p-2"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.5 }}
@@ -88,7 +88,7 @@ export default function IntegrationsPage() {
               className={`
                 flex items-center gap-3 px-6 py-3 rounded-xl font-medium transition-all duration-300
                 ${activeTab === tab.id
-                  ? 'bg-purple-600/20 text-purple-400 border border-purple-500/30 shadow-lg shadow-purple-500/10'
+                  ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 shadow-[var(--shadow-card)] shadow-emerald-500/10'
                   : 'bg-[var(--bg-main)] text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)]'
                 }
               `}

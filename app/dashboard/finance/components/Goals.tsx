@@ -58,12 +58,12 @@ export function Goals() {
   }
 
   if (loading) {
-    return <div className="bg-[var(--bg-main)] rounded-2xl border border-[var(--border-subtle)] p-6 animate-pulse h-48" />
+    return <div className="bg-[var(--bg-main)] rounded-xl border border-[var(--border-subtle)] p-6 animate-pulse h-48" />
   }
 
   if (goals.length === 0) {
     return (
-      <div className="bg-[var(--bg-main)] backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)] p-6">
+      <div className="bg-[var(--bg-main)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)] p-6">
         <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">Objetivos Financieros</h3>
         <p className="text-[var(--text-secondary)] text-sm mb-4">Metas y hitos a alcanzar</p>
         <div className="py-8 text-center text-[var(--text-secondary)]">
@@ -76,7 +76,7 @@ export function Goals() {
 
   return (
     <motion.div
-      className="bg-[var(--bg-main)] backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)] p-6"
+      className="bg-[var(--bg-main)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)] p-6"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.7, duration: 0.5 }}

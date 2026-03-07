@@ -1,12 +1,11 @@
 "use client"
 
-import { motion } from "framer-motion"
 import { ROLE_PERMISSIONS, getPermissionsByRole, hasPermission } from "../lib/permissions"
 import { CheckIcon } from "@heroicons/react/24/outline"
+import { cn } from "@/lib/utils"
 
 export function PermissionsPanel() {
-  const currentRole = 'ADMIN' // Mock - would come from auth context
-
+  const currentRole = 'ADMIN'
   const permissions = getPermissionsByRole(currentRole)
 
   const permissionCategories = {
@@ -71,92 +70,75 @@ export function PermissionsPanel() {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">Permisos del rol</h2>
-        <p className="text-[var(--text-secondary)]">Rol actual: <span className="text-purple-400 font-medium">Administrador</span></p>
+    <div className="space-y-6">
+      {/* Section Header */}
+      <div>
+        <h2 className="text-lg font-semibold text-[#0B1F2A]">Permisos</h2>
+        <p className="text-sm text-slate-500 mt-0.5">
+          Rol actual: <span className="text-[var(--accent)] font-semibold">Administrador</span>
+        </p>
       </div>
 
-      <div className="space-y-6">
-        {Object.entries(permissionCategories).map(([categoryKey, category], categoryIndex) => (
-          <motion.div
-            key={categoryKey}
-            className="bg-[var(--bg-card)] rounded-xl p-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 * categoryIndex, duration: 0.5 }}
-          >
-            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">{category.title}</h3>
+      {/* Permission Categories */}
+      {Object.entries(permissionCategories).map(([categoryKey, category]) => (
+        <div key={categoryKey} className="bg-white rounded-xl border border-slate-200 p-6">
+          <h3 className="text-sm font-medium text-slate-500 mb-4">{category.title}</h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {category.items.map((permission) => {
-                const hasPerm = hasPermission(currentRole, permission.key as any)
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {category.items.map((permission) => {
+              const hasPerm = hasPermission(currentRole, permission.key as any)
 
-                return (
-                  <div
-                    key={permission.key}
-                    className={`flex items-center gap-3 p-3 rounded-lg border ${
-                      hasPerm
-                        ? 'bg-green-500/10 border-green-500/20'
-                        : 'bg-[var(--bg-main)] border-[var(--border-subtle)]'
-                    }`}
-                  >
-                    <div className={`p-1 rounded ${
-                      hasPerm ? 'bg-green-500/20' : 'bg-[var(--bg-surface)]'
-                    }`}>
-                      {hasPerm ? (
-                        <CheckIcon className="w-4 h-4 text-green-400" />
-                      ) : (
-                        <div className="w-4 h-4" />
-                      )}
-                    </div>
-                    <span className={`text-sm ${
-                      hasPerm ? 'text-green-400' : 'text-[var(--text-secondary)]'
-                    }`}>
-                      {permission.label}
-                    </span>
+              return (
+                <div
+                  key={permission.key}
+                  className={cn(
+                    "flex items-center gap-3 p-3 rounded-lg border transition-colors",
+                    hasPerm
+                      ? "bg-emerald-50/50 border-emerald-200/60"
+                      : "bg-slate-50 border-slate-100 opacity-50"
+                  )}
+                >
+                  <div className={cn(
+                    "w-5 h-5 rounded flex items-center justify-center",
+                    hasPerm ? "bg-[var(--accent)]" : "bg-white border border-slate-200"
+                  )}>
+                    {hasPerm && <CheckIcon className="w-3 h-3 text-white" strokeWidth={3} />}
                   </div>
-                )
-              })}
-            </div>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Role Info */}
-      <motion.div
-        className="bg-gradient-to-r from-purple-600/10 to-blue-600/10 border border-purple-500/20 rounded-xl p-6 mt-8"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8, duration: 0.5 }}
-      >
-        <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Información del rol</h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-purple-400 mb-1">
-              {ROLE_PERMISSIONS.find(r => r.role === currentRole)?.permissions.length}
-            </div>
-            <div className="text-sm text-[var(--text-secondary)]">Permisos activos</div>
-          </div>
-
-          <div className="text-center">
-            <div className="text-2xl font-bold text-blue-400 mb-1">
-              {Object.keys(permissionCategories).length}
-            </div>
-            <div className="text-sm text-[var(--text-secondary)]">Categorías</div>
-          </div>
-
-          <div className="text-center">
-            <div className="text-2xl font-bold text-green-400 mb-1">100%</div>
-            <div className="text-sm text-[var(--text-secondary)]">Acceso total</div>
+                  <span className={cn(
+                    "text-sm",
+                    hasPerm ? "text-[#0B1F2A] font-medium" : "text-slate-400"
+                  )}>
+                    {permission.label}
+                  </span>
+                </div>
+              )
+            })}
           </div>
         </div>
-      </motion.div>
-    </motion.div>
+      ))}
+
+      {/* Summary */}
+      <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <h3 className="text-sm font-medium text-slate-500 mb-4">Resumen</h3>
+        <div className="grid grid-cols-3 gap-4">
+          <div className="text-center p-3 bg-slate-50 rounded-lg">
+            <div className="text-lg font-bold text-[#0B1F2A]">
+              {ROLE_PERMISSIONS.find(r => r.role === currentRole)?.permissions.length}
+            </div>
+            <div className="text-xs text-slate-500 mt-0.5">Permisos activos</div>
+          </div>
+          <div className="text-center p-3 bg-slate-50 rounded-lg">
+            <div className="text-lg font-bold text-[#0B1F2A]">
+              {Object.keys(permissionCategories).length}
+            </div>
+            <div className="text-xs text-slate-500 mt-0.5">Módulos</div>
+          </div>
+          <div className="text-center p-3 bg-slate-50 rounded-lg">
+            <div className="text-lg font-bold text-[var(--accent)]">100%</div>
+            <div className="text-xs text-slate-500 mt-0.5">Acceso</div>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }

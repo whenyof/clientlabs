@@ -49,7 +49,7 @@ export function SalesKPIs({ data }: SalesKPIsProps) {
       {cards.map((card) => (
         <article
           key={card.id}
-          className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-main)] p-5 backdrop-blur-xl shadow-lg transition hover:translate-y-0.5"
+          className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-main)] p-5 backdrop-blur-xl shadow-[var(--shadow-card)] transition hover:-translate-y-0.5"
         >
           <p className="text-[11px] uppercase tracking-[0.4em] text-[var(--text-secondary)]">{card.label}</p>
           <p className="mt-4 text-3xl font-semibold text-[var(--text-primary)]">{card.value}</p>

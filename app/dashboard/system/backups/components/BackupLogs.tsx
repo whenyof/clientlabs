@@ -65,7 +65,7 @@ export function BackupLogs({ logs }: BackupLogsProps) {
 
   return (
     <motion.div
-      className="bg-[var(--bg-main)] backdrop-blur-sm border border-[var(--border-subtle)] rounded-2xl p-8"
+      className="bg-[var(--bg-main)] backdrop-blur-sm border border-[var(--border-subtle)] rounded-xl p-8"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}

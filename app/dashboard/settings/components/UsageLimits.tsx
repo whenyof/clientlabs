@@ -1,208 +1,82 @@
 "use client"
 
-import { motion } from "framer-motion"
-import { getPlanLimits, PLANS } from "../lib/plans"
-import { ChartBarIcon, UsersIcon, CogIcon, SparklesIcon } from "@heroicons/react/24/outline"
+import { cn } from "@/lib/utils"
+
+const usageData = [
+  { label: "Clientes", current: 847, limit: 1000, unit: "" },
+  { label: "Leads", current: 2340, limit: 5000, unit: "" },
+  { label: "Automatizaciones", current: 12, limit: 25, unit: "" },
+  { label: "API Calls / mes", current: 8750, limit: 50000, unit: "" },
+  { label: "Almacenamiento", current: 2.3, limit: 10, unit: "GB" },
+  { label: "Miembros del equipo", current: 3, limit: 5, unit: "" },
+]
+
+function getStatus(current: number, limit: number) {
+  const pct = (current / limit) * 100
+  if (pct >= 90) return { color: "bg-red-500", text: "text-red-600", bg: "bg-red-50", label: "Crítico" }
+  if (pct >= 70) return { color: "bg-amber-400", text: "text-amber-600", bg: "bg-amber-50", label: "Atención" }
+  return { color: "bg-[var(--accent)]", text: "text-[var(--accent)]", bg: "bg-emerald-50", label: "Normal" }
+}
 
 export function UsageLimits() {
-  const currentPlan = 'pro' // Mock - would come from user data
-  const limits = getPlanLimits(currentPlan)
-  const plan = PLANS.find(p => p.id === currentPlan)
-
-  // Mock current usage
-  const currentUsage = {
-    clients: 187,
-    automations: 3,
-    integrations: 6,
-    aiRequests: 487
-  }
-
-  const usageItems = [
-    {
-      key: 'clients',
-      label: 'Clientes',
-      icon: UsersIcon,
-      current: currentUsage.clients,
-      limit: limits.clients,
-      color: 'text-blue-400',
-      bgColor: 'bg-blue-500/10'
-    },
-    {
-      key: 'automations',
-      label: 'Automatizaciones',
-      icon: CogIcon,
-      current: currentUsage.automations,
-      limit: limits.automations,
-      color: 'text-green-400',
-      bgColor: 'bg-green-500/10'
-    },
-    {
-      key: 'integrations',
-      label: 'Integraciones',
-      icon: ChartBarIcon,
-      current: currentUsage.integrations,
-      limit: limits.integrations,
-      color: 'text-purple-400',
-      bgColor: 'bg-purple-500/10'
-    },
-    {
-      key: 'aiRequests',
-      label: 'Peticiones IA',
-      icon: SparklesIcon,
-      current: currentUsage.aiRequests,
-      limit: limits.aiRequests,
-      color: 'text-orange-400',
-      bgColor: 'bg-orange-500/10'
-    }
-  ]
-
-  const getUsagePercentage = (current: number, limit: number) => {
-    if (limit === -1) return 0 // Unlimited
-    return Math.min((current / limit) * 100, 100)
-  }
-
-  const getUsageStatus = (percentage: number) => {
-    if (percentage >= 90) return { status: 'danger', color: 'bg-red-500' }
-    if (percentage >= 75) return { status: 'warning', color: 'bg-yellow-500' }
-    return { status: 'good', color: 'bg-green-500' }
-  }
-
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">Límites de uso</h2>
-        <p className="text-[var(--text-secondary)]">Monitorea tu uso actual frente a los límites del plan</p>
+    <div className="space-y-6">
+      {/* Section Header */}
+      <div>
+        <h2 className="text-lg font-semibold text-[#0B1F2A]">Uso del plan</h2>
+        <p className="text-sm text-slate-500 mt-0.5">Consumo actual de recursos y límites de tu plan.</p>
       </div>
 
       {/* Plan Info */}
-      <div className="bg-gradient-to-r from-purple-600/10 to-blue-600/10 border border-purple-500/20 rounded-xl p-6 mb-8">
+      <div className="bg-white rounded-xl border border-slate-200 p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-1">
-              Plan {plan?.name}
-            </h3>
-            <p className="text-[var(--text-secondary)] text-sm">
-              Próxima renovación: 15 de enero de 2025
-            </p>
+            <span className="text-sm font-bold text-[var(--accent)]">PLAN CORPORATE</span>
+            <p className="text-xs text-slate-500 mt-0.5">Ciclo actual: 1 Mar - 31 Mar 2026</p>
           </div>
-          <div className="text-right">
-            <div className="text-sm text-[var(--text-secondary)]">Límite mensual</div>
-            <div className="text-lg font-bold text-[var(--text-primary)]">{plan?.price ? `€${plan.price / 100}` : 'N/A'}</div>
-          </div>
+          <button className="px-4 py-2 text-sm font-medium text-[var(--accent)] border border-[var(--accent)]/20 rounded-lg hover:bg-[var(--accent)]/5 transition-colors">
+            Cambiar plan
+          </button>
         </div>
       </div>
 
-      {/* Usage Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        {usageItems.map((item, index) => {
-          const Icon = item.icon
-          const percentage = getUsagePercentage(item.current, item.limit)
-          const usageStatus = getUsageStatus(percentage)
-          const isUnlimited = item.limit === -1
+      {/* Usage Items */}
+      <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-50">
+        {usageData.map((item) => {
+          const pct = Math.round((item.current / item.limit) * 100)
+          const status = getStatus(item.current, item.limit)
 
           return (
-            <motion.div
-              key={item.key}
-              className="bg-[var(--bg-card)] rounded-xl p-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 * index, duration: 0.5 }}
-            >
-              <div className="flex items-center gap-4 mb-4">
-                <div className={`p-3 rounded-xl ${item.bgColor}`}>
-                  <Icon className={`w-6 h-6 ${item.color}`} />
-                </div>
-                <div className="flex-1">
-                  <h4 className="text-lg font-semibold text-[var(--text-primary)]">{item.label}</h4>
-                  <div className="text-sm text-[var(--text-secondary)]">
-                    {isUnlimited ? 'Ilimitado' : `${item.current} de ${item.limit}`}
-                  </div>
+            <div key={item.label} className="px-6 py-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-[#0B1F2A]">{item.label}</span>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-slate-700 font-mono">
+                    {item.current.toLocaleString()}{item.unit} / {item.limit.toLocaleString()}{item.unit}
+                  </span>
+                  <span className={cn("text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded", status.text, status.bg)}>
+                    {pct}%
+                  </span>
                 </div>
               </div>
-
-              {!isUnlimited && (
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-[var(--text-secondary)]">Uso actual</span>
-                    <span className={`font-medium ${
-                      usageStatus.status === 'danger' ? 'text-red-400' :
-                      usageStatus.status === 'warning' ? 'text-yellow-400' :
-                      'text-green-400'
-                    }`}>
-                      {percentage.toFixed(1)}%
-                    </span>
-                  </div>
-
-                  <div className="w-full bg-[var(--bg-surface)] rounded-full h-3">
-                    <div
-                      className={`h-3 rounded-full transition-all duration-500 ${usageStatus.color}`}
-                      style={{ width: `${percentage}%` }}
-                    />
-                  </div>
-
-                  {usageStatus.status === 'danger' && (
-                    <div className="text-xs text-red-400 bg-red-500/10 p-2 rounded">
-                      ⚠️ Has alcanzado el 90% del límite. Considera actualizar tu plan.
-                    </div>
-                  )}
-
-                  {usageStatus.status === 'warning' && (
-                    <div className="text-xs text-yellow-400 bg-yellow-500/10 p-2 rounded">
-                      ⚠️ Te estás acercando al límite mensual.
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {isUnlimited && (
-                <div className="text-sm text-green-400 bg-green-500/10 p-3 rounded-lg">
-                  ✅ Sin límites - uso ilimitado incluido en tu plan
-                </div>
-              )}
-            </motion.div>
+              <div className="w-full bg-slate-100 rounded-full h-1.5">
+                <div
+                  className={cn("h-1.5 rounded-full transition-all", status.color)}
+                  style={{ width: `${Math.min(pct, 100)}%` }}
+                />
+              </div>
+            </div>
           )
         })}
       </div>
 
-      {/* Usage Insights */}
-      <motion.div
-        className="bg-[var(--bg-card)] rounded-xl p-6"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6, duration: 0.5 }}
-      >
-        <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Insights de uso</h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-            <div className="text-blue-400 font-medium mb-1">Más usado</div>
-            <div className="text-[var(--text-primary)] text-lg">Clientes</div>
-            <div className="text-sm text-[var(--text-secondary)]">93.5% del límite utilizado</div>
-          </div>
-
-          <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
-            <div className="text-green-400 font-medium mb-1">Menos usado</div>
-            <div className="text-[var(--text-primary)] text-lg">IA</div>
-            <div className="text-sm text-[var(--text-secondary)]">48.7% del límite utilizado</div>
-          </div>
-
-          <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4">
-            <div className="text-purple-400 font-medium mb-1">Próximo límite</div>
-            <div className="text-[var(--text-primary)] text-lg">Integraciones</div>
-            <div className="text-sm text-[var(--text-secondary)]">60% utilizado - 4 disponibles</div>
-          </div>
-
-          <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-4">
-            <div className="text-orange-400 font-medium mb-1">Recomendación</div>
-            <div className="text-[var(--text-primary)] text-lg">Actualizar plan</div>
-            <div className="text-sm text-[var(--text-secondary)]">Para uso ilimitado</div>
-          </div>
-        </div>
-      </motion.div>
-    </motion.div>
+      {/* Capacity Note */}
+      <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <h3 className="text-sm font-medium text-slate-500 mb-2">Diagnóstico</h3>
+        <p className="text-sm text-[#0B1F2A]">
+          Tu consumo actual se mantiene dentro de los límites del plan. No se requieren acciones inmediatas.
+        </p>
+      </div>
+    </div>
   )
 }

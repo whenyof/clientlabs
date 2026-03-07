@@ -14,7 +14,7 @@ export function AssistantTimeline() {
       </div>
 
       <div className="relative">
-        <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-purple-500/50 to-transparent"></div>
+        <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-emerald-500/50 to-transparent"></div>
 
         <div className="space-y-6">
           {mockTimelineEvents.map((event, index) => (
@@ -25,8 +25,8 @@ export function AssistantTimeline() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1, duration: 0.5 }}
             >
-              <div className="relative z-10 flex items-center justify-center w-12 h-12 rounded-full bg-purple-600/20 border-2 border-[var(--border-subtle)]">
-                <span className="text-purple-400 text-lg">
+              <div className="relative z-10 flex items-center justify-center w-12 h-12 rounded-full bg-emerald-600/20 border-2 border-[var(--border-subtle)]">
+                <span className="text-emerald-400 text-lg">
                   {event.type === 'analysis' ? '🤖' :
                    event.type === 'recommendation' ? '💡' :
                    event.type === 'email' ? '📧' :
@@ -34,7 +34,7 @@ export function AssistantTimeline() {
                 </span>
               </div>
 
-              <div className="flex-1 bg-[var(--bg-main)] backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)] p-6">
+              <div className="flex-1 bg-[var(--bg-main)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)] p-6">
                 <h4 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
                   {event.title}
                 </h4>

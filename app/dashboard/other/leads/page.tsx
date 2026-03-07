@@ -301,13 +301,7 @@ export default async function LeadsPage({
         sources={sources.map((s) => s.source).filter(Boolean) as string[]}
       />
 
-      <LeadsTable
-        leads={leads}
-        currentSort={{
-          sortBy: searchParams.sortBy || "score",
-          sortOrder: (searchParams.sortOrder || "desc") as "asc" | "desc",
-        }}
-      />
+      <LeadsTable />
     </div>
   )
 }

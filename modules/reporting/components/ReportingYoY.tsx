@@ -151,7 +151,7 @@ export function ReportingYoY({ sales }: Props) {
                                 tickFormatter={(v) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v))}
                             />
                             <Tooltip
-                                formatter={(value: number | undefined) => [formatReportingCurrency(value ?? 0), ""]}
+                                formatter={(value: unknown) => [formatReportingCurrency(typeof value === "number" ? value : Number(value) || 0), ""]}
                                 labelFormatter={(label) => label}
                             />
                             <Legend

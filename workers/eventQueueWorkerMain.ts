@@ -39,19 +39,19 @@ async function dequeueBatch(limit = 20): Promise<QueuedEvent[]> {
 
     if (!raw) break
 
-    let parsed: unknown
+    let parsed: any
 
     try {
       if (typeof raw === "string") {
-        parsed = JSON.parse(raw) as unknown
-      } else if (typeof raw === "object" && raw !== null) {
+        parsed = JSON.parse(raw)
+      } else if (typeof raw === "object") {
         parsed = raw
       } else {
         console.warn("[worker] invalid redis item")
         continue
       }
 
-      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      if (!parsed || typeof parsed !== "object") {
         console.warn("[worker] invalid event structure")
         continue
       }

@@ -70,8 +70,8 @@ export function SalesDistributionChart({ sales, variant = "byStatus" }: Props) {
                                 ))}
                             </Pie>
                             <Tooltip
-                                formatter={(value: number | undefined, _name: string | undefined, props?: { payload?: { value: number } }) => {
-                                    const v = value ?? 0
+                                formatter={(value: unknown, _name: unknown, props?: { payload?: { value: number } }) => {
+                                    const v = typeof value === "number" ? value : Number(value) || 0
                                     const total = data.reduce((s, d) => s + d.value, 0)
                                     const pct = total > 0 ? Math.round((v / total) * 100) : 0
                                     return [v, `${pct}%`]

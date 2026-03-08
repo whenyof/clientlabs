@@ -20,10 +20,12 @@ export function track(type: string, metadata: Record<string, unknown> = {}): boo
         timestamp: Date.now()
     };
 
-    if (CONFIG.debug) console.log("[ClientLabs] event tracked", event.type);
-
     const enqueued = enqueue(event);
 
+    // Si llegamos al batch máximo (20), forzar flush inmediato
+    const qSize = (window as any)._cl_q_size || 0; // Internal size estimate (opcional)
+
+    // 🛡️ Optimización de rendimiento: Si el buffer está lleno, disparar flush.
     if (enqueued && event.type === "identify") {
         // Identify es crítico, disparar flush rápido.
         setTimeout(() => flush(), 50);

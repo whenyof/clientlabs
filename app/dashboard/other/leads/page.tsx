@@ -4,7 +4,6 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { LeadsTable } from "@/modules/leads/components/LeadsTable"
 import { CreateLeadButton } from "@/modules/leads/components/CreateLeadButton"
-import { LeadsKPIsSimple } from "@/modules/leads/components/LeadsKPIsSimple"
 import { WorkViews } from "@/modules/leads/components/WorkViews"
 import { LeadsFilters } from "@/modules/leads/components/LeadsFilters"
 import { ImportHistoryPanel } from "@/modules/leads/components/ImportHistoryPanel"
@@ -278,9 +277,6 @@ export default async function LeadsPage({
           <CreateLeadButton />
         </div>
       </div>
-
-      {/* KPIs: máximo 4, misma estética que Providers */}
-      <LeadsKPIsSimple kpis={kpis} />
 
       {/* Import History */}
       {importBatches.length > 0 && (

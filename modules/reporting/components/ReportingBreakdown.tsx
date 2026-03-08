@@ -50,8 +50,8 @@ export function ReportingBreakdown({ topClients, revenueByType }: Props) {
                                     axisLine={false}
                                 />
                                 <Tooltip
-                                    formatter={(value: number | undefined, _name: string | undefined, props?: { payload?: { fullName?: string; count: number } }) => [
-                                        formatReportingCurrency(value ?? 0),
+                                    formatter={(value: unknown, _name: unknown, props?: { payload?: { fullName?: string; count: number } }) => [
+                                        formatReportingCurrency(typeof value === "number" ? value : Number(value) || 0),
                                         props?.payload?.fullName ?? "",
                                     ]}
                                     labelFormatter={() => ""}
@@ -86,7 +86,7 @@ export function ReportingBreakdown({ topClients, revenueByType }: Props) {
                                     tickFormatter={(v) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v))}
                                 />
                                 <Tooltip
-                                    formatter={(value: number | undefined) => [formatReportingCurrency(value ?? 0), revenueLabel]}
+                                    formatter={(value: unknown) => [formatReportingCurrency(typeof value === "number" ? value : Number(value) || 0), revenueLabel]}
                                 />
                                 <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                                     {typeData.map((_, i) => (

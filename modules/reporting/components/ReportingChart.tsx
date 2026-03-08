@@ -60,7 +60,7 @@ function ReportingChartComponent({ data }: Props) {
                 borderRadius: "8px",
               }}
               labelStyle={{ color: "rgba(255,255,255,0.8)" }}
-              formatter={(value: number | undefined) => [formatReportingCurrency(value ?? 0), revenueLabel]}
+              formatter={(value: unknown) => [formatReportingCurrency(typeof value === "number" ? value : Number(value) || 0), revenueLabel]}
               labelFormatter={(label) => label}
             />
             <Area

@@ -46,7 +46,7 @@ export function FunnelChart({ data = [] }: FunnelChartProps) {
                     borderRadius: '8px',
                     color: 'var(--text-primary)'
                   }}
-                  formatter={(value: number | undefined) => [`${(value || 0).toLocaleString()}`, labels.dashboard.charts.funnel.quantityLabel]}
+                  formatter={(value: unknown) => [`${(typeof value === "number" ? value : Number(value) || 0).toLocaleString()}`, labels.dashboard.charts.funnel.quantityLabel]}
                 />
                 <Funnel dataKey="value" data={data} isAnimationActive>
                   <LabelList position="center" fill="var(--text-primary)" stroke="none" fontSize={14} />

@@ -7,7 +7,7 @@ import { DashboardContainer } from "@/components/layout/DashboardContainer"
 import { AssistantHeader } from "./components/AssistantHeader"
 import { AssistantKPIs } from "./components/AssistantKPIs"
 import { InsightCards } from "./components/InsightCards"
-import { HotLeadsTable } from "./components/HotLeadsTable"
+import { LeadsTable } from "@/modules/leads/components/LeadsTable"
 import { PredictionsChart } from "./components/PredictionsChart"
 import { RecommendationsFeed } from "./components/RecommendationsFeed"
 import { AutomationsPanel } from "./components/AutomationsPanel"
@@ -51,13 +51,13 @@ export default function AiAssistantPage() {
               <InsightCards />
               <RecommendationsFeed />
             </div>
-            <HotLeadsTable />
+            <LeadsTable />
           </div>
         )
       case 'insights':
         return <InsightCards />
       case 'leads':
-        return <HotLeadsTable />
+        return <LeadsTable />
       case 'predictions':
         return <PredictionsChart />
       case 'recommendations':

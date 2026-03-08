@@ -84,7 +84,7 @@ export function SalesChart({ sales, dateRange, preset }: Props) {
                                 tickFormatter={(v) => (mode === "revenue" || mode === "avgTicket" ? (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v)) : String(v))}
                             />
                             <Tooltip
-                                formatter={(value: number | undefined) => [formatValue(value ?? 0), tooltipLabel]}
+                                formatter={(value: unknown) => [formatValue(typeof value === "number" ? value : Number(value) || 0), tooltipLabel]}
                                 labelFormatter={(label) => label}
                             />
                             <Bar dataKey={dataKey} radius={[4, 4, 0, 0]}>
@@ -113,7 +113,7 @@ export function SalesChart({ sales, dateRange, preset }: Props) {
                                 tickFormatter={(v) => (mode === "revenue" || mode === "avgTicket" ? (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v)) : String(v))}
                             />
                             <Tooltip
-                                formatter={(value: number | undefined) => [formatValue(value ?? 0), tooltipLabel]}
+                                formatter={(value: unknown) => [formatValue(typeof value === "number" ? value : Number(value) || 0), tooltipLabel]}
                                 labelFormatter={(label) => label}
                             />
                             <Line

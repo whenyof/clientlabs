@@ -1,0 +1,27 @@
+"use client"
+
+import { useSectorConfig } from "@/hooks/useSectorConfig"
+import { CreateLeadButton } from "./CreateLeadButton"
+import { ConnectWebButton } from "./ConnectWebButton"
+import { AutomationsButton } from "./AutomationsButton"
+
+export function LeadsHeader() {
+  const { labels } = useSectorConfig()
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="min-w-0">
+        <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">
+          {labels.leads?.pageTitle ?? "Pipeline de Oportunidades"}
+        </h1>
+        <p className="mt-0.5 text-sm text-neutral-500 truncate max-w-xl">
+          {labels.leads?.pageSubtitle ?? "Gestiona y convierte tus oportunidades."}
+        </p>
+      </div>
+      <div className="flex items-center gap-2 flex-wrap">
+        <ConnectWebButton />
+        <AutomationsButton />
+        <CreateLeadButton />
+      </div>
+    </div>
+  )
+}

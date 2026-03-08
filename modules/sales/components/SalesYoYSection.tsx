@@ -61,12 +61,16 @@ export function SalesYoYSection({ yoyMetrics, chartData, yearCurrent, yearPrevio
                                     tickFormatter={(v) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v))}
                                 />
                                 <Tooltip
-                                    formatter={(value: number | undefined, name: string | undefined) => [
-                                        name === "revenueCurrent" || name === "revenuePrevious"
-                                            ? formatSaleCurrency(value ?? 0)
-                                            : Math.round(Number(value ?? 0)),
-                                        name === "revenueCurrent" || name === "countCurrent" ? currentYearLabel : previousYearLabel,
-                                    ]}
+                                    formatter={(value: unknown, name: unknown) => {
+                                        const n = typeof value === "number" ? value : Number(value) || 0
+                                        const nameStr = typeof name === "string" ? name : ""
+                                        return [
+                                            nameStr === "revenueCurrent" || nameStr === "revenuePrevious"
+                                                ? formatSaleCurrency(n)
+                                                : Math.round(n),
+                                            nameStr === "revenueCurrent" || nameStr === "countCurrent" ? currentYearLabel : previousYearLabel,
+                                        ]
+                                    }}
                                     labelFormatter={(label) => label}
                                 />
                                 <Legend

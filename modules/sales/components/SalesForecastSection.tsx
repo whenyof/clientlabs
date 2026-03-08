@@ -76,20 +76,14 @@ function ForecastChartRealAndScenarios({ chartData }: { chartData: ForecastChart
                         tickFormatter={(v) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v))}
                     />
                     <Tooltip
-                        formatter={(value: number | undefined, name: string | undefined) => [
-                            typeof value === "number" && (name === "revenue" || name?.startsWith("forecast"))
-                                ? formatSaleCurrency(value ?? 0)
-                                : value ?? 0,
-                            name === "revenue"
-                                ? realLabel
-                                : name === "forecastBase"
-                                    ? baseLabel
-                                    : name === "forecastOptimistic"
-                                        ? optLabel
-                                        : name === "forecastConservative"
-                                            ? consLabel
-                                            : name ?? "",
-                        ]}
+                        formatter={(value: unknown, name: unknown) => {
+                            const n = typeof value === "number" ? value : Number(value) || 0
+                            const nameStr = typeof name === "string" ? name : ""
+                            return [
+                                (nameStr === "revenue" || nameStr.startsWith("forecast")) ? formatSaleCurrency(n) : n,
+                                nameStr === "revenue" ? realLabel : nameStr === "forecastBase" ? baseLabel : nameStr === "forecastOptimistic" ? optLabel : nameStr === "forecastConservative" ? consLabel : nameStr,
+                            ]
+                        }}
                         labelFormatter={(label) => label}
                     />
                     <Legend
@@ -161,10 +155,14 @@ function ForecastChartRevenue({ chartData }: { chartData: SalesForecastResult["c
                         tickFormatter={(v) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v))}
                     />
                     <Tooltip
-                        formatter={(value: number | undefined, name: string | undefined) => [
-                            name === "revenue" ? formatSaleCurrency(value ?? 0) : value ?? 0,
-                            name === "revenue" ? historicalLabel : name === "forecastRevenue" ? projectedLabel : name ?? "",
-                        ]}
+                        formatter={(value: unknown, name: unknown) => {
+                            const n = typeof value === "number" ? value : Number(value) || 0
+                            const nameStr = typeof name === "string" ? name : ""
+                            return [
+                                nameStr === "revenue" ? formatSaleCurrency(n) : n,
+                                nameStr === "revenue" ? historicalLabel : nameStr === "forecastRevenue" ? projectedLabel : nameStr,
+                            ]
+                        }}
                         labelFormatter={(label) => label}
                     />
                     <Legend
@@ -216,10 +214,14 @@ function ForecastChartCount({ chartData }: { chartData: SalesForecastResult["cha
                         axisLine={false}
                     />
                     <Tooltip
-                        formatter={(value: number | undefined, name: string | undefined) => [
-                            Math.round(Number(value ?? 0)),
-                            name === "count" ? historicalLabel : name === "forecastCount" ? projectedLabel : name ?? "",
-                        ]}
+                        formatter={(value: unknown, name: unknown) => {
+                            const n = typeof value === "number" ? value : Number(value) || 0
+                            const nameStr = typeof name === "string" ? name : ""
+                            return [
+                                Math.round(n),
+                                nameStr === "count" ? historicalLabel : nameStr === "forecastCount" ? projectedLabel : nameStr,
+                            ]
+                        }}
                         labelFormatter={(label) => label}
                     />
                     <Legend

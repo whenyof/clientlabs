@@ -36,22 +36,16 @@ export async function flush(isClosing: boolean = false): Promise<boolean> {
         events
     };
 
-    if (CONFIG.debug) console.log("[ClientLabs] sending events", count);
-
     try {
         if (isClosing) {
             const ok = useSendBeacon(CONFIG.endpoint, payload);
-            if (ok) {
-                clearBatch(count);
-                if (CONFIG.debug) console.log("[ClientLabs] ingest success");
-            }
+            if (ok) clearBatch(count);
             return ok;
         }
 
         const ok = await useFetchTransport(CONFIG.endpoint, payload);
         if (ok) {
             clearBatch(count);
-            if (CONFIG.debug) console.log("[ClientLabs] ingest success");
             if (getQueueSize() > 0) setTimeout(() => flush(), 200);
         }
     } finally {

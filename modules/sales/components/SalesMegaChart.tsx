@@ -249,7 +249,7 @@ export function SalesMegaChart({
                   <SalesMegaTooltip
                     mode={mode}
                     active={active}
-                    payload={payload}
+                    payload={payload as ReadonlyArray<{ name?: string; value?: number; dataKey?: string }>}
                     label={label}
                     labelFormatter={(l) => {
                       const found = chartData.find((d) => d.label === l)

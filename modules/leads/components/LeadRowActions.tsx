@@ -24,14 +24,14 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import {
- MoreVertical,
- MessageSquare,
- XCircle,
- CheckCircle,
- Mail,
- ExternalLink,
- Loader2,
- Trash2
+  MoreHorizontal,
+  MessageSquare,
+  Mail,
+  Check,
+  X,
+  ExternalLink,
+  Loader2,
+  Trash2,
 } from "lucide-react"
 import { changeLeadStatus, addLeadNote, markLeadLost, convertLeadToClient } from "../actions"
 import { toast } from "sonner"
@@ -123,16 +123,18 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
  }
  }
 
+ const actionBtn =
+  "h-8 w-8 rounded-md border border-neutral-200 bg-white hover:bg-neutral-100 flex items-center justify-center transition-colors text-neutral-600 disabled:opacity-50 disabled:cursor-not-allowed"
+
  return (
  <>
- <div className="flex items-center justify-end gap-1.5">
- {/* View Client button for converted leads */}
+ <div className="flex items-center justify-end gap-2">
  {lead.leadStatus === "CONVERTED" && lead.clientId && (
  <Link href="/dashboard/clients">
  <Button
  size="sm"
  variant="outline"
- className="h-9 text-xs gap-1.5 bg-[var(--accent-soft)] border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent-soft)]"
+ className="h-8 text-xs gap-1.5 rounded-md border border-neutral-200 bg-white hover:bg-neutral-100 text-neutral-600"
  >
  <ExternalLink className="h-3.5 w-3.5" />
  {ui.viewClient}
@@ -140,72 +142,58 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
  </Link>
  )}
 
- {/* Quick Action Buttons */}
  {!isReadOnly && (
  <>
- {/* Add Note - Gray */}
- <Button
- size="sm"
- variant="outline"
+ <button
+ type="button"
  onClick={() => setNoteDialog(true)}
  disabled={loading}
- className="h-9 w-9 p-0 bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-card)] hover:text-[var(--text-primary)] hover:border-[var(--border-subtle)] transition-all"
+ className={actionBtn}
  title={ui.addNote}
  >
  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
- </Button>
-
- {/* Send Email - Blue */}
- <Button
- size="sm"
- variant="outline"
+ </button>
+ <button
+ type="button"
  onClick={handleEmailClick}
  disabled={!lead.email}
- className="h-9 w-9 p-0 bg-[var(--bg-card)] border-blue-500/30 text-[var(--accent)] hover:bg-[var(--bg-card)] hover:border-blue-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+ className={actionBtn}
  title={lead.email ? `${ui.sendEmail} ${lead.email}` : ui.noEmail}
  >
  <Mail className="h-4 w-4" />
- </Button>
-
- {/* Convert to Client - Green */}
- <Button
- size="sm"
- variant="outline"
+ </button>
+ <button
+ type="button"
  onClick={() => setConvertDialog(true)}
  disabled={loading}
- className="h-9 w-9 p-0 bg-green-500/10 border-green-500/30 text-green-400 hover:bg-green-500/20 hover:border-green-500/50 transition-all"
+ className={actionBtn}
  title={ui.convertToClientShort}
  >
- {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
- </Button>
-
- {/* Mark Lost - Red Outline */}
- <Button
- size="sm"
- variant="outline"
+ {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+ </button>
+ <button
+ type="button"
  onClick={() => setLostDialog(true)}
  disabled={loading}
- className="h-9 w-9 p-0 border-[var(--critical)] text-[var(--critical)] hover:bg-[var(--bg-card)] hover:border-[var(--critical)] transition-all"
+ className={actionBtn}
  title={ui.markLostShort}
  >
- {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
- </Button>
+ {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
+ </button>
  </>
  )}
 
- {/* More Actions Dropdown */}
  <DropdownMenu>
  <DropdownMenuTrigger asChild>
- <Button
- size="sm"
- variant="ghost"
+ <button
+ type="button"
  disabled={loading}
- className="h-9 w-9 p-0 hover:bg-[var(--bg-card)] transition-all"
+ className={actionBtn}
  >
- <MoreVertical className="h-4 w-4" />
- </Button>
+ <MoreHorizontal className="h-4 w-4" />
+ </button>
  </DropdownMenuTrigger>
- <DropdownMenuContent align="end" className="w-48">
+ <DropdownMenuContent align="end" sideOffset={6} className="w-48 bg-white border border-neutral-200 shadow-lg">
  <DropdownMenuLabel className="text-xs text-[var(--text-secondary)]">{ui.changeStatus}</DropdownMenuLabel>
  <DropdownMenuSeparator />
  <DropdownMenuItem onClick={() => handleStatusChange("NEW")} disabled={isReadOnly}>

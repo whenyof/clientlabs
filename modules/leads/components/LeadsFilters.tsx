@@ -129,7 +129,7 @@ export function LeadsFilters({
           <ArrowUpDown className="mr-2 h-4 w-4 text-neutral-500" />
           <SelectValue />
         </SelectTrigger>
-        <SelectContent className="bg-white border border-neutral-200 shadow-lg">
+        <SelectContent align="end" sideOffset={6} className="bg-white border border-neutral-200 shadow-lg">
           <SelectItem value="score-desc">{ui.sortScoreDesc}</SelectItem>
           <SelectItem value="score-asc">{ui.sortScoreAsc}</SelectItem>
           <SelectItem value="lastActionAt-desc">{ui.sortLastActionDesc}</SelectItem>

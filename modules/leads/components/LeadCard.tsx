@@ -91,14 +91,14 @@ export function LeadCard({ lead }: LeadCardProps) {
   return (
     <div
       className={cn(
-        "flex items-center gap-4 px-4 py-3",
+        "relative flex items-center gap-4 pl-5 pr-4 py-3",
         "rounded-lg border border-neutral-200 bg-white",
         "hover:bg-neutral-50 transition-colors"
       )}
     >
-      {/* temperature bar */}
+      {/* temperature bar — flush left, full height */}
       <div
-        className={cn("w-[4px] h-8 rounded shrink-0", temperatureColor)}
+        className={cn("absolute left-0 top-0 bottom-0 w-[4px] rounded-l-lg", temperatureColor)}
         aria-hidden
       />
 

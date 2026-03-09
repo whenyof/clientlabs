@@ -36,6 +36,7 @@ body {
 }
 
 :root {
+  --primary: #10B981;
   --bg-main: #F5F7F9;
   --bg-surface: #F4F7FA;
   --bg-card: #FFFFFF;

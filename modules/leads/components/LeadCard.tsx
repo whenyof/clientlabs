@@ -91,27 +91,30 @@ export function LeadCard({ lead }: LeadCardProps) {
   return (
     <div
       className={cn(
-        "relative flex items-center gap-4 pl-5 pr-4 py-3",
+        "relative flex items-center gap-6 pl-3 pr-4 py-3",
         "rounded-lg border border-neutral-200 bg-white",
         "hover:bg-neutral-50 transition-colors"
       )}
     >
-      {/* temperature bar — flush left, full height */}
-      <div
-        className={cn("absolute left-0 top-0 bottom-0 w-[4px] rounded-l-lg", temperatureColor)}
+      {/* temperature bar */}
+      <span
+        className={cn(
+          "absolute left-0 top-0 bottom-0 w-[4px] rounded-l-lg",
+          temperatureColor
+        )}
         aria-hidden
       />
 
       {/* avatar */}
-      <div className="h-8 w-8 rounded-full bg-neutral-100 ring-1 ring-neutral-200 flex items-center justify-center text-xs font-medium text-neutral-700 shrink-0">
+      <div className="h-8 w-8 shrink-0 rounded-full bg-neutral-100 ring-1 ring-neutral-200 flex items-center justify-center text-xs font-medium text-neutral-700">
         {initial}
       </div>
 
-      {/* lead info */}
-      <div className="flex-1 min-w-0">
+      {/* BLOCK 1 — Lead information */}
+      <div className="flex flex-col min-w-[220px]">
         <Link
           href={`/dashboard/leads/${lead.id}`}
-          className="block text-sm font-semibold text-neutral-900 truncate"
+          className="text-sm font-semibold text-neutral-900 truncate"
         >
           {lead.name || "Sin nombre"}
         </Link>
@@ -121,41 +124,37 @@ export function LeadCard({ lead }: LeadCardProps) {
           </div>
         )}
         {"source" in lead && lead.source && (
-          <div className="text-xs text-neutral-400">
+          <div className="text-xs text-neutral-400 truncate">
             Capturado por {lead.source}
           </div>
         )}
       </div>
 
-      {/* status badge */}
-      <span
-        className={cn(
-          "text-xs px-2 py-0.5 rounded-md whitespace-nowrap shrink-0",
-          statusStyle
-        )}
-      >
-        {statusLabel}
-      </span>
-
-      {/* score */}
-      <div className="flex flex-col text-xs shrink-0">
-        <span className="text-neutral-700">{score} pts</span>
-        <div className="w-12 h-1 bg-neutral-200 rounded overflow-hidden">
-          <div
-            className="h-full bg-emerald-500"
-            style={{ width: `${scorePct}%` }}
-          />
+      {/* BLOCK 2 — Lead metadata */}
+      <div className="flex items-center gap-4 text-sm text-neutral-600">
+        <span
+          className={cn(
+            "text-xs px-2 py-0.5 rounded-md whitespace-nowrap",
+            statusStyle
+          )}
+        >
+          {statusLabel}
+        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-neutral-700">{score} pts</span>
+          <div className="w-12 h-1 bg-neutral-200 rounded overflow-hidden">
+            <div
+              className="h-full bg-emerald-500"
+              style={{ width: `${scorePct}%` }}
+            />
+          </div>
         </div>
+        <span className="text-xs text-neutral-500">{lastActivity}</span>
       </div>
 
-      {/* last activity */}
-      <div className="text-xs text-neutral-500 w-16 shrink-0">
-        {lastActivity}
-      </div>
-
-      {/* actions */}
+      {/* BLOCK 3 — Actions */}
       <div
-        className="flex items-center gap-2 ml-auto shrink-0"
+        className="flex items-center gap-3 ml-auto shrink-0"
         onClick={(e) => e.preventDefault()}
       >
         <LeadRowActions lead={lead} />

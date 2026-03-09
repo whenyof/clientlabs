@@ -37,9 +37,12 @@ export function ImportHistoryPanel({ batches }: ImportHistoryPanelProps) {
  return (
  <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)]">
  {/* Collapsed Header */}
- <button
+ <Button
+ type="button"
+ variant="outline"
+ size="sm"
  onClick={() => setIsExpanded(!isExpanded)}
- className="w-full flex items-center justify-between p-4 hover:bg-[var(--bg-card)] transition-colors"
+ className="w-full flex items-center justify-between p-4 hover:bg-[var(--bg-card)] transition-colors border-0 rounded-xl"
  >
  <div className="flex items-center gap-3">
  <Upload className="h-5 w-5 text-[var(--accent)]" />
@@ -55,7 +58,7 @@ export function ImportHistoryPanel({ batches }: ImportHistoryPanelProps) {
  ) : (
  <ChevronRight className="h-5 w-5 text-[var(--text-secondary)]" />
  )}
- </button>
+ </Button>
 
  {/* Expanded Content */}
  {isExpanded && (

@@ -123,75 +123,76 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
  }
  }
 
- const actionBtn =
-  "h-8 w-8 rounded-md border border-neutral-200 bg-white hover:bg-neutral-100 flex items-center justify-center transition-colors text-neutral-600 disabled:opacity-50 disabled:cursor-not-allowed"
+ const iconBtn =
+  "p-1.5 text-neutral-500 hover:text-neutral-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 
  return (
  <>
- <div className="flex items-center justify-end gap-2">
+ <div className="flex items-center gap-3 ml-auto">
  {lead.leadStatus === "CONVERTED" && lead.clientId && (
- <Link href="/dashboard/clients">
- <Button
- size="sm"
- variant="outline"
- className="h-8 text-xs gap-1.5 rounded-md border border-neutral-200 bg-white hover:bg-neutral-100 text-neutral-600"
+ <Link
+ href="/dashboard/clients"
+ className="p-1.5 text-neutral-500 hover:text-neutral-900 transition-colors"
+ title={ui.viewClient}
  >
- <ExternalLink className="h-3.5 w-3.5" />
- {ui.viewClient}
- </Button>
+ <ExternalLink className="h-4 w-4" />
  </Link>
  )}
 
  {!isReadOnly && (
- <>
- <button
- type="button"
- onClick={() => setNoteDialog(true)}
- disabled={loading}
- className={actionBtn}
- title={ui.addNote}
- >
- {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
- </button>
- <button
- type="button"
- onClick={handleEmailClick}
- disabled={!lead.email}
- className={actionBtn}
- title={lead.email ? `${ui.sendEmail} ${lead.email}` : ui.noEmail}
- >
- <Mail className="h-4 w-4" />
- </button>
- <button
- type="button"
- onClick={() => setConvertDialog(true)}
- disabled={loading}
- className={actionBtn}
- title={ui.convertToClientShort}
- >
- {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
- </button>
- <button
- type="button"
- onClick={() => setLostDialog(true)}
- disabled={loading}
- className={actionBtn}
- title={ui.markLostShort}
- >
- {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
- </button>
- </>
+         <>
+         <Button
+         type="button"
+         variant="outline"
+         size="sm"
+         onClick={() => setNoteDialog(true)}
+         disabled={loading}
+         className={iconBtn}
+         title={ui.addNote}
+         >
+         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
+         </Button>
+         <Button
+         type="button"
+         variant="outline"
+         size="sm"
+         onClick={handleEmailClick}
+         disabled={!lead.email}
+         className={iconBtn}
+         title={lead.email ? `${ui.sendEmail} ${lead.email}` : ui.noEmail}
+         >
+         <Mail className="h-4 w-4" />
+         </Button>
+         <Button
+         type="button"
+         variant="outline"
+         size="sm"
+         onClick={() => setConvertDialog(true)}
+         disabled={loading}
+         className={iconBtn}
+         title={ui.convertToClientShort}
+         >
+         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+         </Button>
+         <Button
+         type="button"
+         variant="outline"
+         size="sm"
+         onClick={() => setLostDialog(true)}
+         disabled={loading}
+         className={iconBtn}
+         title={ui.markLostShort}
+         >
+         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
+         </Button>
+         </>
  )}
 
  <DropdownMenu>
  <DropdownMenuTrigger asChild>
- <button
- type="button"
- disabled={loading}
- className={actionBtn}
- >
+ <Button type="button" variant="outline" size="sm" disabled={loading} className={iconBtn}>
  <MoreHorizontal className="h-4 w-4" />
- </button>
+ </Button>
  </DropdownMenuTrigger>
  <DropdownMenuContent align="end" sideOffset={6} className="w-48 bg-white border border-neutral-200 shadow-lg">
  <DropdownMenuLabel className="text-xs text-[var(--text-secondary)]">{ui.changeStatus}</DropdownMenuLabel>

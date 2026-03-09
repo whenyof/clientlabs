@@ -1,4 +1,5 @@
 import { X } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 type TagPillProps = {
  tag: string
@@ -49,16 +50,19 @@ export function TagPill({ tag, onRemove, size = "sm" }: TagPillProps) {
  >
  {tag}
  {onRemove && (
- <button
+ <Button
+ type="button"
+ variant="outline"
+ size="sm"
  onClick={(e) => {
  e.stopPropagation()
  onRemove()
  }}
- className="hover:bg-[var(--bg-card)] rounded-full p-0.5 transition-colors"
+ className="hover:bg-[var(--bg-card)] rounded-full p-0.5 transition-colors h-auto"
  title="Eliminar tag"
  >
  <X className="h-3 w-3" />
- </button>
+ </Button>
  )}
  </span>
  )

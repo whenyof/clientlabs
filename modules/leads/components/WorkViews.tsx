@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation"
 import { LayoutGrid, Clock, Calendar } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 type WorkView = "all" | "today" | "week"
 
@@ -67,8 +68,11 @@ export function WorkViews({ counts }: {
  const isActive = currentView === view.id
 
  return (
- <button
+ <Button
  key={view.id}
+ type="button"
+ variant="outline"
+ size="sm"
  onClick={view.onClick}
  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all whitespace-nowrap text-sm ${isActive
  ? "bg-[var(--bg-card)] border-blue-500/40 text-[var(--accent)]"
@@ -83,7 +87,7 @@ export function WorkViews({ counts }: {
  }`}>
  {view.count}
  </span>
- </button>
+ </Button>
  )
  })}
  </div>

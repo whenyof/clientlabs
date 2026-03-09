@@ -3,6 +3,40 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
+export async function GET(
+  _req: NextRequest,
+  props: { params: Promise<{ id: string }> }
+) {
+  const params = await props.params
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const lead = await prisma.lead.findFirst({
+      where: { id: params.id, userId: session.user.id },
+    })
+    if (!lead) {
+      return NextResponse.json({ error: 'Lead not found' }, { status: 404 })
+    }
+
+    const activities = await prisma.activity.findMany({
+      where: { leadId: params.id },
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, type: true, title: true, description: true, createdAt: true },
+    })
+
+    return NextResponse.json(activities)
+  } catch (error) {
+    console.error('Error fetching activity:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
 export async function POST(
  request: NextRequest,
  props: { params: Promise<{ id: string }> }

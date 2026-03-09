@@ -1,298 +1,318 @@
 "use client"
 
 import { useState, useEffect, useCallback, useMemo, memo } from "react"
-import { format } from "date-fns"
+import { format, isToday, isYesterday, differenceInDays } from "date-fns"
 import { es } from "date-fns/locale"
-import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
 import {
-    MousePointer2,
-    Eye,
-    ShoppingCart,
-    CreditCard,
-    Download,
-    Mail,
-    Calendar,
-    ChevronDown,
-    Loader2,
-    History,
-    Zap,
-    AlertCircle,
-    RefreshCcw
+  Eye,
+  MousePointer2,
+  ShoppingCart,
+  CreditCard,
+  Mail,
+  Zap,
+  StickyNote,
+  Phone,
+  CheckSquare,
+  Loader2,
+  History,
+  AlertCircle,
+  RefreshCcw,
+  Clock,
 } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
-interface Event {
-    type: string
-    createdAt: string
+interface TimelineEvent {
+  id: string
+  type: string
+  createdAt: string
+  title?: string
+  description?: string
+}
+
+interface ActivityItem {
+  id: string
+  type: string
+  title: string
+  description: string | null
+  createdAt: string
 }
 
 interface TimelineSession {
-    sessionId: string
-    events: Event[]
+  sessionId: string
+  events: { type: string; createdAt: string }[]
 }
 
-interface Pagination {
-    page: number
-    pageSize: number
-    totalSessions: number
-    totalPages: number
-    hasNext: boolean
+const EVENT_LABELS: Record<string, string> = {
+  page_view: "Visitó página",
+  cta_click: "Clic en CTA",
+  form_submit: "Envió formulario",
+  email_capture: "Capturó email",
+  add_to_cart: "Añadió al carrito",
+  payment_completed: "Pago completado",
+  demo_request: "Solicitó demo",
+  NOTE: "Nota",
+  CALL: "Llamada",
+  EMAIL: "Email",
+  TASK: "Tarea",
 }
 
-/**
- * Ensures a minimum duration for a promise to prevent visual flickering
- * when the back-end response is extremely fast.
- */
-async function withMinimumDelay<T>(promise: Promise<T>, minMs = 120): Promise<T> {
-    const start = Date.now()
-    const result = await promise
-    const elapsed = Date.now() - start
-    if (elapsed < minMs) {
-        await new Promise(r => setTimeout(r, minMs - elapsed))
-    }
-    return result
+function getEventLabel(type: string, title?: string): string {
+  if (title) return title
+  return EVENT_LABELS[type] ?? type.replace(/_/g, " ")
+}
+
+function getDayGroup(date: Date): string {
+  if (isToday(date)) return "Hoy"
+  if (isYesterday(date)) return "Ayer"
+  const days = differenceInDays(new Date(), date)
+  if (days < 7) return `Hace ${days} días`
+  if (days < 30) return `Hace ${Math.floor(days / 7)} sem`
+  return format(date, "d MMM yyyy", { locale: es })
 }
 
 const EventIcon = memo(({ type }: { type: string }) => {
-    switch (type) {
-        case 'page_view': return <Eye className="h-4 w-4 text-blue-500" />
-        case 'cta_click': return <MousePointer2 className="h-4 w-4 text-emerald-500" />
-        case 'add_to_cart': return <ShoppingCart className="h-4 w-4 text-orange-500" />
-        case 'payment_completed': return <CreditCard className="h-4 w-4 text-emerald-500" />
-        case 'demo_request': return <Zap className="h-4 w-4 text-emerald-500" />
-        case 'form_submit': return <Mail className="h-4 w-4 text-blue-500" />
-        default: return <MousePointer2 className="h-4 w-4 text-[var(--text-secondary)]" />
-    }
+  switch (type) {
+    case "page_view":
+      return <Eye className="h-4 w-4 text-blue-500 shrink-0" />
+    case "cta_click":
+      return <MousePointer2 className="h-4 w-4 text-emerald-500 shrink-0" />
+    case "add_to_cart":
+      return <ShoppingCart className="h-4 w-4 text-orange-500 shrink-0" />
+    case "payment_completed":
+      return <CreditCard className="h-4 w-4 text-emerald-500 shrink-0" />
+    case "demo_request":
+      return <Zap className="h-4 w-4 text-emerald-500 shrink-0" />
+    case "form_submit":
+    case "email_capture":
+      return <Mail className="h-4 w-4 text-blue-500 shrink-0" />
+    case "NOTE":
+      return <StickyNote className="h-4 w-4 text-amber-500 shrink-0" />
+    case "CALL":
+      return <Phone className="h-4 w-4 text-emerald-500 shrink-0" />
+    case "EMAIL":
+      return <Mail className="h-4 w-4 text-blue-500 shrink-0" />
+    case "TASK":
+      return <CheckSquare className="h-4 w-4 text-violet-500 shrink-0" />
+    default:
+      return <MousePointer2 className="h-4 w-4 text-neutral-400 shrink-0" />
+  }
 })
-EventIcon.displayName = 'EventIcon'
+EventIcon.displayName = "EventIcon"
 
-const SessionCard = memo(({ session, index, totalSessions }: { session: TimelineSession, index: number, totalSessions: number }) => {
-    const hasPurchase = session.events.some(e => e.type === "payment_completed")
-    const hasCart = session.events.some(e => e.type === "add_to_cart")
-    const hasDemo = session.events.some(e => e.type === "demo_request")
+function formatTimeAgo(createdAt: string): string {
+  const date = new Date(createdAt)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffMins = Math.floor(diffMs / 60000)
+  const diffHours = Math.floor(diffMs / 3600000)
+  const diffDays = Math.floor(diffMs / 86400000)
+  if (diffMins < 1) return "Hace un momento"
+  if (diffMins < 60) return `Hace ${diffMins} min`
+  if (diffHours < 24) return `Hace ${diffHours}h`
+  if (diffDays === 1) return "Ayer"
+  if (diffDays < 7) return `Hace ${diffDays} días`
+  return format(date, "d MMM, HH:mm", { locale: es })
+}
 
-    return (
-        <div className="relative pl-12 sm:pl-16 group animate-in slide-in-from-bottom-2 fade-in duration-300 fill-mode-both">
-            {/* Timeline Connector Dot */}
-            <div className={cn(
-                "absolute left-0 mt-3 h-10 w-10 flex items-center justify-center rounded-full bg-[var(--bg-card)] border-2 shadow-sm z-10 transition-transform group-hover:scale-110 duration-300",
-                hasPurchase ? "border-emerald-500 shadow-emerald-500/20" :
-                    hasDemo ? "border-emerald-500 shadow-emerald-500/20" :
-                        hasCart ? "border-blue-500 shadow-blue-500/20" :
-                            "border-blue-500/40"
-            )}>
-                <Zap className={cn(
-                    "h-4 w-4",
-                    hasPurchase ? "text-emerald-500" :
-                        hasDemo ? "text-emerald-500" :
-                            hasCart ? "text-blue-500" :
-                                "text-blue-500"
-                )} />
-            </div>
-
-            <div className={cn(
-                "bg-[var(--bg-card)] rounded-2xl border p-6 shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-sm",
-                "border-[var(--border-subtle)]",
-                hasPurchase && "border-l-4 border-l-emerald-500",
-                hasCart && "border-l-4 border-l-blue-500",
-                hasDemo && "border-l-4 border-l-purple-500"
-            )}>
-                <div className="flex flex-wrap items-center justify-between mb-6 gap-4">
-                    <div className="space-y-1">
-                        <div className="flex items-center gap-3">
-                            <h3 className="text-lg font-bold text-[var(--text-primary)] tracking-tight">
-                                Sesión #{totalSessions - index}
-                            </h3>
-                            {hasCart && !hasPurchase && (
-                                <Badge variant="outline" className="bg-orange-500/10 text-orange-600 border-orange-500/20 text-[10px] py-0 px-2 animate-pulse">
-                                    Abandoned cart opportunity
-                                </Badge>
-                            )}
-                            {hasDemo && (
-                                <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px] py-0 px-2">
-                                    Requested demo
-                                </Badge>
-                            )}
-                        </div>
-                        <p className="text-sm text-[var(--text-secondary)]">
-                            {session.events.length > 0 && format(new Date(session.events[0].createdAt), "PPP 'a las' HH:mm", { locale: es })}
-                        </p>
-                    </div>
-                    <div className="px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-500 text-xs font-bold uppercase tracking-widest">
-                        {session.events.length} Eventos
-                    </div>
-                </div>
-
-                <div className="space-y-4">
-                    {session.events.map((event, eventIdx) => (
-                        <div key={eventIdx} className="flex items-start gap-4 p-3 rounded-xl bg-muted/40 border border-transparent hover:border-[var(--border-subtle)] hover:bg-muted/60 transition-all duration-200 group/item">
-                            <div className="p-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border-subtle)] group-hover/item:border-[var(--accent)]-soft transition-colors">
-                                <EventIcon type={event.type} />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-tight mb-0.5">
-                                    {event.type.replace(/_/g, ' ')}
-                                </p>
-                                <p className="text-xs text-[var(--text-secondary)]">
-                                    {format(new Date(event.createdAt), "HH:mm:ss")}
-                                </p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
+const EventRow = memo(({ event }: { event: TimelineEvent }) => (
+  <div className="flex items-start gap-3 py-2">
+    <div className="flex flex-col items-center">
+      <div className="h-3 w-3 rounded-full bg-neutral-300 shrink-0 mt-1.5" />
+      <div className="w-px flex-1 min-h-[20px] bg-neutral-200" />
+    </div>
+    <div className="flex-1 min-w-0 pb-4">
+      <div className="flex items-start gap-3">
+        <div className="p-2 rounded-lg bg-white border border-neutral-200 shrink-0">
+          <EventIcon type={event.type} />
         </div>
-    )
-})
-SessionCard.displayName = 'SessionCard'
+        <div className="min-w-0 flex-1 space-y-0.5">
+          <p className="text-sm font-medium text-neutral-900">
+            {getEventLabel(event.type, event.title)}
+          </p>
+          <p className="text-xs text-neutral-500">
+            {event.description
+              ? `${event.description} · ${formatTimeAgo(event.createdAt)}`
+              : formatTimeAgo(event.createdAt)}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+))
+EventRow.displayName = "EventRow"
 
 export const LeadTimeline = memo(({ leadId }: { leadId: string }) => {
-    const [sessions, setSessions] = useState<TimelineSession[]>([])
-    const [pagination, setPagination] = useState<Pagination | null>(null)
-    const [loading, setLoading] = useState(true)
-    const [loadingMore, setLoadingMore] = useState(false)
-    const [error, setError] = useState(false)
+  const [insightsSessions, setInsightsSessions] = useState<TimelineSession[]>([])
+  const [activities, setActivities] = useState<ActivityItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
 
-    const fetchInsights = useCallback(async (page: number, signal?: AbortSignal) => {
-        try {
-            if (page === 1) setLoading(true)
-            else setLoadingMore(true)
-            setError(false)
+  const fetchActivities = useCallback(async (signal?: AbortSignal) => {
+    const res = await fetch(`/api/leads/${leadId}/activity`, { signal })
+    if (!res.ok) return []
+    const data = await res.json()
+    return data as ActivityItem[]
+  }, [leadId])
 
-            const url = `/api/leads/${leadId}/insights?page=${page}&pageSize=5`
-            // Apply minimum delay to the fetch promise to avoid flickers
-            const res = await withMinimumDelay(fetch(url, { signal }))
-
-            if (!res.ok) throw new Error('Failed to fetch insights')
-
-            const data = await res.json()
-
-            setSessions(prev =>
-                page === 1 ? data.timeline : [...prev, ...data.timeline]
-            )
-            setPagination(data.pagination)
-        } catch (err: any) {
-            if (err.name !== 'AbortError') {
-                console.error("Error fetching timeline:", err)
-                setError(true)
-            }
-        } finally {
-            setLoading(false)
-            setLoadingMore(false)
-        }
-    }, [leadId])
-
-    useEffect(() => {
-        const controller = new AbortController()
-
-        // IMMEDIATE RESET of state on leadId change (Bloque 2)
-        setSessions([])
-        setPagination(null)
-        setLoading(true)
-        setError(false)
-
-        fetchInsights(1, controller.signal)
-
-        return () => controller.abort()
-    }, [leadId, fetchInsights])
-
-    const handleLoadMore = useCallback(() => {
-        if (loading || loadingMore || !pagination?.hasNext) return
-        fetchInsights(pagination.page + 1)
-    }, [loading, loadingMore, pagination, fetchInsights])
-
-    const handleRetry = useCallback(() => {
-        const page = pagination ? pagination.page : 1
-        fetchInsights(page)
-    }, [pagination, fetchInsights])
-
-    const renderedSessions = useMemo(() => {
-        return sessions.map((session, idx) => (
-            <SessionCard
-                key={session.sessionId}
-                session={session}
-                index={idx}
-                totalSessions={sessions.length}
-            />
-        ))
-    }, [sessions])
-
-    if (loading && !error) return <TimelineSkeleton />
-
-    if (error && sessions.length === 0) {
-        return (
-            <div className="flex flex-col items-center justify-center p-12 bg-red-50/50 border border-red-100 rounded-2xl text-center">
-                <AlertCircle className="h-10 w-10 text-red-500 mb-4" />
-                <h3 className="text-lg font-bold text-red-900 mb-2">Error al cargar el timeline</h3>
-                <p className="text-sm text-red-700 mb-6 max-w-xs mx-auto">
-                    No pudimos recuperar la actividad del lead en este momento. Por favor, intenta de nuevo.
-                </p>
-                <button
-                    onClick={handleRetry}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-white border border-red-200 rounded-xl text-sm font-bold text-red-700 hover:bg-red-50 transition-colors shadow-sm"
-                >
-                    <RefreshCcw className="h-4 w-4" />
-                    Reintentar
-                </button>
-            </div>
-        )
+  const fetchInsights = useCallback(async (signal?: AbortSignal) => {
+    try {
+      const res = await fetch(`/api/leads/${leadId}/insights?page=1&pageSize=20`, {
+        signal,
+      })
+      if (!res.ok) throw new Error("Failed to fetch")
+      const data = await res.json()
+      return (data.timeline ?? []) as TimelineSession[]
+    } catch {
+      return []
     }
+  }, [leadId])
 
+  useEffect(() => {
+    const controller = new AbortController()
+    setLoading(true)
+    setError(false)
+    Promise.all([
+      fetchInsights(controller.signal),
+      fetchActivities(controller.signal),
+    ])
+      .then(([sessions, activityList]) => {
+        setInsightsSessions(sessions)
+        setActivities(activityList)
+      })
+      .catch((err) => {
+        if (err?.name !== "AbortError") setError(true)
+      })
+      .finally(() => setLoading(false))
+    return () => controller.abort()
+  }, [leadId, fetchInsights, fetchActivities])
+
+  const flatEvents = useMemo((): TimelineEvent[] => {
+    const list: TimelineEvent[] = []
+    insightsSessions.forEach((session) => {
+      session.events.forEach((e, i) => {
+        list.push({
+          id: `${session.sessionId}-${i}`,
+          type: e.type,
+          createdAt: e.createdAt,
+        })
+      })
+    })
+    activities.forEach((a) => {
+      list.push({
+        id: `activity-${a.id}`,
+        type: a.type,
+        createdAt: a.createdAt,
+        title: a.title,
+        description: a.description ?? undefined,
+      })
+    })
+    list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    return list
+  }, [insightsSessions, activities])
+
+  const { dayKeys, groupsByDay } = useMemo(() => {
+    const groups: Record<string, TimelineEvent[]> = {}
+    flatEvents.forEach((ev) => {
+      const key = getDayGroup(new Date(ev.createdAt))
+      if (!groups[key]) groups[key] = []
+      groups[key].push(ev)
+    })
+    const order = ["Hoy", "Ayer"]
+    const rest = Object.keys(groups).filter((k) => !order.includes(k))
+    const dayKeys = [...order.filter((k) => groups[k]?.length), ...rest]
+    return { dayKeys, groupsByDay: groups }
+  }, [flatEvents])
+
+  const handleRetry = useCallback(() => {
+    setError(false)
+    setLoading(true)
+    Promise.all([fetchInsights(), fetchActivities()])
+      .then(([sessions, activityList]) => {
+        setInsightsSessions(sessions)
+        setActivities(activityList)
+      })
+      .finally(() => setLoading(false))
+  }, [fetchInsights, fetchActivities])
+
+  if (loading && flatEvents.length === 0) {
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-[var(--text-primary)] tracking-tight flex items-center gap-2">
-                    <History className="h-5 w-5 text-blue-500" />
-                    Timeline de Actividad
-                </h2>
-                {pagination && (
-                    <span className="text-xs text-[var(--text-secondary)] font-medium bg-muted px-2.5 py-1 rounded-full border border-[var(--border-subtle)]">
-                        {pagination.totalSessions} Sesiones
-                    </span>
-                )}
+      <div className="rounded-xl border border-neutral-200 bg-white p-5 space-y-6 animate-pulse">
+        <div className="h-6 w-48 bg-neutral-100 rounded" />
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="flex gap-3">
+              <div className="h-3 w-3 rounded-full bg-neutral-100" />
+              <div className="h-16 flex-1 bg-neutral-100 rounded-lg" />
             </div>
-
-            <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-blue-500/50 before:via-[var(--border-subtle)] before:to-transparent">
-                {renderedSessions}
-            </div>
-
-            {pagination?.hasNext && (
-                <div className="flex justify-center pt-8">
-                    <button
-                        onClick={handleLoadMore}
-                        disabled={loadingMore || loading}
-                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-blue-500/50 hover:bg-blue-500/5 transition-all duration-300 text-sm font-bold text-[var(--text-primary)] disabled:opacity-50 disabled:cursor-not-allowed group shadow-sm"
-                    >
-                        {loadingMore ? (
-                            <span className="flex items-center gap-2">
-                                <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
-                                Cargando...
-                            </span>
-                        ) : (
-                            <>
-                                <ChevronDown className="h-4 w-4 text-blue-500 transition-transform group-hover:translate-y-0.5" />
-                                Cargar sesiones anteriores
-                            </>
-                        )}
-                    </button>
-                </div>
-            )}
+          ))}
         </div>
+      </div>
     )
-})
-LeadTimeline.displayName = 'LeadTimeline'
+  }
 
-function TimelineSkeleton() {
+  if (error && flatEvents.length === 0) {
     return (
-        <div className="space-y-6 animate-pulse">
-            <div className="h-8 w-64 bg-muted rounded-lg" />
-            <div className="space-y-12">
-                {[1, 2, 3].map(i => (
-                    <div key={i} className="pl-16">
-                        <div className="h-48 bg-muted/40 rounded-2xl border border-[var(--border-subtle)]" />
-                    </div>
+      <div className="rounded-xl border border-red-200 bg-red-50/50 p-8 text-center">
+        <AlertCircle className="h-10 w-10 text-red-500 mx-auto mb-3" />
+        <h3 className="font-semibold text-red-900 mb-1">Error al cargar la actividad</h3>
+        <p className="text-sm text-red-700 mb-4">
+          No pudimos recuperar la actividad. Intenta de nuevo.
+        </p>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleRetry}
+          className="inline-flex items-center gap-2 border-red-200 text-red-700 hover:bg-red-50"
+        >
+          <RefreshCcw className="h-4 w-4" />
+          Reintentar
+        </Button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="rounded-xl border border-neutral-200 bg-white p-5">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-lg font-semibold text-neutral-900 flex items-center gap-2">
+          <History className="h-5 w-5 text-neutral-500" />
+          Actividad
+        </h2>
+        {flatEvents.length > 0 && (
+          <span className="text-xs text-neutral-500">
+            {flatEvents.length} {flatEvents.length === 1 ? "entrada" : "entradas"}
+          </span>
+        )}
+      </div>
+
+      {flatEvents.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-8 text-neutral-500">
+          <Clock className="h-8 w-8 mb-3 text-neutral-400" />
+          <p className="text-sm font-medium">
+            Este lead aún no tiene actividad.
+          </p>
+          <p className="text-sm mt-1 text-center max-w-sm">
+            Cuando visite tu web o interactúe con tu negocio aparecerá aquí.
+          </p>
+        </div>
+      ) : (
+        <div className="relative">
+          {dayKeys.map((dayKey) => (
+            <div key={dayKey} className="mb-6">
+              <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">
+                {dayKey}
+              </p>
+              <div className="space-y-4">
+                {groupsByDay[dayKey]?.map((ev) => (
+                  <EventRow key={ev.id} event={ev} />
                 ))}
+              </div>
             </div>
+          ))}
         </div>
-    )
-}
+      )}
+    </div>
+  )
+})
+
+LeadTimeline.displayName = "LeadTimeline"

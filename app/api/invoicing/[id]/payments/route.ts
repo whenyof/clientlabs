@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import * as invoiceService from "@/modules/invoicing/services/invoice.service"
+import * as invoiceService from "@domains/invoicing"
 
 export async function POST(
   request: NextRequest,

@@ -13,9 +13,8 @@ import { SelectSaleForInvoiceDialog } from "./SelectSaleForInvoiceDialog"
 import { IssuedInvoiceEditBlockedModal } from "./IssuedInvoiceEditBlockedModal"
 import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog"
 import type { InvoiceListItem, InvoiceDetail, InvoiceKPIsResponse, ClientOption } from "./types"
-import type { InvoiceLineInput } from "@/modules/invoicing/types"
-import { INVOICE_STATUS } from "@/modules/invoicing/types"
-import { isInvoiceEditable } from "@/modules/invoicing/utils/isInvoiceEditable"
+import type { InvoiceLineInput } from "@domains/invoicing"
+import { INVOICE_STATUS, isInvoiceEditable } from "@domains/invoicing"
 import { formatCurrency } from "@/app/dashboard/finance/lib/formatters"
 
 const defaultFilters: InvoiceFiltersState = {

@@ -2,8 +2,8 @@
 
 import { useParams, useRouter } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
-import { InvoicePreview, type InvoicePreviewCompany } from "@/modules/invoicing/components/InvoicePreview"
-import type { InvoiceDetail } from "@/modules/invoicing/components/types"
+import { InvoicePreview, type InvoicePreviewCompany } from "@domains/invoicing"
+import type { InvoiceDetail } from "@domains/invoicing"
 import { FiscalWarning } from "@/components/fiscal/FiscalWarning"
 import { calculateFiscalCompleteness } from "@/lib/clients/calculateFiscalCompleteness"
 

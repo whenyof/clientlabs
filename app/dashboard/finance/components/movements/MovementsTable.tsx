@@ -2,7 +2,7 @@
 
 import { memo } from "react"
 import { MovementRow } from "./MovementRow"
-import type { Movement } from "@/modules/finance/movements"
+import type { Movement } from "@domains/finance"
 
 interface MovementsTableProps {
   movements: Movement[]

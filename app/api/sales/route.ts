@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
-import { generateInvoiceFromSale } from '@/modules/billing/services/invoice-generator.service'
-import { createInvoiceFromSale } from '@/modules/billing/services/finance-invoice'
+import { generateInvoiceFromSale, createInvoiceFromSale } from '@domains/billing'
 
 /**
  * GET /api/sales - List sales for current user. Optional ?clientId= to filter by client (e.g. for invoice creation).

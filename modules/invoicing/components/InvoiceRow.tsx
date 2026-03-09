@@ -14,9 +14,7 @@ import {
   Trash2,
 } from "lucide-react"
 import type { InvoiceListItem } from "./types"
-import { INVOICE_STATUS } from "@/modules/invoicing/types"
-import { isInvoiceEditable } from "@/modules/invoicing/utils/isInvoiceEditable"
-import { invoiceStatusLabel } from "@/modules/invoicing/utils/invoiceStatusLabel"
+import { INVOICE_STATUS, isInvoiceEditable, invoiceStatusLabel } from "@domains/invoicing"
 
 // Step 5 — Status badge: draft → gray, sent → blue, paid → green, overdue → red, cancelled → dark
 const STATUS_STYLES: Record<string, string> = {

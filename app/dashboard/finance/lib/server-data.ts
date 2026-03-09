@@ -4,14 +4,10 @@
  */
 
 import { prisma } from "@/lib/prisma"
-import {
-  getFinanceSummary,
-  getFinanceMonthlyTrend,
-  getFinanceChartSeries,
-} from "@/modules/finance/services/finance-aggregator"
-import { getUnifiedMovements } from "@/modules/finance/finance-engine"
-import { getMovements } from "@/modules/finance/movements"
-import type { Movement } from "@/modules/finance/movements"
+import { getFinanceSummary, getFinanceMonthlyTrend, getFinanceChartSeries } from "@domains/finance"
+import { getUnifiedMovements } from "@domains/finance"
+import { getMovements } from "@domains/finance"
+import type { Movement } from "@domains/finance"
 import { predictMonthlyRevenue, predictMonthlyExpenses, predictCashFlow } from "./predictors"
 import { detectRecurringExpenses } from "./recurring-expenses"
 

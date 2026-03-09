@@ -14,7 +14,7 @@ import {
  InboxIcon,
 } from "@heroicons/react/24/outline"
 import { formatCurrency, formatDate } from "@/app/dashboard/finance/lib/formatters"
-import { invoiceStatusLabel } from "@/modules/invoicing/utils/invoiceStatusLabel"
+import { invoiceStatusLabel } from "@domains/invoicing"
 import type { ClientInvoiceRow } from "../services/getClientInvoices"
 
 // ---------------------------------------------------------------------------

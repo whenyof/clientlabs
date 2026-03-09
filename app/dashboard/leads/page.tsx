@@ -1,11 +1,11 @@
-import { prisma } from "@/lib/prisma"
+import { prisma } from "@infra/database/prisma"
 import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { LeadsHeader } from "@/modules/leads/components/LeadsHeader"
-import { LeadsKPIs } from "@/modules/leads/components/LeadsKPIs"
-import { LeadsFilters } from "@/modules/leads/components/LeadsFilters"
-import { LeadsTable } from "@/modules/leads/components/LeadsTable"
+import { LeadsHeader } from "@domains/leads/components/LeadsHeader"
+import { LeadsKPIs } from "@domains/leads/components/LeadsKPIs"
+import { LeadsFilters } from "@domains/leads/components/LeadsFilters"
+import { LeadsTable } from "@domains/leads/components/LeadsTable"
 export const dynamic = "force-dynamic"
 
 type SearchParams = Promise<{

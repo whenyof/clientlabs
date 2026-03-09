@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
-import { generateInvoiceFromSale } from '@/modules/billing/services/invoice-generator.service'
-import { createInvoiceFromSale } from '@/modules/billing/services/finance-invoice'
+import { generateInvoiceFromSale, createInvoiceFromSale } from '@domains/billing'
 
 /**
  * PATCH /api/sales/[id] - Update sale (e.g. status). Real persistence.

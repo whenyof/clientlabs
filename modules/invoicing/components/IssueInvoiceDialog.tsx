@@ -11,9 +11,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { formatCurrency, formatDate } from "@/app/dashboard/finance/lib/formatters"
 import type { InvoiceDetail } from "./types"
-import { INVOICE_STATUS } from "@/modules/invoicing/types"
-import { DRAFT_NUMBER_PLACEHOLDER } from "@/modules/invoicing/engine/invoice.engine"
-import { invoiceStatusLabel } from "@/modules/invoicing/utils/invoiceStatusLabel"
+import { INVOICE_STATUS, DRAFT_NUMBER_PLACEHOLDER, invoiceStatusLabel } from "@domains/invoicing"
 import { toast } from "sonner"
 import { FISCAL_DISABLED_TOOLTIP } from "@/components/fiscal/FiscalWarning"
 

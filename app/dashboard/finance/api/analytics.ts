@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { prisma } from "@/lib/prisma"
-import {
-  getFinanceSummary,
-  getFinanceMonthlyTrend,
-} from "@/modules/finance/services/finance-aggregator"
+import { getFinanceSummary, getFinanceMonthlyTrend } from "@domains/finance"
 import { getSalesComparisons } from "@/modules/sales/services/salesAnalytics"
 import { predictMonthlyRevenue, predictMonthlyExpenses, predictCashFlow } from "../lib/predictors"
 

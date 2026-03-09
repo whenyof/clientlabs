@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { registerPayment } from "@/modules/billing/services/invoice.service"
+import { registerPayment } from "@domains/billing"
 
 /**
  * POST /api/billing/invoices/[id]/pay

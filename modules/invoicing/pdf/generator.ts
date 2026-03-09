@@ -1,7 +1,7 @@
 /**
  * Invoice PDF generator — load invoice, render, save to storage, update DB, return URL.
+ * Only import from API routes (server-only by usage).
  */
-
 import { mkdir, writeFile, access, readFile } from "fs/promises"
 import path from "path"
 import { getBrandingForUser } from "./branding"

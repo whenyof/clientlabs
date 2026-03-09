@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSectorConfig } from "@/hooks/useSectorConfig"
+import { useSectorConfig } from "@shared/hooks/useSectorConfig"
 import { DashboardContainer } from "@/components/layout/DashboardContainer"
 import { AnalyticsKPIs } from "./components/AnalyticsKPIs"
 import { DateRangePicker } from "./components/DateRangePicker"

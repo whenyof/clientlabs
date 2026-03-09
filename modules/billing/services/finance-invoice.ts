@@ -5,4 +5,4 @@
 export {
   createInvoiceFromSale,
   backfillInvoicesFromSales,
-} from "@/modules/invoicing/services/invoice.service"
+} from "@domains/invoicing"

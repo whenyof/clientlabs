@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth"
 import { loadFinancePageData } from "@/app/dashboard/finance/lib/server-data"
 import { FinanceView } from "@/app/dashboard/finance/FinanceView"
 import SalesPage from "@/app/dashboard/other/sales/page"
-import { BillingView } from "@/modules/billing/components"
+import { BillingView } from "@domains/billing"
 import PurchasesPage from "./purchases/page"
 
 type PageSearchParams = {

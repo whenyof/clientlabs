@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { backfillInvoicesForUser } from "@/modules/billing/services/invoice-generator.service"
+import { backfillInvoicesForUser } from "@domains/billing"
 
 /**
  * POST /api/billing/backfill

@@ -3,7 +3,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server"
-import { processInvoiceReminders } from "@/modules/billing/services/reminder-engine.service"
+import { processInvoiceReminders } from "@domains/billing"
 
 export const dynamic = "force-dynamic"
 export const maxDuration = 60

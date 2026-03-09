@@ -2,7 +2,7 @@
 
 import { MagnifyingGlassIcon, ArrowsUpDownIcon } from "@heroicons/react/24/outline"
 import { FilterDropdown } from "@/components/ui/FilterDropdown"
-import type { MovementSortField, MovementSortDir } from "@/modules/finance/movements"
+import type { MovementSortField, MovementSortDir } from "@domains/finance"
 
 const PERIOD_OPTIONS = [
   { value: "week", label: "Semana" },

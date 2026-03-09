@@ -413,11 +413,7 @@ export async function issueInvoice(invoiceId: string, userId: string): Promise<I
     console.log("NUMBER ASSIGNED:", number)
     console.log("SEQUENCE USED:", sequenceUsed)
   }
-  // Generate PDF when invoice is issued (stored for download / email)
-  const { generateInvoicePDF } = await import("../pdf/generator")
-  generateInvoicePDF(invoiceId, userId, { forceRegenerate: true }).catch((e) =>
-    console.error("PDF generation after issue failed:", e)
-  )
+  // PDF generation is done by the API route when the user requests the PDF
   const rectifiesId = (inv as { rectifiesInvoiceId?: string | null }).rectifiesInvoiceId
   if (rectifiesId) {
     await repo.addEvent(rectifiesId, "RECTIFICATION_ISSUED", {
@@ -718,7 +714,7 @@ export async function listInvoices(userId: string, options?: ListInvoicesOptions
   return repo.listByUser(userId, options)
 }
 
-export type InvoiceKPIs = {
+type InvoiceKPIs = {
   outstanding: number
   paidThisMonth: number
   overdueCount: number

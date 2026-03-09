@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react"
 import { MovementsHeader } from "./MovementsHeader"
 import { MovementsTable } from "./MovementsTable"
 import { MovementDetailsDrawer } from "./MovementDetailsDrawer"
-import type { Movement, MovementSortField, MovementSortDir } from "@/modules/finance/movements"
+import type { Movement, MovementSortField, MovementSortDir } from "@domains/finance"
 
 type PeriodValue = "week" | "month" | "quarter" | "year"
 

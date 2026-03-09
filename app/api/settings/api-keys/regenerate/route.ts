@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { createApiKeyPair } from "@/lib/security/hashApiKey"
-import { logger } from "@/lib/logger"
+import { logger } from "@infra/logger/logger"
 
 /**
  * POST: Regenerate a Secret API Key

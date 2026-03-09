@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@shared/ui/button"
 import {
  Dialog,
  DialogContent,
@@ -13,7 +13,7 @@ import { CreateLeadManualDialog } from "./CreateLeadManualDialog"
 import { ImportLeadsDialog } from "./ImportLeadsDialog"
 import { PasteLeadsDialog } from "./PasteLeadsDialog"
 import { ScrapingDialog } from "./ScrapingDialog"
-import { useSectorConfig } from "@/hooks/useSectorConfig"
+import { useSectorConfig } from "@shared/hooks/useSectorConfig"
 
 type Mode = "manual" | "import" | "paste" | "scraping" | null
 

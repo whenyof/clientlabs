@@ -1,8 +1,8 @@
-import { prisma, safePrismaQuery } from "@/lib/prisma"
+import { prisma, safePrismaQuery } from "@infra/database/prisma"
 import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { ClientsView } from "@/modules/clients/components/ClientsView"
+import { ClientsView } from "@domains/clients/components/ClientsView"
 import { getSectorConfigByPath } from "@/config/sectors"
 
 type SearchParams = Promise<{

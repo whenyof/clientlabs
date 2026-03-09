@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { getMovements } from "@/modules/finance/movements"
-import type { MovementSortField, MovementSortDir } from "@/modules/finance/movements"
+import { getMovements } from "@domains/finance"
+import type { MovementSortField, MovementSortDir } from "@domains/finance"
 
 function getDateRange(period: string, startDate?: string | null, endDate?: string | null) {
  if (startDate && endDate) {

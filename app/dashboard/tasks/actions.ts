@@ -3,7 +3,7 @@
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
-import { prisma } from "@/lib/prisma"
+import { prisma } from "@infra/database/prisma"
 import { recalculateClientStatus } from "@/modules/clients/actions"
 import { ensureUserExists } from "@/lib/ensure-user"
 import {

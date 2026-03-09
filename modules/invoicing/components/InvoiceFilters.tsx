@@ -2,7 +2,7 @@
 
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline"
 import { FilterDropdown } from "@/components/ui/FilterDropdown"
-import { invoiceStatusLabel } from "@/modules/invoicing/utils/invoiceStatusLabel"
+import { invoiceStatusLabel } from "@domains/invoicing"
 import type { ClientOption } from "./types"
 
 const PERIOD_OPTIONS = [

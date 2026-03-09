@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation"
 import { XMarkIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline"
 import { formatCurrency, formatDate, getAmountColor } from "../../lib/formatters"
-import type { Movement } from "@/modules/finance/movements"
+import type { Movement } from "@domains/finance"
 
 const ORIGIN_LABELS: Record<Movement["originModule"], string> = {
   sale: "Venta",

@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth"
 import { writeFile, mkdir } from "fs/promises"
 import path from "path"
 import { prisma } from "@/lib/prisma"
-import { createInvoiceFromSale } from "@/modules/invoicing/services/invoice.service"
+import { createInvoiceFromSale } from "@domains/invoicing"
 
 const UPLOAD_DIR = "public/uploads/sales"
 const MAX_SIZE = 10 * 1024 * 1024 // 10MB

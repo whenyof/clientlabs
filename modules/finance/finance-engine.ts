@@ -88,7 +88,7 @@ export async function getPending(
  .reduce((sum, s) => sum + (Number(s.amount) || 0), 0)
 }
 
-export type MonthlyTrendPoint = {
+type MonthlyTrendPoint = {
  month: string
  income: number
  expenses: number

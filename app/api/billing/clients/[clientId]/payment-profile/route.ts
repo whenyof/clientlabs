@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import * as paymentBehaviour from "@/modules/invoicing/behaviour/payment-behaviour.service"
+import * as paymentBehaviour from "@domains/invoicing"
 import { prisma } from "@/lib/prisma"
 
 /**

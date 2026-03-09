@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import * as invoiceService from "@/modules/invoicing/services/invoice.service"
-import { computeDueState } from "@/modules/invoicing/utils/due-engine"
-import type { CreateInvoiceInput } from "@/modules/invoicing/types"
+import * as invoiceService from "@domains/invoicing"
+import { computeDueState } from "@domains/invoicing"
+import type { CreateInvoiceInput } from "@domains/invoicing"
 
 export const dynamic = "force-dynamic"
 
@@ -193,7 +193,7 @@ export async function POST(request: NextRequest) {
     taxPercent: Number(l.taxPercent) || 0,
     lineTotal: l.lineTotal != null ? Number(l.lineTotal) : undefined,
     priceMode: (l.priceMode === "total" ? "total" : undefined) as "base" | "total" | undefined,
-  })) as import("@/modules/invoicing/types").InvoiceLineInput[]
+  })) as import("@domains/invoicing").InvoiceLineInput[]
   if (!clientId || lines.length === 0) {
     return NextResponse.json({ error: "clientId and at least one line required" }, { status: 400 })
   }

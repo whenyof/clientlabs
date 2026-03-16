@@ -10,20 +10,21 @@
 // ---------------------------------------------------------------------------
 
 export interface Client360Base {
- id: string
- name: string | null
- email: string | null
- phone: string | null
- taxId: string | null
- companyName: string | null
- legalName: string | null
- address: string | null
- city: string | null
- postalCode: string | null
- country: string | null
- status: string
- riskLevel: string | null
- createdAt: string
+  id: string
+  name: string | null
+  email: string | null
+  phone: string | null
+  taxId: string | null
+  companyName: string | null
+  legalName: string | null
+  address: string | null
+  city: string | null
+  postalCode: string | null
+  country: string | null
+  source: string | null
+  status: string
+  riskLevel: string | null
+  createdAt: string
 }
 
 // ---------------------------------------------------------------------------

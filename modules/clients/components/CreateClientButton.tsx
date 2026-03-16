@@ -35,7 +35,7 @@ export function CreateClientButton() {
         <>
             <Button
                 onClick={() => setOpen(true)}
-                className="h-11 px-6 shrink-0 bg-blue-500 hover:bg-blue-600 text-white font-semibold shadow-[0_0_20px_rgba(59,130,246,0.2)]"
+                className="h-11 px-6 shrink-0 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
             >
                 <Plus className="h-4 w-4 mr-2" />
                 {labels.clients.newButton}
@@ -101,7 +101,7 @@ export function CreateClientButton() {
                         <Button
                             onClick={handleCreate}
                             disabled={loading}
-                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white"
                         >
                             {loading ? "Creando..." : "Crear Cliente"}
                         </Button>

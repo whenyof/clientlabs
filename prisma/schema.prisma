@@ -331,7 +331,7 @@ model CalendarEvent {
   clientPhone   String?
   googleEventId String?       @unique
   createdAt     DateTime      @default(now())
-  updatedAt     DateTime
+  updatedAt     DateTime      @updatedAt
   Client        Client?       @relation(fields: [clientId], references: [id])
   User          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -534,7 +534,7 @@ model FinancialRecord {
   date          DateTime @default(now())
   note          String?
   createdAt     DateTime @default(now())
-  updatedAt     DateTime
+  updatedAt     DateTime @updatedAt
   User          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([category])
@@ -639,7 +639,7 @@ model LeadAIInsight {
   actions       Json
   estimatedTime Int?
   createdAt     DateTime @default(now())
-  updatedAt     DateTime
+  updatedAt     DateTime @updatedAt
   Lead          Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
   User          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -710,7 +710,7 @@ model Post {
   published   Boolean   @default(false)
   publishedAt DateTime?
   createdAt   DateTime  @default(now())
-  updatedAt   DateTime
+  updatedAt   DateTime  @updatedAt
 
   @@index([category])
   @@index([publishedAt])
@@ -719,18 +719,14 @@ model Post {
 }
 
 model Sale {
-  id               String           @id
+  id               String           @id @default(uuid())
   userId           String
   clientId         String?
   clientName       String
   clientEmail      String?
-  product          String
-  category         String?
-  price            Float
-  discount         Float            @default(0)
-  tax              Float            @default(0)
-  total            Float
-  amount           Float?
+  discount         Decimal          @db.Decimal(10, 2)
+  total            Decimal          @db.Decimal(10, 2)
+  amount           Decimal?         @db.Decimal(10, 2)
   currency         String           @default("EUR")
   provider         String           @default("STRIPE")
   paymentMethod    String
@@ -741,20 +737,37 @@ model Sale {
   notes            String?
   saleDate         DateTime         @default(now())
   createdAt        DateTime         @default(now())
-  updatedAt        DateTime
+  updatedAt        DateTime         @updatedAt
   invoiceUrl       String?
+  subtotal         Decimal          @db.Decimal(10, 2)
+  taxTotal         Decimal          @db.Decimal(10, 2)
   BillingInvoice   BillingInvoice[]
   Invoice          Invoice[]
   Client           Client?          @relation(fields: [clientId], references: [id])
   User             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items            SaleItem[]
 
-  @@index([category])
   @@index([paymentMethod])
   @@index([saleDate])
   @@index([status])
   @@index([stripeCustomerId])
   @@index([stripePaymentId])
   @@index([userId])
+}
+
+model SaleItem {
+  id        String   @id @default(uuid())
+  saleId    String
+  product   String?
+  quantity  Int
+  price     Decimal  @db.Decimal(10, 2)
+  taxRate   Int
+  lineTotal Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sale      Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+
+  @@index([saleId])
 }
 
 model Session {
@@ -861,10 +874,12 @@ model User {
   pipelineStages         PipelineStage[]
   providers              Provider[]
   providerContactLogs    ProviderContactLog[]
+  providerEmailTemplates ProviderEmailTemplate[]
   providerFiles          ProviderFile[]
   providerNotes          ProviderNote[]
   providerOrders         ProviderOrder[]
   providerPayments       ProviderPayment[]
+  providerProducts       ProviderProduct[]
   providerTasks          ProviderTask[]
   providerTimelineEvents ProviderTimelineEvent[]
   realEstateMetrics      RealEstateMetrics[]
@@ -991,7 +1006,7 @@ model Website {
   description   String?
   status        String        @default("draft")
   createdAt     DateTime      @default(now())
-  updatedAt     DateTime
+  updatedAt     DateTime      @updatedAt
   palette       Json?
   Lead          Lead[]
   User          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -1160,14 +1175,15 @@ model Subscription {
 }
 
 model Payment {
-  id                    String   @id @default(cuid())
+  id                    String   @id @default(uuid())
   userId                String
-  amount                Int
+  amount                Decimal  @db.Decimal(10, 2)
   currency              String   @default("EUR")
   status                String   @default("PENDING")
   invoiceUrl            String?
   stripePaymentIntentId String?
   createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
   User                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -1504,10 +1520,12 @@ model Provider {
   invoices                 Invoice[]
   User                     User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
   contactLogs              ProviderContactLog[]
+  providerEmailTemplates   ProviderEmailTemplate[]
   files                    ProviderFile[]
   notes_list               ProviderNote[]
   orders                   ProviderOrder[]
   payments                 ProviderPayment[]
+  products                 ProviderProduct[]
   tasks                    ProviderTask[]
   timelineEvents           ProviderTimelineEvent[]
   services                 Service[]                @relation("ProviderToService")
@@ -1520,6 +1538,29 @@ model Provider {
   @@index([lastOrderDate])
 }
 
+model ProviderProduct {
+  id          String              @id @default(cuid())
+  providerId  String
+  userId      String
+  name        String
+  code        String
+  unit        String?
+  price       Float               @default(0)
+  description String?
+  isActive    Boolean             @default(true)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  category    String?
+  notes       String?
+  orderItems  ProviderOrderItem[]
+  Provider    Provider            @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  User        User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([providerId])
+  @@index([userId])
+  @@index([isActive])
+}
+
 model ProviderOrder {
   id                   String                  @id @default(cuid())
   providerId           String
@@ -1527,21 +1568,69 @@ model ProviderOrder {
   amount               Float                   @default(0)
   status               ProviderOrderStatus     @default(PENDING)
   orderDate            DateTime                @default(now())
+  sentAt               DateTime?
   expectedDeliveryDate DateTime?
   type                 ProviderOrderType
   description          String?
   createdAt            DateTime                @default(now())
   updatedAt            DateTime                @updatedAt
+  emailBody            String?
+  emailSubject         String?
+  emailTo              String?
+  notes                String?
+  orderNumber          String?
+  templateId           String?
   invoice              Invoice?
   files                ProviderFile[]          @relation("OrderFiles")
   Provider             Provider                @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  emailTemplate        ProviderEmailTemplate?  @relation("OrderTemplate", fields: [templateId], references: [id])
   User                 User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items                ProviderOrderItem[]
   payment              ProviderPayment?
   timelineEvents       ProviderTimelineEvent[]
 
   @@index([providerId])
   @@index([userId])
   @@index([status])
+  @@index([templateId])
+}
+
+model ProviderOrderItem {
+  id                String           @id @default(cuid())
+  orderId           String
+  productId         String?
+  codeSnapshot      String
+  nameSnapshot      String
+  unitSnapshot      String?
+  unitPriceSnapshot Float
+  quantity          Float            @default(1)
+  subtotal          Float
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  order             ProviderOrder    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product           ProviderProduct? @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model ProviderEmailTemplate {
+  id         String          @id @default(cuid())
+  providerId String
+  userId     String
+  name       String
+  subject    String
+  body       String
+  isDefault  Boolean         @default(false)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  Provider   Provider        @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  User       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders     ProviderOrder[] @relation("OrderTemplate")
+
+  @@index([providerId])
+  @@index([userId])
+  @@index([isDefault])
 }
 
 model ProviderPayment {
@@ -1722,6 +1811,10 @@ model Invoice {
   isRectification        Boolean              @default(false)
   rectificationReason    String?
   rectifiesInvoiceId     String?
+  /// Optional discount total at invoice level
+  discount               Decimal              @default(0) @db.Decimal(14, 2)
+  /// Optional explicit tax total (mirrors taxAmount) for reporting
+  taxTotal               Decimal              @default(0) @db.Decimal(14, 2)
   Client                 Client?              @relation(fields: [clientId], references: [id], onDelete: Restrict)
   LinkedInvoicePayment   InvoicePayment?      @relation("LinkedFromPayment", fields: [linkedInvoicePaymentId], references: [id])
   Provider               Provider?            @relation(fields: [providerId], references: [id], onDelete: Restrict)
@@ -1732,6 +1825,7 @@ model Invoice {
   Sale                   Sale?                @relation(fields: [saleId], references: [id])
   User                   User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   events                 InvoiceEvent[]
+  items                  InvoiceItem[]
   lines                  InvoiceLine[]
   payments               InvoicePayment[]     @relation("InvoicePayments")
   reminderLogs           InvoiceReminderLog[]
@@ -1761,6 +1855,36 @@ model InvoiceReminderLog {
   @@index([sentAt])
 }
 
+enum ScanSessionEntityType {
+  PROVIDER
+  ORDER
+  PAYMENT
+}
+
+enum ScanSessionStatus {
+  PENDING
+  COMPLETED
+  EXPIRED
+}
+
+model ScanSession {
+  id              String               @id @default(cuid())
+  entityType      ScanSessionEntityType
+  entityId        String
+  category        ProviderFileCategory
+  documentName    String
+  createdByUserId String
+
+  status          ScanSessionStatus    @default(PENDING)
+  fileUrl         String?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  expiresAt       DateTime
+
+  @@index([createdByUserId])
+  @@index([entityType, entityId])
+}
+
 model InvoiceLine {
   id              String   @id @default(cuid())
   invoiceId       String
@@ -1773,6 +1897,21 @@ model InvoiceLine {
   taxAmount       Decimal  @db.Decimal(14, 2)
   total           Decimal  @db.Decimal(14, 2)
   Invoice         Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+}
+
+model InvoiceItem {
+  id        String   @id @default(uuid())
+  invoiceId String
+  product   String?
+  quantity  Int
+  price     Decimal  @db.Decimal(10, 2)
+  taxRate   Int
+  lineTotal Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  invoice   Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 
   @@index([invoiceId])
 }
@@ -2164,6 +2303,9 @@ enum ProviderOrderStatus {
   DRAFT
   ISSUE
   CLOSED
+  PREPARED
+  PENDING_SEND_CONFIRMATION
+  SENT
 }
 
 enum ProviderPaymentStatus {
@@ -2195,6 +2337,7 @@ enum ProviderFileCategory {
   ORDER
   CONTRACT
   OTHER
+  ORDER_SHEET
 }
 
 enum ProviderTimelineEventType {

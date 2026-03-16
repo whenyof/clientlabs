@@ -204,15 +204,15 @@ export function ClientQuickActions({ clientId, clientName }: ClientQuickActionsP
  router.refresh()
  }, [router])
 
- return (
- <>
- {/* ─── Actions bar ─── */}
- <div
- id="client360-quick-actions"
- className="
- flex flex-wrap items-center gap-2
- "
- >
+  return (
+    <>
+      {/* ─── Actions bar ─── */}
+      <div
+        id="client360-quick-actions"
+        className="
+        sticky top-0 z-10 flex flex-wrap items-center gap-2 bg-[var(--bg-card)]/90 backdrop-blur
+        "
+      >
  {ACTIONS.map((action) => {
  const Icon = action.icon
  return (

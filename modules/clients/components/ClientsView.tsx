@@ -2,29 +2,18 @@
 
 import { useState, useMemo, useCallback, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Search, Plus } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { ClientsKPIs } from "./ClientsKPIs"
-import { ClientsTable } from "./ClientsTable"
+import { ClientsHeader } from "@domains/clients/components/ClientsHeader"
+import { ClientsKPIs } from "@domains/clients/components/ClientsKPIs"
+import { ClientsTable } from "@domains/clients/components/ClientsTable"
+import type { ClientWithLead as TableClientWithLead } from "@domains/clients/components/ClientsTable"
+import { ClientsInsights } from "@domains/clients/components/ClientsInsights"
 import { ClientsFilters } from "./ClientsFilters"
-import { ClientSidePanel } from "./ClientSidePanel"
-import { CreateClientButton } from "./CreateClientButton"
-import { Client } from "@prisma/client"
 import { deriveClientStatus, isClientForgotten } from "@/lib/logic/client-status"
-import { useSectorConfig } from "@/hooks/useSectorConfig"
 
-type ClientWithLead = Client & {
-    convertedFromLead: {
-        id: string
-        name: string | null
-        convertedAt: Date | null
-    } | null
+type ClientWithLead = TableClientWithLead & {
     Task?: { id: string, status?: string }[]
     notes?: string | null
     Sale?: { id: string }[]
-    clientTraits?: string[]
-    riskLevel?: string | null
 }
 
 type ClientsViewProps = {
@@ -48,7 +37,6 @@ type ClientsViewProps = {
 }
 
 export function ClientsView({ initialClients, allClientsBase, currentFilters, serverNow }: ClientsViewProps & { serverNow?: string }) {
-    const { labels } = useSectorConfig()
     const router = useRouter()
     const searchParams = useSearchParams()
     // 1. Unified Reference Date for Hydration Consistency
@@ -57,9 +45,6 @@ export function ClientsView({ initialClients, allClientsBase, currentFilters, se
 
     // State for the table
     const [clients, setClients] = useState<ClientWithLead[]>(initialClients)
-    // State for the Side Panel
-    const [selectedClient, setSelectedClient] = useState<ClientWithLead | null>(null)
-    const [isPanelOpen, setIsPanelOpen] = useState(false)
     // State for KPIs (all clients set)
     const [kpiClients, setKpiClients] = useState(allClientsBase)
 
@@ -68,13 +53,6 @@ export function ClientsView({ initialClients, allClientsBase, currentFilters, se
     // debemos actualizar el estado local para reflejar la "verdad" del servidor.
     useEffect(() => {
         setClients(initialClients)
-    }, [initialClients])
-
-    // Sync selected client when server data changes (e.g. after task/note/reminder + router.refresh)
-    useEffect(() => {
-        if (!selectedClient) return
-        const updated = initialClients.find((c) => c.id === selectedClient.id)
-        if (updated) setSelectedClient(updated)
     }, [initialClients])
 
     useEffect(() => {
@@ -109,7 +87,6 @@ export function ClientsView({ initialClients, allClientsBase, currentFilters, se
         };
 
         setClients(prev => prev.map(updateFn));
-        setSelectedClient(prev => prev && prev.id === clientId ? updateFn(prev) : prev);
         setKpiClients(prev => prev.map(updateFn));
     }, [])
 
@@ -138,48 +115,30 @@ export function ClientsView({ initialClients, allClientsBase, currentFilters, se
     }, [kpiClients, derivedLogic])
 
     return (
-        <div className="space-y-8">
-            {/* Barra de búsqueda + botón Nuevo cliente (igual que Providers) */}
-            <div className="flex flex-wrap items-center gap-3">
-                <div className="relative flex-1 min-w-[200px] max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
-                    <Input
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        placeholder={`Buscar ${labels.clients.plural.toLowerCase()}...`}
-                        className="bg-white/5 border-white/10 text-white pl-10 h-11"
-                    />
-                </div>
-                <CreateClientButton />
-            </div>
+        <div className="space-y-6">
+            <ClientsHeader />
 
-            {/* KPIs */}
             <ClientsKPIs kpis={kpis} />
 
-            {/* Filters */}
-            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur p-4">
-                <ClientsFilters currentFilters={currentFilters} />
-            </div>
-
-            {/* 3. Table */}
-            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur overflow-hidden">
-                <ClientsTable
-                    clients={clientsWithDerivedStatus}
-                    onClientUpdate={handleClientUpdate}
-                    onClientClick={(client: ClientWithLead) => {
-                        setSelectedClient(client)
-                        setIsPanelOpen(true)
-                    }}
+            <div className="rounded-xl border border-neutral-200 bg-white py-3 px-4 shadow-sm">
+                <ClientsFilters
+                    currentFilters={currentFilters}
+                    searchValue={searchTerm}
+                    onSearchChange={setSearchTerm}
                 />
             </div>
 
-            {/* Side Panel Overlay & Sidebar */}
-            <ClientSidePanel
-                client={selectedClient ? derivedLogic(selectedClient) : null}
-                isOpen={isPanelOpen}
-                onClose={() => setIsPanelOpen(false)}
-                onClientUpdate={handleClientUpdate}
-            />
+            <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[3fr_1fr]">
+                <div className="min-w-0">
+                    <ClientsTable
+                        clients={clientsWithDerivedStatus}
+                        onClientUpdate={handleClientUpdate}
+                    />
+                </div>
+                <aside className="lg:min-w-0">
+                    <ClientsInsights clients={clientsWithDerivedStatus} />
+                </aside>
+            </div>
         </div>
     )
 }

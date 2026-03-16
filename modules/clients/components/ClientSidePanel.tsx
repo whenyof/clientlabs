@@ -36,7 +36,7 @@ import { getTasks, createTask, toggleTaskCompletion, deleteTask } from "@/app/da
 import { useAssistant } from "@/context/AssistantContext"
 
 
-import { StatusBadgeSelector } from "./StatusBadgeSelector"
+import { StatusBadgeSelector, type ClientStatus } from "@/components/StatusBadgeSelector"
 import { PaymentStatusBadge } from "./PaymentStatusBadge"
 import { PaymentBehaviourCard } from "./PaymentBehaviourCard"
 import { ReminderDialog } from "./ReminderDialog"
@@ -177,9 +177,20 @@ export function ClientSidePanel({ client, isOpen, onClose, onClientUpdate }: Cli
     const { setSuggestions, clearSuggestions } = useAssistant()
     const [isSalePanelOpen, setIsSalePanelOpen] = useState(false)
 
-    const normalizeStatus = (status: any): "ACTIVE" | "FOLLOW_UP" | "INACTIVE" | "VIP" => {
-        const validStatuses = ["ACTIVE", "FOLLOW_UP", "INACTIVE", "VIP"]
-        return validStatuses.includes(status) ? status : "INACTIVE"
+    type BackendStatus = "ACTIVE" | "FOLLOW_UP" | "INACTIVE" | "VIP"
+    const normalizeStatus = (status: unknown): BackendStatus => {
+        const validStatuses: BackendStatus[] = ["ACTIVE", "FOLLOW_UP", "INACTIVE", "VIP"]
+        return validStatuses.includes(status as BackendStatus) ? (status as BackendStatus) : "INACTIVE"
+    }
+    const backendToClientStatus = (backend: BackendStatus): ClientStatus => {
+        if (backend === "ACTIVE" || backend === "VIP") return "active"
+        if (backend === "INACTIVE") return "inactive"
+        return "risk"
+    }
+    const clientStatusToBackend = (s: ClientStatus): BackendStatus => {
+        if (s === "active") return "ACTIVE"
+        if (s === "inactive") return "INACTIVE"
+        return "FOLLOW_UP"
     }
 
     const [optimisticStatus, setOptimisticStatus] = useOptimistic(
@@ -803,8 +814,7 @@ export function ClientSidePanel({ client, isOpen, onClose, onClientUpdate }: Cli
                                     <h2 className="text-xl font-bold text-white tracking-tight truncate">{client.name || labels.common.noResults}</h2>
                                     <div className="flex items-center gap-2">
                                         <StatusBadgeSelector
-                                            currentStatus={optimisticStatus as "ACTIVE" | "FOLLOW_UP" | "INACTIVE" | "VIP"}
-                                            onStatusChange={handleStatusChange}
+                                            currentStatus={backendToClientStatus(optimisticStatus)}
                                         />
                                         <RiskLevelSelector
                                             currentLevel={(client as any).riskLevel || "LOW"}

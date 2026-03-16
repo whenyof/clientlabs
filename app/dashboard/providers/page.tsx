@@ -65,20 +65,25 @@ export default async function ProvidersPage() {
 
     return (
         <div className="space-y-6">
-            {/* Header: título + contador */}
-            <div>
-                <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">
-                    {labels.providers.title}
-                    <span className="ml-3 text-2xl font-normal text-white/50">
-                        ({kpis.totalProviders})
-                    </span>
-                </h1>
-                <p className="text-base text-white/60 max-w-2xl">
-                    Control de costes, dependencias y riesgos operativos
-                </p>
-            </div>
+            {/* 1. Page identity */}
+            <header className="pb-5">
+                <div className="flex flex-wrap items-end justify-between gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold text-[var(--text-primary)] tracking-tight">
+                            {labels.providers.title}
+                        </h1>
+                        <p className="mt-1 text-base text-[var(--text-secondary)] max-w-xl">
+                            Control de costes, dependencias y riesgos operativos
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <span className="rounded-full bg-white border border-neutral-200/80 px-3 py-1.5 text-sm font-medium text-[var(--text-primary)] tabular-nums shadow-sm">
+                            {kpis.totalProviders} {kpis.totalProviders === 1 ? labels.providers.singular.toLowerCase() : labels.providers.plural.toLowerCase()}
+                        </span>
+                    </div>
+                </div>
+            </header>
 
-            {/* Barra búsqueda + botón único y vista (KPIs + tabla) */}
             <ProvidersView
                 initialProviders={providers}
                 initialKPIs={kpis}

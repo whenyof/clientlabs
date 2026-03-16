@@ -250,123 +250,49 @@ function ReasonsSection({ reasons, level }: { reasons: string[]; level: ClientFi
 // ---------------------------------------------------------------------------
 
 interface ClientFinancialRiskCardProps {
- risk: ClientFinancialRisk
+  risk: ClientFinancialRisk
 }
 
 export function ClientFinancialRiskCard({ risk }: ClientFinancialRiskCardProps) {
- const cfg = LEVEL_CONFIG[risk.level]
+  const hasNoHistory = risk.invoicesSent === 0
 
- const hasNoHistory = risk.invoicesSent === 0
+  return (
+    <section id="client360-financial-risk" className="border-b border-neutral-200 pb-4 space-y-3">
+      <div className="flex items-center gap-2">
+        <ShieldExclamationIcon className="w-4 h-4 text-[var(--text-secondary)]" />
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+          Riesgo financiero
+        </h3>
+      </div>
 
- return (
- <div
- id="client360-financial-risk"
- className={`
- relative overflow-hidden rounded-2xl
- bg-[var(--bg-card)] backdrop-
- border ${cfg.borderColor}
- transition-all duration-300
- hover:shadow-sm ${cfg.glowShadow}
- `}
- >
- {/* Top gradient stripe */}
- <div className={`h-1 bg-[var(--bg-card)] ${cfg.gradient}`} />
-
- {/* Background glow */}
- <div className={`absolute inset-0 bg-[var(--bg-card)] ${cfg.bgGradient} opacity-50 pointer-events-none`} />
-
- {/* Header */}
- <div className="relative flex items-center gap-3 px-6 py-4 border-b border-[var(--border-subtle)]">
- <div className={`p-2.5 rounded-xl bg-[var(--bg-card)] ${cfg.gradient} shadow-sm`}>
- <ShieldExclamationIcon className="w-5 h-5 text-[var(--text-primary)]" />
- </div>
- <div>
- <h3 className="text-sm font-bold text-[var(--text-primary)] tracking-wide">
- Riesgo Financiero
- </h3>
- <p className="text-[11px] text-gray-500 font-medium">
- Análisis basado en historial de pagos
- </p>
- </div>
- </div>
-
- {/* Body */}
- <div className="relative p-6">
- {hasNoHistory ? (
- /* ────── Empty state ────── */
- <div className="flex flex-col items-center justify-center py-8 text-center">
- <div className="w-16 h-16 mb-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] flex items-center justify-center">
- <DocumentCheckIcon className="w-8 h-8 text-gray-600" />
- </div>
- <p className="text-sm text-[var(--text-secondary)] font-medium">
- Sin historial de facturación
- </p>
- <p className="text-xs text-gray-600 mt-1 max-w-[220px]">
- El score de riesgo se calculará cuando existan facturas emitidas
- </p>
- </div>
- ) : (
- /* ────── Full view ────── */
- <div className="flex flex-col lg:flex-row gap-8">
- {/* Left: Score ring */}
- <div className="flex justify-center lg:justify-start">
- <ScoreRing
- score={risk.score}
- level={risk.level}
- label={risk.label}
- />
- </div>
-
- {/* Right: Indicators + bar */}
- <div className="flex-1 min-w-0 space-y-5">
- {/* Indicators grid */}
- <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
- <Indicator
- icon={ClockIcon}
- label="Retraso medio"
- value={`${risk.avgDelayDays}d`}
- accent={risk.avgDelayDays > 15 ? "text-[var(--text-secondary)]" : "text-[var(--text-primary)]"}
- iconBg={cfg.iconBg}
- />
- <Indicator
- icon={ExclamationTriangleIcon}
- label="Peor retraso"
- value={`${risk.worstDelayDays}d`}
- accent={risk.worstDelayDays > 30 ? "text-[var(--critical)]" : "text-[var(--text-primary)]"}
- iconBg={cfg.iconBg}
- />
- <Indicator
- icon={ChartBarIcon}
- label="Tiempo medio de pago"
- value={`${risk.avgPaymentDays}d`}
- iconBg={cfg.iconBg}
- />
- <Indicator
- icon={CheckBadgeIcon}
- label="Volumen vencido"
- value={formatCurrency(risk.overdueAmount)}
- sublabel={risk.overdueCount > 0 ? `(${risk.overdueCount} fact.)` : undefined}
- accent={risk.overdueAmount > 0 ? "text-[var(--critical)]" : "text-[var(--accent)]"}
- iconBg={cfg.iconBg}
- />
- </div>
-
- {/* Invoice bar */}
- <InvoiceBar
- sent={risk.invoicesSent}
- paid={risk.invoicesPaid}
- level={risk.level}
- />
-
- {/* Reasons */}
- <ReasonsSection reasons={risk.reasons} level={risk.level} />
- </div>
- </div>
- )}
- </div>
-
- {/* Hover glow overlay */}
- <div className="absolute inset-0 rounded-2xl bg-[var(--bg-card)] opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
- </div>
- )
+      {hasNoHistory ? (
+        <div className="flex items-center gap-3 text-xs text-[var(--text-secondary)]">
+          <DocumentCheckIcon className="w-4 h-4 text-gray-500" />
+          <span>Sin historial de facturación suficiente para calcular el riesgo.</span>
+        </div>
+      ) : (
+        <div className="flex items-baseline justify-between text-sm">
+          <div className="space-y-0.5">
+            <div className="text-[11px] uppercase tracking-wider text-gray-500">
+              Risk score
+            </div>
+            <div className="text-2xl font-semibold text-[var(--text-primary)] tabular-nums">
+              {risk.score}
+            </div>
+          </div>
+          <div className="text-right space-y-0.5">
+            <div className="text-xs text-[var(--text-secondary)]">
+              Nivel: <span className="font-medium text-[var(--text-primary)]">{risk.label}</span>
+            </div>
+            <div className="text-xs text-[var(--text-secondary)]">
+              Volumen vencido:{" "}
+              <span className="font-medium text-[var(--critical)]">
+                {formatCurrency(risk.overdueAmount)}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
+  )
 }

@@ -216,165 +216,54 @@ interface ClientProfitabilityCardProps {
 }
 
 export function ClientProfitabilityCard({ profitability: p }: ClientProfitabilityCardProps) {
- const hasData = p.totalRevenue > 0
+  const hasData = p.totalRevenue > 0
 
- const marginColor =
- p.marginPercent !== null
- ? p.marginPercent >= 40
- ? "text-[var(--accent)]"
- : p.marginPercent >= 20
- ? "text-[var(--accent)]"
- : p.marginPercent >= 0
- ? "text-[var(--text-secondary)]"
- : "text-[var(--critical)]"
- : "text-[var(--text-secondary)]"
+  const marginColor =
+    p.marginPercent !== null
+      ? p.marginPercent >= 40
+        ? "text-[var(--accent)]"
+        : p.marginPercent >= 20
+          ? "text-[var(--accent)]"
+          : p.marginPercent >= 0
+            ? "text-[var(--text-secondary)]"
+            : "text-[var(--critical)]"
+      : "text-[var(--text-secondary)]"
 
- return (
- <div
- id="client360-profitability"
- className="
- relative overflow-hidden rounded-2xl
- bg-[var(--bg-card)] backdrop-
- border border-[var(--border-subtle)]
- transition-all duration-300
- hover:border-[var(--border-subtle)] hover:shadow-sm hover:shadow-emerald-500/5
- "
- >
- {/* Top gradient stripe */}
- <div className="h-1 bg-[var(--bg-card)] " />
+  return (
+    <section id="client360-profitability" className="border-b border-neutral-200 pb-4 space-y-3">
+      <div className="flex items-center gap-2">
+        <ChartBarSquareIcon className="w-4 h-4 text-[var(--text-secondary)]" />
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+          Rentabilidad
+        </h3>
+        {hasData && <TrendBadge trend={p.trend} />}
+      </div>
 
- {/* Background glow */}
- <div className="absolute inset-0 bg-[var(--bg-card)] opacity-50 pointer-events-none" />
-
- {/* Header */}
- <div className="relative flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)]">
- <div className="flex items-center gap-3">
- <div className="p-2.5 rounded-xl bg-[var(--bg-card)] shadow-sm">
- <ChartBarSquareIcon className="w-5 h-5 text-[var(--text-primary)]" />
- </div>
- <div>
- <h3 className="text-sm font-bold text-[var(--text-primary)] tracking-wide">
- Rentabilidad
- </h3>
- <p className="text-[11px] text-gray-500 font-medium">
- Análisis de ingresos{p.hasCostData ? " y costes" : ""}
- </p>
- </div>
- </div>
- {hasData && <TrendBadge trend={p.trend} />}
- </div>
-
- {/* Body */}
- <div className="relative p-6">
- {!hasData ? (
- /* ────── Empty state ────── */
- <div className="flex flex-col items-center justify-center py-8 text-center">
- <div className="w-16 h-16 mb-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] flex items-center justify-center">
- <SparklesIcon className="w-8 h-8 text-gray-600" />
- </div>
- <p className="text-sm text-[var(--text-secondary)] font-medium">
- Sin datos de facturación
- </p>
- <p className="text-xs text-gray-600 mt-1 max-w-[240px]">
- El análisis de rentabilidad estará disponible cuando existan facturas emitidas
- </p>
- </div>
- ) : (
- <div className="space-y-6">
- {/* ── Hero metrics ── */}
- <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
- {/* Revenue */}
- <div className="rounded-xl bg-[var(--bg-card)]/60 border border-[var(--border-subtle)] p-4 text-center group hover:border-blue-500/30 transition-colors">
- <div className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider mb-1">
- Facturación total
- </div>
- <div className="text-2xl font-bold text-[var(--text-primary)] tabular-nums">
- {formatCurrency(p.totalRevenue)}
- </div>
- </div>
-
- {/* Profit */}
- <div className="rounded-xl bg-[var(--bg-card)]/60 border border-[var(--border-subtle)] p-4 text-center group hover:border-[var(--accent)]-primary/30 transition-colors">
- <div className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider mb-1">
- {p.hasCostData ? "Beneficio estimado" : "—"}
- </div>
- <div className={`text-2xl font-bold tabular-nums ${p.profit !== null ? (p.profit >= 0 ? "text-[var(--accent)]" : "text-[var(--critical)]") : "text-gray-600"}`}>
- {p.profit !== null ? formatCurrency(p.profit) : "—"}
- </div>
- {!p.hasCostData && (
- <div className="text-[10px] text-gray-600 mt-1">
- Sin datos de coste
- </div>
- )}
- </div>
-
- {/* Margin */}
- <div className="rounded-xl bg-[var(--bg-card)]/60 border border-[var(--border-subtle)] p-4 text-center group hover:border-emerald-500/30 transition-colors">
- <div className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider mb-1">
- {p.hasCostData ? "Margen" : "—"}
- </div>
- <div className={`text-2xl font-bold tabular-nums ${marginColor}`}>
- {p.marginPercent !== null ? formatPercent(p.marginPercent) : "—"}
- </div>
- {!p.hasCostData && (
- <div className="text-[10px] text-gray-600 mt-1">
- Sin datos de coste
- </div>
- )}
- </div>
- </div>
-
- {/* ── Mini bar chart ── */}
- <MiniBarChart months={p.months} hasCostData={p.hasCostData} />
-
- {/* ── Bottom KPIs row ── */}
- <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2 border-t border-[var(--border-subtle)]">
- {p.bestMonth && (
- <MonthKpiCard
- bucket={p.bestMonth}
- label="Mejor mes"
- accentColor="text-[var(--accent)]"
- />
- )}
- {p.worstMonth && (
- <MonthKpiCard
- bucket={p.worstMonth}
- label="Peor mes"
- accentColor="text-[var(--text-secondary)]"
- />
- )}
- {p.hasCostData && p.totalCost !== null && (
- <MiniKpi
- icon={CurrencyEuroIcon}
- label="Coste total"
- value={formatCurrency(p.totalCost)}
- />
- )}
- <MiniKpi
- icon={ArrowTrendingUpIcon}
- label="Tendencia"
- value={
- p.trend === "up"
- ? "Creciente"
- : p.trend === "down"
- ? "Decreciente"
- : "Estable"
- }
- accent={
- p.trend === "up"
- ? "text-[var(--accent)]"
- : p.trend === "down"
- ? "text-[var(--critical)]"
- : "text-[var(--text-secondary)]"
- }
- />
- </div>
- </div>
- )}
- </div>
-
- {/* Hover glow overlay */}
- <div className="absolute inset-0 rounded-2xl bg-[var(--bg-card)] opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
- </div>
- )
+      {!hasData ? (
+        <div className="flex items-center gap-3 text-xs text-[var(--text-secondary)]">
+          <SparklesIcon className="w-4 h-4 text-gray-500" />
+          <span>Sin datos suficientes para calcular la rentabilidad del cliente.</span>
+        </div>
+      ) : (
+        <div className="flex items-baseline justify-between text-sm">
+          <div className="space-y-0.5">
+            <div className="text-[11px] uppercase tracking-wider text-gray-500">
+              Ingresos
+            </div>
+            <div className="text-lg font-semibold text-[var(--text-primary)] tabular-nums">
+              {formatCurrency(p.totalRevenue)}
+            </div>
+          </div>
+          <div className="text-right space-y-0.5">
+            <div className="text-[11px] uppercase tracking-wider text-gray-500">
+              Margen
+            </div>
+            <div className={`text-lg font-semibold tabular-nums ${marginColor}`}>
+              {p.marginPercent !== null ? formatPercent(p.marginPercent) : "—"}
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
+  )
 }

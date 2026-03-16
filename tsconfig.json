@@ -22,7 +22,15 @@
     "baseUrl": ".",
 
     "paths": {
-      "@/*": ["./*"],
+      "@/*": ["./src/*"],
+      "@src/*": ["./src/*"],
+      "@/modules/*": ["./modules/*"],
+      "@/components/*": ["./components/*"],
+      "@/app/*": ["./app/*"],
+      "@/lib/*": ["./lib/*"],
+      "@/config/*": ["./config/*"],
+      "@/core/*": ["./core/*"],
+      "@/context/*": ["./context/*"],
       "@domains/*": ["src/domains/*"],
       "@analytics/*": ["src/analytics/*"],
       "@sdk/*": ["src/sdk/*"],

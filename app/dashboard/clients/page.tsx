@@ -3,7 +3,6 @@ import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { ClientsView } from "@domains/clients/components/ClientsView"
-import { getSectorConfigByPath } from "@/config/sectors"
 
 type SearchParams = Promise<{
     status?: string
@@ -26,8 +25,6 @@ export default async function ClientsPage({
     }
 
     const userId = session.user.id
-    const config = getSectorConfigByPath('/dashboard/clients')
-    const { labels } = config
 
     /* ---------------- WHERE ---------------- */
     const where: any = {
@@ -92,18 +89,7 @@ export default async function ClientsPage({
     }))
 
     return (
-        <div className="space-y-8">
-            <div className="flex flex-wrap items-center gap-3">
-                <div className="min-w-0">
-                    <h1 className="text-2xl font-bold text-white tracking-tight truncate">
-                        {labels.clients.title}
-                    </h1>
-                    <p className="text-sm text-white/60 mt-0.5 truncate max-w-xl">
-                        Gestión de relaciones e ingresos para {labels.clients.plural.toLowerCase()}
-                    </p>
-                </div>
-            </div>
-
+        <div className="space-y-6">
             <ClientsView
                 initialClients={clients as any}
                 allClientsBase={allClients as any}
@@ -116,5 +102,5 @@ export default async function ClientsPage({
                 }}
             />
         </div>
-    )
+    );
 }

@@ -1,7 +1,7 @@
 
 import React, { memo } from "react"
 import { Checkbox } from "@/components/ui/checkbox"
-import { StatusBadgeSelector } from "./StatusBadgeSelector"
+import { StatusBadgeSelector, type ClientStatus } from "@/components/StatusBadgeSelector"
 import { ClientRowActions } from "./ClientRowActions"
 import { Mail, Phone, AlertTriangle } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
@@ -30,7 +30,19 @@ type ClientRowProps = {
  onClick?: (client: ClientWithLead) => void
  onStatusChange: (id: string, status: "ACTIVE" | "FOLLOW_UP" | "INACTIVE" | "VIP") => Promise<void>
  isMounted: boolean
- normalizeStatus: (status: any) => "ACTIVE" | "FOLLOW_UP" | "INACTIVE" | "VIP"
+ normalizeStatus: (status: unknown) => "ACTIVE" | "FOLLOW_UP" | "INACTIVE" | "VIP"
+}
+
+function backendToClientStatus(backend: "ACTIVE" | "FOLLOW_UP" | "INACTIVE" | "VIP"): ClientStatus {
+  if (backend === "ACTIVE" || backend === "VIP") return "active"
+  if (backend === "INACTIVE") return "inactive"
+  return "risk"
+}
+
+function clientStatusToBackend(s: ClientStatus): "ACTIVE" | "FOLLOW_UP" | "INACTIVE" | "VIP" {
+  if (s === "active") return "ACTIVE"
+  if (s === "inactive") return "INACTIVE"
+  return "FOLLOW_UP"
 }
 
 export const ClientRow = memo(function ClientRow({
@@ -113,8 +125,7 @@ export const ClientRow = memo(function ClientRow({
  <td className="p-4" onClick={(e) => e.stopPropagation()}>
  <div className="transition-all duration-200 hover:scale-105 origin-left">
  <StatusBadgeSelector
- currentStatus={normalizeStatus(client.status)}
- onStatusChange={(newStatus) => onStatusChange(client.id, newStatus)}
+   currentStatus={backendToClientStatus(normalizeStatus(client.status))}
  />
  </div>
  </td>

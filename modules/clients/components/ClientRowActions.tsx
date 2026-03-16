@@ -99,15 +99,15 @@ export function ClientRowActions({ client }: { client: Client }) {
  return (
  <>
  <div className="flex items-center justify-end gap-2">
- {/* Inline Quick Actions */}
- <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+ {/* Inline Quick Actions - always visible */}
+ <div className="flex items-center gap-1 text-neutral-400">
  {client.email && (
  <Button
  size="sm"
  variant="ghost"
  className="h-8 w-8 p-0 text-[var(--text-secondary)] hover:text-[var(--accent)] hover:bg-[var(--bg-card)]"
  onClick={() => window.location.href = `mailto:${client.email}`}
- title="Enviar Email"
+ title="Enviar email"
  >
  <Mail className="h-4 w-4" />
  </Button>
@@ -118,7 +118,7 @@ export function ClientRowActions({ client }: { client: Client }) {
  variant="ghost"
  className="h-8 w-8 p-0 text-[var(--text-secondary)] hover:text-[var(--accent)] hover:bg-[var(--accent-soft)]"
  onClick={() => window.location.href = `tel:${client.phone}`}
- title={labels.leads.actions.registerCall}
+ title="Llamar"
  >
  <Phone className="h-4 w-4" />
  </Button>
@@ -128,7 +128,7 @@ export function ClientRowActions({ client }: { client: Client }) {
  variant="ghost"
  className="h-8 w-8 p-0 text-[var(--text-secondary)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-card)]"
  onClick={() => setNoteDialog(true)}
- title={labels.providers.actions.addNote}
+ title="Crear nota"
  >
  <MessageSquare className="h-4 w-4" />
  </Button>
@@ -137,7 +137,7 @@ export function ClientRowActions({ client }: { client: Client }) {
  variant="ghost"
  className="h-8 w-8 p-0 text-[var(--text-secondary)] hover:text-emerald-400 hover:bg-emerald-500/10"
  onClick={() => setInteractionDialog(true)}
- title="Registrar Interacción"
+ title="Asignar tarea"
  >
  <Users className="h-4 w-4" />
  </Button>
@@ -151,6 +151,7 @@ export function ClientRowActions({ client }: { client: Client }) {
  variant="ghost"
  disabled={loading}
  className="h-8 w-8 p-0 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+ title="Más acciones"
  >
  <MoreVertical className="h-4 w-4" />
  </Button>

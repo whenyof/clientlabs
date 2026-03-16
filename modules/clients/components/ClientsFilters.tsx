@@ -8,6 +8,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
+import { Search } from "lucide-react"
 import { ArrowUpDown } from "lucide-react"
 
 type ClientsFiltersProps = {
@@ -17,9 +19,11 @@ type ClientsFiltersProps = {
         sortBy: string
         sortOrder: string
     }
+    searchValue?: string
+    onSearchChange?: (value: string) => void
 }
 
-export function ClientsFilters({ currentFilters }: ClientsFiltersProps) {
+export function ClientsFilters({ currentFilters, searchValue, onSearchChange }: ClientsFiltersProps) {
     const router = useRouter()
     const searchParams = useSearchParams()
 
@@ -34,39 +38,31 @@ export function ClientsFilters({ currentFilters }: ClientsFiltersProps) {
     }
 
     return (
-        <div className="flex items-center gap-3">
-            {/* Left: Filters */}
-            <div className="flex items-center gap-2">
-                {/* Status Filter */}
-                <Select
-                    value={currentFilters.status}
-                    onValueChange={(value) => updateFilter("status", value)}
-                >
-                    <SelectTrigger className="w-[140px] h-10 bg-white/5 border-white/10 text-white text-sm hover:bg-white/10 transition-all">
-                        <SelectValue placeholder="Estado" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">Todos</SelectItem>
-                        <SelectItem value="ACTIVE">Activos</SelectItem>
-                        <SelectItem value="INACTIVE">Inactivos</SelectItem>
-                    </SelectContent>
-                </Select>
-
-                {/* Tags Filter (Visual-only) */}
-                <Select value="all" onValueChange={() => { }}>
-                    <SelectTrigger className="w-[140px] h-10 bg-white/5 border-white/10 text-white text-sm hover:bg-white/10 transition-all">
-                        <SelectValue placeholder="Tags" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">Todos</SelectItem>
-                        <SelectItem value="vip">⭐ VIP</SelectItem>
-                        <SelectItem value="risk">⚠️ En riesgo</SelectItem>
-                        <SelectItem value="dormant">💤 Dormidos</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
-
-            {/* Middle: Sort */}
+        <div className="flex flex-wrap items-center gap-3">
+            {onSearchChange != null && searchValue !== undefined && (
+                <div className="relative min-w-[200px] flex-1 max-w-sm">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+                    <Input
+                        value={searchValue}
+                        onChange={(e) => onSearchChange(e.target.value)}
+                        placeholder="Buscar clientes..."
+                        className="h-10 border-neutral-200 bg-white pl-9 text-neutral-900 text-sm"
+                    />
+                </div>
+            )}
+            <Select
+                value={currentFilters.status}
+                onValueChange={(value) => updateFilter("status", value)}
+            >
+                <SelectTrigger className="w-[130px] h-10 border-neutral-200 bg-white text-neutral-900 text-sm hover:bg-neutral-50 transition-colors">
+                    <SelectValue placeholder="Estado" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    <SelectItem value="ACTIVE">Activos</SelectItem>
+                    <SelectItem value="INACTIVE">Inactivos</SelectItem>
+                </SelectContent>
+            </Select>
             <Select
                 value={`${currentFilters.sortBy}-${currentFilters.sortOrder}`}
                 onValueChange={(value) => {
@@ -77,8 +73,8 @@ export function ClientsFilters({ currentFilters }: ClientsFiltersProps) {
                     router.push(`?${params.toString()}`)
                 }}
             >
-                <SelectTrigger className="w-[180px] h-10 bg-white/5 border-white/10 text-white text-sm hover:bg-white/10 transition-all">
-                    <ArrowUpDown className="mr-2 h-4 w-4" />
+                <SelectTrigger className="w-[160px] h-10 border-neutral-200 bg-white text-neutral-900 text-sm hover:bg-neutral-50 transition-colors">
+                    <ArrowUpDown className="mr-2 h-4 w-4 shrink-0" />
                     <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

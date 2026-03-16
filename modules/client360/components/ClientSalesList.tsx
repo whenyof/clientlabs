@@ -144,206 +144,160 @@ export function ClientSalesList({ sales, kpis, clientId }: ClientSalesListProps)
  [router, clientId]
  )
 
- // ── Empty state ──────────────────────────────────────────────────────
+  // ── Empty state ──────────────────────────────────────────────────────
 
- if (sales.length === 0) {
- return (
- <div
- id="client360-widget-sales"
- className="rounded-2xl bg-[var(--bg-card)] backdrop- border border-[var(--border-subtle)] overflow-hidden"
- >
- <div className="flex items-center gap-3 px-6 py-4 border-b border-[var(--border-subtle)]">
- <div className="p-2 rounded-lg bg-[var(--bg-card)] shadow-md">
- <ShoppingBagIcon className="w-4 h-4 text-[var(--text-primary)]" />
- </div>
- <h3 className="text-sm font-bold text-[var(--text-primary)] tracking-wide">
- Ventas del cliente
- </h3>
- </div>
+  if (sales.length === 0) {
+    return (
+      <div className="text-xs text-[var(--text-secondary)]">
+        Este cliente no tiene ventas registradas todavía.
+      </div>
+    )
+  }
 
- <div className="flex flex-col items-center justify-center py-16 px-6">
- <div className="w-12 h-12 rounded-2xl mb-4 bg-[var(--bg-card)] opacity-20 flex items-center justify-center">
- <InboxIcon className="w-6 h-6 text-[var(--text-primary)]" />
- </div>
- <p className="text-sm text-[var(--text-secondary)] font-medium">Sin ventas</p>
- <p className="text-xs text-gray-500 mt-1">
- Este cliente no tiene ventas registradas todavía
- </p>
- </div>
- </div>
- )
- }
+  // ── Table ────────────────────────────────────────────────────────────
 
- // ── Table ────────────────────────────────────────────────────────────
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm text-left">
+        <thead>
+          <tr className="border-b border-[var(--border-subtle)]">
+            <th className="py-3 px-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
+              Producto
+            </th>
+            <th className="py-3 px-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
+              Fecha
+            </th>
+            <th className="py-3 px-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
+              Estado
+            </th>
+            <th className="py-3 px-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider text-right">
+              Total
+            </th>
+            <th className="py-3 px-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider text-center">
+              Factura
+            </th>
+            <th className="py-3 px-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider text-right">
+              Acciones
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {sales.map((sale) => {
+            const st = STATUS_STYLES[sale.status] ?? {
+              label: sale.status,
+              style: "bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border-subtle)]",
+            }
+            const hasInvoice = !!sale.invoiceId
 
- return (
- <div
- id="client360-widget-sales"
- className="rounded-2xl bg-[var(--bg-card)] backdrop- border border-[var(--border-subtle)] overflow-hidden"
- >
- {/* Header */}
- <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)]">
- <div className="flex items-center gap-3">
- <div className="p-2 rounded-lg bg-[var(--bg-card)] shadow-md">
- <ShoppingBagIcon className="w-4 h-4 text-[var(--text-primary)]" />
- </div>
- <h3 className="text-sm font-bold text-[var(--text-primary)] tracking-wide">
- Ventas del cliente
- </h3>
- <span className="text-xs text-gray-500 ml-1">
- ({sales.length})
- </span>
- </div>
- </div>
+            return (
+              <tr
+                key={sale.id}
+                className="border-b border-[var(--border-subtle)] transition-colors hover:bg-neutral-50 cursor-pointer"
+                onClick={() => handleView(sale.id)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault()
+                    handleView(sale.id)
+                  }
+                }}
+                aria-label={`Ver venta ${sale.product}`}
+              >
+                {/* Product */}
+                <td className="py-3.5 px-4 text-sm font-medium text-[var(--text-secondary)] max-w-[220px] truncate">
+                  {sale.product}
+                </td>
 
- {/* Mini KPIs */}
- <div className="pt-4">
- <SalesKpiCards kpis={kpis} />
- </div>
+                {/* Date */}
+                <td className="py-3.5 px-4 text-sm text-[var(--text-secondary)] whitespace-nowrap">
+                  {formatDate(sale.saleDate)}
+                </td>
 
- {/* Scrollable table */}
- <div className="overflow-x-auto">
- <table className="w-full text-left">
- <thead>
- <tr className="border-b border-[var(--border-subtle)]">
- <th className="py-3 px-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
- Producto
- </th>
- <th className="py-3 px-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
- Fecha
- </th>
- <th className="py-3 px-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
- Estado
- </th>
- <th className="py-3 px-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider text-right">
- Total
- </th>
- <th className="py-3 px-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider text-center">
- Factura
- </th>
- <th className="py-3 px-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider text-right">
- Acciones
- </th>
- </tr>
- </thead>
- <tbody>
- {sales.map((sale) => {
- const st = STATUS_STYLES[sale.status] ?? {
- label: sale.status,
- style: "bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border-subtle)]",
- }
- const hasInvoice = !!sale.invoiceId
+                {/* Status */}
+                <td className="py-3.5 px-4">
+                  <span
+                    className={`inline-flex w-fit items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold ${st.style}`}
+                  >
+                    {st.label}
+                  </span>
+                </td>
 
- return (
- <tr
- key={sale.id}
- className="border-b border-[var(--border-subtle)] transition-colors hover:bg-[var(--bg-card)]/[0.04] cursor-pointer"
- onClick={() => handleView(sale.id)}
- role="button"
- tabIndex={0}
- onKeyDown={(e) => {
- if (e.key === "Enter" || e.key === " ") {
- e.preventDefault()
- handleView(sale.id)
- }
- }}
- aria-label={`Ver venta ${sale.product}`}
- >
- {/* Product */}
- <td className="py-3.5 px-4 text-sm font-medium text-[var(--text-secondary)] max-w-[220px] truncate">
- {sale.product}
- </td>
+                {/* Total */}
+                <td className="py-3.5 px-4 text-sm font-medium tabular-nums text-right whitespace-nowrap text-[var(--text-secondary)]">
+                  {formatCurrency(sale.total, sale.currency)}
+                </td>
 
- {/* Date */}
- <td className="py-3.5 px-4 text-sm text-[var(--text-secondary)] whitespace-nowrap">
- {formatDate(sale.saleDate)}
- </td>
+                {/* Invoice association */}
+                <td className="py-3.5 px-4 text-center">
+                  {hasInvoice ? (
+                    <span className="inline-flex items-center gap-1 rounded-md border border-[var(--accent)] bg-[var(--accent-soft)] px-2 py-0.5 text-xs font-semibold text-[var(--accent)]">
+                      Sí
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card)] px-2 py-0.5 text-xs font-semibold text-gray-500">
+                      No
+                    </span>
+                  )}
+                </td>
 
- {/* Status */}
- <td className="py-3.5 px-4">
- <span
- className={`inline-flex w-fit items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold ${st.style}`}
- >
- {st.label}
- </span>
- </td>
+                {/* Actions */}
+                <td
+                  className="py-3.5 px-4 text-right w-0"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex items-center justify-end gap-0.5">
+                    {/* View */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={ICON_BTN}
+                      title="Ver venta"
+                      onClick={() => handleView(sale.id)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
 
- {/* Total */}
- <td className="py-3.5 px-4 text-sm font-medium tabular-nums text-right whitespace-nowrap text-[var(--text-secondary)]">
- {formatCurrency(sale.total, sale.currency)}
- </td>
+                    {/* Edit */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={ICON_BTN}
+                      title="Editar venta"
+                      onClick={() => handleEdit(sale.id)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
 
- {/* Invoice association */}
- <td className="py-3.5 px-4 text-center">
- {hasInvoice ? (
- <span className="inline-flex items-center gap-1 rounded-md border border-[var(--accent)] bg-[var(--accent-soft)] px-2 py-0.5 text-xs font-semibold text-[var(--accent)]">
- Sí
- </span>
- ) : (
- <span className="inline-flex items-center gap-1 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card)] border border-[var(--border-subtle)] px-2 py-0.5 text-xs font-semibold text-gray-500">
- No
- </span>
- )}
- </td>
-
- {/* Actions */}
- <td
- className="py-3.5 px-4 text-right w-0"
- onClick={(e) => e.stopPropagation()}
- >
- <div className="flex items-center justify-end gap-0.5">
- {/* View */}
- <Button
- variant="ghost"
- size="sm"
- className={ICON_BTN}
- title="Ver venta"
- onClick={() => handleView(sale.id)}
- >
- <Eye className="h-4 w-4" />
- </Button>
-
- {/* Edit */}
- <Button
- variant="ghost"
- size="sm"
- className={ICON_BTN}
- title="Editar venta"
- onClick={() => handleEdit(sale.id)}
- >
- <Pencil className="h-4 w-4" />
- </Button>
-
- {/* Invoice: view or create */}
- {hasInvoice ? (
- <Button
- variant="ghost"
- size="sm"
- className={ICON_BTN}
- title="Ver factura asociada"
- onClick={() => handleViewInvoice(sale.invoiceId!)}
- >
- <FileText className="h-4 w-4 text-[var(--accent)]" />
- </Button>
- ) : (
- <Button
- variant="ghost"
- size="sm"
- className={ICON_BTN}
- title="Crear factura"
- onClick={() => handleCreateInvoice(sale.id)}
- >
- <FilePlus2 className="h-4 w-4 text-[var(--accent)]" />
- </Button>
- )}
- </div>
- </td>
- </tr>
- )
- })}
- </tbody>
- </table>
- </div>
- </div>
- )
+                    {/* Invoice: view or create */}
+                    {hasInvoice ? (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className={ICON_BTN}
+                        title="Ver factura asociada"
+                        onClick={() => handleViewInvoice(sale.invoiceId!)}
+                      >
+                        <FileText className="h-4 w-4 text-[var(--accent)]" />
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className={ICON_BTN}
+                        title="Crear factura"
+                        onClick={() => handleCreateInvoice(sale.id)}
+                      >
+                        <FilePlus2 className="h-4 w-4 text-[var(--accent)]" />
+                      </Button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
+  )
 }

@@ -17,6 +17,7 @@ import {
     TaskStatus,
     TaskPriority
 } from "@prisma/client"
+import { renderOrderEmail, formatProductsTableSpanish } from "@/modules/providers/services/renderOrderEmail"
 
 // ...
 
@@ -1868,12 +1869,14 @@ export async function createProviderOrder(data: {
 // ────────────────────────────────────────────────────────────
 // ORDER STATUS TRANSITIONS (with sync rules)
 // ────────────────────────────────────────────────────────────
-// FASE B: Flujo PENDING → RECEIVED → PAID (solo vía pago) | CANCELLED
-// RECEIVED no puede pasar a PAID/CLOSED manualmente; solo al marcar pago como PAID.
+// Flujo correo: DRAFT → PENDING_SEND_CONFIRMATION (abrir mailto) → SENT (usuario confirma) o DRAFT (seguir editando)
+// Flujo recepción: PENDING/SENT → RECEIVED → PAID/CLOSED (vía pago)
 const VALID_ORDER_TRANSITIONS: Record<string, string[]> = {
-    DRAFT: ["PENDING", "CANCELLED"],
+    DRAFT: ["PENDING", "CANCELLED", "PENDING_SEND_CONFIRMATION"],
+    PENDING_SEND_CONFIRMATION: ["SENT", "DRAFT", "CANCELLED"],
     PENDING: ["RECEIVED", "CANCELLED", "ISSUE"],
-    RECEIVED: ["CANCELLED", "ISSUE"], // PAID solo vía updateProviderPaymentStatus/registerProviderPayment
+    SENT: ["RECEIVED", "CANCELLED", "ISSUE", "PAID"],
+    RECEIVED: ["CANCELLED", "ISSUE", "PAID"],
     ISSUE: ["RECEIVED", "CANCELLED"],
     CANCELLED: [],
     PAID: [],
@@ -1885,7 +1888,7 @@ const VALID_ORDER_TRANSITIONS: Record<string, string[]> = {
  */
 export async function updateProviderOrderStatus(
     orderId: string,
-    newStatus: "DRAFT" | "PENDING" | "RECEIVED" | "ISSUE" | "CANCELLED" | "CLOSED" | "PAID"
+    newStatus: "DRAFT" | "PENDING" | "PENDING_SEND_CONFIRMATION" | "SENT" | "RECEIVED" | "ISSUE" | "CANCELLED" | "CLOSED" | "PAID"
 ) {
     const session = await checkAuth()
     if (!session) return { success: false, error: "Unauthorized" }
@@ -1901,6 +1904,11 @@ export async function updateProviderOrderStatus(
             if (currentOrder.status === newStatus) return currentOrder
 
             // Validate transition
+            console.log("[ProviderOrderStatus] before", {
+                orderId,
+                from: currentOrder.status,
+                to: newStatus,
+            })
             const allowed = VALID_ORDER_TRANSITIONS[currentOrder.status] || []
             if (!allowed.includes(newStatus)) {
                 throw new Error(`Transición inválida: ${currentOrder.status} → ${newStatus}`)
@@ -1911,11 +1919,39 @@ export async function updateProviderOrderStatus(
                 throw new Error("El pedido solo puede estar pagado cuando existe un pago completado. Use «Registrar pago».")
             }
 
+            const statusMap: Record<typeof newStatus, ProviderOrderStatus> = {
+                DRAFT: ProviderOrderStatus.DRAFT,
+                PENDING: ProviderOrderStatus.PENDING,
+                PENDING_SEND_CONFIRMATION: ProviderOrderStatus.PENDING_SEND_CONFIRMATION,
+                SENT: ProviderOrderStatus.SENT,
+                RECEIVED: ProviderOrderStatus.RECEIVED,
+                ISSUE: ProviderOrderStatus.ISSUE,
+                CANCELLED: ProviderOrderStatus.CANCELLED,
+                CLOSED: ProviderOrderStatus.CLOSED,
+                PAID: ProviderOrderStatus.PAID,
+            }
+            const updateData: { status: ProviderOrderStatus; sentAt?: Date } = {
+                status: statusMap[newStatus],
+            }
+            if (newStatus === "SENT") {
+                updateData.sentAt = new Date()
+            }
+
+            console.log("[ProviderOrderStatus] updateData", {
+                orderId,
+                updateData,
+            })
+
             // Update order
             const order = await tx.providerOrder.update({
                 where: { id: orderId, userId: session.user.id },
-                data: { status: newStatus as ProviderOrderStatus },
+                data: updateData,
                 include: { payment: true }
+            })
+
+            console.log("[ProviderOrderStatus] after", {
+                orderId,
+                to: order.status,
             })
 
             // Timeline event
@@ -1996,6 +2032,51 @@ export async function cancelProviderOrder(orderId: string) {
     return updateProviderOrderStatus(orderId, "CANCELLED")
 }
 
+/**
+ * Set order to PENDING_SEND_CONFIRMATION (after user opens mailto).
+ */
+export async function setOrderPendingSendConfirmation(orderId: string) {
+    return updateProviderOrderStatus(orderId, "PENDING_SEND_CONFIRMATION")
+}
+
+/**
+ * Mark order as SENT (user confirmed they sent the email). Sets sentAt.
+ */
+export async function markOrderSent(orderId: string) {
+    return updateProviderOrderStatus(orderId, "SENT")
+}
+
+/**
+ * Delete a provider order. Disconnects payment, files and timeline events then deletes the order (items cascade).
+ */
+export async function deleteProviderOrder(orderId: string) {
+    const session = await checkAuth()
+    if (!session) return { success: false, error: "No autorizado" }
+
+    try {
+        const order = await prisma.providerOrder.findFirst({
+            where: { id: orderId, userId: session.user.id },
+            select: { id: true, providerId: true }
+        })
+        if (!order) return { success: false, error: "Pedido no encontrado" }
+
+        await prisma.$transaction(async (tx) => {
+            await tx.providerPayment.updateMany({ where: { orderId }, data: { orderId: null } })
+            await tx.providerFile.updateMany({ where: { orderId }, data: { orderId: null } })
+            await tx.providerTimelineEvent.updateMany({ where: { orderId }, data: { orderId: null } })
+            await tx.providerOrderItem.deleteMany({ where: { orderId } })
+            await tx.providerOrder.delete({ where: { id: orderId, userId: session.user.id } })
+        })
+
+        revalidatePath("/dashboard/providers")
+        revalidatePath(`/dashboard/providers/${order.providerId}`)
+        return { success: true }
+    } catch (error: any) {
+        console.error("Error deleting provider order:", error)
+        return { success: false, error: error?.message ?? "Error al eliminar el pedido" }
+    }
+}
+
 // Log to timeline as highly important
 
 
@@ -2049,6 +2130,27 @@ export async function updateProviderOperationalDetails(providerId: string, data:
 }
 
 /**
+ * Get a single provider order with items (for loading a draft into the order dialog).
+ */
+export async function getProviderOrder(orderId: string) {
+    unstable_noStore()
+    const session = await checkAuth()
+    if (!session) return { success: false, error: "Unauthorized" }
+
+    try {
+        const order = await prisma.providerOrder.findFirst({
+            where: { id: orderId, userId: session.user.id },
+            include: { items: true }
+        })
+        if (!order) return { success: false, error: "Pedido no encontrado" }
+        return { success: true, order }
+    } catch (error) {
+        console.error("Error getting provider order:", error)
+        return { success: false, error: "Error al obtener el pedido" }
+    }
+}
+
+/**
  * Get provider orders - Always fresh data
  */
 export async function getProviderOrders(providerId: string) {
@@ -2063,6 +2165,7 @@ export async function getProviderOrders(providerId: string) {
             include: {
                 payment: true,
                 files: true,
+                items: true,
                 invoice: { select: { id: true, number: true, status: true, total: true } }
             }
         })
@@ -2155,5 +2258,459 @@ export async function getProviderTasks(providerId: string) {
     } catch (error) {
         console.error("Error getting tasks:", error)
         return { success: false, error: "Error al obtener tareas" }
+    }
+}
+
+/**
+ * Get provider products - Always filtered by userId
+ */
+export async function getProviderProducts(providerId: string) {
+    unstable_noStore()
+    const session = await checkAuth()
+    if (!session) return { success: false, error: "Unauthorized" }
+
+    try {
+        const products = await prisma.providerProduct.findMany({
+            where: { providerId, userId: session.user.id },
+            orderBy: [{ name: "asc" }]
+        })
+        return { success: true, products }
+    } catch (error) {
+        console.error("Error getting provider products:", error)
+        return { success: false, error: "Error al obtener productos" }
+    }
+}
+
+/**
+ * Create provider product - userId from session
+ */
+export async function createProviderProduct(data: {
+    providerId: string
+    name: string
+    code: string
+    unit?: string | null
+    price: number
+    description?: string | null
+    category?: string | null
+}) {
+    const session = await checkAuth()
+    if (!session) return { success: false, error: "Unauthorized" }
+
+    const isDbAlive = await safeDbCheck()
+    if (!isDbAlive) return { success: false, error: "Base de datos no disponible." }
+
+    await ensureUserExists(session.user)
+
+    try {
+        const provider = await prisma.provider.findFirst({
+            where: { id: data.providerId, userId: session.user.id }
+        })
+        if (!provider) return { success: false, error: "Proveedor no encontrado" }
+
+        const product = await prisma.providerProduct.create({
+            data: {
+                providerId: data.providerId,
+                userId: session.user.id,
+                name: data.name.trim(),
+                code: data.code.trim(),
+                unit: data.unit?.trim() || null,
+                price: Number(data.price) || 0,
+                description: data.description?.trim() || null,
+                category: data.category?.trim() || null,
+                isActive: true
+            }
+        })
+        revalidatePath("/dashboard/providers")
+        revalidatePath(`/dashboard/providers/${data.providerId}`)
+        return { success: true, product }
+    } catch (error) {
+        console.error("Error creating provider product:", error)
+        return { success: false, error: "Error al crear el producto" }
+    }
+}
+
+/**
+ * Update provider product - Only if owned by user
+ */
+export async function updateProviderProduct(
+    productId: string,
+    data: { name?: string; code?: string; unit?: string | null; price?: number; description?: string | null; category?: string | null; isActive?: boolean }
+) {
+    const session = await checkAuth()
+    if (!session) return { success: false, error: "Unauthorized" }
+
+    try {
+        const existing = await prisma.providerProduct.findFirst({
+            where: { id: productId, userId: session.user.id }
+        })
+        if (!existing) return { success: false, error: "Producto no encontrado" }
+
+        const product = await prisma.providerProduct.update({
+            where: { id: productId },
+            data: {
+                ...(data.name !== undefined && { name: data.name.trim() }),
+                ...(data.code !== undefined && { code: data.code.trim() }),
+                ...(data.unit !== undefined && { unit: data.unit?.trim() || null }),
+                ...(data.price !== undefined && { price: Number(data.price) }),
+                ...(data.description !== undefined && { description: data.description?.trim() || null }),
+                ...(data.isActive !== undefined && { isActive: data.isActive }),
+                ...(data.category !== undefined && { category: data.category?.trim() || null })
+            }
+        })
+        revalidatePath("/dashboard/providers")
+        revalidatePath(`/dashboard/providers/${existing.providerId}`)
+        return { success: true, product }
+    } catch (error) {
+        console.error("Error updating provider product:", error)
+        return { success: false, error: "Error al actualizar el producto" }
+    }
+}
+
+/**
+ * Import provider products from CSV rows (code, name, category?, unit?, price, description?).
+ * Duplicate codes: skip or update (MVP: create and allow duplicates for manual review).
+ */
+export async function importProviderProductsFromCsv(
+    providerId: string,
+    rows: { code: string; name: string; category?: string; unit?: string; price: number; description?: string }[]
+) {
+    const session = await checkAuth()
+    if (!session) return { success: false, error: "Unauthorized" }
+
+    const isDbAlive = await safeDbCheck()
+    if (!isDbAlive) return { success: false, error: "Base de datos no disponible." }
+
+    try {
+        const provider = await prisma.provider.findFirst({
+            where: { id: providerId, userId: session.user.id }
+        })
+        if (!provider) return { success: false, error: "Proveedor no encontrado" }
+
+        let created = 0
+        let skipped = 0
+        for (const row of rows) {
+            const code = (row.code ?? "").trim()
+            const name = (row.name ?? "").trim()
+            if (!code || !name) {
+                skipped++
+                continue
+            }
+            const price = Number(row.price)
+            if (Number.isNaN(price) || price < 0) {
+                skipped++
+                continue
+            }
+            const existing = await prisma.providerProduct.findFirst({
+                where: { providerId, code, userId: session.user.id }
+            })
+            if (existing) {
+                await prisma.providerProduct.update({
+                    where: { id: existing.id },
+                    data: {
+                        name,
+                        category: row.category?.trim() || null,
+                        unit: row.unit?.trim() || null,
+                        price,
+                        description: row.description?.trim() || null
+                    }
+                })
+                created++
+            } else {
+                await prisma.providerProduct.create({
+                    data: {
+                        providerId,
+                        userId: session.user.id,
+                        code,
+                        name,
+                        category: row.category?.trim() || null,
+                        unit: row.unit?.trim() || null,
+                        price,
+                        description: row.description?.trim() || null,
+                        isActive: true
+                    }
+                })
+                created++
+            }
+        }
+
+        revalidatePath("/dashboard/providers")
+        revalidatePath(`/dashboard/providers/${providerId}`)
+        return { success: true, created, skipped }
+    } catch (error) {
+        console.error("Error importing products:", error)
+        return { success: false, error: "Error al importar productos" }
+    }
+}
+
+/** Format currency for email (e.g. 12,50 €) */
+function formatCurrencyForEmail(amount: number): string {
+    return new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(amount)
+}
+
+/**
+ * Create provider order with line items and optional email generation from template.
+ */
+export async function createProviderOrderWithItems(data: {
+    providerId: string
+    orderDate: Date
+    templateId?: string | null
+    notes?: string | null
+    emailTo?: string | null
+    items: { productId: string | null; code: string; name: string; unit: string | null; unitPrice: number; quantity: number; subtotal: number }[]
+}) {
+    const session = await checkAuth()
+    if (!session) return { success: false, error: "Unauthorized" }
+
+    const isDbAlive = await safeDbCheck()
+    if (!isDbAlive) return { success: false, error: "Base de datos no disponible." }
+
+    await ensureUserExists(session.user)
+
+    if (!data.items.length) return { success: false, error: "Añade al menos una línea al pedido" }
+
+    const total = data.items.reduce((sum, i) => sum + i.subtotal, 0)
+
+    try {
+        const provider = await prisma.provider.findFirst({
+            where: { id: data.providerId, userId: session.user.id },
+            include: { providerEmailTemplates: true }
+        })
+        if (!provider) return { success: false, error: "Proveedor no encontrado" }
+
+        const template = data.templateId
+            ? provider.providerEmailTemplates.find((t) => t.id === data.templateId)
+            : provider.providerEmailTemplates.find((t) => t.isDefault)
+
+        const orderNumber =
+            "PRO-" +
+            new Date().getFullYear() +
+            String(new Date().getMonth() + 1).padStart(2, "0") +
+            "-" +
+            String(Math.floor(1000 + Math.random() * 9000))
+
+        const orderDateStr = new Date(data.orderDate).toLocaleDateString("es-ES", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric"
+        })
+        const productsTableText = formatProductsTableSpanish(
+            data.items.map((i) => ({
+                code: i.code,
+                name: i.name,
+                unit: i.unit,
+                quantity: i.quantity,
+                unitPrice: i.unitPrice,
+                subtotal: i.subtotal
+            })),
+            formatCurrencyForEmail
+        )
+        let emailSubject = ""
+        let emailBody = ""
+        const emailTo = data.emailTo?.trim() || provider.contactEmail?.trim() || ""
+
+        if (template) {
+            const rendered = renderOrderEmail(template.subject, template.body, {
+                providerName: provider.name,
+                orderDate: orderDateStr,
+                orderNumber,
+                productsTable: productsTableText,
+                totalAmount: formatCurrencyForEmail(total),
+                notes: data.notes?.trim() || ""
+            })
+            emailSubject = rendered.subject
+            emailBody = rendered.body
+        }
+
+        const result = await safePrismaQuery(() =>
+            prisma.$transaction(async (tx) => {
+                const order = await tx.providerOrder.create({
+                    data: {
+                        userId: session!.user.id,
+                        providerId: data.providerId,
+                        orderDate: data.orderDate,
+                        amount: total,
+                        status: ProviderOrderStatus.DRAFT,
+                        type: ProviderOrderType.ONE_TIME,
+                        description: `Pedido ${orderNumber}`,
+                        notes: data.notes,
+                        orderNumber,
+                        templateId: template?.id ?? null,
+                        emailTo: emailTo || null,
+                        emailSubject: emailSubject || null,
+                        emailBody: emailBody || null
+                    }
+                })
+
+                for (const item of data.items) {
+                    await tx.providerOrderItem.create({
+                        data: {
+                            orderId: order.id,
+                            productId: item.productId,
+                            codeSnapshot: item.code,
+                            nameSnapshot: item.name,
+                            unitSnapshot: item.unit,
+                            unitPriceSnapshot: item.unitPrice,
+                            quantity: item.quantity,
+                            subtotal: item.subtotal
+                        }
+                    })
+                }
+
+                await tx.providerTimelineEvent.create({
+                    data: {
+                        userId: session!.user.id,
+                        providerId: data.providerId,
+                        type: ProviderTimelineEventType.ORDER,
+                        orderId: order.id
+                    }
+                })
+
+                return order
+            })
+        )
+
+        revalidatePath("/dashboard/providers")
+        revalidatePath(`/dashboard/providers/${data.providerId}`)
+        return { success: true, order: result, emailSubject, emailBody, emailTo }
+    } catch (error: any) {
+        console.error("Error creating provider order with items:", error)
+        return { success: false, error: error?.message || "Error al crear el pedido" }
+    }
+}
+
+// ────────────────────────────────────────────────────────────
+// PROVIDER EMAIL TEMPLATES
+// ────────────────────────────────────────────────────────────
+
+export async function getProviderEmailTemplates(providerId: string) {
+    unstable_noStore()
+    const session = await checkAuth()
+    if (!session) return { success: false, error: "Unauthorized" }
+    try {
+        const templates = await prisma.providerEmailTemplate.findMany({
+            where: { providerId, userId: session.user.id },
+            orderBy: [{ isDefault: "desc" }, { name: "asc" }]
+        })
+        return { success: true, templates }
+    } catch (error) {
+        console.error("Error getting email templates:", error)
+        return { success: false, error: "Error al obtener plantillas" }
+    }
+}
+
+export async function createProviderEmailTemplate(data: {
+    providerId: string
+    name: string
+    subject: string
+    body: string
+    isDefault?: boolean
+}) {
+    const session = await checkAuth()
+    if (!session) return { success: false, error: "Unauthorized" }
+    const isDbAlive = await safeDbCheck()
+    if (!isDbAlive) return { success: false, error: "Base de datos no disponible." }
+    try {
+        const provider = await prisma.provider.findFirst({
+            where: { id: data.providerId, userId: session.user.id }
+        })
+        if (!provider) return { success: false, error: "Proveedor no encontrado" }
+        if (data.isDefault) {
+            await prisma.providerEmailTemplate.updateMany({
+                where: { providerId: data.providerId, userId: session.user.id },
+                data: { isDefault: false }
+            })
+        }
+        const template = await prisma.providerEmailTemplate.create({
+            data: {
+                providerId: data.providerId,
+                userId: session.user.id,
+                name: data.name.trim(),
+                subject: data.subject.trim(),
+                body: data.body.trim(),
+                isDefault: data.isDefault ?? false
+            }
+        })
+        revalidatePath("/dashboard/providers")
+        revalidatePath(`/dashboard/providers/${data.providerId}`)
+        return { success: true, template }
+    } catch (error) {
+        console.error("Error creating email template:", error)
+        return { success: false, error: "Error al crear la plantilla" }
+    }
+}
+
+export async function updateProviderEmailTemplate(
+    templateId: string,
+    data: { name?: string; subject?: string; body?: string; isDefault?: boolean }
+) {
+    const session = await checkAuth()
+    if (!session) return { success: false, error: "Unauthorized" }
+    try {
+        const existing = await prisma.providerEmailTemplate.findFirst({
+            where: { id: templateId, userId: session.user.id }
+        })
+        if (!existing) return { success: false, error: "Plantilla no encontrada" }
+        if (data.isDefault === true) {
+            await prisma.providerEmailTemplate.updateMany({
+                where: { providerId: existing.providerId, userId: session.user.id },
+                data: { isDefault: false }
+            })
+        }
+        const template = await prisma.providerEmailTemplate.update({
+            where: { id: templateId },
+            data: {
+                ...(data.name !== undefined && { name: data.name.trim() }),
+                ...(data.subject !== undefined && { subject: data.subject.trim() }),
+                ...(data.body !== undefined && { body: data.body }),
+                ...(data.isDefault !== undefined && { isDefault: data.isDefault })
+            }
+        })
+        revalidatePath("/dashboard/providers")
+        revalidatePath(`/dashboard/providers/${existing.providerId}`)
+        return { success: true, template }
+    } catch (error) {
+        console.error("Error updating email template:", error)
+        return { success: false, error: "Error al actualizar la plantilla" }
+    }
+}
+
+export async function deleteProviderEmailTemplate(templateId: string) {
+    const session = await checkAuth()
+    if (!session) return { success: false, error: "Unauthorized" }
+    try {
+        const existing = await prisma.providerEmailTemplate.findFirst({
+            where: { id: templateId, userId: session.user.id }
+        })
+        if (!existing) return { success: false, error: "Plantilla no encontrada" }
+        await prisma.providerEmailTemplate.delete({ where: { id: templateId } })
+        revalidatePath("/dashboard/providers")
+        revalidatePath(`/dashboard/providers/${existing.providerId}`)
+        return { success: true }
+    } catch (error) {
+        console.error("Error deleting email template:", error)
+        return { success: false, error: "Error al eliminar la plantilla" }
+    }
+}
+
+export async function setDefaultProviderEmailTemplate(providerId: string, templateId: string) {
+    const session = await checkAuth()
+    if (!session) return { success: false, error: "Unauthorized" }
+    try {
+        await prisma.$transaction([
+            prisma.providerEmailTemplate.updateMany({
+                where: { providerId, userId: session.user.id },
+                data: { isDefault: false }
+            }),
+            prisma.providerEmailTemplate.update({
+                where: { id: templateId, providerId, userId: session.user.id },
+                data: { isDefault: true }
+            })
+        ])
+        revalidatePath("/dashboard/providers")
+        revalidatePath(`/dashboard/providers/${providerId}`)
+        return { success: true }
+    } catch (error) {
+        console.error("Error setting default template:", error)
+        return { success: false, error: "Error al establecer plantilla predeterminada" }
     }
 }

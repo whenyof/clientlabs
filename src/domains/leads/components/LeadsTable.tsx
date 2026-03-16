@@ -1,6 +1,6 @@
 "use client"
 
-import { useLeads } from "@shared/hooks/useLeads"
+import { useLeads } from "@/hooks/useLeads"
 import { useSearchParams } from "next/navigation"
 import { useMemo } from "react"
 import type { Lead } from "@prisma/client"

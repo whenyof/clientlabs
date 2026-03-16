@@ -38,19 +38,21 @@ export async function GET(request: NextRequest) {
       prisma.lead.count({ where }),
       prisma.lead.count() // debug: total en la DB
     ])
+    
+    if (process.env.NODE_ENV === "development") {
+      console.log('[api/leads] session user:', session.user.id)
+      console.log('[api/leads] leads returned:', leads.length)
+      console.log('[api/leads] total leads in DB:', globalCount)
 
-    console.log('[api/leads] leads returned:', leads.length)
-    console.log('[api/leads] total leads in DB:', globalCount)
-
-    if (leads.length > 0) {
-      const first = leads[0]
-
-      console.log('[api/leads] first lead:', {
-        id: first.id,
-        email: first.email,
-        userId: first.userId,
-        createdAt: first.createdAt
-      })
+      if (leads.length > 0) {
+        const first = leads[0]
+        console.log('[api/leads] first lead:', {
+          id: first.id,
+          email: first.email,
+          userId: first.userId,
+          createdAt: first.createdAt
+        })
+      }
     }
 
     return NextResponse.json({
@@ -69,7 +71,9 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('[api/leads] error:', error)
+    if (process.env.NODE_ENV === "development") {
+      console.error('[api/leads] error:', error)
+    }
 
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -142,7 +146,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(updatedLead, { status: 201 })
 
   } catch (error) {
-    console.error('[api/leads] create error:', error)
+    if (process.env.NODE_ENV === "development") {
+      console.error('[api/leads] create error:', error)
+    }
 
     return NextResponse.json(
       { error: 'Internal server error' },

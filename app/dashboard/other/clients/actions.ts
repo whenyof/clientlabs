@@ -5,6 +5,11 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
 import { ensureUserExists } from "@/lib/ensure-user"
+import {
+    addClientNote as addClientNoteCanonical,
+    logClientEmailSent as logClientEmailSentCanonical,
+    registerClientInteraction as registerClientInteractionCanonical,
+} from "@/modules/clients/actions"
 
 /* ==================== CLIENT ACTIONS ==================== */
 
@@ -68,78 +73,10 @@ export async function updateClientInfo(
     return { success: true }
 }
 
-// Add note to client
-export async function addClientNote(clientId: string, text: string) {
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.id) return { success: false, error: "Unauthorized" }
-
-    const client = await prisma.client.findUnique({
-        where: { id: clientId, userId: session.user.id },
-    })
-
-    if (!client) return { success: false, error: "Client not found" }
-
-    // Note: Activity model doesn't have clientId, so we store in client.notes
-    // and update timestamp for activity tracking
-    const currentNotes = client.notes || ""
-    const timestamp = new Date().toISOString()
-    const newNote = `[NOTE:${timestamp}] ${text}`
-    const updatedNotes = currentNotes ? `${currentNotes}\n\n${newNote}` : newNote
-
-    await prisma.client.update({
-        where: { id: clientId },
-        data: {
-            notes: updatedNotes,
-            updatedAt: new Date()
-        },
-    })
-
-    revalidatePath("/dashboard/clients")
-    revalidatePath("/dashboard/other")
-    return { success: true }
-}
-
-// Register client interaction
-export async function registerClientInteraction(
-    clientId: string,
-    type: "CALL" | "MEETING" | "EMAIL",
-    notes: string
-) {
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.id) return { success: false, error: "Unauthorized" }
-
-    const client = await prisma.client.findUnique({
-        where: { id: clientId, userId: session.user.id },
-    })
-
-    if (!client) return { success: false, error: "Client not found" }
-
-    const titles = {
-        CALL: "Llamada realizada",
-        MEETING: "Reunión realizada",
-        EMAIL: "Email enviado",
-    }
-
-    // Store interaction in client notes
-    const currentNotes = client.notes || ""
-    const timestamp = new Date().toISOString()
-    // Format must match getClientTimeline regex: [INTERACTION:ISO] TYPE - Content
-    const newNote = `[INTERACTION:${timestamp}] ${type} - ${notes.replace(/\n/g, " ")}`
-    const updatedNotes = currentNotes ? `${currentNotes}\n\n${newNote}` : newNote
-
-    await prisma.client.update({
-        where: { id: clientId },
-        data: {
-            notes: updatedNotes,
-            updatedAt: new Date()
-        },
-    })
-
-    revalidatePath("/dashboard/clients")
-    revalidatePath("/dashboard/other")
-    return { success: true }
-}
-
+// Canonical implementation in @/modules/clients/actions; re-export to avoid drift.
+export const addClientNote = addClientNoteCanonical
+export const logClientEmailSent = logClientEmailSentCanonical
+export const registerClientInteraction = registerClientInteractionCanonical
 
 // Add manual purchase/sale
 export async function addClientPurchase(

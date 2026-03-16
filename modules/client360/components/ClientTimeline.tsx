@@ -10,6 +10,11 @@ import {
  BanknotesIcon,
  ClockIcon,
  ChevronDownIcon,
+ ChevronUpIcon,
+ ClipboardDocumentListIcon,
+ ChatBubbleLeftRightIcon,
+ PhoneIcon,
+ EnvelopeIcon,
 } from "@heroicons/react/24/outline"
 import type { TimelineEvent, TimelineEventType } from "../services/getClientTimeline"
 
@@ -69,6 +74,34 @@ const EVENT_CONFIG: Record<
  dotColor: "bg-emerald-500",
  label: "Pago",
  },
+ task_created: {
+ icon: ClipboardDocumentListIcon,
+ gradient: " ",
+ lineColor: "bg-amber-500/30",
+ dotColor: "bg-amber-500",
+ label: "Tarea",
+ },
+ note_added: {
+ icon: ChatBubbleLeftRightIcon,
+ gradient: " ",
+ lineColor: "bg-slate-400/30",
+ dotColor: "bg-slate-500",
+ label: "Nota",
+ },
+ interaction_logged: {
+ icon: PhoneIcon,
+ gradient: " ",
+ lineColor: "bg-blue-400/30",
+ dotColor: "bg-blue-500",
+ label: "Interacción",
+ },
+ email_sent: {
+ icon: EnvelopeIcon,
+ gradient: " ",
+ lineColor: "bg-indigo-400/30",
+ dotColor: "bg-indigo-500",
+ label: "Email",
+ },
 }
 
 // ---------------------------------------------------------------------------
@@ -86,6 +119,7 @@ function formatCurrency(value: number, currency: string = "EUR"): string {
 
 function formatDate(iso: string): string {
  const d = new Date(iso)
+ if (Number.isNaN(d.getTime())) return "—"
  return d.toLocaleDateString("es-ES", {
  day: "numeric",
  month: "short",
@@ -95,6 +129,7 @@ function formatDate(iso: string): string {
 
 function formatTime(iso: string): string {
  const d = new Date(iso)
+ if (Number.isNaN(d.getTime())) return "—"
  return d.toLocaleTimeString("es-ES", {
  hour: "2-digit",
  minute: "2-digit",
@@ -108,11 +143,13 @@ function getResourceUrl(event: TimelineEvent): string | null {
  case "invoice":
  return `/dashboard/invoicing?invoiceId=${event.resourceId}`
  case "sale":
- return null // Sales don't have a dedicated detail page in this app
+ return null
  case "client":
- return null // Already on this page
+ return null
  case "payment":
  return `/dashboard/invoicing?invoiceId=${event.resourceId}`
+ case "task":
+ return `/dashboard/tasks?taskId=${event.resourceId}`
  default:
  return null
  }
@@ -122,6 +159,14 @@ function getResourceUrl(event: TimelineEvent): string | null {
 // Single timeline item
 // ---------------------------------------------------------------------------
 
+const DEFAULT_EVENT_CONFIG = {
+  icon: ClockIcon,
+  gradient: " ",
+  lineColor: "bg-gray-400/30",
+  dotColor: "bg-gray-500",
+  label: "Evento",
+}
+
 function TimelineItem({
  event,
  isLast,
@@ -129,7 +174,7 @@ function TimelineItem({
  event: TimelineEvent
  isLast: boolean
 }) {
- const config = EVENT_CONFIG[event.type]
+ const config = EVENT_CONFIG[event.type] ?? DEFAULT_EVENT_CONFIG
  const Icon = config.icon
  const url = getResourceUrl(event)
 
@@ -243,97 +288,75 @@ function TimelineItem({
 // Main component
 // ---------------------------------------------------------------------------
 
-const INITIAL_VISIBLE = 10
+const INITIAL_VISIBLE = 4
 
 interface ClientTimelineProps {
- events: TimelineEvent[]
+  events: TimelineEvent[]
 }
 
 export function ClientTimeline({ events }: ClientTimelineProps) {
- const [showAll, setShowAll] = useState(false)
- const visible = showAll ? events : events.slice(0, INITIAL_VISIBLE)
- const hasMore = events.length > INITIAL_VISIBLE
+  const [showAll, setShowAll] = useState(false)
+  const visible = showAll ? events : events.slice(0, INITIAL_VISIBLE)
+  const hasMore = events.length > INITIAL_VISIBLE
 
- return (
- <div
- id="client360-timeline"
- className="
- relative overflow-hidden rounded-2xl
- bg-[var(--bg-card)] backdrop-
- border border-[var(--border-subtle)]
- transition-all duration-300
- hover:border-[var(--border-subtle)]
- "
- >
- {/* Top gradient stripe */}
- <div className="h-1 bg-[var(--bg-card)] " />
+  return (
+    <section id="client360-timeline" className="border-b border-neutral-200 pb-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <ClockIcon className="w-4 h-4 text-[var(--text-secondary)]" />
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+            Actividad
+          </h3>
+        </div>
+        <span className="text-[11px] text-gray-500">
+          {events.length} evento{events.length !== 1 ? "s" : ""}
+        </span>
+      </div>
 
- {/* Header */}
- <div className="relative flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)]">
- <div className="flex items-center gap-3">
- <div className="p-2.5 rounded-xl bg-[var(--bg-card)] shadow-sm">
- <ClockIcon className="w-5 h-5 text-[var(--text-primary)]" />
- </div>
- <div>
- <h3 className="text-sm font-bold text-[var(--text-primary)] tracking-wide">
- Línea Temporal
- </h3>
- <p className="text-[11px] text-gray-500 font-medium">
- {events.length} evento{events.length !== 1 ? "s" : ""} registrado{events.length !== 1 ? "s" : ""}
- </p>
- </div>
- </div>
- </div>
+      <div className="space-y-2">
+        {events.length === 0 ? (
+          <p className="text-xs text-[var(--text-secondary)]">
+            Sin actividad registrada todavía. Los eventos aparecerán aquí a medida que se registren
+            ventas, facturas, pagos, tareas, notas e interacciones.
+          </p>
+        ) : (
+          <>
+            <div className="space-y-3">
+              {visible.map((event, i) => (
+                <TimelineItem
+                  key={event.id}
+                  event={event}
+                  isLast={i === visible.length - 1}
+                />
+              ))}
+            </div>
 
- {/* Body */}
- <div className="relative p-6">
- {events.length === 0 ? (
- /* ────── Empty state ────── */
- <div className="flex flex-col items-center justify-center py-8 text-center">
- <div className="w-16 h-16 mb-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] flex items-center justify-center">
- <ClockIcon className="w-8 h-8 text-gray-600" />
- </div>
- <p className="text-sm text-[var(--text-secondary)] font-medium">
- Sin actividad registrada
- </p>
- <p className="text-xs text-gray-600 mt-1 max-w-[220px]">
- Los eventos aparecerán aquí a medida que se registren ventas, facturas y pagos
- </p>
- </div>
- ) : (
- <>
- {/* ────── Timeline ────── */}
- <div>
- {visible.map((event, i) => (
- <TimelineItem
- key={event.id}
- event={event}
- isLast={i === visible.length - 1}
- />
- ))}
- </div>
+            {hasMore && !showAll && (
+              <div className="flex justify-start pt-1">
+                <button
+                  onClick={() => setShowAll(true)}
+                  className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                >
+                  <ChevronDownIcon className="w-3.5 h-3.5" />
+                  Mostrar más
+                </button>
+              </div>
+            )}
 
- {/* ────── Show more ────── */}
- {hasMore && !showAll && (
- <div className="flex justify-center pt-2">
- <button
- onClick={() => setShowAll(true)}
- className="
- inline-flex items-center gap-1.5 px-4 py-2 rounded-xl
- bg-[var(--bg-card)] border border-[var(--border-subtle)] border border-[var(--border-subtle)]
- text-xs font-semibold text-[var(--text-secondary)]
- hover:bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:text-[var(--text-primary)] hover:border-gray-500/40
- transition-all duration-200
- "
- >
- <ChevronDownIcon className="w-3.5 h-3.5" />
- Mostrar {events.length - INITIAL_VISIBLE} más
- </button>
- </div>
- )}
- </>
- )}
- </div>
- </div>
- )
+            {hasMore && showAll && (
+              <div className="flex justify-start pt-1">
+                <button
+                  onClick={() => setShowAll(false)}
+                  className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                >
+                  <ChevronUpIcon className="w-3.5 h-3.5" />
+                  Mostrar menos
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </section>
+  )
 }

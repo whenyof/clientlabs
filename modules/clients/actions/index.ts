@@ -101,10 +101,44 @@ export async function addClientNote(clientId: string, text: string) {
     return { success: true }
 }
 
-// Register client interaction
+// Register email in timeline only (no outbound send). Persists to Client.notes for Client360; UI labels say "Registrar email".
+export async function logClientEmailSent(
+    clientId: string,
+    data: { to: string; subject: string; body: string }
+) {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) return { success: false, error: "Unauthorized" }
+
+    const client = await prisma.client.findUnique({
+        where: { id: clientId, userId: session.user.id },
+    })
+
+    if (!client) return { success: false, error: "Client not found" }
+
+    const timestamp = new Date().toISOString()
+    const preview = data.body.replace(/\n/g, " ").slice(0, 80)
+    const line = `[EMAIL_SENT:${timestamp}] ${data.to}|${data.subject} - ${preview}${data.body.length > 80 ? "…" : ""}`
+    const currentNotes = client.notes || ""
+    const updatedNotes = currentNotes ? `${currentNotes}\n\n${line}` : line
+
+    await prisma.client.update({
+        where: { id: clientId },
+        data: {
+            notes: updatedNotes,
+            updatedAt: new Date(),
+        },
+    })
+
+    revalidatePath("/dashboard/clients")
+    revalidatePath("/dashboard/other")
+    revalidatePath("/dashboard/other/sales")
+    return { success: true }
+}
+
+// Register client interaction (CALL, MEETING, EMAIL, WHATSAPP, VISITA)
 export async function registerClientInteraction(
     clientId: string,
-    type: "CALL" | "MEETING" | "EMAIL",
+    type: "CALL" | "MEETING" | "EMAIL" | "WHATSAPP" | "VISITA",
     notes: string
 ) {
     const session = await getServerSession(authOptions)

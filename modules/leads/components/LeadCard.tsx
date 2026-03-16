@@ -91,7 +91,7 @@ export function LeadCard({ lead }: LeadCardProps) {
   return (
     <div
       className={cn(
-        "relative flex items-center gap-6 pl-3 pr-4 py-3",
+        "relative flex items-center gap-4 pl-3 pr-4 py-3",
         "rounded-lg border border-neutral-200 bg-white",
         "hover:bg-neutral-50 transition-colors"
       )}
@@ -131,7 +131,7 @@ export function LeadCard({ lead }: LeadCardProps) {
       </div>
 
       {/* BLOCK 2 — Lead metadata */}
-      <div className="flex items-center gap-4 text-sm text-neutral-600">
+      <div className="flex items-center gap-2 text-sm text-neutral-600">
         <span
           className={cn(
             "text-xs px-2 py-0.5 rounded-md whitespace-nowrap",

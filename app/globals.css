@@ -1,97 +1,121 @@
+/* ===============================
+   Tailwind Core
+================================ */
+
 @import "tailwindcss";
+@config "../tailwind.config.ts";
+
+/* Tell Tailwind where to scan */
+@source "../app/**/*.{ts,tsx,js,jsx,mdx}";
+@source "../components/**/*.{ts,tsx,js,jsx,mdx}";
+@source "../modules/**/*.{ts,tsx,js,jsx,mdx}";
+@source "../src/**/*.{ts,tsx,js,jsx,mdx}";
+
+/* Animations plugin */
 @import "tw-animate-css";
 
-/* ClientLabs institutional theme (green / teal) */
-@theme {
-  --color-primary: #10B981;
-  --color-primary-dark: #059669;
-  --color-primary-soft: #34D399;
-  --color-background: #071A1F;
-  --color-surface: #0B2A2F;
-  --color-border: #134E4A;
-  --color-text: #E6FFFA;
-}
-
-/* GLOBAL RESET */
-html,
-body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  width: 100%;
-  overflow-x: hidden;
-}
-
-/* SCROLL INVISIBLE */
-::-webkit-scrollbar {
-  width: 0px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: transparent;
-}
+/* ===============================
+   ClientLabs Theme Tokens
+================================ */
 
 :root {
-  --primary: #10B981;
   --bg-main: #F5F7F9;
   --bg-surface: #F4F7FA;
   --bg-card: #FFFFFF;
 
-  --border-subtle: #E3E8EF;
-
   --text-primary: #111827;
   --text-secondary: #6B7280;
 
-  /* ClientLabs institutional green / teal */
+  --border-main: #E3E8EF;
+  --border-subtle: #E3E8EF;
+
   --accent: #10B981;
-  --accent-bg-emerald-600: #059669;
-  --accent-soft: rgba(16, 185, 129, 0.08);
+  --accent-soft: #D1FAE5;
 
-  --critical: #C95656;
-  --warning: #D9A441;
+  --critical: #EF4444;
+  --warning: #F59E0B;
 
-  --shadow-sidebar: 2px 0 6px rgba(0, 0, 0, 0.03);
-  --shadow-card: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.08);
+  --shadow-sidebar: 0 2px 6px rgba(15, 23, 42, 0.06);
 }
+
+/* Dark mode */
 
 html[data-theme="dark"] {
   --bg-main: #071A1F;
   --bg-surface: #0B2A2F;
   --bg-card: #0B2A2F;
 
-  --border-subtle: #134E4A;
-
   --text-primary: #E6FFFA;
   --text-secondary: #99F6E4;
 
+  --border-main: #134E4A;
+  --border-subtle: #134E4A;
+
   --accent: #34D399;
-  --accent-bg-emerald-600: #10B981;
   --accent-soft: rgba(52, 211, 153, 0.1);
 
-  --critical: #C95656;
-  --warning: #D9A441;
+  --critical: #F97373;
+  --warning: #FACC6B;
 
-  --shadow-sidebar: none;
   --shadow-card: none;
+  --shadow-sidebar: none;
 }
 
-/* Base */
+/* ===============================
+   Global Reset
+================================ */
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  min-height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+  background: var(--bg-main);
+  color: var(--text-primary);
+}
+
+/* Hide scrollbars visually but keep scroll functionality */
+
+html,
+body {
+  scrollbar-width: none;
+}
+
+::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+}
+
+/* ===============================
+   Base Layer
+================================ */
+
 @layer base {
 
-  html,
-  body {
-    scrollbar-width: none;
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
   }
+
+  body {
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
 }
 
-/* Utilities */
+/* ===============================
+   Utility Classes
+================================ */
+
 @layer utilities {
 
-  /* Scroll hidden */
+  /* Hide scrollbars utility */
+
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -101,7 +125,8 @@ html[data-theme="dark"] {
     display: none;
   }
 
-  /* Marquee */
+  /* Marquee animation */
+
   @keyframes marquee {
     to {
       transform: translateX(-50%);
@@ -112,26 +137,30 @@ html[data-theme="dark"] {
     animation: marquee 30s linear infinite;
   }
 
-  /* Sections */
+  /* Full-height section helper */
+
   .last-section {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
   }
 
-  /* Performance */
+  /* Performance hint */
+
   .motion-element {
     will-change: transform, opacity;
   }
 
-  /* Hover lift */
+  /* Hover lift effect */
+
   @media (prefers-reduced-motion: no-preference) {
-    .bg-emerald-600-lift:hover {
+    .hover-lift:hover {
       transform: translateY(-2px);
     }
   }
 
-  /* 3D flip */
+  /* 3D utilities */
+
   .perspective {
     perspective: 1200px;
   }
@@ -147,7 +176,12 @@ html[data-theme="dark"] {
   .rotate-y-180 {
     transform: rotateY(180deg);
   }
+
 }
+
+/* ===============================
+   Edge Fixes
+================================ */
 
 .force-light-hero * {
   color: inherit;

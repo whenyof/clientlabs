@@ -72,15 +72,25 @@ export async function getClientFinancialKPIs(
  AND i."status" NOT IN ('DRAFT', 'CANCELED')
  ),
 
- -- Sales linked to the client
- sales AS (
- SELECT
- COALESCE(SUM(s."total"::NUMERIC - s."price"::NUMERIC), 0) AS "costDiff",
- COUNT(*) > 0 AS "hasSales"
- FROM "Sale" s
- WHERE s."userId" = $1
- AND s."clientId" = $2
- )
+      -- Sales linked to the client, using SaleItem as the source of cost
+      sales AS (
+      SELECT
+      COALESCE(SUM(
+        s."total"::NUMERIC
+        - COALESCE(
+            (
+              SELECT SUM(si."price"::NUMERIC * si."quantity"::NUMERIC)
+              FROM "SaleItem" si
+              WHERE si."saleId" = s."id"
+            ),
+            0
+          )
+      ), 0) AS "costDiff",
+      COUNT(*) > 0 AS "hasSales"
+      FROM "Sale" s
+      WHERE s."userId" = $1
+      AND s."clientId" = $2
+      )
 
  SELECT
  -- 1) Total Revenue (historical)

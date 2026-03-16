@@ -1,10 +1,8 @@
 /**
  * Client 360 Page — /dashboard/clients/[clientId]
  *
- * Master page for a single customer. Server component that:
- *  1. Validates session (requireOnboardedUser)
- *  2. Loads all data in parallel (base, KPIs, invoices, sales, payments)
- *  3. Renders the Client 360 layout shell
+ * 3-column SaaS layout: Timeline (left) | Profile + Marketing + Insights (center) | KPIs + Transactions (right).
+ * No backend or query logic changes.
  */
 
 import { requireOnboardedUser } from "@/lib/auth-guards"
@@ -18,116 +16,100 @@ import { getClientFinancialRisk } from "@/modules/client360/services/getClientFi
 import { getClientProfitability } from "@/modules/client360/services/getClientProfitability"
 import { getClientTimeline } from "@/modules/client360/services/getClientTimeline"
 import {
-    ClientHeader,
-    ClientKpiStrip,
-    ClientInvoiceList,
-    ClientSalesList,
-    ClientPaymentsList,
-    ClientFinancialRiskCard,
-    ClientProfitabilityCard,
-    ClientTimeline,
-    ClientQuickActions,
-    ClientMainGrid,
-    ClientNotFound,
+  ClientHeader,
+  ClientKpiOverview,
+  ClientFinancialRiskCard,
+  ClientProfitabilityCard,
+  ClientTimeline,
+  ClientTransactionsTabs,
+  ClientProfileCard,
+  ClientNotFound,
 } from "@/modules/client360/components"
+import { Client360ActionsBar } from "@/modules/client360/actions/Client360ActionsBar"
 
 type Params = Promise<{ clientId: string }>
 
 export default async function Client360Page({
-    params: paramsPromise,
+  params: paramsPromise,
 }: {
-    params: Params
+  params: Params
 }) {
-    const { session } = await requireOnboardedUser()
-    const params = await paramsPromise
-    const userId = session.user!.id
-    const clientId = params.clientId
+  const { session } = await requireOnboardedUser()
+  const params = await paramsPromise
+  const userId = session.user!.id
+  const clientId = params.clientId
 
-    // Parallel load — no waterfall
-    const [client, kpis, invoices, salesData, paymentsData, financialRisk, profitability, timeline] = await Promise.all([
-        getClient360Base(clientId, userId),
-        getClientFinancialKPIs(clientId, userId),
-        getClientInvoices(clientId, userId),
-        getClientSales(clientId, userId),
-        getClientPayments(clientId, userId),
-        getClientFinancialRisk(clientId, userId),
-        getClientProfitability(clientId, userId),
-        getClientTimeline(clientId, userId),
+  const [client, kpis, invoices, salesData, paymentsData, financialRisk, profitability, timeline] =
+    await Promise.all([
+      getClient360Base(clientId, userId),
+      getClientFinancialKPIs(clientId, userId),
+      getClientInvoices(clientId, userId),
+      getClientSales(clientId, userId),
+      getClientPayments(clientId, userId),
+      getClientFinancialRisk(clientId, userId),
+      getClientProfitability(clientId, userId),
+      getClientTimeline(clientId, userId),
     ])
 
-    if (!client) {
-        return (
-            <DashboardContainer>
-                <ClientNotFound />
-            </DashboardContainer>
-        )
-    }
-
+  if (!client) {
     return (
-        <DashboardContainer>
-            {/* Back link */}
-            <div className="mb-2">
-                <a
-                    href="/dashboard/clients"
-                    className="inline-flex items-center gap-1.5 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-200"
-                >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                    </svg>
-                    Clientes
-                </a>
-            </div>
-
-            {/* Client Header + Quick Actions */}
-            <ClientHeader client={client} />
-
-            {/* Quick Actions Bar — fixed row of premium action buttons */}
-            <div className="mt-4">
-                <ClientQuickActions clientId={clientId} clientName={client.name ?? client.companyName ?? ""} />
-            </div>
-
-            {/* KPI Strip — real data */}
-            <div className="mt-6">
-                <ClientKpiStrip kpis={kpis} />
-            </div>
-
-            {/* Invoice List */}
-            <div className="mt-8">
-                <ClientInvoiceList invoices={invoices} clientId={clientId} />
-            </div>
-
-            {/* Sales List */}
-            <div className="mt-8">
-                <ClientSalesList
-                    sales={salesData.sales}
-                    kpis={salesData.kpis}
-                    clientId={clientId}
-                />
-            </div>
-
-            {/* Payments List */}
-            <div className="mt-8">
-                <ClientPaymentsList
-                    payments={paymentsData.payments}
-                    kpis={paymentsData.kpis}
-                />
-            </div>
-
-            {/* Financial Risk + Profitability side by side on large screens */}
-            <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <ClientFinancialRiskCard risk={financialRisk} />
-                <ClientProfitabilityCard profitability={profitability} />
-            </div>
-
-            {/* Timeline */}
-            <div className="mt-8">
-                <ClientTimeline events={timeline} />
-            </div>
-
-            {/* Remaining widget grid */}
-            <div className="mt-8">
-                <ClientMainGrid />
-            </div>
-        </DashboardContainer>
+      <DashboardContainer>
+        <ClientNotFound />
+      </DashboardContainer>
     )
+  }
+
+  return (
+    <DashboardContainer>
+      {/* HEADER: breadcrumb + client identity */}
+      <div className="mb-2">
+        <a
+          href="/dashboard/clients"
+          className="inline-flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-900 transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+          Clientes
+        </a>
+      </div>
+
+      {/* Client header */}
+      <div className="mt-4">
+        <ClientHeader client={client} />
+      </div>
+
+      {/* Main workspace + context grid */}
+      <div className="mt-8 grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-10 items-start">
+        {/* LEFT: client financial workspace */}
+        <div className="space-y-10 min-w-0">
+          <ClientKpiOverview kpis={kpis} salesKpis={salesData.kpis} />
+
+          {/* Quick actions aligned with KPI width */}
+          <Client360ActionsBar clientId={client.id} defaultEmail={client.email} />
+
+          <ClientTransactionsTabs
+            clientId={clientId}
+            invoices={invoices}
+            salesData={salesData}
+            paymentsData={paymentsData}
+          />
+        </div>
+
+        {/* RIGHT: client context panel */}
+        <aside className="space-y-8 sticky top-6 lg:min-w-0">
+          <ClientProfileCard client={client} />
+
+          <div className="border-t border-[var(--border-subtle)] pt-6">
+            <ClientTimeline events={timeline} />
+          </div>
+
+          <div className="space-y-4 border-t border-[var(--border-subtle)] pt-6">
+            <ClientFinancialRiskCard risk={financialRisk} />
+            <ClientProfitabilityCard profitability={profitability} />
+          </div>
+        </aside>
+      </div>
+    </DashboardContainer>
+  )
 }

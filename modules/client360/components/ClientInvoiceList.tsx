@@ -101,60 +101,17 @@ export function ClientInvoiceList({ invoices, clientId }: ClientInvoiceListProps
 
  if (invoices.length === 0) {
  return (
- <div
- id="client360-widget-invoices"
- className="rounded-2xl bg-[var(--bg-card)] backdrop- border border-[var(--border-subtle)] overflow-hidden"
- >
- {/* Header */}
- <div className="flex items-center gap-3 px-6 py-4 border-b border-[var(--border-subtle)]">
- <div className="p-2 rounded-lg bg-[var(--bg-card)] shadow-md">
- <DocumentTextIcon className="w-4 h-4 text-[var(--text-primary)]" />
- </div>
- <h3 className="text-sm font-bold text-[var(--text-primary)] tracking-wide">
- Facturas del cliente
- </h3>
- </div>
-
- <div className="flex flex-col items-center justify-center py-16 px-6">
- <div className="w-12 h-12 rounded-2xl mb-4 bg-[var(--bg-card)] opacity-20 flex items-center justify-center">
- <InboxIcon className="w-6 h-6 text-[var(--text-primary)]" />
- </div>
- <p className="text-sm text-[var(--text-secondary)] font-medium">
- Sin facturas
- </p>
- <p className="text-xs text-gray-500 mt-1">
- Este cliente no tiene facturas registradas todavía
- </p>
- </div>
- </div>
+      <div className="text-xs text-[var(--text-secondary)]">
+        Este cliente no tiene facturas registradas todavía.
+      </div>
  )
  }
 
  // ── Table ────────────────────────────────────────────────────────────
 
- return (
- <div
- id="client360-widget-invoices"
- className="rounded-2xl bg-[var(--bg-card)] backdrop- border border-[var(--border-subtle)] overflow-hidden"
- >
- {/* Header */}
- <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)]">
- <div className="flex items-center gap-3">
- <div className="p-2 rounded-lg bg-[var(--bg-card)] shadow-md">
- <DocumentTextIcon className="w-4 h-4 text-[var(--text-primary)]" />
- </div>
- <h3 className="text-sm font-bold text-[var(--text-primary)] tracking-wide">
- Facturas del cliente
- </h3>
- <span className="text-xs text-gray-500 ml-1">
- ({invoices.length})
- </span>
- </div>
- </div>
-
- {/* Scrollable table */}
- <div className="overflow-x-auto">
- <table className="w-full text-left">
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-left text-sm">
  <thead>
  <tr className="border-b border-[var(--border-subtle)]">
  <th className="py-3 px-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
@@ -191,13 +148,13 @@ export function ClientInvoiceList({ invoices, clientId }: ClientInvoiceListProps
  const isCanceled = inv.status === "CANCELED"
 
  return (
- <tr
- key={inv.id}
- className={`
- border-b border-[var(--border-subtle)] transition-colors
- hover:bg-[var(--bg-card)]/[0.04] cursor-pointer
- ${isCanceled ? "opacity-50" : ""}
- `}
+              <tr
+                key={inv.id}
+                className={`
+            border-b border-[var(--border-subtle)] transition-colors
+            hover:bg-neutral-50 cursor-pointer
+            ${isCanceled ? "opacity-50" : ""}
+            `}
  onClick={() => handleView(inv.id)}
  role="button"
  tabIndex={0}
@@ -317,8 +274,7 @@ export function ClientInvoiceList({ invoices, clientId }: ClientInvoiceListProps
  )
  })}
  </tbody>
- </table>
- </div>
- </div>
+      </table>
+    </div>
  )
 }

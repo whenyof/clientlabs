@@ -16,96 +16,90 @@ export async function GET() {
         const userId = session.user.id
 
         const now = new Date()
-        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999)
-        const startOfPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-        const endOfPrevMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999)
+        const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1))
+        const endOfMonth = new Date(
+            Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999),
+        )
+        const startOfPrevMonth = new Date(
+            Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1),
+        )
+        const endOfPrevMonth = new Date(
+            Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 0, 23, 59, 59, 999),
+        )
+        const sixMonthsAgo = new Date(
+            Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 5, 1),
+        )
 
         const whereUser = { userId }
 
-        // Current month aggregates
-        const [
-            incomeThisMonth,
-            incomePrevMonth,
-            salesCountThisMonth,
-            salesCountPrevMonth,
-            clientsTotal,
-            leadsTotal,
-            tasksPending,
-            automationsActive,
-            userSettings,
-        ] = await Promise.all([
-            prisma.transaction.aggregate({
-                where: {
-                    ...whereUser,
-                    type: 'INCOME',
-                    status: 'COMPLETED',
-                    date: { gte: startOfMonth, lte: endOfMonth },
-                },
-                _sum: { amount: true },
-            }),
-            prisma.transaction.aggregate({
-                where: {
-                    ...whereUser,
-                    type: 'INCOME',
-                    status: 'COMPLETED',
-                    date: { gte: startOfPrevMonth, lte: endOfPrevMonth },
-                },
-                _sum: { amount: true },
-            }),
-            prisma.sale.count({
-                where: {
-                    ...whereUser,
-                    saleDate: { gte: startOfMonth, lte: endOfMonth },
-                },
-            }),
-            prisma.sale.count({
-                where: {
-                    ...whereUser,
-                    saleDate: { gte: startOfPrevMonth, lte: endOfPrevMonth },
-                },
-            }),
-            prisma.client.count({ where: whereUser }),
-            prisma.lead.count({ where: whereUser }),
-            prisma.task.count({
-                where: { ...whereUser, status: 'PENDING' },
-            }),
-            prisma.automation.count({
-                where: { ...whereUser, active: true },
-            }),
-            prisma.user.findUnique({
-                where: { id: userId },
-                select: { monthlyRevenueTarget: true },
-            }),
-        ])
+        // Postgres aggregation: one query returns up to 6 rows (monthly revenue); no transaction list in Node
+        type MonthlyRevenueRow = { month: Date; revenue: number }
+        const [monthlyRevenueRows, salesCountThisMonth, salesCountPrevMonth, clientsTotal, leadsTotal, tasksPending, automationsActive, userSettings] =
+            await Promise.all([
+                prisma.$queryRaw<MonthlyRevenueRow[]>`
+                    SELECT
+                        (DATE_TRUNC('month', "date" AT TIME ZONE 'UTC'))::date AS month,
+                        COALESCE(SUM(amount), 0)::float AS revenue
+                    FROM "Transaction"
+                    WHERE "userId" = ${userId}
+                        AND "type" = 'INCOME'
+                        AND "status" = 'COMPLETED'
+                        AND "date" >= ${sixMonthsAgo}
+                        AND "date" <= ${endOfMonth}
+                    GROUP BY month
+                    ORDER BY month
+                `,
+                prisma.sale.count({
+                    where: {
+                        ...whereUser,
+                        saleDate: { gte: startOfMonth, lte: endOfMonth },
+                    },
+                }),
+                prisma.sale.count({
+                    where: {
+                        ...whereUser,
+                        saleDate: { gte: startOfPrevMonth, lte: endOfPrevMonth },
+                    },
+                }),
+                prisma.client.count({ where: whereUser }),
+                prisma.lead.count({ where: whereUser }),
+                prisma.task.count({
+                    where: { ...whereUser, status: 'PENDING' },
+                }),
+                prisma.automation.count({
+                    where: { ...whereUser, active: true },
+                }),
+                prisma.user.findUnique({
+                    where: { id: userId },
+                    select: { monthlyRevenueTarget: true },
+                }),
+            ])
 
-        const incomeCur = incomeThisMonth._sum.amount ?? 0
-        const incomePrev = incomePrevMonth._sum.amount ?? 0
+        // Map YYYY-MM (UTC) -> revenue from aggregated rows; validate range and numeric safety
+        const monthlyTotals = new Map<string, number>()
+        for (const r of monthlyRevenueRows) {
+            const revenue = Number(r.revenue)
+            if (!Number.isFinite(revenue)) continue
+            const monthDate = r.month instanceof Date ? r.month : new Date(r.month)
+            if (monthDate < sixMonthsAgo || monthDate > endOfMonth) continue
+            const key = `${monthDate.getUTCFullYear()}-${String(monthDate.getUTCMonth() + 1).padStart(2, '0')}`
+            monthlyTotals.set(key, revenue)
+        }
+        const currentKey = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`
+        const prevMonthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1))
+        const prevKey = `${prevMonthStart.getUTCFullYear()}-${String(prevMonthStart.getUTCMonth() + 1).padStart(2, '0')}`
+        const incomeCur = monthlyTotals.get(currentKey) ?? 0
+        const incomePrev = monthlyTotals.get(prevKey) ?? 0
         const incomeChange = incomePrev === 0 ? 0 : ((incomeCur - incomePrev) / incomePrev) * 100
         const salesChange = salesCountPrevMonth === 0 ? 0 : ((salesCountThisMonth - salesCountPrevMonth) / salesCountPrevMonth) * 100
 
-        // Revenue by month (last 6 months) from Transaction INCOME
-        const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1)
-        const txList = await prisma.transaction.findMany({
-            where: {
-                ...whereUser,
-                type: 'INCOME',
-                status: 'COMPLETED',
-                date: { gte: sixMonthsAgo, lte: endOfMonth },
-            },
-            select: { date: true, amount: true },
-        })
         const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
         const revenueByMonth: { month: string; revenue: number }[] = []
         for (let i = 5; i >= 0; i--) {
-            const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
-            const sum = txList
-                .filter((r) => {
-                    const dt = new Date(r.date)
-                    return dt.getFullYear() === d.getFullYear() && dt.getMonth() === d.getMonth()
-                })
-                .reduce((acc, r) => acc + r.amount, 0)
-            revenueByMonth.push({ month: monthNames[d.getMonth()], revenue: Math.round(sum) })
+            const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1))
+            const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`
+            const sum = monthlyTotals.get(key) ?? 0
+            revenueByMonth.push({ month: monthNames[d.getUTCMonth()], revenue: Math.round(sum) })
         }
 
         return NextResponse.json({

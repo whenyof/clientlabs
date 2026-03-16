@@ -17,6 +17,7 @@ import {
 // Types that match what the UI expects
 export type TaskData = {
     title: string
+    description?: string
     dueDate?: Date
     priority?: "LOW" | "MEDIUM" | "HIGH"
     type?: "CALL" | "EMAIL" | "MEETING" | "MANUAL"

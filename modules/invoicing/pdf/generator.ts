@@ -22,14 +22,16 @@ type IssuedSnapshots = {
 }
 
 function toPdfData(invoice: NonNullable<InvoiceForPdf>): InvoicePdfData {
+  const providerName = (invoice as { Provider?: { name?: string | null } | null }).Provider?.name ?? undefined
+  const client = (invoice as { Client?: { name?: string | null; email?: string | null } | null }).Client ?? null
   const recipient =
     invoice.type === "VENDOR"
-      ? { name: invoice.Provider?.name ?? "—", taxId: undefined, address: undefined, email: undefined, phone: undefined }
+      ? { name: providerName ?? "—", taxId: undefined, address: undefined, email: undefined, phone: undefined }
       : {
-          name: invoice.Client?.name ?? invoice.Client?.email ?? "—",
+          name: client?.name ?? client?.email ?? "—",
           taxId: undefined,
           address: undefined,
-          email: invoice.Client?.email ?? undefined,
+          email: client?.email ?? undefined,
           phone: undefined,
         }
 
@@ -59,7 +61,15 @@ function toPdfData(invoice: NonNullable<InvoiceForPdf>): InvoicePdfData {
     subtotal: invoice.subtotal,
     taxAmount: invoice.taxAmount,
     total: invoice.total,
-    lines: invoice.lines.map((l) => ({
+    lines: (invoice.lines as Array<{
+      description: string
+      quantity: number
+      unitPrice: number
+      taxPercent: number
+      subtotal: number
+      taxAmount: number
+      total: number
+    }>).map((l) => ({
       description: l.description,
       quantity: l.quantity,
       unitPrice: l.unitPrice,
@@ -68,7 +78,10 @@ function toPdfData(invoice: NonNullable<InvoiceForPdf>): InvoicePdfData {
       taxAmount: l.taxAmount,
       total: l.total,
     })),
-    payments: invoice.payments.map((p) => ({ amount: p.amount, method: p.method })),
+    payments: (invoice.payments as Array<{ amount: number; method: string | null }>).map((p) => ({
+      amount: p.amount,
+      method: p.method ?? "—",
+    })),
     recipient,
     branding: {} as InvoicePdfData["branding"],
     ...(inv.isRectification && {
@@ -120,7 +133,10 @@ function toPdfDataFromSnapshots(
     taxAmount: totals.taxAmount,
     total: totals.total,
     lines: items,
-    payments: invoice.payments.map((p) => ({ amount: p.amount, method: p.method })),
+    payments: (invoice.payments as Array<{ amount: number; method: string | null }>).map((p) => ({
+      amount: p.amount,
+      method: p.method ?? "—",
+    })),
     recipient,
     ...(inv.isRectification && {
       isRectification: true,

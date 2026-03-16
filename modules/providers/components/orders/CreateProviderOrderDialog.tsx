@@ -94,7 +94,13 @@ function OrderStepper({
   )
 }
 
-type LoadedDraft = { id: string; emailTo: string | null; emailSubject: string | null; emailBody: string | null }
+type LoadedDraft = {
+  id: string
+  status?: string
+  emailTo: string | null
+  emailSubject: string | null
+  emailBody: string | null
+}
 
 export type CreateProviderOrderDialogProps = {
   open: boolean

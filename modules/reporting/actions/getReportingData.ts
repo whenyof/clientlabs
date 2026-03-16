@@ -20,7 +20,6 @@ export async function getReportingData(): Promise<ReportingSale[]> {
       saleDate: true,
       clientName: true,
       clientId: true,
-      category: true,
     },
   })
 
@@ -31,6 +30,6 @@ export async function getReportingData(): Promise<ReportingSale[]> {
     saleDate: s.saleDate.toISOString(),
     clientName: s.clientName ?? "",
     clientId: s.clientId,
-    category: s.category,
+    category: null,
   }))
 }

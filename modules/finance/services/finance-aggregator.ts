@@ -49,9 +49,10 @@ function defaultMonthRange(): { from: Date; to: Date } {
  }
 }
 
-function safeNum(n: number | null | undefined): number {
- if (n == null || !Number.isFinite(n)) return 0
- return n
+function safeNum(n: unknown): number {
+ const v = Number(n ?? 0)
+ if (!Number.isFinite(v)) return 0
+ return v
 }
 
 /**

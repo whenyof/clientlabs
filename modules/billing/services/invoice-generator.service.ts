@@ -9,9 +9,10 @@ import { createInvoice } from "./invoice.service"
 /** Status values that represent a confirmed / closed / completed sale. */
 const COMPLETED_SALE_STATUSES = ["PAGADO", "PAID", "COMPLETED", "WON", "CONFIRMED"]
 
-function isEligibleForInvoice(sale: { userId: string; clientId: string | null; total: number; status: string }): boolean {
+function isEligibleForInvoice(sale: { clientId: string | null; total: unknown; status: string }): boolean {
   const hasClient = !!sale.clientId
-  const hasAmount = typeof sale.total === "number" && sale.total > 0
+  const totalNumber = Number(sale.total ?? 0)
+  const hasAmount = Number.isFinite(totalNumber) && totalNumber > 0
   const statusUpper = (sale.status || "").toUpperCase()
   const isCompleted = COMPLETED_SALE_STATUSES.some((s) => s === statusUpper)
   return hasClient && hasAmount && isCompleted
@@ -39,13 +40,21 @@ export async function generateInvoiceFromSale(saleId: string): Promise<{ invoice
   const dueAt = new Date(now)
   dueAt.setDate(dueAt.getDate() + 15)
   const total = Number(sale.total)
-  const tax = Number(sale.tax) || 0
+  const tax = Number((sale as any).taxTotal ?? 0)
   const subtotal = Math.round((total - tax) * 100) / 100
   const number = `INV-${Date.now()}`
   const currency = (sale.currency || "EUR").trim() || "EUR"
-  const description = (sale.product || "Service").trim() || "Service"
-  const unitPrice = total
-  const taxRate = total > 0 && tax > 0 ? Math.round((tax / (total - tax)) * 10000) / 100 : 0
+  const firstItem = (sale as any).items?.[0] as
+    | { product?: string | null; price?: unknown; taxRate?: number | null }
+    | undefined
+  const description = (firstItem?.product || "Service").trim() || "Service"
+  const unitPrice = Number(firstItem?.price ?? subtotal)
+  const taxRate =
+    typeof firstItem?.taxRate === "number"
+      ? firstItem.taxRate
+      : total > 0 && tax > 0
+        ? Math.round((tax / (total - tax)) * 10000) / 100
+        : 0
 
   const invoice = await createInvoice({
     userId: sale.userId,

@@ -48,6 +48,7 @@ export type ProviderOrdersTabProps = {
   onRegisterPayment: (order: ProviderOrderRow) => void
   onUploadInvoice: (orderId: string) => void
   onUploadOrderFile: (orderId: string) => void
+  onUploadOrderSheet?: (orderId: string) => void
   onPreviewFile: (file: { id: string; name: string; url?: string; category: string; createdAt?: Date }) => void
   onDeleteFile: (file: { id: string; name: string }) => void
   /** Abre el modal de confirmación «¿Has enviado el pedido?» para pedidos en PENDING_SEND_CONFIRMATION */
@@ -73,6 +74,7 @@ export function ProviderOrdersTab({
   onRegisterPayment,
   onUploadInvoice,
   onUploadOrderFile,
+  onUploadOrderSheet,
   onPreviewFile,
   onDeleteFile,
   onConfirmSendOrder,
@@ -384,7 +386,8 @@ export function ProviderOrdersTab({
                             size="sm"
                             variant="outline"
                             className="text-[11px]"
-                            onClick={() => onUploadOrderSheet(order.id)}
+                            onClick={() => onUploadOrderSheet?.(order.id)}
+                            disabled={!onUploadOrderSheet}
                           >
                             <Upload className="h-3.5 w-3.5 mr-1.5" /> Subir hoja de pedido
                           </Button>

@@ -206,7 +206,7 @@ export function ProviderOperationalCenterCard({
                           fontSize: "11px",
                         }
                   }
-                  formatter={(value: number) => [formatCurrency(value), "Gasto"]}
+                  formatter={(value) => [formatCurrency(Number(value ?? 0)), "Gasto"]}
                   labelFormatter={(label) => `Mes: ${label}`}
                 />
                 <Bar

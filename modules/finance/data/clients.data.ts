@@ -67,7 +67,7 @@ export async function getClientRevenue(
  return rows.map((r) => ({
  id: r.id,
  clientId: r.clientId,
- amount: r.total,
+ amount: Number(r.total),
  saleDate: r.saleDate,
  }))
 }

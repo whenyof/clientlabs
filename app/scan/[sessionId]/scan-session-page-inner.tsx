@@ -165,7 +165,8 @@ export function ScanSessionPageInner({ sessionId }: { sessionId: string }) {
       }
 
       const pdfBytes = await pdfDoc.save()
-      const pdfBlob = new Blob([pdfBytes], { type: "application/pdf" })
+      // pdfBytes is Uint8Array; convert its buffer to an ArrayBuffer BlobPart
+      const pdfBlob = new Blob([pdfBytes.buffer as ArrayBuffer], { type: "application/pdf" })
 
       // 2. Subir PDF reutilizando el flujo de upload existente
       const fd = new FormData()

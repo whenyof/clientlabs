@@ -93,7 +93,7 @@ export async function createOrderFlow(
 
     const baseAfterDiscount = taxableBase * proportion
 
-    return acc + (baseAfterDiscount * item.taxRate) / 100
+    return acc + (baseAfterDiscount * (item.taxRate ?? 0)) / 100
 
   }, 0)
 
@@ -127,7 +127,7 @@ export async function createOrderFlow(
         status: "PENDIENTE",
         stripePaymentId: null,
         stripeCustomerId: null,
-        metadata: null,
+        metadata: Prisma.JsonNull,
         notes: notes ?? null,
         saleDate: now,
         createdAt: now
@@ -215,7 +215,7 @@ export async function createOrderFlow(
       for (const item of normalizedItems) {
 
         const base = item.quantity * item.price
-        const taxAmount = (base * item.taxRate) / 100
+        const taxAmount = (base * (item.taxRate ?? 0)) / 100
         const totalWithTax = base + taxAmount
 
         await tx.invoiceLine.create({
@@ -225,7 +225,7 @@ export async function createOrderFlow(
             description: item.product,
             quantity: new Prisma.Decimal(item.quantity),
             unitPrice: dec(item.price),
-            taxPercent: dec(item.taxRate),
+            taxPercent: dec(item.taxRate ?? 0),
             subtotal: dec(base),
             taxAmount: dec(taxAmount),
             total: dec(totalWithTax)

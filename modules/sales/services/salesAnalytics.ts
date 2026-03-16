@@ -91,7 +91,7 @@ async function aggregateSalesInPeriod(
     _sum: { total: true },
     _count: true,
   })
-  const revenue = result._sum.total ?? 0
+  const revenue = Number(result._sum.total ?? 0)
   const count = result._count
   const safeRevenue = Number.isFinite(revenue) ? revenue : 0
   return { revenue: safeRevenue, count }

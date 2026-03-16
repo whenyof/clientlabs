@@ -21,8 +21,8 @@ export type SalesForecastApiResult = {
   confidence: "HIGH" | "MEDIUM" | "LOW"
 }
 
-function amountForSale(sale: { total: number; amount?: number | null }): number {
-  return Number(sale.amount ?? sale.total ?? 0)
+function amountForSale(sale: { total: unknown; amount?: unknown | null }): number {
+  return Number((sale as any).amount ?? (sale as any).total ?? 0)
 }
 
 /**

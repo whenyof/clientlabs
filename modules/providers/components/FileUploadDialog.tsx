@@ -134,7 +134,7 @@ export function FileUploadDialog({
                 }
 
                 const pdfBytes = await pdfDoc.save()
-                const pdfBlob = new Blob([pdfBytes], { type: "application/pdf" })
+                const pdfBlob = new Blob([pdfBytes.buffer as ArrayBuffer], { type: "application/pdf" })
                 const fd = new FormData()
                 fd.set("file", pdfBlob, `${documentName.trim() || "documento"}.pdf`)
                 const res = await fetch("/api/providers/upload", { method: "POST", body: fd })

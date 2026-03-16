@@ -38,7 +38,7 @@ export async function getUnifiedMovementsForLedger(
  clientName: true,
  clientId: true,
  status: true,
- product: true,
+ items: { select: { product: true } },
  },
  orderBy: { saleDate: "desc" },
  }),
@@ -73,6 +73,7 @@ export async function getUnifiedMovementsForLedger(
  const items: Movement[] = []
 
  for (const s of sales) {
+ const firstItem = (s.items?.[0] as { product?: string | null } | undefined)
  items.push({
  id: `sale-${s.id}`,
  date: s.saleDate.toISOString(),
@@ -80,7 +81,7 @@ export async function getUnifiedMovementsForLedger(
  amount: Number(s.total) ?? 0,
  contactName: s.clientName || null,
  contactType: "client",
- concept: s.product || "Venta",
+ concept: firstItem?.product || "Venta",
  category: undefined,
  status: toStatus(s.status),
  originModule: "sale",

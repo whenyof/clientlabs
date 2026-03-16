@@ -208,17 +208,18 @@ export async function createInvoiceFromSale(saleId: string, userId: string): Pro
 
   const sale = await prisma.sale.findFirst({
     where: { id: saleId, userId },
-    include: { Client: true },
+    include: { Client: true, items: { take: 1 } },
   })
   if (!sale || !sale.clientId) return null
 
   const total = Number(sale.total)
-  const tax = Number(sale.tax)
+  const tax = Number((sale as any).taxTotal ?? 0)
   const subtotalLine = Math.round((total - tax) * 100) / 100
   const taxPct = subtotalLine > 0 ? Math.round((tax / subtotalLine) * 10000) / 100 : 0
+  const firstItem = (sale.items?.[0] as { product?: string | null } | undefined)
   const lines: CreateInvoiceInput["lines"] = [
     {
-      description: sale.product,
+      description: firstItem?.product ?? "Venta",
       quantity: 1,
       unitPrice: subtotalLine,
       discountPercent: sale.discount ? Number(sale.discount) : 0,

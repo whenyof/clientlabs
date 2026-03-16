@@ -33,7 +33,7 @@ export async function findById(id: string, userId: string) {
     include: {
       Client: { select: clientSelect },
       Provider: { select: providerSelect },
-      Sale: { select: { id: true, product: true, total: true } },
+      Sale: { select: { id: true, total: true, items: { select: { product: true } } } },
       ProviderOrder: { select: { id: true, status: true } },
       ProviderPayment: { select: { id: true, amount: true, paymentDate: true } },
       lines: true,

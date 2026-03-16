@@ -199,7 +199,7 @@ export async function addClientPurchase(
 
     if (!client) return { success: false, error: "Client not found" }
 
-    // Create sale
+    // Create sale (summary + single line item)
     await prisma.sale.create({
         data: {
             id: `sale_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -207,9 +207,11 @@ export async function addClientPurchase(
             clientId,
             clientName: client.name || "Sin nombre",
             clientEmail: client.email || undefined,
-            product: data.concept,
-            price: data.amount,
+            subtotal: data.amount,
+            taxTotal: 0,
             total: data.amount,
+            amount: data.amount,
+            discount: 0,
             currency: client.currency,
             paymentMethod: "MANUAL",
             provider: "MANUAL",
@@ -217,6 +219,15 @@ export async function addClientPurchase(
             notes: data.note,
             saleDate: data.date,
             updatedAt: new Date(),
+            items: {
+                create: {
+                    product: data.concept,
+                    quantity: 1,
+                    price: data.amount,
+                    taxRate: 0,
+                    lineTotal: data.amount,
+                },
+            },
         },
     })
 
@@ -282,12 +293,13 @@ export async function getClientTimeline(clientId: string) {
     })
 
     // Sales/Purchases
-    client.Sale.forEach((sale) => {
+    client.Sale.forEach((sale: any) => {
+        const firstItem = sale.items?.[0] as { product?: string | null } | undefined
         timeline.push({
             id: sale.id,
             type: "SALE",
             title: "Compra registrada",
-            description: sale.product || "Compra",
+            description: firstItem?.product || "Compra",
             date: sale.createdAt,
             amount: sale.total ?? undefined,
             currency: sale.currency,
@@ -615,7 +627,7 @@ async function recalculateClientTotalSpent(clientId: string) {
         }
     })
 
-    const totalSpent = aggregations._sum.total || 0
+    const totalSpent = Number(aggregations._sum.total || 0)
 
     await prisma.client.update({
         where: { id: clientId },
@@ -650,7 +662,7 @@ export async function createClientSale(
 
     if (!client) return { success: false, error: "Client not found" }
 
-    // Create sale
+    // Create sale (summary + single line item)
     const sale = await prisma.sale.create({
         data: {
             id: `sale_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -658,9 +670,11 @@ export async function createClientSale(
             clientId,
             clientName: client.name || "Sin nombre",
             clientEmail: client.email,
-            product: data.product,
-            price: data.total,
+            subtotal: data.total,
+            taxTotal: 0,
             total: data.total,
+            amount: data.total,
+            discount: 0,
             currency: client.currency,
             paymentMethod: "MANUAL",
             provider: "MANUAL",
@@ -668,6 +682,15 @@ export async function createClientSale(
             notes: data.notes,
             saleDate: data.saleDate,
             updatedAt: new Date(),
+            items: {
+                create: {
+                    product: data.product,
+                    quantity: 1,
+                    price: data.total,
+                    taxRate: 0,
+                    lineTotal: data.total,
+                },
+            },
         },
     })
 
@@ -690,6 +713,7 @@ export async function updateSaleStatus(saleId: string, newStatus: string) {
 
     const sale = await prisma.sale.findUnique({
         where: { id: saleId },
+        include: { items: true },
     })
 
     if (!sale || sale.userId !== session.user.id) {
@@ -719,7 +743,9 @@ export async function updateSaleStatus(saleId: string, newStatus: string) {
     if (activityType) {
         const client = await prisma.client.findUnique({ where: { id: sale.clientId } })
         if (client) {
-            const noteEntry = `\n[INTERACTION:${new Date().toISOString()}] ${activityType} - Pago actualizado: ${sale.product} (${newStatus})`
+            const firstItem = (sale as any).items?.[0] as { product?: string | null } | undefined
+            const productLabel = firstItem?.product || "Compra"
+            const noteEntry = `\n[INTERACTION:${new Date().toISOString()}] ${activityType} - Pago actualizado: ${productLabel} (${newStatus})`
             await prisma.client.update({
                 where: { id: sale.clientId },
                 data: {
@@ -758,16 +784,35 @@ export async function updateClientSale(
         return { success: false, error: "Sale not found" }
     }
 
+    const newTotal = data.total ?? sale.total
+    const saleWithItems = sale as any
+    const firstItem = (saleWithItems.items?.[0] as { id: string; product?: string | null } | undefined)
+
     const updatedSale = await prisma.sale.update({
         where: { id: saleId },
         data: {
-            product: data.product ?? sale.product,
-            price: data.total ?? sale.price,
-            total: data.total ?? sale.total,
+            subtotal: newTotal,
+            taxTotal: (sale as any).taxTotal ?? 0,
+            total: newTotal,
+            amount: newTotal,
             saleDate: data.saleDate ?? sale.saleDate,
             status: data.status ?? sale.status,
             notes: data.notes ?? sale.notes,
             updatedAt: new Date(),
+            ...(firstItem && (data.product || data.total !== undefined)
+                ? {
+                      items: {
+                          update: {
+                              where: { id: firstItem.id },
+                              data: {
+                                  product: data.product ?? firstItem.product,
+                                  price: newTotal,
+                                  lineTotal: newTotal,
+                              },
+                          },
+                      },
+                  }
+                : {}),
         },
     })
 
@@ -808,7 +853,9 @@ export async function deleteClientSale(saleId: string) {
         })
 
         if (client) {
-            const noteEntry = `\n[INTERACTION:${new Date().toISOString()}] SALE_DELETED - Venta eliminada: ${sale.product}`
+            const firstItem = (sale as any).items?.[0] as { product?: string | null } | undefined
+            const productLabel = firstItem?.product || "Compra"
+            const noteEntry = `\n[INTERACTION:${new Date().toISOString()}] SALE_DELETED - Venta eliminada: ${productLabel}`
             await prisma.client.update({
                 where: { id: sale.clientId },
                 data: {

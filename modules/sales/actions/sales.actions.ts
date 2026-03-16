@@ -74,12 +74,11 @@ export async function createSale(data: SaleCreateInput) {
       clientId: data.clientId ?? null,
       clientName: data.clientName,
       clientEmail: data.clientEmail ?? null,
-      product: data.product,
-      category: data.category ?? null,
-      price: total,
+      subtotal: total,
+      taxTotal: 0,
       total,
+      amount: total,
       discount: 0,
-      tax: 0,
       currency: data.currency ?? "EUR",
       paymentMethod: "MANUAL",
       provider: "MANUAL",
@@ -87,6 +86,15 @@ export async function createSale(data: SaleCreateInput) {
       notes: data.notes ?? null,
       saleDate,
       updatedAt: new Date(),
+      items: {
+        create: {
+          product: data.product,
+          quantity: 1,
+          price: total,
+          taxRate: 0,
+          lineTotal: total,
+        },
+      },
     },
   })
 
@@ -125,6 +133,7 @@ export async function updateSale(id: string, data: SaleUpdateInput) {
 
   const existing = await prisma.sale.findFirst({
     where: { id, userId: session.user.id },
+    include: { items: { take: 1 } },
   })
 
   if (!existing) return { success: false, error: "Sale not found" }
@@ -132,15 +141,40 @@ export async function updateSale(id: string, data: SaleUpdateInput) {
   const updateData: Record<string, unknown> = {
     updatedAt: new Date(),
   }
-  if (data.product !== undefined) updateData.product = data.product
-  if (data.total !== undefined) {
-    updateData.price = data.total
-    updateData.total = data.total
+  const newTotal = data.total !== undefined ? Number(data.total) : undefined
+  if (newTotal !== undefined) {
+    updateData.subtotal = newTotal
+    updateData.total = newTotal
+    updateData.amount = newTotal
   }
   if (data.status !== undefined) updateData.status = data.status
   if (data.notes !== undefined) updateData.notes = data.notes
   if (data.saleDate !== undefined) updateData.saleDate = new Date(data.saleDate)
   if (data.invoiceUrl !== undefined) updateData.invoiceUrl = data.invoiceUrl
+
+  const firstItem = (existing.items?.[0] as { id: string; product?: string | null } | undefined)
+  if (firstItem && (data.product !== undefined || newTotal !== undefined)) {
+    updateData.items = {
+      update: {
+        where: { id: firstItem.id },
+        data: {
+          ...(data.product !== undefined ? { product: data.product } : {}),
+          ...(newTotal !== undefined ? { price: newTotal, lineTotal: newTotal } : {}),
+        },
+      },
+    }
+  } else if (!firstItem && data.product !== undefined) {
+    const fallbackTotal = newTotal ?? Number(existing.total)
+    updateData.items = {
+      create: {
+        product: data.product,
+        quantity: 1,
+        price: fallbackTotal,
+        taxRate: 0,
+        lineTotal: fallbackTotal,
+      },
+    }
+  }
 
   await prisma.sale.update({
     where: { id },
@@ -181,7 +215,7 @@ async function recalculateClientTotalSpent(clientId: string) {
     },
     _sum: { total: true },
   })
-  const totalSpent = agg._sum.total ?? 0
+  const totalSpent = Number(agg._sum.total ?? 0)
 
   await prisma.client.update({
     where: { id: clientId },

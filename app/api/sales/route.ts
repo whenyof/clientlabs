@@ -110,17 +110,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const numericTotal = Number(total)
+
     const sale = await prisma.sale.create({
       data: {
         id: `sale_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
         userId: session.user.id,
         clientName: String(clientName),
         clientEmail: clientEmail ? String(clientEmail) : null,
-        product: String(product),
-        price: Number(total),
-        total: Number(total),
+        // Economic summary at sale level
+        subtotal: numericTotal,
+        taxTotal: 0,
+        total: numericTotal,
+        amount: numericTotal,
         discount: 0,
-        tax: 0,
         currency: 'EUR',
         paymentMethod: 'MANUAL',
         provider: 'MANUAL',
@@ -128,6 +131,16 @@ export async function POST(request: NextRequest) {
         notes: notes ? String(notes) : null,
         saleDate: saleDate ? new Date(saleDate) : new Date(),
         updatedAt: new Date(),
+        // Single-line item for this simple API
+        items: {
+          create: {
+            product: String(product),
+            quantity: 1,
+            price: numericTotal,
+            taxRate: 0,
+            lineTotal: numericTotal,
+          },
+        },
       },
     })
     console.log("SALE CREATED:", sale.id)

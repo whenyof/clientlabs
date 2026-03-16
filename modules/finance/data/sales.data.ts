@@ -34,7 +34,7 @@ export async function getSalesInRange(
  })
  return rows.map((r) => ({
  id: r.id,
- amount: r.total,
+ amount: Number(r.total),
  createdAt: r.createdAt,
  clientId: r.clientId,
  status: r.status,

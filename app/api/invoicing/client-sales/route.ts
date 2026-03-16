@@ -29,6 +29,9 @@ export async function GET(request: NextRequest) {
       clientId,
       Invoice: { none: {} },
     },
+    include: {
+      items: true,
+    },
     orderBy: { saleDate: "desc" },
     take: 200,
   })
@@ -50,26 +53,53 @@ export async function GET(request: NextRequest) {
           clientName,
           Invoice: { none: {} },
         },
+        include: {
+          items: true,
+        },
         orderBy: { saleDate: "desc" },
         take: 200,
       })
     }
   }
 
-  const payload = sales.map((s) => ({
-    id: s.id,
-    number: s.id,
-    reference: s.id,
-    date: s.saleDate instanceof Date ? s.saleDate.toISOString() : s.saleDate,
-    total: s.total,
-    product: s.product,
-    category: s.category ?? null,
-    price: s.price,
-    discount: s.discount,
-    tax: s.tax,
-    currency: s.currency ?? "EUR",
-    items: [{ description: s.product, quantity: 1, unitPrice: s.price, tax: s.tax, total: s.total }],
-  }))
+  const payload = sales.map((s) => {
+    const items = (s as any).items ?? []
+    const firstItem = items[0] as
+      | {
+          product?: string | null
+          quantity?: number | null
+          price?: any
+        }
+      | undefined
+
+    const total = Number(s.total)
+    const tax = Number((s as any).taxTotal ?? 0)
+    const discount = Number((s as any).discount ?? 0)
+    const subtotalLine = Math.round((total - tax) * 100) / 100
+
+    return {
+      id: s.id,
+      number: s.id,
+      reference: s.id,
+      date: s.saleDate instanceof Date ? s.saleDate.toISOString() : s.saleDate,
+      total,
+      product: firstItem?.product ?? "Venta",
+      category: null,
+      price: subtotalLine,
+      discount,
+      tax,
+      currency: s.currency ?? "EUR",
+      items: [
+        {
+          description: firstItem?.product ?? "Venta",
+          quantity: firstItem?.quantity ?? 1,
+          unitPrice: subtotalLine,
+          tax,
+          total,
+        },
+      ],
+    }
+  })
 
   return NextResponse.json(payload)
 }

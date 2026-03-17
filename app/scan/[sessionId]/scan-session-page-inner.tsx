@@ -2,13 +2,13 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { PDFDocument } from "pdf-lib"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 
-type ScanSessionStatus = "PENDING" | "COMPLETED" | "EXPIRED"
+type ScanSessionStatus = "PENDING" | "UPLOADED" | "COMPLETED" | "EXPIRED"
 
 type ScanSessionInfo = {
   status: ScanSessionStatus
@@ -25,6 +25,8 @@ type PageFile = {
 
 export function ScanSessionPageInner({ sessionId }: { sessionId: string }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const publicToken = searchParams.get("token")
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -39,7 +41,7 @@ export function ScanSessionPageInner({ sessionId }: { sessionId: string }) {
       try {
         setLoading(true)
         setError(null)
-        const res = await fetch(`/api/scan-sessions/${encodeURIComponent(sessionId)}`, {
+        const res = await fetch(`/api/scan-sessions/${encodeURIComponent(sessionId)}?token=${encodeURIComponent(publicToken || "")}`, {
           method: "GET",
           credentials: "include",
         })
@@ -67,7 +69,7 @@ export function ScanSessionPageInner({ sessionId }: { sessionId: string }) {
     return () => {
       cancelled = true
     }
-  }, [sessionId])
+  }, [sessionId, publicToken])
 
   const handleAddPages = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
@@ -186,24 +188,26 @@ export function ScanSessionPageInner({ sessionId }: { sessionId: string }) {
         throw new Error("La subida no devolvió una URL válida.")
       }
 
-      // 3. Marcar la sesión como completada
-      const completeRes = await fetch(`/api/scan-sessions/${encodeURIComponent(sessionId)}/complete`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      // 3. Marcar la sesión como subida (UPLOADED); la confirmación final se hace en desktop
+      const sessionUploadRes = await fetch(
+        `/api/scan-sessions/${encodeURIComponent(sessionId)}/upload?token=${encodeURIComponent(publicToken || "")}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ fileUrl }),
         },
-        credentials: "include",
-        body: JSON.stringify({ fileUrl }),
-      })
-      if (!completeRes.ok) {
-        const data = await completeRes.json().catch(() => ({}))
+      )
+      if (!sessionUploadRes.ok) {
+        const data = await sessionUploadRes.json().catch(() => ({}))
         throw new Error(data.error || "No se ha podido completar la sesión de escaneo.")
       }
 
       // cleanup previews tras éxito
       pages.forEach((p) => URL.revokeObjectURL(p.previewUrl))
       setPages([])
-      setSession((prev) => (prev ? { ...prev, status: "COMPLETED", fileUrl } : prev))
+      setSession((prev) => (prev ? { ...prev, status: "UPLOADED", fileUrl } : prev))
     } catch (err: any) {
       setError(err?.message || "Error al guardar el documento escaneado.")
     } finally {

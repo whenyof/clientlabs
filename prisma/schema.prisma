@@ -1863,6 +1863,7 @@ enum ScanSessionEntityType {
 
 enum ScanSessionStatus {
   PENDING
+  UPLOADED
   COMPLETED
   EXPIRED
 }
@@ -1874,6 +1875,7 @@ model ScanSession {
   category        ProviderFileCategory
   documentName    String
   createdByUserId String
+  publicToken     String               @unique
 
   status          ScanSessionStatus    @default(PENDING)
   fileUrl         String?

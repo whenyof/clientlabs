@@ -6,17 +6,14 @@ import { prisma } from "@/lib/prisma"
 type Params = { params: Promise<{ id: string }> }
 
 export async function GET(req: NextRequest, { params }: Params) {
-  const session = await getServerSession(authOptions)
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
   const { id } = await params
   if (!id) {
     return NextResponse.json({ error: "Missing id" }, { status: 400 })
   }
 
-  const scanSession = await prisma.scanSession.findUnique({
+  const token = req.nextUrl.searchParams.get("token")
+
+  let scanSession = await prisma.scanSession.findUnique({
     where: { id },
   })
 
@@ -24,8 +21,18 @@ export async function GET(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: "Not found" }, { status: 404 })
   }
 
-  if (scanSession.createdByUserId !== session.user.id) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+  if (token) {
+    if (scanSession.publicToken !== token) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    }
+  } else {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+    if (scanSession.createdByUserId !== session.user.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    }
   }
 
   const now = new Date()

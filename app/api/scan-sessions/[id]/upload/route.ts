@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma"
 
 type Params = { params: Promise<{ id: string }> }
 
-const completeSchema = z.object({
+const uploadSchema = z.object({
   fileUrl: z.string().url(),
 })
 
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest, { params }: Params) {
   }
 
   const json = await req.json().catch(() => null)
-  const parsed = completeSchema.safeParse(json)
+  const parsed = uploadSchema.safeParse(json)
   if (!parsed.success) {
     return NextResponse.json(
       { error: "Invalid input", details: parsed.error.flatten() },
@@ -58,22 +58,19 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   if (scanSession.status !== "PENDING") {
     return NextResponse.json(
-      { error: `Cannot complete session from status ${scanSession.status}` },
+      { error: `Cannot upload from status ${scanSession.status}` },
       { status: 400 },
     )
-  }
-
-  if (scanSession.fileUrl) {
-    return NextResponse.json({ error: "Session already has a fileUrl" }, { status: 400 })
   }
 
   const updated = await prisma.scanSession.update({
     where: { id },
     data: {
-      status: "COMPLETED",
+      status: "UPLOADED",
       fileUrl,
     },
   })
 
   return NextResponse.json({ success: true, status: updated.status })
 }
+

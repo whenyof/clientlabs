@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { z } from "zod"
 import { addMinutes } from "date-fns"
+import { randomBytes } from "crypto"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
@@ -57,6 +58,7 @@ export async function POST(req: NextRequest) {
   }
 
   const expiresAt = addMinutes(new Date(), 15)
+  const publicToken = randomBytes(32).toString("hex")
 
   const scanSession = await prisma.scanSession.create({
     data: {
@@ -65,12 +67,13 @@ export async function POST(req: NextRequest) {
       category,
       documentName: documentName.trim(),
       createdByUserId: session.user.id,
+      publicToken,
       expiresAt,
     },
   })
 
   const origin = req.nextUrl.origin
-  const scanUrl = `${origin}/scan/${scanSession.id}`
+  const scanUrl = `${origin}/scan/${scanSession.id}?token=${publicToken}`
 
   return NextResponse.json({
     sessionId: scanSession.id,

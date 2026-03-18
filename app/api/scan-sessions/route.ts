@@ -73,7 +73,8 @@ export async function POST(req: NextRequest) {
   })
 
   const origin = req.nextUrl.origin
-  const scanUrl = `${origin}/scan/${scanSession.id}?token=${publicToken}`
+  // Mobile must send `token` back on every request (GET status, upload, complete).
+  const scanUrl = `${origin}/scan/${scanSession.id}?token=${encodeURIComponent(publicToken)}`
 
   return NextResponse.json({
     sessionId: scanSession.id,

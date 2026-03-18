@@ -36,36 +36,48 @@ export function ScanSessionPageInner({ sessionId }: { sessionId: string }) {
   const pagesRef = useRef<PageFile[]>([])
 
   useEffect(() => {
+    if (!sessionId) return
+    if (!publicToken) {
+      setLoading(false)
+      setError("Token inválido.")
+      return
+    }
+
     let cancelled = false
+
     const loadSession = async () => {
       try {
-        setLoading(true)
-        setError(null)
-        const res = await fetch(`/api/scan-sessions/${encodeURIComponent(sessionId)}?token=${encodeURIComponent(publicToken || "")}`, {
-          method: "GET",
-          credentials: "include",
-        })
+        const res = await fetch(
+          `/api/scan-sessions/${encodeURIComponent(sessionId)}?token=${encodeURIComponent(publicToken)}`,
+        )
+
         if (!res.ok) {
-          const data = await res.json().catch(() => ({}))
-          if (!cancelled) {
-            setError(data.error || "No se ha podido cargar la sesión de escaneo.")
-            setSession(null)
-          }
+          if (!cancelled) setError("Error cargando sesión")
           return
         }
-        const data = (await res.json()) as ScanSessionInfo
-        if (!cancelled) {
-          setSession(data)
+
+        const data = await res.json().catch(() => null)
+
+        if (!data || !data.status) {
+          if (!cancelled) setError("Sesión no encontrada")
+          return
         }
-      } catch {
-        if (!cancelled) {
-          setError("Error al cargar la sesión. Comprueba tu conexión.")
+
+        if (data.status === "EXPIRED") {
+          if (!cancelled) setError("Sesión expirada")
+          return
         }
+
+        if (!cancelled) setSession(data as ScanSessionInfo)
+      } catch (err) {
+        if (!cancelled) setError("Error de red")
       } finally {
         if (!cancelled) setLoading(false)
       }
     }
+
     loadSession()
+
     return () => {
       cancelled = true
     }
@@ -109,6 +121,11 @@ export function ScanSessionPageInner({ sessionId }: { sessionId: string }) {
   }, [])
 
   const handleSubmit = async () => {
+    if (!sessionId) return
+    if (!publicToken) {
+      setError("Token inválido.")
+      return
+    }
     if (!session) return
     if (session.status !== "PENDING") {
       setError("La sesión ya no está pendiente.")
@@ -190,13 +207,13 @@ export function ScanSessionPageInner({ sessionId }: { sessionId: string }) {
 
       // 3. Marcar la sesión como subida (UPLOADED); la confirmación final se hace en desktop
       const sessionUploadRes = await fetch(
-        `/api/scan-sessions/${encodeURIComponent(sessionId)}/upload?token=${encodeURIComponent(publicToken || "")}`,
+        `/api/scan-sessions/${encodeURIComponent(sessionId)}/upload?token=${encodeURIComponent(publicToken)}`,
         {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ fileUrl }),
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ fileUrl }),
         },
       )
       if (!sessionUploadRes.ok) {
@@ -265,6 +282,20 @@ export function ScanSessionPageInner({ sessionId }: { sessionId: string }) {
         <h1 className="text-base font-semibold text-[var(--text-primary)]">Documento enviado</h1>
         <p className="text-sm text-[var(--text-secondary)]">
           El documento escaneado se ha enviado correctamente. Puedes continuar en ClientLabs en tu ordenador.
+        </p>
+        <Button variant="outline" onClick={() => router.push("/dashboard")}>
+          Volver al panel
+        </Button>
+      </div>
+    )
+  }
+
+  if (session.status === "UPLOADED") {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-4 text-center space-y-3">
+        <h1 className="text-base font-semibold text-[var(--text-primary)]">Documento recibido</h1>
+        <p className="text-sm text-[var(--text-secondary)]">
+          El documento ya está subido. Ahora el proveedor debe confirmarlo desde ClientLabs en su ordenador.
         </p>
         <Button variant="outline" onClick={() => router.push("/dashboard")}>
           Volver al panel

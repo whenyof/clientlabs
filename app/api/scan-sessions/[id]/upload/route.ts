@@ -15,8 +15,17 @@ export async function POST(req: NextRequest, { params }: Params) {
   }
 
   const token = req.nextUrl.searchParams.get("token")
-  if (!token) {
-    return NextResponse.json({ error: "Missing token" }, { status: 401 })
+  const scanSession = await prisma.scanSession.findUnique({
+    where: { id },
+  })
+
+  if (!scanSession) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 })
+  }
+
+  // Token mandatory and must match the server-side `publicToken`.
+  if (!token || scanSession.publicToken !== token) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
   const json = await req.json().catch(() => null)
@@ -33,18 +42,6 @@ export async function POST(req: NextRequest, { params }: Params) {
   const uploadBase = process.env.UPLOAD_BASE_URL
   if (uploadBase && !fileUrl.startsWith(uploadBase)) {
     return NextResponse.json({ error: "Invalid file URL domain" }, { status: 400 })
-  }
-
-  const scanSession = await prisma.scanSession.findUnique({
-    where: { id },
-  })
-
-  if (!scanSession) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 })
-  }
-
-  if (scanSession.publicToken !== token) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
   const now = new Date()
@@ -68,6 +65,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     data: {
       status: "UPLOADED",
       fileUrl,
+      publicToken: null, // invalidate after upload to prevent reuse/abuse
     },
   })
 

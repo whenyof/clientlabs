@@ -39,6 +39,7 @@ export async function POST(_req: NextRequest, { params }: Params) {
     where: { id },
     data: {
       status: "COMPLETED",
+      publicToken: null, // invalidate token on completion to prevent reuse
     },
   })
 

@@ -72,6 +72,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     data: {
       status: "COMPLETED",
       fileUrl,
+      publicToken: null, // invalidate token on completion to prevent reuse
     },
   })
 

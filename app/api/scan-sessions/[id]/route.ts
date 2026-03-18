@@ -21,18 +21,15 @@ export async function GET(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: "Not found" }, { status: 404 })
   }
 
-  if (token) {
-    if (scanSession.publicToken !== token) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-    }
-  } else {
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-    if (scanSession.createdByUserId !== session.user.id) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-    }
+  const tokenOk = Boolean(token && scanSession.publicToken && token === scanSession.publicToken)
+  const session = await getServerSession(authOptions)
+  const desktopOk = Boolean(session?.user?.id && scanSession.createdByUserId === session.user.id)
+
+  // Hardening:
+  // - Mobile (auth-less) must provide a valid token.
+  // - Desktop must be authenticated and be the owner, even if the token was invalidated after upload.
+  if (!tokenOk && !desktopOk) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
   const now = new Date()

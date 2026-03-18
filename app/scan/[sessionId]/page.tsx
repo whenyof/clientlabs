@@ -6,6 +6,13 @@ export const dynamic = "force-dynamic"
 
 export default function ScanSessionPage(props: { params: { sessionId: string } }) {
   const { sessionId } = props.params
+  if (!sessionId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-sm text-neutral-500">
+        Sesión de escaneo no válida.
+      </div>
+    )
+  }
   return (
     <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-sm text-neutral-500">Cargando sesión de escaneo…</div>}>
       <ScanSessionPageInner sessionId={sessionId} />

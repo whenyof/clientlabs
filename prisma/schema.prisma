@@ -1875,7 +1875,9 @@ model ScanSession {
   category        ProviderFileCategory
   documentName    String
   createdByUserId String
-  publicToken     String               @unique
+  // Token is used for auth-less mobile access. Once the mobile uploads the document
+  // we invalidate the token to prevent reuse/abuse and limit the window of exposure.
+  publicToken     String?              @unique
 
   status          ScanSessionStatus    @default(PENDING)
   fileUrl         String?

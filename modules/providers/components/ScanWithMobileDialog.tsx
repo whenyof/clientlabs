@@ -64,6 +64,7 @@ export function ScanWithMobileDialog({
         setFileUrl(null)
         setSessionId(null)
         setScanUrl(null)
+        setPublicToken(null)
         setExpiresAt(null)
 
         const res = await fetch("/api/scan-sessions", {
@@ -89,10 +90,10 @@ export function ScanWithMobileDialog({
           setSessionId(data.sessionId)
           setScanUrl(data.scanUrl)
           setExpiresAt(data.expiresAt)
+          // The QR URL includes `?token=...`; desktop must send it for polling.
           try {
             const url = new URL(data.scanUrl)
-            const token = url.searchParams.get("token")
-            setPublicToken(token)
+            setPublicToken(url.searchParams.get("token"))
           } catch {
             setPublicToken(null)
           }
@@ -115,16 +116,20 @@ export function ScanWithMobileDialog({
 
   // Polling para comprobar el estado de la sesión
   useEffect(() => {
-    if (!open || !sessionId || !publicToken) return
+    if (!open || !sessionId) return
+    if (!publicToken) return
     if (status === "COMPLETED" || status === "EXPIRED" || status === "UPLOADED") return
 
     let cancelled = false
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`/api/scan-sessions/${encodeURIComponent(sessionId)}?token=${encodeURIComponent(publicToken)}`, {
+        const res = await fetch(
+          `/api/scan-sessions/${encodeURIComponent(sessionId)}?token=${encodeURIComponent(publicToken)}`,
+          {
           method: "GET",
           credentials: "include",
-        })
+          },
+        )
         if (!res.ok) {
           const data = await res.json().catch(() => ({}))
           if (!cancelled) setError(data.error || "Error al consultar la sesión de escaneo.")
@@ -154,12 +159,13 @@ export function ScanWithMobileDialog({
       cancelled = true
       clearInterval(interval)
     }
-  }, [open, sessionId, status, onCompleted, onOpenChange, publicToken])
+  }, [open, sessionId, publicToken, status, onCompleted, onOpenChange])
 
   const handleGenerateNew = () => {
     // Crea una nueva sesión reiniciando el estado local; el useEffect de creación se encargará
     setSessionId(null)
     setScanUrl(null)
+    setPublicToken(null)
     setStatus(null)
     setFileUrl(null)
     setError(null)

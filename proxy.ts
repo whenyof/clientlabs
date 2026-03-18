@@ -13,11 +13,16 @@ export async function proxy(req: NextRequest) {
 
   if (
     pathname === "/" ||
+    pathname.startsWith("/scan") ||
     pathname.startsWith("/auth") ||
     pathname.startsWith("/register") ||
     pathname.startsWith("/api/auth")
   ) {
-    return NextResponse.next()
+    const res = NextResponse.next()
+    if (pathname.startsWith("/scan")) {
+      res.headers.set("x-clientlabs-scan-route", "1")
+    }
+    return res
   }
 
   const token = await getToken({
@@ -40,5 +45,5 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/dashboard/:path*", "/onboarding/:path*"],
+  matcher: ["/admin/:path*", "/dashboard/:path*", "/onboarding/:path*", "/scan/:path*"],
 }

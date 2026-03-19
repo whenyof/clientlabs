@@ -119,7 +119,11 @@ export function ScanSessionPageInner({ sessionId }: { sessionId: string }) {
       pagesRef.current.forEach((p) => URL.revokeObjectURL(p.previewUrl))
     }
   }, [])
-
+ 
+  if (!publicToken) {
+    setError("Token inválido (no presente en URL)")
+    return
+  }
   const handleSubmit = async () => {
     if (!sessionId) return
     if (!publicToken) {
@@ -205,6 +209,7 @@ export function ScanSessionPageInner({ sessionId }: { sessionId: string }) {
         throw new Error("La subida no devolvió una URL válida.")
       }
 
+      console.log("TOKEN FRONT:", publicToken)
       // 3. Marcar la sesión como subida (UPLOADED); la confirmación final se hace en desktop
       const sessionUploadRes = await fetch(
         `/api/scan-sessions/${encodeURIComponent(sessionId)}/upload?token=${encodeURIComponent(publicToken)}`,

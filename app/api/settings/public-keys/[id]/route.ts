@@ -10,7 +10,7 @@ import { logger } from "@/lib/logger"
  */
 export async function DELETE(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
@@ -18,7 +18,7 @@ export async function DELETE(
     }
 
     const userId = session.user.id
-    const { id } = params
+    const { id } = await params
 
     if (!id) {
         return NextResponse.json({ error: "Key ID required" }, { status: 400 })

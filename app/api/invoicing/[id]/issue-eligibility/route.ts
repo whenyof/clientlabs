@@ -5,13 +5,13 @@ import * as invoiceService from "@domains/invoicing"
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const { id } = params
+  const { id } = await params
   try {
     const eligibility = await invoiceService.getIssueEligibility(id, session.user.id)
     if (!eligibility) return NextResponse.json({ error: "Not found" }, { status: 404 })

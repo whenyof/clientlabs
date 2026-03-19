@@ -12,7 +12,7 @@ const MAX_EVENTS = 100
 
 export async function GET(
   _req: Request,
-  { params }: { params: { visitorId: string } }
+  { params }: { params: Promise<{ visitorId: string }> }
 ) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
@@ -22,7 +22,7 @@ export async function GET(
     })
   }
 
-  const { visitorId } = params
+  const { visitorId } = await params
   if (!visitorId) {
     return new Response(JSON.stringify({ error: "Missing visitorId" }), {
       status: 400,

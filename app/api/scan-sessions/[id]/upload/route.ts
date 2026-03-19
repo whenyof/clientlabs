@@ -6,8 +6,8 @@ const uploadSchema = z.object({
   fileUrl: z.string().url(),
 })
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
-  const { id } = params
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
 
   if (!id) {
     return NextResponse.json({ error: "Missing id" }, { status: 400 })

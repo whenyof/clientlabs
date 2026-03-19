@@ -44,7 +44,7 @@ interface LastActivityRaw {
 
 export async function GET(
     request: NextRequest,
-    context: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
         // ── 1. Auth & Ownership ──────────────────────────
@@ -53,7 +53,7 @@ export async function GET(
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
         const userId = session.user.id
-        const { id: leadId } = context.params
+        const { id: leadId } = await context.params
 
         // Parse query params for pagination
         const { searchParams } = request.nextUrl

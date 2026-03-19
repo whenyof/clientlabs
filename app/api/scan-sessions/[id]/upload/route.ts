@@ -13,8 +13,6 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     return NextResponse.json({ error: "Missing id" }, { status: 400 })
   }
 
-  const token = req.nextUrl.searchParams.get("token")
-
   const scanSession = await prisma.scanSession.findUnique({
     where: { id },
   })
@@ -23,7 +21,39 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     return NextResponse.json({ error: "Not found" }, { status: 404 })
   }
 
-  // 🔒 Token obligatorio
+  // 1) Idempotencia: si ya fue procesada como UPLOADED, tratar como éxito.
+  if (scanSession.status === "UPLOADED") {
+    return NextResponse.json({
+      success: true,
+      status: "UPLOADED",
+      alreadyProcessed: true,
+    })
+  }
+
+  // 2) Si ya está completada, bloquear.
+  if (scanSession.status === "COMPLETED") {
+    return NextResponse.json({ error: "Already completed" }, { status: 400 })
+  }
+
+  // 3) Expiración.
+  if (scanSession.expiresAt <= new Date()) {
+    await prisma.scanSession.update({
+      where: { id },
+      data: { status: "EXPIRED" },
+    })
+    return NextResponse.json({ error: "Session expired" }, { status: 400 })
+  }
+
+  // Para cualquier otro estado no permitido, bloquear.
+  if (scanSession.status !== "PENDING") {
+    return NextResponse.json(
+      { error: `Cannot upload from status ${scanSession.status}` },
+      { status: 400 }
+    )
+  }
+
+  // 4) Token obligatorio solo cuando sigue PENDING.
+  const token = req.nextUrl.searchParams.get("token")
   if (!token || scanSession.publicToken !== token) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
@@ -44,23 +74,6 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   if (uploadBase && !fileUrl.startsWith(uploadBase)) {
     return NextResponse.json(
       { error: "Invalid file URL domain" },
-      { status: 400 }
-    )
-  }
-
-  const now = new Date()
-
-  if (scanSession.expiresAt <= now) {
-    await prisma.scanSession.update({
-      where: { id },
-      data: { status: "EXPIRED" },
-    })
-    return NextResponse.json({ error: "Session expired" }, { status: 400 })
-  }
-
-  if (scanSession.status !== "PENDING") {
-    return NextResponse.json(
-      { error: `Cannot upload from status ${scanSession.status}` },
       { status: 400 }
     )
   }

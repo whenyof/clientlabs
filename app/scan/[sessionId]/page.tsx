@@ -1,11 +1,25 @@
-import { Suspense } from "react"
+import { Suspense, use } from "react"
 import { ScanSessionPageInner } from "./scan-session-page-inner"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
-export default function ScanSessionPage(props: { params: { sessionId: string } }) {
-  const { sessionId } = props.params
+export default function ScanSessionPage({
+  params,
+}: {
+  params: { sessionId: string }
+}) {
+  console.log("SCAN PAGE PARAMS:", params)
+  // Next.js puede entregar `params` como Promise en ciertos modos.
+  // Para que `sessionId` nunca quede undefined, desempaquetamos de forma segura sin `await`.
+  const sessionId =
+    typeof (params as any)?.then === "function"
+      ? (use(params as any) as { sessionId?: string })?.sessionId
+      : params?.sessionId
+
+  if (!params || !sessionId) {
+    console.error("INVALID PARAMS:", params)
+  }
   if (!sessionId) {
     return (
       <div className="min-h-screen flex items-center justify-center text-sm text-neutral-500">

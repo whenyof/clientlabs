@@ -4,9 +4,9 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(
  request: NextRequest,
- props: { params: Promise<{ id: string }> }
+  props: { params: { id: string } }
 ) {
- const params = await props.params;
+ const params = props.params;
  try {
  const body = await request.json()
  const { action, config } = body

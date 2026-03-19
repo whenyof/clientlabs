@@ -5,9 +5,9 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(
   _req: NextRequest,
-  props: { params: Promise<{ id: string }> }
+  props: { params: { id: string } }
 ) {
-  const params = await props.params
+  const params = props.params
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
@@ -39,9 +39,9 @@ export async function GET(
 
 export async function POST(
  request: NextRequest,
- props: { params: Promise<{ id: string }> }
+  props: { params: { id: string } }
 ) {
- const params = await props.params;
+ const params = props.params;
  try {
  const session = await getServerSession(authOptions)
  if (!session?.user?.id) {

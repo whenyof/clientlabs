@@ -11,9 +11,9 @@ import { prisma } from "@/lib/prisma"
  */
 export async function PATCH(
  req: NextRequest,
- props: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
- const params = await props.params;
+  const { id } = params;
  try {
  // ✅ SERVER-SIDE ADMIN CHECK
  const session = await getServerSession(authOptions)
@@ -59,7 +59,7 @@ export async function PATCH(
 
  // ✅ CHECK IF USER EXISTS
  const targetUser = await prisma.user.findUnique({
- where: { id: params.id }
+    where: { id }
  })
 
  if (!targetUser) {
@@ -75,7 +75,7 @@ export async function PATCH(
  if (plan) updateData.plan = plan
 
  const updatedUser = await prisma.user.update({
- where: { id: params.id },
+    where: { id },
  data: updateData,
  select: {
  id: true,

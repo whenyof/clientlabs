@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { getSessionUserId } from "@/app/api/tasks/utils"
 import { recalculateClientStatus } from "@/modules/clients/actions"
 
-type RouteParams = { params: Promise<{ id: string }> }
+type RouteParams = { params: { id: string } }
 
 /**
  * POST /api/tasks/[id]/complete
@@ -16,7 +16,7 @@ export async function POST(_request: Request, { params }: RouteParams) {
  return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
  }
 
- const { id } = await params
+ const { id } = params
 
  const existing = await prisma.task.findFirst({
  where: { id, userId },

@@ -11,13 +11,13 @@ import { prisma } from "@/lib/prisma"
  */
 export async function GET(
   _request: NextRequest,
-  { params }: { params: Promise<{ clientId: string }> }
+  { params }: { params: { clientId: string } }
 ) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const { clientId } = await params
+  const { clientId } = params
   const client = await prisma.client.findFirst({
     where: { id: clientId, userId: session.user.id },
     select: { id: true },

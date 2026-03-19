@@ -5,13 +5,13 @@ import * as invoiceService from "@domains/invoicing"
 
 export async function POST(
   _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const { id } = await params
+  const { id } = params
   try {
     const result = await invoiceService.issueInvoice(id, session.user.id)
     if (!result.success) {

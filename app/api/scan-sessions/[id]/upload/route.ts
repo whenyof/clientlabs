@@ -2,14 +2,12 @@ import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { prisma } from "@/lib/prisma"
 
-type Params = { params: { id: string } }
-
 const uploadSchema = z.object({
   fileUrl: z.string().url(),
 })
 
-export async function POST(req: NextRequest, { params }: Params) {
-  const id = params?.id
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+  const { id } = params
 
   if (!id) {
     return NextResponse.json({ error: "Missing id" }, { status: 400 })

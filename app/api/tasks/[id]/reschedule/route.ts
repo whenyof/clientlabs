@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getSessionUserId } from "@/app/api/tasks/utils"
 
-type RouteParams = { params: Promise<{ id: string }> }
+type RouteParams = { params: { id: string } }
 
 /**
  * POST /api/tasks/[id]/reschedule
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
  return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
  }
 
- const { id } = await params
+  const { id } = params
  const body = (await request.json()) as { dueDate?: string }
 
  const existing = await prisma.task.findFirst({

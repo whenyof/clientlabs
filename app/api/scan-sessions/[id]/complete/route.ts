@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { prisma } from "@/lib/prisma"
 console.log("DB URL RUNTIME:", process.env.DATABASE_URL)
-type Params = { params: Promise<{ id: string }> }
+type Params = { params: { id: string } }
 
 const completeSchema = z.object({
   fileUrl: z.string().url(),
 })
 
 export async function POST(req: NextRequest, { params }: Params) {
-  const { id } = await params
+  const { id } = params
   if (!id) {
     return NextResponse.json({ error: "Missing id" }, { status: 400 })
   }

@@ -5,9 +5,9 @@ import { PipelineService } from '@/lib/services/pipelineService'
 
 export async function PATCH(
  request: NextRequest,
- props: { params: Promise<{ id: string }> }
+  props: { params: { id: string } }
 ) {
- const params = await props.params;
+ const params = props.params;
  try {
  const session = await getServerSession(authOptions)
  if (!session?.user?.id) {

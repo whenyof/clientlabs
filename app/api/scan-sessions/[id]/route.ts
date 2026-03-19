@@ -3,10 +3,10 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
-type Params = { params: Promise<{ id: string }> }
+type Params = { params: { id: string } }
 
 export async function GET(req: NextRequest, { params }: Params) {
-  const { id } = await params
+  const { id } = params
   if (!id) {
     return NextResponse.json({ error: "Missing id" }, { status: 400 })
   }

@@ -6,20 +6,18 @@ import type { TaskType } from "@prisma/client"
 import { recalculateClientStatus } from "@/modules/clients/actions"
 import { enqueueTaskCalendarSync, enqueueTaskSyncForAllProviders } from "@/lib/calendar-sync"
 
-type RouteParams = { params: Promise<{ id: string }> }
-
 /**
  * GET /api/tasks/[id]
  * Return a single task by id. Verifies task belongs to user.
  */
-export async function GET(_request: NextRequest, { params }: RouteParams) {
+export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
  try {
  const userId = await getSessionUserId()
  if (!userId) {
  return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
  }
 
- const { id } = await params
+  const { id } = params
 
  const task = await prisma.task.findFirst({
  where: { id, userId },
@@ -67,7 +65,7 @@ export type UpdateTaskBody = {
  */
 export async function PATCH(
  request: NextRequest,
- { params }: RouteParams
+  { params }: { params: { id: string } }
 ) {
  try {
  const userId = await getSessionUserId()
@@ -75,7 +73,7 @@ export async function PATCH(
  return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
  }
 
- const { id } = await params
+  const { id } = params
  const body = (await request.json()) as UpdateTaskBody
 
  const existing = await prisma.task.findFirst({
@@ -160,7 +158,7 @@ export async function PATCH(
  */
 export async function DELETE(
  _request: NextRequest,
- { params }: RouteParams
+  { params }: { params: { id: string } }
 ) {
  try {
  const userId = await getSessionUserId()
@@ -168,7 +166,7 @@ export async function DELETE(
  return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
  }
 
- const { id } = await params
+  const { id } = params
 
  const existing = await prisma.task.findFirst({
  where: { id, userId },

@@ -6,13 +6,13 @@ import type { InvoiceLineInput } from "@domains/invoicing"
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const { id } = await params
+  const { id } = params
   try {
     const invoice = await invoiceService.getInvoice(id, session.user.id)
     if (!invoice) return NextResponse.json({ error: "Not found" }, { status: 404 })
@@ -25,13 +25,13 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const { id } = await params
+  const { id } = params
   try {
     const existing = await invoiceService.getInvoice(id, session.user.id)
     if (existing && existing.status !== "DRAFT") {
@@ -115,13 +115,13 @@ export async function PATCH(
 
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const { id } = await params
+  const { id } = params
   try {
     const existing = await invoiceService.getInvoice(id, session.user.id)
     if (existing && existing.status !== "DRAFT") {

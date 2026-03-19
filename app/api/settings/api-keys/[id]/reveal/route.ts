@@ -12,15 +12,14 @@ import { logger } from "@/lib/logger"
  */
 export async function GET(
     req: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    { params }: { params: { id: string } }
 ) {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const resolvedParams = await params
-    const id = resolvedParams.id
+    const { id } = params
     const userId = session.user.id
 
     if (!id) {

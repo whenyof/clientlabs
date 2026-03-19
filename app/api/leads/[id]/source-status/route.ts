@@ -12,10 +12,10 @@ import { logger } from "@/lib/logger"
  */
 export async function GET(
     request: NextRequest,
-    context: { params: Promise<{ id: string }> }
+    context: { params: { id: string } }
 ) {
     const session = await getServerSession(authOptions)
-    const { id: leadId } = await context.params
+    const { id: leadId } = context.params
 
     try {
         // 🔐 Security: Auth check

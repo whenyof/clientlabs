@@ -12,13 +12,13 @@ import path from "path"
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const { id } = await params
+  const { id } = params
   const regenerate = request.nextUrl.searchParams.get("regenerate") === "1"
   try {
     const result = await generateInvoicePDF(id, session.user.id, { forceRegenerate: regenerate })

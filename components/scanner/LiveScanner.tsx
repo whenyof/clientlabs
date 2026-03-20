@@ -13,7 +13,10 @@ export type LiveScannerProps = {
 
 export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveScannerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null)
+  /** Full-resolution frame for manual/auto capture only (never shared with detection). */
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  /** Small downscaled frame for OpenCV detection only — avoids racing capture canvas. */
+  const detectionCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const overlayRef = useRef<HTMLCanvasElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
 
@@ -237,13 +240,13 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
 
         const detectDocument = () => {
           if (cancelled) return
+          // Re-entrancy guard for OpenCV work only — does not affect capture (separate canvas).
           if (detectBusyRef.current) return
-          if (capturingRef.current) return
 
           const video = videoRef.current
-          const canvas = canvasRef.current
+          const detectionCanvas = detectionCanvasRef.current
           const overlay = overlayRef.current
-          if (!video || !canvas || !overlay) return
+          if (!video || !detectionCanvas || !overlay) return
           if (video.readyState < 2) return
 
           detectBusyRef.current = true
@@ -256,14 +259,14 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
             const height = 240
 
             // Downscale for performance.
-            canvas.width = width
-            canvas.height = height
+            detectionCanvas.width = width
+            detectionCanvas.height = height
 
-            const ctx = canvas.getContext("2d")
+            const ctx = detectionCanvas.getContext("2d")
             if (!ctx) return
             ctx.drawImage(video, 0, 0, width, height)
 
-            const src = cv.imread(canvas)
+            const src = cv.imread(detectionCanvas)
             const gray = new cv.Mat()
             const edges = new cv.Mat()
             const contours = new cv.MatVector()
@@ -272,9 +275,12 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
             try {
               cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY)
               cv.GaussianBlur(gray, gray, new cv.Size(5, 5), 0)
-              cv.Canny(gray, edges, 75, 200)
+              cv.Canny(gray, edges, 50, 150)
 
               cv.findContours(edges, contours, hierarchy, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)
+
+              const contourCount = contours.size()
+              console.log("[LiveScanner] contours found:", contourCount)
 
               let biggestValid: any | null = null
               let maxArea = 0
@@ -337,6 +343,13 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
                 const prevStable = detectionStableRef.current
                 detectionStableRef.current = Math.min(prevStable + 2, 10)
 
+                console.log(
+                  "[LiveScanner] valid quad contour:",
+                  true,
+                  "detectionStable:",
+                  detectionStableRef.current,
+                )
+
                 const orderedNew = orderPoints(biggestValid)
                 const orderedOld = smoothedContourRef.current ? orderPoints(smoothedContourRef.current) : null
 
@@ -387,6 +400,13 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
                 lastAreaRef.current = maxArea
               } else {
                 detectionStableRef.current = Math.max(detectionStableRef.current - 1, 0)
+
+                console.log(
+                  "[LiveScanner] valid quad contour:",
+                  false,
+                  "detectionStable:",
+                  detectionStableRef.current,
+                )
 
                 // Only drop overlay when stability fully decays (anti-flicker).
                 if (detectionStableRef.current === 0) {
@@ -583,10 +603,73 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
 
     ctx.drawImage(video, 0, 0, width, height)
 
+    const contour = detectedContourRef.current
+
+    const finishCaptureFromBlob = (blob: Blob | null) => {
+      if (!isMountedRef.current) return
+      if (blob) {
+        onCapture(blob)
+        if (isMountedRef.current) setShowAdded(true)
+        if (showAddedTimeoutRef.current) window.clearTimeout(showAddedTimeoutRef.current)
+        showAddedTimeoutRef.current = window.setTimeout(() => {
+          if (isMountedRef.current) setShowAdded(false)
+        }, 800)
+        try {
+          if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+            ;(navigator as any).vibrate?.(50)
+          }
+        } catch {
+          // ignore
+        }
+      }
+      capturingRef.current = false
+    }
+
+    // Full-frame JPEG without OpenCV — always works even if detection failed or OpenCV is slow.
+    if (!contour) {
+      canvas.toBlob(
+        (blob) => finishCaptureFromBlob(blob),
+        "image/jpeg",
+        0.9,
+      )
+      return
+    }
+
+    const detectionW = 320
+    const detectionH = 240
+    const scaleX = width / detectionW
+    const scaleY = height / detectionH
+
+    const ordered = orderPoints(contour)
+
+    ordered.tl.x *= scaleX
+    ordered.tl.y *= scaleY
+    ordered.tr.x *= scaleX
+    ordered.tr.y *= scaleY
+    ordered.br.x *= scaleX
+    ordered.br.y *= scaleY
+    ordered.bl.x *= scaleX
+    ordered.bl.y *= scaleY
+
+    const widthA = Math.hypot(ordered.br.x - ordered.bl.x, ordered.br.y - ordered.bl.y)
+    const widthB = Math.hypot(ordered.tr.x - ordered.tl.x, ordered.tr.y - ordered.tl.y)
+    const maxWidth = Math.max(widthA, widthB)
+
+    const heightA = Math.hypot(ordered.tr.x - ordered.br.x, ordered.tr.y - ordered.br.y)
+    const heightB = Math.hypot(ordered.tl.x - ordered.bl.x, ordered.tl.y - ordered.bl.y)
+    const maxHeight = Math.max(heightA, heightB)
+
+    if (maxWidth < 50 || maxHeight < 50) {
+      canvas.toBlob(
+        (blob) => finishCaptureFromBlob(blob),
+        "image/jpeg",
+        0.9,
+      )
+      return
+    }
+
     const cv = await loadOpenCV()
     const src = cv.imread(canvas)
-
-    const contour = detectedContourRef.current
 
     let dst: any | null = null
     let M: any | null = null
@@ -594,86 +677,6 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
     let dstTri: any | null = null
 
     try {
-      if (!contour) {
-        canvas.toBlob(
-          (blob) => {
-            if (!isMountedRef.current) return
-            if (blob) {
-              onCapture(blob)
-              if (isMountedRef.current) setShowAdded(true)
-              if (showAddedTimeoutRef.current) window.clearTimeout(showAddedTimeoutRef.current)
-              showAddedTimeoutRef.current = window.setTimeout(() => {
-                if (isMountedRef.current) setShowAdded(false)
-              }, 800)
-              try {
-                if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-                  ;(navigator as any).vibrate?.(50)
-                }
-              } catch {
-                // ignore
-              }
-            }
-            capturingRef.current = false
-          },
-          "image/jpeg",
-          0.9,
-        )
-        return
-      }
-
-      const detectionW = 320
-      const detectionH = 240
-      const scaleX = width / detectionW
-      const scaleY = height / detectionH
-
-      const ordered = orderPoints(contour)
-
-      // Apply scaling because contour was detected on downscaled frames.
-      ordered.tl.x *= scaleX
-      ordered.tl.y *= scaleY
-      ordered.tr.x *= scaleX
-      ordered.tr.y *= scaleY
-      ordered.br.x *= scaleX
-      ordered.br.y *= scaleY
-      ordered.bl.x *= scaleX
-      ordered.bl.y *= scaleY
-
-      const widthA = Math.hypot(ordered.br.x - ordered.bl.x, ordered.br.y - ordered.bl.y)
-      const widthB = Math.hypot(ordered.tr.x - ordered.tl.x, ordered.tr.y - ordered.tl.y)
-      const maxWidth = Math.max(widthA, widthB)
-
-      const heightA = Math.hypot(ordered.tr.x - ordered.br.x, ordered.tr.y - ordered.br.y)
-      const heightB = Math.hypot(ordered.tl.x - ordered.bl.x, ordered.tl.y - ordered.bl.y)
-      const maxHeight = Math.max(heightA, heightB)
-
-      // Prevent invalid warps that produce tiny/blank results.
-      if (maxWidth < 50 || maxHeight < 50) {
-        canvas.toBlob(
-          (blob) => {
-            if (!isMountedRef.current) return
-            if (blob) {
-              onCapture(blob)
-              if (isMountedRef.current) setShowAdded(true)
-              if (showAddedTimeoutRef.current) window.clearTimeout(showAddedTimeoutRef.current)
-              showAddedTimeoutRef.current = window.setTimeout(() => {
-                if (isMountedRef.current) setShowAdded(false)
-              }, 800)
-              try {
-                if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-                  ;(navigator as any).vibrate?.(50)
-                }
-              } catch {
-                // ignore
-              }
-            }
-            capturingRef.current = false
-          },
-          "image/jpeg",
-          0.9,
-        )
-        return
-      }
-
       const outW = Math.max(2, Math.round(maxWidth))
       const outH = Math.max(2, Math.round(maxHeight))
 
@@ -708,49 +711,13 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
       cv.imshow(resultCanvas, dst)
 
       resultCanvas.toBlob(
-        (blob) => {
-          if (!isMountedRef.current) return
-          if (blob) {
-            onCapture(blob)
-            if (isMountedRef.current) setShowAdded(true)
-            if (showAddedTimeoutRef.current) window.clearTimeout(showAddedTimeoutRef.current)
-            showAddedTimeoutRef.current = window.setTimeout(() => {
-              if (isMountedRef.current) setShowAdded(false)
-            }, 800)
-            try {
-              if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-                ;(navigator as any).vibrate?.(50)
-              }
-            } catch {
-              // ignore
-            }
-          }
-          capturingRef.current = false
-        },
+        (blob) => finishCaptureFromBlob(blob),
         "image/jpeg",
         0.95,
       )
     } catch {
       canvas.toBlob(
-        (blob) => {
-          if (!isMountedRef.current) return
-          if (blob) {
-            onCapture(blob)
-            if (isMountedRef.current) setShowAdded(true)
-            if (showAddedTimeoutRef.current) window.clearTimeout(showAddedTimeoutRef.current)
-            showAddedTimeoutRef.current = window.setTimeout(() => {
-              if (isMountedRef.current) setShowAdded(false)
-            }, 800)
-            try {
-              if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-                ;(navigator as any).vibrate?.(50)
-              }
-            } catch {
-              // ignore
-            }
-          }
-          capturingRef.current = false
-        },
+        (blob) => finishCaptureFromBlob(blob),
         "image/jpeg",
         0.9,
       )
@@ -813,18 +780,18 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
 
   return (
     <div className="fixed inset-0 z-50 bg-black/90 transition-opacity duration-200 ease-out flex flex-col">
-      <div className="relative flex-1">
+      <div className="relative flex-1 min-h-0 min-w-0">
         <video
           ref={videoRef}
           autoPlay
           playsInline
           muted
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
         />
 
         <canvas
           ref={overlayRef}
-          className="absolute inset-0 w-full h-full pointer-events-none"
+          className="absolute inset-0 z-[1] w-full h-full pointer-events-none"
         />
 
         <div
@@ -833,7 +800,7 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
           }`}
         />
 
-        <div className="absolute top-0 inset-x-0 z-10 px-4 pt-[max(env(safe-area-inset-top),12px)] pb-2 flex items-center justify-between pointer-events-none">
+        <div className="absolute top-0 inset-x-0 z-[2] px-4 pt-[max(env(safe-area-inset-top),12px)] pb-2 flex items-center justify-between pointer-events-none">
           <p className="text-xs text-white/80">Escaneando...</p>
           <p className="text-xs text-white/80">
             {pageCount} {pageCount === 1 ? "página" : "páginas"}
@@ -841,13 +808,13 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
         </div>
 
         {error && (
-          <div className="absolute inset-0 flex items-center justify-center px-4">
+          <div className="absolute inset-0 z-[2] flex items-center justify-center px-4 pointer-events-none">
             <p className="text-sm text-white">{error}</p>
           </div>
         )}
       </div>
 
-      <div className="p-4">
+      <div className="relative z-30 p-4 shrink-0 pointer-events-auto bg-black/90 border-t border-white/10">
         <div className="flex items-center justify-between mb-2">
           <p className="text-xs text-white/90">
             {pageCount} páginas escaneadas
@@ -865,28 +832,40 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
           </div>
         </div>
 
-        <div className="flex items-center justify-between">
-          <Button type="button" variant="ghost" onClick={handleCancel} className="text-white">
+        <div className="flex items-center justify-between gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={handleCancel}
+            className="text-white relative z-10 pointer-events-auto"
+          >
             Cancelar
           </Button>
 
           <Button
             type="button"
             onClick={handleCapture}
-            className={`w-14 h-14 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition-transform duration-[120ms] ease-out ${
+            className={`relative z-10 pointer-events-auto w-14 h-14 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition-transform duration-[120ms] ease-out ${
               capturePressed ? "scale-[0.94]" : "scale-100"
             }`}
           >
-            <span className="w-10 h-10 rounded-full bg-black/70" />
+            <span className="w-10 h-10 rounded-full bg-black/70 pointer-events-none" />
           </Button>
 
-          <Button type="button" variant="ghost" onClick={handleFinalize} className="text-white">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={handleFinalize}
+            className="text-white relative z-10 pointer-events-auto"
+          >
             Finalizar
           </Button>
         </div>
 
-        {/* Hidden canvas used for capture */}
-        <canvas ref={canvasRef} className="hidden" />
+        {/* Full-res capture canvas — never used by OpenCV detection */}
+        <canvas ref={canvasRef} className="hidden" aria-hidden />
+        {/* Downscaled detection canvas — isolated from capture to avoid races */}
+        <canvas ref={detectionCanvasRef} className="hidden" aria-hidden />
       </div>
     </div>
   )

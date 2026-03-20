@@ -41,6 +41,9 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
   const pageCountRef = useRef(pageCount)
   const autoCaptureBlockUntilRef = useRef(0)
 
+  /** Ready / lock threshold (aligned with auto-capture). */
+  const READY_STABLE_THRESHOLD = 3
+
   useEffect(() => {
     pageCountRef.current = pageCount
   }, [pageCount])
@@ -100,16 +103,23 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
     ctx.fillRect(0, 0, overlayW, overlayH)
     ctx.clearRect(pad, pad, overlayW - pad * 2, overlayH - pad * 2)
 
-    const isReady = detectionStableRef.current >= 5
+    const isReady = detectionStableRef.current >= READY_STABLE_THRESHOLD
     const isCountingDown = isCountingDownRef.current
     const hasContour = Boolean(contour)
 
-    // Guide (always visible).
-    ctx.lineWidth = isCountingDown ? 6 : 2
+    // Guide (always visible) — stronger “locked” look when ready (iPhone Notes–style).
+    ctx.lineWidth = isCountingDown ? 6 : isReady ? 5 : 2
     ctx.setLineDash([10, 6])
     ctx.strokeStyle = isCountingDown ? "#00FFAA" : isReady ? "#00FFAA" : "#FFFFFF"
+    if (isReady && !isCountingDown) {
+      ctx.shadowColor = "#00FFAA"
+      ctx.shadowBlur = 14
+    } else {
+      ctx.shadowBlur = 0
+    }
     ctx.strokeRect(pad, pad, overlayW - pad * 2, overlayH - pad * 2)
     ctx.setLineDash([])
+    ctx.shadowBlur = 0
 
     // UX text feedback.
     ctx.textAlign = "center"
@@ -120,7 +130,7 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
       ctx.fillText("Capturando...", overlayW / 2, 8)
     } else if (isReady) {
       ctx.fillStyle = "#00FFAA"
-      ctx.font = "600 14px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif"
+      ctx.font = "700 15px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif"
       ctx.fillText("Documento listo", overlayW / 2, 8)
     } else if (hasContour) {
       ctx.fillStyle = "#FFFFFF"
@@ -129,7 +139,7 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
     } else {
       ctx.fillStyle = "#FFFFFF"
       ctx.font = "600 14px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif"
-      ctx.fillText("Ajusta el documento dentro del marco", overlayW / 2, 8)
+      ctx.fillText("Ajusta el documento", overlayW / 2, 8)
     }
 
     if (!contour) return
@@ -138,9 +148,9 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
     ctx.globalAlpha = 0.95
     ctx.strokeStyle = "#00FFAA"
     if (isReady) {
-      ctx.lineWidth = 4
+      ctx.lineWidth = 5
       ctx.shadowColor = "#00FFAA"
-      ctx.shadowBlur = 12
+      ctx.shadowBlur = 14
     } else {
       ctx.lineWidth = 3
       ctx.shadowColor = "transparent"
@@ -272,7 +282,7 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
               for (let i = 0; i < contours.size(); i++) {
                 const cnt = contours.get(i)
                 const area = cv.contourArea(cnt)
-                if (area > 1500) {
+                if (area > 800) {
                   const peri = cv.arcLength(cnt, true)
                   const approx = new cv.Mat()
                   cv.approxPolyDP(cnt, approx, 0.02 * peri, true)
@@ -284,7 +294,7 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
                     continue
                   }
 
-                  // Contour validation (critical): area, aspect ratio, size.
+                  // Contour validation: relaxed for real-world documents.
                   let ordered: ReturnType<typeof orderPoints> | null = null
                   try {
                     ordered = orderPoints(approx)
@@ -308,11 +318,7 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
                   const ratio = maxHeight > 0 ? maxWidth / maxHeight : 0
 
                   const valid =
-                    area > 1500 &&
-                    ratio > 0.5 &&
-                    ratio < 2 &&
-                    maxWidth > 80 &&
-                    maxHeight > 80
+                    area > 800 && ratio > 0.3 && ratio < 3
 
                   if (valid && area > maxArea) {
                     if (biggestValid) biggestValid.delete()
@@ -328,16 +334,17 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
               const validThisFrame = Boolean(biggestValid)
               if (validThisFrame) {
                 noContourFramesRef.current = 0
-                detectionStableRef.current = Math.min(detectionStableRef.current + 1, 10)
+                const prevStable = detectionStableRef.current
+                detectionStableRef.current = Math.min(prevStable + 2, 10)
 
                 const orderedNew = orderPoints(biggestValid)
                 const orderedOld = smoothedContourRef.current ? orderPoints(smoothedContourRef.current) : null
 
-                // Smart smoothing anti-lag: if point moved <20px, smooth; otherwise accept the new point.
+                // Smoothing: small moves → blend; large moves → snap (no lag).
                 const smoothPoint = (oldPt: { x: number; y: number } | null, nextPt: { x: number; y: number }) => {
                   if (!oldPt) return nextPt
                   const dist = Math.hypot(nextPt.x - oldPt.x, nextPt.y - oldPt.y)
-                  if (dist < 20) {
+                  if (dist < 25) {
                     return { x: oldPt.x * 0.7 + nextPt.x * 0.3, y: oldPt.y * 0.7 + nextPt.y * 0.3 }
                   }
                   return nextPt
@@ -350,33 +357,39 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
                   bl: smoothPoint(orderedOld ? orderedOld.bl : null, orderedNew.bl),
                 }
 
-                // Delete previous contours before replacing (prevent cloned Mats leaks).
-                const oldDetected = detectedContourRef.current
-                const oldSmoothed = smoothedContourRef.current
-                if (oldDetected?.delete) oldDetected.delete()
-                if (oldSmoothed?.delete && oldSmoothed !== oldDetected) oldSmoothed.delete()
+                // When already “locked” (stable enough), freeze contour geometry — no per-frame jitter.
+                const freezeContour = prevStable >= READY_STABLE_THRESHOLD && detectedContourRef.current
 
-                const nextContour = biggestValid.clone()
-                const d = nextContour.data32S
-                if (d && d.length >= 8) {
-                  d[0] = Math.round(smooth.tl.x)
-                  d[1] = Math.round(smooth.tl.y)
-                  d[2] = Math.round(smooth.tr.x)
-                  d[3] = Math.round(smooth.tr.y)
-                  d[4] = Math.round(smooth.br.x)
-                  d[5] = Math.round(smooth.br.y)
-                  d[6] = Math.round(smooth.bl.x)
-                  d[7] = Math.round(smooth.bl.y)
+                if (!freezeContour) {
+                  // Delete previous contours before replacing (prevent cloned Mats leaks).
+                  const oldDetected = detectedContourRef.current
+                  const oldSmoothed = smoothedContourRef.current
+                  if (oldDetected?.delete) oldDetected.delete()
+                  if (oldSmoothed?.delete && oldSmoothed !== oldDetected) oldSmoothed.delete()
+
+                  const nextContour = biggestValid.clone()
+                  const d = nextContour.data32S
+                  if (d && d.length >= 8) {
+                    d[0] = Math.round(smooth.tl.x)
+                    d[1] = Math.round(smooth.tl.y)
+                    d[2] = Math.round(smooth.tr.x)
+                    d[3] = Math.round(smooth.tr.y)
+                    d[4] = Math.round(smooth.br.x)
+                    d[5] = Math.round(smooth.br.y)
+                    d[6] = Math.round(smooth.bl.x)
+                    d[7] = Math.round(smooth.bl.y)
+                  }
+
+                  detectedContourRef.current = nextContour
+                  smoothedContourRef.current = nextContour.clone()
                 }
 
-                detectedContourRef.current = nextContour
-                smoothedContourRef.current = nextContour.clone()
                 lastAreaRef.current = maxArea
               } else {
                 detectionStableRef.current = Math.max(detectionStableRef.current - 1, 0)
-                noContourFramesRef.current += 1
 
-                if (noContourFramesRef.current >= 10) {
+                // Only drop overlay when stability fully decays (anti-flicker).
+                if (detectionStableRef.current === 0) {
                   const oldDetected = detectedContourRef.current
                   const oldSmoothed = smoothedContourRef.current
                   if (oldDetected?.delete) oldDetected.delete()
@@ -387,19 +400,16 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
                 }
               }
 
-              // Auto-capture scheduler (Phase 4.1 Final Polish).
-              // CRITICAL FIX: no frame dependency. Readiness signal ONLY from stability.
-              const isReady = detectionStableRef.current >= 5
-              const isUnstable = detectionStableRef.current < 3
+              // Auto-capture: readiness from stability only; cancel countdown only if stability < 2.
+              const isReady = detectionStableRef.current >= READY_STABLE_THRESHOLD
+              const shouldCancelAuto = detectionStableRef.current < 2
 
-              // Hysteresis cancel (anti-flicker).
-              if (autoCaptureTimeoutRef.current && isUnstable) {
+              if (autoCaptureTimeoutRef.current && shouldCancelAuto) {
                 window.clearTimeout(autoCaptureTimeoutRef.current)
                 autoCaptureTimeoutRef.current = null
                 isCountingDownRef.current = false
               }
 
-              // Arm countdown only once (no duplicated timers).
               const canAuto =
                 isReady &&
                 !capturingRef.current &&
@@ -410,7 +420,6 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
                 !autoCaptureTimeoutRef.current
 
               if (canAuto) {
-                // Safety clear (should be null because of !autoCaptureTimeoutRef.current).
                 if (autoCaptureTimeoutRef.current) window.clearTimeout(autoCaptureTimeoutRef.current)
                 isCountingDownRef.current = true
                 autoCaptureTimeoutRef.current = window.setTimeout(() => {
@@ -506,7 +515,7 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
     if (capturingRef.current) return
 
     // Re-check trigger conditions (race-safe).
-    if (detectionStableRef.current < 5) return
+    if (detectionStableRef.current < READY_STABLE_THRESHOLD) return
 
     isAutoCapturingRef.current = true
     lastCaptureTimeRef.current = now

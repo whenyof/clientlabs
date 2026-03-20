@@ -585,30 +585,25 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
     let dstTri: any | null = null
 
     try {
-    const handleCapturedBlob = (blob: Blob) => {
-        if (!isMountedRef.current) return
-        onCapture(blob)
-        if (isMountedRef.current) setShowAdded(true)
-        if (showAddedTimeoutRef.current) window.clearTimeout(showAddedTimeoutRef.current)
-        showAddedTimeoutRef.current = window.setTimeout(() => {
-          if (isMountedRef.current) setShowAdded(false)
-        }, 800)
-
-        // Optional UX: tiny haptic feedback on supported devices.
-        try {
-          if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-            ;(navigator as any).vibrate?.(50)
-          }
-        } catch {
-          // ignore
-        }
-      }
-
       if (!contour) {
         canvas.toBlob(
           (blob) => {
             if (!isMountedRef.current) return
-            if (blob) handleCapturedBlob(blob)
+            if (blob) {
+              onCapture(blob)
+              if (isMountedRef.current) setShowAdded(true)
+              if (showAddedTimeoutRef.current) window.clearTimeout(showAddedTimeoutRef.current)
+              showAddedTimeoutRef.current = window.setTimeout(() => {
+                if (isMountedRef.current) setShowAdded(false)
+              }, 800)
+              try {
+                if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+                  ;(navigator as any).vibrate?.(50)
+                }
+              } catch {
+                // ignore
+              }
+            }
             capturingRef.current = false
           },
           "image/jpeg",
@@ -647,7 +642,21 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
         canvas.toBlob(
           (blob) => {
             if (!isMountedRef.current) return
-            if (blob) handleCapturedBlob(blob)
+            if (blob) {
+              onCapture(blob)
+              if (isMountedRef.current) setShowAdded(true)
+              if (showAddedTimeoutRef.current) window.clearTimeout(showAddedTimeoutRef.current)
+              showAddedTimeoutRef.current = window.setTimeout(() => {
+                if (isMountedRef.current) setShowAdded(false)
+              }, 800)
+              try {
+                if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+                  ;(navigator as any).vibrate?.(50)
+                }
+              } catch {
+                // ignore
+              }
+            }
             capturingRef.current = false
           },
           "image/jpeg",
@@ -692,7 +701,21 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
       resultCanvas.toBlob(
         (blob) => {
           if (!isMountedRef.current) return
-          if (blob) handleCapturedBlob(blob)
+          if (blob) {
+            onCapture(blob)
+            if (isMountedRef.current) setShowAdded(true)
+            if (showAddedTimeoutRef.current) window.clearTimeout(showAddedTimeoutRef.current)
+            showAddedTimeoutRef.current = window.setTimeout(() => {
+              if (isMountedRef.current) setShowAdded(false)
+            }, 800)
+            try {
+              if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+                ;(navigator as any).vibrate?.(50)
+              }
+            } catch {
+              // ignore
+            }
+          }
           capturingRef.current = false
         },
         "image/jpeg",
@@ -702,7 +725,21 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
       canvas.toBlob(
         (blob) => {
           if (!isMountedRef.current) return
-          if (blob) handleCapturedBlob(blob)
+          if (blob) {
+            onCapture(blob)
+            if (isMountedRef.current) setShowAdded(true)
+            if (showAddedTimeoutRef.current) window.clearTimeout(showAddedTimeoutRef.current)
+            showAddedTimeoutRef.current = window.setTimeout(() => {
+              if (isMountedRef.current) setShowAdded(false)
+            }, 800)
+            try {
+              if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+                ;(navigator as any).vibrate?.(50)
+              }
+            } catch {
+              // ignore
+            }
+          }
           capturingRef.current = false
         },
         "image/jpeg",

@@ -51,7 +51,15 @@ export function EdgeEditor({ image, initialCorners, onConfirm, onCancel }: EdgeE
 
   useEffect(() => {
     if (!normalizedInitial) return
-    setPoints(normalizedInitial)
+
+    const clonedPoints: [CornerPoint, CornerPoint, CornerPoint, CornerPoint] = [
+      normalizedInitial[0],
+      normalizedInitial[1],
+      normalizedInitial[2],
+      normalizedInitial[3],
+    ]
+
+    setPoints(clonedPoints)
   }, [normalizedInitial])
 
   useEffect(() => {

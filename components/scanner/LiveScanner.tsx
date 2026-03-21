@@ -21,12 +21,16 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
   const streamRef = useRef<MediaStream | null>(null)
 
   const [error, setError] = useState<string | null>(null)
+  /** Increment to re-run camera `getUserMedia` (user retry). */
+  const [cameraRetryTick, setCameraRetryTick] = useState(0)
   const [flash, setFlash] = useState(false)
   const [showAdded, setShowAdded] = useState(false)
   const [capturePressed, setCapturePressed] = useState(false)
   const capturingRef = useRef(false)
   const detectBusyRef = useRef(false)
   const openCvPromiseRef = useRef<Promise<any> | null>(null)
+  /** OpenCV runtime when ready; detection skips until set (camera/capture work without it). */
+  const cvRef = useRef<any>(null)
   const detectedContourRef = useRef<any>(null)
   const lastAreaRef = useRef(0)
   const noContourFramesRef = useRef(0)
@@ -52,7 +56,9 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
   }, [pageCount])
 
   useEffect(() => {
+    console.log("Scanner mounted")
     return () => {
+      console.log("Scanner unmounted")
       isMountedRef.current = false
       isAutoCapturingRef.current = false
       capturingRef.current = false
@@ -187,7 +193,59 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
   useEffect(() => {
     let mounted = true
 
+    /**
+     * Attach stream to `<video>` once the ref exists (fixes race: getUserMedia before first paint).
+     * Does not call getUserMedia again.
+     */
+    const attachStreamToVideo = (stream: MediaStream, videoWaitAttempts = 0) => {
+      if (!mounted) {
+        stream.getTracks().forEach((t) => t.stop())
+        return
+      }
+
+      const video = videoRef.current
+      if (!video) {
+        if (videoWaitAttempts > 180) {
+          console.error("Camera: videoRef never became available")
+          stream.getTracks().forEach((t) => t.stop())
+          if (mounted) setError("No se pudo iniciar la cámara")
+          return
+        }
+        requestAnimationFrame(() => attachStreamToVideo(stream, videoWaitAttempts + 1))
+        return
+      }
+
+      streamRef.current = stream
+      video.srcObject = stream
+      video.muted = true
+      video.playsInline = true
+
+      void (async () => {
+        try {
+          await video.play()
+          console.log("Video playing")
+        } catch (e) {
+          console.warn("Video play failed, retrying...", e)
+          await new Promise((r) => setTimeout(r, 100))
+          try {
+            await videoRef.current?.play()
+          } catch (e2) {
+            console.error("Video play failed after retry:", e2)
+            if (mounted) setError("No se pudo iniciar la cámara")
+          }
+        }
+      })()
+    }
+
     const start = async () => {
+      if (streamRef.current) {
+        console.log("Camera: stream already active — skip init")
+        return
+      }
+
+      setError(null)
+      console.log("Requesting camera access...", { retryTick: cameraRetryTick })
+
       try {
         if (!navigator.mediaDevices?.getUserMedia) {
           throw new Error("MediaDevices no disponible")
@@ -202,18 +260,23 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
         })
 
         if (!mounted) {
+          console.log("Camera: unmounted before stream attach — stopping tracks")
           stream.getTracks().forEach((t) => t.stop())
           return
         }
 
-        streamRef.current = stream
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream
-          // Some browsers require play() to begin the stream.
-          await videoRef.current.play().catch(() => {})
-        }
-      } catch {
-        setError("No se pudo acceder a la cámara")
+        console.log("Camera stream acquired")
+        attachStreamToVideo(stream)
+      } catch (err) {
+        console.error("Camera error:", err)
+        const isDenied =
+          err instanceof DOMException &&
+          (err.name === "NotAllowedError" || err.name === "PermissionDeniedError")
+        setError(
+          isDenied
+            ? "Permiso de cámara denegado"
+            : "No se pudo iniciar la cámara",
+        )
       }
     }
 
@@ -226,129 +289,172 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
         stream.getTracks().forEach((track) => track.stop())
       }
       streamRef.current = null
+      if (videoRef.current) {
+        videoRef.current.srcObject = null
+      }
     }
-  }, [])
+  }, [cameraRetryTick])
+
+  const retryCamera = () => {
+    console.log("Reintentar cámara — user action")
+    setError(null)
+    const stream = streamRef.current
+    if (stream) {
+      stream.getTracks().forEach((t) => t.stop())
+    }
+    streamRef.current = null
+    if (videoRef.current) {
+      videoRef.current.srcObject = null
+    }
+    setCameraRetryTick((n) => n + 1)
+  }
 
   useEffect(() => {
     let interval: any
     let cancelled = false
 
-    const startDetection = async () => {
-      try {
-        const cv = await loadOpenCV()
+    // Load OpenCV in background — never blocks the detection interval or camera.
+    loadOpenCV()
+      .then((cv) => {
         if (cancelled) return
+        cvRef.current = cv
+      })
+      .catch((err) => {
+        console.error("OpenCV / detection init failed (background):", err)
+        // cvRef stays null: manual capture and camera still work.
+      })
 
-        const detectDocument = () => {
-          if (cancelled) return
-          // Re-entrancy guard for OpenCV work only — does not affect capture (separate canvas).
-          if (detectBusyRef.current) return
+    const detectDocument = () => {
+      if (cancelled) return
+      console.log("Detection tick")
 
-          const video = videoRef.current
-          const detectionCanvas = detectionCanvasRef.current
-          const overlay = overlayRef.current
-          if (!video || !detectionCanvas || !overlay) return
-          if (video.readyState < 2) return
+      const video = videoRef.current
+      const detectionCanvas = detectionCanvasRef.current
+      const overlay = overlayRef.current
+      if (!video || !detectionCanvas || !overlay) {
+        console.log("Detection skip: missing ref", {
+          video: Boolean(video),
+          detectionCanvas: Boolean(detectionCanvas),
+          overlay: Boolean(overlay),
+        })
+        return
+      }
+      if (video.readyState < 2) {
+        console.log("Detection skip: video not ready yet", {
+          readyState: video.readyState,
+          videoWidth: video.videoWidth,
+          videoHeight: video.videoHeight,
+        })
+        return
+      }
 
-          detectBusyRef.current = true
-          const busyResetTimer = window.setTimeout(() => {
-            if (detectBusyRef.current) detectBusyRef.current = false
-          }, 500)
+      const cv = cvRef.current
+      if (!cv) {
+        // OpenCV not ready yet — keep loop alive, show guide only.
+        drawOverlay(null, overlay, 320, 240)
+        return
+      }
 
-          try {
-            const width = 320
-            const height = 240
+      // Re-entrancy guard for OpenCV work only — does not affect capture (separate canvas).
+      if (detectBusyRef.current) {
+        console.log("Detection skip: busy (previous OpenCV pass still running)")
+        return
+      }
 
-            // Downscale for performance.
-            detectionCanvas.width = width
-            detectionCanvas.height = height
+      detectBusyRef.current = true
+      const busyResetTimer = window.setTimeout(() => {
+        if (detectBusyRef.current) detectBusyRef.current = false
+      }, 500)
 
-            const ctx = detectionCanvas.getContext("2d")
-            if (!ctx) return
-            ctx.drawImage(video, 0, 0, width, height)
+      try {
+        const width = 320
+        const height = 240
 
-            const src = cv.imread(detectionCanvas)
-            const gray = new cv.Mat()
-            const edges = new cv.Mat()
-            const contours = new cv.MatVector()
-            const hierarchy = new cv.Mat()
+        // Downscale for performance.
+        detectionCanvas.width = width
+        detectionCanvas.height = height
 
-            try {
-              cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY)
-              cv.GaussianBlur(gray, gray, new cv.Size(5, 5), 0)
-              cv.Canny(gray, edges, 50, 150)
+        const ctx = detectionCanvas.getContext("2d")
+        if (!ctx) return
+        ctx.drawImage(video, 0, 0, width, height)
 
-              cv.findContours(edges, contours, hierarchy, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)
+        const src = cv.imread(detectionCanvas)
+        const gray = new cv.Mat()
+        const edges = new cv.Mat()
+        const contours = new cv.MatVector()
+        const hierarchy = new cv.Mat()
 
-              const contourCount = contours.size()
-              console.log("[LiveScanner] contours found:", contourCount)
+        try {
+          cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY)
+          cv.GaussianBlur(gray, gray, new cv.Size(5, 5), 0)
+          cv.Canny(gray, edges, 50, 150)
 
-              let biggestValid: any | null = null
-              let maxArea = 0
+          cv.findContours(edges, contours, hierarchy, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)
 
-              for (let i = 0; i < contours.size(); i++) {
-                const cnt = contours.get(i)
-                const area = cv.contourArea(cnt)
-                if (area > 800) {
-                  const peri = cv.arcLength(cnt, true)
-                  const approx = new cv.Mat()
-                  cv.approxPolyDP(cnt, approx, 0.02 * peri, true)
+          const contourCount = contours.size()
+          console.log("Contours found:", contourCount)
 
-                  // approx.rows gives the number of points for some builds; keep robust.
-                  const rows = approx.rows ?? approx.length
-                  if (rows !== 4) {
-                    approx.delete()
-                    continue
-                  }
+          let biggestValid: any | null = null
+          let maxArea = 0
 
-                  // Contour validation: relaxed for real-world documents.
-                  let ordered: ReturnType<typeof orderPoints> | null = null
-                  try {
-                    ordered = orderPoints(approx)
-                  } catch {
-                    ordered = null
-                  }
+          for (let i = 0; i < contours.size(); i++) {
+            const cnt = contours.get(i)
+            const area = cv.contourArea(cnt)
+            if (area > 800) {
+              const peri = cv.arcLength(cnt, true)
+              const approx = new cv.Mat()
+              cv.approxPolyDP(cnt, approx, 0.02 * peri, true)
 
-                  if (!ordered) {
-                    approx.delete()
-                    continue
-                  }
-
-                  const widthA = Math.hypot(ordered.br.x - ordered.bl.x, ordered.br.y - ordered.bl.y)
-                  const widthB = Math.hypot(ordered.tr.x - ordered.tl.x, ordered.tr.y - ordered.tl.y)
-                  const maxWidth = Math.max(widthA, widthB)
-
-                  const heightA = Math.hypot(ordered.tr.x - ordered.br.x, ordered.tr.y - ordered.br.y)
-                  const heightB = Math.hypot(ordered.tl.x - ordered.bl.x, ordered.tl.y - ordered.bl.y)
-                  const maxHeight = Math.max(heightA, heightB)
-
-                  const ratio = maxHeight > 0 ? maxWidth / maxHeight : 0
-
-                  const valid =
-                    area > 800 && ratio > 0.3 && ratio < 3
-
-                  if (valid && area > maxArea) {
-                    if (biggestValid) biggestValid.delete()
-                    biggestValid = approx
-                    maxArea = area
-                  } else {
-                    approx.delete()
-                  }
-                }
-                cnt.delete?.()
+              // approx.rows gives the number of points for some builds; keep robust.
+              const rows = approx.rows ?? approx.length
+              if (rows !== 4) {
+                approx.delete()
+                continue
               }
 
-              const validThisFrame = Boolean(biggestValid)
-              if (validThisFrame) {
+              // Contour validation: relaxed for real-world documents.
+              let ordered: ReturnType<typeof orderPoints> | null = null
+              try {
+                ordered = orderPoints(approx)
+              } catch {
+                ordered = null
+              }
+
+              if (!ordered) {
+                approx.delete()
+                continue
+              }
+
+              const widthA = Math.hypot(ordered.br.x - ordered.bl.x, ordered.br.y - ordered.bl.y)
+              const widthB = Math.hypot(ordered.tr.x - ordered.tl.x, ordered.tr.y - ordered.tl.y)
+              const maxWidth = Math.max(widthA, widthB)
+
+              const heightA = Math.hypot(ordered.tr.x - ordered.br.x, ordered.tr.y - ordered.br.y)
+              const heightB = Math.hypot(ordered.tl.x - ordered.bl.x, ordered.tl.y - ordered.bl.y)
+              const maxHeight = Math.max(heightA, heightB)
+
+              const ratio = maxHeight > 0 ? maxWidth / maxHeight : 0
+
+              const valid =
+                area > 800 && ratio > 0.3 && ratio < 3
+
+              if (valid && area > maxArea) {
+                if (biggestValid) biggestValid.delete()
+                biggestValid = approx
+                maxArea = area
+              } else {
+                approx.delete()
+              }
+            }
+            cnt.delete?.()
+          }
+
+          const validThisFrame = Boolean(biggestValid)
+
+          if (validThisFrame) {
                 noContourFramesRef.current = 0
                 const prevStable = detectionStableRef.current
                 detectionStableRef.current = Math.min(prevStable + 2, 10)
-
-                console.log(
-                  "[LiveScanner] valid quad contour:",
-                  true,
-                  "detectionStable:",
-                  detectionStableRef.current,
-                )
 
                 const orderedNew = orderPoints(biggestValid)
                 const orderedOld = smoothedContourRef.current ? orderPoints(smoothedContourRef.current) : null
@@ -401,13 +507,6 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
               } else {
                 detectionStableRef.current = Math.max(detectionStableRef.current - 1, 0)
 
-                console.log(
-                  "[LiveScanner] valid quad contour:",
-                  false,
-                  "detectionStable:",
-                  detectionStableRef.current,
-                )
-
                 // Only drop overlay when stability fully decays (anti-flicker).
                 if (detectionStableRef.current === 0) {
                   const oldDetected = detectedContourRef.current
@@ -419,6 +518,9 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
                   lastAreaRef.current = 0
                 }
               }
+
+              console.log("Valid contour:", validThisFrame)
+              console.log("Stability:", detectionStableRef.current)
 
               // Auto-capture: readiness from stability only; cancel countdown only if stability < 2.
               const isReady = detectionStableRef.current >= READY_STABLE_THRESHOLD
@@ -449,34 +551,29 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
                 }, 700)
               }
 
-              // Always redraw overlay (guide is always visible).
-              drawOverlay(detectedContourRef.current, overlay, width, height)
+        // Always redraw overlay (guide is always visible).
+        drawOverlay(detectedContourRef.current, overlay, width, height)
 
-              if (biggestValid) biggestValid.delete()
-            } finally {
-              src.delete()
-              gray.delete()
-              edges.delete()
-              contours.delete()
-              hierarchy.delete()
-            }
-          } finally {
-            window.clearTimeout(busyResetTimer)
-            detectBusyRef.current = false
-          }
-        }
-
-        interval = setInterval(() => detectDocument(), 300)
-      } catch {
-        // If OpenCV fails, keep the scanner functional without overlay.
+        if (biggestValid) biggestValid.delete()
+      } finally {
+        src.delete()
+        gray.delete()
+        edges.delete()
+        contours.delete()
+        hierarchy.delete()
       }
+    } finally {
+      window.clearTimeout(busyResetTimer)
+      detectBusyRef.current = false
+    }
     }
 
-    startDetection()
+    interval = setInterval(() => detectDocument(), 300)
 
     return () => {
       cancelled = true
       if (interval) clearInterval(interval)
+      cvRef.current = null
     }
   }, [])
 
@@ -779,28 +876,46 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/90 transition-opacity duration-200 ease-out flex flex-col">
-      <div className="relative flex-1 min-h-0 min-w-0">
+    <div className="fixed inset-0 z-50 flex flex-col bg-black transition-opacity duration-200 ease-out">
+      <div className="relative flex-1 min-h-0 min-w-0 overflow-hidden">
         <video
           ref={videoRef}
           autoPlay
           playsInline
           muted
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+          className="pointer-events-none"
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            position: "absolute",
+            inset: 0,
+            zIndex: 1,
+            pointerEvents: "none",
+          }}
+          onLoadedMetadata={(e) => {
+            const v = e.currentTarget
+            console.log("Video ready:", v.readyState, v.videoWidth, v.videoHeight)
+          }}
+          onPlaying={() => {
+            const v = videoRef.current
+            if (v) console.log("Video playing (event), dimensions:", v.videoWidth, v.videoHeight)
+          }}
         />
 
         <canvas
           ref={overlayRef}
-          className="absolute inset-0 z-[1] w-full h-full pointer-events-none"
+          className="absolute inset-0 h-full w-full"
+          style={{ zIndex: 2, pointerEvents: "none" }}
         />
 
         <div
-          className={`absolute inset-0 bg-white pointer-events-none transition-opacity duration-[120ms] ease-out ${
+          className={`pointer-events-none absolute inset-0 z-[3] bg-white transition-opacity duration-[120ms] ease-out ${
             flash ? "opacity-25" : "opacity-0"
           }`}
         />
 
-        <div className="absolute top-0 inset-x-0 z-[2] px-4 pt-[max(env(safe-area-inset-top),12px)] pb-2 flex items-center justify-between pointer-events-none">
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-40 flex items-center justify-between px-4 pb-2 pt-[max(env(safe-area-inset-top),12px)]">
           <p className="text-xs text-white/80">Escaneando...</p>
           <p className="text-xs text-white/80">
             {pageCount} {pageCount === 1 ? "página" : "páginas"}
@@ -808,13 +923,23 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
         </div>
 
         {error && (
-          <div className="absolute inset-0 z-[2] flex items-center justify-center px-4 pointer-events-none">
-            <p className="text-sm text-white">{error}</p>
+          <div className="pointer-events-auto absolute inset-0 z-[60] flex items-center justify-center bg-black/55 px-4">
+            <div className="w-full max-w-sm rounded-lg border border-white/15 bg-black/80 p-4 text-center shadow-lg space-y-3">
+              <p className="text-sm text-white">{error}</p>
+              <Button
+                type="button"
+                variant="secondary"
+                className="w-full"
+                onClick={retryCamera}
+              >
+                Reintentar cámara
+              </Button>
+            </div>
           </div>
         )}
       </div>
 
-      <div className="relative z-30 p-4 shrink-0 pointer-events-auto bg-black/90 border-t border-white/10">
+      <div className="pointer-events-auto relative z-50 shrink-0 border-t border-white/10 bg-black/90 p-4">
         <div className="flex items-center justify-between mb-2">
           <p className="text-xs text-white/90">
             {pageCount} páginas escaneadas

@@ -14,28 +14,45 @@ export function LiveScanner({ onCapture }: LiveScannerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null)
 
   const handleCapture = () => {
+    console.log("CLICK CAPTURE")
+
     const video = videoRef.current
-    if (!video) return
-    if (!video.videoWidth || !video.videoHeight) return
+    if (!video) {
+      console.log("NO VIDEO REF")
+      return
+    }
+
+    console.log("VIDEO SIZE:", video.videoWidth, video.videoHeight)
+
+    if (video.videoWidth === 0) {
+      console.log("VIDEO NOT READY")
+      return
+    }
 
     const canvas = document.createElement("canvas")
     canvas.width = video.videoWidth
     canvas.height = video.videoHeight
 
     const ctx = canvas.getContext("2d")
-    if (!ctx) return
+    if (!ctx) {
+      console.log("NO CONTEXT")
+      return
+    }
+
     ctx.drawImage(video, 0, 0)
 
-    canvas.toBlob(
-      (blob) => {
-        if (blob) {
-          console.log("CAPTURE OK", blob)
-          onCapture(blob)
-        }
-      },
-      "image/jpeg",
-      0.95,
-    )
+    console.log("DRAW DONE")
+
+    canvas.toBlob((blob) => {
+      console.log("BLOB RESULT:", blob)
+
+      if (blob) {
+        console.log("CALLING onCapture")
+        onCapture(blob)
+      } else {
+        console.log("BLOB IS NULL")
+      }
+    }, "image/jpeg", 0.95)
   }
 
   function waitForVideo() {

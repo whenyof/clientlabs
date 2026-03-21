@@ -21,6 +21,7 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
   const streamRef = useRef<MediaStream | null>(null)
 
   const [error, setError] = useState<string | null>(null)
+  const [cvError, setCvError] = useState<string | null>(null)
   /** Increment to re-run camera `getUserMedia` (user retry). */
   const [cameraRetryTick, setCameraRetryTick] = useState(0)
   const [flash, setFlash] = useState(false)
@@ -56,6 +57,7 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
   }, [pageCount])
 
   useEffect(() => {
+    isMountedRef.current = true
     console.log("Scanner mounted")
     return () => {
       console.log("Scanner unmounted")
@@ -67,7 +69,7 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
   }, [])
 
   const loadOpenCV = () =>
-    (openCvPromiseRef.current ??= new Promise((resolve) => {
+    (openCvPromiseRef.current ??= new Promise((resolve, reject) => {
       const w = window as any
       if (w.cv) return resolve(w.cv)
 
@@ -78,15 +80,21 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
       script.onload = () => {
         // opencv.js sets `cv` and `cv.onRuntimeInitialized` is called once ready.
         w.cv = w.cv ?? w.cv
-        w.cv.onRuntimeInitialized = () => resolve(w.cv)
-
+        if (!w.cv) {
+          reject(new Error("OpenCV failed"))
+          return
+        }
         // If runtime is already initialized, resolve immediately.
-        if (w.cv && w.cv.getBuildInformation) resolve(w.cv)
+        if (w.cv.getBuildInformation) {
+          resolve(w.cv)
+          return
+        }
+        w.cv.onRuntimeInitialized = () => resolve(w.cv)
       }
 
       script.onerror = () => {
-        if (!isMountedRef.current) return
-        setError("No se pudo cargar OpenCV para detectar el documento")
+        if (isMountedRef.current) setCvError("OpenCV failed to load")
+        reject(new Error("OpenCV failed"))
       }
 
       document.body.appendChild(script)
@@ -239,8 +247,12 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
 
     const start = async () => {
       if (streamRef.current) {
-        console.log("Camera: stream already active — skip init")
-        return
+        const tracks = streamRef.current.getTracks()
+        const active = tracks.some((t) => t.readyState === "live")
+        if (active) {
+          console.log("Camera: stream already active — skip init")
+          return
+        }
       }
 
       setError(null)
@@ -294,6 +306,12 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
       }
     }
   }, [cameraRetryTick])
+
+  useEffect(() => {
+    if (cvError) {
+      console.warn(cvError)
+    }
+  }, [cvError])
 
   const retryCamera = () => {
     console.log("Reintentar cámara — user action")

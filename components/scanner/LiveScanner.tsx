@@ -65,18 +65,29 @@ export function LiveScanner(_props: LiveScannerProps) {
   }, [])
 
   return (
-    <video
-      ref={videoRef}
-      autoPlay
-      playsInline
-      muted
+    <div
       style={{
-        width: "100%",
-        height: "100%",
-        objectFit: "cover",
         background: "black",
+        position: "fixed",
+        inset: 0,
+        zIndex: 9999,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
       }}
-    />
+    >
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        muted
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+        }}
+      />
+    </div>
   )
 }
 

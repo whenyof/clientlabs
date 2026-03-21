@@ -19,7 +19,12 @@ export function LiveScanner({ onCapture, onCancel }: LiveScannerProps) {
   const contourRef = useRef<Point2D[] | null>(null)
   const stableFramesRef = useRef(0)
   const frameCountRef = useRef(0)
+  const autoCaptureTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const lastCaptureTimeRef = useRef(0)
+  const isAutoCapturingRef = useRef(false)
+  const handleCaptureRef = useRef<() => Promise<void>>(() => Promise.resolve())
   const [flash, setFlash] = useState(false)
+  const [isCountingDown, setIsCountingDown] = useState(false)
   const [isPressed, setIsPressed] = useState(false)
   const [showAdded, setShowAdded] = useState(false)
 
@@ -98,23 +103,48 @@ export function LiveScanner({ onCapture, onCancel }: LiveScannerProps) {
       }
       const isReady = stableFramesRef.current >= 5
 
+      const now = Date.now()
+      const canCapture =
+        isReady &&
+        !isAutoCapturingRef.current &&
+        now - lastCaptureTimeRef.current > 2000
+
+      if (canCapture && !autoCaptureTimeoutRef.current) {
+        autoCaptureTimeoutRef.current = setTimeout(() => {
+          setIsCountingDown(false)
+          isAutoCapturingRef.current = true
+          handleCaptureRef.current()
+          lastCaptureTimeRef.current = Date.now()
+          setTimeout(() => {
+            isAutoCapturingRef.current = false
+          }, 1000)
+          autoCaptureTimeoutRef.current = null
+        }, 700)
+        setIsCountingDown(true)
+      }
+
+      if (!isReady && autoCaptureTimeoutRef.current) {
+        clearTimeout(autoCaptureTimeoutRef.current)
+        autoCaptureTimeoutRef.current = null
+        setIsCountingDown(false)
+      }
+
       overlay.width = w
       overlay.height = h
       const ovCtx = overlay.getContext("2d")
       if (!ovCtx) return
       ovCtx.clearRect(0, 0, w, h)
-      ovCtx.strokeStyle = !best ? "#ef4444" : isReady ? "#22c55e" : "#eab308"
-      ovCtx.lineWidth = 4
-      ovCtx.beginPath()
       if (best) {
+        ovCtx.strokeStyle = isReady ? "#22c55e" : "#eab308"
+        ovCtx.lineWidth = isReady ? 6 : 4
+        ovCtx.beginPath()
         ovCtx.moveTo(best[0].x, best[0].y)
-        for (let i = 1; i < best.length; i++) ovCtx.lineTo(best[i].x, best[i].y)
+        for (let i = 1; i < best.length; i++) {
+          ovCtx.lineTo(best[i].x, best[i].y)
+        }
         ovCtx.closePath()
-      } else {
-        const pad = Math.min(w, h) * 0.1
-        ovCtx.strokeRect(pad, pad, w - pad * 2, h - pad * 2)
+        ovCtx.stroke()
       }
-      ovCtx.stroke()
     } finally {
       src?.delete()
       gray?.delete()
@@ -126,6 +156,10 @@ export function LiveScanner({ onCapture, onCancel }: LiveScannerProps) {
   }, [])
 
   useEffect(() => {
+    handleCaptureRef.current = handleCapture
+  })
+
+  useEffect(() => {
     loadOpenCV()
       .then((cv) => {
         cvRef.current = cv
@@ -133,6 +167,14 @@ export function LiveScanner({ onCapture, onCancel }: LiveScannerProps) {
       .catch(() => {
         console.warn("OpenCV failed, continue without detection")
       })
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (autoCaptureTimeoutRef.current) {
+        clearTimeout(autoCaptureTimeoutRef.current)
+      }
+    }
   }, [])
 
   useEffect(() => {
@@ -252,6 +294,24 @@ export function LiveScanner({ onCapture, onCancel }: LiveScannerProps) {
             zIndex: 99999,
           }}
         />
+      )}
+      {isCountingDown && (
+        <div
+          style={{
+            position: "absolute",
+            top: "20px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            background: "rgba(0,0,0,0.7)",
+            color: "white",
+            padding: "8px 16px",
+            borderRadius: "999px",
+            zIndex: 99999,
+            pointerEvents: "none",
+          }}
+        >
+          Capturando...
+        </div>
       )}
       {showAdded && (
         <div

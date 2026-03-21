@@ -20,6 +20,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@heroicons/react": "^2.2.0",
     "@next-auth/prisma-adapter": "^1.0.7",
+    "@opencvjs/web": "^4.13.0-release.1",
     "@paralleldrive/cuid2": "^3.0.6",
     "@prisma/client": "^5.22.0",
     "@radix-ui/react-alert-dialog": "^1.1.15",

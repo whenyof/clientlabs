@@ -344,7 +344,6 @@ export function ScanSessionPageInner({ sessionId }: { sessionId: string }) {
   const [pages, setPages] = useState<PageFile[]>([])
   const [selectedPage, setSelectedPage] = useState<PageFile | null>(null)
   const [dragIndex, setDragIndex] = useState<number | null>(null)
-  const [filterMode, setFilterMode] = useState<"color" | "bw" | "contrast">("bw")
   const [scannerOpen, setScannerOpen] = useState(false)
   const [reviewMode, setReviewMode] = useState(false)
   const [editingPage, setEditingPage] = useState<PageFile | null>(null)
@@ -648,7 +647,7 @@ export function ScanSessionPageInner({ sessionId }: { sessionId: string }) {
       const warpedFile = new File([warpedBlob], `scan-${Date.now()}-edited.jpg`, { type: "image/jpeg" })
       nextPreviewUrl = URL.createObjectURL(warpedBlob)
 
-      const processedBlob = await processImage(warpedFile, filterMode, { skipGeometry: true })
+      const processedBlob = await processImage(warpedFile, "bw", { skipGeometry: true })
       nextProcessedUrl = URL.createObjectURL(processedBlob)
 
       if (!nextPreviewUrl || !nextProcessedUrl) {
@@ -666,7 +665,7 @@ export function ScanSessionPageInner({ sessionId }: { sessionId: string }) {
             file: warpedFile,
             previewUrl: safePreviewUrl,
             processedPreviewUrl: safeProcessedUrl,
-            processedMode: filterMode,
+            processedMode: "bw",
             processing: false,
             corners: newCorners,
             isWarped: true,
@@ -725,11 +724,11 @@ export function ScanSessionPageInner({ sessionId }: { sessionId: string }) {
     ;(async () => {
       for (const page of pagesRef.current) {
         if (cancelled || generation !== previewGenerationRef.current) return
-        if (page.processedPreviewUrl && page.processedMode === filterMode && !page.processing) {
+        if (page.processedPreviewUrl && page.processedMode === "bw" && !page.processing) {
           continue
         }
         try {
-          const processedBlob = await processImage(page.file, filterMode, { skipGeometry: page.isWarped === true })
+          const processedBlob = await processImage(page.file, "bw", { skipGeometry: page.isWarped === true })
           if (cancelled || generation !== previewGenerationRef.current) return
           const nextUrl = URL.createObjectURL(processedBlob)
           setPages((prev) =>
@@ -741,7 +740,7 @@ export function ScanSessionPageInner({ sessionId }: { sessionId: string }) {
               return {
                 ...p,
                 processedPreviewUrl: nextUrl,
-                processedMode: filterMode,
+                processedMode: "bw",
                 processing: false,
               }
             }),
@@ -757,7 +756,7 @@ export function ScanSessionPageInner({ sessionId }: { sessionId: string }) {
     return () => {
       cancelled = true
     }
-  }, [filterMode, pages.length])
+  }, [pages.length])
  
   const handleSubmit = async () => {
     if (submitting) return
@@ -881,7 +880,7 @@ export function ScanSessionPageInner({ sessionId }: { sessionId: string }) {
       for (const scanPage of pagesSnapshot) {
         if (!isMountedRef.current) return
 
-        const processedBlob = await processImage(scanPage.file, filterMode, { skipGeometry: scanPage.isWarped })
+        const processedBlob = await processImage(scanPage.file, "bw", { skipGeometry: scanPage.isWarped })
         const highQJpegBlob = await reencodeJpeg(processedBlob, 0.95)
         const jpegBytes = new Uint8Array(await highQJpegBlob.arrayBuffer())
         const img = await pdfDoc.embedJpg(jpegBytes)
@@ -1180,38 +1179,6 @@ export function ScanSessionPageInner({ sessionId }: { sessionId: string }) {
             <div className="space-y-1 pb-1">
               <h2 className="text-base font-semibold text-[var(--text-primary)]">Revisa tu documento</h2>
               <p className="text-xs text-[var(--text-secondary)]">Ordena y ajusta antes de enviarlo</p>
-            </div>
-          )}
-
-          {!reviewMode && (
-            <div className="space-y-2">
-              <Label className="text-xs font-medium text-[var(--text-secondary)]">Filtro</Label>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  size="sm"
-                  variant={filterMode === "color" ? "default" : "outline"}
-                  onClick={() => setFilterMode("color")}
-                >
-                  Color
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant={filterMode === "bw" ? "default" : "outline"}
-                  onClick={() => setFilterMode("bw")}
-                >
-                  B/N
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant={filterMode === "contrast" ? "default" : "outline"}
-                  onClick={() => setFilterMode("contrast")}
-                >
-                  Alto contraste
-                </Button>
-              </div>
             </div>
           )}
 

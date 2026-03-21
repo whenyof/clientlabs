@@ -17,6 +17,7 @@ export function LiveScanner({ onCapture, onCancel }: LiveScannerProps) {
   const overlayRef = useRef<HTMLCanvasElement | null>(null)
   const cvRef = useRef<Awaited<ReturnType<typeof loadOpenCV>> | null>(null)
   const contourRef = useRef<Point2D[] | null>(null)
+  const lastContourRef = useRef<Point2D[] | null>(null)
   const stableFramesRef = useRef(0)
   const frameCountRef = useRef(0)
   const autoCaptureTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -66,7 +67,7 @@ export function LiveScanner({ onCapture, onCancel }: LiveScannerProps) {
 
       let best: Point2D[] | null = null
       let bestArea = 0
-      const minArea = w * h * 0.05
+      const minArea = w * h * 0.2
 
       for (let i = 0; i < contours.size(); i++) {
         const c = contours.get(i)
@@ -97,11 +98,14 @@ export function LiveScanner({ onCapture, onCancel }: LiveScannerProps) {
       contourRef.current = best
 
       if (best) {
-        stableFramesRef.current += 1
+        lastContourRef.current = best
+        stableFramesRef.current = Math.min(stableFramesRef.current + 2, 10)
       } else {
-        stableFramesRef.current = Math.max(0, stableFramesRef.current - 1)
+        stableFramesRef.current = Math.max(stableFramesRef.current - 1, 0)
       }
-      const isReady = stableFramesRef.current >= 5
+      const isReady = stableFramesRef.current >= 8
+
+      const contourToDraw = best ?? lastContourRef.current
 
       const now = Date.now()
       const canCapture =
@@ -134,13 +138,13 @@ export function LiveScanner({ onCapture, onCancel }: LiveScannerProps) {
       const ovCtx = overlay.getContext("2d")
       if (!ovCtx) return
       ovCtx.clearRect(0, 0, w, h)
-      if (best) {
+      if (contourToDraw) {
         ovCtx.strokeStyle = isReady ? "#22c55e" : "#eab308"
         ovCtx.lineWidth = isReady ? 6 : 4
         ovCtx.beginPath()
-        ovCtx.moveTo(best[0].x, best[0].y)
-        for (let i = 1; i < best.length; i++) {
-          ovCtx.lineTo(best[i].x, best[i].y)
+        ovCtx.moveTo(contourToDraw[0].x, contourToDraw[0].y)
+        for (let i = 1; i < contourToDraw.length; i++) {
+          ovCtx.lineTo(contourToDraw[i].x, contourToDraw[i].y)
         }
         ovCtx.closePath()
         ovCtx.stroke()
@@ -231,13 +235,46 @@ export function LiveScanner({ onCapture, onCancel }: LiveScannerProps) {
       const video = videoRef.current
       if (!video) return
 
-      stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
-      })
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+            focusMode: "continuous",
+          },
+        })
+      } catch {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+          },
+        })
+      }
+
+      const track = stream.getVideoTracks()[0]
+      if (track?.getCapabilities) {
+        try {
+          await track.applyConstraints({
+            advanced: [
+              {
+                focusMode: "continuous",
+                exposureMode: "continuous",
+                whiteBalanceMode: "continuous",
+              },
+            ],
+          })
+        } catch {
+          // Constraints may be unsupported on this device; continue with default
+        }
+      }
 
       video.srcObject = stream
       video.muted = true
       video.playsInline = true
+      video.style.objectFit = "cover"
       await video.play()
     }
 

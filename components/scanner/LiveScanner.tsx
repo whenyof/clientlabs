@@ -16,8 +16,6 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
   const videoRef = useRef<HTMLVideoElement | null>(null)
   /** Full-resolution frame for manual/auto capture only (never shared with detection). */
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
-  /** Small downscaled frame for OpenCV detection only — avoids racing capture canvas. */
-  const detectionCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const overlayRef = useRef<HTMLCanvasElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
 
@@ -347,27 +345,16 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
         // cvRef stays null: manual capture and camera still work.
       })
 
+    // Isolated offscreen canvas for detection only (never touches camera/capture canvases).
+    const detectionCanvas = document.createElement("canvas")
+
     const detectDocument = () => {
       if (cancelled) return
-      console.log("Detection tick")
 
       const video = videoRef.current
-      const detectionCanvas = detectionCanvasRef.current
       const overlay = overlayRef.current
-      if (!video || !detectionCanvas || !overlay) {
-        console.log("Detection skip: missing ref", {
-          video: Boolean(video),
-          detectionCanvas: Boolean(detectionCanvas),
-          overlay: Boolean(overlay),
-        })
-        return
-      }
-      if (video.readyState < 2) {
-        console.log("Detection skip: video not ready yet", {
-          readyState: video.readyState,
-          videoWidth: video.videoWidth,
-          videoHeight: video.videoHeight,
-        })
+      if (!video || !overlay) return
+      if (video.readyState < 2 || video.videoWidth <= 0 || video.videoHeight <= 0) {
         return
       }
 
@@ -390,10 +377,9 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
       }, 500)
 
       try {
+        // Downscale frame for fast detection.
         const width = 320
         const height = 240
-
-        // Downscale for performance.
         detectionCanvas.width = width
         detectionCanvas.height = height
 
@@ -401,166 +387,98 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
         if (!ctx) return
         ctx.drawImage(video, 0, 0, width, height)
 
-        const src = cv.imread(detectionCanvas)
-        const gray = new cv.Mat()
-        const thresh = new cv.Mat()
-        const edges = new cv.Mat()
-        const contours = new cv.MatVector()
-        const hierarchy = new cv.Mat()
-
+        // Keep all OpenCV work isolated and fail-safe.
         try {
-          cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY)
-          cv.GaussianBlur(gray, gray, new cv.Size(5, 5), 0)
-          cv.adaptiveThreshold(
-            gray,
-            thresh,
-            255,
-            cv.ADAPTIVE_THRESH_GAUSSIAN_C,
-            cv.THRESH_BINARY,
-            11,
-            2,
-          )
-          cv.Canny(thresh, edges, 50, 150)
+          const src = cv.imread(detectionCanvas)
+          const gray = new cv.Mat()
+          const thresh = new cv.Mat()
+          const edges = new cv.Mat()
+          const contours = new cv.MatVector()
+          const hierarchy = new cv.Mat()
 
-          cv.findContours(edges, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-          console.log("Contours:", contours.size())
+          try {
+            cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY)
+            cv.GaussianBlur(gray, gray, new cv.Size(5, 5), 0)
+            cv.adaptiveThreshold(
+              gray,
+              thresh,
+              255,
+              cv.ADAPTIVE_THRESH_GAUSSIAN_C,
+              cv.THRESH_BINARY,
+              11,
+              2,
+            )
+            cv.Canny(thresh, edges, 50, 150)
+            cv.findContours(edges, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
 
-          let biggestValid: any | null = null
-          let maxArea = 0
-          const contourOrder: Array<{ idx: number; area: number }> = []
+            let biggestValid: any | null = null
+            let maxArea = 0
+            const contourOrder: Array<{ idx: number; area: number }> = []
 
-          for (let i = 0; i < contours.size(); i++) {
-            const cnt = contours.get(i)
-            const area = cv.contourArea(cnt)
-            contourOrder.push({ idx: i, area })
-            cnt.delete?.()
-          }
-
-          contourOrder.sort((a, b) => b.area - a.area)
-
-          for (const { idx, area } of contourOrder) {
-            if (area <= 2000) continue
-            const cnt = contours.get(idx)
-            const peri = cv.arcLength(cnt, true)
-            const approx = new cv.Mat()
-            cv.approxPolyDP(cnt, approx, 0.02 * peri, true)
-
-            const rows = approx.rows ?? approx.length
-            if (rows === 4 && area > maxArea) {
-              if (biggestValid) biggestValid.delete()
-              biggestValid = approx
-              maxArea = area
-            } else {
-              approx.delete()
+            for (let i = 0; i < contours.size(); i++) {
+              const cnt = contours.get(i)
+              const area = cv.contourArea(cnt)
+              contourOrder.push({ idx: i, area })
+              cnt.delete?.()
             }
-            cnt.delete?.()
-          }
+            contourOrder.sort((a, b) => b.area - a.area)
 
-          const validThisFrame = Boolean(biggestValid)
-          console.log("Best area:", maxArea)
+            for (const { idx, area } of contourOrder) {
+              if (area <= 2000) continue
+              const cnt = contours.get(idx)
+              const peri = cv.arcLength(cnt, true)
+              const approx = new cv.Mat()
+              cv.approxPolyDP(cnt, approx, 0.02 * peri, true)
+              const rows = approx.rows ?? approx.length
 
-          if (validThisFrame) {
-                noContourFramesRef.current = 0
-                detectionStableRef.current = Math.min(detectionStableRef.current + 2, 10)
+              if (rows === 4 && area > maxArea) {
+                if (biggestValid) biggestValid.delete()
+                biggestValid = approx
+                maxArea = area
+              } else {
+                approx.delete()
+              }
+              cnt.delete?.()
+            }
 
-                const orderedNew = orderPoints(biggestValid)
-                const orderedOld = smoothedContourRef.current ? orderPoints(smoothedContourRef.current) : null
+            if (biggestValid) {
+              const oldDetected = detectedContourRef.current
+              const oldSmoothed = smoothedContourRef.current
+              if (oldDetected?.delete) oldDetected.delete()
+              if (oldSmoothed?.delete && oldSmoothed !== oldDetected) oldSmoothed.delete()
 
-                const smoothPoint = (oldPt: { x: number; y: number } | null, nextPt: { x: number; y: number }) => {
-                  if (!oldPt) return nextPt
-                  const dist = Math.hypot(nextPt.x - oldPt.x, nextPt.y - oldPt.y)
-                  if (dist < 25) {
-                    return { x: oldPt.x * 0.7 + nextPt.x * 0.3, y: oldPt.y * 0.7 + nextPt.y * 0.3 }
-                  }
-                  return nextPt
-                }
-
-                const smooth = {
-                  tl: smoothPoint(orderedOld ? orderedOld.tl : null, orderedNew.tl),
-                  tr: smoothPoint(orderedOld ? orderedOld.tr : null, orderedNew.tr),
-                  br: smoothPoint(orderedOld ? orderedOld.br : null, orderedNew.br),
-                  bl: smoothPoint(orderedOld ? orderedOld.bl : null, orderedNew.bl),
-                }
-
+              detectedContourRef.current = biggestValid.clone()
+              smoothedContourRef.current = detectedContourRef.current.clone()
+              detectionStableRef.current = Math.min(detectionStableRef.current + 2, 10)
+              lastAreaRef.current = maxArea
+              biggestValid.delete()
+            } else {
+              detectionStableRef.current = Math.max(detectionStableRef.current - 1, 0)
+              if (detectionStableRef.current === 0) {
                 const oldDetected = detectedContourRef.current
                 const oldSmoothed = smoothedContourRef.current
                 if (oldDetected?.delete) oldDetected.delete()
                 if (oldSmoothed?.delete && oldSmoothed !== oldDetected) oldSmoothed.delete()
-
-                const nextContour = biggestValid.clone()
-                const d = nextContour.data32S
-                if (d && d.length >= 8) {
-                  d[0] = Math.round(smooth.tl.x)
-                  d[1] = Math.round(smooth.tl.y)
-                  d[2] = Math.round(smooth.tr.x)
-                  d[3] = Math.round(smooth.tr.y)
-                  d[4] = Math.round(smooth.br.x)
-                  d[5] = Math.round(smooth.br.y)
-                  d[6] = Math.round(smooth.bl.x)
-                  d[7] = Math.round(smooth.bl.y)
-                }
-
-                detectedContourRef.current = nextContour
-                smoothedContourRef.current = nextContour.clone()
-                lastAreaRef.current = maxArea
-              } else {
-                detectionStableRef.current = Math.max(detectionStableRef.current - 1, 0)
-
-                if (detectionStableRef.current === 0) {
-                  const oldDetected = detectedContourRef.current
-                  const oldSmoothed = smoothedContourRef.current
-                  if (oldDetected?.delete) oldDetected.delete()
-                  if (oldSmoothed?.delete && oldSmoothed !== oldDetected) oldSmoothed.delete()
-                  detectedContourRef.current = null
-                  smoothedContourRef.current = null
-                  lastAreaRef.current = 0
-                }
+                detectedContourRef.current = null
+                smoothedContourRef.current = null
+                lastAreaRef.current = 0
               }
+            }
+          } finally {
+            src.delete()
+            gray.delete()
+            thresh.delete()
+            edges.delete()
+            contours.delete()
+            hierarchy.delete()
+          }
+        } catch (detectErr) {
+          // Fail-safe: detection failures never affect camera lifecycle/UI.
+          console.warn("Detection frame failed:", detectErr)
+        }
 
-              console.log("Valid contour:", validThisFrame)
-              console.log("Stability:", detectionStableRef.current)
-
-              // Auto-capture: readiness from stability only; cancel countdown only if stability < 2.
-              const isReady = detectionStableRef.current >= READY_STABLE_THRESHOLD
-              const shouldCancelAuto = detectionStableRef.current < 2
-
-              if (autoCaptureTimeoutRef.current && shouldCancelAuto) {
-                window.clearTimeout(autoCaptureTimeoutRef.current)
-                autoCaptureTimeoutRef.current = null
-                isCountingDownRef.current = false
-              }
-
-              const canAuto =
-                isReady &&
-                !capturingRef.current &&
-                !isAutoCapturingRef.current &&
-                pageCountRef.current < 10 &&
-                Date.now() >= autoCaptureBlockUntilRef.current &&
-                Date.now() - lastCaptureTimeRef.current >= 2000 &&
-                !autoCaptureTimeoutRef.current
-
-              if (canAuto) {
-                if (autoCaptureTimeoutRef.current) window.clearTimeout(autoCaptureTimeoutRef.current)
-                isCountingDownRef.current = true
-                autoCaptureTimeoutRef.current = window.setTimeout(() => {
-                  autoCaptureTimeoutRef.current = null
-                  isCountingDownRef.current = false
-                  triggerCapture()
-                }, 700)
-              }
-
-              // Always redraw overlay (guide is always visible).
-              drawOverlay(detectedContourRef.current, overlay, width, height)
-
-              if (biggestValid) biggestValid.delete()
-      } finally {
-        src.delete()
-        gray.delete()
-        thresh.delete()
-        edges.delete()
-        contours.delete()
-        hierarchy.delete()
-      }
+        // Overlay only: draw current contour/guide; no camera state changes.
+        drawOverlay(detectedContourRef.current, overlay, width, height)
     } finally {
       window.clearTimeout(busyResetTimer)
       detectBusyRef.current = false
@@ -1002,8 +920,6 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
 
         {/* Full-res capture canvas — never used by OpenCV detection */}
         <canvas ref={canvasRef} className="hidden" aria-hidden />
-        {/* Downscaled detection canvas — isolated from capture to avoid races */}
-        <canvas ref={detectionCanvasRef} className="hidden" aria-hidden />
       </div>
     </div>
   )

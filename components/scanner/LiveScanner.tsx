@@ -1,7 +1,7 @@
 /* Live camera scanner (minimal diagnostic mode) */
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useCallback } from "react"
 
 export type LiveScannerProps = {
   onCapture: (blob: Blob) => void
@@ -10,24 +10,46 @@ export type LiveScannerProps = {
   pageCount: number
 }
 
+function waitForVideoReady(video: HTMLVideoElement): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (video.videoWidth > 0) {
+      resolve()
+      return
+    }
+    const timeout = setTimeout(() => {
+      clearInterval(interval)
+      reject(new Error("Video never became ready"))
+    }, 15000)
+    const interval = setInterval(() => {
+      if (video.videoWidth > 0) {
+        clearInterval(interval)
+        clearTimeout(timeout)
+        resolve()
+      }
+    }, 100)
+  })
+}
+
 export function LiveScanner({ onCapture }: LiveScannerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null)
 
-  const handleCapture = () => {
-    console.log("CLICK CAPTURE")
+  const handleCapture = useCallback(async () => {
+    console.log("CAPTURE START")
 
     const video = videoRef.current
     if (!video) {
-      console.log("NO VIDEO REF")
+      console.log("NO VIDEO")
       return
     }
 
-    console.log("VIDEO SIZE:", video.videoWidth, video.videoHeight)
-
-    if (video.videoWidth === 0) {
-      console.log("VIDEO NOT READY")
+    try {
+      await waitForVideoReady(video)
+    } catch (err) {
+      console.error("Video not ready:", err)
       return
     }
+
+    console.log("VIDEO READY:", video.videoWidth, video.videoHeight)
 
     const canvas = document.createElement("canvas")
     canvas.width = video.videoWidth
@@ -41,19 +63,18 @@ export function LiveScanner({ onCapture }: LiveScannerProps) {
 
     ctx.drawImage(video, 0, 0)
 
-    console.log("DRAW DONE")
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/jpeg", 0.95)
+    )
 
-    canvas.toBlob((blob) => {
-      console.log("BLOB RESULT:", blob)
+    if (!blob) {
+      console.log("BLOB FAILED")
+      return
+    }
 
-      if (blob) {
-        console.log("CALLING onCapture")
-        onCapture(blob)
-      } else {
-        console.log("BLOB IS NULL")
-      }
-    }, "image/jpeg", 0.95)
-  }
+    console.log("CAPTURE SUCCESS")
+    onCapture(blob)
+  }, [onCapture])
 
   function waitForVideo() {
     return new Promise<HTMLVideoElement>((resolve) => {
@@ -139,12 +160,13 @@ export function LiveScanner({ onCapture }: LiveScannerProps) {
           display: "flex",
           justifyContent: "center",
           zIndex: 10000,
+          pointerEvents: "auto",
         }}
       >
         <button
           type="button"
           onClick={() => {
-            console.log("BUTTON CLICK WORKING")
+            console.log("CLICK DETECTED")
             handleCapture()
           }}
           style={{

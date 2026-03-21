@@ -33,26 +33,6 @@ export function LiveScanner({ onCapture, onCancel }: LiveScannerProps) {
   }
 
   useEffect(() => {
-    const check = (e: MouseEvent) => {
-      const el = document.elementFromPoint(e.clientX, e.clientY)
-      console.log("TOP ELEMENT:", el)
-    }
-    window.addEventListener("click", check)
-    return () => window.removeEventListener("click", check)
-  }, [])
-
-  useEffect(() => {
-    document.querySelectorAll("*").forEach((el) => {
-      ;(el as HTMLElement).style.outline = "1px solid red"
-    })
-    return () => {
-      document.querySelectorAll("*").forEach((el) => {
-        ;(el as HTMLElement).style.outline = ""
-      })
-    }
-  }, [])
-
-  useEffect(() => {
     let stream: MediaStream | null = null
 
     const start = async () => {
@@ -94,6 +74,7 @@ export function LiveScanner({ onCapture, onCancel }: LiveScannerProps) {
           width: "100%",
           height: "100%",
           objectFit: "cover",
+          pointerEvents: "none",
         }}
       />
       <button
@@ -108,6 +89,7 @@ export function LiveScanner({ onCapture, onCancel }: LiveScannerProps) {
           border: "none",
           borderRadius: "8px",
           zIndex: 10000,
+          pointerEvents: "auto",
           cursor: "pointer",
         }}
       >
@@ -126,6 +108,7 @@ export function LiveScanner({ onCapture, onCancel }: LiveScannerProps) {
           borderRadius: "50%",
           background: "white",
           zIndex: 10000,
+          pointerEvents: "auto",
         }}
       />
     </div>

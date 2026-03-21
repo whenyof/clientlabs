@@ -235,41 +235,13 @@ export function LiveScanner({ onCapture, onCancel }: LiveScannerProps) {
       const video = videoRef.current
       if (!video) return
 
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: { ideal: "environment" },
-            width: { ideal: 1920 },
-            height: { ideal: 1080 },
-            focusMode: "continuous",
-          },
-        })
-      } catch {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: { ideal: "environment" },
-            width: { ideal: 1920 },
-            height: { ideal: 1080 },
-          },
-        })
-      }
-
-      const track = stream.getVideoTracks()[0]
-      if (track?.getCapabilities) {
-        try {
-          await track.applyConstraints({
-            advanced: [
-              {
-                focusMode: "continuous",
-                exposureMode: "continuous",
-                whiteBalanceMode: "continuous",
-              },
-            ],
-          })
-        } catch {
-          // Constraints may be unsupported on this device; continue with default
-        }
-      }
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: "environment" },
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+        },
+      })
 
       video.srcObject = stream
       video.muted = true

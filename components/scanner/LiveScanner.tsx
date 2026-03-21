@@ -12,6 +12,7 @@ export type LiveScannerProps = {
 }
 
 export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveScannerProps) {
+  const CAMERA_TEST_MODE = true
   const videoRef = useRef<HTMLVideoElement | null>(null)
   /** Full-resolution frame for manual/auto capture only (never shared with detection). */
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -227,20 +228,18 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
       video.srcObject = stream
       video.muted = true
       video.playsInline = true
+      video.autoplay = true
 
       void (async () => {
         try {
           await video.play()
           console.log("Video playing")
-        } catch (e) {
-          console.warn("Video play failed, retrying...", e)
-          await new Promise((r) => setTimeout(r, 100))
-          try {
-            await videoRef.current?.play()
-          } catch (e2) {
-            console.error("Video play failed after retry:", e2)
-            if (mounted) setError("No se pudo iniciar la cámara")
-          }
+          console.log("Video state:", video.readyState, video.videoWidth, video.videoHeight)
+        } catch (err) {
+          console.warn("video.play failed, retrying...", err)
+          setTimeout(() => {
+            video.play().catch(() => {})
+          }, 300)
         }
       })()
     }
@@ -278,6 +277,8 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
         }
 
         console.log("Camera stream acquired")
+        console.log("Tracks:", stream.getTracks())
+        console.log("Video track settings:", stream.getVideoTracks()[0]?.getSettings())
         attachStreamToVideo(stream)
       } catch (err) {
         console.error("Camera error:", err)
@@ -328,6 +329,10 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
   }
 
   useEffect(() => {
+    if (CAMERA_TEST_MODE) {
+      console.log("Camera test mode: detection loop disabled")
+      return
+    }
     let interval: any
     let cancelled = false
 
@@ -675,6 +680,20 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
   }
 
   const handleCapture = async () => {
+    if (CAMERA_TEST_MODE) {
+      const video = videoRef.current
+      console.log("Capture button clicked (camera test mode)")
+      if (!video) {
+        console.log("Video not ready yet")
+        return
+      }
+      console.log("Video state:", video.readyState, video.videoWidth, video.videoHeight)
+      if (video.readyState < 2) {
+        console.log("Video not ready yet")
+        return
+      }
+      return
+    }
     // Prevent concurrent captures (manual + auto).
     if (capturingRef.current) return
 
@@ -901,7 +920,7 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
           autoPlay
           playsInline
           muted
-          className="pointer-events-none"
+          className="absolute inset-0 w-full h-full object-cover bg-black pointer-events-none"
           style={{
             width: "100%",
             height: "100%",

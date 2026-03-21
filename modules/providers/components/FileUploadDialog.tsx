@@ -50,7 +50,6 @@ export function FileUploadDialog({
     const [step, setStep] = useState<1 | 2>(1)
     const [loading, setLoading] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
-    const cameraInputRef = useRef<HTMLInputElement>(null)
     const [documentName, setDocumentName] = useState("")
     const [category, setCategory] = useState<"INVOICE" | "ORDER" | "ORDER_SHEET" | "CONTRACT" | "OTHER">(presetCategory || "OTHER")
     const [files, setFiles] = useState<File[]>([])
@@ -64,7 +63,6 @@ export function FileUploadDialog({
             setCategory(presetCategory || "OTHER")
             setFiles([])
             if (fileInputRef.current) fileInputRef.current.value = ""
-            if (cameraInputRef.current) cameraInputRef.current.value = ""
         }
     }, [open, presetCategory])
 
@@ -81,15 +79,6 @@ export function FileUploadDialog({
         if (added.length) setFiles((prev) => {
             const next = [...prev, ...added]
             return next.slice(0, 10) // límite de 10 páginas
-        })
-        e.target.value = ""
-    }
-
-    const handleAddCameraFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const added = Array.from(e.target.files || [])
-        if (added.length) setFiles((prev) => {
-            const next = [...prev, ...added]
-            return next.slice(0, 10)
         })
         e.target.value = ""
     }
@@ -191,11 +180,6 @@ export function FileUploadDialog({
             <DialogContent className="max-w-lg bg-[var(--bg-card)] border-[var(--border-main)]">
                 <DialogHeader>
                     <DialogTitle className="text-[var(--text-primary)] text-base sm:text-lg">{title}</DialogTitle>
-                    <p className="text-xs text-[var(--text-secondary)]">
-                        {step === 1
-                            ? "Introduce el nombre o número del documento."
-                            : "Elige cómo añadir el documento y revisa los archivos seleccionados antes de guardar."}
-                    </p>
                 </DialogHeader>
 
                 <input
@@ -206,16 +190,6 @@ export function FileUploadDialog({
                     className="hidden"
                     onChange={handleAddFiles}
                 />
-                <input
-                    ref={cameraInputRef}
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    multiple
-                    className="hidden"
-                    onChange={handleAddCameraFiles}
-                />
-
                 {step === 1 && (
                     <div className="space-y-4">
                         <div className="space-y-2">
@@ -242,7 +216,7 @@ export function FileUploadDialog({
                             <Button
                                 type="button"
                                 onClick={handleStep1Next}
-                                className="bg-[var(--accent)] text-white hover:opacity-90"
+                                className="w-full sm:w-auto rounded-xl bg-[var(--accent)] text-white hover:opacity-90 shadow-sm"
                             >
                                 Continuar →
                             </Button>
@@ -296,44 +270,45 @@ export function FileUploadDialog({
                             </div>
                         )}
 
-                        <div className="space-y-2">
-                            <Label className="text-xs font-medium text-[var(--text-secondary)]">
-                                ¿Cómo quieres añadir el documento?
+                        <div className="space-y-3">
+                            <Label className="text-sm font-semibold text-[var(--text-primary)]">
+                                Añadir documento
                             </Label>
-                            <div className="flex flex-wrap gap-2">
+                            <div className="space-y-3">
                                 <Button
                                     type="button"
-                                    variant="outline"
-                                    className="border-[var(--border-main)] text-[var(--text-secondary)] hover:bg-[var(--bg-main)] text-[11px]"
+                                    variant="ghost"
+                                    className="w-full h-auto rounded-2xl border border-[var(--border-main)] bg-[var(--bg-main)]/50 p-4 text-left justify-start transition-all duration-200 hover:shadow-md hover:border-[var(--accent)]/40 active:scale-[0.98]"
                                     onClick={() => {
                                         setScanMode("none")
                                         fileInputRef.current?.click()
                                     }}
                                 >
-                                    <Upload className="h-3.5 w-3.5 mr-1.5" /> Importar archivo
+                                    <span className="mr-4 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--accent)]/10 text-[var(--accent)]">
+                                        <Upload className="h-5 w-5" />
+                                    </span>
+                                    <span className="min-w-0">
+                                        <span className="block text-sm font-semibold text-[var(--text-primary)]">Importar archivo</span>
+                                        <span className="block text-xs text-[var(--text-secondary)]">Sube PDF, imágenes o documentos desde tu dispositivo</span>
+                                    </span>
                                 </Button>
                                 <Button
                                     type="button"
-                                    variant="outline"
-                                    className="border-[var(--border-main)] text-[var(--text-secondary)] hover:bg-[var(--bg-main)] text-[11px]"
-                                    onClick={() => {
-                                        setScanMode("scan")
-                                        cameraInputRef.current?.click()
-                                    }}
-                                >
-                                    <FileText className="h-3.5 w-3.5 mr-1.5" /> Escanear documento
-                                </Button>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    className="border-[var(--border-main)] text-[var(--text-secondary)] hover:bg-[var(--bg-main)] text-[11px]"
+                                    variant="ghost"
+                                    className="w-full h-auto rounded-2xl border border-[var(--border-main)] bg-[var(--bg-main)]/50 p-4 text-left justify-start transition-all duration-200 hover:shadow-md hover:border-[var(--accent)]/40 active:scale-[0.98]"
                                     disabled={!documentName.trim()}
                                     onClick={() => {
                                         if (!documentName.trim()) return
                                         setShowScanWithMobile(true)
                                     }}
                                 >
-                                    <Smartphone className="h-3.5 w-3.5 mr-1.5" /> Escanear con el móvil
+                                    <span className="mr-4 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--accent)]/10 text-[var(--accent)]">
+                                        <Smartphone className="h-5 w-5" />
+                                    </span>
+                                    <span className="min-w-0">
+                                        <span className="block text-sm font-semibold text-[var(--text-primary)]">Escanear con el móvil</span>
+                                        <span className="block text-xs text-[var(--text-secondary)]">Captura el documento con la cámara en segundos</span>
+                                    </span>
                                 </Button>
                             </div>
                         </div>
@@ -370,9 +345,13 @@ export function FileUploadDialog({
                                     ))}
                                 </ul>
                             ) : (
-                                <p className="text-sm text-[var(--text-muted)]">
-                                    Aún no hay archivos. Usa “Importar archivo” o “Escanear documento” para añadirlos.
-                                </p>
+                                <div className="rounded-2xl border border-dashed border-[var(--border-main)] bg-[var(--bg-main)]/30 px-4 py-10 text-center">
+                                    <div className="mx-auto mb-3 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--accent)]/10 text-[var(--accent)]">
+                                        <FileText className="h-5 w-5" />
+                                    </div>
+                                    <p className="text-sm font-semibold text-[var(--text-primary)]">Sin documentos aún</p>
+                                    <p className="mt-1 text-xs text-[var(--text-secondary)]">Añade tu primer documento para empezar</p>
+                                </div>
                             )}
                         </div>
 
@@ -389,9 +368,9 @@ export function FileUploadDialog({
                                 type="button"
                                 onClick={handleSave}
                                 disabled={loading || files.length === 0}
-                                className="bg-[var(--accent)] hover:opacity-90 text-white"
+                                className="w-full sm:w-auto rounded-xl bg-[var(--accent)] text-white hover:opacity-90 shadow-sm"
                             >
-                                {loading ? labels.common.loading : "Guardar documento"}
+                                {loading ? labels.common.loading : "Continuar"}
                             </Button>
                         </DialogFooter>
                     </div>

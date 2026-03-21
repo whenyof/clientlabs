@@ -11,26 +11,6 @@ export type LiveScannerProps = {
 
 export function LiveScanner({ onCapture, onCancel }: LiveScannerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null)
-  const rootRef = useRef<HTMLDivElement | null>(null)
-
-  useEffect(() => {
-    const root = rootRef.current
-    if (!root) return
-
-    const all = document.querySelectorAll("*")
-    all.forEach((el) => {
-      if (el === document.body) return
-      if (el === root || root.contains(el)) return
-
-      const style = window.getComputedStyle(el as Element)
-      if (
-        style.position === "fixed" &&
-        parseInt(style.zIndex || "0") > 1000
-      ) {
-        ;(el as HTMLElement).style.pointerEvents = "none"
-      }
-    })
-  }, [])
 
   const handleCapture = async () => {
     const video = videoRef.current
@@ -78,13 +58,11 @@ export function LiveScanner({ onCapture, onCancel }: LiveScannerProps) {
 
   return (
     <div
-      ref={rootRef}
       style={{
         position: "fixed",
         inset: 0,
         background: "black",
         zIndex: 999999,
-        pointerEvents: "auto",
       }}
     >
       <video

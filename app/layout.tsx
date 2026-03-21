@@ -131,6 +131,11 @@ export default function RootLayout({
                 <Toaster
                   richColors
                   position="top-right"
+                  toastOptions={{
+                    style: {
+                      zIndex: 10,
+                    },
+                  }}
                 />
               </ToastProvider>
             </Providers>

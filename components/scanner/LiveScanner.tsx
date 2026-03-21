@@ -127,6 +127,7 @@ export function LiveScanner({ onCapture }: LiveScannerProps) {
           width: "100%",
           height: "100%",
           objectFit: "cover",
+          pointerEvents: "none",
         }}
       />
       <div
@@ -137,17 +138,22 @@ export function LiveScanner({ onCapture }: LiveScannerProps) {
           right: 0,
           display: "flex",
           justifyContent: "center",
+          zIndex: 10000,
         }}
       >
         <button
           type="button"
-          onClick={handleCapture}
+          onClick={() => {
+            console.log("BUTTON CLICK WORKING")
+            handleCapture()
+          }}
           style={{
             width: "70px",
             height: "70px",
             borderRadius: "50%",
             background: "white",
             border: "4px solid rgba(0,0,0,0.3)",
+            pointerEvents: "auto",
           }}
         />
       </div>

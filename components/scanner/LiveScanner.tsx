@@ -14,32 +14,47 @@ export function LiveScanner(_props: LiveScannerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null)
 
   useEffect(() => {
+    let stream: MediaStream | null = null
+
     async function startCamera() {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: "environment",
+          },
         })
 
         const video = videoRef.current
 
         if (!video) {
-          console.error("video ref null")
+          console.error("Video element not ready")
           return
         }
 
         video.srcObject = stream
+        video.setAttribute("playsinline", "true")
         video.muted = true
-        video.playsInline = true
 
+        await new Promise((resolve) => {
+          video.onloadedmetadata = () => {
+            resolve(true)
+          }
+        })
         await video.play()
 
-        console.log("Camera started", video.videoWidth, video.videoHeight)
+        console.log("Camera working:", video.videoWidth, video.videoHeight)
       } catch (err) {
-        console.error("Camera error:", err)
+        console.error("Camera failed:", err)
       }
     }
 
     startCamera()
+
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop())
+      }
+    }
   }, [])
 
   return (
@@ -52,7 +67,7 @@ export function LiveScanner(_props: LiveScannerProps) {
         width: "100%",
         height: "100%",
         objectFit: "cover",
-        background: "black",
+        backgroundColor: "black",
       }}
     />
   )

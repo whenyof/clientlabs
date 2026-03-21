@@ -12,7 +12,7 @@ export type LiveScannerProps = {
 }
 
 export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveScannerProps) {
-  const CAMERA_TEST_MODE = true
+  const CAMERA_TEST_MODE = false
   const videoRef = useRef<HTMLVideoElement | null>(null)
   /** Full-resolution frame for manual/auto capture only (never shared with detection). */
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -403,6 +403,7 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
 
         const src = cv.imread(detectionCanvas)
         const gray = new cv.Mat()
+        const thresh = new cv.Mat()
         const edges = new cv.Mat()
         const contours = new cv.MatVector()
         const hierarchy = new cv.Mat()
@@ -410,79 +411,61 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
         try {
           cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY)
           cv.GaussianBlur(gray, gray, new cv.Size(5, 5), 0)
-          cv.Canny(gray, edges, 50, 150)
+          cv.adaptiveThreshold(
+            gray,
+            thresh,
+            255,
+            cv.ADAPTIVE_THRESH_GAUSSIAN_C,
+            cv.THRESH_BINARY,
+            11,
+            2,
+          )
+          cv.Canny(thresh, edges, 50, 150)
 
-          cv.findContours(edges, contours, hierarchy, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)
-
-          const contourCount = contours.size()
-          console.log("Contours found:", contourCount)
+          cv.findContours(edges, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+          console.log("Contours:", contours.size())
 
           let biggestValid: any | null = null
           let maxArea = 0
+          const contourOrder: Array<{ idx: number; area: number }> = []
 
           for (let i = 0; i < contours.size(); i++) {
             const cnt = contours.get(i)
             const area = cv.contourArea(cnt)
-            if (area > 800) {
-              const peri = cv.arcLength(cnt, true)
-              const approx = new cv.Mat()
-              cv.approxPolyDP(cnt, approx, 0.02 * peri, true)
+            contourOrder.push({ idx: i, area })
+            cnt.delete?.()
+          }
 
-              // approx.rows gives the number of points for some builds; keep robust.
-              const rows = approx.rows ?? approx.length
-              if (rows !== 4) {
-                approx.delete()
-                continue
-              }
+          contourOrder.sort((a, b) => b.area - a.area)
 
-              // Contour validation: relaxed for real-world documents.
-              let ordered: ReturnType<typeof orderPoints> | null = null
-              try {
-                ordered = orderPoints(approx)
-              } catch {
-                ordered = null
-              }
+          for (const { idx, area } of contourOrder) {
+            if (area <= 2000) continue
+            const cnt = contours.get(idx)
+            const peri = cv.arcLength(cnt, true)
+            const approx = new cv.Mat()
+            cv.approxPolyDP(cnt, approx, 0.02 * peri, true)
 
-              if (!ordered) {
-                approx.delete()
-                continue
-              }
-
-              const widthA = Math.hypot(ordered.br.x - ordered.bl.x, ordered.br.y - ordered.bl.y)
-              const widthB = Math.hypot(ordered.tr.x - ordered.tl.x, ordered.tr.y - ordered.tl.y)
-              const maxWidth = Math.max(widthA, widthB)
-
-              const heightA = Math.hypot(ordered.tr.x - ordered.br.x, ordered.tr.y - ordered.br.y)
-              const heightB = Math.hypot(ordered.tl.x - ordered.bl.x, ordered.tl.y - ordered.bl.y)
-              const maxHeight = Math.max(heightA, heightB)
-
-              const ratio = maxHeight > 0 ? maxWidth / maxHeight : 0
-
-              const valid =
-                area > 800 && ratio > 0.3 && ratio < 3
-
-              if (valid && area > maxArea) {
-                if (biggestValid) biggestValid.delete()
-                biggestValid = approx
-                maxArea = area
-              } else {
-                approx.delete()
-              }
+            const rows = approx.rows ?? approx.length
+            if (rows === 4 && area > maxArea) {
+              if (biggestValid) biggestValid.delete()
+              biggestValid = approx
+              maxArea = area
+            } else {
+              approx.delete()
             }
             cnt.delete?.()
           }
 
           const validThisFrame = Boolean(biggestValid)
+          console.log("Best area:", maxArea)
 
           if (validThisFrame) {
                 noContourFramesRef.current = 0
-                const prevStable = detectionStableRef.current
-                detectionStableRef.current = Math.min(prevStable + 2, 10)
+                detectionStableRef.current = Math.min(detectionStableRef.current + 2, 10)
 
                 const orderedNew = orderPoints(biggestValid)
                 const orderedOld = smoothedContourRef.current ? orderPoints(smoothedContourRef.current) : null
 
-                // Smoothing: small moves → blend; large moves → snap (no lag).
                 const smoothPoint = (oldPt: { x: number; y: number } | null, nextPt: { x: number; y: number }) => {
                   if (!oldPt) return nextPt
                   const dist = Math.hypot(nextPt.x - oldPt.x, nextPt.y - oldPt.y)
@@ -499,38 +482,30 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
                   bl: smoothPoint(orderedOld ? orderedOld.bl : null, orderedNew.bl),
                 }
 
-                // When already “locked” (stable enough), freeze contour geometry — no per-frame jitter.
-                const freezeContour = prevStable >= READY_STABLE_THRESHOLD && detectedContourRef.current
+                const oldDetected = detectedContourRef.current
+                const oldSmoothed = smoothedContourRef.current
+                if (oldDetected?.delete) oldDetected.delete()
+                if (oldSmoothed?.delete && oldSmoothed !== oldDetected) oldSmoothed.delete()
 
-                if (!freezeContour) {
-                  // Delete previous contours before replacing (prevent cloned Mats leaks).
-                  const oldDetected = detectedContourRef.current
-                  const oldSmoothed = smoothedContourRef.current
-                  if (oldDetected?.delete) oldDetected.delete()
-                  if (oldSmoothed?.delete && oldSmoothed !== oldDetected) oldSmoothed.delete()
-
-                  const nextContour = biggestValid.clone()
-                  const d = nextContour.data32S
-                  if (d && d.length >= 8) {
-                    d[0] = Math.round(smooth.tl.x)
-                    d[1] = Math.round(smooth.tl.y)
-                    d[2] = Math.round(smooth.tr.x)
-                    d[3] = Math.round(smooth.tr.y)
-                    d[4] = Math.round(smooth.br.x)
-                    d[5] = Math.round(smooth.br.y)
-                    d[6] = Math.round(smooth.bl.x)
-                    d[7] = Math.round(smooth.bl.y)
-                  }
-
-                  detectedContourRef.current = nextContour
-                  smoothedContourRef.current = nextContour.clone()
+                const nextContour = biggestValid.clone()
+                const d = nextContour.data32S
+                if (d && d.length >= 8) {
+                  d[0] = Math.round(smooth.tl.x)
+                  d[1] = Math.round(smooth.tl.y)
+                  d[2] = Math.round(smooth.tr.x)
+                  d[3] = Math.round(smooth.tr.y)
+                  d[4] = Math.round(smooth.br.x)
+                  d[5] = Math.round(smooth.br.y)
+                  d[6] = Math.round(smooth.bl.x)
+                  d[7] = Math.round(smooth.bl.y)
                 }
 
+                detectedContourRef.current = nextContour
+                smoothedContourRef.current = nextContour.clone()
                 lastAreaRef.current = maxArea
               } else {
                 detectionStableRef.current = Math.max(detectionStableRef.current - 1, 0)
 
-                // Only drop overlay when stability fully decays (anti-flicker).
                 if (detectionStableRef.current === 0) {
                   const oldDetected = detectedContourRef.current
                   const oldSmoothed = smoothedContourRef.current
@@ -574,13 +549,14 @@ export function LiveScanner({ onCapture, onCancel, onFinish, pageCount }: LiveSc
                 }, 700)
               }
 
-        // Always redraw overlay (guide is always visible).
-        drawOverlay(detectedContourRef.current, overlay, width, height)
+              // Always redraw overlay (guide is always visible).
+              drawOverlay(detectedContourRef.current, overlay, width, height)
 
-        if (biggestValid) biggestValid.delete()
+              if (biggestValid) biggestValid.delete()
       } finally {
         src.delete()
         gray.delete()
+        thresh.delete()
         edges.delete()
         contours.delete()
         hierarchy.delete()

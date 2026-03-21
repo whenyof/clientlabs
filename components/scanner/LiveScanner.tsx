@@ -33,12 +33,12 @@ export function LiveScanner({ onCapture, onCancel }: LiveScannerProps) {
     const w = video.videoWidth
     const h = video.videoHeight
 
-    let src: ReturnType<typeof cv.Mat> | null = null
-    let gray: ReturnType<typeof cv.Mat> | null = null
-    let blurred: ReturnType<typeof cv.Mat> | null = null
-    let edges: ReturnType<typeof cv.Mat> | null = null
-    let contours: ReturnType<typeof cv.MatVector> | null = null
-    let hierarchy: ReturnType<typeof cv.Mat> | null = null
+    let src: any = null
+    let gray: any = null
+    let blurred: any = null
+    let edges: any = null
+    let contours: any = null
+    let hierarchy: any = null
 
     try {
       const tempCanvas = document.createElement("canvas")

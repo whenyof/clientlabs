@@ -32,6 +32,83 @@ function orderQuadPoints(pts: Point2D[]): [Point2D, Point2D, Point2D, Point2D] {
   return [tl, tr, br, bl]
 }
 
+const CORNER_ARM_PX = 25
+
+function drawCornerArm(
+  ctx: CanvasRenderingContext2D,
+  from: Point2D,
+  toward: Point2D,
+  maxLen: number,
+) {
+  const d = distance(from, toward)
+  if (d < 1) return
+  const len = Math.min(maxLen, d * 0.99)
+  const t = len / d
+  ctx.beginPath()
+  ctx.moveTo(from.x, from.y)
+  ctx.lineTo(from.x + (toward.x - from.x) * t, from.y + (toward.y - from.y) * t)
+  ctx.stroke()
+}
+
+/** iPhone-style L corners on ordered quad TL → TR → BR → BL */
+function drawPremiumCorners(
+  ctx: CanvasRenderingContext2D,
+  quad: Point2D[],
+  options: {
+    color: string
+    lineWidth: number
+    shadowBlur: number
+    shadowColor: string
+    globalAlpha: number
+  },
+) {
+  if (quad.length !== 4) return
+  const [tl, tr, br, bl] = orderQuadPoints(quad)
+  ctx.save()
+  ctx.globalAlpha = options.globalAlpha
+  ctx.strokeStyle = options.color
+  ctx.lineWidth = options.lineWidth
+  ctx.lineCap = "round"
+  ctx.lineJoin = "round"
+  ctx.shadowColor = options.shadowColor
+  ctx.shadowBlur = options.shadowBlur
+  drawCornerArm(ctx, tl, tr, CORNER_ARM_PX)
+  drawCornerArm(ctx, tl, bl, CORNER_ARM_PX)
+  drawCornerArm(ctx, tr, tl, CORNER_ARM_PX)
+  drawCornerArm(ctx, tr, br, CORNER_ARM_PX)
+  drawCornerArm(ctx, br, tr, CORNER_ARM_PX)
+  drawCornerArm(ctx, br, bl, CORNER_ARM_PX)
+  drawCornerArm(ctx, bl, br, CORNER_ARM_PX)
+  drawCornerArm(ctx, bl, tl, CORNER_ARM_PX)
+  ctx.restore()
+}
+
+const SCAN_SWEEP_MS = 2200
+
+function drawScanningSweepLine(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  color: string,
+  isReady: boolean,
+) {
+  const t = (performance.now() % SCAN_SWEEP_MS) / SCAN_SWEEP_MS
+  const y = t * height
+  const pulse = Math.sin(Date.now() / 120) * 0.5 + 0.5
+  ctx.save()
+  ctx.globalAlpha = isReady ? 0.6 * (0.85 + pulse * 0.15) : 0.6
+  ctx.strokeStyle = color
+  ctx.lineWidth = 2
+  ctx.lineCap = "round"
+  ctx.shadowColor = color
+  ctx.shadowBlur = isReady ? 22 : 10
+  ctx.beginPath()
+  ctx.moveTo(0, y)
+  ctx.lineTo(width, y)
+  ctx.stroke()
+  ctx.restore()
+}
+
 async function warpDocumentToBlob(cv: any, video: HTMLVideoElement, quad: Point2D[]): Promise<Blob | null> {
   if (quad.length !== 4) return null
 
@@ -177,6 +254,8 @@ export function LiveScanner({ onCapture, onCancel }: LiveScannerProps) {
   const [isCountingDown, setIsCountingDown] = useState(false)
   const [isPressed, setIsPressed] = useState(false)
   const [showAdded, setShowAdded] = useState(false)
+  const [scannerReady, setScannerReady] = useState(false)
+  const wasReadyRef = useRef(false)
 
   const detectDocument = useCallback(() => {
     const cv = cvRef.current
@@ -252,7 +331,13 @@ export function LiveScanner({ onCapture, onCancel }: LiveScannerProps) {
       } else {
         stableFramesRef.current = Math.max(stableFramesRef.current - 1, 0)
       }
-      const isReady = stableFramesRef.current >= 4
+      const isReady = stableFramesRef.current >= 5
+
+      if (isReady && !wasReadyRef.current) {
+        navigator.vibrate?.(30)
+      }
+      wasReadyRef.current = isReady
+      setScannerReady((prev) => (prev === isReady ? prev : isReady))
 
       const contourToDraw = best ?? lastContourRef.current
 
@@ -287,17 +372,23 @@ export function LiveScanner({ onCapture, onCancel }: LiveScannerProps) {
       const ovCtx = overlay.getContext("2d")
       if (!ovCtx) return
       ovCtx.clearRect(0, 0, w, h)
-      if (contourToDraw) {
-        ovCtx.strokeStyle = isReady ? "#22c55e" : "#eab308"
-        ovCtx.lineWidth = isReady ? 6 : 4
-        ovCtx.beginPath()
-        ovCtx.moveTo(contourToDraw[0].x, contourToDraw[0].y)
-        for (let i = 1; i < contourToDraw.length; i++) {
-          ovCtx.lineTo(contourToDraw[i].x, contourToDraw[i].y)
-        }
-        ovCtx.closePath()
-        ovCtx.stroke()
+
+      const stateColor = isReady ? "#22c55e" : "#eab308"
+      drawScanningSweepLine(ovCtx, w, h, stateColor, isReady)
+
+      // RED / nothing: no contour → only sweep line
+      if (!contourToDraw || contourToDraw.length !== 4) {
+        return
       }
+      const pulse = Math.sin(Date.now() / 120) * 0.5 + 0.5
+      const cornerAlpha = isReady ? 0.8 + pulse * 0.2 : 1
+      drawPremiumCorners(ovCtx, contourToDraw, {
+        color: stateColor,
+        lineWidth: isReady ? 4 : 2,
+        shadowBlur: isReady ? 25 : 10,
+        shadowColor: isReady ? "#22c55e" : "#eab308",
+        globalAlpha: cornerAlpha,
+      })
     } finally {
       src?.delete()
       gray?.delete()
@@ -445,6 +536,73 @@ export function LiveScanner({ onCapture, onCancel }: LiveScannerProps) {
           pointerEvents: "none",
         }}
       />
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          zIndex: 10,
+          transform: scannerReady ? "scale(1.02)" : "scale(1)",
+          transformOrigin: "center center",
+          transition: "transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            boxShadow: scannerReady
+              ? "inset 0 0 0 1000px rgba(0,0,0,0.28), inset 0 0 100px rgba(34,197,94,0.1)"
+              : "inset 0 0 0 1000px rgba(0,0,0,0.35)",
+            transition: "box-shadow 0.45s ease",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            width: "80%",
+            height: "60%",
+            transform: "translate(-50%, -50%)",
+            borderRadius: "16px",
+            border: scannerReady
+              ? "1px dashed rgba(134,239,172,0.7)"
+              : "1px dashed rgba(255,255,255,0.4)",
+            boxShadow: scannerReady ? "0 0 40px rgba(34,197,94,0.3)" : "none",
+            transition: "border-color 0.45s ease, box-shadow 0.45s ease",
+          }}
+        />
+      </div>
+      <div
+        style={{
+          position: "absolute",
+          top: "max(20px, env(safe-area-inset-top, 0px))",
+          left: "50%",
+          transform: "translateX(-50%)",
+          textAlign: "center",
+          color: "white",
+          zIndex: 50,
+          pointerEvents: "none",
+          maxWidth: "90%",
+        }}
+      >
+        <div style={{ fontSize: "14px", opacity: 0.8, lineHeight: 1.35 }}>
+          Coloca el documento dentro del marco
+        </div>
+        <div
+          style={{
+            marginTop: "6px",
+            fontSize: "14px",
+            fontWeight: 600,
+            opacity: 0.95,
+            color: scannerReady ? "#86efac" : "rgba(255,255,255,0.92)",
+            transition: "color 0.35s ease",
+          }}
+        >
+          {scannerReady ? "Listo para capturar" : "Buscando documento..."}
+        </div>
+      </div>
       <canvas
         ref={overlayRef}
         style={{
@@ -454,7 +612,7 @@ export function LiveScanner({ onCapture, onCancel }: LiveScannerProps) {
           height: "100%",
           objectFit: "cover",
           pointerEvents: "none",
-          zIndex: 1,
+          zIndex: 11,
         }}
       />
       {flash && (

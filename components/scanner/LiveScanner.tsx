@@ -44,18 +44,25 @@ async function warpDocumentToBlob(cv: any, video: HTMLVideoElement, quad: Point2
   const outH = Math.max(2, Math.round(Math.max(hLeft, hRight)))
 
   let srcMat: any = null
-  let dst: any = null
+  let warped: any = null
+  let upscaled: any = null
+  let blurMat: any = null
+  let sharpened: any = null
   let M: any = null
   let srcTri: any = null
   let dstTri: any = null
 
+  const UPSCALE = 2
+
   try {
     const tempCanvas = document.createElement("canvas")
-    tempCanvas.width = video.videoWidth
-    tempCanvas.height = video.videoHeight
+    const vw = video.videoWidth
+    const vh = video.videoHeight
+    tempCanvas.width = vw
+    tempCanvas.height = vh
     const ctx = tempCanvas.getContext("2d")
     if (!ctx) return null
-    ctx.drawImage(video, 0, 0)
+    ctx.drawImage(video, 0, 0, vw, vh)
 
     srcMat = cv.imread(tempCanvas)
 
@@ -80,18 +87,74 @@ async function warpDocumentToBlob(cv: any, video: HTMLVideoElement, quad: Point2
       outH - 1,
     ])
     M = cv.getPerspectiveTransform(srcTri, dstTri)
-    dst = new cv.Mat()
-    cv.warpPerspective(srcMat, dst, M, new cv.Size(outW, outH), cv.INTER_LINEAR)
+    warped = new cv.Mat()
+    cv.warpPerspective(srcMat, warped, M, new cv.Size(outW, outH), cv.INTER_LINEAR)
+
+    // Orientation: match warped aspect to contour bbox (longest extent in frame).
+    const width = warped.cols
+    const height = warped.rows
+    const xs = quad.map((p) => p.x)
+    const ys = quad.map((p) => p.y)
+    const bboxW = Math.max(...xs) - Math.min(...xs)
+    const bboxH = Math.max(...ys) - Math.min(...ys)
+    const preferPortrait = bboxH > bboxW * 1.05
+    const preferLandscape = bboxW > bboxH * 1.05
+
+    let needsRotate = false
+    if (preferPortrait) {
+      // Vertical document in frame → expect portrait output (height > width * 1.2).
+      if (!(height > width * 1.2)) {
+        needsRotate = true
+      }
+    } else if (preferLandscape) {
+      // Horizontal document → expect landscape (width > height * 1.2).
+      if (!(width > height * 1.2)) {
+        needsRotate = true
+      }
+    } else {
+      // Ambiguous bbox: use pixel rule from spec.
+      if (!(height > width * 1.2)) {
+        needsRotate = true
+      }
+    }
+
+    if (needsRotate) {
+      const rotated = new cv.Mat()
+      cv.rotate(warped, rotated, cv.ROTATE_90_CLOCKWISE)
+      warped.delete()
+      warped = rotated
+    }
+
+    const upCols = Math.max(2, Math.round(warped.cols * UPSCALE))
+    const upRows = Math.max(2, Math.round(warped.rows * UPSCALE))
+    upscaled = new cv.Mat()
+    cv.resize(warped, upscaled, new cv.Size(upCols, upRows), 0, 0, cv.INTER_CUBIC)
+    warped.delete()
+    warped = null
+
+    blurMat = new cv.Mat()
+    cv.GaussianBlur(upscaled, blurMat, new cv.Size(3, 3), 0)
+    sharpened = new cv.Mat()
+    cv.addWeighted(upscaled, 1.25, blurMat, -0.25, 0, sharpened)
+    upscaled.delete()
+    upscaled = null
+    blurMat.delete()
+    blurMat = null
 
     const outCanvas = document.createElement("canvas")
-    outCanvas.width = outW
-    outCanvas.height = outH
-    cv.imshow(outCanvas, dst)
+    outCanvas.width = sharpened.cols
+    outCanvas.height = sharpened.rows
+    cv.imshow(outCanvas, sharpened)
+    sharpened.delete()
+    sharpened = null
 
-    return await new Promise<Blob | null>((res) => outCanvas.toBlob((b) => res(b), "image/jpeg", 0.95))
+    return await new Promise<Blob | null>((res) => outCanvas.toBlob((b) => res(b), "image/jpeg", 1))
   } finally {
     srcMat?.delete()
-    dst?.delete()
+    warped?.delete()
+    upscaled?.delete()
+    blurMat?.delete()
+    sharpened?.delete()
     M?.delete()
     srcTri?.delete()
     dstTri?.delete()
@@ -308,16 +371,18 @@ export function LiveScanner({ onCapture, onCancel }: LiveScannerProps) {
 
     if (!blob) {
       const canvas = document.createElement("canvas")
-      canvas.width = video.videoWidth
-      canvas.height = video.videoHeight
+      const vw = video.videoWidth
+      const vh = video.videoHeight
+      canvas.width = vw
+      canvas.height = vh
 
       const ctx = canvas.getContext("2d")
       if (!ctx) return
 
-      ctx.drawImage(video, 0, 0)
+      ctx.drawImage(video, 0, 0, vw, vh)
 
       blob = await new Promise<Blob | null>((res) =>
-        canvas.toBlob(res, "image/jpeg", 0.95)
+        canvas.toBlob(res, "image/jpeg", 1)
       )
     }
 

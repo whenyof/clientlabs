@@ -12,6 +12,92 @@ export type LiveScannerProps = {
 
 type Point2D = { x: number; y: number }
 
+function distance(a: Point2D, b: Point2D): number {
+  return Math.hypot(b.x - a.x, b.y - a.y)
+}
+
+/** Order quad: top-left, top-right, bottom-right, bottom-left */
+function orderQuadPoints(pts: Point2D[]): [Point2D, Point2D, Point2D, Point2D] {
+  const tl = pts.reduce((a, b) => (a.x + a.y < b.x + b.y ? a : b))
+  const br = pts.reduce((a, b) => (a.x + a.y > b.x + b.y ? a : b))
+  const rest = pts.filter((p) => p !== tl && p !== br)
+  if (rest.length !== 2) {
+    const s = [...pts].sort((a, b) => a.y - b.y)
+    const top = s.slice(0, 2).sort((a, b) => a.x - b.x)
+    const bottom = s.slice(2, 4).sort((a, b) => a.x - b.x)
+    return [top[0], top[1], bottom[1], bottom[0]]
+  }
+  const tr = rest[0].y <= rest[1].y ? rest[0] : rest[1]
+  const bl = rest[0].y <= rest[1].y ? rest[1] : rest[0]
+  return [tl, tr, br, bl]
+}
+
+async function warpDocumentToBlob(cv: any, video: HTMLVideoElement, quad: Point2D[]): Promise<Blob | null> {
+  if (quad.length !== 4) return null
+
+  const [tl, tr, br, bl] = orderQuadPoints(quad)
+  const wTop = distance(tl, tr)
+  const wBot = distance(bl, br)
+  const hLeft = distance(tl, bl)
+  const hRight = distance(tr, br)
+  const outW = Math.max(2, Math.round(Math.max(wTop, wBot)))
+  const outH = Math.max(2, Math.round(Math.max(hLeft, hRight)))
+
+  let srcMat: any = null
+  let dst: any = null
+  let M: any = null
+  let srcTri: any = null
+  let dstTri: any = null
+
+  try {
+    const tempCanvas = document.createElement("canvas")
+    tempCanvas.width = video.videoWidth
+    tempCanvas.height = video.videoHeight
+    const ctx = tempCanvas.getContext("2d")
+    if (!ctx) return null
+    ctx.drawImage(video, 0, 0)
+
+    srcMat = cv.imread(tempCanvas)
+
+    srcTri = cv.matFromArray(4, 1, cv.CV_32FC2, [
+      tl.x,
+      tl.y,
+      tr.x,
+      tr.y,
+      br.x,
+      br.y,
+      bl.x,
+      bl.y,
+    ])
+    dstTri = cv.matFromArray(4, 1, cv.CV_32FC2, [
+      0,
+      0,
+      outW - 1,
+      0,
+      outW - 1,
+      outH - 1,
+      0,
+      outH - 1,
+    ])
+    M = cv.getPerspectiveTransform(srcTri, dstTri)
+    dst = new cv.Mat()
+    cv.warpPerspective(srcMat, dst, M, new cv.Size(outW, outH), cv.INTER_LINEAR)
+
+    const outCanvas = document.createElement("canvas")
+    outCanvas.width = outW
+    outCanvas.height = outH
+    cv.imshow(outCanvas, dst)
+
+    return await new Promise<Blob | null>((res) => outCanvas.toBlob((b) => res(b), "image/jpeg", 0.95))
+  } finally {
+    srcMat?.delete()
+    dst?.delete()
+    M?.delete()
+    srcTri?.delete()
+    dstTri?.delete()
+  }
+}
+
 export function LiveScanner({ onCapture, onCancel }: LiveScannerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const overlayRef = useRef<HTMLCanvasElement | null>(null)
@@ -99,11 +185,11 @@ export function LiveScanner({ onCapture, onCancel }: LiveScannerProps) {
 
       if (best) {
         lastContourRef.current = best
-        stableFramesRef.current = Math.min(stableFramesRef.current + 2, 10)
+        stableFramesRef.current = Math.min(stableFramesRef.current + 3, 10)
       } else {
         stableFramesRef.current = Math.max(stableFramesRef.current - 1, 0)
       }
-      const isReady = stableFramesRef.current >= 8
+      const isReady = stableFramesRef.current >= 4
 
       const contourToDraw = best ?? lastContourRef.current
 
@@ -111,7 +197,7 @@ export function LiveScanner({ onCapture, onCancel }: LiveScannerProps) {
       const canCapture =
         isReady &&
         !isAutoCapturingRef.current &&
-        now - lastCaptureTimeRef.current > 2000
+        now - lastCaptureTimeRef.current > 1200
 
       if (canCapture && !autoCaptureTimeoutRef.current) {
         autoCaptureTimeoutRef.current = setTimeout(() => {
@@ -123,7 +209,7 @@ export function LiveScanner({ onCapture, onCancel }: LiveScannerProps) {
             isAutoCapturingRef.current = false
           }, 1000)
           autoCaptureTimeoutRef.current = null
-        }, 700)
+        }, 400)
         setIsCountingDown(true)
       }
 
@@ -208,18 +294,32 @@ export function LiveScanner({ onCapture, onCancel }: LiveScannerProps) {
     const video = videoRef.current
     if (!video || video.videoWidth === 0) return
 
-    const canvas = document.createElement("canvas")
-    canvas.width = video.videoWidth
-    canvas.height = video.videoHeight
+    const cv = cvRef.current
+    const quad = contourRef.current ?? lastContourRef.current
 
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
+    let blob: Blob | null = null
+    if (cv && quad && quad.length === 4) {
+      try {
+        blob = await warpDocumentToBlob(cv, video, quad)
+      } catch {
+        blob = null
+      }
+    }
 
-    ctx.drawImage(video, 0, 0)
+    if (!blob) {
+      const canvas = document.createElement("canvas")
+      canvas.width = video.videoWidth
+      canvas.height = video.videoHeight
 
-    const blob = await new Promise<Blob | null>((res) =>
-      canvas.toBlob(res, "image/jpeg", 0.95)
-    )
+      const ctx = canvas.getContext("2d")
+      if (!ctx) return
+
+      ctx.drawImage(video, 0, 0)
+
+      blob = await new Promise<Blob | null>((res) =>
+        canvas.toBlob(res, "image/jpeg", 0.95)
+      )
+    }
 
     if (blob) {
       onCapture(blob)

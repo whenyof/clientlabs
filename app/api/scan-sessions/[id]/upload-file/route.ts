@@ -30,44 +30,72 @@ function filePublicUrl(req: NextRequest, pathname: string): string {
  * (mobile QR flow has no NextAuth cookie).
  */
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
-  const token = req.nextUrl.searchParams.get("token")
-
-  if (!id || !token) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
-  const scanSession = await prisma.scanSession.findUnique({
-    where: { id },
-  })
-
-  if (!scanSession) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 })
-  }
-
-  if (scanSession.status === "UPLOADED" || scanSession.status === "COMPLETED") {
-    return NextResponse.json({ error: "Already uploaded" }, { status: 400 })
-  }
-
-  if (scanSession.expiresAt <= new Date()) {
-    await prisma.scanSession.update({
-      where: { id },
-      data: { status: "EXPIRED" },
-    })
-    return NextResponse.json({ error: "Session expired" }, { status: 400 })
-  }
-
-  if (scanSession.status !== "PENDING") {
-    return NextResponse.json({ error: "Cannot upload from this status" }, { status: 400 })
-  }
-
-  if (!scanSession.publicToken || scanSession.publicToken !== token) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
   try {
+    const { id } = await params
+    const token = req.nextUrl.searchParams.get("token")
+
+    console.log("[upload-file] request", {
+      sessionId: id,
+      hasToken: Boolean(token),
+      tokenLength: token?.length ?? 0,
+    })
+
+    if (!id || !token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const scanSession = await prisma.scanSession.findUnique({
+      where: { id },
+    })
+
+    console.log(
+      "[upload-file] session:",
+      scanSession
+        ? {
+            id: scanSession.id,
+            status: scanSession.status,
+            expiresAt: scanSession.expiresAt.toISOString(),
+            hasPublicToken: Boolean(scanSession.publicToken),
+            tokenMatches: scanSession.publicToken === token,
+          }
+        : null,
+    )
+
+    if (!scanSession) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 })
+    }
+
+    if (scanSession.status === "UPLOADED" || scanSession.status === "COMPLETED") {
+      return NextResponse.json({ error: "Already uploaded" }, { status: 400 })
+    }
+
+    if (scanSession.expiresAt <= new Date()) {
+      await prisma.scanSession.update({
+        where: { id },
+        data: { status: "EXPIRED" },
+      })
+      return NextResponse.json({ error: "Session expired" }, { status: 400 })
+    }
+
+    if (scanSession.status !== "PENDING") {
+      return NextResponse.json({ error: "Cannot upload from this status" }, { status: 400 })
+    }
+
+    if (!scanSession.publicToken || scanSession.publicToken !== token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
     const formData = await req.formData()
+    console.log("FORM DATA RECEIVED")
+
     const file = formData.get("file") as File | null
+    console.log(
+      "file:",
+      file instanceof File
+        ? { name: file.name, size: file.size, type: file.type }
+        : file,
+    )
+
     if (!file || !(file instanceof File)) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 })
     }
@@ -87,9 +115,20 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const pathname = `/uploads/providers/${safeName}`
     const url = filePublicUrl(req, pathname)
 
+    console.log("[upload-file] success", { url, safeName })
+
     return NextResponse.json({ url, name: file.name })
   } catch (err) {
-    console.error("Scan session file upload error:", err)
-    return NextResponse.json({ error: "Upload failed" }, { status: 500 })
+    console.error("UPLOAD ERROR:", err)
+    const message = err instanceof Error ? err.message : String(err)
+    return NextResponse.json(
+      {
+        error: message,
+        ...(process.env.NODE_ENV === "development" && err instanceof Error && err.stack
+          ? { stack: err.stack }
+          : {}),
+      },
+      { status: 500 },
+    )
   }
 }

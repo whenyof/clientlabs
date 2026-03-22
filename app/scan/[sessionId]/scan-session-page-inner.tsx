@@ -926,12 +926,16 @@ export function ScanSessionPageInner({ sessionId }: { sessionId: string }) {
       uploadTimeout = window.setTimeout(() => uploadController?.abort(), 15000)
 
       let fileUrl: string | undefined
-      const uploadRes = await fetch("/api/providers/upload", {
-        method: "POST",
-        body: fd,
-        credentials: "include",
-        signal: uploadController.signal,
-      })
+      // Token-based upload: mobile scan users often have no NextAuth cookie (QR on phone).
+      const uploadRes = await fetch(
+        `/api/scan-sessions/${encodeURIComponent(sessionId)}/upload-file?token=${encodeURIComponent(publicToken)}`,
+        {
+          method: "POST",
+          body: fd,
+          credentials: "include",
+          signal: uploadController.signal,
+        },
+      )
       if (!uploadRes.ok) {
         const data = await uploadRes.json().catch(() => ({}))
         throw new Error(data.error || "Error al subir el PDF escaneado.")

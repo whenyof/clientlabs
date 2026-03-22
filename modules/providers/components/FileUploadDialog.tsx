@@ -126,7 +126,11 @@ export function FileUploadDialog({
                 const pdfBlob = new Blob([pdfBytes.buffer as ArrayBuffer], { type: "application/pdf" })
                 const fd = new FormData()
                 fd.set("file", pdfBlob, `${documentName.trim() || "documento"}.pdf`)
-                const res = await fetch("/api/providers/upload", { method: "POST", body: fd })
+                const res = await fetch("/api/providers/upload", {
+                    method: "POST",
+                    body: fd,
+                    credentials: "include",
+                })
                 if (!res.ok) {
                     const data = await res.json().catch(() => ({}))
                     toast.error(data.error || "Error al subir el PDF escaneado")
@@ -147,7 +151,11 @@ export function FileUploadDialog({
                 for (const file of files) {
                     const fd = new FormData()
                     fd.set("file", file)
-                    const res = await fetch("/api/providers/upload", { method: "POST", body: fd })
+                    const res = await fetch("/api/providers/upload", {
+                        method: "POST",
+                        body: fd,
+                        credentials: "include",
+                    })
                     if (!res.ok) {
                         const data = await res.json().catch(() => ({}))
                         toast.error(data.error || `Error al subir ${file.name}`)

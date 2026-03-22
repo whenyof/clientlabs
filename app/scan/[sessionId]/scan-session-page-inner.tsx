@@ -836,15 +836,25 @@ export function ScanSessionPageInner({ sessionId }: { sessionId: string }) {
     let uploadTimeout: any = null
 
     try {
-      // 1) PDF: processing stage
-      const pdfDoc = await PDFDocument.create()
+      const MAX_PDF_BYTES = 5 * 1024 * 1024
+      /** Longest edge cap before PDF embed (px); keeps files small without harsh loss. */
+      const MAX_EDGE_PRIMARY = 1800
+      const MAX_EDGE_TIGHT = 1400
+      const JPEG_Q_PRIMARY = 0.85
+      const JPEG_Q_REDUCED = 0.75
+      const JPEG_Q_TIGHT = 0.7
+
       const pageWidth = 595.28 // A4 puntos 72 DPI
       const pageHeight = 841.89
       const pdfMarginPt = 16
       const availableW = pageWidth - pdfMarginPt * 2
       const availableH = pageHeight - pdfMarginPt * 2
 
-      const reencodeJpeg = async (blob: Blob, quality: number): Promise<Blob> => {
+      const reencodeJpegWithDownscale = async (
+        blob: Blob,
+        quality: number,
+        maxEdgePx: number,
+      ): Promise<Blob> => {
         const url = URL.createObjectURL(blob)
         try {
           const imgEl = await new Promise<HTMLImageElement>((resolve, reject) => {
@@ -854,18 +864,25 @@ export function ScanSessionPageInner({ sessionId }: { sessionId: string }) {
             img.src = url
           })
 
+          const w = imgEl.naturalWidth || imgEl.width
+          const h = imgEl.naturalHeight || imgEl.height
+          const maxDim = Math.max(w, h)
+          const scale = maxDim > maxEdgePx ? maxEdgePx / maxDim : 1
+          const cw = Math.max(1, Math.round(w * scale))
+          const ch = Math.max(1, Math.round(h * scale))
+
           const canvas = document.createElement("canvas")
-          canvas.width = imgEl.naturalWidth || imgEl.width
-          canvas.height = imgEl.naturalHeight || imgEl.height
+          canvas.width = cw
+          canvas.height = ch
           const ctx = canvas.getContext("2d")
           if (!ctx) throw new Error("No se pudo crear canvas para re-encode JPEG")
-          ctx.drawImage(imgEl, 0, 0)
+          ctx.drawImage(imgEl, 0, 0, w, h, 0, 0, cw, ch)
 
           return await new Promise<Blob>((resolve) => {
             canvas.toBlob(
               (b) => {
                 if (!isMountedRef.current) return resolve(blob)
-                resolve(b ? b : blob) // Fallback: si toBlob devuelve null, usamos el original
+                resolve(b ? b : blob)
               },
               "image/jpeg",
               quality,
@@ -876,43 +893,64 @@ export function ScanSessionPageInner({ sessionId }: { sessionId: string }) {
         }
       }
 
-      // PROCESAR IMÁGENES usando SOLO el snapshot.
-      for (const scanPage of pagesSnapshot) {
-        if (!isMountedRef.current) return
+      const buildScanPdfBlob = async (
+        jpegQuality: number,
+        maxEdgePx: number,
+      ): Promise<Blob> => {
+        const pdfDoc = await PDFDocument.create()
+        for (const scanPage of pagesSnapshot) {
+          if (!isMountedRef.current) throw new Error("cancelled")
 
-        const processedBlob = await processImage(scanPage.file, "bw", { skipGeometry: scanPage.isWarped })
-        const highQJpegBlob = await reencodeJpeg(processedBlob, 0.95)
-        const jpegBytes = new Uint8Array(await highQJpegBlob.arrayBuffer())
-        const img = await pdfDoc.embedJpg(jpegBytes)
+          const processedBlob = await processImage(scanPage.file, "bw", { skipGeometry: scanPage.isWarped })
+          const jpegBlob = await reencodeJpegWithDownscale(processedBlob, jpegQuality, maxEdgePx)
+          const jpegBytes = new Uint8Array(await jpegBlob.arrayBuffer())
+          const img = await pdfDoc.embedJpg(jpegBytes)
 
-        const { width, height } = img.scale(1)
-        const scale = Math.min(availableW / width, availableH / height)
-        const scaledWidth = width * scale
-        const scaledHeight = height * scale
-        const page = pdfDoc.addPage([pageWidth, pageHeight])
+          const { width, height } = img.scale(1)
+          const scale = Math.min(availableW / width, availableH / height)
+          const scaledWidth = width * scale
+          const scaledHeight = height * scale
+          const page = pdfDoc.addPage([pageWidth, pageHeight])
 
-        // Fondo blanco para evitar “edge cut feeling”.
-        page.drawRectangle({
-          x: 0,
-          y: 0,
-          width: pageWidth,
-          height: pageHeight,
-          color: rgb(1, 1, 1),
-        })
+          page.drawRectangle({
+            x: 0,
+            y: 0,
+            width: pageWidth,
+            height: pageHeight,
+            color: rgb(1, 1, 1),
+          })
 
-        const x = (pageWidth - scaledWidth) / 2
-        const y = (pageHeight - scaledHeight) / 2
-        page.drawImage(img, { x, y, width: scaledWidth, height: scaledHeight })
+          const x = (pageWidth - scaledWidth) / 2
+          const y = (pageHeight - scaledHeight) / 2
+          page.drawImage(img, { x, y, width: scaledWidth, height: scaledHeight })
+        }
+
+        const pdfBytes = await pdfDoc.save()
+        const pdfArrayBuffer = pdfBytes.buffer.slice(
+          pdfBytes.byteOffset,
+          pdfBytes.byteOffset + pdfBytes.byteLength,
+        ) as ArrayBuffer
+        return new Blob([pdfArrayBuffer], { type: "application/pdf" })
       }
 
-      // 2) PDF stage
+      // 1) PDF: build with tuned JPEG + downscale; retry if over 5MB
+      safeSetLoadingStep("processing")
+      let pdfBlob = await buildScanPdfBlob(JPEG_Q_PRIMARY, MAX_EDGE_PRIMARY)
+      if (pdfBlob.size > MAX_PDF_BYTES) {
+        safeSetLoadingStep("pdf")
+        pdfBlob = await buildScanPdfBlob(JPEG_Q_REDUCED, MAX_EDGE_PRIMARY)
+      }
+      if (pdfBlob.size > MAX_PDF_BYTES) {
+        pdfBlob = await buildScanPdfBlob(JPEG_Q_TIGHT, MAX_EDGE_TIGHT)
+      }
+      if (pdfBlob.size > MAX_PDF_BYTES) {
+        throw new Error(
+          "El PDF supera 5 MB incluso tras comprimir. Prueba con menos páginas o vuelve a escanear.",
+        )
+      }
+
+      // 2) PDF stage (progress)
       safeSetLoadingStep("pdf")
-      const pdfBytes = await pdfDoc.save()
-      const pdfArrayBuffer = pdfBytes.buffer.slice(
-        pdfBytes.byteOffset,
-        pdfBytes.byteOffset + pdfBytes.byteLength,
-      ) as ArrayBuffer
-      const pdfBlob = new Blob([pdfArrayBuffer], { type: "application/pdf" })
 
       // 3) Upload stage
       const dateStr = new Date().toISOString().slice(0, 10)

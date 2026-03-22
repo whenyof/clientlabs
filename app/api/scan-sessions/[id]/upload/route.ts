@@ -71,7 +71,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const { fileUrl } = parsed.data
 
   const uploadBase = process.env.UPLOAD_BASE_URL
-  if (uploadBase && !fileUrl.startsWith(uploadBase)) {
+  const isCloudinaryUrl = fileUrl.startsWith("https://res.cloudinary.com/")
+  if (uploadBase && !fileUrl.startsWith(uploadBase) && !isCloudinaryUrl) {
     return NextResponse.json(
       { error: "Invalid file URL domain" },
       { status: 400 }

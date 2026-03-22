@@ -1,33 +1,36 @@
 import { NextRequest, NextResponse } from "next/server"
-import { writeFile, mkdir } from "fs/promises"
-import path from "path"
+import type { UploadApiResponse } from "cloudinary"
+import cloudinary from "@/lib/cloudinary"
 import { prisma } from "@/lib/prisma"
 
-const UPLOAD_DIR = "public/uploads/providers"
 const MAX_SIZE = 10 * 1024 * 1024 // 10MB
 
-/** Public absolute URL for stored file (required by scan-sessions upload zod .url()) */
-function filePublicUrl(req: NextRequest, pathname: string): string {
-  const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host")
-  let proto = req.headers.get("x-forwarded-proto")
-  if (!proto) {
-    proto = host?.includes("localhost") ? "http" : "https"
-  }
-  if (host) {
-    return `${proto}://${host}${pathname}`
-  }
-  const base = process.env.NEXTAUTH_URL ?? process.env.VERCEL_URL
-  if (base) {
-    const normalized = base.startsWith("http") ? base : `https://${base}`
-    return `${normalized.replace(/\/$/, "")}${pathname}`
-  }
-  return pathname
+function uploadRawToCloudinary(buffer: Buffer): Promise<UploadApiResponse> {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: "scans",
+        resource_type: "raw",
+      },
+      (error, result) => {
+        if (error) {
+          reject(error)
+          return
+        }
+        if (!result) {
+          reject(new Error("Cloudinary returned no result"))
+          return
+        }
+        resolve(result)
+      },
+    )
+    uploadStream.end(buffer)
+  })
 }
 
 /**
  * POST /api/scan-sessions/[id]/upload-file?token=...
- * Same storage as /api/providers/upload but authenticates via scan publicToken
- * (mobile QR flow has no NextAuth cookie).
+ * Uploads scan PDF to Cloudinary (no local filesystem — Vercel-safe).
  */
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -104,20 +107,26 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: "File too large (max 10MB)" }, { status: 400 })
     }
 
-    const ext = path.extname(file.name) || ""
-    const safeName = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}${ext}`
-    const dir = path.join(process.cwd(), UPLOAD_DIR)
-    await mkdir(dir, { recursive: true })
-    const filePath = path.join(dir, safeName)
     const bytes = await file.arrayBuffer()
-    await writeFile(filePath, Buffer.from(bytes))
+    const buffer = Buffer.from(bytes)
 
-    const pathname = `/uploads/providers/${safeName}`
-    const url = filePublicUrl(req, pathname)
+    const result = await uploadRawToCloudinary(buffer)
+    const secureUrl = result.secure_url
+    if (!secureUrl) {
+      throw new Error("Cloudinary upload missing secure_url")
+    }
 
-    console.log("[upload-file] success", { url, safeName })
+    await prisma.scanSession.update({
+      where: { id },
+      data: { fileUrl: secureUrl },
+    })
 
-    return NextResponse.json({ url, name: file.name })
+    console.log("[upload-file] success", { url: secureUrl })
+
+    return NextResponse.json({
+      success: true,
+      url: secureUrl,
+    })
   } catch (err) {
     console.error("UPLOAD ERROR:", err)
     const message = err instanceof Error ? err.message : String(err)

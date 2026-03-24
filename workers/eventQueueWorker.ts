@@ -3,6 +3,10 @@
  * Loads .env first, verifies Redis config, then starts the worker loop.
  */
 
+import { fileURLToPath } from "url"
+
+const __filename = fileURLToPath(import.meta.url)
+
 console.log("🚀 CLIENTLABS WORKER FILE LOADED:", __filename)
 
 import "dotenv/config"

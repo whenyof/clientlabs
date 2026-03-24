@@ -5,10 +5,14 @@
  * Telegram bot for backup management and monitoring
  */
 
-const https = require('https');
-const { exec } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+import https from 'https';
+import { exec } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Configuration
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -373,9 +377,9 @@ Comandos disponibles:
     } else if (text?.startsWith('/rollback ')) {
       const backupName = text.substring(10).trim();
       if (!backupName) {
-        await sendMessage(chatId, '❌ *Formato incorrecto*
+        await sendMessage(chatId, `❌ *Formato incorrecto*
 
-Uso: \`/rollback backup_2026-01-22_03-00-01.zip\`');
+Uso: \`/rollback backup_2026-01-22_03-00-01.zip\``);
         return;
       }
       await handleRollback(chatId, backupName);
@@ -384,9 +388,9 @@ Uso: \`/rollback backup_2026-01-22_03-00-01.zip\`');
       await executeRollback(chatId);
 
     } else {
-      await sendMessage(chatId, '❓ *Comando no reconocido*
+      await sendMessage(chatId, `❓ *Comando no reconocido*
 
-Usa \`/help\` para ver comandos disponibles.');
+Usa \`/help\` para ver comandos disponibles.`);
     }
 
   } catch (error) {

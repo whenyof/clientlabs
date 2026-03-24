@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { exec } from 'child_process'
 import { promisify } from 'util'
+import fs from 'fs'
+import path from 'path'
 
 const execAsync = promisify(exec)
 
@@ -36,8 +38,6 @@ export async function GET(request: NextRequest) {
  // Get local backups
  const localBackups = []
  try {
- const fs = require('fs')
- const path = require('path')
  const backupDir = path.join(process.cwd(), 'backups')
 
  if (fs.existsSync(backupDir)) {

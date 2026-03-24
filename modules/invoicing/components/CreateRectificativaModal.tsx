@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useCallback } from "react"
 import { XMarkIcon, DocumentDuplicateIcon } from "@heroicons/react/24/outline"
@@ -37,7 +39,7 @@ export function CreateRectificativaModal({
       }
       setSubmitting(true)
       try {
-        const res = await fetch(`/api/billing/${invoiceId}/rectify`, {
+        const res = await fetch(`${getBaseUrl()}/api/billing/${invoiceId}/rectify`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",

@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
@@ -71,7 +73,7 @@ export function TasksRadar({ className }: { className?: string }) {
  let cancelled = false
  setLoading(true)
  setError(false)
- fetch("/api/tasks/radar")
+ fetch(getBaseUrl() + "/api/tasks/radar")
  .then((res) => {
  if (!res.ok) throw new Error("Radar failed")
  return res.json() as Promise<RadarData>

@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
@@ -30,7 +32,7 @@ export function InvoiceClientRiskBadge({
       return
     }
     setLoading(true)
-    fetch(`/api/billing/clients/${encodeURIComponent(clientId)}/payment-profile`, {
+    fetch(`${getBaseUrl()}/api/billing/clients/${encodeURIComponent(clientId)}/payment-profile`, {
       credentials: "include",
     })
       .then((res) => res.ok ? res.json() : null)

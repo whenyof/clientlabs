@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useEffect, useRef, useCallback } from "react"
 import { motion } from "framer-motion"
@@ -46,7 +48,7 @@ export function CompanySettings() {
   ]
 
   const loadProfile = useCallback(async () => {
-    const res = await fetch("/api/settings/business-profile", {
+    const res = await fetch(getBaseUrl() + "/api/settings/business-profile", {
       credentials: "include",
       cache: "no-store",
       headers: { "Cache-Control": "no-store" },
@@ -98,7 +100,7 @@ export function CompanySettings() {
         logoUrl: companyData.logoUrl || null,
       }
       console.log("SENDING DATA:", payload)
-      const res = await fetch("/api/settings/business-profile", {
+      const res = await fetch(getBaseUrl() + "/api/settings/business-profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -147,7 +149,7 @@ export function CompanySettings() {
     try {
       const fd = new FormData()
       fd.append("file", file)
-      const res = await fetch("/api/settings/upload", { method: "POST", credentials: "include", body: fd })
+      const res = await fetch(getBaseUrl() + "/api/settings/upload", { method: "POST", credentials: "include", body: fd })
       const data = await res.json().catch(() => ({}))
       if (res.ok && data.url) {
         const url = data.url as string
@@ -167,7 +169,7 @@ export function CompanySettings() {
           sector: companyData.sector || "servicios",
           logoUrl: url,
         }
-        const putRes = await fetch("/api/settings/business-profile", {
+        const putRes = await fetch(getBaseUrl() + "/api/settings/business-profile", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           credentials: "include",

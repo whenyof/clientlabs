@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
@@ -144,7 +146,7 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
 
  // Check against existing leads
  try {
- const response = await fetch("/api/leads/check-duplicates", {
+ const response = await fetch(getBaseUrl() + "/api/leads/check-duplicates", {
  method: "POST",
  headers: { "Content-Type": "application/json" },
  body: JSON.stringify({ emails, phones })

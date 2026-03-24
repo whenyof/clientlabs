@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -21,7 +23,7 @@ export function BackupTrigger() {
  const handleTriggerBackup = async () => {
  setLoading(true)
  try {
- const response = await fetch("/api/admin/backup/trigger", {
+ const response = await fetch(getBaseUrl() + "/api/admin/backup/trigger", {
  method: "POST",
  })
 

@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
@@ -26,7 +28,7 @@ export function LeadNotesCard({ leadId }: LeadNotesCardProps) {
   const [loadingNotes, setLoadingNotes] = useState(true)
 
   useEffect(() => {
-    fetch(`/api/leads/${leadId}/activity`)
+    fetch(`${getBaseUrl()}/api/leads/${leadId}/activity`)
       .then((res) => res.json())
       .then((data: ActivityItem[]) => {
         const noteItems = (Array.isArray(data) ? data : []).filter(
@@ -43,7 +45,7 @@ export function LeadNotesCard({ leadId }: LeadNotesCardProps) {
     if (!text || loading) return
     setLoading(true)
     try {
-      const res = await fetch(`/api/leads/${leadId}/activity`, {
+      const res = await fetch(`${getBaseUrl()}/api/leads/${leadId}/activity`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -55,7 +57,7 @@ export function LeadNotesCard({ leadId }: LeadNotesCardProps) {
       if (!res.ok) throw new Error("Failed to create note")
       setNewNote("")
       router.refresh()
-      const data = await fetch(`/api/leads/${leadId}/activity`).then((r) =>
+      const data = await fetch(`${getBaseUrl()}/api/leads/${leadId}/activity`).then((r) =>
         r.json()
       )
       const noteItems = (Array.isArray(data) ? data : []).filter(

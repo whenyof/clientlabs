@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useEffect, useMemo } from "react"
 
@@ -68,7 +70,7 @@ export function LeadFeed() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch("/api/v1/leads/feed")
+    fetch(getBaseUrl() + "/api/v1/leads/feed")
       .then((res) => (res.ok ? res.json() : Promise.reject(res)))
       .then((data: FeedItem[]) => setItems(Array.isArray(data) ? data : []))
       .catch(() => setItems([]))

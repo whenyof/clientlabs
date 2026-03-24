@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useEffect } from "react"
 import { ChevronDown, ChevronRight, TrendingUp, AlertTriangle } from "lucide-react"
@@ -62,7 +64,7 @@ export function PredictionsOperativasSection({
  setLoading(true)
  setError(null)
  const params = new URLSearchParams({ from, to })
- fetch(`/api/tasks/predictions?${params}`)
+ fetch(`${getBaseUrl()}/api/tasks/predictions?${params}`)
  .then((res) => {
  if (!res.ok) throw new Error(res.status === 401 ? "No autorizado" : "Error al cargar predicciones")
  return res.json()

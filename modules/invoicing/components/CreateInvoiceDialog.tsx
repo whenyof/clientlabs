@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useCallback, useEffect, useRef } from "react"
 import { XMarkIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline"
@@ -308,7 +310,7 @@ export function CreateInvoiceDialog({
           dueDate: formatDateForTemplate(dueDateStr),
           issueDate: formatDateForTemplate(issueDateStr),
         }
-        fetch("/api/billing/branding", { credentials: "include" })
+        fetch(getBaseUrl() + "/api/billing/branding", { credentials: "include" })
           .then((r) => (r.ok ? r.json() : {}))
           .then((data: { company?: { defaultNotesTemplate?: string; defaultTermsTemplate?: string; invoiceLanguage?: string } }) => {
             const notesTpl =
@@ -428,7 +430,7 @@ export function CreateInvoiceDialog({
     }
     try {
       if (editInvoiceId) {
-        const res = await fetch(`/api/billing/${editInvoiceId}`, {
+        const res = await fetch(`${getBaseUrl()}/api/billing/${editInvoiceId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
@@ -443,7 +445,7 @@ export function CreateInvoiceDialog({
         onClose()
         return
       }
-      const res = await fetch("/api/billing", {
+      const res = await fetch(getBaseUrl() + "/api/billing", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

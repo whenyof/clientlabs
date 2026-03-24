@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
@@ -145,7 +147,7 @@ export function NewOrderModal({
         registerPayment,
       }
 
-      const res = await fetch("/api/orders/create-flow", {
+      const res = await fetch(getBaseUrl() + "/api/orders/create-flow", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useEffect, useCallback } from "react"
 import { XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline"
@@ -34,7 +36,7 @@ export function SelectSaleForInvoiceDialog({
   const fetchSales = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await fetch("/api/sales", { credentials: "include" })
+      const res = await fetch(getBaseUrl() + "/api/sales", { credentials: "include" })
       if (!res.ok) return
       const data = await res.json()
       if (Array.isArray(data.sales)) {

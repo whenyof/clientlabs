@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useEffect, useCallback } from "react"
 import {
@@ -45,11 +47,11 @@ export function IssueInvoiceDialog({
       setLoadingCompany(true)
       setEligibility(null)
       Promise.all([
-        fetch("/api/billing/branding", { credentials: "include" })
+        fetch(getBaseUrl() + "/api/billing/branding", { credentials: "include" })
           .then((res) => (res.ok ? res.json() : null))
           .then((data) => (data?.success && data.company ? data.company : null))
           .catch(() => null),
-        fetch(`/api/invoicing/${invoice.id}/issue-eligibility`, { credentials: "include" })
+        fetch(`${getBaseUrl()}/api/invoicing/${invoice.id}/issue-eligibility`, { credentials: "include" })
           .then((res) => (res.ok ? res.json() : null))
           .then((data) => (data?.success ? { canIssue: data.canIssue, validationErrors: data.validationErrors ?? [] } : null))
           .catch(() => null),
@@ -66,7 +68,7 @@ export function IssueInvoiceDialog({
     console.log("ISSUE CONFIRMED:", invoice.id)
     setIssuing(true)
     try {
-      const res = await fetch(`/api/billing/${invoice.id}/issue`, {
+      const res = await fetch(`${getBaseUrl()}/api/billing/${invoice.id}/issue`, {
         method: "POST",
         credentials: "include",
       })

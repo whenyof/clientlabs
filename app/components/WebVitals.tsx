@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useEffect } from "react"
 
@@ -19,7 +21,7 @@ export function WebVitals() {
  return
  }
 
- fetch("/api/vitals", {
+ fetch(getBaseUrl() + "/api/vitals", {
  method: "POST",
  body,
  keepalive: true,

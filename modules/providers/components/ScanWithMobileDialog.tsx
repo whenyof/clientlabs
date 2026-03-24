@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useEffect, useRef, useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
@@ -67,7 +69,7 @@ export function ScanWithMobileDialog({
         setPublicToken(null)
         setExpiresAt(null)
 
-        const res = await fetch("/api/scan-sessions", {
+        const res = await fetch(getBaseUrl() + "/api/scan-sessions", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
@@ -176,7 +178,7 @@ export function ScanWithMobileDialog({
   const handleConfirmAttach = async () => {
     if (!sessionId || !pendingFileUrl) return
     try {
-      const res = await fetch(`/api/scan-sessions/${encodeURIComponent(sessionId)}/confirm`, {
+      const res = await fetch(`${getBaseUrl()}/api/scan-sessions/${encodeURIComponent(sessionId)}/confirm`, {
         method: "POST",
         credentials: "include",
       })

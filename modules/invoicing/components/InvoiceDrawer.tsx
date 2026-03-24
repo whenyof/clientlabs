@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useCallback, useEffect } from "react"
 import {
@@ -144,14 +146,14 @@ export function InvoiceDrawer({
 
   const handleCancel = useCallback(() => {
     if (!invoice || !confirm("¿Cancelar esta factura?")) return
-    runAction(() => fetch(`/api/billing/${invoice.id}/cancel`, { method: "POST", credentials: "include" })).then(
+    runAction(() => fetch(`${getBaseUrl()}/api/billing/${invoice.id}/cancel`, { method: "POST", credentials: "include" })).then(
       () => onClose()
     )
   }, [invoice, runAction, onClose])
 
   const handleDelete = useCallback(() => {
     if (!invoice || !confirm("¿Eliminar este borrador de forma permanente?")) return
-    runAction(() => fetch(`/api/billing/${invoice.id}/delete`, { method: "POST", credentials: "include" })).then(
+    runAction(() => fetch(`${getBaseUrl()}/api/billing/${invoice.id}/delete`, { method: "POST", credentials: "include" })).then(
       () => onClose()
     )
   }, [invoice, runAction, onClose])
@@ -160,7 +162,7 @@ export function InvoiceDrawer({
     if (!invoice) return
     const remaining = invoice.total - invoice.payments.reduce((s, p) => s + p.amount, 0)
     runAction(() =>
-      fetch(`/api/billing/${invoice.id}/payments`, {
+      fetch(`${getBaseUrl()}/api/billing/${invoice.id}/payments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -189,7 +191,7 @@ export function InvoiceDrawer({
     const amount = parseFloat(paymentAmount)
     if (Number.isNaN(amount) || amount <= 0) return
     setActionLoading(true)
-    fetch(`/api/billing/${invoice.id}/payments`, {
+    fetch(`${getBaseUrl()}/api/billing/${invoice.id}/payments`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",

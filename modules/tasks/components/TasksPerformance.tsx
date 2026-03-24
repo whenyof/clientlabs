@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
@@ -93,7 +95,7 @@ export function TasksPerformance({ className }: { className?: string }) {
  let cancelled = false
  setLoading(true)
  setError(false)
- fetch("/api/tasks/performance")
+ fetch(getBaseUrl() + "/api/tasks/performance")
  .then((res) => {
  if (!res.ok) throw new Error("Performance failed")
  return res.json() as Promise<PerformanceRow[]>

@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useEffect, useState } from "react"
 import { format } from "date-fns"
@@ -41,7 +43,7 @@ export function LeadSidebar({ leadId, lead }: LeadSidebarProps) {
   const [insights, setInsights] = useState<InsightsData | null>(null)
 
   useEffect(() => {
-    fetch(`/api/leads/${leadId}/insights`)
+    fetch(`${getBaseUrl()}/api/leads/${leadId}/insights`)
       .then((res) => res.json())
       .then((data) => setInsights(data))
       .catch((err) => console.error("Error fetching sidebar insights:", err))

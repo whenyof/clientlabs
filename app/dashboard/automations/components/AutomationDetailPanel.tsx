@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
@@ -97,7 +99,7 @@ export function AutomationDetailPanel({ ruleId, onToggleActive }: AutomationDeta
         setLoading(true)
         setError("")
         try {
-            const res = await fetch(`/api/automations/${ruleId}/details`)
+            const res = await fetch(`${getBaseUrl()}/api/automations/${ruleId}/details`)
             if (!res.ok) throw new Error("Failed to load")
             const json = await res.json()
             setRule(json.rule)
@@ -116,7 +118,7 @@ export function AutomationDetailPanel({ ruleId, onToggleActive }: AutomationDeta
         if (!rule) return
         const newActive = !rule.isActive
         setRule((r) => r ? { ...r, isActive: newActive } : r)
-        await fetch(`/api/automations/${ruleId}`, {
+        await fetch(`${getBaseUrl()}/api/automations/${ruleId}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ isActive: newActive }),

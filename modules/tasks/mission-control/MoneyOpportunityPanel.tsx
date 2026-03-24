@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
@@ -39,7 +41,7 @@ export function MoneyOpportunityPanel({
  if (from) params.set("from", typeof from === "string" ? from : from.toISOString())
  if (to) params.set("to", typeof to === "string" ? to : to.toISOString())
  const qs = params.toString()
- fetch(`/api/tasks/money-opportunity${qs ? `?${qs}` : ""}`)
+ fetch(`${getBaseUrl()}/api/tasks/money-opportunity${qs ? `?${qs}` : ""}`)
  .then((r) => (r.ok ? r.json() : null))
  .then((d: MoneyOpportunityData | null) => {
  if (!cancelled && d) setData(d)

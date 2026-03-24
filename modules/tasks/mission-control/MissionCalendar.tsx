@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useMemo, useState, useCallback, useEffect, useRef, memo } from "react"
 import { useRouter } from "next/navigation"
@@ -133,7 +135,7 @@ async function patchTask(
  estimatedMinutes?: number | null
  }
 ): Promise<boolean> {
- const res = await fetch(`/api/tasks/${taskId}`, {
+ const res = await fetch(`${getBaseUrl()}/api/tasks/${taskId}`, {
  method: "PATCH",
  headers: { "Content-Type": "application/json" },
  body: JSON.stringify(body),
@@ -337,7 +339,7 @@ async function patchReminder(
  reminderId: string,
  body: { status?: string; start?: string; end?: string }
 ): Promise<boolean> {
- const res = await fetch(`/api/reminders/${reminderId}`, {
+ const res = await fetch(`${getBaseUrl()}/api/reminders/${reminderId}`, {
  method: "PATCH",
  headers: { "Content-Type": "application/json" },
  body: JSON.stringify(body),
@@ -487,7 +489,7 @@ export function MissionCalendar({
  setLoadingRange(true)
  const from = start.toISOString()
  const to = end.toISOString()
- fetch(`/api/calendar/events?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`)
+ fetch(`${getBaseUrl()}/api/calendar/events?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`)
  .then((res) => (res.ok ? res.json() : Promise.reject(new Error("Fetch failed"))))
  .then((items: CalendarItem[]) => {
  const mapped = items.map(calendarItemToDisplayItem)
@@ -509,7 +511,7 @@ export function MissionCalendar({
  prefetchingKeysRef.current.add(nextRangeKey)
  const from = start.toISOString()
  const to = end.toISOString()
- fetch(`/api/calendar/events?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`)
+ fetch(`${getBaseUrl()}/api/calendar/events?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`)
  .then((res) => (res.ok ? res.json() : Promise.reject(new Error("Fetch failed"))))
  .then((items: CalendarItem[]) => {
  const mapped = items.map(calendarItemToDisplayItem)

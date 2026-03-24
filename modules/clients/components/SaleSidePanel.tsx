@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useEffect, useCallback } from "react"
 import { X, DollarSign, Calendar, CreditCard, FileText, Trash2, User, AlertCircle, ExternalLink } from "lucide-react"
@@ -33,7 +35,7 @@ export function SaleSidePanel({ sale, isOpen, onClose, onStatusChange, onDelete 
         if (!sale?.id) return
         setLoadingInvoice(true)
         try {
-            const res = await fetch(`/api/billing?saleId=${encodeURIComponent(sale.id)}`, { credentials: "include" })
+            const res = await fetch(`${getBaseUrl()}/api/billing?saleId=${encodeURIComponent(sale.id)}`, { credentials: "include" })
             const data = await res.json().catch(() => ({}))
             const list = Array.isArray(data.invoices) ? data.invoices : []
             const first = list[0]

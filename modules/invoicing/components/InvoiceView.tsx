@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useCallback, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
@@ -149,7 +151,7 @@ export function InvoiceView() {
   }, [filters])
 
   const fetchClients = useCallback(async () => {
-    const res = await fetch("/api/billing/clients", { credentials: "include" })
+    const res = await fetch(getBaseUrl() + "/api/billing/clients", { credentials: "include" })
     if (!res.ok) return
     const data = await res.json()
     if (data.success && Array.isArray(data.clients)) setClients(data.clients)
@@ -158,7 +160,7 @@ export function InvoiceView() {
   const fetchDetail = useCallback(async (id: string) => {
     setDetailLoading(true)
     try {
-      const res = await fetch(`/api/billing/${id}`, { credentials: "include" })
+      const res = await fetch(`${getBaseUrl()}/api/billing/${id}`, { credentials: "include" })
       if (!res.ok) {
         setDetail(null)
         return
@@ -283,7 +285,7 @@ export function InvoiceView() {
   const handleCancelInvoice = useCallback(
     async (invoice: InvoiceListItem) => {
       try {
-        const res = await fetch(`/api/billing/${invoice.id}/cancel`, {
+        const res = await fetch(`${getBaseUrl()}/api/billing/${invoice.id}/cancel`, {
           method: "POST",
           credentials: "include",
         })
@@ -315,7 +317,7 @@ export function InvoiceView() {
     const idToDelete = deleteId
     setDeleteId(null)
     try {
-      const res = await fetch(`/api/billing/${idToDelete}`, { method: "DELETE", credentials: "include" })
+      const res = await fetch(`${getBaseUrl()}/api/billing/${idToDelete}`, { method: "DELETE", credentials: "include" })
       if (res.ok) {
         if (selectedId === idToDelete) {
           setSelectedId(null)
@@ -387,7 +389,7 @@ export function InvoiceView() {
     async (saleId: string) => {
       setCreatingFromSale(true)
       try {
-        const res = await fetch("/api/billing/from-sale", {
+        const res = await fetch(getBaseUrl() + "/api/billing/from-sale", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",

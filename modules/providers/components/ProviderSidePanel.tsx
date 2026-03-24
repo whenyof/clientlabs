@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useEffect, useOptimistic, useTransition, useMemo } from "react"
 import { useRouter } from "next/navigation"
@@ -271,7 +273,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
         if (!provider?.id) return
         setLoadingProviderInvoices(true)
         try {
-            const res = await fetch(`/api/billing?providerId=${encodeURIComponent(provider.id)}`, { credentials: "include" })
+            const res = await fetch(`${getBaseUrl()}/api/billing?providerId=${encodeURIComponent(provider.id)}`, { credentials: "include" })
             const data = await res.json().catch(() => ({}))
             const list = Array.isArray(data.invoices) ? data.invoices : []
             setProviderInvoices(list.map((inv: any) => ({ id: inv.id, number: inv.number ?? inv.id, total: Number(inv.total ?? 0), status: inv.status ?? "" })))

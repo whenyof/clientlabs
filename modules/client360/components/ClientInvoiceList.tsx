@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
@@ -77,7 +79,7 @@ export function ClientInvoiceList({ invoices, clientId }: ClientInvoiceListProps
  async (invoiceId: string) => {
  try {
  setDownloading(invoiceId)
- const res = await fetch(`/api/invoicing/${invoiceId}/pdf`, {
+ const res = await fetch(`${getBaseUrl()}/api/invoicing/${invoiceId}/pdf`, {
  credentials: "include",
  })
  if (!res.ok) throw new Error("PDF generation failed")

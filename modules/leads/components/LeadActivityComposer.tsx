@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
@@ -22,7 +24,7 @@ export function LeadActivityComposer({ leadId }: { leadId: string }) {
     if (loading) return
     setLoading(true)
     try {
-      const res = await fetch(`/api/leads/${leadId}/activity`, {
+      const res = await fetch(`${getBaseUrl()}/api/leads/${leadId}/activity`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

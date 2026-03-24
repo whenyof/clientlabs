@@ -1,4 +1,6 @@
-"use client";
+"use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+;
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
@@ -139,7 +141,7 @@ export function RevenueChart({
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => {
-    fetch("/api/dashboard/current-month")
+    fetch(getBaseUrl() + "/api/dashboard/current-month")
       .then((r) => (r.ok ? r.json() : []))
       .then((d: DailyPoint[]) => setDailyData(Array.isArray(d) ? d : []))
       .catch(() => setDailyData([]));

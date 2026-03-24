@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useEffect } from "react"
 import { TrendingUp, Clock, AlertCircle, Wallet } from "lucide-react"
@@ -47,7 +49,7 @@ export function PaymentBehaviourCard({ clientId, currency = "EUR" }: PaymentBeha
     }
     setLoading(true)
     setError(false)
-    fetch(`/api/billing/clients/${encodeURIComponent(clientId)}/payment-profile`, {
+    fetch(`${getBaseUrl()}/api/billing/clients/${encodeURIComponent(clientId)}/payment-profile`, {
       credentials: "include",
     })
       .then((res) => {

@@ -18,12 +18,36 @@ export const dynamic = 'force-dynamic'
  *
  * All queries are scoped to the authenticated user via compound indexes.
  */
+
+function withCors(response: NextResponse, origin: string | null): NextResponse {
+    response.headers.set('Access-Control-Allow-Origin', origin || '*')
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    response.headers.set('Access-Control-Allow-Credentials', 'true')
+    return response
+}
+
+export async function OPTIONS(request: NextRequest) {
+    const origin = request.headers.get('origin')
+    return new NextResponse(null, {
+        status: 204,
+        headers: {
+            'Access-Control-Allow-Origin': origin || '*',
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+            'Access-Control-Allow-Credentials': 'true',
+            'Access-Control-Max-Age': '86400',
+        }
+    })
+}
+
 export async function GET(request: NextRequest) {
+  const origin = request.headers.get('origin')
   try {
     const session = await getServerSession(authOptions)
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return withCors(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }), origin)
     }
 
     const { searchParams } = new URL(request.url)
@@ -151,7 +175,7 @@ export async function GET(request: NextRequest) {
     const results = hasNext ? leads.slice(0, limit) : leads
     const nextCursor = hasNext ? results[results.length - 1]?.id : null
 
-    return NextResponse.json({
+    return withCors(NextResponse.json({
       leads: results,
       pagination: {
         // Cursor-based pagination
@@ -171,27 +195,28 @@ export async function GET(request: NextRequest) {
         sortBy: safeSortBy,
         sortOrder,
       },
-    })
+    }), origin)
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
       console.error('[api/leads] error:', error)
     }
 
-    return NextResponse.json(
+    return withCors(NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
-    )
+    ), origin)
   }
 }
 
 
 // POST /api/leads
 export async function POST(request: NextRequest) {
+  const origin = request.headers.get('origin')
   try {
     const session = await getServerSession(authOptions)
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return withCors(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }), origin)
     }
 
     const body = await request.json()
@@ -247,15 +272,15 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    return NextResponse.json(updatedLead, { status: 201 })
+    return withCors(NextResponse.json(updatedLead, { status: 201 }), origin)
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
       console.error('[api/leads] create error:', error)
     }
 
-    return NextResponse.json(
+    return withCors(NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
-    )
+    ), origin)
   }
 }

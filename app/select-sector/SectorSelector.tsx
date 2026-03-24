@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState } from "react"
 import {
@@ -43,7 +45,7 @@ export default function SectorSelector({
   const selectSector = async (sector: string) => {
     setLoading(sector)
     try {
-      const response = await fetch("/api/onboarding/sector", {
+      const response = await fetch(getBaseUrl() + "/api/onboarding/sector", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sector }),

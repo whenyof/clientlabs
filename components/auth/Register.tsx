@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState } from "react"
 import GoogleButton from "./GoogleButton"
@@ -38,7 +40,7 @@ export default function Register({ onSwitch }: Props) {
 
     setLoading(true)
 
-    const res = await fetch("/api/register", {
+    const res = await fetch(getBaseUrl() + "/api/register", {
       method: "POST",
       body: JSON.stringify({ name, email, password }),
     })

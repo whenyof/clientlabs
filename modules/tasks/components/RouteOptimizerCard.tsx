@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useCallback } from "react"
 import { MapPin, Route, Loader2, Check, ChevronDown } from "lucide-react"
@@ -49,7 +51,7 @@ export function RouteOptimizerCard({
  setLoading(true)
  setResult(null)
  try {
- const res = await fetch("/api/tasks/route-optimize", {
+ const res = await fetch(getBaseUrl() + "/api/tasks/route-optimize", {
  method: "POST",
  headers: { "Content-Type": "application/json" },
  body: JSON.stringify({ date }),
@@ -71,7 +73,7 @@ export function RouteOptimizerCard({
  if (!result || result.orderedTaskIds.length === 0) return
  setApplying(true)
  try {
- const res = await fetch("/api/tasks/route-apply", {
+ const res = await fetch(getBaseUrl() + "/api/tasks/route-apply", {
  method: "POST",
  headers: { "Content-Type": "application/json" },
  body: JSON.stringify({

@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useEffect } from "react"
 import { AnimatePresence, motion } from "framer-motion"
@@ -50,7 +52,7 @@ export default function ApiSettingsPage() {
     const fetchKeys = async () => {
         setLoading(true)
         try {
-            const res = await fetch("/api/settings/api-keys")
+            const res = await fetch(getBaseUrl() + "/api/settings/api-keys")
             if (res.ok) {
                 const data = await res.json()
                 setKeys(data)
@@ -67,7 +69,7 @@ export default function ApiSettingsPage() {
         if (!newKeyName.trim()) return
 
         try {
-            const res = await fetch("/api/settings/api-keys", {
+            const res = await fetch(getBaseUrl() + "/api/settings/api-keys", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ name: newKeyName })
@@ -90,7 +92,7 @@ export default function ApiSettingsPage() {
 
         setActionLoading(id)
         try {
-            const res = await fetch("/api/settings/api-keys/regenerate", {
+            const res = await fetch(getBaseUrl() + "/api/settings/api-keys/regenerate", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ id })
@@ -116,7 +118,7 @@ export default function ApiSettingsPage() {
 
         setActionLoading(id)
         try {
-            const res = await fetch("/api/settings/api-keys", {
+            const res = await fetch(getBaseUrl() + "/api/settings/api-keys", {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ id })
@@ -137,7 +139,7 @@ export default function ApiSettingsPage() {
     const handleRevealKey = async (id: string) => {
         setActionLoading(id)
         try {
-            const res = await fetch(`/api/settings/api-keys/${id}/reveal`)
+            const res = await fetch(`${getBaseUrl()}/api/settings/api-keys/${id}/reveal`)
             const data = await res.json()
             if (res.ok && data.key) {
                 setRevealedKey(data.key)

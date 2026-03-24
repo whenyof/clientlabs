@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState } from "react"
 import { Globe, ShieldCheck, Loader2 } from "lucide-react"
@@ -40,7 +42,7 @@ export function DomainCard({ currentDomain, onSuccess }: DomainCardProps) {
 
         setIsSaving(true)
         try {
-            const res = await fetch("/api/settings/public-keys", {
+            const res = await fetch(getBaseUrl() + "/api/settings/public-keys", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ name: `Web Connect: ${domain}`, domain })

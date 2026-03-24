@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
@@ -17,9 +19,9 @@ export function TasksMiniKPIs({ className }: { className?: string }) {
  useEffect(() => {
  let cancelled = false
  Promise.all([
- fetch("/api/tasks/radar").then((r) => (r.ok ? r.json() : Promise.reject())),
- fetch("/api/tasks/sla").then((r) => (r.ok ? r.json() : Promise.reject())),
- fetch("/api/tasks/performance").then((r) => (r.ok ? r.json() : Promise.reject())),
+ fetch(getBaseUrl() + "/api/tasks/radar").then((r) => (r.ok ? r.json() : Promise.reject())),
+ fetch(getBaseUrl() + "/api/tasks/sla").then((r) => (r.ok ? r.json() : Promise.reject())),
+ fetch(getBaseUrl() + "/api/tasks/performance").then((r) => (r.ok ? r.json() : Promise.reject())),
  ])
  .then(([radar, sla, performance]) => {
  if (cancelled) return

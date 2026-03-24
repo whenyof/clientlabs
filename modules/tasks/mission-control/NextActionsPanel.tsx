@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
@@ -34,7 +36,7 @@ export function NextActionsPanel({
  useEffect(() => {
  let cancelled = false
  setLoading(true)
- fetch("/api/tasks/next")
+ fetch(getBaseUrl() + "/api/tasks/next")
  .then((r) => (r.ok ? r.json() : []))
  .then((data: NextActionItem[]) => {
  if (!cancelled) setItems(Array.isArray(data) ? data : [])

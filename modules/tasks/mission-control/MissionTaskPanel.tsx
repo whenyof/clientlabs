@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useEffect } from "react"
 import {
@@ -36,7 +38,7 @@ async function patchTask(
  taskId: string,
  body: { dueDate?: string; estimatedMinutes?: number | null; assignedToId?: string | null }
 ): Promise<boolean> {
- const res = await fetch(`/api/tasks/${taskId}`, {
+ const res = await fetch(`${getBaseUrl()}/api/tasks/${taskId}`, {
  method: "PATCH",
  headers: { "Content-Type": "application/json" },
  body: JSON.stringify(body),
@@ -48,7 +50,7 @@ async function patchReminder(
  reminderId: string,
  body: { status?: string; start?: string; end?: string }
 ): Promise<boolean> {
- const res = await fetch(`/api/reminders/${reminderId}`, {
+ const res = await fetch(`${getBaseUrl()}/api/reminders/${reminderId}`, {
  method: "PATCH",
  headers: { "Content-Type": "application/json" },
  body: JSON.stringify(body),
@@ -85,7 +87,7 @@ export function MissionTaskPanel({
 
  useEffect(() => {
  if (!open) return
- fetch("/api/admin/users")
+ fetch(getBaseUrl() + "/api/admin/users")
  .then((res) => (res.ok ? res.json() : null))
  .then((data: { users?: UserOption[] } | null) => {
  if (data?.users?.length) setUsers(data.users)

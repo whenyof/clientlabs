@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useEffect, useCallback } from "react"
 import { Check, X, Sparkles, Loader2 } from "lucide-react"
@@ -60,7 +62,7 @@ async function applyChange(change: SuggestedChange): Promise<boolean> {
  if ("estimatedMinutes" in change) body.estimatedMinutes = change.estimatedMinutes
  if ("priority" in change) body.priority = change.priority
  if (Object.keys(body).length === 0) return true
- const res = await fetch(`/api/tasks/${taskId}`, {
+ const res = await fetch(`${getBaseUrl()}/api/tasks/${taskId}`, {
  method: "PATCH",
  headers: { "Content-Type": "application/json" },
  body: JSON.stringify(body),
@@ -84,7 +86,7 @@ export function DecisionesRecomendadasSection({
  setLoading(true)
  setError(null)
  const params = new URLSearchParams({ from, to })
- fetch(`/api/tasks/recommendations?${params}`)
+ fetch(`${getBaseUrl()}/api/tasks/recommendations?${params}`)
  .then((res) => {
  if (!res.ok) throw new Error(res.status === 401 ? "No autorizado" : "Error al cargar")
  return res.json()

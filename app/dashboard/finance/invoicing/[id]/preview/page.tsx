@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useParams, useRouter } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
@@ -23,10 +25,10 @@ export default function InvoicePreviewPage() {
       return
     }
     Promise.all([
-      fetch(`/api/billing/${id}`, { credentials: "include" }).then((res) =>
+      fetch(`${getBaseUrl()}/api/billing/${id}`, { credentials: "include" }).then((res) =>
         res.ok ? res.json() : null
       ),
-      fetch("/api/billing/branding", { credentials: "include" }).then((res) =>
+      fetch(getBaseUrl() + "/api/billing/branding", { credentials: "include" }).then((res) =>
         res.ok ? res.json() : null
       ),
     ])

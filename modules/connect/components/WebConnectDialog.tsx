@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useEffect, useMemo } from "react"
 import { useRouter } from "next/navigation"
@@ -82,7 +84,7 @@ export function WebConnectDialog({ open, onOpenChange }: WebConnectDialogProps) 
     const fetchIntegrations = async () => {
         setIsLoadingInts(true)
         try {
-            const res = await fetch("/api/integrations")
+            const res = await fetch(getBaseUrl() + "/api/integrations")
             if (res.ok) {
                 const data = await res.json()
                 setIntegrations(data.items || [])
@@ -97,7 +99,7 @@ export function WebConnectDialog({ open, onOpenChange }: WebConnectDialogProps) 
     const fetchPublicKeys = async () => {
         setIsLoading(true)
         try {
-            const res = await fetch("/api/settings/public-keys")
+            const res = await fetch(getBaseUrl() + "/api/settings/public-keys")
             if (res.ok) {
                 const data = await res.json()
                 setPublicKeys(data)
@@ -117,7 +119,7 @@ export function WebConnectDialog({ open, onOpenChange }: WebConnectDialogProps) 
 
         setIsCreating(true)
         try {
-            const res = await fetch("/api/settings/public-keys", {
+            const res = await fetch(getBaseUrl() + "/api/settings/public-keys", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ name: newName, domain: newDomain })
@@ -190,7 +192,7 @@ export function WebConnectDialog({ open, onOpenChange }: WebConnectDialogProps) 
         if (!confirm("¿Eliminar este dominio?")) return
         setDeletingId(key.id)
         try {
-            const res = await fetch(`/api/settings/public-keys/${key.id}`, { method: "DELETE" })
+            const res = await fetch(`${getBaseUrl()}/api/settings/public-keys/${key.id}`, { method: "DELETE" })
             if (res.ok) {
                 setPublicKeys(prev => prev.filter(k => k.id !== key.id))
                 toast.success("Dominio eliminado")
@@ -225,7 +227,7 @@ export function WebConnectDialog({ open, onOpenChange }: WebConnectDialogProps) 
             // Wait a bit to simulate scanning feel
             await new Promise(r => setTimeout(r, 1500))
 
-            const res = await fetch(`/api/v1/sdk/status?key=${encodeURIComponent(keyForCheck)}`)
+            const res = await fetch(`${getBaseUrl()}/api/v1/sdk/status?key=${encodeURIComponent(keyForCheck)}`)
             if (res.ok) {
                 const data = await res.json()
                 setSdkConnected(Boolean(data.connected))
@@ -258,7 +260,7 @@ export function WebConnectDialog({ open, onOpenChange }: WebConnectDialogProps) 
             try {
                 const k = selectedKey?.apiKey ?? selectedKey?.rawKey
                 if (!k) return
-                const res = await fetch(`/api/v1/sdk/status?key=${encodeURIComponent(k)}`)
+                const res = await fetch(`${getBaseUrl()}/api/v1/sdk/status?key=${encodeURIComponent(k)}`)
                 if (!res.ok) return
                 const data = await res.json()
                 if (cancelled) return
@@ -309,7 +311,7 @@ export function WebConnectDialog({ open, onOpenChange }: WebConnectDialogProps) 
 
         setIsLoading(true)
         try {
-            const res = await fetch("/api/integrations/connect", {
+            const res = await fetch(getBaseUrl() + "/api/integrations/connect", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ type: "web", provider })

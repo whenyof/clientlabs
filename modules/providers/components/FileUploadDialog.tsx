@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useRef, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
@@ -126,7 +128,7 @@ export function FileUploadDialog({
                 const pdfBlob = new Blob([pdfBytes.buffer as ArrayBuffer], { type: "application/pdf" })
                 const fd = new FormData()
                 fd.set("file", pdfBlob, `${documentName.trim() || "documento"}.pdf`)
-                const res = await fetch("/api/providers/upload", {
+                const res = await fetch(getBaseUrl() + "/api/providers/upload", {
                     method: "POST",
                     body: fd,
                     credentials: "include",
@@ -151,7 +153,7 @@ export function FileUploadDialog({
                 for (const file of files) {
                     const fd = new FormData()
                     fd.set("file", file)
-                    const res = await fetch("/api/providers/upload", {
+                    const res = await fetch(getBaseUrl() + "/api/providers/upload", {
                         method: "POST",
                         body: fd,
                         credentials: "include",

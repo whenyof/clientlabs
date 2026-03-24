@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useEffect, useOptimistic, startTransition, useMemo, useRef, useCallback } from "react"
 import type { Client } from "@prisma/client"
@@ -305,7 +307,7 @@ export function ClientSidePanel({ client, isOpen, onClose, onClientUpdate }: Cli
         if (!client?.id) return
         setLoadingInvoices(true)
         try {
-            const res = await fetch(`/api/billing?clientId=${encodeURIComponent(client.id)}`, { credentials: "include" })
+            const res = await fetch(`${getBaseUrl()}/api/billing?clientId=${encodeURIComponent(client.id)}`, { credentials: "include" })
             const data = await res.json().catch(() => ({}))
             const list = Array.isArray(data.invoices) ? data.invoices : []
             setClientInvoices(list.map((inv: any) => ({

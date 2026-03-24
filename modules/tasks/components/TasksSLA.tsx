@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
@@ -77,7 +79,7 @@ export function TasksSLA({ className }: { className?: string }) {
  let cancelled = false
  setLoading(true)
  setError(false)
- fetch("/api/tasks/sla")
+ fetch(getBaseUrl() + "/api/tasks/sla")
  .then((res) => {
  if (!res.ok) throw new Error("SLA failed")
  return res.json() as Promise<SLAData>

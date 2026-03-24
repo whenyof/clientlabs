@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useEffect, useState } from "react"
 import { Lightbulb } from "lucide-react"
@@ -17,7 +19,7 @@ export function LeadInsightsCard({ leadId, score = 0 }: LeadInsightsCardProps) {
   const [insights, setInsights] = useState<InsightsData | null>(null)
 
   useEffect(() => {
-    fetch(`/api/leads/${leadId}/insights`)
+    fetch(`${getBaseUrl()}/api/leads/${leadId}/insights`)
       .then((res) => res.json())
       .then((data) => setInsights(data))
       .catch(() => setInsights(null))

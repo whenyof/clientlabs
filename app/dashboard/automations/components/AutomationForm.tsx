@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
@@ -116,7 +118,7 @@ export default function AutomationForm({ ruleId }: Props) {
     // Load existing rule for edit mode
     useEffect(() => {
         if (!ruleId) return
-        fetch(`/api/automations/${ruleId}`)
+        fetch(`${getBaseUrl()}/api/automations/${ruleId}`)
             .then((r) => (r.ok ? r.json() : Promise.reject()))
             .then((json) => {
                 const d = json.data

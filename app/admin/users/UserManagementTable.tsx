@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -83,7 +85,7 @@ export function UserManagementTable({ initialUsers }: { initialUsers: UserData[]
 
  const handleRoleChange = async (userId: string, newRole: "USER" | "ADMIN") => {
  try {
- const response = await fetch(`/api/admin/users/${userId}`, {
+ const response = await fetch(`${getBaseUrl()}/api/admin/users/${userId}`, {
  method: "PATCH",
  headers: { "Content-Type": "application/json" },
  body: JSON.stringify({ role: newRole })
@@ -107,7 +109,7 @@ export function UserManagementTable({ initialUsers }: { initialUsers: UserData[]
 
  const handlePlanChange = async (userId: string, newPlan: "FREE" | "PRO" | "ENTERPRISE") => {
  try {
- const response = await fetch(`/api/admin/users/${userId}`, {
+ const response = await fetch(`${getBaseUrl()}/api/admin/users/${userId}`, {
  method: "PATCH",
  headers: { "Content-Type": "application/json" },
  body: JSON.stringify({ plan: newPlan })

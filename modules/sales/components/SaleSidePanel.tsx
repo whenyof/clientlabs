@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
@@ -61,7 +63,7 @@ export function SaleSidePanel({ sale, open, onClose, onSaleUpdate }: Props) {
     try {
       const formData = new FormData()
       formData.set("file", file)
-      const res = await fetch(`/api/sales/${sale.id}/invoice`, {
+      const res = await fetch(`${getBaseUrl()}/api/sales/${sale.id}/invoice`, {
         method: "POST",
         body: formData,
       })

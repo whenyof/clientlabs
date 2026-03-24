@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
@@ -58,7 +60,7 @@ export default function AutomationsPage() {
 
   const fetchRules = useCallback(async () => {
     try {
-      const res = await fetch("/api/automations")
+      const res = await fetch(getBaseUrl() + "/api/automations")
       if (!res.ok) throw new Error("Failed to load")
       const json = await res.json()
       setRules(json.data || [])
@@ -80,7 +82,7 @@ export default function AutomationsPage() {
   }
 
   const toggleActive = async (id: string, current: boolean) => {
-    await fetch(`/api/automations/${id}`, {
+    await fetch(`${getBaseUrl()}/api/automations/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ isActive: !current }),
@@ -98,7 +100,7 @@ export default function AutomationsPage() {
 
   const deleteRule = async (id: string) => {
     if (!confirm("Delete this automation?")) return
-    await fetch(`/api/automations/${id}`, { method: "DELETE" })
+    await fetch(`${getBaseUrl()}/api/automations/${id}`, { method: "DELETE" })
     setRules((prev) => prev.filter((r) => r.id !== id))
     if (selectedId === id) closeDetail()
   }

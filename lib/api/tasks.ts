@@ -5,6 +5,7 @@
  */
 
 import { cookies } from "next/headers"
+import { getBaseUrl } from "@/lib/api/baseUrl"
 
 export type TaskEntityType = "LEAD" | "CLIENT" | "PROVIDER" | "SALE"
 export type TaskPriority = "LOW" | "MEDIUM" | "HIGH"
@@ -36,11 +37,7 @@ export type UpdateTaskPayload = {
  estimatedMinutes?: number | null
 }
 
-function getBaseUrl(): string {
- if (process.env.NEXTAUTH_URL) return process.env.NEXTAUTH_URL
- if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
- return "http://localhost:3000"
-}
+// Removed local getBaseUrl implementation - using centralized one from @/lib/api/baseUrl
 
 async function getHeaders(): Promise<HeadersInit> {
  const cookieStore = await cookies()

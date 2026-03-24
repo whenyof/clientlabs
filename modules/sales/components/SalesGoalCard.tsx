@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useMemo } from "react"
 import { Pencil } from "lucide-react"
@@ -84,7 +86,7 @@ export function SalesGoalCard({
     if (Number.isNaN(value) || value < 0) return
     setSaving(true)
     try {
-      const res = await fetch("/api/sales/monthly-goal", {
+      const res = await fetch(getBaseUrl() + "/api/sales/monthly-goal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ targetRevenue: value }),

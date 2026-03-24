@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import React, { useState, useEffect } from "react"
 import { GlobeAltIcon, ChatBubbleOvalLeftEllipsisIcon } from "@heroicons/react/24/outline"
@@ -106,7 +108,7 @@ export default function ConnectPage() {
         const controller = new AbortController()
         const timeoutId = setTimeout(() => controller.abort(), 8000)
 
-        fetch("/api/integrations", { signal: controller.signal })
+        fetch(getBaseUrl() + "/api/integrations", { signal: controller.signal })
             .then((res) => res.json())
             .then((data) => {
                 if (data.web || data.whatsapp || data.facebook) {

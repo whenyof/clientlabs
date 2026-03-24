@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useEffect, useState } from "react"
 import { AlertCircle } from "lucide-react"
@@ -45,7 +47,7 @@ export function DelayRiskIndicator({
  const params = new URLSearchParams()
  if (from) params.set("from", from)
  if (to) params.set("to", to)
- fetch(`/api/tasks/delay-risk?${params.toString()}`)
+ fetch(`${getBaseUrl()}/api/tasks/delay-risk?${params.toString()}`)
  .then((res) => (res.ok ? res.json() : []))
  .then((data) => setRisks(Array.isArray(data) ? data : []))
  .catch(() => setRisks([]))

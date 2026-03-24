@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useCallback, useEffect, useMemo, useRef } from "react"
 import { useRouter } from "next/navigation"
@@ -84,7 +86,7 @@ export function SalesView({ initialSales, mode = "sales" }: Props) {
   const historical = comparisons
 
   const refetchMonthlyGoal = useCallback(() => {
-    fetch("/api/sales/monthly-goal")
+    fetch(getBaseUrl() + "/api/sales/monthly-goal")
       .then((res) => (res.ok ? res.json() : { goal: null, analytics: null }))
       .then((data) => {
         setMonthlyGoalTarget(data?.goal?.targetRevenue ?? 0)
@@ -106,7 +108,7 @@ export function SalesView({ initialSales, mode = "sales" }: Props) {
 
   useEffect(() => {
     if (mode !== "sales") return
-    fetch("/api/sales/client-predictions")
+    fetch(getBaseUrl() + "/api/sales/client-predictions")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => setClientPredictions(data ?? null))
       .catch(() => setClientPredictions(null))
@@ -134,7 +136,7 @@ export function SalesView({ initialSales, mode = "sales" }: Props) {
     setLoadingComparisons(true)
     const fromIso = from.toISOString()
     const toIso = to.toISOString()
-    fetch(`/api/sales/comparisons?from=${encodeURIComponent(fromIso)}&to=${encodeURIComponent(toIso)}`)
+    fetch(`${getBaseUrl()}/api/sales/comparisons?from=${encodeURIComponent(fromIso)}&to=${encodeURIComponent(toIso)}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => setComparisons(data ?? null))
       .catch(() => setComparisons(null))
@@ -145,7 +147,7 @@ export function SalesView({ initialSales, mode = "sales" }: Props) {
     if (mode !== "sales") return
     const fromIso = from.toISOString()
     const toIso = to.toISOString()
-    fetch(`/api/sales/anomalies?from=${encodeURIComponent(fromIso)}&to=${encodeURIComponent(toIso)}`)
+    fetch(`${getBaseUrl()}/api/sales/anomalies?from=${encodeURIComponent(fromIso)}&to=${encodeURIComponent(toIso)}`)
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => setAnomalies(Array.isArray(data) ? data : []))
       .catch(() => setAnomalies([]))

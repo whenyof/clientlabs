@@ -1,4 +1,6 @@
 "use client"
+import { getBaseUrl } from "@/lib/api/baseUrl"
+
 
 import { useState, useCallback } from "react"
 import type { Lead } from "@prisma/client"
@@ -54,7 +56,7 @@ export function EnrichmentPanel({ lead, onRefresh }: EnrichmentPanelProps) {
     const handleRetry = useCallback(async () => {
         setRetrying(true)
         try {
-            const res = await fetch(`/api/leads/${lead.id}/retry-enrichment`, { method: "POST" })
+            const res = await fetch(`${getBaseUrl()}/api/leads/${lead.id}/retry-enrichment`, { method: "POST" })
             if (!res.ok) {
                 const data = await res.json()
                 throw new Error(data.error || "Retry failed")

@@ -32,29 +32,44 @@ export default async function LeadsPage({
     redirect("/auth")
   }
 
-  const allLeads = await prisma.lead.findMany({
-    where: { userId: session.user.id },
-    select: { leadStatus: true, temperature: true, lastActionAt: true },
-  })
+  // ── Calculate KPIs using efficient database queries (NOT memory filtering) ──
+  const [totalLeads, hotLeads, convertedLeads, stalledLeads, distinctSources] =
+    await Promise.all([
+      prisma.lead.count({ where: { userId: session.user.id } }),
+      prisma.lead.count({
+        where: { userId: session.user.id, temperature: "HOT" },
+      }),
+      prisma.lead.count({
+        where: { userId: session.user.id, leadStatus: "CONVERTED" },
+      }),
+      prisma.lead.count({
+        where: {
+          userId: session.user.id,
+          NOT: { leadStatus: { in: ["CONVERTED", "LOST"] } },
+          OR: [
+            { lastActionAt: null },
+            {
+              lastActionAt: {
+                lt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
+              },
+            },
+          ],
+        },
+      }),
+      prisma.lead.groupBy({
+        by: ["source"],
+        where: { userId: session.user.id },
+      }),
+    ])
 
   const kpis = {
-    total: allLeads.length,
-    hot: allLeads.filter((l) => l.temperature === "HOT").length,
-    converted: allLeads.filter((l) => l.leadStatus === "CONVERTED").length,
-    stalled: allLeads.filter((l) => {
-      if (!l.lastActionAt) return true
-      const days = Math.floor(
-        (Date.now() - new Date(l.lastActionAt).getTime()) / (1000 * 60 * 60 * 24)
-      )
-      return days > 14 && l.leadStatus !== "CONVERTED" && l.leadStatus !== "LOST"
-    }).length,
+    total: totalLeads,
+    hot: hotLeads,
+    converted: convertedLeads,
+    stalled: stalledLeads,
   }
 
-  const sources = await prisma.lead.findMany({
-    where: { userId: session.user.id },
-    select: { source: true },
-    distinct: ["source"],
-  })
+  const sources = distinctSources.map((s) => s.source).filter(Boolean) as string[]
 
   return (
     <div className="space-y-6">
@@ -71,7 +86,7 @@ export default async function LeadsPage({
           showConverted: searchParams.showConverted === "true",
           showLost: searchParams.showLost === "true",
         }}
-        sources={sources.map((s) => s.source).filter(Boolean) as string[]}
+        sources={sources}
       />
       <LeadsTable />
     </div>

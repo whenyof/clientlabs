@@ -124,7 +124,7 @@ export async function triggerEnrichment(
                 userId: lead.userId,
                 score: newScore,
                 priorityLevel: newPriority,
-                status: lead.status,
+                status: lead.leadStatus ?? 'NEW', // @deprecated — synced from leadStatus
                 leadStatus: lead.leadStatus ?? 'NEW',
                 source: lead.source,
                 tags: lead.tags,

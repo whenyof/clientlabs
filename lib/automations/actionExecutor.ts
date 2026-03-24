@@ -2,7 +2,7 @@
  * Action Executor — Executes automation actions on a lead
  *
  * Supports:
- * - CHANGE_STATUS → update lead.status
+ * - CHANGE_STATUS → update lead.leadStatus (enum, single source of truth)
  * - ASSIGN_USER → update lead.userId (reassign)
  * - ADD_TAG → push to lead.tags (deduped)
  * - SEND_WEBHOOK → fire-and-forget POST with lead data
@@ -83,7 +83,10 @@ async function executeSingleAction(
 async function changeStatus(leadId: string, newStatus: string): Promise<void> {
     await prisma.lead.update({
         where: { id: leadId },
-        data: { status: newStatus },
+        data: {
+            leadStatus: newStatus as any, // LeadStatus enum: NEW | CONTACTED | INTERESTED | QUALIFIED | LOST | CONVERTED
+            status: newStatus,            // @deprecated — kept in sync for backward compatibility
+        },
     })
 }
 
@@ -156,7 +159,7 @@ async function sendWebhook(
                     name: lead.name,
                     phone: lead.phone,
                     score: lead.score,
-                    status: lead.status,
+                    status: lead.leadStatus, // Uses leadStatus (single source of truth)
                     tags: lead.tags,
                     source: lead.source,
                 },

@@ -2,10 +2,22 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 
 export const dynamic = 'force-dynamic'
 
-// GET /api/leads
+/**
+ * GET /api/leads
+ *
+ * Supports:
+ *  - Cursor-based pagination (cursor=<id>, limit=20)
+ *  - Offset-based pagination (page=1, limit=20) — legacy fallback
+ *  - Server-side filters: status, temperature, source
+ *  - Server-side search (ILIKE on name, email, phone)
+ *  - Configurable sort (sortBy, sortOrder)
+ *
+ * All queries are scoped to the authenticated user via compound indexes.
+ */
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -16,62 +28,152 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
 
-    const page = Number(searchParams.get('page') ?? 1)
-    const limit = Number(searchParams.get('limit') ?? 20)
+    // ── Pagination params ──
+    const cursor = searchParams.get('cursor')       // cursor-based (preferred)
+    const page = Number(searchParams.get('page') ?? 1) // offset-based (legacy)
+    const limit = Math.min(Number(searchParams.get('limit') ?? 20), 100) // max 100
 
-    const offset = (page - 1) * limit
+    // ── Filter params ──
+    const statusFilter = searchParams.get('status')
+    const temperatureFilter = searchParams.get('temperature')
+    const sourceFilter = searchParams.get('source')
+    const search = searchParams.get('search')?.trim()
 
-    console.log('[api/leads] session user:', session.user.id)
+    // ── Sort params ──
+    const sortBy = searchParams.get('sortBy') ?? 'createdAt'
+    const sortOrder = (searchParams.get('sortOrder') ?? 'desc') as 'asc' | 'desc'
 
-    // Leads del usuario actual
-    const where = {
-      userId: session.user.id
+    // Validate sortBy to prevent injection
+    const ALLOWED_SORT_FIELDS = ['createdAt', 'score', 'lastActionAt', 'temperature', 'name', 'email']
+    const safeSortBy = ALLOWED_SORT_FIELDS.includes(sortBy) ? sortBy : 'createdAt'
+
+    const stale = searchParams.get('stale') === 'true'
+    const showConverted = searchParams.get('showConverted') === 'true'
+    const showLost = searchParams.get('showLost') === 'true'
+
+    // ── Build WHERE clause ──
+    const where: Prisma.LeadWhereInput = {
+      userId: session.user.id,
     }
 
-    const [leads, total, globalCount] = await Promise.all([
+    // Status filtering logic
+    const statusInclusions: any[] = []
+    const statusExclusions: any[] = []
+
+    if (statusFilter && statusFilter !== 'all') {
+      statusInclusions.push(statusFilter)
+    } else {
+      if (!showConverted) statusExclusions.push('CONVERTED')
+      if (!showLost) statusExclusions.push('LOST')
+    }
+
+    if (stale) {
+      where.lastActionAt = {
+        lt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
+      }
+      statusExclusions.push('CONVERTED', 'LOST')
+    }
+
+    // Apply combined status filters
+    if (statusInclusions.length > 0) {
+      where.leadStatus = { in: statusInclusions as any }
+    } else if (statusExclusions.length > 0) {
+      where.leadStatus = { notIn: Array.from(new Set(statusExclusions)) as any }
+    }
+
+    if (temperatureFilter && temperatureFilter !== 'all') {
+      where.temperature = temperatureFilter as any
+    }
+
+    if (sourceFilter && sourceFilter !== 'all') {
+      where.source = sourceFilter
+    }
+
+    // ── Search: server-side ILIKE across name, email, phone ──
+    if (search && search.length > 0) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
+        { phone: { contains: search, mode: 'insensitive' } },
+      ]
+    }
+
+    // ── Build ORDER BY ──
+    const orderBy: Prisma.LeadOrderByWithRelationInput = {
+      [safeSortBy]: sortOrder,
+    }
+
+    // ── Execute query ──
+    const useCursor = !!cursor
+    const offset = useCursor ? undefined : (page - 1) * limit
+
+    const [leads, total] = await Promise.all([
       prisma.lead.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
-        skip: offset,
-        take: limit
+        orderBy,
+        take: limit + 1, // Fetch one extra to detect hasNext
+        ...(useCursor
+          ? {
+              cursor: { id: cursor },
+              skip: 1, // skip the cursor itself
+            }
+          : {
+              skip: offset,
+            }),
+        select: {
+          id: true,
+          userId: true,
+          email: true,
+          name: true,
+          phone: true,
+          source: true,
+          leadStatus: true,
+          temperature: true,
+          score: true,
+          priority: true,
+          tags: true,
+          notes: true,
+          converted: true,
+          clientId: true,
+          lastActionAt: true,
+          createdAt: true,
+          updatedAt: true,
+          conversionProbability: true,
+          aiSegment: true,
+          metadata: true,
+        },
       }),
       prisma.lead.count({ where }),
-      prisma.lead.count() // debug: total en la DB
     ])
-    
-    if (process.env.NODE_ENV === "development") {
-      console.log('[api/leads] session user:', session.user.id)
-      console.log('[api/leads] leads returned:', leads.length)
-      console.log('[api/leads] total leads in DB:', globalCount)
 
-      if (leads.length > 0) {
-        const first = leads[0]
-        console.log('[api/leads] first lead:', {
-          id: first.id,
-          email: first.email,
-          userId: first.userId,
-          createdAt: first.createdAt
-        })
-      }
-    }
+    // ── Determine if there are more results ──
+    const hasNext = leads.length > limit
+    const results = hasNext ? leads.slice(0, limit) : leads
+    const nextCursor = hasNext ? results[results.length - 1]?.id : null
 
     return NextResponse.json({
-      sessionUser: session.user.id,
-      leads,
+      leads: results,
       pagination: {
-        page,
+        // Cursor-based pagination
+        nextCursor,
+        hasNext,
+        // Offset-based (legacy compatibility)
+        page: useCursor ? undefined : page,
         limit,
         total,
-        pages: Math.ceil(total / limit)
+        pages: Math.ceil(total / limit),
       },
-      debug: {
-        leadsForUser: leads.length,
-        totalLeadsInDatabase: globalCount
-      }
+      filters: {
+        status: statusFilter ?? 'all',
+        temperature: temperatureFilter ?? 'all',
+        source: sourceFilter ?? 'all',
+        search: search ?? '',
+        sortBy: safeSortBy,
+        sortOrder,
+      },
     })
-
   } catch (error) {
-    if (process.env.NODE_ENV === "development") {
+    if (process.env.NODE_ENV === 'development') {
       console.error('[api/leads] error:', error)
     }
 
@@ -111,15 +213,17 @@ export async function POST(request: NextRequest) {
         email,
         phone,
         source: source || 'Web',
+        leadStatus: 'NEW',
+        status: 'NEW', // @deprecated — kept in sync with leadStatus
         notes,
         metadata: {
           ...(company ? { company } : {}),
-          ...(budget ? { budget: parseFloat(budget) } : {})
-        }
+          ...(budget ? { budget: parseFloat(budget) } : {}),
+        },
       },
       include: {
-        stage: true
-      }
+        stage: true,
+      },
     })
 
     const { LeadScoringService } = await import('@/lib/services/leadScoring')
@@ -129,7 +233,7 @@ export async function POST(request: NextRequest) {
     const updatedLead = await prisma.lead.update({
       where: { id: lead.id },
       data: { score: initialScore },
-      include: { stage: true }
+      include: { stage: true },
     })
 
     await prisma.activity.create({
@@ -139,14 +243,13 @@ export async function POST(request: NextRequest) {
         type: 'lead_created',
         title: 'Lead creado',
         description: `Nuevo lead ${name ?? email ?? 'sin nombre'} creado`,
-        metadata: { source }
-      }
+        metadata: { source },
+      },
     })
 
     return NextResponse.json(updatedLead, { status: 201 })
-
   } catch (error) {
-    if (process.env.NODE_ENV === "development") {
+    if (process.env.NODE_ENV === 'development') {
       console.error('[api/leads] create error:', error)
     }
 

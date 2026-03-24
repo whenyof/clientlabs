@@ -19,7 +19,7 @@ export default function DashboardShell({
         <div className="flex h-screen w-screen overflow-hidden bg-[var(--bg-main)] text-[var(--text-primary)]" data-debug="shell">
             {/* Sidebar Column */}
             <div
-                className="flex-shrink-0 transition-all duration-300 z-20 bg-[var(--bg-card)] border-r border-[var(--border-subtle)] h-full overflow-hidden"
+                className="flex-shrink-0 transition-all duration-300 z-20 bg-[var(--bg-card)] border-r border-[var(--border-subtle)] h-full overflow-hidden pointer-events-auto"
                 style={{ width: isCollapsed ? 72 : 240 }}
             >
                 <Sidebar

@@ -78,7 +78,9 @@ export interface LeadSnapshot {
     userId: string
     score: number
     priorityLevel: number
+    /** @deprecated Use `leadStatus` instead. Kept for backward compatibility. */
     status: string
+    /** Single source of truth for lead lifecycle stage (LeadStatus enum). */
     leadStatus: string
     source: string
     tags: string[]

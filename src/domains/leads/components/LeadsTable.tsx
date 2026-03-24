@@ -2,10 +2,9 @@
 
 import { useLeads } from "@/hooks/useLeads"
 import { useSearchParams } from "next/navigation"
-import { useMemo } from "react"
-import type { Lead } from "@prisma/client"
+import { useMemo, useRef, useCallback, useEffect } from "react"
 import { LeadCard } from "@/modules/leads/components/LeadCard"
-import { Upload, Globe, Zap } from "lucide-react"
+import { Upload, Globe, Zap, Loader2 } from "lucide-react"
 
 function EmptyState() {
   return (
@@ -33,48 +32,48 @@ function EmptyState() {
   )
 }
 
-function filterLeads(
-  leads: Lead[],
-  status: string,
-  temperature: string,
-  source: string,
-  search: string
-): Lead[] {
-  let out = leads
-  if (status && status !== "all") {
-    out = out.filter((l) => l.leadStatus === status)
-  }
-  if (temperature && temperature !== "all") {
-    out = out.filter((l) => l.temperature === temperature)
-  }
-  if (source && source !== "all") {
-    out = out.filter((l) => l.source === source)
-  }
-  if (search.trim()) {
-    const q = search.trim().toLowerCase()
-    out = out.filter(
-      (l) =>
-        (l.name?.toLowerCase().includes(q) ?? false) ||
-        (l.email?.toLowerCase().includes(q) ?? false) ||
-        (l.phone?.toLowerCase().includes(q) ?? false)
-    )
-  }
-  return out
-}
-
 export function LeadsTable() {
   const searchParams = useSearchParams()
-  const { leads, isLoading } = useLeads()
 
-  const status = searchParams.get("status") ?? "all"
-  const temperature = searchParams.get("temperature") ?? "all"
-  const source = searchParams.get("source") ?? "all"
-  const search = searchParams.get("search") ?? ""
+  const filters = useMemo(() => ({
+    status: searchParams.get("status") ?? "all",
+    temperature: searchParams.get("temperature") ?? "all",
+    source: searchParams.get("source") ?? "all",
+    search: searchParams.get("search") ?? "",
+    sortBy: searchParams.get("sortBy") ?? "createdAt",
+    sortOrder: (searchParams.get("sortOrder") ?? "desc") as "asc" | "desc",
+    stale: searchParams.get("stale") ?? "false",
+    showConverted: searchParams.get("showConverted") ?? "false",
+    showLost: searchParams.get("showLost") ?? "false",
+  }), [searchParams])
 
-  const filteredLeads = useMemo(
-    () => filterLeads(leads, status, temperature, source, search),
-    [leads, status, temperature, source, search]
-  )
+  const { 
+    leads, 
+    total, 
+    isLoading, 
+    isFetchingNextPage, 
+    hasNextPage, 
+    fetchNextPage 
+  } = useLeads(filters)
+
+  // ── Infinite scroll observation ──
+  const observerRef = useRef<IntersectionObserver | null>(null)
+  const lastLeadRef = useCallback((node: HTMLDivElement | null) => {
+    if (isFetchingNextPage) return
+    if (observerRef.current) observerRef.current.disconnect()
+
+    observerRef.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasNextPage) {
+        fetchNextPage()
+      }
+    })
+
+    if (node) observerRef.current.observe(node)
+  }, [isFetchingNextPage, hasNextPage, fetchNextPage])
+
+  useEffect(() => {
+    return () => observerRef.current?.disconnect()
+  }, [])
 
   if (isLoading) {
     return (
@@ -89,19 +88,30 @@ export function LeadsTable() {
     )
   }
 
-  if (filteredLeads.length === 0) {
+  if (leads.length === 0) {
     return <EmptyState />
   }
 
   return (
     <div className="space-y-2">
-      {filteredLeads.map((lead) => (
-        <LeadCard key={lead.id} lead={lead} />
-      ))}
+      {leads.map((lead, index) => {
+        const isLast = index === leads.length - 1
+        return (
+          <div key={lead.id} ref={isLast ? lastLeadRef : undefined}>
+            <LeadCard lead={lead} />
+          </div>
+        )
+      })}
+
+      {isFetchingNextPage && (
+        <div className="flex justify-center py-4">
+          <Loader2 className="h-6 w-6 animate-spin text-neutral-400" />
+        </div>
+      )}
+
       <p className="text-sm text-neutral-500 pt-2">
-        {filteredLeads.length} {filteredLeads.length === 1 ? "lead" : "leads"}
+        Mostrando {leads.length} de {total} {total === 1 ? "lead" : "leads"}
       </p>
     </div>
   )
 }
-

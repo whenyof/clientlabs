@@ -11,12 +11,15 @@ const MetaIcon = (props: React.SVGProps<SVGSVGElement>) => (
 )
 
 import { WebConnectDialog } from "@/modules/connect/components/WebConnectDialog"
+import { IntegrationModal } from "@/app/dashboard/integrations/components/IntegrationModal"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 
 interface IntegrationsStatus {
     web: { connected: boolean; lastSync: Date | null }
     whatsapp: { connected: boolean }
     facebook: { connected: boolean }
+    items?: any[]
 }
 
 function IntegrationCard({
@@ -95,33 +98,69 @@ export default function ConnectPage() {
     const [integrations, setIntegrations] = useState<IntegrationsStatus | null>(null)
     const [loading, setLoading] = useState(true)
     const [openWebModal, setOpenWebModal] = useState(false)
+    const [selectedIntegration, setSelectedIntegration] = useState<any>(null)
+    const [openIntegrationModal, setOpenIntegrationModal] = useState(false)
 
     // Fetch status on mount
     useEffect(() => {
-        fetch("/api/integrations")
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 8000)
+
+        fetch("/api/integrations", { signal: controller.signal })
             .then((res) => res.json())
             .then((data) => {
                 if (data.web || data.whatsapp || data.facebook) {
                     setIntegrations(data)
                 }
             })
-            .catch((err) => console.error("Failed to load integrations status", err))
-            .finally(() => setLoading(false))
+            .catch((err) => {
+                console.error("Failed to load integrations status", err)
+                if (err.name !== 'AbortError') {
+                    toast.error("Error al cargar estados de conexión")
+                }
+            })
+            .finally(() => {
+                clearTimeout(timeoutId)
+                setLoading(false)
+            })
+            
+        return () => {
+            clearTimeout(timeoutId)
+            controller.abort()
+        }
     }, [])
 
     const handleConnect = (type: string) => {
         if (type === "web") {
             setOpenWebModal(true)
         } else {
-            console.log(`Open connect modal for ${type}`)
-            // Placeholder for other modals (WhatsApp, FB)
-            // En una release futura se agregarían sus respectivos dialogs
+            const config = type === "whatsapp" 
+                ? { name: "WhatsApp Business", description: "Conecta tu cuenta oficial de WhatsApp.", action: "connect", logo: "💬" }
+                : { name: "Facebook Lead Ads", description: "Sincroniza tus campañas de Meta.", action: "connect", logo: "📱" }
+            
+            setSelectedIntegration(config)
+            setOpenIntegrationModal(true)
+            toast.info(`Iniciando conexión con ${config.name}`)
         }
     }
 
     const handleManage = (type: string) => {
-        console.log(`Manage integration for ${type}`)
-        // Placeholder for manage modals/settings
+        if (type === "web") {
+            setOpenWebModal(true) // Re-use the same modal for managing SDK domains
+        } else {
+            // Find current integration data if available, or use defaults
+            const currentItem = integrations?.items?.find(i => i.provider.toLowerCase() === type)
+            const config = {
+                name: type === "whatsapp" ? "WhatsApp Business" : "Facebook Lead Ads",
+                description: "Gestiona tu integración activa.",
+                action: "configure",
+                status: "connected",
+                logo: type === "whatsapp" ? "💬" : "📱",
+                ...currentItem
+            }
+            setSelectedIntegration(config)
+            setOpenIntegrationModal(true)
+        }
     }
 
     // Derived statuses safely avoiding null on initial render
@@ -147,7 +186,7 @@ export default function ConnectPage() {
             </header>
 
             {/* Grid Modular Enterprise */}
-            <div className={cn("grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 transition-opacity", loading && "opacity-50 pointer-events-none")}>
+            <div className={cn("grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 transition-opacity", loading && "opacity-60")}>
                 <IntegrationCard
                     type="web"
                     title="Web Ingestion"
@@ -179,8 +218,14 @@ export default function ConnectPage() {
                 />
             </div>
 
-            {/* Web Connect Dialog: Preserved from old component */}
+            {/* Dialogs */}
             <WebConnectDialog open={openWebModal} onOpenChange={setOpenWebModal} />
+            
+            <IntegrationModal 
+                isOpen={openIntegrationModal} 
+                onClose={() => setOpenIntegrationModal(false)}
+                integration={selectedIntegration}
+            />
         </section>
     )
 }

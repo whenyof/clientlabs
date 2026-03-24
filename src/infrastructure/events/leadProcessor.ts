@@ -91,7 +91,8 @@ export async function detectLead(event: QueuedEvent): Promise<void> {
         email,
         name: name ?? null,
         source: "sdk",
-        status: "NEW",
+        leadStatus: "NEW",
+        status: "NEW", // @deprecated — kept in sync for backward compatibility
         temperature: "COLD",
         lastActionAt: ts,
         lastAction: event.type,

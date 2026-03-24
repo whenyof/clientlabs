@@ -7,77 +7,12 @@ import { revalidatePath } from "next/cache"
 import type { LeadStatus, LeadTemp } from "@prisma/client"
 import { ensureUserExists } from "@/lib/ensure-user"
 
-
 /* ==================== SCORING & TEMPERATURE ==================== */
 
-// Internal function to recalculate lead score and temperature
-async function recalculateLeadScore(leadId: string) {
-    const lead = await prisma.lead.findUnique({
-        where: { id: leadId },
-        include: {
-            activities: {
-                where: {
-                    type: { in: ["NOTE", "CALL"] },
-                },
-            },
-        },
-    })
-
-    if (!lead) return
-
-    let score = 0
-
-    // Count activities
-    const noteCount = lead.activities.filter((a) => a.type === "NOTE").length
-    const callCount = lead.activities.filter((a) => a.type === "CALL").length
-
-    // +10 per note
-    score += noteCount * 10
-
-    // +20 per call
-    score += callCount * 20
-
-    // +15 if INTERESTED
-    if (lead.leadStatus === "INTERESTED") {
-        score += 15
-    }
-
-    // +25 if QUALIFIED
-    if (lead.leadStatus === "QUALIFIED") {
-        score += 25
-    }
-
-    // -20 if inactive >14 days
-    if (lead.lastActionAt) {
-        const daysSinceLastAction = Math.floor(
-            (Date.now() - new Date(lead.lastActionAt).getTime()) / (1000 * 60 * 60 * 24)
-        )
-        if (daysSinceLastAction > 14) {
-            score -= 20
-        }
-    }
-
-    // Clamp score between 0 and 100
-    score = Math.max(0, Math.min(100, score))
-
-    // Derive temperature from score
-    let temperature: LeadTemp
-    if (score >= 70) {
-        temperature = "HOT"
-    } else if (score >= 40) {
-        temperature = "WARM"
-    } else {
-        temperature = "COLD"
-    }
-
-    // Update lead
-    await prisma.lead.update({
-        where: { id: leadId },
-        data: {
-            score,
-            temperature,
-        },
-    })
+// Global trigger for lead scoring (unified engine)
+async function triggerLeadScoring(leadId: string) {
+    const { LeadScoringService } = await import("@/lib/services/leadScoring")
+    await LeadScoringService.calculateLeadScore(leadId)
 }
 
 /* ==================== ACTIONS ==================== */
@@ -104,13 +39,15 @@ export async function changeLeadStatus(leadId: string, status: LeadStatus) {
         where: { id: leadId, userId: session.user.id },
         data: {
             leadStatus: status,
+            status: status, // @deprecated — kept in sync with leadStatus
             lastActionAt: new Date(),
         },
     })
 
-    // Recalculate score and temperature
-    await recalculateLeadScore(leadId)
+    // Recalculate score and temperature using global engine
+    await triggerLeadScoring(leadId)
 
+    revalidatePath("/dashboard/leads")
     revalidatePath("/dashboard/other/leads")
     revalidatePath("/dashboard/other")
     return { success: true }
@@ -137,9 +74,10 @@ export async function changeLeadTemperature(leadId: string, temperature: LeadTem
         },
     })
 
-    // Recalculate score
-    await recalculateLeadScore(leadId)
+    // Recalculate score using global engine
+    await triggerLeadScoring(leadId)
 
+    revalidatePath("/dashboard/leads")
     revalidatePath("/dashboard/other/leads")
     revalidatePath("/dashboard/other")
     return { success: true }
@@ -172,6 +110,7 @@ export async function addLeadTag(leadId: string, tag: string) {
         },
     })
 
+    revalidatePath("/dashboard/leads")
     revalidatePath("/dashboard/other/leads")
     revalidatePath("/dashboard/other")
     return { success: true }
@@ -201,6 +140,7 @@ export async function removeLeadTag(leadId: string, tag: string) {
         },
     })
 
+    revalidatePath("/dashboard/leads")
     revalidatePath("/dashboard/other/leads")
     revalidatePath("/dashboard/other")
     return { success: true }
@@ -242,6 +182,7 @@ export async function setLeadReminder(
         },
     })
 
+    revalidatePath("/dashboard/leads")
     revalidatePath("/dashboard/other/leads")
     revalidatePath("/dashboard/other")
     return { success: true }
@@ -286,6 +227,7 @@ export async function completeLeadReminder(leadId: string) {
         },
     })
 
+    revalidatePath("/dashboard/leads")
     revalidatePath("/dashboard/other/leads")
     revalidatePath("/dashboard/other")
     return { success: true }
@@ -317,7 +259,7 @@ export async function addLeadNote(leadId: string, text: string) {
         },
     })
 
-    // 2️⃣ Guardar en el lead (ESTO ES LO QUE FALTABA)
+    // 2️⃣ Guardar en el lead
     const newNote = `[${new Date().toLocaleString()}] ${text}`
 
     await prisma.lead.update({
@@ -330,7 +272,10 @@ export async function addLeadNote(leadId: string, text: string) {
         },
     })
 
-    await recalculateLeadScore(leadId)
+    // Recalculate score using global engine
+    await triggerLeadScoring(leadId)
+    
+    revalidatePath("/dashboard/leads")
     revalidatePath("/dashboard/other/leads")
     revalidatePath("/dashboard/other")
 
@@ -365,9 +310,10 @@ export async function registerLeadCall(leadId: string, notes: string) {
         data: { lastActionAt: new Date() },
     })
 
-    // Recalculate score (+20 for call)
-    await recalculateLeadScore(leadId)
+    // Recalculate score using global engine
+    await triggerLeadScoring(leadId)
 
+    revalidatePath("/dashboard/leads")
     revalidatePath("/dashboard/other/leads")
     revalidatePath("/dashboard/other")
     return { success: true }
@@ -390,6 +336,7 @@ export async function markLeadLost(leadId: string, reason: string) {
         where: { id: leadId, userId: session.user.id },
         data: {
             leadStatus: "LOST",
+            status: "LOST", // @deprecated — kept in sync with leadStatus
             lastActionAt: new Date(),
         },
     })
@@ -405,6 +352,7 @@ export async function markLeadLost(leadId: string, reason: string) {
         },
     })
 
+    revalidatePath("/dashboard/leads")
     revalidatePath("/dashboard/other/leads")
     revalidatePath("/dashboard/other")
     return { success: true }
@@ -464,6 +412,7 @@ export async function convertLeadToClient(leadId: string) {
         where: { id: leadId },
         data: {
             leadStatus: "CONVERTED",
+            status: "CONVERTED", // @deprecated — kept in sync with leadStatus
             converted: true,
             clientId: client.id,
             convertedAt: new Date(),
@@ -485,8 +434,8 @@ export async function convertLeadToClient(leadId: string) {
         },
     })
 
+    revalidatePath("/dashboard/leads")
     revalidatePath("/dashboard/other/leads")
-    revalidatePath("/dashboard/other")
     revalidatePath("/dashboard/clients")
     revalidatePath("/dashboard/other")
     return { success: true, clientId: client.id, clientCreated }
@@ -522,12 +471,14 @@ export async function createLead(data: {
             phone: data.phone?.trim() || null,
             source: data.source?.trim() || "manual",
             leadStatus: "NEW",
+            status: "NEW", // @deprecated — kept in sync
             temperature: "COLD",
             score: 0,
             lastActionAt: new Date(),
         },
     })
 
+    revalidatePath("/dashboard/leads")
     revalidatePath("/dashboard/other/leads")
     revalidatePath("/dashboard/other")
     return { success: true, leadId: lead.id }
@@ -619,6 +570,7 @@ export async function importLeads(
                     phone,
                     source,
                     leadStatus: "NEW",
+                    status: "NEW", // @deprecated — kept in sync
                     temperature: leadData.temperature || "COLD", // Use provided temperature or default to COLD
                     score: 0,
                     converted: false,
@@ -634,6 +586,7 @@ export async function importLeads(
         }
     }
 
+    revalidatePath("/dashboard/leads")
     revalidatePath("/dashboard/other/leads")
     revalidatePath("/dashboard/other")
     return { success: true, created, skipped, invalid }
@@ -675,6 +628,7 @@ export async function dismissAISuggestion(leadId: string) {
         },
     })
 
+    revalidatePath("/dashboard/leads")
     revalidatePath("/dashboard/other/leads")
     revalidatePath("/dashboard/other")
     return { success: true }
@@ -706,7 +660,7 @@ export async function getAutomationSuggestions(leadId: string) {
     }
 
     // Import dynamically to avoid bundling OpenAI in client
-    const { generateAutomationSuggestions } = await import("../utils/openai")
+    const { generateAutomationSuggestions } = await import("@/modules/leads/utils/openai")
     const suggestions = await generateAutomationSuggestions(lead)
 
     return suggestions
@@ -741,6 +695,7 @@ export async function deleteLead(leadId: string) {
         where: { id: leadId },
     })
 
+    revalidatePath("/dashboard/leads")
     revalidatePath("/dashboard/other/leads")
     revalidatePath("/dashboard/other")
     return { success: true }

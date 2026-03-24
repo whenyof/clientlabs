@@ -51,36 +51,6 @@ const themeScript = `
 `
 
 /* ================================
-   ClientLabs tracking config
-================================ */
-
-const clientlabsConfig = {
-  key:
-    process.env.NEXT_PUBLIC_CLIENTLABS_PUBLIC_KEY ||
-    "cl_pub_1005fd6d5b7da49b438d470f9ae23eea",
-  features: {
-    pageview: true,
-    forms: true,
-    intent: true,
-    ecommerce: true,
-    heartbeat: true,
-    utm: true,
-    email: true,
-    cta: true,
-    whatsapp: true,
-    cart: true,
-  },
-}
-
-const clientlabsConfigScript = `
-window.clientlabsConfig=${JSON.stringify(clientlabsConfig)};
-`
-
-const clientlabsLoaderUrl =
-  process.env.NEXT_PUBLIC_CLIENTLABS_CDN ||
-  "https://cdn.clientlabs.io/v1/loader.js"
-
-/* ================================
    Root Layout
 ================================ */
 
@@ -96,14 +66,32 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
 
         {/* ClientLabs tracking config */}
-        <script dangerouslySetInnerHTML={{ __html: clientlabsConfigScript }} />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.clientlabsConfig = {
+                key: "cl_pub_dfcbdb08d9da7f3e5d1f4468e304ef40",
+                features: {
+                  pageview: true,
+                  forms: true,
+                  intent: true,
+                  ecommerce: true,
+                  heartbeat: true,
+                  utm: true,
+                  email: true,
+                  cta: true,
+                  whatsapp: true,
+                  cart: true
+                }
+              };
+            `,
+          }}
+        />
 
         {/* ClientLabs loader */}
         <Script
-          id="clientlabs-loader"
-          src={clientlabsLoaderUrl}
+          src="https://cdn.clientlabs.io/v1/loader.js"
           strategy="afterInteractive"
-          async
         />
       </head>
 

@@ -10,7 +10,7 @@ export function DashboardHeader() {
 
     return (
         <header
-            className="flex items-center justify-between px-6 bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] sticky top-0 z-30 shrink-0 h-16 w-full"
+            className="flex items-center justify-between px-6 bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] sticky top-0 z-30 shrink-0 h-16 w-full pointer-events-auto"
         >
             {/* Izquierda: Buscador */}
             <div className="flex items-center gap-8 flex-1">

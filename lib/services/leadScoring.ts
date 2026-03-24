@@ -145,44 +145,66 @@ export class LeadScoringService {
  break
  }
 
- // Ensure score doesn't go below 0
- totalScore = Math.max(0, totalScore)
+  // Rule 4: Manual activities (align with manual scoring actions)
+  const manualCalls = lead.activities.filter(a => a.type === 'CALL').length
+  const manualNotes = lead.activities.filter(a => a.type === 'NOTE').length
+  
+  if (manualCalls > 0) {
+    const callPoints = manualCalls * 20
+    totalScore += callPoints
+    appliedRules.push({ leadId, rule: 'manual_calls', points: callPoints })
+  }
+  if (manualNotes > 0) {
+    const notePoints = manualNotes * 10
+    totalScore += notePoints
+    appliedRules.push({ leadId, rule: 'manual_notes', points: notePoints })
+  }
 
- // Update lead score and log scoring events
- await prisma.lead.update({
- where: { id: leadId },
- data: { aiPrediction: totalScore }
- })
+  // Ensure score doesn't go below 0 and cap at 100
+  totalScore = Math.max(0, Math.min(100, totalScore))
 
- // Log scoring events
- for (const rule of appliedRules) {
- await prisma.leadScore.create({
- data: {
- userId: lead.userId,
- leadId,
- score: totalScore,
- rule: rule.rule,
- points: rule.points,
- metadata: rule.metadata
- }
- })
- }
+  // Derive temperature
+  const temperature = LeadScoringService.getLeadTempFromScore(totalScore)
 
- return totalScore
- } catch (error) {
- console.error('Error calculating lead score:', error)
- throw error
- }
- }
+  // Update lead score, temperature and log scoring events
+  await prisma.lead.update({
+    where: { id: leadId },
+    data: { 
+      aiPrediction: totalScore,
+      score: Math.round(totalScore),
+      temperature
+    }
+  })
 
- /**
- * Get lead status based on score
- */
- static getLeadStatusFromScore(score: number): 'hot' | 'warm' | 'cold' {
- if (score >= 80) return 'hot'
- if (score >= 40) return 'warm'
- return 'cold'
- }
+  // Log scoring events
+  for (const rule of appliedRules) {
+    await prisma.leadScore.create({
+      data: {
+        userId: lead.userId,
+        leadId,
+        score: Math.round(totalScore),
+        rule: rule.rule,
+        points: rule.points,
+        metadata: rule.metadata
+      }
+    })
+  }
+
+  return totalScore
+  } catch (error) {
+  console.error('Error calculating lead score:', error)
+  throw error
+  }
+  }
+
+  /**
+  * Get lead temperature based on score
+  */
+  static getLeadTempFromScore(score: number): 'HOT' | 'WARM' | 'COLD' {
+  if (score >= 70) return 'HOT'
+  if (score >= 40) return 'WARM'
+  return 'COLD'
+  }
 
  /**
  * Recalculate scores for all leads (batch operation)

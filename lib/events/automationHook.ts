@@ -47,10 +47,12 @@ export async function triggerAutomation(
 
         if (!lead) return
 
+        const canonicalStatus = lead.leadStatus ?? 'NEW'
         const leadSnapshot: LeadSnapshot = {
             ...lead,
             priorityLevel: typeof lead.priority === 'number' ? lead.priority : (parseInt(String(lead.priority), 10) || 1),
-            leadStatus: lead.leadStatus ?? 'NEW',
+            status: canonicalStatus,     // @deprecated — synced from leadStatus
+            leadStatus: canonicalStatus,
             temperature: lead.temperature ?? null,
         }
 

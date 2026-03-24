@@ -553,6 +553,7 @@ model Lead {
   message               String?
   source                String          @default("WEB")
   formId                String?
+  /// @deprecated Use `leadStatus` (enum) as the single source of truth. Kept for backward compatibility; auto-synced from leadStatus.
   status                String          @default("NEW")
   leadStatus            LeadStatus      @default(NEW)
   temperature           LeadTemp?
@@ -627,6 +628,16 @@ model Lead {
   @@index([userId])
   @@index([validationStatus])
   @@index([websiteId])
+
+  // ── Compound indexes for scalable queries ──
+  @@index([userId, createdAt(sort: Desc)])        // Default listing: WHERE userId ORDER BY createdAt DESC
+  @@index([userId, leadStatus, createdAt(sort: Desc)]) // Status filter + sort
+  @@index([userId, temperature, createdAt(sort: Desc)]) // Temperature filter + sort
+  @@index([userId, source, createdAt(sort: Desc)]) // Source filter + sort
+  @@index([userId, score(sort: Desc)])            // Score-based sort
+  @@index([userId, lastActionAt(sort: Desc)])     // Last activity sort
+  @@index([userId, email])                        // Duplicate checking (case-sensitive)
+  @@index([userId, phone])                        // Duplicate checking (phone-based)
 }
 
 model LeadAIInsight {

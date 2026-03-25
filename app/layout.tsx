@@ -66,27 +66,6 @@ export default function RootLayout({
         <Script id="theme-init" strategy="beforeInteractive">
           {themeScript}
         </Script>
-        {/* ClientLabs Tracking */}
-        <Script id="clientlabs-config" strategy="beforeInteractive">
-          {`
-            window.clientlabsConfig = {
-              "key": "cl_pub_7be9eaae0943d86d66f1beca45fa1853",
-              "features": {
-                "pageview": true,
-                "forms": true,
-                "intent": true,
-                "ecommerce": true,
-                "heartbeat": true,
-                "utm": true,
-                "email": true,
-                "cta": true,
-                "whatsapp": true,
-                "cart": true
-              }
-            };
-          `}
-        </Script>
-        <Script id="clientlabs-loader" src="/v1/loader.js" strategy="afterInteractive" />
       </head>
 
       <body
@@ -123,6 +102,31 @@ export default function RootLayout({
             </Providers>
           </ThemeProvider>
         </QueryProvider>
+        {/* ClientLabs Tracking */}
+        <Script id="clientlabs-config" strategy="beforeInteractive">
+          {`
+            window.clientlabsConfig = {
+              "key": "cl_pub_7be9eaae0943d86d66f1beca45fa1853",
+              "features": {
+                "pageview": true,
+                "forms": true,
+                "intent": true,
+                "ecommerce": true,
+                "heartbeat": true,
+                "utm": true,
+                "email": true,
+                "cta": true,
+                "whatsapp": true,
+                "cart": true
+              }
+            };
+          `}
+        </Script>
+        <Script
+          id="clientlabs-loader"
+          src="/v1/loader.js"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   )

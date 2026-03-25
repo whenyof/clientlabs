@@ -106,7 +106,7 @@ export default function RootLayout({
         <Script id="clientlabs-config" strategy="beforeInteractive">
           {`
             window.clientlabsConfig = {
-              "key": "cl_pub_7be9eaae0943d86d66f1beca45fa1853",
+              "key": "cl_pub_53a0606e42e11fc841c3176ce99597be07920e238483360e6f0234f0c1004ed1",
               "features": {
                 "pageview": true,
                 "forms": true,
@@ -124,7 +124,7 @@ export default function RootLayout({
         </Script>
         <Script
           id="clientlabs-loader"
-          src="/v1/loader.js"
+          src="https://clientlabs.io/v1/loader.js"
           strategy="afterInteractive"
         />
       </body>

@@ -3,11 +3,11 @@
  * Framework-safe for Next.js, React, Astro, Shopify, Webflow, WordPress, GTM.
  */
 
-const DEFAULT_LOADER_URL = "https://cdn.clientlabs.io/v1/loader.js";
+const DEFAULT_LOADER_URL = "/v1/loader.js";
 
-/** Loader URL (configurable via NEXT_PUBLIC_CLIENTLABS_CDN; fallback: .io CDN). */
+/** Loader URL (always served from this app). */
 export function getClientlabsLoaderUrl(): string {
-  return (typeof process !== "undefined" && process.env?.NEXT_PUBLIC_CLIENTLABS_CDN) || DEFAULT_LOADER_URL;
+  return DEFAULT_LOADER_URL;
 }
 
 export const CLIENTLABS_LOADER_URL = DEFAULT_LOADER_URL;
@@ -59,7 +59,7 @@ export function getClientlabsSnippetLegacy(options: {
   const safeKey = String(key).replace(/"/g, "\\\"");
   return `<!-- ClientLabs Tracking (legacy) -->
 <script
-  src="https://cdn.clientlabs.io/v1/sdk.js"
+  src="/v1/sdk.js"
   data-key="${safeKey}"
   data-features='${featuresStr}'
   async

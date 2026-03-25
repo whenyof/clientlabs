@@ -8,6 +8,8 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
+    "create-key": "npx tsx scripts/create-api-key.ts",
+    "test-ingest": "npx tsx scripts/test-ingest.ts",
     "repair-invoice-duplicates": "tsx scripts/repair-invoice-duplicates.ts",
     "worker:events": "tsx workers/eventQueueWorker.ts"
   },

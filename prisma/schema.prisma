@@ -608,6 +608,7 @@ model Lead {
   leadScores            LeadScore[]
   Task                  Task[]
   TrackingEvent         TrackingEvent[]
+  Reminder              Reminder[]
 
   @@index([category])
   @@index([clientId])
@@ -951,19 +952,24 @@ model CalendarBlock {
 }
 
 model Reminder {
-  id        String         @id @default(cuid())
-  userId    String
-  title     String
-  start     DateTime
-  end       DateTime
-  status    ReminderStatus @default(PENDING)
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
-  User      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String         @id @default(cuid())
+  userId      String
+  leadId      String?
+  title       String
+  description String?
+  type        String?        @default("custom")
+  start       DateTime
+  end         DateTime
+  status      ReminderStatus @default(PENDING)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  User        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Lead        Lead?          @relation(fields: [leadId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([start])
   @@index([status])
+  @@index([leadId])
 }
 
 model MonthlyGoal {

@@ -1,5 +1,11 @@
 import { Redis } from "@upstash/redis"
 
+if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
+  console.error(
+    "[Redis] UPSTASH_REDIS_REST_URL o UPSTASH_REDIS_REST_TOKEN no están definidas. El rate limiter no funcionará correctamente.",
+  )
+}
+
 /**
  * Single Redis client for the entire app and worker.
  * Do not create Redis clients anywhere else.

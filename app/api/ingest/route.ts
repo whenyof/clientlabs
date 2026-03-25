@@ -4,9 +4,8 @@ import { logger } from "@/lib/logger"
 import * as crypto from "node:crypto"
 import { ApiKeyScope, Prisma } from "@prisma/client"
 
-// Temporarily disabled external dependencies for diagnostic stabilization
-// import redis from "@/lib/security/redis"
-// import { checkDistributedRateLimit } from "@/lib/security/distributedRateLimiter"
+import { redis } from "@/lib/security/redis"
+import { checkDistributedRateLimit } from "@/lib/security/distributedRateLimiter"
 
 const MAX_REQUEST_BYTES = 100 * 1024 // 100KB for lead ingestion
 
@@ -95,8 +94,23 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Forbidden: insufficient scope" }, { status: 403 })
         }
 
-        // 📊 7. Rate Limit (Key Boundary) - Temporarily disabled for stabilization
-        console.log("[INGEST] RATE_LIMIT: skipped (external dep disabled)")
+        // 📊 7. Rate Limit (Key Boundary)
+        try {
+            const redisConfigured = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+            if (redisConfigured) {
+                const rateCheck = await checkDistributedRateLimit(
+                    `api_ingest:${apiKey.userId}:${clientIp}`, // Enforcing per-user/IP limit
+                    100, // 100 requests
+                    60   // per 60 seconds
+                )
+                if (!rateCheck.allowed) {
+                    console.warn(`[INGEST] RATE_LIMIT_EXCEEDED: ${clientIp}`)
+                    return NextResponse.json({ error: "Too Many Requests" }, { status: 429 })
+                }
+            }
+        } catch (err) {
+            console.error("[INGEST][RATE_LIMIT ERROR] Failing open:", err)
+        }
 
         const userId = apiKey.userId
 

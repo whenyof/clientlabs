@@ -9,7 +9,6 @@ if (typeof process !== "undefined") {
 import { prisma } from "@/lib/prisma"
 import { ApiKeyType } from "@prisma/client"
 import { buildCorsHeaders } from "@/lib/track/originValidator"
-import { logger } from "@/lib/logger"
 import { checkDistributedRateLimit } from "@/lib/security/distributedRateLimiter"
 import { enqueueEvents } from "@/lib/queue/eventsQueue"
 import type { QueuedEvent } from "@/lib/events/types"
@@ -103,198 +102,234 @@ export async function POST(request: NextRequest) {
   const origin = request.headers.get("origin")
   let corsHeaders = buildCorsHeaders(null, origin)
 
-  const contentLength = Number(request.headers.get("content-length")) || 0
-  if (contentLength > MAX_REQUEST_BYTES) {
-    return withCors(NextResponse.json({ error: "Payload too large" }, { status: 413 }), corsHeaders)
-  }
-
-  const body = await request.json().catch(() => null)
-  if (body == null || typeof body !== "object" || Array.isArray(body)) {
-    return withCors(NextResponse.json({ error: "Invalid JSON" }, { status: 400 }), corsHeaders)
-  }
-
-  const payload = body as SdkIngestPayload & { api_key?: string; apiKey?: string }
-
-  if (contentLength <= 0) {
-    const bodyBytes = safeByteLength(payload)
-    if (bodyBytes === null || bodyBytes > MAX_REQUEST_BYTES) {
+  try {
+    const contentLength = Number(request.headers.get("content-length")) || 0
+    if (contentLength > MAX_REQUEST_BYTES) {
       return withCors(NextResponse.json({ error: "Payload too large" }, { status: 413 }), corsHeaders)
     }
-  }
 
-  const headerKey =
-    request.headers.get("x-api-key")?.trim() ||
-    request.headers.get("authorization")?.replace(/^Bearer\s+/i, "").trim() ||
-    ""
-  const queryKey = request.nextUrl.searchParams.get("api_key")?.trim() || ""
-  const bodyKey = (
-    typeof payload.api_key === "string" ? payload.api_key : typeof payload.apiKey === "string" ? payload.apiKey : ""
-  ).trim()
-  const api_key = headerKey || queryKey || bodyKey
+    const body = await request.json().catch(() => null)
+    if (body == null || typeof body !== "object" || Array.isArray(body)) {
+      return withCors(NextResponse.json({ error: "Invalid JSON" }, { status: 400 }), corsHeaders)
+    }
 
-  if (process.env.NODE_ENV !== "production") {
-    console.log("[ingest] apiKey source:", {
-      header: !!headerKey,
-      query: !!queryKey,
-      body: !!bodyKey,
-    })
-  }
+    const payload = body as SdkIngestPayload & { api_key?: string; apiKey?: string }
 
-  if (!api_key) {
-    return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }), corsHeaders)
-  }
+    if (contentLength <= 0) {
+      const bodyBytes = safeByteLength(payload)
+      if (bodyBytes === null || bodyBytes > MAX_REQUEST_BYTES) {
+        return withCors(NextResponse.json({ error: "Payload too large" }, { status: 413 }), corsHeaders)
+      }
+    }
 
-  console.log("[ingest] received apiKey:", api_key)
+    const headerKey =
+      request.headers.get("x-api-key")?.trim() ||
+      request.headers.get("authorization")?.replace(/^Bearer\s+/i, "").trim() ||
+      ""
+    const queryKey = request.nextUrl.searchParams.get("api_key")?.trim() || ""
+    const bodyKey = (
+      typeof payload.api_key === "string"
+        ? payload.api_key
+        : typeof payload.apiKey === "string"
+          ? payload.apiKey
+          : ""
+    ).trim()
+    const api_key = headerKey || queryKey || bodyKey
 
-  const { events } = payload
+    if (process.env.NODE_ENV !== "production") {
+      console.log("[ingest] apiKey source:", {
+        header: !!headerKey,
+        query: !!queryKey,
+        body: !!bodyKey,
+      })
+    }
 
-  if (!Array.isArray(events) || events.length === 0) {
-    return withCors(NextResponse.json({ error: "Bad Request: events must be a non-empty array" }, { status: 400 }), corsHeaders)
-  }
+    if (!api_key) {
+      return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }), corsHeaders)
+    }
 
-  if (events.length > MAX_EVENTS_PER_REQUEST) {
-    return withCors(NextResponse.json({ error: `Too many events: max ${MAX_EVENTS_PER_REQUEST}` }, { status: 400 }), corsHeaders)
-  }
+    console.log("[ingest] received apiKey:", api_key)
 
-  if (!origin) {
-    return withCors(NextResponse.json({ error: "Forbidden" }, { status: 403 }), corsHeaders)
-  }
+    const { events } = payload
 
-  let hostname: string
-  try {
-    hostname = new URL(origin).hostname
-  } catch {
-    return withCors(NextResponse.json({ error: "Forbidden" }, { status: 403 }), corsHeaders)
-  }
+    if (!Array.isArray(events) || events.length === 0) {
+      return withCors(
+        NextResponse.json({ error: "Bad Request: events must be a non-empty array" }, { status: 400 }),
+        corsHeaders
+      )
+    }
 
-  const hash = crypto.createHash("sha256").update(api_key).digest("hex")
-  let keyRecord = await prisma.apiKey.findUnique({
-    where: { keyHash: hash },
-  })
+    if (events.length > MAX_EVENTS_PER_REQUEST) {
+      return withCors(
+        NextResponse.json({ error: `Too many events: max ${MAX_EVENTS_PER_REQUEST}` }, { status: 400 }),
+        corsHeaders
+      )
+    }
 
-  if (!keyRecord) {
-    if (process.env.NODE_ENV === "development") {
-      console.log("[ingest] creating dev apiKey:", api_key)
-      const devUserId =
-        process.env.DEV_INGEST_USER_ID ??
-        (await prisma.user.findFirst({ select: { id: true } }))?.id
-      if (!devUserId) {
-        console.warn("[ingest] no user in DB; cannot auto-create dev key")
+    if (!origin) {
+      return withCors(NextResponse.json({ error: "Forbidden" }, { status: 403 }), corsHeaders)
+    }
+
+    let hostname: string
+    try {
+      hostname = new URL(origin).hostname
+    } catch {
+      return withCors(NextResponse.json({ error: "Forbidden" }, { status: 403 }), corsHeaders)
+    }
+
+    const hash = crypto.createHash("sha256").update(api_key).digest("hex")
+    let keyRecord: any = null
+    try {
+      keyRecord = await prisma.apiKey.findUnique({
+        where: { keyHash: hash },
+      })
+    } catch (dbError) {
+      console.error("[ingest] DB lookup failed:", dbError)
+      return withCors(
+        NextResponse.json({ error: "Service temporarily unavailable" }, { status: 503 }),
+        corsHeaders
+      )
+    }
+
+    if (!keyRecord) {
+      if (process.env.NODE_ENV === "development") {
+        console.log("[ingest] creating dev apiKey:", api_key)
+        const devUserId =
+          process.env.DEV_INGEST_USER_ID ??
+          (await prisma.user.findFirst({ select: { id: true } }))?.id
+        if (!devUserId) {
+          console.warn("[ingest] no user in DB; cannot auto-create dev key")
+          return withCors(
+            NextResponse.json({ error: "API key not found", apiKey: api_key }, { status: 401 }),
+            corsHeaders
+          )
+        }
+        keyRecord = await prisma.apiKey.create({
+          data: {
+            userId: devUserId,
+            keyHash: hash,
+            name: "Auto-created dev key",
+            type: ApiKeyType.public,
+            domain: hostname,
+            revoked: false,
+          },
+        })
+      } else {
         return withCors(
           NextResponse.json({ error: "API key not found", apiKey: api_key }, { status: 401 }),
           corsHeaders
         )
       }
-      keyRecord = await prisma.apiKey.create({
-        data: {
-          userId: devUserId,
-          keyHash: hash,
-          name: "Auto-created dev key",
-          type: ApiKeyType.public,
-          domain: hostname,
-          revoked: false,
-        },
-      })
-    } else {
+    }
+
+    console.log(
+      "[ingest] apiKeyRecord:",
+      keyRecord ? { id: keyRecord.id, type: keyRecord.type, domain: keyRecord.domain } : null
+    )
+
+    const now = Date.now()
+    const isInactive =
+      keyRecord.type !== ApiKeyType.public ||
+      keyRecord.revoked ||
+      (keyRecord.expiryDate != null && keyRecord.expiryDate.getTime() <= now)
+    if (isInactive) {
       return withCors(
-        NextResponse.json({ error: "API key not found", apiKey: api_key }, { status: 401 }),
+        NextResponse.json({ error: "API key inactive", apiKey: api_key }, { status: 401 }),
         corsHeaders
       )
     }
-  }
 
-  console.log("[ingest] apiKeyRecord:", keyRecord ? { id: keyRecord.id, type: keyRecord.type, domain: keyRecord.domain } : null)
-
-  const now = Date.now()
-  const isInactive =
-    keyRecord.type !== ApiKeyType.public ||
-    keyRecord.revoked ||
-    (keyRecord.expiryDate != null && keyRecord.expiryDate.getTime() <= now)
-  if (isInactive) {
-    return withCors(
-      NextResponse.json({ error: "API key inactive", apiKey: api_key }, { status: 401 }),
-      corsHeaders
-    )
-  }
-
-  if (keyRecord.domain && hostname !== keyRecord.domain) {
-    return withCors(
-      NextResponse.json({
-        error: "Domain not allowed",
-        origin: request.headers.get("origin"),
-        allowedDomain: keyRecord.domain,
-      }, { status: 401 }),
-      corsHeaders
-    )
-  }
-
-  const apiKey = keyRecord
-
-  corsHeaders = buildCorsHeaders(apiKey.domain, origin)
-
-  const clientIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
-  let rateLimitAllowed = true
-  try {
-    const redisConfigured =
-      process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
-    if (redisConfigured && process.env.NODE_ENV === "production") {
-      const rateCheck = await checkDistributedRateLimit(
-        `v1ingest:${apiKey.userId}:${clientIp}`,
-        RATE_LIMIT_REQUESTS,
-        RATE_LIMIT_WINDOW_SECONDS
+    if (keyRecord.domain && hostname !== keyRecord.domain) {
+      return withCors(
+        NextResponse.json(
+          {
+            error: "Domain not allowed",
+            origin: request.headers.get("origin"),
+            allowedDomain: keyRecord.domain,
+          },
+          { status: 401 }
+        ),
+        corsHeaders
       )
-      rateLimitAllowed = rateCheck.allowed
     }
-  } catch (err) {
-    console.error("[rate-limit] redis failure, failing open", err)
-    rateLimitAllowed = true
-  }
-  if (!rateLimitAllowed) {
+
+    const apiKey = keyRecord
+
+    corsHeaders = buildCorsHeaders(apiKey.domain, origin)
+
+    const clientIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
+    let rateLimitAllowed = true
+    try {
+      const redisConfigured =
+        process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+      if (redisConfigured && process.env.NODE_ENV === "production") {
+        const rateCheck = await checkDistributedRateLimit(
+          `v1ingest:${apiKey.userId}:${clientIp}`,
+          RATE_LIMIT_REQUESTS,
+          RATE_LIMIT_WINDOW_SECONDS
+        )
+        rateLimitAllowed = rateCheck.allowed
+      }
+    } catch (rateLimitError) {
+      console.error("[ingest] Rate limit check failed, failing open:", rateLimitError)
+      rateLimitAllowed = true // Nunca bloquear por fallo de Redis
+    }
+    if (!rateLimitAllowed) {
+      return withCors(NextResponse.json({ error: "Too Many Requests" }, { status: 429 }), corsHeaders)
+    }
+
+    const userId = apiKey.userId
+    const validEvents: QueuedEvent[] = []
+    let skipped = 0
+
+    for (const ev of events) {
+      if (!isValidEventItem(ev, now)) {
+        skipped += 1
+        continue
+      }
+
+      const o = ev as Record<string, unknown>
+      const type = normalizeEventType((o.type as string) ?? "")
+      const visitorId = (o.visitorId ?? o.visitor_id) as string
+      const props = isPlainObject(o.properties) ? o.properties : {}
+      const sessionId = (props.session_id ?? o.session_id ?? "") as string
+      const ts =
+        o.timestamp != null
+          ? typeof o.timestamp === "number"
+            ? new Date(o.timestamp).toISOString()
+            : new Date(Number(o.timestamp)).toISOString()
+          : new Date().toISOString()
+
+      validEvents.push({
+        type,
+        userId,
+        apiKey: api_key,
+        domain: hostname,
+        visitor_id: visitorId,
+        session_id: typeof sessionId === "string" ? sessionId : "",
+        timestamp: ts,
+        payload: props as Record<string, unknown>,
+      })
+    }
+
+    console.log("[ingest] enqueueing events:", validEvents.length)
+    await enqueueEvents(validEvents)
+
     return withCors(
-      NextResponse.json({ error: "Too Many Requests" }, { status: 429 }),
+      NextResponse.json({ ok: true, processed: validEvents.length, skipped, queued: true }),
+      corsHeaders
+    )
+  } catch (error) {
+    console.error("[ingest] Unhandled error:", {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      url: request.url,
+      origin: request.headers.get("origin"),
+    })
+
+    return withCors(
+      NextResponse.json({ error: "Internal server error" }, { status: 500 }),
       corsHeaders
     )
   }
-
-  const userId = apiKey.userId
-  const validEvents: QueuedEvent[] = []
-  let skipped = 0
-
-  for (const ev of events) {
-    if (!isValidEventItem(ev, now)) {
-      skipped += 1
-      continue
-    }
-
-    const o = ev as Record<string, unknown>
-    const type = normalizeEventType((o.type as string) ?? "")
-    const visitorId = (o.visitorId ?? o.visitor_id) as string
-    const props = isPlainObject(o.properties) ? o.properties : {}
-    const sessionId = (props.session_id ?? o.session_id ?? "") as string
-    const ts =
-      o.timestamp != null
-        ? typeof o.timestamp === "number"
-          ? new Date(o.timestamp).toISOString()
-          : new Date(Number(o.timestamp)).toISOString()
-        : new Date().toISOString()
-
-    validEvents.push({
-      type,
-      userId,
-      apiKey: api_key,
-      domain: hostname,
-      visitor_id: visitorId,
-      session_id: typeof sessionId === "string" ? sessionId : "",
-      timestamp: ts,
-      payload: props as Record<string, unknown>,
-    })
-  }
-
-  console.log("[ingest] enqueueing events:", validEvents.length)
-  await enqueueEvents(validEvents)
-
-  return withCors(
-    NextResponse.json({ ok: true, processed: validEvents.length, skipped, queued: true }),
-    corsHeaders
-  )
 }

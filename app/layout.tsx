@@ -63,36 +63,30 @@ export default function RootLayout({
     <html lang="es" suppressHydrationWarning>
       <head>
         {/* Theme initialization */}
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-
-        {/* ClientLabs tracking config */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.clientlabsConfig = {
-                key: "cl_pub_dfcbdb08d9da7f3e5d1f4468e304ef40",
-                features: {
-                  pageview: true,
-                  forms: true,
-                  intent: true,
-                  ecommerce: true,
-                  heartbeat: true,
-                  utm: true,
-                  email: true,
-                  cta: true,
-                  whatsapp: true,
-                  cart: true
-                }
-              };
-            `,
-          }}
-        />
-
-        {/* ClientLabs loader */}
-        <Script
-          src="https://cdn.clientlabs.io/v1/loader.js"
-          strategy="afterInteractive"
-        />
+        <Script id="theme-init" strategy="beforeInteractive">
+          {themeScript}
+        </Script>
+        {/* ClientLabs Tracking */}
+        <Script id="clientlabs-config" strategy="beforeInteractive">
+          {`
+            window.clientlabsConfig = {
+              "key": "cl_pub_7be9eaae0943d86d66f1beca45fa1853",
+              "features": {
+                "pageview": true,
+                "forms": true,
+                "intent": true,
+                "ecommerce": true,
+                "heartbeat": true,
+                "utm": true,
+                "email": true,
+                "cta": true,
+                "whatsapp": true,
+                "cart": true
+              }
+            };
+          `}
+        </Script>
+        <Script id="clientlabs-loader" src="/v1/loader.js" strategy="afterInteractive" />
       </head>
 
       <body

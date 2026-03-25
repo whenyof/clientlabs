@@ -1,13 +1,16 @@
 /**
  * ClientLabs script generator — config + loader architecture.
- * Framework-safe for Next.js, React, Astro, Shopify, Webflow, WordPress, GTM.
+ * Framework-safe para Next.js, React, Astro, Shopify, Webflow, WordPress, GTM.
  */
 
-const DEFAULT_LOADER_URL = "/v1/loader.js";
+const DEFAULT_LOADER_URL = "https://clientlabs.io/v1/loader.js";
 
-/** Loader URL (always served from this app). */
+/** Loader URL — usa variable de entorno en dev, producción por defecto. */
 export function getClientlabsLoaderUrl(): string {
-  return DEFAULT_LOADER_URL;
+  return (
+    process.env.NEXT_PUBLIC_CLIENTLABS_LOADER_URL ||
+    DEFAULT_LOADER_URL
+  );
 }
 
 export const CLIENTLABS_LOADER_URL = DEFAULT_LOADER_URL;
@@ -26,9 +29,8 @@ const DEFAULT_FEATURES = {
 };
 
 /**
- * Build the framework-safe installation snippet (config + loader).
- * No data-* attributes; key and features serialized via JSON.stringify for valid JS and safe escaping.
- * Readable formatting (indent 2). Compatible with HTML, Next.js, React, Astro, Shopify, Webflow, WordPress, GTM.
+ * Genera el snippet de instalación para el cliente.
+ * Compatible con HTML, Next.js, React, Astro, Shopify, Webflow, WordPress, GTM.
  */
 export function getClientlabsSnippet(options: {
   key: string;
@@ -47,8 +49,8 @@ window.clientlabsConfig = ${configStr};
 }
 
 /**
- * Legacy snippet: single script with data-key and data-features.
- * Not used in UI; only for programmatic/backward compatibility. Prefer getClientlabsSnippet.
+ * Snippet legacy — solo para compatibilidad hacia atrás.
+ * No usar en UI nueva. Usar getClientlabsSnippet en su lugar.
  */
 export function getClientlabsSnippetLegacy(options: {
   key: string;
@@ -59,7 +61,7 @@ export function getClientlabsSnippetLegacy(options: {
   const safeKey = String(key).replace(/"/g, "\\\"");
   return `<!-- ClientLabs Tracking (legacy) -->
 <script
-  src="/v1/sdk.js"
+  src="https://clientlabs.io/v1/sdk.js"
   data-key="${safeKey}"
   data-features='${featuresStr}'
   async

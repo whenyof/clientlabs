@@ -76,7 +76,12 @@ export function WebConnectDialog({ open, onOpenChange }: WebConnectDialogProps) 
 
     useEffect(() => {
         if (open) {
-            fetchPublicKeys()
+            fetchPublicKeys().then((keys) => {
+                if (keys && keys.length > 0) {
+                    setSelectedKey(keys[0])
+                    setStep("script")
+                }
+            })
             fetchIntegrations()
         }
     }, [open])
@@ -103,12 +108,14 @@ export function WebConnectDialog({ open, onOpenChange }: WebConnectDialogProps) 
             if (res.ok) {
                 const data = await res.json()
                 setPublicKeys(data)
+                return data
             }
         } catch (err) {
             console.error("Failed to fetch public keys", err)
         } finally {
             setIsLoading(false)
         }
+        return []
     }
 
     const handleCreateKey = async () => {

@@ -7,6 +7,7 @@ import { LeadsKPIs } from "@domains/leads/components/LeadsKPIs"
 import { LeadsFilters } from "@domains/leads/components/LeadsFilters"
 import { LeadsTable } from "@domains/leads/components/LeadsTable"
 export const dynamic = "force-dynamic"
+export const revalidate = 10
 
 type SearchParams = Promise<{
   status?: string

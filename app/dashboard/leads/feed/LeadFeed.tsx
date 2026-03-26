@@ -70,11 +70,16 @@ export function LeadFeed() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch(getBaseUrl() + "/api/v1/leads/feed")
-      .then((res) => (res.ok ? res.json() : Promise.reject(res)))
-      .then((data: FeedItem[]) => setItems(Array.isArray(data) ? data : []))
-      .catch(() => setItems([]))
-      .finally(() => setLoading(false))
+    const fetchFeed = () => {
+      fetch(getBaseUrl() + "/api/v1/leads/feed")
+        .then((res) => (res.ok ? res.json() : Promise.reject(res)))
+        .then((data: FeedItem[]) => setItems(Array.isArray(data) ? data : []))
+        .catch(() => setItems([]))
+        .finally(() => setLoading(false))
+    }
+    fetchFeed()
+    const interval = setInterval(fetchFeed, 5000)
+    return () => clearInterval(interval)
   }, [])
 
   const sorted = useMemo(() => {

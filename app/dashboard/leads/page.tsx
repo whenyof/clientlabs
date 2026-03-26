@@ -3,7 +3,7 @@ import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { LeadsHeader } from "@domains/leads/components/LeadsHeader"
-import { LeadsKPIs } from "@domains/leads/components/LeadsKPIs"
+import { LeadsKpisClient } from "./components/LeadsKpisClient"
 import { LeadsFilters } from "@domains/leads/components/LeadsFilters"
 import { LeadsTable } from "@domains/leads/components/LeadsTable"
 export const dynamic = "force-dynamic"
@@ -75,7 +75,7 @@ export default async function LeadsPage({
   return (
     <div className="space-y-6">
       <LeadsHeader />
-      <LeadsKPIs kpis={kpis} />
+      <LeadsKpisClient initial={kpis} />
       <LeadsFilters
         currentFilters={{
           status: searchParams.status ?? "all",

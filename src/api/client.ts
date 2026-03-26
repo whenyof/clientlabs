@@ -1,5 +1,5 @@
 export async function apiFetch<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, init)
+  const res = await fetch(url, { ...init, cache: "no-store" })
 
   if (!res.ok) {
     const text = await res.text().catch(() => "")

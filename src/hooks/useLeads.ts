@@ -15,6 +15,7 @@ export function useLeads(filters: GetLeadsParams = {}) {
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.pagination?.nextCursor,
     refetchInterval: 5000,
+    staleTime: 0,
   })
 
   // Flatten leads from all loaded pages

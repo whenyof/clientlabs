@@ -1,18 +1,16 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { LeadsKPIs } from "@domains/leads/components/LeadsKPIs"
+import { LeadsKPIs, type KpisData } from "@domains/leads/components/LeadsKPIs"
 
-type Kpis = { total: number; hot: number; converted: number; stalled: number }
-
-export function LeadsKpisClient({ initial }: { initial: Kpis }) {
+export function LeadsKpisClient({ initial }: { initial: KpisData }) {
   const [kpis, setKpis] = useState(initial)
 
   useEffect(() => {
     const fetchKpis = () => {
       fetch("/api/leads/kpis", { cache: "no-store" })
         .then((res) => (res.ok ? res.json() : Promise.reject(res)))
-        .then((data: Kpis) => setKpis(data))
+        .then((data: KpisData) => setKpis(data))
         .catch(() => {})
     }
 

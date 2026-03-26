@@ -23,8 +23,8 @@ type Filters = {
   showLost: boolean
 }
 
-const filterTriggerClass =
-  "border border-neutral-200 rounded-lg px-3 py-2 text-sm bg-white hover:bg-neutral-50 min-w-0 h-10"
+const triggerStyle =
+  "rounded-lg px-3 py-2 text-sm h-10 min-w-0"
 
 export function LeadsFilters({
   currentFilters,
@@ -62,25 +62,45 @@ export function LeadsFilters({
   const sortValue = `${currentFilters.sortBy}-${currentFilters.sortOrder}`
 
   return (
-    <div className="flex items-center gap-3 flex-wrap">
-      {/* Search — left aligned */}
-      <div className="relative w-full max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400 pointer-events-none" />
+    <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+      {/* Search */}
+      <div style={{ position: "relative", flex: 1, minWidth: 200 }}>
+        <Search
+          size={16}
+          style={{
+            position: "absolute",
+            left: 12,
+            top: "50%",
+            transform: "translateY(-50%)",
+            color: "var(--text-secondary)",
+            pointerEvents: "none",
+          }}
+        />
         <input
           type="text"
           placeholder="Buscar por nombre, email o teléfono..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full rounded-lg border border-neutral-200 bg-white py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-200"
+          style={{
+            width: "100%",
+            padding: "7px 12px 7px 36px",
+            borderRadius: 8,
+            border: "0.5px solid var(--border-subtle)",
+            background: "var(--bg-card)",
+            color: "var(--text-primary)",
+            fontSize: 13,
+            outline: "none",
+          }}
         />
       </div>
-      {/* Filters — right aligned */}
-      <div className="ml-auto flex items-center gap-3 flex-wrap">
+
+      {/* Filters */}
+      <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginLeft: "auto" }}>
         <Select value={currentFilters.status} onValueChange={(v) => update({ status: v })}>
-          <SelectTrigger className={filterTriggerClass + " w-[140px]"}>
+          <SelectTrigger className={triggerStyle} style={{ width: 140, border: "0.5px solid var(--border-subtle)", background: "var(--bg-card)", color: "var(--text-primary)" }}>
             <SelectValue placeholder={ui.filterStatus} />
           </SelectTrigger>
-          <SelectContent className="bg-white border border-neutral-200 shadow-lg">
+          <SelectContent style={{ background: "var(--bg-card)", border: "0.5px solid var(--border-subtle)" }}>
             <SelectItem value="all">{ui.filterAll}</SelectItem>
             <SelectItem value="NEW">{labels.leads.status.NEW}</SelectItem>
             <SelectItem value="CONTACTED">{labels.leads.status.CONTACTED}</SelectItem>
@@ -89,30 +109,23 @@ export function LeadsFilters({
           </SelectContent>
         </Select>
 
-        {/* Source */}
         <Select value={currentFilters.source} onValueChange={(v) => update({ source: v })}>
-          <SelectTrigger className={filterTriggerClass + " w-[140px]"}>
+          <SelectTrigger className={triggerStyle} style={{ width: 140, border: "0.5px solid var(--border-subtle)", background: "var(--bg-card)", color: "var(--text-primary)" }}>
             <SelectValue placeholder={ui.filterSource} />
           </SelectTrigger>
-          <SelectContent className="bg-white border border-neutral-200 shadow-lg">
+          <SelectContent style={{ background: "var(--bg-card)", border: "0.5px solid var(--border-subtle)" }}>
             <SelectItem value="all">{ui.filterSourceAll ?? "Todas"}</SelectItem>
             {sources.map((s) => (
-              <SelectItem key={s} value={s}>
-                {s}
-              </SelectItem>
+              <SelectItem key={s} value={s}>{s}</SelectItem>
             ))}
           </SelectContent>
         </Select>
 
-        {/* Temperature */}
-        <Select
-          value={currentFilters.temperature}
-          onValueChange={(v) => update({ temperature: v })}
-        >
-          <SelectTrigger className={filterTriggerClass + " w-[140px]"}>
+        <Select value={currentFilters.temperature} onValueChange={(v) => update({ temperature: v })}>
+          <SelectTrigger className={triggerStyle} style={{ width: 140, border: "0.5px solid var(--border-subtle)", background: "var(--bg-card)", color: "var(--text-primary)" }}>
             <SelectValue placeholder={ui.filterTemperature} />
           </SelectTrigger>
-          <SelectContent className="bg-white border border-neutral-200 shadow-lg">
+          <SelectContent style={{ background: "var(--bg-card)", border: "0.5px solid var(--border-subtle)" }}>
             <SelectItem value="all">{ui.filterAllTemps}</SelectItem>
             <SelectItem value="HOT">{labels.leads.temperatures.HOT}</SelectItem>
             <SelectItem value="WARM">{labels.leads.temperatures.WARM}</SelectItem>
@@ -120,7 +133,6 @@ export function LeadsFilters({
           </SelectContent>
         </Select>
 
-        {/* Sort */}
         <Select
           value={sortValue}
           onValueChange={(v) => {
@@ -128,8 +140,8 @@ export function LeadsFilters({
             update({ sortBy, sortOrder })
           }}
         >
-          <SelectTrigger className={filterTriggerClass + " w-[180px]"}>
-            <ArrowUpDown className="mr-2 h-4 w-4 text-neutral-500" />
+          <SelectTrigger className={triggerStyle} style={{ width: 180, border: "0.5px solid var(--border-subtle)", background: "var(--bg-card)", color: "var(--text-primary)" }}>
+            <ArrowUpDown size={14} style={{ marginRight: 8, color: "var(--text-secondary)" }} />
             <SelectValue placeholder="Ordenar" />
           </SelectTrigger>
           <SelectContent
@@ -137,7 +149,7 @@ export function LeadsFilters({
             align="end"
             sideOffset={4}
             position="popper"
-            className="bg-white border border-neutral-200 shadow-lg z-50"
+            style={{ background: "var(--bg-card)", border: "0.5px solid var(--border-subtle)", zIndex: 50 }}
           >
             <SelectItem value="score-desc">{ui.sortScoreDesc}</SelectItem>
             <SelectItem value="score-asc">{ui.sortScoreAsc}</SelectItem>
@@ -152,4 +164,3 @@ export function LeadsFilters({
     </div>
   )
 }
-

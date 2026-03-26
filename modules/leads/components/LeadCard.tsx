@@ -3,158 +3,193 @@
 import type { Lead } from "@prisma/client"
 import Link from "next/link"
 import { LeadRowActions } from "./LeadRowActions"
-import { cn } from "@/lib/utils"
 
-const STATUS_DISPLAY: Record<string, string> = {
-  NEW: "Nuevo",
-  CONTACTED: "Contactado",
-  QUALIFIED: "Calificado",
-  CONVERTED: "Cliente",
-  INTERESTED: "Interesado",
-  LOST: "Perdido",
+/* ── Status badges ── */
+
+const STATUS_CONFIG: Record<string, { label: string; bg: string; color: string; border: string; dot: string }> = {
+  NEW: { label: "Nuevo", bg: "#E1F5EE", color: "#0F6E56", border: "#9FE1CB", dot: "#1FA97A" },
+  CONTACTED: { label: "Contactado", bg: "#E6F1FB", color: "#185FA5", border: "#B5D4F4", dot: "#378ADD" },
+  QUALIFIED: { label: "Cualificado", bg: "#FAEEDA", color: "#854F0B", border: "#FAC775", dot: "#EF9F27" },
+  INTERESTED: { label: "Interesado", bg: "#FAEEDA", color: "#854F0B", border: "#FAC775", dot: "#EF9F27" },
+  LOST: { label: "Perdido", bg: "#FCEBEB", color: "#A32D2D", border: "#F7C1C1", dot: "#E24B4A" },
+  CONVERTED: { label: "Convertido", bg: "#E1F5EE", color: "#0F6E56", border: "#9FE1CB", dot: "#085041" },
 }
 
-function getStatusLabel(status?: string | null): string {
-  if (!status) return "—"
-  return STATUS_DISPLAY[status] ?? status
+function StatusBadge({ status }: { status?: string | null }) {
+  const cfg = STATUS_CONFIG[status ?? ""] ?? { label: status ?? "—", bg: "var(--bg-surface)", color: "var(--text-secondary)", border: "var(--border-subtle)", dot: "var(--text-secondary)" }
+  return (
+    <span style={{
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 6,
+      fontSize: 12,
+      fontWeight: 500,
+      padding: "3px 10px",
+      borderRadius: 6,
+      background: cfg.bg,
+      color: cfg.color,
+      border: `0.5px solid ${cfg.border}`,
+      whiteSpace: "nowrap",
+    }}>
+      <span style={{ width: 6, height: 6, borderRadius: "50%", background: cfg.dot, flexShrink: 0 }} />
+      {cfg.label}
+    </span>
+  )
 }
 
-function getStatusStyle(status?: string | null): string {
-  switch (status) {
-    case "NEW":
-      return "bg-blue-50 text-blue-700"
-    case "CONTACTED":
-      return "bg-amber-50 text-amber-700"
-    case "QUALIFIED":
-      return "bg-emerald-50 text-emerald-700"
-    case "CONVERTED":
-      return "bg-emerald-50 text-emerald-700"
-    case "LOST":
-      return "bg-red-50 text-red-700"
-    default:
-      return "bg-neutral-100 text-neutral-600"
-  }
-}
+/* ── Source label ── */
 
-function getTemperatureColor(temp?: string | null): string {
+function formatSource(source?: string | null): string {
+  if (!source) return "—"
   const map: Record<string, string> = {
-    HOT: "bg-red-500",
-    WARM: "bg-amber-400",
-    COLD: "bg-blue-400",
+    sdk: "SDK directo",
+    WEB: "Formulario web",
+    API: "API",
+    MANUAL: "Manual",
   }
-
-  if (!temp) return "bg-neutral-200"
-  return map[temp] ?? "bg-neutral-200"
+  return map[source] ?? source
 }
 
-function lastActivityText(lastActionAt?: Date | null): string {
-  if (!lastActionAt) return "—"
+/* ── Score bar ── */
 
-  const d = new Date(lastActionAt)
+function ScoreBar({ score }: { score: number }) {
+  const pct = Math.min(100, Math.max(0, score))
+  let barColor: string
+  let numColor: string
+  if (score >= 60) {
+    barColor = "#1FA97A"; numColor = "#0F6E56"
+  } else if (score >= 30) {
+    barColor = "#EF9F27"; numColor = "#854F0B"
+  } else {
+    barColor = "#B4B2A9"; numColor = "var(--text-secondary)"
+  }
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 80 }}>
+      <div style={{ flex: 1, height: 3, borderRadius: 2, background: "var(--border-subtle)", overflow: "hidden" }}>
+        <div style={{ height: "100%", width: `${pct}%`, borderRadius: 2, background: barColor, transition: "width 0.3s" }} />
+      </div>
+      <span style={{ fontSize: 12, fontWeight: 500, color: numColor, minWidth: 28, textAlign: "right" }}>{score}</span>
+    </div>
+  )
+}
+
+/* ── Time formatting ── */
+
+function formatTime(date?: Date | null): string {
+  if (!date) return ""
+  const d = new Date(date)
   const now = new Date()
   const diffMs = now.getTime() - d.getTime()
-
   const days = Math.floor(diffMs / (1000 * 60 * 60 * 24))
 
-  if (days <= 0) return "Hoy"
-  if (days === 1) return "Ayer"
-  if (days < 7) return `Hace ${days}d`
-  if (days < 30) return `Hace ${Math.floor(days / 7)}sem`
-
-  return `Hace ${Math.floor(days / 30)}m`
+  const time = d.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })
+  if (days === 0) return `Hoy, ${time}`
+  if (days === 1) return `Ayer, ${time}`
+  return d.toLocaleDateString("es-ES", { day: "numeric", month: "short" })
 }
 
-function scorePercent(score?: number | null): number {
-  if (!score) return 0
-  return Math.min(100, Math.max(0, score))
+/* ── Initials ── */
+
+function getInitials(name?: string | null, email?: string | null): string {
+  if (name && name.trim().length > 0) {
+    const parts = name.trim().split(/\s+/)
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
+    return name.slice(0, 2).toUpperCase()
+  }
+  if (email) return email.slice(0, 2).toUpperCase()
+  return "??"
 }
+
+/* ── Main component ── */
 
 interface LeadCardProps {
   lead: Lead
 }
 
 export function LeadCard({ lead }: LeadCardProps) {
-  const statusLabel = getStatusLabel(lead.leadStatus)
-  const statusStyle = getStatusStyle(lead.leadStatus)
-
-  const lastActivity = lastActivityText(lead.lastActionAt)
-  const temperatureColor = getTemperatureColor(lead.temperature)
-
   const score = lead.score ?? 0
-  const scorePct = scorePercent(score)
-
-  const initial =
-    (lead.name && lead.name.length > 0
-      ? lead.name.charAt(0)
-      : lead.email?.charAt(0))?.toUpperCase() ?? "?"
+  const initials = getInitials(lead.name, lead.email)
+  const timeStr = formatTime(lead.createdAt)
 
   return (
     <div
-      className={cn(
-        "relative flex items-center gap-4 pl-3 pr-4 py-3",
-        "rounded-lg border border-neutral-200 bg-white",
-        "hover:bg-neutral-50 transition-colors"
-      )}
+      style={{
+        display: "grid",
+        gridTemplateColumns: "2fr 1fr 1fr 1.2fr 90px",
+        alignItems: "center",
+        padding: "13px 20px",
+        borderBottom: "0.5px solid var(--border-subtle)",
+        transition: "background 0.12s",
+        cursor: "pointer",
+      }}
+      onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-surface)")}
+      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
     >
-      {/* temperature bar */}
-      <span
-        className={cn(
-          "absolute left-0 top-0 bottom-0 w-[4px] rounded-l-lg",
-          temperatureColor
-        )}
-        aria-hidden
-      />
-
-      {/* avatar */}
-      <div className="h-8 w-8 shrink-0 rounded-full bg-neutral-100 ring-1 ring-neutral-200 flex items-center justify-center text-xs font-medium text-neutral-700">
-        {initial}
-      </div>
-
-      {/* BLOCK 1 — Lead information */}
-      <div className="flex flex-col min-w-[220px]">
-        <Link
-          href={`/dashboard/leads/${lead.id}`}
-          className="text-sm font-semibold text-neutral-900 truncate"
-        >
-          {lead.name || "Sin nombre"}
-        </Link>
-        {lead.email && (
-          <div className="text-xs text-neutral-500 truncate">
-            {lead.email}
-          </div>
-        )}
-        {"source" in lead && lead.source && (
-          <div className="text-xs text-neutral-400 truncate">
-            Capturado por {lead.source}
-          </div>
-        )}
-      </div>
-
-      {/* BLOCK 2 — Lead metadata */}
-      <div className="flex items-center gap-2 text-sm text-neutral-600">
-        <span
-          className={cn(
-            "text-xs px-2 py-0.5 rounded-md whitespace-nowrap",
-            statusStyle
-          )}
-        >
-          {statusLabel}
-        </span>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-neutral-700">{score} pts</span>
-          <div className="w-12 h-1 bg-neutral-200 rounded overflow-hidden">
-            <div
-              className="h-full bg-emerald-500"
-              style={{ width: `${scorePct}%` }}
-            />
-          </div>
+      {/* Lead */}
+      <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
+        <div style={{
+          width: 34,
+          height: 34,
+          borderRadius: "50%",
+          background: "var(--bg-surface)",
+          border: "0.5px solid var(--border-subtle)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 12,
+          fontWeight: 500,
+          color: "var(--text-secondary)",
+          flexShrink: 0,
+        }}>
+          {initials}
         </div>
-        <span className="text-xs text-neutral-500">{lastActivity}</span>
+        <div style={{ minWidth: 0 }}>
+          <Link
+            href={`/dashboard/leads/${lead.id}`}
+            style={{
+              fontSize: 13,
+              fontWeight: 500,
+              color: "var(--text-primary)",
+              textDecoration: "none",
+              display: "block",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {lead.name || "Sin nombre"}
+          </Link>
+          <p style={{
+            fontSize: 12,
+            color: "var(--text-secondary)",
+            margin: 0,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}>
+            {lead.email ?? ""}{lead.email && timeStr ? " · " : ""}{timeStr}
+          </p>
+        </div>
       </div>
 
-      {/* BLOCK 3 — Actions */}
+      {/* Estado */}
+      <div>
+        <StatusBadge status={lead.leadStatus} />
+      </div>
+
+      {/* Fuente — hidden on mobile */}
+      <div className="hidden md:block" style={{ fontSize: 12, color: "var(--text-secondary)" }}>
+        {formatSource(lead.source)}
+      </div>
+
+      {/* Score — hidden on mobile */}
+      <div className="hidden md:block">
+        <ScoreBar score={score} />
+      </div>
+
+      {/* Actions */}
       <div
-        className="flex items-center gap-3 ml-auto shrink-0"
+        style={{ display: "flex", justifyContent: "flex-end" }}
         onClick={(e) => e.preventDefault()}
       >
         <LeadRowActions lead={lead} />

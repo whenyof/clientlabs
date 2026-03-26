@@ -8,29 +8,47 @@ import { Upload, Globe, Zap, Loader2 } from "lucide-react"
 
 function EmptyState() {
   return (
-    <div className="rounded-lg border border-neutral-200 bg-neutral-50/50 p-12 text-center">
-      <div className="mx-auto max-w-md space-y-4">
-        <div className="flex justify-center gap-4">
-          <div className="rounded-lg border border-neutral-200 bg-white p-3">
-            <Upload className="h-6 w-6 text-neutral-500" />
+    <div
+      style={{
+        background: "var(--bg-card)",
+        border: "0.5px solid var(--border-subtle)",
+        borderRadius: 12,
+        padding: 48,
+        textAlign: "center",
+      }}
+    >
+      <div style={{ display: "flex", justifyContent: "center", gap: 16, marginBottom: 16 }}>
+        {[Upload, Globe, Zap].map((Icon, i) => (
+          <div
+            key={i}
+            style={{
+              padding: 12,
+              borderRadius: 8,
+              background: "var(--bg-surface)",
+              border: "0.5px solid var(--border-subtle)",
+            }}
+          >
+            <Icon size={24} style={{ color: "var(--text-secondary)" }} />
           </div>
-          <div className="rounded-lg border border-neutral-200 bg-white p-3">
-            <Globe className="h-6 w-6 text-neutral-500" />
-          </div>
-          <div className="rounded-lg border border-neutral-200 bg-white p-3">
-            <Zap className="h-6 w-6 text-neutral-500" />
-          </div>
-        </div>
-        <div>
-          <h3 className="text-lg font-semibold text-neutral-900">Sin leads</h3>
-          <p className="mt-1 text-sm text-neutral-500">
-            Los leads aparecerán aquí cuando captures contactos desde tu web o los importes.
-          </p>
-        </div>
+        ))}
       </div>
+      <h3 style={{ fontSize: 18, fontWeight: 600, color: "var(--text-primary)", margin: "0 0 4px" }}>
+        Sin leads
+      </h3>
+      <p style={{ fontSize: 14, color: "var(--text-secondary)", margin: 0, maxWidth: 360, marginInline: "auto" }}>
+        Los leads aparecerán aquí cuando captures contactos desde tu web o los importes.
+      </p>
     </div>
   )
 }
+
+const HEADER_COLUMNS = [
+  { label: "LEAD", className: "" },
+  { label: "ESTADO", className: "" },
+  { label: "FUENTE", className: "hidden md:block" },
+  { label: "SCORE", className: "hidden md:block" },
+  { label: "", className: "" },
+]
 
 export function LeadsTable() {
   const searchParams = useSearchParams()
@@ -47,27 +65,23 @@ export function LeadsTable() {
     showLost: searchParams.get("showLost") ?? "false",
   }), [searchParams])
 
-  const { 
-    leads, 
-    total, 
-    isLoading, 
-    isFetchingNextPage, 
-    hasNextPage, 
-    fetchNextPage 
+  const {
+    leads,
+    total,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
   } = useLeads(filters)
 
-  // ── Infinite scroll observation ──
+  // ── Infinite scroll ──
   const observerRef = useRef<IntersectionObserver | null>(null)
   const lastLeadRef = useCallback((node: HTMLDivElement | null) => {
     if (isFetchingNextPage) return
     if (observerRef.current) observerRef.current.disconnect()
-
-    observerRef.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && hasNextPage) {
-        fetchNextPage()
-      }
+    observerRef.current = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && hasNextPage) fetchNextPage()
     })
-
     if (node) observerRef.current.observe(node)
   }, [isFetchingNextPage, hasNextPage, fetchNextPage])
 
@@ -77,13 +91,25 @@ export function LeadsTable() {
 
   if (isLoading) {
     return (
-      <div className="space-y-3">
-        <div className="h-10 w-full max-w-md rounded-lg bg-neutral-100 animate-pulse" />
-        <div className="space-y-2">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="h-[56px] rounded-lg bg-neutral-100 animate-pulse" />
-          ))}
-        </div>
+      <div
+        style={{
+          background: "var(--bg-card)",
+          border: "0.5px solid var(--border-subtle)",
+          borderRadius: 12,
+          overflow: "hidden",
+        }}
+      >
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div
+            key={i}
+            style={{
+              height: 56,
+              borderBottom: "0.5px solid var(--border-subtle)",
+              background: i % 2 === 0 ? "var(--bg-surface)" : "transparent",
+            }}
+            className="animate-pulse"
+          />
+        ))}
       </div>
     )
   }
@@ -93,7 +119,41 @@ export function LeadsTable() {
   }
 
   return (
-    <div className="space-y-2">
+    <div
+      style={{
+        background: "var(--bg-card)",
+        border: "0.5px solid var(--border-subtle)",
+        borderRadius: 12,
+        overflow: "hidden",
+      }}
+    >
+      {/* Table header */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "2fr 1fr 1fr 1.2fr 90px",
+          padding: "10px 20px",
+          background: "var(--bg-surface)",
+          borderBottom: "0.5px solid var(--border-subtle)",
+        }}
+      >
+        {HEADER_COLUMNS.map((col, i) => (
+          <span
+            key={i}
+            className={col.className}
+            style={{
+              fontSize: 11,
+              fontWeight: 500,
+              letterSpacing: "0.05em",
+              color: "var(--text-secondary)",
+            }}
+          >
+            {col.label}
+          </span>
+        ))}
+      </div>
+
+      {/* Rows */}
       {leads.map((lead, index) => {
         const isLast = index === leads.length - 1
         return (
@@ -104,14 +164,39 @@ export function LeadsTable() {
       })}
 
       {isFetchingNextPage && (
-        <div className="flex justify-center py-4">
-          <Loader2 className="h-6 w-6 animate-spin text-neutral-400" />
+        <div style={{ display: "flex", justifyContent: "center", padding: 16 }}>
+          <Loader2 size={20} className="animate-spin" style={{ color: "var(--text-secondary)" }} />
         </div>
       )}
 
-      <p className="text-sm text-neutral-500 pt-2">
-        Mostrando {leads.length} de {total} {total === 1 ? "lead" : "leads"}
-      </p>
+      {/* Footer */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "12px 20px",
+          borderTop: "0.5px solid var(--border-subtle)",
+          fontSize: 12,
+          color: "var(--text-secondary)",
+        }}
+      >
+        <span>
+          Mostrando {leads.length} de {total} {total === 1 ? "lead" : "leads"}
+        </span>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+          <span
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: "50%",
+              background: "#1FA97A",
+              animation: "pulse-dot 2s ease-in-out infinite",
+            }}
+          />
+          Actualizando en tiempo real
+        </span>
+      </div>
     </div>
   )
 }

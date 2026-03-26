@@ -33,34 +33,34 @@ export default async function LeadsPage({
     redirect("/auth")
   }
 
-  // ── Calculate KPIs using efficient database queries (NOT memory filtering) ──
-  const [totalLeads, hotLeads, convertedLeads, stalledLeads, distinctSources] =
+  // ── Calculate KPIs using efficient database queries ──
+  const uid = session.user.id
+  const now = new Date()
+  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+  const dayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+  const staleDays = 7 * 24 * 60 * 60 * 1000
+
+  const [totalLeads, hotLeads, convertedLeads, stalledLeads, newThisWeek, hotYesterday, convertedThisMonth, totalThisMonth, distinctSources] =
     await Promise.all([
-      prisma.lead.count({ where: { userId: session.user.id } }),
-      prisma.lead.count({
-        where: { userId: session.user.id, temperature: "HOT" },
-      }),
-      prisma.lead.count({
-        where: { userId: session.user.id, leadStatus: "CONVERTED" },
-      }),
+      prisma.lead.count({ where: { userId: uid } }),
+      prisma.lead.count({ where: { userId: uid, temperature: "HOT" } }),
+      prisma.lead.count({ where: { userId: uid, leadStatus: "CONVERTED" } }),
       prisma.lead.count({
         where: {
-          userId: session.user.id,
+          userId: uid,
           NOT: { leadStatus: { in: ["CONVERTED", "LOST"] } },
           OR: [
             { lastActionAt: null },
-            {
-              lastActionAt: {
-                lt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
-              },
-            },
+            { lastActionAt: { lt: new Date(now.getTime() - staleDays) } },
           ],
         },
       }),
-      prisma.lead.groupBy({
-        by: ["source"],
-        where: { userId: session.user.id },
-      }),
+      prisma.lead.count({ where: { userId: uid, createdAt: { gte: weekAgo } } }),
+      prisma.lead.count({ where: { userId: uid, temperature: "HOT", createdAt: { lt: dayAgo } } }),
+      prisma.lead.count({ where: { userId: uid, leadStatus: "CONVERTED", updatedAt: { gte: monthStart } } }),
+      prisma.lead.count({ where: { userId: uid, createdAt: { gte: monthStart } } }),
+      prisma.lead.groupBy({ by: ["source"], where: { userId: uid } }),
     ])
 
   const kpis = {
@@ -68,6 +68,9 @@ export default async function LeadsPage({
     hot: hotLeads,
     converted: convertedLeads,
     stalled: stalledLeads,
+    newThisWeek,
+    hotDelta: hotLeads - hotYesterday,
+    conversionRate: totalThisMonth > 0 ? Math.round((convertedThisMonth / totalThisMonth) * 100) : 0,
   }
 
   const sources = distinctSources.map((s) => s.source).filter(Boolean) as string[]

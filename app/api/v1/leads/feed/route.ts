@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"
+
 /**
  * GET /api/v1/leads/feed
  * Lead feed — latest 50 visitors with score, intent, last event.

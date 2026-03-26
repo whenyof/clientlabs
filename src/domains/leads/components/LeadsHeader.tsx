@@ -11,10 +11,10 @@ export function LeadsHeader() {
     <div className="flex flex-wrap items-center justify-between gap-4">
       <div className="min-w-0">
         <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">
-          {labels.leads?.pageTitle ?? "Pipeline de Oportunidades"}
+          {labels.leads?.pageTitle ?? "Mis Leads"}
         </h1>
         <p className="mt-0.5 text-sm text-neutral-500 truncate max-w-xl">
-          {labels.leads?.pageSubtitle ?? "Gestiona y convierte tus oportunidades."}
+          {labels.leads?.pageSubtitle ?? "Gestiona tus contactos y conviértelos en clientes"}
         </p>
       </div>
       <div className="flex items-center gap-2 flex-wrap">

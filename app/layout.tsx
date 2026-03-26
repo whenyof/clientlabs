@@ -106,7 +106,7 @@ export default function RootLayout({
         <Script id="clientlabs-config" strategy="beforeInteractive">
           {`
             window.clientlabsConfig = {
-              "key": "cl_pub_70fd7ea9a369b19760f4866e9c65ff54147d78c899a208f9ee31cf4291fe9c8b",
+              "key": "cl_pub_16413eafbfdbbe6ab8bde12e2cb69678b596ecad673a5e71fd653ec7faa7467a",
               "features": {
                 "pageview": true,
                 "forms": true,

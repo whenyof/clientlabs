@@ -313,10 +313,16 @@ export async function POST(request: NextRequest) {
     }
 
     console.log("[ingest] enqueueing events:", validEvents.length)
-    await enqueueEvents(validEvents)
+    let queued = false
+    try {
+      await enqueueEvents(validEvents)
+      queued = true
+    } catch (queueError) {
+      console.error("[ingest] enqueueEvents failed:", queueError instanceof Error ? queueError.message : String(queueError))
+    }
 
     return withCors(
-      NextResponse.json({ ok: true, processed: validEvents.length, skipped, queued: true }),
+      NextResponse.json({ ok: true, processed: validEvents.length, skipped, queued }),
       corsHeaders
     )
   } catch (error) {

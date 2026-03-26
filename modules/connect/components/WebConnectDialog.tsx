@@ -43,7 +43,7 @@ type WebConnectDialogProps = {
 export function WebConnectDialog({ open, onOpenChange }: WebConnectDialogProps) {
     const router = useRouter()
     const { data: session } = useSession()
-    const [step, setStep] = useState<"list" | "manage" | "script">("list")
+    const [step, setStep] = useState<"list" | "manage" | "script" | "wordpress">("list")
     const [publicKeys, setPublicKeys] = useState<PublicApiKey[]>([])
     const [integrations, setIntegrations] = useState<any[]>([])
     const [isLoading, setIsLoading] = useState(false)
@@ -76,12 +76,7 @@ export function WebConnectDialog({ open, onOpenChange }: WebConnectDialogProps) 
 
     useEffect(() => {
         if (open) {
-            fetchPublicKeys().then((keys) => {
-                if (keys && keys.length > 0) {
-                    setSelectedKey(keys[0])
-                    setStep("script")
-                }
-            })
+            fetchPublicKeys()
             fetchIntegrations()
         }
     }, [open])
@@ -313,6 +308,10 @@ export function WebConnectDialog({ open, onOpenChange }: WebConnectDialogProps) 
     const handleConnect = async (provider: string) => {
         if (provider === "web_sdk") {
             setStep("manage")
+            return
+        }
+        if (provider === "wordpress") {
+            setStep("wordpress")
             return
         }
 
@@ -567,40 +566,6 @@ export function WebConnectDialog({ open, onOpenChange }: WebConnectDialogProps) 
                         </Button>
                     </div>
 
-                    {/* 1b. WORDPRESS PLUGIN */}
-                    <div className="border border-slate-200 rounded-xl p-5 bg-slate-50 mb-6">
-                        <div className="flex items-center justify-between gap-4">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center flex-shrink-0">
-                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="#21759B">
-                                        <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 1.5c1.788 0 3.46.5 4.887 1.362L5.862 16.887A8.474 8.474 0 0 1 3.5 12c0-4.687 3.813-8.5 8.5-8.5zm0 17c-1.788 0-3.46-.5-4.887-1.362l11.025-12.025A8.474 8.474 0 0 1 20.5 12c0 4.687-3.813 8.5-8.5 8.5z"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <div className="text-sm font-semibold text-slate-900">Plugin para WordPress</div>
-                                    <div className="text-xs text-slate-500 mt-0.5">Instala el SDK en tu WordPress sin tocar código</div>
-                                </div>
-                            </div>
-                            <a
-                                href="/api/downloads/wordpress-plugin"
-                                download="clientlabs-lead-capture.zip"
-                                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#21759B] text-white text-sm font-medium hover:bg-[#1a5f7a] transition-colors flex-shrink-0"
-                            >
-                                <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                                    <path d="M8 2v8M5 7l3 3 3-3M3 13h10" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-                                </svg>
-                                Descargar plugin
-                            </a>
-                        </div>
-                        <div className="mt-3 pt-3 border-t border-slate-200 flex items-center gap-2 text-xs text-slate-500">
-                            <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
-                                <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.2"/>
-                                <path d="M8 5v4M8 11v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                            </svg>
-                            Después de instalar el plugin, pega tu API Key en Ajustes → ClientLabs dentro de tu WordPress. Tu clave pública es la que aparece arriba.
-                        </div>
-                    </div>
-
                     {/* 2. GRID PRINCIPAL */}
                     <div className="grid grid-cols-[360px_minmax(0,1fr)] gap-6 items-start w-full">
                         {/* COLUMNA IZQUIERDA */}
@@ -717,11 +682,112 @@ export function WebConnectDialog({ open, onOpenChange }: WebConnectDialogProps) 
         )
     }
 
+    const renderWordPressStep = () => (
+        <div className="p-8 space-y-6">
+            <div className="flex items-center gap-4 mb-6">
+                <button
+                    onClick={() => setStep("list")}
+                    className="p-2 hover:bg-slate-50 rounded-lg transition-colors border border-slate-100"
+                >
+                    <ArrowLeft className="h-4 w-4 text-slate-500" />
+                </button>
+                <div>
+                    <h2 className="text-xl font-semibold text-slate-900">Plugin para WordPress</h2>
+                    <p className="text-sm text-slate-500 mt-0.5">Instala ClientLabs en tu WordPress sin tocar código</p>
+                </div>
+            </div>
+
+            <div className="border border-slate-200 rounded-xl p-6 bg-white space-y-6">
+                <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-[#f0f6fb] border border-[#d0e8f5] flex items-center justify-center flex-shrink-0">
+                        <svg width="30" height="30" viewBox="0 0 24 24" fill="#21759B">
+                            <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 1.5c1.788 0 3.46.5 4.887 1.362L5.862 16.887A8.474 8.474 0 0 1 3.5 12c0-4.687 3.813-8.5 8.5-8.5zm0 17c-1.788 0-3.46-.5-4.887-1.362l11.025-12.025A8.474 8.474 0 0 1 20.5 12c0 4.687-3.813 8.5-8.5 8.5z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 className="text-base font-semibold text-slate-900">ClientLabs — Lead Capture</h3>
+                        <p className="text-sm text-slate-500 mt-0.5">Plugin oficial · v1.0.0 · GPL v2</p>
+                    </div>
+                    <a
+                        href="/api/downloads/wordpress-plugin"
+                        download="clientlabs-lead-capture.zip"
+                        className="ml-auto flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#21759B] text-white text-sm font-medium hover:bg-[#1a5f7a] transition-colors flex-shrink-0"
+                    >
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                            <path d="M8 2v8M5 7l3 3 3-3M3 13h10" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                        </svg>
+                        Descargar .zip
+                    </a>
+                </div>
+
+                <div className="border-t border-slate-100 pt-5">
+                    <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Cómo instalarlo</h4>
+                    <div className="space-y-3">
+                        {[
+                            { num: "1", text: "Descarga el archivo .zip con el botón de arriba" },
+                            { num: "2", text: "En tu WordPress ve a Plugins → Añadir nuevo → Subir plugin" },
+                            { num: "3", text: "Sube el .zip, instala y activa el plugin" },
+                            { num: "4", text: "Ve a Ajustes → ClientLabs y pega tu API Key" },
+                        ].map((s) => (
+                            <div key={s.num} className="flex items-start gap-3">
+                                <div className="w-6 h-6 rounded-full bg-[#E1F5EE] text-[#0F6E56] text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    {s.num}
+                                </div>
+                                <p className="text-sm text-slate-700">{s.text}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="border-t border-slate-100 pt-5">
+                    <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Tu API Key pública</h4>
+                    <p className="text-xs text-slate-500 mb-3">
+                        Necesitarás esta clave al configurar el plugin en WordPress.
+                        Genera una nueva si aún no tienes ninguna.
+                    </p>
+                    {publicKeys.length > 0 ? (
+                        <div className="space-y-2">
+                            {publicKeys.map((key) => (
+                                <div key={key.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100">
+                                    <div>
+                                        <p className="text-xs font-bold text-slate-700">{key.name}</p>
+                                        <p className="text-xs text-slate-500 font-mono mt-0.5">{maskKey(key.rawKey ?? key.apiKey)}</p>
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            const k = key.rawKey ?? key.apiKey ?? ""
+                                            navigator.clipboard.writeText(k)
+                                            toast.success("API Key copiada")
+                                        }}
+                                        className="p-2 rounded-lg hover:bg-white border border-transparent hover:border-slate-200 transition-colors"
+                                    >
+                                        <Copy className="h-3.5 w-3.5 text-slate-500" />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center p-6 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                            <p className="text-xs text-slate-500 mb-3">Aún no tienes ninguna API Key generada</p>
+                            <button
+                                onClick={() => setStep("manage")}
+                                className="text-xs font-medium text-[#1FA97A] hover:underline"
+                            >
+                                Generar API Key →
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    )
+
     return (
         <Modal isOpen={open} onClose={handleClose} width="ultraWide">
             {step === "list" && renderListStep()}
             {step === "manage" && renderManageStep()}
             {step === "script" && renderScriptStep()}
+            {step === "wordpress" && renderWordPressStep()}
         </Modal>
     )
 }

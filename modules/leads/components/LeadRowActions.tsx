@@ -128,7 +128,7 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
 
  return (
  <>
- <div className="flex items-center gap-1.5 ml-auto">
+ <div className="flex items-center gap-1 ml-auto">
  {lead.leadStatus === "CONVERTED" && lead.clientId && (
  <Link
  href="/dashboard/clients"
@@ -166,10 +166,11 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
          type="button"
          onClick={() => setConvertDialog(true)}
          disabled={loading}
-         style={{ fontSize: 11, fontWeight: 600, padding: "0 8px", height: 26, borderRadius: 4, border: "none", background: "#1FA97A", color: "#fff", cursor: "pointer", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 4 }}
-         title={ui.convertToClientShort}
+         className={iconBtn}
+         style={{ borderColor: "var(--border-subtle)", color: "var(--text-secondary)", background: "transparent" }}
+         title="Convertir en cliente"
          >
-         {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <>Convertir<span style={{ fontSize: 13 }}>&rarr;</span></>}
+         {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
          </button>
          </>
  )}

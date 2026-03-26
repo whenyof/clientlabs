@@ -114,7 +114,7 @@ export function LeadCard({ lead }: LeadCardProps) {
 
   return (
     <div
-      className="grid grid-cols-[1fr_100px_auto] md:grid-cols-[1fr_120px_120px_100px_150px]"
+      className="grid grid-cols-[1fr_100px_auto] md:grid-cols-[2.5fr_140px_140px_180px_120px]"
       style={{
         alignItems: "center",
         padding: "13px 20px",
@@ -186,7 +186,7 @@ export function LeadCard({ lead }: LeadCardProps) {
       </div>
 
       {/* Score — hidden on mobile */}
-      <div className="hidden md:block" style={{ maxWidth: 100 }}>
+      <div className="hidden md:block">
         <ScoreBar score={score} />
       </div>
 

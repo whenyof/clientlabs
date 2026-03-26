@@ -560,6 +560,40 @@ export function WebConnectDialog({ open, onOpenChange }: WebConnectDialogProps) 
                         </Button>
                     </div>
 
+                    {/* 1b. WORDPRESS PLUGIN */}
+                    <div className="border border-slate-200 rounded-xl p-5 bg-slate-50 mb-6">
+                        <div className="flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center flex-shrink-0">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="#21759B">
+                                        <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 1.5c1.788 0 3.46.5 4.887 1.362L5.862 16.887A8.474 8.474 0 0 1 3.5 12c0-4.687 3.813-8.5 8.5-8.5zm0 17c-1.788 0-3.46-.5-4.887-1.362l11.025-12.025A8.474 8.474 0 0 1 20.5 12c0 4.687-3.813 8.5-8.5 8.5z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div className="text-sm font-semibold text-slate-900">Plugin para WordPress</div>
+                                    <div className="text-xs text-slate-500 mt-0.5">Instala el SDK en tu WordPress sin tocar código</div>
+                                </div>
+                            </div>
+                            <a
+                                href="/api/downloads/wordpress-plugin"
+                                download="clientlabs-lead-capture.zip"
+                                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#21759B] text-white text-sm font-medium hover:bg-[#1a5f7a] transition-colors flex-shrink-0"
+                            >
+                                <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                                    <path d="M8 2v8M5 7l3 3 3-3M3 13h10" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                                </svg>
+                                Descargar plugin
+                            </a>
+                        </div>
+                        <div className="mt-3 pt-3 border-t border-slate-200 flex items-center gap-2 text-xs text-slate-500">
+                            <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                                <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.2"/>
+                                <path d="M8 5v4M8 11v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                            </svg>
+                            Después de instalar el plugin, pega tu API Key en Ajustes → ClientLabs dentro de tu WordPress. Tu clave pública es la que aparece arriba.
+                        </div>
+                    </div>
+
                     {/* 2. GRID PRINCIPAL */}
                     <div className="grid grid-cols-[360px_minmax(0,1fr)] gap-6 items-start w-full">
                         {/* COLUMNA IZQUIERDA */}

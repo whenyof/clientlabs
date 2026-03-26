@@ -129,9 +129,8 @@ export function LeadsTable() {
     >
       {/* Table header */}
       <div
+        className="grid grid-cols-[2fr_1fr_90px] md:grid-cols-[2fr_1fr_1fr_1.2fr_90px]"
         style={{
-          display: "grid",
-          gridTemplateColumns: "2fr 1fr 1fr 1.2fr 90px",
           padding: "10px 20px",
           background: "var(--bg-surface)",
           borderBottom: "0.5px solid var(--border-subtle)",

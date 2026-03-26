@@ -41,13 +41,14 @@ function StatusBadge({ status }: { status?: string | null }) {
 
 function formatSource(source?: string | null): string {
   if (!source) return "—"
+  const key = source.toLowerCase()
   const map: Record<string, string> = {
     sdk: "SDK directo",
-    WEB: "Formulario web",
-    API: "API",
-    MANUAL: "Manual",
+    web: "Formulario web",
+    api: "API",
+    manual: "Manual",
   }
-  return map[source] ?? source
+  return map[key] ?? source
 }
 
 /* ── Score bar ── */
@@ -113,9 +114,8 @@ export function LeadCard({ lead }: LeadCardProps) {
 
   return (
     <div
+      className="grid grid-cols-[2fr_1fr_90px] md:grid-cols-[2fr_1fr_1fr_1.2fr_90px]"
       style={{
-        display: "grid",
-        gridTemplateColumns: "2fr 1fr 1fr 1.2fr 90px",
         alignItems: "center",
         padding: "13px 20px",
         borderBottom: "0.5px solid var(--border-subtle)",

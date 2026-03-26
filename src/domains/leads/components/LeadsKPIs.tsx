@@ -114,7 +114,7 @@ export function LeadsKPIs({ kpis }: LeadsKPIsProps) {
             {kpis[card.key].toLocaleString()}
           </p>
           <div style={{
-            height: 0.5,
+            height: 1,
             background: "var(--border-subtle)",
             margin: "12px 0",
           }} />

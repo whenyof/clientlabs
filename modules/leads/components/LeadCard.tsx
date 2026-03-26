@@ -114,9 +114,10 @@ export function LeadCard({ lead }: LeadCardProps) {
 
   return (
     <div
-      className="grid grid-cols-[1fr_auto_auto] md:grid-cols-[1.2fr_120px_120px_160px_auto]"
       style={{
+        display: "flex",
         alignItems: "center",
+        gap: 24,
         padding: "16px 20px",
         borderBottom: "0.5px solid var(--border-subtle)",
         transition: "background 0.12s",
@@ -125,8 +126,8 @@ export function LeadCard({ lead }: LeadCardProps) {
       onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-surface)")}
       onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
     >
-      {/* Lead */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
+      {/* Lead info */}
+      <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0, width: 280, flexShrink: 0 }}>
         <div style={{
           width: 38,
           height: 38,
@@ -173,26 +174,26 @@ export function LeadCard({ lead }: LeadCardProps) {
       </div>
 
       {/* Estado */}
-      <div>
+      <div style={{ width: 120, flexShrink: 0 }}>
         <StatusBadge status={lead.leadStatus} />
       </div>
 
-      {/* Fuente — hidden on mobile */}
-      <div className="hidden md:block" style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.4 }}>
+      {/* Fuente */}
+      <div className="hidden md:block" style={{ width: 120, flexShrink: 0, fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.4 }}>
         <span>{formatSource(lead.source)}</span>
         {lead.allowedDomain && (
           <span style={{ display: "block", fontSize: 11, opacity: 0.7 }}>{lead.allowedDomain}</span>
         )}
       </div>
 
-      {/* Score — hidden on mobile */}
-      <div className="hidden md:block">
+      {/* Score */}
+      <div className="hidden md:block" style={{ width: 160, flexShrink: 0 }}>
         <ScoreBar score={score} />
       </div>
 
       {/* Actions */}
       <div
-        style={{ display: "flex", justifyContent: "flex-end", justifySelf: "end" }}
+        style={{ marginLeft: "auto", flexShrink: 0 }}
         onClick={(e) => e.preventDefault()}
       >
         <LeadRowActions lead={lead} />

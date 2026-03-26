@@ -42,14 +42,6 @@ function EmptyState() {
   )
 }
 
-const HEADER_COLUMNS = [
-  { label: "LEAD", className: "" },
-  { label: "ESTADO", className: "" },
-  { label: "FUENTE", className: "hidden md:block" },
-  { label: "SCORE", className: "hidden md:block" },
-  { label: "", className: "" },
-]
-
 export function LeadsTable() {
   const searchParams = useSearchParams()
 
@@ -129,27 +121,20 @@ export function LeadsTable() {
     >
       {/* Table header */}
       <div
-        className="grid grid-cols-[1fr_auto_auto] md:grid-cols-[1.2fr_120px_120px_160px_auto]"
         style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 24,
           padding: "12px 20px",
           background: "var(--bg-surface)",
           borderBottom: "0.5px solid var(--border-subtle)",
         }}
       >
-        {HEADER_COLUMNS.map((col, i) => (
-          <span
-            key={i}
-            className={col.className}
-            style={{
-              fontSize: 11,
-              fontWeight: 500,
-              letterSpacing: "0.05em",
-              color: "var(--text-secondary)",
-            }}
-          >
-            {col.label}
-          </span>
-        ))}
+        <span style={{ width: 280, flexShrink: 0, fontSize: 11, fontWeight: 500, letterSpacing: "0.05em", color: "var(--text-secondary)" }}>LEAD</span>
+        <span style={{ width: 120, flexShrink: 0, fontSize: 11, fontWeight: 500, letterSpacing: "0.05em", color: "var(--text-secondary)" }}>ESTADO</span>
+        <span className="hidden md:block" style={{ width: 120, flexShrink: 0, fontSize: 11, fontWeight: 500, letterSpacing: "0.05em", color: "var(--text-secondary)" }}>FUENTE</span>
+        <span className="hidden md:block" style={{ width: 160, flexShrink: 0, fontSize: 11, fontWeight: 500, letterSpacing: "0.05em", color: "var(--text-secondary)" }}>SCORE</span>
+        <span style={{ marginLeft: "auto" }}></span>
       </div>
 
       {/* Rows */}

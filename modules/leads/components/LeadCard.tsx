@@ -65,9 +65,9 @@ function ScoreBar({ score }: { score: number }) {
     barColor = "#B4B2A9"; numColor = "var(--text-secondary)"
   }
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 80 }}>
-      <div style={{ flex: 1, height: 3, borderRadius: 2, background: "var(--border-subtle)", overflow: "hidden" }}>
-        <div style={{ height: "100%", width: `${pct}%`, borderRadius: 2, background: barColor, transition: "width 0.3s" }} />
+    <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 100 }}>
+      <div style={{ flex: 1, height: 4, borderRadius: 3, background: "var(--border-subtle)", overflow: "hidden" }}>
+        <div style={{ height: "100%", width: `${pct}%`, borderRadius: 3, background: barColor, transition: "width 0.3s" }} />
       </div>
       <span style={{ fontSize: 13, fontWeight: 600, color: numColor, minWidth: 42, textAlign: "right", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>{score} pts</span>
     </div>
@@ -114,10 +114,10 @@ export function LeadCard({ lead }: LeadCardProps) {
 
   return (
     <div
-      className="grid grid-cols-[1fr_100px_auto] md:grid-cols-[2.5fr_140px_140px_180px_120px]"
+      className="grid grid-cols-[1fr_auto_auto] md:grid-cols-[1.2fr_120px_120px_160px_auto]"
       style={{
         alignItems: "center",
-        padding: "13px 20px",
+        padding: "16px 20px",
         borderBottom: "0.5px solid var(--border-subtle)",
         transition: "background 0.12s",
         cursor: "pointer",
@@ -128,15 +128,15 @@ export function LeadCard({ lead }: LeadCardProps) {
       {/* Lead */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
         <div style={{
-          width: 34,
-          height: 34,
+          width: 38,
+          height: 38,
           borderRadius: "50%",
           background: "var(--bg-surface)",
           border: "0.5px solid var(--border-subtle)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          fontSize: 12,
+          fontSize: 13,
           fontWeight: 500,
           color: "var(--text-secondary)",
           flexShrink: 0,
@@ -192,7 +192,7 @@ export function LeadCard({ lead }: LeadCardProps) {
 
       {/* Actions */}
       <div
-        style={{ display: "flex", justifyContent: "flex-end" }}
+        style={{ display: "flex", justifyContent: "flex-end", justifySelf: "end" }}
         onClick={(e) => e.preventDefault()}
       >
         <LeadRowActions lead={lead} />

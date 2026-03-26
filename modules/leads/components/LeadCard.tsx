@@ -69,7 +69,7 @@ function ScoreBar({ score }: { score: number }) {
       <div style={{ flex: 1, height: 3, borderRadius: 2, background: "var(--border-subtle)", overflow: "hidden" }}>
         <div style={{ height: "100%", width: `${pct}%`, borderRadius: 2, background: barColor, transition: "width 0.3s" }} />
       </div>
-      <span style={{ fontSize: 12, fontWeight: 500, color: numColor, minWidth: 28, textAlign: "right" }}>{score}</span>
+      <span style={{ fontSize: 13, fontWeight: 600, color: numColor, minWidth: 28, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{score}</span>
     </div>
   )
 }

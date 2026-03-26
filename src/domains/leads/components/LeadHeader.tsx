@@ -2,25 +2,16 @@
 
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
-import { ArrowLeft, Mail, Phone, CheckSquare, Trash2, ArrowRightLeft } from "lucide-react"
+import { ArrowLeft, Mail, StickyNote } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-
-const STATUS_LABELS: Record<string, string> = {
-  NEW: "Nuevo",
-  CONTACTED: "Contactado",
-  INTERESTED: "Interesado",
-  QUALIFIED: "Calificado",
-  CONVERTED: "Cliente",
-  LOST: "Perdido",
-}
-
-const TEMP_LABELS: Record<string, string> = {
-  HOT: "Caliente",
-  WARM: "Tibio",
-  COLD: "Frío",
-}
+import {
+  formatSource,
+  getInitials,
+  STATUS_LABELS,
+  TEMP_LABELS,
+} from "@domains/leads/utils/formatting"
 
 export interface LeadHeaderLead {
   id: string
@@ -32,135 +23,236 @@ export interface LeadHeaderLead {
   source: string
   temperature?: string | null
   createdAt: Date
+  lastActionAt?: Date | null
 }
 
 interface LeadHeaderProps {
   lead: LeadHeaderLead
 }
 
-function getInitial(name: string | null, email: string | null): string {
-  if (name?.trim()) return name.charAt(0).toUpperCase()
-  if (email?.trim()) return email.charAt(0).toUpperCase()
-  return "?"
+function Badge({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        fontSize: 12,
+        fontWeight: 500,
+        padding: "3px 10px",
+        borderRadius: 6,
+        border: "0.5px solid var(--border-subtle)",
+        background: "var(--bg-surface)",
+        color: "var(--text-secondary)",
+        whiteSpace: "nowrap",
+        ...style,
+      }}
+    >
+      {children}
+    </span>
+  )
 }
 
 export function LeadHeader({ lead }: LeadHeaderProps) {
   const router = useRouter()
+  const [converting, setConverting] = useState(false)
+
+  const initials = getInitials(lead.name, lead.email)
   const statusLabel = STATUS_LABELS[lead.leadStatus] ?? lead.leadStatus
-  const tempLabel = lead.temperature
-    ? TEMP_LABELS[lead.temperature] ?? lead.temperature
-    : "—"
-  const initial = getInitial(lead.name, lead.email)
+  const tempLabel = lead.temperature ? TEMP_LABELS[lead.temperature] ?? lead.temperature : null
 
   const handleEmail = () => {
     if (!lead.email) return
     window.location.href = `mailto:${lead.email}?subject=Contacto`
   }
 
-  const handleCall = () => {
-    if (!lead.phone) return
-    window.location.href = `tel:${lead.phone}`
+  const handleConvert = async () => {
+    setConverting(true)
+    try {
+      await fetch(`/api/leads/${lead.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ leadStatus: "CONVERTED", converted: true }),
+      })
+      router.refresh()
+    } finally {
+      setConverting(false)
+    }
   }
 
-  const handleTask = () => {
-    // Placeholder for future task creation UI
+  const handleLost = async () => {
+    await fetch(`/api/leads/${lead.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ leadStatus: "LOST" }),
+    })
+    router.refresh()
   }
 
-  const handleMovePipeline = () => {
-    // Placeholder for future pipeline move UI
-  }
-
-  const handleLost = () => {
-    // Placeholder for future lost flow
-  }
+  const createdFormatted = format(new Date(lead.createdAt), "d MMM yyyy", { locale: es })
+  const lastActivityFormatted = lead.lastActionAt
+    ? format(new Date(lead.lastActionAt), "d MMM yyyy", { locale: es })
+    : "Sin actividad"
 
   return (
-    <header className="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm">
+    <div>
       <Button
         type="button"
         variant="ghost"
         size="sm"
         onClick={() => router.push("/dashboard/leads")}
-        className="mb-4 flex items-center gap-2 px-0 text-sm text-neutral-600 hover:text-neutral-900"
+        style={{ marginBottom: 12, paddingLeft: 0, color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: 6, fontSize: 13 }}
       >
-        <ArrowLeft className="h-4 w-4" />
+        <ArrowLeft style={{ width: 14, height: 14 }} />
         Volver a leads
       </Button>
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex items-start gap-4">
-          <div
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-neutral-200 text-sm font-semibold text-neutral-700"
-            aria-hidden
-          >
-            {initial}
-          </div>
-          <div className="min-w-0">
-            <h1 className="text-xl font-semibold text-neutral-900">
-              {lead.name || "Sin nombre"}
-            </h1>
-            {lead.email && (
-              <p className="mt-0.5 text-sm text-neutral-600">{lead.email}</p>
-            )}
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <Badge variant="secondary" className="font-normal">
-                {lead.score} pts
-              </Badge>
-              <Badge variant="secondary" className="font-normal">
-                {tempLabel}
-              </Badge>
-              <Badge variant="secondary" className="font-normal">
-                {statusLabel}
-              </Badge>
+      <div
+        style={{
+          background: "var(--bg-card)",
+          border: "0.5px solid var(--border-subtle)",
+          borderRadius: 12,
+          padding: 24,
+        }}
+      >
+        {/* Top row: avatar + info + buttons */}
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+          {/* Left: avatar + identity */}
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
+            <div
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: "50%",
+                background: "var(--green-badge-bg)",
+                color: "var(--green-badge-text)",
+                border: "0.5px solid var(--green-badge-border)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 20,
+                fontWeight: 600,
+                flexShrink: 0,
+              }}
+            >
+              {initials}
             </div>
+            <div>
+              <h1 style={{ fontSize: 22, fontWeight: 500, color: "var(--text-primary)", margin: 0 }}>
+                {lead.name || "Sin nombre"}
+              </h1>
+              {(lead.email || lead.phone) && (
+                <p style={{ fontSize: 13, color: "var(--text-secondary)", margin: "4px 0 0 0" }}>
+                  {[lead.email, lead.phone].filter(Boolean).join(" · ")}
+                </p>
+              )}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
+                <Badge>{statusLabel}</Badge>
+                {tempLabel && <Badge>{tempLabel}</Badge>}
+                <Badge>{lead.score} pts</Badge>
+              </div>
+            </div>
+          </div>
+
+          {/* Right: action buttons */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleEmail}
+              disabled={!lead.email}
+              style={{ display: "flex", alignItems: "center", gap: 6 }}
+            >
+              <Mail style={{ width: 14, height: 14 }} />
+              Email
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              style={{ display: "flex", alignItems: "center", gap: 6 }}
+            >
+              <StickyNote style={{ width: 14, height: 14 }} />
+              Nota
+            </Button>
+            <button
+              type="button"
+              onClick={handleConvert}
+              disabled={converting || lead.leadStatus === "CONVERTED"}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "6px 14px",
+                fontSize: 13,
+                fontWeight: 500,
+                borderRadius: 8,
+                border: "none",
+                background: "var(--green-btn)",
+                color: "#fff",
+                cursor: converting || lead.leadStatus === "CONVERTED" ? "not-allowed" : "pointer",
+                opacity: converting || lead.leadStatus === "CONVERTED" ? 0.6 : 1,
+              }}
+            >
+              {converting ? "Convirtiendo..." : "Convertir en cliente"}
+            </button>
+            <button
+              type="button"
+              onClick={handleLost}
+              disabled={lead.leadStatus === "LOST"}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "6px 14px",
+                fontSize: 13,
+                fontWeight: 500,
+                borderRadius: 8,
+                border: "0.5px solid var(--danger-soft-text)",
+                background: "var(--danger-soft-bg)",
+                color: "var(--danger-soft-text)",
+                cursor: lead.leadStatus === "LOST" ? "not-allowed" : "pointer",
+                opacity: lead.leadStatus === "LOST" ? 0.6 : 1,
+              }}
+            >
+              Perdido
+            </button>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
-          <Button
-            type="button"
-            variant="default"
-            size="sm"
-            onClick={handleEmail}
-            disabled={!lead.email}
-          >
-            <Mail className="h-4 w-4" />
-            Email
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleCall}
-            disabled={!lead.phone}
-          >
-            <Phone className="h-4 w-4" />
-            Llamar
-          </Button>
-          <Button type="button" variant="outline" size="sm" onClick={handleTask}>
-            <CheckSquare className="h-4 w-4" />
-            Crear tarea
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleMovePipeline}
-          >
-            <ArrowRightLeft className="h-4 w-4" />
-            Mover pipeline
-          </Button>
-          <Button
-            type="button"
-            variant="destructive"
-            size="sm"
-            onClick={handleLost}
-          >
-            <Trash2 className="h-4 w-4" />
-            Marcar perdido
-          </Button>
+        {/* Stats bar */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(4, 1fr)",
+            borderTop: "0.5px solid var(--border-subtle)",
+            marginTop: 20,
+            paddingTop: 16,
+          }}
+        >
+          {[
+            { label: "Fuente", value: formatSource(lead.source) },
+            { label: "Creado", value: createdFormatted },
+            { label: "Última actividad", value: lastActivityFormatted },
+            { label: "Estado", value: statusLabel },
+          ].map((item, i) => (
+            <div
+              key={item.label}
+              style={{
+                padding: "0 16px",
+                borderLeft: i > 0 ? "0.5px solid var(--border-subtle)" : "none",
+              }}
+            >
+              <p style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-secondary)", margin: 0, fontWeight: 500 }}>
+                {item.label}
+              </p>
+              <p style={{ fontSize: 14, fontWeight: 500, color: "var(--text-primary)", margin: "4px 0 0 0" }}>
+                {item.value}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
-    </header>
+    </div>
   )
 }

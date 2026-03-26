@@ -3,9 +3,10 @@
 import { LeadHeader } from "@domains/leads/components/LeadHeader"
 import { LeadTimeline } from "@domains/leads/components/LeadTimeline"
 import { LeadInfoCard } from "@domains/leads/components/LeadInfoCard"
-import { LeadInsightsCard } from "@domains/leads/components/LeadInsightsCard"
+import { LeadAIRecommendations } from "@domains/leads/components/LeadAIRecommendations"
 import { LeadNextActionCard } from "@domains/leads/components/LeadNextActionCard"
 import { LeadNotesCard } from "@domains/leads/components/LeadNotesCard"
+import { LeadEmailModule } from "@domains/leads/components/LeadEmailModule"
 
 interface LeadPanelProps {
   lead: {
@@ -14,6 +15,7 @@ interface LeadPanelProps {
     email: string | null
     phone: string | null
     createdAt: Date
+    lastActionAt: Date | null
     leadStatus: string
     score: number
     source: string
@@ -23,21 +25,68 @@ interface LeadPanelProps {
 
 export function LeadPanel({ lead }: LeadPanelProps) {
   return (
-    <div className="mx-auto max-w-6xl flex flex-col gap-6 px-6 pb-20 pt-6">
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "var(--bg-main)",
+        padding: 24,
+      }}
+    >
+      {/* Hero */}
       <LeadHeader lead={lead} />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[2fr_1fr]">
-        <div className="min-w-0">
+      {/* Two-column layout */}
+      <div
+        style={{
+          display: "flex",
+          gap: 16,
+          marginTop: 16,
+          alignItems: "flex-start",
+        }}
+        className="lead-panel-columns"
+      >
+        {/* Left column */}
+        <div
+          style={{
+            flex: 1,
+            minWidth: 0,
+            display: "flex",
+            flexDirection: "column",
+            gap: 16,
+          }}
+        >
+          <LeadEmailModule leadId={lead.id} leadEmail={lead.email} leadName={lead.name} />
           <LeadTimeline leadId={lead.id} createdAt={lead.createdAt} />
+          <LeadNotesCard leadId={lead.id} />
         </div>
-        <aside className="flex flex-col gap-6">
+
+        {/* Right column */}
+        <div
+          style={{
+            width: 320,
+            flexShrink: 0,
+            display: "flex",
+            flexDirection: "column",
+            gap: 16,
+          }}
+          className="lead-panel-sidebar"
+        >
           <LeadInfoCard lead={lead} />
-          <LeadInsightsCard leadId={lead.id} score={lead.score} />
+          <LeadAIRecommendations score={lead.score} phone={lead.phone} leadStatus={lead.leadStatus} />
           <LeadNextActionCard leadId={lead.id} leadStatus={lead.leadStatus} />
-        </aside>
+        </div>
       </div>
 
-      <LeadNotesCard leadId={lead.id} />
+      <style>{`
+        @media (max-width: 768px) {
+          .lead-panel-columns {
+            flex-direction: column !important;
+          }
+          .lead-panel-sidebar {
+            width: auto !important;
+          }
+        }
+      `}</style>
     </div>
   )
 }

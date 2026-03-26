@@ -1,12 +1,10 @@
 "use client"
 import { getBaseUrl } from "@/lib/api/baseUrl"
 
-
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { StickyNote, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Loader2, Trash2 } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
+import { formatTimeAgo } from "@domains/leads/utils/formatting"
 
 interface ActivityItem {
   id: string
@@ -21,23 +19,23 @@ interface LeadNotesCardProps {
 }
 
 export function LeadNotesCard({ leadId }: LeadNotesCardProps) {
-  const router = useRouter()
   const [notes, setNotes] = useState<ActivityItem[]>([])
   const [newNote, setNewNote] = useState("")
   const [loading, setLoading] = useState(false)
   const [loadingNotes, setLoadingNotes] = useState(true)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  const fetchNotes = async () => {
+    try {
+      const data = await fetch(`${getBaseUrl()}/api/leads/${leadId}/activity`).then((r) => r.json())
+      setNotes((Array.isArray(data) ? data : []).filter((a: ActivityItem) => a.type === "NOTE"))
+    } catch {
+      setNotes([])
+    }
+  }
 
   useEffect(() => {
-    fetch(`${getBaseUrl()}/api/leads/${leadId}/activity`)
-      .then((res) => res.json())
-      .then((data: ActivityItem[]) => {
-        const noteItems = (Array.isArray(data) ? data : []).filter(
-          (a) => a.type === "NOTE"
-        )
-        setNotes(noteItems)
-      })
-      .catch(() => setNotes([]))
-      .finally(() => setLoadingNotes(false))
+    fetchNotes().finally(() => setLoadingNotes(false))
   }, [leadId])
 
   const submitNote = async () => {
@@ -48,22 +46,11 @@ export function LeadNotesCard({ leadId }: LeadNotesCardProps) {
       const res = await fetch(`${getBaseUrl()}/api/leads/${leadId}/activity`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "NOTE",
-          title: "Nota",
-          description: text,
-        }),
+        body: JSON.stringify({ type: "NOTE", title: "Nota", description: text }),
       })
       if (!res.ok) throw new Error("Failed to create note")
       setNewNote("")
-      router.refresh()
-      const data = await fetch(`${getBaseUrl()}/api/leads/${leadId}/activity`).then((r) =>
-        r.json()
-      )
-      const noteItems = (Array.isArray(data) ? data : []).filter(
-        (a: ActivityItem) => a.type === "NOTE"
-      )
-      setNotes(noteItems)
+      await fetchNotes()
     } catch (err) {
       console.error(err)
     } finally {
@@ -71,73 +58,113 @@ export function LeadNotesCard({ leadId }: LeadNotesCardProps) {
     }
   }
 
-  const formatDate = (createdAt: string) => {
-    const d = new Date(createdAt)
-    const now = new Date()
-    const diffDays = Math.floor(
-      (now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24)
-    )
-    if (diffDays === 0) return "Hoy"
-    if (diffDays === 1) return "Ayer"
-    if (diffDays < 7) return `Hace ${diffDays} días`
-    return d.toLocaleDateString("es-ES", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    })
+  const deleteNote = async (id: string) => {
+    setDeletingId(id)
+    try {
+      await fetch(`${getBaseUrl()}/api/leads/${leadId}/activity?activityId=${id}`, { method: "DELETE" })
+      setNotes((prev) => prev.filter((n) => n.id !== id))
+    } finally {
+      setDeletingId(null)
+    }
   }
 
   return (
-    <div className="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm">
-      <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-neutral-500">
-        <StickyNote className="h-3.5 w-3.5" />
-        Notas internas
-      </h3>
-      <Textarea
-        placeholder="Escribe una nota..."
-        value={newNote}
-        onChange={(e) => setNewNote(e.target.value)}
-        className="min-h-[80px] resize-none rounded-lg border border-neutral-200 px-3 py-2 text-sm"
-        disabled={loading}
-      />
-      <Button
-        type="button"
-        variant="default"
-        size="sm"
-        className="mt-3"
-        onClick={submitNote}
-        disabled={!newNote?.trim() || loading}
-      >
-        {loading ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          "Guardar nota"
-        )}
-      </Button>
+    <div style={{ background: "var(--bg-card)", border: "0.5px solid var(--border-subtle)", borderRadius: 12, padding: 20 }}>
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+        <h3 style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)", margin: 0 }}>Notas internas</h3>
+        <span style={{ fontSize: 12, color: "var(--green-btn)", fontWeight: 500 }}>
+          {notes.length > 0 ? `${notes.length} nota${notes.length > 1 ? "s" : ""}` : ""}
+        </span>
+      </div>
 
+      {/* Existing notes (above textarea) */}
       {loadingNotes ? (
-        <div className="mt-6 h-16 animate-pulse rounded-lg bg-neutral-100" />
+        <div style={{ height: 48, borderRadius: 8, background: "var(--bg-surface)", marginBottom: 12 }} className="animate-pulse" />
       ) : notes.length > 0 ? (
-        <ul className="mt-6 space-y-4 border-t border-neutral-100 pt-4">
+        <ul style={{ listStyle: "none", margin: "0 0 16px", padding: 0, display: "flex", flexDirection: "column", gap: 8 }}>
           {notes.map((note) => (
             <li
               key={note.id}
-              className="rounded-lg border border-neutral-100 bg-neutral-50/50 p-3 text-sm"
+              style={{
+                padding: 12,
+                background: "var(--bg-surface)",
+                border: "0.5px solid var(--border-subtle)",
+                borderRadius: 8,
+                display: "flex",
+                gap: 8,
+                alignItems: "flex-start",
+              }}
             >
-              <p className="text-neutral-900">
-                {note.description || note.title}
-              </p>
-              <p className="mt-1 text-xs text-neutral-500">
-                {formatDate(note.createdAt)}
-              </p>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ fontSize: 13, color: "var(--text-primary)", margin: 0 }}>
+                  {note.description || note.title}
+                </p>
+                <p style={{ fontSize: 11, color: "var(--text-secondary)", margin: "4px 0 0" }}>
+                  {formatTimeAgo(note.createdAt)}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => deleteNote(note.id)}
+                disabled={deletingId === note.id}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: deletingId === note.id ? "not-allowed" : "pointer",
+                  padding: 4,
+                  color: "var(--text-secondary)",
+                  opacity: deletingId === note.id ? 0.4 : 1,
+                  flexShrink: 0,
+                }}
+              >
+                {deletingId === note.id
+                  ? <Loader2 style={{ width: 13, height: 13 }} className="animate-spin" />
+                  : <Trash2 style={{ width: 13, height: 13 }} />
+                }
+              </button>
             </li>
           ))}
         </ul>
       ) : (
-        <p className="mt-6 text-sm italic text-neutral-400">
-          Aún no hay notas. Añade una arriba.
+        <p style={{ fontSize: 13, color: "var(--text-secondary)", fontStyle: "italic", marginBottom: 16 }}>
+          Aún no hay notas. Añade una abajo.
         </p>
       )}
+
+      {/* New note form */}
+      <Textarea
+        placeholder="Escribe una nota interna..."
+        value={newNote}
+        onChange={(e) => setNewNote(e.target.value)}
+        rows={3}
+        disabled={loading}
+        style={{ resize: "none", fontSize: 13 }}
+      />
+      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
+        <button
+          type="button"
+          onClick={submitNote}
+          disabled={!newNote?.trim() || loading}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "7px 16px",
+            fontSize: 13,
+            fontWeight: 500,
+            borderRadius: 8,
+            border: "none",
+            background: "var(--green-btn)",
+            color: "#fff",
+            cursor: !newNote?.trim() || loading ? "not-allowed" : "pointer",
+            opacity: !newNote?.trim() || loading ? 0.5 : 1,
+          }}
+        >
+          {loading ? <Loader2 style={{ width: 14, height: 14 }} className="animate-spin" /> : null}
+          Guardar nota
+        </button>
+      </div>
     </div>
   )
 }

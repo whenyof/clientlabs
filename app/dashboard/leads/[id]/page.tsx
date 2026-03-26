@@ -28,6 +28,7 @@ export default async function LeadPage({
             email: true,
             phone: true,
             createdAt: true,
+            lastActionAt: true,
             leadStatus: true,
             score: true,
             source: true,

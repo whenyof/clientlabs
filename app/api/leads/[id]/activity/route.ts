@@ -92,3 +92,36 @@ export async function POST(
  )
  }
 }
+
+export async function DELETE(
+  request: NextRequest,
+  props: { params: Promise<{ id: string }> }
+) {
+  const params = await props.params
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const activityId = searchParams.get('activityId')
+    if (!activityId) {
+      return NextResponse.json({ error: 'activityId is required' }, { status: 400 })
+    }
+
+    // Verify the activity belongs to this lead and user
+    const activity = await prisma.activity.findFirst({
+      where: { id: activityId, leadId: params.id, userId: session.user.id },
+    })
+    if (!activity) {
+      return NextResponse.json({ error: 'Activity not found' }, { status: 404 })
+    }
+
+    await prisma.activity.delete({ where: { id: activityId } })
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Error deleting activity:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}

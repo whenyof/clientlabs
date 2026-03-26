@@ -129,7 +129,7 @@ export function LeadsTable() {
     >
       {/* Table header */}
       <div
-        className="grid grid-cols-[2fr_1fr_90px] md:grid-cols-[2fr_1fr_1fr_1.2fr_90px]"
+        className="grid grid-cols-[2fr_1fr_auto] md:grid-cols-[2fr_1fr_1fr_120px_auto]"
         style={{
           padding: "10px 20px",
           background: "var(--bg-surface)",

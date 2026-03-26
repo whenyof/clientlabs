@@ -179,8 +179,8 @@ export const defaultSectorConfig: SectorConfig = {
             plural: 'Leads',
             newButton: 'Nuevo Lead',
             emptyState: 'No hay leads registrados',
-            pageTitle: 'Pipeline de Oportunidades',
-            pageSubtitle: 'Identifica, prioriza y convierte tus mejores leads en clientes',
+            pageTitle: 'Mis Leads',
+            pageSubtitle: 'Gestiona tus contactos y conviértelos en clientes',
             status: {
                 NEW: 'Nuevo',
                 CONTACTED: 'Contactado',

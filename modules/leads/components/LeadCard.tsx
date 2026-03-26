@@ -114,7 +114,7 @@ export function LeadCard({ lead }: LeadCardProps) {
 
   return (
     <div
-      className="grid grid-cols-[2fr_1fr_90px] md:grid-cols-[2fr_1fr_1fr_1.2fr_90px]"
+      className="grid grid-cols-[2fr_1fr_auto] md:grid-cols-[2fr_1fr_1fr_120px_auto]"
       style={{
         alignItems: "center",
         padding: "13px 20px",
@@ -178,12 +178,15 @@ export function LeadCard({ lead }: LeadCardProps) {
       </div>
 
       {/* Fuente — hidden on mobile */}
-      <div className="hidden md:block" style={{ fontSize: 12, color: "var(--text-secondary)" }}>
-        {formatSource(lead.source)}
+      <div className="hidden md:block" style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.4 }}>
+        <span>{formatSource(lead.source)}</span>
+        {lead.allowedDomain && (
+          <span style={{ display: "block", fontSize: 11, opacity: 0.7 }}>{lead.allowedDomain}</span>
+        )}
       </div>
 
       {/* Score — hidden on mobile */}
-      <div className="hidden md:block">
+      <div className="hidden md:block" style={{ maxWidth: 120 }}>
         <ScoreBar score={score} />
       </div>
 

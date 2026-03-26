@@ -124,67 +124,53 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
  }
 
  const iconBtn =
-  "p-1.5 text-neutral-500 hover:text-neutral-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+  "flex items-center justify-center w-[26px] h-[26px] rounded border transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 
  return (
  <>
- <div className="flex items-center gap-3 ml-auto">
+ <div className="flex items-center gap-1.5 ml-auto">
  {lead.leadStatus === "CONVERTED" && lead.clientId && (
  <Link
  href="/dashboard/clients"
- className="p-1.5 text-neutral-500 hover:text-neutral-900 transition-colors"
+ className={iconBtn}
+ style={{ borderColor: "var(--border-subtle)", color: "var(--text-secondary)" }}
  title={ui.viewClient}
  >
- <ExternalLink className="h-4 w-4" />
+ <ExternalLink className="h-3.5 w-3.5" />
  </Link>
  )}
 
  {!isReadOnly && (
          <>
-         <Button
+         <button
          type="button"
-         variant="outline"
-         size="sm"
          onClick={() => setNoteDialog(true)}
          disabled={loading}
          className={iconBtn}
-         title={ui.addNote}
+         style={{ borderColor: "var(--border-subtle)", color: "var(--text-secondary)", background: "transparent" }}
+         title="Nota"
          >
-         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
-         </Button>
-         <Button
+         {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <MessageSquare className="h-3.5 w-3.5" />}
+         </button>
+         <button
          type="button"
-         variant="outline"
-         size="sm"
          onClick={handleEmailClick}
          disabled={!lead.email}
          className={iconBtn}
-         title={lead.email ? `${ui.sendEmail} ${lead.email}` : ui.noEmail}
+         style={{ borderColor: "var(--border-subtle)", color: "var(--text-secondary)", background: "transparent" }}
+         title="Email"
          >
-         <Mail className="h-4 w-4" />
-         </Button>
-         <Button
+         <Mail className="h-3.5 w-3.5" />
+         </button>
+         <button
          type="button"
-         variant="outline"
-         size="sm"
          onClick={() => setConvertDialog(true)}
          disabled={loading}
-         className={iconBtn}
+         style={{ fontSize: 11, fontWeight: 600, padding: "0 8px", height: 26, borderRadius: 4, border: "none", background: "#1FA97A", color: "#fff", cursor: "pointer", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 4 }}
          title={ui.convertToClientShort}
          >
-         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-         </Button>
-         <Button
-         type="button"
-         variant="outline"
-         size="sm"
-         onClick={() => setLostDialog(true)}
-         disabled={loading}
-         className={iconBtn}
-         title={ui.markLostShort}
-         >
-         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
-         </Button>
+         {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <>Convertir<span style={{ fontSize: 13 }}>&rarr;</span></>}
+         </button>
          </>
  )}
 

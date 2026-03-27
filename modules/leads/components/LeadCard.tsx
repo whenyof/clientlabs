@@ -1,8 +1,12 @@
 "use client"
 
+import { useState, useRef, useEffect } from "react"
 import type { Lead } from "@prisma/client"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { LeadRowActions } from "./LeadRowActions"
+import { changeLeadStatus } from "../actions"
+import { toast } from "sonner"
 
 /* ── Status badges ── */
 
@@ -12,28 +16,36 @@ const STATUS_CONFIG: Record<string, { label: string; bg: string; color: string; 
   QUALIFIED: { label: "Cualificado", bg: "#FAEEDA", color: "#854F0B", border: "#FAC775", dot: "#EF9F27" },
   INTERESTED: { label: "Interesado", bg: "#FAEEDA", color: "#854F0B", border: "#FAC775", dot: "#EF9F27" },
   LOST: { label: "Perdido", bg: "#FCEBEB", color: "#A32D2D", border: "#F7C1C1", dot: "#E24B4A" },
-  CONVERTED: { label: "Convertido", bg: "#E1F5EE", color: "#0F6E56", border: "#9FE1CB", dot: "#085041" },
+  CONVERTED: { label: "Convertido", bg: "#EEEDFE", color: "#3C3489", border: "#CECBF6", dot: "#6C63FF" },
 }
 
-function StatusBadge({ status }: { status?: string | null }) {
+const STATUS_ORDER = ["NEW", "CONTACTED", "QUALIFIED", "CONVERTED", "LOST"]
+
+function StatusBadge({ status, onClick }: { status?: string | null; onClick?: () => void }) {
   const cfg = STATUS_CONFIG[status ?? ""] ?? { label: status ?? "—", bg: "var(--bg-surface)", color: "var(--text-secondary)", border: "var(--border-subtle)", dot: "var(--text-secondary)" }
   return (
-    <span style={{
-      display: "inline-flex",
-      alignItems: "center",
-      gap: 6,
-      fontSize: 12,
-      fontWeight: 500,
-      padding: "3px 10px",
-      borderRadius: 6,
-      background: cfg.bg,
-      color: cfg.color,
-      border: `0.5px solid ${cfg.border}`,
-      whiteSpace: "nowrap",
-    }}>
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        fontSize: 12,
+        fontWeight: 500,
+        padding: "3px 10px",
+        borderRadius: 6,
+        background: cfg.bg,
+        color: cfg.color,
+        border: `0.5px solid ${cfg.border}`,
+        whiteSpace: "nowrap",
+        cursor: onClick ? "pointer" : "default",
+        transition: "opacity 0.15s",
+      }}
+    >
       <span style={{ width: 6, height: 6, borderRadius: "50%", background: cfg.dot, flexShrink: 0 }} />
       {cfg.label}
-    </span>
+    </button>
   )
 }
 
@@ -108,9 +120,40 @@ interface LeadCardProps {
 }
 
 export function LeadCard({ lead }: LeadCardProps) {
+  const router = useRouter()
   const score = lead.score ?? 0
   const initials = getInitials(lead.name, lead.email)
   const timeStr = formatTime(lead.createdAt)
+
+  const [currentStatus, setCurrentStatus] = useState(lead.leadStatus)
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    if (!dropdownOpen) return
+    function handleClick(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClick)
+    return () => document.removeEventListener("mousedown", handleClick)
+  }, [dropdownOpen])
+
+  const handleStatusChange = async (newStatus: string) => {
+    const prev = currentStatus
+    setCurrentStatus(newStatus as any)
+    setDropdownOpen(false)
+    try {
+      await changeLeadStatus(lead.id, newStatus as any)
+      toast.success(`Estado cambiado a ${STATUS_CONFIG[newStatus]?.label ?? newStatus}`)
+      router.refresh()
+    } catch (error) {
+      setCurrentStatus(prev)
+      toast.error(error instanceof Error ? error.message : "Error al cambiar estado")
+    }
+  }
 
   return (
     <div
@@ -173,9 +216,55 @@ export function LeadCard({ lead }: LeadCardProps) {
         </div>
       </div>
 
-      {/* Estado */}
-      <div style={{ width: 120, flexShrink: 0 }}>
-        <StatusBadge status={lead.leadStatus} />
+      {/* Estado — clickable dropdown */}
+      <div ref={dropdownRef} style={{ width: 120, flexShrink: 0, position: "relative" }}>
+        <StatusBadge status={currentStatus} onClick={() => setDropdownOpen(!dropdownOpen)} />
+        {dropdownOpen && (
+          <div style={{
+            position: "absolute",
+            top: "calc(100% + 4px)",
+            left: 0,
+            zIndex: 50,
+            minWidth: 160,
+            background: "#fff",
+            border: "0.5px solid var(--border-subtle, #e5e7eb)",
+            borderRadius: 8,
+            boxShadow: "0 4px 16px rgba(0,0,0,0.10)",
+            padding: "4px 0",
+          }}>
+            {STATUS_ORDER.map((key) => {
+              const cfg = STATUS_CONFIG[key]
+              if (!cfg) return null
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); handleStatusChange(key) }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    width: "100%",
+                    padding: "7px 12px",
+                    fontSize: 13,
+                    color: cfg.color,
+                    background: key === currentStatus ? cfg.bg : "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    fontWeight: key === currentStatus ? 600 : 400,
+                    transition: "background 0.1s",
+                    textAlign: "left",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = cfg.bg)}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = key === currentStatus ? cfg.bg : "transparent")}
+                >
+                  <span style={{ width: 7, height: 7, borderRadius: "50%", background: cfg.dot, flexShrink: 0 }} />
+                  {cfg.label}
+                </button>
+              )
+            })}
+          </div>
+        )}
       </div>
 
       {/* Fuente */}

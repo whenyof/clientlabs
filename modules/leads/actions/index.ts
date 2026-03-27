@@ -452,6 +452,7 @@ export async function createLead(data: {
     email?: string
     phone?: string
     source?: string
+    leadStatus?: string
 }) {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) throw new Error("Unauthorized")
@@ -463,6 +464,9 @@ export async function createLead(data: {
         throw new Error("Name is required")
     }
 
+    const validStatuses = ["NEW", "CONTACTED", "QUALIFIED", "CONVERTED", "LOST"] as const
+    const initialStatus = validStatuses.includes(data.leadStatus as any) ? data.leadStatus as typeof validStatuses[number] : "NEW"
+
     const lead = await prisma.lead.create({
         data: {
             userId: session.user.id,
@@ -470,8 +474,8 @@ export async function createLead(data: {
             email: data.email?.trim() || null,
             phone: data.phone?.trim() || null,
             source: data.source?.trim() || "manual",
-            leadStatus: "NEW",
-            status: "NEW", // @deprecated — kept in sync
+            leadStatus: initialStatus,
+            status: initialStatus, // @deprecated — kept in sync
             temperature: "COLD",
             score: 0,
             lastActionAt: new Date(),

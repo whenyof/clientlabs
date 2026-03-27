@@ -10,11 +10,17 @@ import {
  DialogTitle,
  DialogFooter,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Loader2 } from "lucide-react"
 import { createLead } from "../actions"
 import { toast } from "sonner"
+
+const STATUS_OPTIONS = [
+ { value: "NEW", label: "Nuevo" },
+ { value: "CONTACTED", label: "Contactado" },
+ { value: "QUALIFIED", label: "Cualificado" },
+ { value: "CONVERTED", label: "Convertido" },
+ { value: "LOST", label: "Perdido" },
+]
 
 export function CreateLeadManualDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
  const router = useRouter()
@@ -24,6 +30,7 @@ export function CreateLeadManualDialog({ open, onOpenChange }: { open: boolean; 
  email: "",
  phone: "",
  source: "",
+ leadStatus: "NEW",
  })
 
  const handleSubmit = async (e: React.FormEvent) => {
@@ -33,7 +40,7 @@ export function CreateLeadManualDialog({ open, onOpenChange }: { open: boolean; 
  setLoading(true)
  try {
  await createLead(formData)
- setFormData({ name: "", email: "", phone: "", source: "" })
+ setFormData({ name: "", email: "", phone: "", source: "", leadStatus: "NEW" })
  onOpenChange(false)
  router.refresh()
  toast.success("Lead creado correctamente")
@@ -45,69 +52,83 @@ export function CreateLeadManualDialog({ open, onOpenChange }: { open: boolean; 
  }
  }
 
+ const inputStyle: React.CSSProperties = {
+  border: "0.5px solid var(--color-border-secondary, #e5e7eb)",
+  borderRadius: "var(--border-radius-md, 8px)",
+  padding: "8px 12px",
+  fontSize: 14,
+  width: "100%",
+  color: "var(--color-text-primary, #0B1F2A)",
+  background: "transparent",
+  outline: "none",
+ }
+
+ const labelClass = "text-[11px] uppercase tracking-wider font-semibold text-[var(--color-text-secondary,#6b7280)]"
+
  return (
  <Dialog open={open} onOpenChange={onOpenChange}>
- <DialogContent className="bg-[var(--color-background-primary,#fff)] border-[var(--color-border-secondary,#e5e7eb)]" style={{ borderRadius: "var(--border-radius-lg, 12px)", padding: 24 }}>
+ <DialogContent
+  className="bg-[var(--color-background-primary,#fff)] border-[var(--color-border-secondary,#e5e7eb)]"
+  style={{ borderRadius: "var(--border-radius-lg, 12px)", padding: 24 }}
+ >
  <DialogHeader>
- <DialogTitle className="text-[var(--color-text-primary,#0B1F2A)] text-xl">Crear Nuevo Lead</DialogTitle>
+ <DialogTitle style={{ fontSize: 18, fontWeight: 500, color: "var(--color-text-primary, #0B1F2A)" }}>
+  Nuevo lead
+ </DialogTitle>
  </DialogHeader>
  <form onSubmit={handleSubmit}>
- <div className="space-y-4">
+ <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
  <div>
- <Label htmlFor="name" className="text-[var(--color-text-primary,#0B1F2A)]">
+ <label className={labelClass}>
  Nombre <span className="text-red-500">*</span>
- </Label>
- <Input
- id="name"
+ </label>
+ <input
  value={formData.name}
- onChange={(e) =>
- setFormData({ ...formData, name: e.target.value })
- }
+ onChange={(e) => setFormData({ ...formData, name: e.target.value })}
  placeholder="Juan Pérez"
  required
- className="mt-2 text-[var(--color-text-primary,#0B1F2A)] placeholder:text-neutral-400"
- style={{ border: "0.5px solid var(--color-border-secondary, #e5e7eb)" }}
+ style={{ ...inputStyle, marginTop: 6 }}
  />
  </div>
  <div>
- <Label htmlFor="email" className="text-[var(--color-text-primary,#0B1F2A)]">Email</Label>
- <Input
- id="email"
+ <label className={labelClass}>Email</label>
+ <input
  type="email"
  value={formData.email}
- onChange={(e) =>
- setFormData({ ...formData, email: e.target.value })
- }
+ onChange={(e) => setFormData({ ...formData, email: e.target.value })}
  placeholder="juan@example.com"
- className="mt-2 text-[var(--color-text-primary,#0B1F2A)] placeholder:text-neutral-400"
- style={{ border: "0.5px solid var(--color-border-secondary, #e5e7eb)" }}
+ style={{ ...inputStyle, marginTop: 6 }}
  />
  </div>
  <div>
- <Label htmlFor="phone" className="text-[var(--color-text-primary,#0B1F2A)]">Teléfono</Label>
- <Input
- id="phone"
+ <label className={labelClass}>Teléfono</label>
+ <input
  value={formData.phone}
- onChange={(e) =>
- setFormData({ ...formData, phone: e.target.value })
- }
+ onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
  placeholder="+34 600 000 000"
- className="mt-2 text-[var(--color-text-primary,#0B1F2A)] placeholder:text-neutral-400"
- style={{ border: "0.5px solid var(--color-border-secondary, #e5e7eb)" }}
+ style={{ ...inputStyle, marginTop: 6 }}
  />
  </div>
  <div>
- <Label htmlFor="source" className="text-[var(--color-text-primary,#0B1F2A)]">Fuente</Label>
- <Input
- id="source"
+ <label className={labelClass}>Fuente</label>
+ <input
  value={formData.source}
- onChange={(e) =>
- setFormData({ ...formData, source: e.target.value })
- }
+ onChange={(e) => setFormData({ ...formData, source: e.target.value })}
  placeholder="Web, Referido, LinkedIn..."
- className="mt-2 text-[var(--color-text-primary,#0B1F2A)] placeholder:text-neutral-400"
- style={{ border: "0.5px solid var(--color-border-secondary, #e5e7eb)" }}
+ style={{ ...inputStyle, marginTop: 6 }}
  />
+ </div>
+ <div>
+ <label className={labelClass}>Estado inicial</label>
+ <select
+ value={formData.leadStatus}
+ onChange={(e) => setFormData({ ...formData, leadStatus: e.target.value })}
+ style={{ ...inputStyle, marginTop: 6, appearance: "none", backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
+ >
+ {STATUS_OPTIONS.map((opt) => (
+  <option key={opt.value} value={opt.value}>{opt.label}</option>
+ ))}
+ </select>
  </div>
  </div>
  <DialogFooter className="mt-6">
@@ -124,7 +145,7 @@ export function CreateLeadManualDialog({ open, onOpenChange }: { open: boolean; 
  className="bg-[#1FA97A] text-white hover:bg-[#178f68]"
  >
  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
- Crear Lead
+ Crear lead
  </Button>
  </DialogFooter>
  </form>

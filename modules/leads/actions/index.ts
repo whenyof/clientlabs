@@ -30,8 +30,8 @@ export async function changeLeadStatus(leadId: string, status: LeadStatus) {
     if (lead.leadStatus === "CONVERTED") throw new Error("Cannot modify converted lead")
     if (lead.leadStatus === "LOST") throw new Error("Cannot modify lost lead")
 
-    // Cannot downgrade from QUALIFIED
-    if (lead.leadStatus === "QUALIFIED" && status !== "QUALIFIED") {
+    // From QUALIFIED only allow advancing to CONVERTED or LOST
+    if (lead.leadStatus === "QUALIFIED" && !["QUALIFIED", "CONVERTED", "LOST"].includes(status)) {
         throw new Error("Cannot downgrade from QUALIFIED status")
     }
 

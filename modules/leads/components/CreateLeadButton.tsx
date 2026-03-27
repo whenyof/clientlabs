@@ -47,34 +47,34 @@ export function CreateLeadButton() {
 
  {/* Mode Selector Dialog */}
  <Dialog open={modeSelectOpen} onOpenChange={setModeSelectOpen}>
- <DialogContent className="bg-zinc-900 border-[var(--border-subtle)] max-w-2xl">
+ <DialogContent className="bg-[var(--color-background-primary,#fff)] border-[var(--color-border-secondary,#e5e7eb)] max-w-2xl" style={{ borderRadius: "var(--border-radius-lg, 12px)", padding: 24 }}>
  <DialogHeader>
- <DialogTitle className="text-[var(--text-primary)] text-xl">{ui.createHowTitle}</DialogTitle>
+ <DialogTitle style={{ fontSize: 18, fontWeight: 500, color: "var(--color-text-primary, #0B1F2A)" }}>{ui.createHowTitle}</DialogTitle>
  </DialogHeader>
 
  <div className="grid grid-cols-2 gap-4 py-4">
  {modes.map((mode) => {
  const Icon = mode.icon
  const colorClasses = {
- blue: "bg-[var(--bg-card)] border-blue-500/30 text-[var(--accent)] hover:bg-[var(--bg-card)] hover:border-blue-500/50",
- cyan: "bg-cyan-500/10 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 hover:border-cyan-500/50",
- emerald: "bg-[var(--accent-soft)] border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent-soft)] hover:border-[var(--accent)]"
+ blue: "bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300",
+ cyan: "bg-cyan-50 border-cyan-200 text-cyan-700 hover:bg-cyan-100 hover:border-cyan-300",
+ emerald: "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300"
  }
 
  return (
  <button
  key={mode.id}
  onClick={() => handleModeSelect(mode.id)}
- className={`relative p-6 rounded-lg border-2 transition-all duration-200 hover:scale-[1.02] text-left ${colorClasses[mode.color as keyof typeof colorClasses]}`}
+ className={`relative p-6 rounded-lg border transition-all duration-200 hover:scale-[1.02] text-left ${colorClasses[mode.color as keyof typeof colorClasses]}`}
  >
  {mode.badge && (
- <span className="absolute top-2 right-2 px-2 py-0.5 rounded text-[10px] bg-[var(--bg-card)] text-[var(--text-secondary)]">
+ <span className="absolute top-2 right-2 px-2 py-0.5 rounded text-[10px] bg-neutral-100 text-neutral-500">
  {mode.badge}
  </span>
  )}
  <Icon className="h-8 w-8 mb-3" />
  <h3 className="font-semibold text-lg mb-1">{mode.title}</h3>
- <p className="text-sm opacity-80">{mode.description}</p>
+ <p className="text-sm opacity-70">{mode.description}</p>
  </button>
  )
  })}

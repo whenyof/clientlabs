@@ -127,7 +127,9 @@ export function LeadCard({ lead }: LeadCardProps) {
 
   const [currentStatus, setCurrentStatus] = useState(lead.leadStatus)
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [showAbove, setShowAbove] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const badgeRef = useRef<HTMLDivElement>(null)
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -218,11 +220,18 @@ export function LeadCard({ lead }: LeadCardProps) {
 
       {/* Estado — clickable dropdown */}
       <div ref={dropdownRef} style={{ width: 120, flexShrink: 0, position: "relative" }}>
-        <StatusBadge status={currentStatus} onClick={() => setDropdownOpen(!dropdownOpen)} />
+        <div ref={badgeRef}>
+          <StatusBadge status={currentStatus} onClick={() => {
+            const rect = badgeRef.current?.getBoundingClientRect()
+            const spaceBelow = window.innerHeight - (rect?.bottom ?? 0)
+            setShowAbove(spaceBelow < 200)
+            setDropdownOpen(!dropdownOpen)
+          }} />
+        </div>
         {dropdownOpen && (
           <div style={{
             position: "absolute",
-            top: "calc(100% + 4px)",
+            ...(showAbove ? { bottom: "calc(100% + 4px)" } : { top: "calc(100% + 4px)" }),
             left: 0,
             zIndex: 50,
             minWidth: 160,

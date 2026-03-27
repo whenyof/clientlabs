@@ -3,7 +3,7 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { getLeads, type GetLeadsParams } from "@/api/leads"
 import { useMemo, useCallback } from "react"
-import type { Lead } from "@prisma/client"
+import type { Lead, LeadStatus } from "@prisma/client"
 import { changeLeadStatus } from "@/modules/leads/actions"
 import { toast } from "sonner"
 
@@ -71,7 +71,7 @@ export function useUpdateLeadStatus() {
             ...page,
             leads: page.leads.map((lead) =>
               lead.id === leadId
-                ? { ...lead, leadStatus: status, status }
+                ? { ...lead, leadStatus: status as LeadStatus, status, metadata: lead.metadata ?? {} }
                 : lead
             ),
           })),

@@ -342,9 +342,10 @@ export function WebConnectDialog({ open, onOpenChange }: WebConnectDialogProps) 
                     const integration = integrations.find(i => i.provider === item.provider)
                     const isConnected = integration?.status === 'CONNECTED'
                     const isError = integration?.status === 'ERROR'
+                    const isComingSoon = ["shopify", "gtm", "wix", "webflow"].includes(item.provider)
 
                     return (
-                        <div key={item.provider} className="bg-white border border-slate-200 rounded-xl p-5 hover:shadow-sm transition flex flex-col justify-between">
+                        <div key={item.provider} className={cn("bg-white border border-slate-200 rounded-xl p-5 transition flex flex-col justify-between", isComingSoon ? "opacity-60 cursor-not-allowed" : "hover:shadow-sm")}>
                             <div className="flex items-start gap-4">
                                 <div className="h-10 w-10 flex-shrink-0 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
                                     {item.icon}
@@ -352,7 +353,7 @@ export function WebConnectDialog({ open, onOpenChange }: WebConnectDialogProps) 
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
                                         <h3 className="text-base font-semibold text-[#0B1F2A] truncate tracking-tight">{item.title}</h3>
-                                        {isConnected && (
+                                        {isConnected && !isComingSoon && (
                                             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                         )}
                                     </div>
@@ -364,22 +365,28 @@ export function WebConnectDialog({ open, onOpenChange }: WebConnectDialogProps) 
 
                             <div className="mt-6 flex items-center justify-between">
                                 <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                                    {isConnected ? 'Estado: Activo' : isError ? 'Estado: Error' : 'Sin conectar'}
+                                    {isComingSoon ? 'Próximamente' : isConnected ? 'Estado: Activo' : isError ? 'Estado: Error' : 'Sin conectar'}
                                 </span>
-                                <Button
-                                    size="sm"
-                                    onClick={() => handleConnect(item.provider)}
-                                    className={cn(
-                                        "h-8 px-4 rounded-lg font-medium transition-all text-xs",
-                                        isConnected
-                                            ? "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
-                                            : isError
-                                                ? "bg-amber-100 text-amber-700 hover:bg-amber-200"
-                                                : "bg-[#1FA97A] text-white hover:bg-[#178f68]"
-                                    )}
-                                >
-                                    {isConnected ? 'Gestionar' : isError ? 'Revisar' : 'Conectar'}
-                                </Button>
+                                {isComingSoon ? (
+                                    <span className="text-xs font-medium px-3 py-1 rounded-full bg-slate-100 text-slate-400">
+                                        Próximamente
+                                    </span>
+                                ) : (
+                                    <Button
+                                        size="sm"
+                                        onClick={() => handleConnect(item.provider)}
+                                        className={cn(
+                                            "h-8 px-4 rounded-lg font-medium transition-all text-xs",
+                                            isConnected
+                                                ? "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
+                                                : isError
+                                                    ? "bg-amber-100 text-amber-700 hover:bg-amber-200"
+                                                    : "bg-[#1FA97A] text-white hover:bg-[#178f68]"
+                                        )}
+                                    >
+                                        {isConnected ? 'Gestionar' : isError ? 'Revisar' : 'Conectar'}
+                                    </Button>
+                                )}
                             </div>
                         </div>
                     )

@@ -19,18 +19,31 @@ export async function GET() {
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
   const staleDays = 7 * 24 * 60 * 60 * 1000
 
+  const staleDate = new Date(now.getTime() - staleDays)
+
   const [total, hot, converted, stalled, newThisWeek, hotYesterday, hotNow, convertedThisMonth, totalThisMonth] =
     await Promise.all([
       prisma.lead.count({ where: { userId } }),
-      prisma.lead.count({ where: { userId, temperature: "HOT" } }),
-      prisma.lead.count({ where: { userId, leadStatus: "CONVERTED" } }),
+      // Potenciales = score > 40 OR leadStatus = QUALIFIED
       prisma.lead.count({
         where: {
           userId,
           NOT: { leadStatus: { in: ["CONVERTED", "LOST"] } },
           OR: [
-            { lastActionAt: null },
-            { lastActionAt: { lt: new Date(now.getTime() - staleDays) } },
+            { score: { gt: 40 } },
+            { leadStatus: "QUALIFIED" },
+          ],
+        },
+      }),
+      prisma.lead.count({ where: { userId, leadStatus: "CONVERTED" } }),
+      // Estancados = not CONVERTED/LOST AND no activity in 7+ days
+      prisma.lead.count({
+        where: {
+          userId,
+          NOT: { leadStatus: { in: ["CONVERTED", "LOST"] } },
+          OR: [
+            { lastActionAt: { not: null, lt: staleDate } },
+            { lastActionAt: null, createdAt: { lt: staleDate } },
           ],
         },
       }),

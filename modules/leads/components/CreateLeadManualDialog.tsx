@@ -22,6 +22,17 @@ const STATUS_OPTIONS = [
  { value: "LOST", label: "Perdido" },
 ]
 
+const SOURCE_OPTIONS = [
+ { value: "web", label: "Web" },
+ { value: "manual", label: "Manual" },
+ { value: "referido", label: "Referido" },
+ { value: "linkedin", label: "LinkedIn" },
+ { value: "instagram", label: "Instagram" },
+ { value: "facebook", label: "Facebook" },
+ { value: "google", label: "Google Ads" },
+ { value: "otro", label: "Otro" },
+]
+
 export function CreateLeadManualDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
  const router = useRouter()
  const [loading, setLoading] = useState(false)
@@ -59,7 +70,7 @@ export function CreateLeadManualDialog({ open, onOpenChange }: { open: boolean; 
   fontSize: 14,
   width: "100%",
   color: "var(--color-text-primary, #0B1F2A)",
-  background: "transparent",
+  background: "var(--color-background-primary, #fff)",
   outline: "none",
  }
 
@@ -110,15 +121,6 @@ export function CreateLeadManualDialog({ open, onOpenChange }: { open: boolean; 
  />
  </div>
  <div>
- <label className={labelClass}>Fuente</label>
- <input
- value={formData.source}
- onChange={(e) => setFormData({ ...formData, source: e.target.value })}
- placeholder="Web, Referido, LinkedIn..."
- style={{ ...inputStyle, marginTop: 6 }}
- />
- </div>
- <div>
  <label className={labelClass}>Estado inicial</label>
  <select
  value={formData.leadStatus}
@@ -126,6 +128,19 @@ export function CreateLeadManualDialog({ open, onOpenChange }: { open: boolean; 
  style={{ ...inputStyle, marginTop: 6, appearance: "none", backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
  >
  {STATUS_OPTIONS.map((opt) => (
+  <option key={opt.value} value={opt.value}>{opt.label}</option>
+ ))}
+ </select>
+ </div>
+ <div>
+ <label className={labelClass}>Fuente</label>
+ <select
+ value={formData.source}
+ onChange={(e) => setFormData({ ...formData, source: e.target.value })}
+ style={{ ...inputStyle, marginTop: 6, appearance: "none", backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
+ >
+ <option value="">Seleccionar...</option>
+ {SOURCE_OPTIONS.map((opt) => (
   <option key={opt.value} value={opt.value}>{opt.label}</option>
  ))}
  </select>

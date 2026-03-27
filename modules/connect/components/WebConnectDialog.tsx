@@ -335,7 +335,7 @@ export function WebConnectDialog({ open, onOpenChange }: WebConnectDialogProps) 
 
     const renderListStep = () => (
         <div className="p-8 md:p-10 space-y-6">
-            <h2 className="text-xl font-semibold text-[#0B1F2A]">Web Implementation Methods</h2>
+            <h2 className="text-xl font-semibold text-[#0B1F2A]">Métodos de instalación</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {webProviders.map((item) => {

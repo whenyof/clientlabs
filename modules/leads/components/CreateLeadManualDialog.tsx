@@ -47,15 +47,15 @@ export function CreateLeadManualDialog({ open, onOpenChange }: { open: boolean; 
 
  return (
  <Dialog open={open} onOpenChange={onOpenChange}>
- <DialogContent className="bg-zinc-900 border-[var(--border-subtle)]">
+ <DialogContent className="bg-[var(--color-background-primary,#fff)] border-[var(--color-border-secondary,#e5e7eb)]" style={{ borderRadius: "var(--border-radius-lg, 12px)", padding: 24 }}>
  <DialogHeader>
- <DialogTitle className="text-[var(--text-primary)] text-xl">Crear Nuevo Lead</DialogTitle>
+ <DialogTitle className="text-[var(--color-text-primary,#0B1F2A)] text-xl">Crear Nuevo Lead</DialogTitle>
  </DialogHeader>
  <form onSubmit={handleSubmit}>
  <div className="space-y-4">
  <div>
- <Label htmlFor="name" className="text-[var(--text-secondary)]">
- Nombre <span className="text-[var(--critical)]">*</span>
+ <Label htmlFor="name" className="text-[var(--color-text-primary,#0B1F2A)]">
+ Nombre <span className="text-red-500">*</span>
  </Label>
  <Input
  id="name"
@@ -65,11 +65,12 @@ export function CreateLeadManualDialog({ open, onOpenChange }: { open: boolean; 
  }
  placeholder="Juan Pérez"
  required
- className="bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] mt-2"
+ className="mt-2 text-[var(--color-text-primary,#0B1F2A)] placeholder:text-neutral-400"
+ style={{ border: "0.5px solid var(--color-border-secondary, #e5e7eb)" }}
  />
  </div>
  <div>
- <Label htmlFor="email" className="text-[var(--text-secondary)]">Email</Label>
+ <Label htmlFor="email" className="text-[var(--color-text-primary,#0B1F2A)]">Email</Label>
  <Input
  id="email"
  type="email"
@@ -78,11 +79,12 @@ export function CreateLeadManualDialog({ open, onOpenChange }: { open: boolean; 
  setFormData({ ...formData, email: e.target.value })
  }
  placeholder="juan@example.com"
- className="bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] mt-2"
+ className="mt-2 text-[var(--color-text-primary,#0B1F2A)] placeholder:text-neutral-400"
+ style={{ border: "0.5px solid var(--color-border-secondary, #e5e7eb)" }}
  />
  </div>
  <div>
- <Label htmlFor="phone" className="text-[var(--text-secondary)]">Teléfono</Label>
+ <Label htmlFor="phone" className="text-[var(--color-text-primary,#0B1F2A)]">Teléfono</Label>
  <Input
  id="phone"
  value={formData.phone}
@@ -90,11 +92,12 @@ export function CreateLeadManualDialog({ open, onOpenChange }: { open: boolean; 
  setFormData({ ...formData, phone: e.target.value })
  }
  placeholder="+34 600 000 000"
- className="bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] mt-2"
+ className="mt-2 text-[var(--color-text-primary,#0B1F2A)] placeholder:text-neutral-400"
+ style={{ border: "0.5px solid var(--color-border-secondary, #e5e7eb)" }}
  />
  </div>
  <div>
- <Label htmlFor="source" className="text-[var(--text-secondary)]">Fuente</Label>
+ <Label htmlFor="source" className="text-[var(--color-text-primary,#0B1F2A)]">Fuente</Label>
  <Input
  id="source"
  value={formData.source}
@@ -102,7 +105,8 @@ export function CreateLeadManualDialog({ open, onOpenChange }: { open: boolean; 
  setFormData({ ...formData, source: e.target.value })
  }
  placeholder="Web, Referido, LinkedIn..."
- className="bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] mt-2"
+ className="mt-2 text-[var(--color-text-primary,#0B1F2A)] placeholder:text-neutral-400"
+ style={{ border: "0.5px solid var(--color-border-secondary, #e5e7eb)" }}
  />
  </div>
  </div>
@@ -117,7 +121,7 @@ export function CreateLeadManualDialog({ open, onOpenChange }: { open: boolean; 
  <Button
  type="submit"
  disabled={loading || !formData.name.trim()}
- className="bg-[var(--bg-card)] border-blue-500/30 text-[var(--accent)] hover:bg-[var(--bg-card)]"
+ className="bg-[#1FA97A] text-white hover:bg-[#178f68]"
  >
  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
  Crear Lead

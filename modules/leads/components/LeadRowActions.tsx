@@ -211,7 +211,7 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
 
  {/* Note Dialog */}
  <Dialog open={noteDialog} onOpenChange={setNoteDialog}>
- <DialogContent className="bg-zinc-900 border-[var(--border-subtle)]">
+ <DialogContent className="bg-[var(--color-background-primary,#fff)] border-[var(--border-subtle)]">
  <DialogHeader>
  <DialogTitle className="text-[var(--text-primary)]">{ui.addNote}</DialogTitle>
  </DialogHeader>
@@ -245,7 +245,7 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
 
  {/* Lost Dialog */}
  <Dialog open={lostDialog} onOpenChange={setLostDialog}>
- <DialogContent className="bg-zinc-900 border-[var(--border-subtle)]">
+ <DialogContent className="bg-[var(--color-background-primary,#fff)] border-[var(--border-subtle)]">
  <DialogHeader>
  <DialogTitle className="text-[var(--text-primary)]">{ui.lostDialogTitle}</DialogTitle>
  </DialogHeader>
@@ -278,7 +278,7 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
 
  {/* Convert Confirmation Dialog */}
  <Dialog open={convertDialog} onOpenChange={setConvertDialog}>
- <DialogContent className="bg-zinc-900 border-[var(--border-subtle)]">
+ <DialogContent className="bg-[var(--color-background-primary,#fff)] border-[var(--border-subtle)]">
  <DialogHeader>
  <DialogTitle className="text-[var(--text-primary)] text-xl">{ui.convertDialogTitle}</DialogTitle>
  </DialogHeader>

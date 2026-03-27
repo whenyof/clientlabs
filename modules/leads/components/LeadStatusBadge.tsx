@@ -15,12 +15,12 @@ const statusIcons: Record<LeadStatus, typeof Sparkles> = {
 }
 
 const statusClassNames: Record<LeadStatus, string> = {
- NEW: "bg-[var(--bg-card)] text-[var(--accent)] border-blue-500/40 font-medium",
- CONTACTED: "bg-[var(--accent-soft)]-primary/20 text-[var(--accent)]-hover border-[var(--accent)]-primary/40 font-medium",
- INTERESTED: "bg-yellow-500/20 text-yellow-400 border-yellow-500/40 font-medium",
- QUALIFIED: "bg-green-500/20 text-green-400 border-green-500/40 font-medium",
- CONVERTED: "bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)] font-medium",
- LOST: "bg-[var(--bg-card)] text-[var(--critical)] border-[var(--critical)] font-medium",
+ NEW: "bg-[#E1F5EE] text-[#0F6E56] border-[#0F6E56]/30 font-medium",
+ CONTACTED: "bg-[#E6F1FB] text-[#185FA5] border-[#185FA5]/30 font-medium",
+ INTERESTED: "bg-[#FAEEDA] text-[#854F0B] border-[#854F0B]/30 font-medium",
+ QUALIFIED: "bg-[#FAEEDA] text-[#854F0B] border-[#854F0B]/30 font-medium",
+ CONVERTED: "bg-[#EEEDFE] text-[#3C3489] border-[#CECBF6] font-medium",
+ LOST: "bg-[#FCEBEB] text-[#A32D2D] border-[#A32D2D]/30 font-medium",
 }
 
 export function LeadStatusBadge({ status }: { status: LeadStatus }) {

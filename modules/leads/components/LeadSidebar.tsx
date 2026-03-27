@@ -65,16 +65,15 @@ export function LeadSidebar({ leadId, lead }: LeadSidebarProps) {
     setCurrentStatus(newStatus)
     setStatusOpen(false)
     setStatusLoading(true)
-    try {
-      await changeLeadStatus(leadId, newStatus as any)
+    const result = await changeLeadStatus(leadId, newStatus as any)
+    if (result.success) {
       toast.success(`Estado cambiado a ${STATUS_LABELS[newStatus] ?? newStatus}`)
       router.refresh()
-    } catch (error) {
+    } else {
       setCurrentStatus(prev)
-      toast.error(error instanceof Error ? error.message : "Error al cambiar estado")
-    } finally {
-      setStatusLoading(false)
+      toast.error(result.error ?? "Error al cambiar estado")
     }
+    setStatusLoading(false)
   }
 
   const isReadOnly = currentStatus === "CONVERTED" || currentStatus === "LOST"

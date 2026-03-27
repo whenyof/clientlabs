@@ -46,8 +46,11 @@ export function useUpdateLeadStatus() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ leadId, status }: { leadId: string; status: string }) =>
-      changeLeadStatus(leadId, status as any),
+    mutationFn: async ({ leadId, status }: { leadId: string; status: string }) => {
+      const result = await changeLeadStatus(leadId, status as any)
+      if (!result.success) throw new Error(result.error ?? "Error al cambiar estado")
+      return result
+    },
 
     onMutate: async ({ leadId, status }) => {
       // Cancel in-flight queries so they don't overwrite our optimistic update

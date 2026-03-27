@@ -19,38 +19,47 @@ async function triggerLeadScoring(leadId: string) {
 
 // Change lead status
 export async function changeLeadStatus(leadId: string, status: LeadStatus) {
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.id) throw new Error("Unauthorized")
+    try {
+        const session = await getServerSession(authOptions)
+        if (!session?.user?.id) return { success: false, error: "No autorizado" }
 
-    const lead = await prisma.lead.findUnique({
-        where: { id: leadId, userId: session.user.id },
-    })
+        const lead = await prisma.lead.findUnique({
+            where: { id: leadId, userId: session.user.id },
+        })
 
-    if (!lead) throw new Error("Lead not found")
-    if (lead.leadStatus === "CONVERTED") throw new Error("Cannot modify converted lead")
-    if (lead.leadStatus === "LOST") throw new Error("Cannot modify lost lead")
+        if (!lead) return { success: false, error: "Lead no encontrado" }
+        if (lead.leadStatus === "CONVERTED") return { success: false, error: "No se puede modificar un lead convertido" }
+        if (lead.leadStatus === "LOST") return { success: false, error: "No se puede modificar un lead perdido" }
 
-    // From QUALIFIED only allow advancing to CONVERTED or LOST
-    if (lead.leadStatus === "QUALIFIED" && !["QUALIFIED", "CONVERTED", "LOST"].includes(status)) {
-        throw new Error("Cannot downgrade from QUALIFIED status")
+        // From QUALIFIED only allow advancing to CONVERTED or LOST
+        if (lead.leadStatus === "QUALIFIED" && !["QUALIFIED", "CONVERTED", "LOST"].includes(status)) {
+            return { success: false, error: "Desde Cualificado solo se puede avanzar a Convertido o Perdido" }
+        }
+
+        await prisma.lead.update({
+            where: { id: leadId, userId: session.user.id },
+            data: {
+                leadStatus: status,
+                status: status, // @deprecated — kept in sync with leadStatus
+                lastActionAt: new Date(),
+            },
+        })
+
+        // Recalculate score and temperature — non-blocking, don't fail the status change
+        try {
+            await triggerLeadScoring(leadId)
+        } catch (scoringError) {
+            console.error("[changeLeadStatus] Scoring failed (non-blocking):", scoringError)
+        }
+
+        revalidatePath("/dashboard/leads")
+        revalidatePath("/dashboard/other/leads")
+        revalidatePath("/dashboard/other")
+        return { success: true }
+    } catch (error) {
+        console.error("[changeLeadStatus] Unexpected error:", error)
+        return { success: false, error: "Error inesperado al cambiar estado" }
     }
-
-    await prisma.lead.update({
-        where: { id: leadId, userId: session.user.id },
-        data: {
-            leadStatus: status,
-            status: status, // @deprecated — kept in sync with leadStatus
-            lastActionAt: new Date(),
-        },
-    })
-
-    // Recalculate score and temperature using global engine
-    await triggerLeadScoring(leadId)
-
-    revalidatePath("/dashboard/leads")
-    revalidatePath("/dashboard/other/leads")
-    revalidatePath("/dashboard/other")
-    return { success: true }
 }
 
 // Change lead temperature

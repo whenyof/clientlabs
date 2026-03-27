@@ -147,13 +147,13 @@ export function LeadCard({ lead }: LeadCardProps) {
     const prev = currentStatus
     setCurrentStatus(newStatus as any)
     setDropdownOpen(false)
-    try {
-      await changeLeadStatus(lead.id, newStatus as any)
+    const result = await changeLeadStatus(lead.id, newStatus as any)
+    if (result.success) {
       toast.success(`Estado cambiado a ${STATUS_CONFIG[newStatus]?.label ?? newStatus}`)
       router.refresh()
-    } catch (error) {
+    } else {
       setCurrentStatus(prev)
-      toast.error(error instanceof Error ? error.message : "Error al cambiar estado")
+      toast.error(result.error ?? "Error al cambiar estado")
     }
   }
 

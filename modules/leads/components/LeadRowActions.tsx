@@ -55,16 +55,14 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
 
  const handleStatusChange = async (status: typeof lead.leadStatus) => {
  setLoading(true)
- try {
- await changeLeadStatus(lead.id, status)
+ const result = await changeLeadStatus(lead.id, status)
+ if (result.success) {
  router.refresh()
  toast.success(`${labels.leads.singular} marcado como ${(statusLabels[status] ?? status).toLowerCase()}`)
- } catch (error) {
- console.error(error)
- toast.error(ui.toastErrorStatus)
- } finally {
- setLoading(false)
+ } else {
+ toast.error(result.error ?? ui.toastErrorStatus)
  }
+ setLoading(false)
  }
 
  const handleAddNote = async () => {

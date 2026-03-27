@@ -30,7 +30,7 @@ export async function GET() {
           userId,
           NOT: { leadStatus: { in: ["CONVERTED", "LOST"] } },
           OR: [
-            { score: { gt: 40 } },
+            { score: { gte: 40 } },
             { leadStatus: "QUALIFIED" },
           ],
         },

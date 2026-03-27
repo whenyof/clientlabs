@@ -29,7 +29,6 @@ export async function changeLeadStatus(leadId: string, status: LeadStatus) {
 
         if (!lead) return { success: false, error: "Lead no encontrado" }
         if (lead.leadStatus === "CONVERTED") return { success: false, error: "No se puede modificar un lead convertido" }
-        if (lead.leadStatus === "LOST") return { success: false, error: "No se puede modificar un lead perdido" }
 
         // From QUALIFIED only allow advancing to CONVERTED or LOST
         if (lead.leadStatus === "QUALIFIED" && !["QUALIFIED", "CONVERTED", "LOST"].includes(status)) {
@@ -73,7 +72,6 @@ export async function changeLeadTemperature(leadId: string, temperature: LeadTem
 
     if (!lead) throw new Error("Lead not found")
     if (lead.leadStatus === "CONVERTED") throw new Error("Cannot modify converted lead")
-    if (lead.leadStatus === "LOST") throw new Error("Cannot modify lost lead")
 
     await prisma.lead.update({
         where: { id: leadId, userId: session.user.id },
@@ -104,7 +102,6 @@ export async function addLeadTag(leadId: string, tag: string) {
 
     if (!lead) throw new Error("Lead not found")
     if (lead.leadStatus === "CONVERTED") throw new Error("Cannot modify converted lead")
-    if (lead.leadStatus === "LOST") throw new Error("Cannot modify lost lead")
 
     const currentTags = lead.tags || []
     if (currentTags.includes(tag)) {
@@ -136,7 +133,6 @@ export async function removeLeadTag(leadId: string, tag: string) {
 
     if (!lead) throw new Error("Lead not found")
     if (lead.leadStatus === "CONVERTED") throw new Error("Cannot modify converted lead")
-    if (lead.leadStatus === "LOST") throw new Error("Cannot modify lost lead")
 
     const currentTags = lead.tags || []
     const newTags = currentTags.filter(t => t !== tag)
@@ -175,7 +171,6 @@ export async function setLeadReminder(
 
     if (!lead) throw new Error("Lead not found")
     if (lead.leadStatus === "CONVERTED") throw new Error("Cannot modify converted lead")
-    if (lead.leadStatus === "LOST") throw new Error("Cannot modify lost lead")
 
     const metadata = (lead.metadata as any) || {}
     metadata.reminder = {
@@ -255,7 +250,6 @@ export async function addLeadNote(leadId: string, text: string) {
 
     if (!lead) throw new Error("Lead not found")
     if (lead.leadStatus === "CONVERTED") throw new Error("Cannot modify converted lead")
-    if (lead.leadStatus === "LOST") throw new Error("Cannot modify lost lead")
 
     // 1️⃣ Guardar en historial
     await prisma.activity.create({
@@ -302,7 +296,6 @@ export async function registerLeadCall(leadId: string, notes: string) {
 
     if (!lead) throw new Error("Lead not found")
     if (lead.leadStatus === "CONVERTED") throw new Error("Cannot modify converted lead")
-    if (lead.leadStatus === "LOST") throw new Error("Cannot modify lost lead")
 
     await prisma.activity.create({
         data: {
@@ -625,9 +618,9 @@ export async function dismissAISuggestion(leadId: string) {
         throw new Error("Lead no encontrado")
     }
 
-    // Don't modify CONVERTED or LOST
-    if (lead.leadStatus === "CONVERTED" || lead.leadStatus === "LOST") {
-        throw new Error("No se puede modificar un lead convertido o perdido")
+    // Don't modify CONVERTED
+    if (lead.leadStatus === "CONVERTED") {
+        throw new Error("No se puede modificar un lead convertido")
     }
 
     const metadata = (lead.metadata as any) || {}

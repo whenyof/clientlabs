@@ -14,6 +14,7 @@ export function LeadsKpisClient({ initial }: { initial: KpisData }) {
         .catch(() => {})
     }
 
+    fetchKpis()
     const interval = setInterval(fetchKpis, 10000)
     return () => clearInterval(interval)
   }, [])

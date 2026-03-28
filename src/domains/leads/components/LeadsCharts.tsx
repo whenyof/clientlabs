@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip,
   ResponsiveContainer, Cell,
-  PieChart, Pie
+  PieChart, Pie, ReferenceLine, LabelList
 } from "recharts"
 import { ChevronDown, ChevronUp, BarChart2 } from "lucide-react"
 
@@ -24,28 +24,11 @@ interface LeadsChartsProps {
   userId?: string
 }
 
-// ── Colores por estado ──────────────────
-const STATUS_COLORS: Record<string, string> = {
-  NEW:       "#1FA97A",
-  CONTACTED: "#3B82F6",
-  QUALIFIED: "#D9A441",
-  CONVERTED: "#8B5CF6",
-  LOST:      "#EF4444",
-}
-
-const STATUS_LABELS: Record<string, string> = {
-  NEW:       "Nuevo",
-  CONTACTED: "Contactado",
-  QUALIFIED: "Cualificado",
-  CONVERTED: "Convertido",
-  LOST:      "Perdido",
-}
-
 // ── Tooltip personalizado barra ─────────
 function BarTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-white border border-slate-200 rounded-lg px-3 py-2 shadow-lg text-xs">
+    <div className="bg-white border border-slate-100 rounded-xl px-3 py-2 shadow-[0_4px_16px_rgba(0,0,0,0.08)] text-xs">
       <p className="text-slate-500 mb-1">{label}</p>
       <p className="font-semibold text-slate-900">
         {payload[0].value} leads
@@ -58,7 +41,7 @@ function BarTooltip({ active, payload, label }: any) {
 function PieTooltip({ active, payload }: any) {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-white border border-slate-200 rounded-lg px-3 py-2 shadow-lg text-xs">
+    <div className="bg-white border border-slate-100 rounded-xl px-3 py-2 shadow-[0_4px_16px_rgba(0,0,0,0.08)] text-xs">
       <p className="font-semibold text-slate-900">
         {payload[0].name}
       </p>
@@ -111,6 +94,12 @@ export function LeadsCharts({}: LeadsChartsProps) {
     (acc, s) => acc + s.value, 0
   )
 
+  const avg = dailyData.length > 0
+    ? Math.round(dailyData.reduce((a, b) => a + b.total, 0) / dailyData.length)
+    : 0
+
+  const periodTotal = dailyData.reduce((a, b) => a + b.total, 0)
+
   return (
     <div className="border border-slate-200 rounded-xl overflow-hidden bg-white mb-4">
 
@@ -136,7 +125,7 @@ export function LeadsCharts({}: LeadsChartsProps) {
 
       {/* ── Contenido ── */}
       {isOpen && (
-        <div className="border-t border-slate-100 px-5 py-4">
+        <div className="border-t border-slate-100 px-5 py-5">
           {isLoading ? (
             <div className="flex items-center justify-center h-[160px]">
               <div className="flex gap-1">
@@ -149,53 +138,13 @@ export function LeadsCharts({}: LeadsChartsProps) {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-[1fr_220px] gap-6">
+            <div style={{ display: "grid", gridTemplateColumns: "180px 1fr", gap: "24px", alignItems: "center" }}>
 
-              {/* ── Gráfico barras ── */}
+              {/* ── Donut + leyenda (IZQUIERDA) ── */}
               <div>
-                <p className="text-[11px] uppercase tracking-[0.08em] text-slate-400 font-medium mt-0 mb-3">
-                  Leads captados por día
-                </p>
-                <ResponsiveContainer width="100%" height={150}>
-                  <BarChart
-                    data={dailyData}
-                    margin={{ top: 0, right: 0, left: -20, bottom: 0 }}
-                    barSize={6}
-                  >
-                    <XAxis
-                      dataKey="date"
-                      tick={{ fontSize: 10, fill: "#9CA3AF" }}
-                      tickLine={false}
-                      axisLine={false}
-                      interval="preserveStartEnd"
-                    />
-                    <YAxis
-                      tick={{ fontSize: 10, fill: "#9CA3AF" }}
-                      tickLine={false}
-                      axisLine={false}
-                      allowDecimals={false}
-                    />
-                    <Tooltip
-                      content={<BarTooltip />}
-                      cursor={{ fill: "rgba(31,169,122,0.06)", radius: 4 }}
-                    />
-                    <Bar dataKey="total" radius={[3, 3, 0, 0]}>
-                      {dailyData.map((_, i) => (
-                        <Cell
-                          key={i}
-                          fill={i === dailyData.length - 1 ? "#1FA97A" : "#E5E7EB"}
-                        />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-
-              {/* ── Donut + leyenda ── */}
-              <div>
-                <div className="flex flex-col items-center gap-3">
-                  <div className="relative flex-shrink-0">
-                    <ResponsiveContainer width={140} height={140}>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+                  <div style={{ position: "relative" }}>
+                    <ResponsiveContainer width={160} height={160}>
                       <PieChart>
                         <Pie
                           data={statusData.length > 0
@@ -204,10 +153,11 @@ export function LeadsCharts({}: LeadsChartsProps) {
                           }
                           cx="50%"
                           cy="50%"
-                          innerRadius={44}
-                          outerRadius={62}
+                          innerRadius={48}
+                          outerRadius={68}
                           dataKey="value"
                           strokeWidth={0}
+                          paddingAngle={2}
                         >
                           {(statusData.length > 0
                             ? statusData
@@ -220,36 +170,112 @@ export function LeadsCharts({}: LeadsChartsProps) {
                       </PieChart>
                     </ResponsiveContainer>
                     {/* Total en el centro */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                      <span className="text-[18px] font-bold text-slate-900 leading-none">
+                    <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+                      <span style={{ fontSize: 20, fontWeight: 700, color: "#0F172A", lineHeight: 1 }}>
                         {totalLeads}
                       </span>
-                      <span className="text-[9px] text-slate-400 mt-0.5 uppercase tracking-wider">
+                      <span style={{ fontSize: 9, color: "#9CA3AF", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.05em" }}>
                         total
                       </span>
                     </div>
                   </div>
 
                   {/* Leyenda */}
-                  <div className="w-full space-y-1.5">
+                  <div style={{ width: "100%", borderTop: "1px solid #F1F5F9", paddingTop: 12, marginTop: 4 }}>
                     {statusData.map(s => (
-                      <div key={s.name} className="flex justify-between">
-                        <div className="flex items-center gap-1.5">
-                          <div
-                            className="w-2 h-2 rounded-full flex-shrink-0"
-                            style={{ background: s.color }}
-                          />
-                          <span className="text-[11px] text-slate-600">
+                      <div key={s.name} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "3px 0" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <div style={{ width: 7, height: 7, borderRadius: "50%", background: s.color, flexShrink: 0 }} />
+                          <span style={{ fontSize: 11, color: "#475569" }}>
                             {s.name}
                           </span>
                         </div>
-                        <span className="text-[11px] font-medium text-slate-900 tabular-nums">
+                        <span style={{ fontSize: 11, fontWeight: 600, color: "#0F172A", fontVariantNumeric: "tabular-nums" }}>
                           {s.value}
                         </span>
                       </div>
                     ))}
                   </div>
                 </div>
+              </div>
+
+              {/* ── Gráfico barras (DERECHA) ── */}
+              <div>
+                <div className="flex items-baseline gap-2 mb-3">
+                  <span className="text-[11px] uppercase tracking-[0.08em] text-slate-400 font-medium">
+                    Leads captados · 30 días
+                  </span>
+                  <span className="text-[13px] font-semibold text-slate-900 ml-auto">
+                    {periodTotal} total
+                  </span>
+                </div>
+                <ResponsiveContainer width="100%" height={180}>
+                  <BarChart
+                    data={dailyData}
+                    margin={{ top: 16, right: 0, left: -20, bottom: 0 }}
+                    barSize={8}
+                  >
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fontSize: 10, fill: "#9CA3AF" }}
+                      tickLine={false}
+                      axisLine={false}
+                      interval={1}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 10, fill: "#9CA3AF" }}
+                      tickLine={false}
+                      axisLine={false}
+                      allowDecimals={false}
+                    />
+                    <Tooltip
+                      content={<BarTooltip />}
+                      cursor={{ fill: "rgba(31,169,122,0.06)", radius: 4 }}
+                    />
+                    <ReferenceLine
+                      y={avg}
+                      stroke="#1FA97A"
+                      strokeDasharray="3 3"
+                      strokeOpacity={0.4}
+                      strokeWidth={1}
+                    />
+                    <Bar dataKey="total" radius={[3, 3, 0, 0]}>
+                      {dailyData.map((entry, i) => (
+                        <Cell
+                          key={i}
+                          fill={
+                            i === dailyData.length - 1
+                              ? "#1FA97A"
+                              : entry.total > 0
+                                ? "#D1FAE5"
+                                : "#F3F4F6"
+                          }
+                        />
+                      ))}
+                      <LabelList
+                        dataKey="total"
+                        position="top"
+                        content={(props: any) => {
+                          const { x, y, width, value, index } = props
+                          if (index !== dailyData.length - 1) return null
+                          if (!value) return null
+                          return (
+                            <text
+                              x={x + width / 2}
+                              y={y - 6}
+                              textAnchor="middle"
+                              fill="#1FA97A"
+                              fontSize={10}
+                              fontWeight={600}
+                            >
+                              Hoy
+                            </text>
+                          )
+                        }}
+                      />
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
 
             </div>

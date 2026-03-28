@@ -127,9 +127,9 @@ export function LeadCard({ lead }: LeadCardProps) {
 
   const [currentStatus, setCurrentStatus] = useState(lead.leadStatus)
   const [dropdownOpen, setDropdownOpen] = useState(false)
-  const [showAbove, setShowAbove] = useState(false)
+  const [position, setPosition] = useState<"top" | "bottom">("bottom")
   const dropdownRef = useRef<HTMLDivElement>(null)
-  const badgeRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLDivElement>(null)
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -142,6 +142,21 @@ export function LeadCard({ lead }: LeadCardProps) {
     document.addEventListener("mousedown", handleClick)
     return () => document.removeEventListener("mousedown", handleClick)
   }, [dropdownOpen])
+
+  const handleOpen = () => {
+    if (triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect()
+      const viewportHeight = window.innerHeight
+      const spaceBelow = viewportHeight - rect.bottom
+      const spaceAbove = rect.top
+      if (spaceBelow < 240 && spaceAbove > spaceBelow) {
+        setPosition("top")
+      } else {
+        setPosition("bottom")
+      }
+    }
+    setDropdownOpen(!dropdownOpen)
+  }
 
   const handleStatusChange = async (newStatus: string) => {
     const prev = currentStatus
@@ -168,7 +183,7 @@ export function LeadCard({ lead }: LeadCardProps) {
         transition: "background 0.12s",
         cursor: "pointer",
         position: "relative",
-        zIndex: 0,
+        zIndex: dropdownOpen ? 30 : 1,
       }}
       onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-surface)")}
       onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
@@ -222,26 +237,21 @@ export function LeadCard({ lead }: LeadCardProps) {
 
       {/* Estado — clickable dropdown */}
       <div ref={dropdownRef} style={{ width: 120, flexShrink: 0, position: "relative" }}>
-        <div ref={badgeRef}>
-          <StatusBadge status={currentStatus} onClick={() => {
-            const rect = badgeRef.current?.getBoundingClientRect()
-            const spaceBelow = window.innerHeight - (rect?.bottom ?? 0)
-            setShowAbove(spaceBelow < 200)
-            setDropdownOpen(!dropdownOpen)
-          }} />
+        <div ref={triggerRef}>
+          <StatusBadge status={currentStatus} onClick={handleOpen} />
         </div>
         {dropdownOpen && (
           <div style={{
             position: "absolute",
-            ...(showAbove ? { bottom: "calc(100% + 4px)" } : { top: "calc(100% + 4px)" }),
+            ...(position === "top" ? { bottom: "calc(100% + 6px)", top: "auto" } : { top: "calc(100% + 6px)", bottom: "auto" }),
             left: 0,
             zIndex: 50,
-            minWidth: 160,
-            background: "#fff",
-            border: "0.5px solid var(--border-subtle, #e5e7eb)",
-            borderRadius: 8,
-            boxShadow: "0 4px 16px rgba(0,0,0,0.10)",
-            padding: "4px 0",
+            minWidth: 170,
+            background: "white",
+            border: "1px solid #E5E7EB",
+            borderRadius: 12,
+            boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+            overflow: "hidden",
           }}>
             {STATUS_ORDER.map((key) => {
               const cfg = STATUS_CONFIG[key]
@@ -256,9 +266,9 @@ export function LeadCard({ lead }: LeadCardProps) {
                     alignItems: "center",
                     gap: 8,
                     width: "100%",
-                    padding: "7px 12px",
+                    padding: "8px 12px",
                     fontSize: 13,
-                    color: cfg.color,
+                    color: key === currentStatus ? cfg.color : "#334155",
                     background: key === currentStatus ? cfg.bg : "transparent",
                     border: "none",
                     cursor: "pointer",
@@ -266,10 +276,10 @@ export function LeadCard({ lead }: LeadCardProps) {
                     transition: "background 0.1s",
                     textAlign: "left",
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = cfg.bg)}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "#F8FAFB")}
                   onMouseLeave={(e) => (e.currentTarget.style.background = key === currentStatus ? cfg.bg : "transparent")}
                 >
-                  <span style={{ width: 7, height: 7, borderRadius: "50%", background: cfg.dot, flexShrink: 0 }} />
+                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: cfg.dot, flexShrink: 0 }} />
                   {cfg.label}
                 </button>
               )

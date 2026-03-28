@@ -116,7 +116,7 @@ export function LeadsTable() {
         background: "var(--bg-card)",
         border: "0.5px solid var(--border-subtle)",
         borderRadius: 12,
-        overflow: "hidden",
+        overflow: "visible",
       }}
     >
       {/* Table header */}

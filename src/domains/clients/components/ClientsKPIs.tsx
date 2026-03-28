@@ -1,8 +1,7 @@
 "use client"
 
 import { useRouter, useSearchParams } from "next/navigation"
-import { cn } from "@/lib/utils"
-import { Users, TrendingUp, TriangleAlert, Crown } from "lucide-react"
+import { Users, TrendingUp, AlertTriangle, Crown } from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
 
 export interface ClientsKPIsData {
@@ -16,41 +15,6 @@ export interface ClientsKPIsData {
 interface ClientsKPIsProps {
   kpis: ClientsKPIsData
 }
-
-const CARDS = [
-  {
-    id: "active",
-    label: "Clientes activos",
-    sub: "Con actividad reciente",
-    icon: Users,
-    getValue: (k: ClientsKPIsData) => k.active,
-    format: "number" as const,
-  },
-  {
-    id: "revenue",
-    label: "Ingresos generados",
-    sub: "Total facturado",
-    icon: TrendingUp,
-    getValue: (k: ClientsKPIsData) => k.totalRevenue,
-    format: "currency" as const,
-  },
-  {
-    id: "inactive",
-    label: "Clientes en riesgo",
-    sub: "Inactivos o seguimiento",
-    icon: TriangleAlert,
-    getValue: (k: ClientsKPIsData) => k.inactive + k.followup,
-    format: "number" as const,
-  },
-  {
-    id: "vip",
-    label: "Clientes VIP",
-    sub: "Clientes prioritarios",
-    icon: Crown,
-    getValue: (k: ClientsKPIsData) => k.vip,
-    format: "number" as const,
-  },
-]
 
 export function ClientsKPIs({ kpis }: ClientsKPIsProps) {
   const router = useRouter()
@@ -67,34 +31,75 @@ export function ClientsKPIs({ kpis }: ClientsKPIsProps) {
     router.push(`?${params.toString()}`)
   }
 
+  const atRisk = kpis.inactive + kpis.followup
+
+  const cards = [
+    {
+      id: "active",
+      label: "Clientes activos",
+      sub: "Con actividad reciente",
+      icon: Users,
+      value: kpis.active,
+      format: "number" as const,
+      accent: false,
+    },
+    {
+      id: "revenue",
+      label: "Ingresos totales",
+      sub: "Total facturado",
+      icon: TrendingUp,
+      value: kpis.totalRevenue,
+      format: "currency" as const,
+      accent: false,
+    },
+    {
+      id: "inactive",
+      label: "En riesgo",
+      sub: "Inactivos o seguimiento",
+      icon: AlertTriangle,
+      value: atRisk,
+      format: "number" as const,
+      accent: atRisk > 0 ? "red" as const : false as const,
+    },
+    {
+      id: "vip",
+      label: "Clientes VIP",
+      sub: "Clientes prioritarios",
+      icon: Crown,
+      value: kpis.vip,
+      format: "number" as const,
+      accent: kpis.vip > 0 ? "amber" as const : false as const,
+    },
+  ]
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {CARDS.map((card) => {
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {cards.map((card) => {
         const Icon = card.icon
-        const value = card.getValue(kpis)
         const isActive = activeFilter === card.id
+        const iconBg = card.accent === "red" ? "bg-red-50" : card.accent === "amber" ? "bg-amber-50" : "bg-slate-50"
+        const iconColor = card.accent === "red" ? "text-red-400" : card.accent === "amber" ? "text-amber-400" : "text-slate-400"
+        const valueColor = card.accent === "red" ? "text-red-600" : card.accent === "amber" ? "text-amber-600" : "text-slate-900"
+
         return (
-          <button
+          <div
             key={card.id}
-            type="button"
             onClick={() => handleClick(card.id)}
-            className={cn(
-              "rounded-xl border bg-white p-5 text-left shadow-sm transition-colors",
-              "border-neutral-200 hover:border-neutral-300",
-              isActive && "ring-2 ring-neutral-400 ring-offset-2"
-            )}
+            className={`bg-white border border-slate-200 rounded-xl p-4 cursor-pointer hover:border-[#1FA97A]/40 hover:shadow-[0_2px_12px_rgba(31,169,122,0.08)] transition-all duration-200 ${isActive ? "ring-2 ring-[#1FA97A]/40 border-[#1FA97A]/40" : ""}`}
           >
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-sm font-medium text-neutral-600">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] uppercase tracking-[0.08em] font-medium text-slate-500">
                 {card.label}
               </span>
-              <Icon className="h-5 w-5 shrink-0 text-gray-500" />
+              <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${iconBg}`}>
+                <Icon className={`h-3.5 w-3.5 ${iconColor}`} />
+              </div>
             </div>
-            <p className="mt-2 text-2xl font-bold text-neutral-900">
-              {card.format === "currency" ? formatCurrency(value) : value}
-            </p>
-            <p className="mt-1 text-xs text-neutral-500">{card.sub}</p>
-          </button>
+            <div className={`text-[26px] font-bold leading-none tracking-tight ${valueColor}`}>
+              {card.format === "currency" ? formatCurrency(card.value) : card.value}
+            </div>
+            <p className="text-[12px] text-slate-500 mt-1.5">{card.sub}</p>
+          </div>
         )
       })}
     </div>

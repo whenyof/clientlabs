@@ -129,7 +129,7 @@ function ClientsTableComponent({ clients }: ClientsTableProps) {
   }
 
   return (
-    <div className="rounded-xl border border-neutral-200 bg-white shadow-sm overflow-hidden">
+    <div className="rounded-xl border border-neutral-200 bg-white shadow-sm overflow-visible">
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>

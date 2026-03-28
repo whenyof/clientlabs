@@ -6,7 +6,7 @@ import { ClientsHeader } from "@domains/clients/components/ClientsHeader"
 import { ClientsKPIs } from "@domains/clients/components/ClientsKPIs"
 import { ClientsTable } from "@domains/clients/components/ClientsTable"
 import type { ClientWithLead as TableClientWithLead } from "@domains/clients/components/ClientsTable"
-import { ClientsInsights } from "@domains/clients/components/ClientsInsights"
+import { ClientsCharts } from "@domains/clients/components/ClientsCharts"
 import { ClientsFilters } from "./ClientsFilters"
 import { deriveClientStatus, isClientForgotten } from "@/lib/logic/client-status"
 
@@ -120,7 +120,9 @@ export function ClientsView({ initialClients, allClientsBase, currentFilters, se
 
             <ClientsKPIs kpis={kpis} />
 
-            <div className="rounded-xl border border-neutral-200 bg-white py-3 px-4 shadow-sm">
+            <ClientsCharts clients={kpiClients as any} />
+
+            <div className="rounded-xl border border-slate-200 bg-white py-3 px-4 shadow-sm">
                 <ClientsFilters
                     currentFilters={currentFilters}
                     searchValue={searchTerm}
@@ -128,17 +130,10 @@ export function ClientsView({ initialClients, allClientsBase, currentFilters, se
                 />
             </div>
 
-            <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[3fr_1fr]">
-                <div className="min-w-0">
-                    <ClientsTable
-                        clients={clientsWithDerivedStatus}
-                        onClientUpdate={handleClientUpdate}
-                    />
-                </div>
-                <aside className="lg:min-w-0">
-                    <ClientsInsights clients={clientsWithDerivedStatus} />
-                </aside>
-            </div>
+            <ClientsTable
+                clients={clientsWithDerivedStatus}
+                onClientUpdate={handleClientUpdate}
+            />
         </div>
     )
 }

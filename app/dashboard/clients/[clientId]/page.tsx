@@ -76,7 +76,12 @@ export default async function Client360Page({
 
       {/* Client header */}
       <div className="mt-4">
-        <ClientHeader client={client} />
+        <ClientHeader
+          client={client}
+          kpis={kpis}
+          invoiceCount={invoices.length}
+          lastActivityAt={timeline[0]?.date ?? null}
+        />
       </div>
 
       {/* Main workspace + context grid */}

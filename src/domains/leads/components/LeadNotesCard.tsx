@@ -3,7 +3,6 @@ import { getBaseUrl } from "@/lib/api/baseUrl"
 
 import { useState, useEffect } from "react"
 import { Loader2, Trash2 } from "lucide-react"
-import { Textarea } from "@/components/ui/textarea"
 import { formatTimeAgo } from "@domains/leads/utils/formatting"
 
 interface ActivityItem {
@@ -69,99 +68,73 @@ export function LeadNotesCard({ leadId }: LeadNotesCardProps) {
   }
 
   return (
-    <div style={{ background: "var(--bg-card)", border: "0.5px solid var(--border-subtle)", borderRadius: 12, padding: 20 }}>
+    <div className="bg-white border border-slate-200 rounded-xl p-5">
       {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-        <h3 style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)", margin: 0 }}>Notas internas</h3>
-        <span style={{ fontSize: 12, color: "var(--green-btn)", fontWeight: 500 }}>
-          {notes.length > 0 ? `${notes.length} nota${notes.length > 1 ? "s" : ""}` : ""}
-        </span>
+      <div className="flex items-center gap-2 mb-4">
+        <h3 className="text-[14px] font-semibold text-slate-900">Notas</h3>
+        {notes.length > 0 && (
+          <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
+            {notes.length}
+          </span>
+        )}
       </div>
 
-      {/* Existing notes (above textarea) */}
+      {/* Existing notes */}
       {loadingNotes ? (
-        <div style={{ height: 48, borderRadius: 8, background: "var(--bg-surface)", marginBottom: 12 }} className="animate-pulse" />
+        <div className="h-12 rounded-xl bg-slate-50 mb-4 animate-pulse" />
       ) : notes.length > 0 ? (
-        <ul style={{ listStyle: "none", margin: "0 0 16px", padding: 0, display: "flex", flexDirection: "column", gap: 8 }}>
+        <div className="flex flex-col gap-2 mb-4">
           {notes.map((note) => (
-            <li
+            <div
               key={note.id}
-              style={{
-                padding: 12,
-                background: "var(--bg-surface)",
-                border: "0.5px solid var(--border-subtle)",
-                borderRadius: 8,
-                display: "flex",
-                gap: 8,
-                alignItems: "flex-start",
-              }}
+              className="p-3 bg-slate-50 rounded-xl border border-slate-100 group"
             >
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: 13, color: "var(--text-primary)", margin: 0 }}>
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-[13px] text-slate-800 leading-relaxed flex-1">
                   {note.description || note.title}
                 </p>
-                <p style={{ fontSize: 11, color: "var(--text-secondary)", margin: "4px 0 0" }}>
-                  {formatTimeAgo(note.createdAt)}
-                </p>
+                <button
+                  type="button"
+                  onClick={() => deleteNote(note.id)}
+                  disabled={deletingId === note.id}
+                  className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 transition-all p-1 rounded disabled:opacity-40"
+                >
+                  {deletingId === note.id ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-3.5 w-3.5" />
+                  )}
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => deleteNote(note.id)}
-                disabled={deletingId === note.id}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: deletingId === note.id ? "not-allowed" : "pointer",
-                  padding: 4,
-                  color: "var(--text-secondary)",
-                  opacity: deletingId === note.id ? 0.4 : 1,
-                  flexShrink: 0,
-                }}
-              >
-                {deletingId === note.id
-                  ? <Loader2 style={{ width: 13, height: 13 }} className="animate-spin" />
-                  : <Trash2 style={{ width: 13, height: 13 }} />
-                }
-              </button>
-            </li>
+              <p className="text-[11px] text-slate-400 mt-2">
+                {formatTimeAgo(note.createdAt)}
+              </p>
+            </div>
           ))}
-        </ul>
+        </div>
       ) : (
-        <p style={{ fontSize: 13, color: "var(--text-secondary)", fontStyle: "italic", marginBottom: 16 }}>
+        <p className="text-[13px] text-slate-400 italic mb-4">
           Aún no hay notas. Añade una abajo.
         </p>
       )}
 
       {/* New note form */}
-      <Textarea
-        placeholder="Escribe una nota interna..."
+      <textarea
+        id="lead-notes-textarea"
+        placeholder="Escribe una nota sobre este lead..."
         value={newNote}
         onChange={(e) => setNewNote(e.target.value)}
-        rows={3}
         disabled={loading}
-        style={{ resize: "none", fontSize: 13 }}
+        className="w-full min-h-[80px] p-3 border border-slate-200 rounded-xl text-[13px] text-slate-900 placeholder:text-slate-400 bg-slate-50 focus:bg-white focus:border-[#1FA97A] focus:ring-1 focus:ring-[#1FA97A]/20 outline-none resize-none transition-all"
       />
-      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
+      <div className="flex justify-end mt-2">
         <button
           type="button"
           onClick={submitNote}
           disabled={!newNote?.trim() || loading}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            padding: "7px 16px",
-            fontSize: 13,
-            fontWeight: 500,
-            borderRadius: 8,
-            border: "none",
-            background: "var(--green-btn)",
-            color: "#fff",
-            cursor: !newNote?.trim() || loading ? "not-allowed" : "pointer",
-            opacity: !newNote?.trim() || loading ? 0.5 : 1,
-          }}
+          className="flex items-center gap-1.5 bg-[#1FA97A] text-white rounded-xl px-4 py-2 text-[13px] font-medium hover:bg-[#178f68] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? <Loader2 style={{ width: 14, height: 14 }} className="animate-spin" /> : null}
+          {loading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
           Guardar nota
         </button>
       </div>

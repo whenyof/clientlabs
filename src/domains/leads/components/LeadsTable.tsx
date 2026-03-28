@@ -128,6 +128,9 @@ export function LeadsTable() {
           padding: "12px 20px",
           background: "var(--bg-surface)",
           borderBottom: "0.5px solid var(--border-subtle)",
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
         }}
       >
         <span style={{ width: 280, flexShrink: 0, fontSize: 11, fontWeight: 500, letterSpacing: "0.05em", color: "var(--text-secondary)" }}>LEAD</span>

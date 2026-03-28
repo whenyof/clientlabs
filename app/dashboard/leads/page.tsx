@@ -6,6 +6,7 @@ import { LeadsHeader } from "@domains/leads/components/LeadsHeader"
 import { LeadsKpisClient } from "./components/LeadsKpisClient"
 import { LeadsFilters } from "@domains/leads/components/LeadsFilters"
 import { LeadsTable } from "@domains/leads/components/LeadsTable"
+import { LeadsCharts } from "@domains/leads/components/LeadsCharts"
 export const dynamic = "force-dynamic"
 export const revalidate = 10
 
@@ -92,6 +93,7 @@ export default async function LeadsPage({
         }}
         sources={sources}
       />
+      <LeadsCharts />
       <LeadsTable />
     </div>
   )

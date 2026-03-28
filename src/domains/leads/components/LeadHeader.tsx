@@ -6,6 +6,8 @@ import { ArrowLeft, Mail, StickyNote } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
+import { getBaseUrl } from "@/lib/api/baseUrl"
 import {
   formatSource,
   getInitials,
@@ -52,9 +54,22 @@ function Badge({ children, style }: { children: React.ReactNode; style?: React.C
   )
 }
 
+async function logActivity(leadId: string, type: string, content: string) {
+  try {
+    await fetch(`${getBaseUrl()}/api/leads/${leadId}/activity`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type, title: content, description: content }),
+    })
+  } catch {
+    // non-blocking
+  }
+}
+
 export function LeadHeader({ lead }: LeadHeaderProps) {
   const router = useRouter()
   const [converting, setConverting] = useState(false)
+  const [markingLost, setMarkingLost] = useState(false)
 
   const initials = getInitials(lead.name, lead.email)
   const statusLabel = STATUS_LABELS[lead.leadStatus] ?? lead.leadStatus
@@ -66,32 +81,58 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
   }
 
   const handleConvert = async () => {
+    if (!confirm("¿Convertir este lead en cliente?")) return
     setConverting(true)
     try {
-      await fetch(`/api/leads/${lead.id}`, {
+      const res = await fetch(`/api/leads/${lead.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ leadStatus: "CONVERTED", converted: true }),
       })
-      router.refresh()
+      if (res.ok) {
+        await logActivity(lead.id, "STATUS_CHANGE", "Lead convertido a cliente")
+        toast.success("Lead convertido a cliente")
+        router.refresh()
+      } else {
+        toast.error("Error al convertir")
+      }
+    } catch {
+      toast.error("Error de conexión")
     } finally {
       setConverting(false)
     }
   }
 
   const handleLost = async () => {
-    await fetch(`/api/leads/${lead.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ leadStatus: "LOST" }),
-    })
-    router.refresh()
+    if (!confirm("¿Marcar este lead como perdido?")) return
+    setMarkingLost(true)
+    try {
+      const res = await fetch(`/api/leads/${lead.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ leadStatus: "LOST" }),
+      })
+      if (res.ok) {
+        await logActivity(lead.id, "STATUS_CHANGE", "Lead marcado como perdido")
+        toast.success("Lead marcado como perdido")
+        router.refresh()
+      } else {
+        toast.error("Error al cambiar estado")
+      }
+    } catch {
+      toast.error("Error de conexión")
+    } finally {
+      setMarkingLost(false)
+    }
   }
 
   const createdFormatted = format(new Date(lead.createdAt), "d MMM yyyy", { locale: es })
   const lastActivityFormatted = lead.lastActionAt
     ? format(new Date(lead.lastActionAt), "d MMM yyyy", { locale: es })
     : "Sin actividad"
+
+  const showConvert = lead.leadStatus !== "CONVERTED"
+  const showLost = lead.leadStatus !== "LOST" && lead.leadStatus !== "CONVERTED"
 
   return (
     <div>
@@ -171,52 +212,60 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
               variant="outline"
               size="sm"
               style={{ display: "flex", alignItems: "center", gap: 6 }}
+              onClick={() => {
+                const el = document.getElementById("lead-notes-textarea")
+                if (el) { el.focus(); el.scrollIntoView({ behavior: "smooth", block: "center" }) }
+              }}
             >
               <StickyNote style={{ width: 14, height: 14 }} />
               Nota
             </Button>
-            <button
-              type="button"
-              onClick={handleConvert}
-              disabled={converting || lead.leadStatus === "CONVERTED"}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "6px 14px",
-                fontSize: 13,
-                fontWeight: 500,
-                borderRadius: 8,
-                border: "none",
-                background: "var(--green-btn)",
-                color: "#fff",
-                cursor: converting || lead.leadStatus === "CONVERTED" ? "not-allowed" : "pointer",
-                opacity: converting || lead.leadStatus === "CONVERTED" ? 0.6 : 1,
-              }}
-            >
-              {converting ? "Convirtiendo..." : "Convertir en cliente"}
-            </button>
-            <button
-              type="button"
-              onClick={handleLost}
-              disabled={lead.leadStatus === "LOST"}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "6px 14px",
-                fontSize: 13,
-                fontWeight: 500,
-                borderRadius: 8,
-                border: "0.5px solid var(--danger-soft-text)",
-                background: "var(--danger-soft-bg)",
-                color: "var(--danger-soft-text)",
-                cursor: lead.leadStatus === "LOST" ? "not-allowed" : "pointer",
-                opacity: lead.leadStatus === "LOST" ? 0.6 : 1,
-              }}
-            >
-              Perdido
-            </button>
+            {showConvert && (
+              <button
+                type="button"
+                onClick={handleConvert}
+                disabled={converting}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "6px 14px",
+                  fontSize: 13,
+                  fontWeight: 500,
+                  borderRadius: 8,
+                  border: "none",
+                  background: "var(--green-btn)",
+                  color: "#fff",
+                  cursor: converting ? "not-allowed" : "pointer",
+                  opacity: converting ? 0.6 : 1,
+                }}
+              >
+                {converting ? "Convirtiendo..." : "Convertir en cliente"}
+              </button>
+            )}
+            {showLost && (
+              <button
+                type="button"
+                onClick={handleLost}
+                disabled={markingLost}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "6px 14px",
+                  fontSize: 13,
+                  fontWeight: 500,
+                  borderRadius: 8,
+                  border: "0.5px solid var(--danger-soft-text)",
+                  background: "var(--danger-soft-bg)",
+                  color: "var(--danger-soft-text)",
+                  cursor: markingLost ? "not-allowed" : "pointer",
+                  opacity: markingLost ? 0.6 : 1,
+                }}
+              >
+                {markingLost ? "Marcando..." : "Perdido"}
+              </button>
+            )}
           </div>
         </div>
 

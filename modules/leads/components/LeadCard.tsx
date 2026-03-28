@@ -167,6 +167,8 @@ export function LeadCard({ lead }: LeadCardProps) {
         borderBottom: "0.5px solid var(--border-subtle)",
         transition: "background 0.12s",
         cursor: "pointer",
+        position: "relative",
+        zIndex: 0,
       }}
       onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-surface)")}
       onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}

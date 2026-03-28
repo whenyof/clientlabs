@@ -99,7 +99,7 @@ export function LeadsTable() {
       {leads.map((lead, index) => {
         const isLast = index === leads.length - 1
         return (
-          <div key={lead.id} ref={isLast ? lastLeadRef : undefined}>
+          <div key={`${lead.id}-${index}`} ref={isLast ? lastLeadRef : undefined}>
             <LeadCard lead={lead as any} />
           </div>
         )

@@ -13,7 +13,7 @@ import {
  DialogFooter,
  DialogDescription,
 } from "@/components/ui/dialog"
-import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, XCircle, Loader2, X, Undo2, Flame, CloudSnow, CloudSun } from "lucide-react"
+import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, XCircle, Loader2, X, Undo2, Flame, CloudSun, CloudSnow } from "lucide-react"
 import Papa from "papaparse"
 import * as XLSX from "xlsx"
 import { importLeads } from "../actions"
@@ -57,7 +57,6 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
  let parsedData: any[] = []
 
  if (fileType === "csv") {
- // Parse CSV
  Papa.parse(file, {
  header: true,
  skipEmptyLines: true,
@@ -72,7 +71,6 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
  }
  })
  } else {
- // Parse Excel
  const data = await file.arrayBuffer()
  const workbook = XLSX.read(data)
  const sheetName = workbook.SheetNames[0]
@@ -88,7 +86,6 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
  }
 
  const processLeads = async (data: any[], fileType: "csv" | "excel") => {
- // Normalize column names (case-insensitive)
  const normalizedLeads: LeadRow[] = data.map((row) => {
  const normalized: any = {}
  Object.keys(row).forEach((key) => {
@@ -114,11 +111,9 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
  return normalized
  })
 
- // Apply intelligent rules to each lead
  const { applyImportRules } = await import("../utils/importRules")
 
  const validatedLeads: LeadRow[] = normalizedLeads.map((lead) => {
- // Must have at least email OR phone
  if (!lead.email && !lead.phone) {
  return {
  ...lead,
@@ -130,7 +125,6 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
  }
  }
 
- // Apply intelligent rules
  const processed = applyImportRules(lead, fileType)
 
  return {
@@ -140,11 +134,9 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
  }
  })
 
- // Check for duplicates (client-side basic check)
  const emails = validatedLeads.filter(l => l.email).map(l => l.email!.toLowerCase())
  const phones = validatedLeads.filter(l => l.phone).map(l => l.phone!)
 
- // Check against existing leads
  try {
  const response = await fetch(getBaseUrl() + "/api/leads/check-duplicates", {
  method: "POST",
@@ -155,7 +147,6 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
  if (response.ok) {
  const { duplicates } = await response.json()
 
- // Mark duplicates
  validatedLeads.forEach((lead) => {
  if (lead.status === "valid") {
  const isDuplicate = duplicates.some((dup: any) =>
@@ -191,7 +182,6 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
  }
 
  const handleImport = async () => {
- // Filter: valid AND not excluded
  const leadsToImport = leads.filter(l => l.status === "valid" && !l.excluded)
  if (leadsToImport.length === 0) {
  toast.warning("No hay leads válidos para importar")
@@ -246,13 +236,13 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
  onOpenChange(open)
  if (!open) resetDialog()
  }}>
- <DialogContent className="bg-zinc-900 border-[var(--border-subtle)] max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
- <DialogHeader>
- <DialogTitle className="text-[var(--text-primary)] text-xl flex items-center gap-2">
- <FileSpreadsheet className="h-5 w-5 text-cyan-400" />
+ <DialogContent className="bg-white border-slate-200 max-w-4xl max-h-[90vh] overflow-hidden flex flex-col rounded-2xl">
+ <DialogHeader className="bg-white border-b border-slate-100 pb-4">
+ <DialogTitle className="text-slate-900 text-xl flex items-center gap-2">
+ <FileSpreadsheet className="h-5 w-5 text-[#1FA97A]" />
  Importar Leads desde CSV/Excel
  </DialogTitle>
- <DialogDescription className="text-[var(--text-secondary)]">
+ <DialogDescription className="text-slate-500">
  {step === "upload" && "Selecciona un archivo CSV o Excel con tus leads"}
  {step === "preview" && "Revisa los leads antes de importar"}
  {step === "importing" && "Importando leads..."}
@@ -262,18 +252,17 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
  <div className="flex-1 overflow-auto">
  {/* STEP 1: Upload */}
  {step === "upload" && (
- <div className="flex flex-col items-center justify-center py-12 space-y-6">
- <div className="p-6 rounded-full bg-cyan-500/10 border-2 border-cyan-500/30">
- <Upload className="h-12 w-12 text-cyan-400" />
+ <div className="py-8 px-4">
+ <div
+ onClick={() => !loading && fileInputRef.current?.click()}
+ className="group border-2 border-dashed border-slate-200 rounded-xl p-10 text-center hover:border-[#1FA97A]/50 hover:bg-[#F0FDF8]/50 transition-all cursor-pointer"
+ >
+ <div className="flex justify-center mb-4">
+ <Upload className="h-12 w-12 text-slate-300 group-hover:text-[#1FA97A] transition-colors" />
  </div>
-
- <div className="text-center space-y-2">
- <h3 className="text-lg font-semibold text-[var(--text-primary)]">Selecciona tu archivo</h3>
- <p className="text-sm text-[var(--text-secondary)] max-w-md">
- Formatos soportados: CSV, XLSX, XLS<br />
- Columnas esperadas: nombre, email, teléfono, fuente
- </p>
- </div>
+ <p className="text-slate-700 font-medium">Arrastra tu archivo aquí o haz clic para seleccionar</p>
+ <p className="text-slate-400 text-sm mt-1">Formatos soportados: CSV, XLSX, XLS</p>
+ <p className="text-slate-400 text-sm">Columnas esperadas: nombre, email, teléfono, fuente</p>
 
  <input
  ref={fileInputRef}
@@ -283,113 +272,98 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
  className="hidden"
  />
 
- <Button
- onClick={() => fileInputRef.current?.click()}
+ <button
  disabled={loading}
- className="bg-[var(--bg-card)] border-cyan-500/40 text-cyan-300 hover: hover:"
+ className="mt-6 bg-[#1FA97A] text-white rounded-lg px-4 py-2 text-sm hover:bg-[#178f68] transition-colors disabled:opacity-50"
+ onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click() }}
  >
  {loading ? (
- <>
- <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+ <span className="flex items-center gap-2">
+ <Loader2 className="h-4 w-4 animate-spin" />
  Procesando...
- </>
+ </span>
  ) : (
- <>
- <Upload className="mr-2 h-4 w-4" />
- Seleccionar Archivo
- </>
+ "Seleccionar Archivo"
  )}
- </Button>
+ </button>
+ </div>
  </div>
  )}
 
  {/* STEP 2: Preview */}
  {step === "preview" && (
- <div className="space-y-4">
- {/* Summary */}
+ <div className="space-y-4 p-4">
+ {/* KPIs */}
  <div className="grid grid-cols-4 gap-3">
- <div className="p-3 rounded-lg bg-[var(--bg-card)] border border-blue-500/30">
- <div className="flex items-center gap-2 mb-1">
- <FileSpreadsheet className="h-4 w-4 text-[var(--accent)]" />
- <span className="text-xs text-[var(--text-secondary)]">Detectados</span>
+ <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+ <p className="text-xl font-bold text-slate-900">{totalDetected}</p>
+ <p className="text-xs text-slate-500 mt-0.5">Detectados</p>
  </div>
- <p className="text-2xl font-bold text-[var(--accent)]">{totalDetected}</p>
+ <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+ <p className="text-xl font-bold text-slate-900">{validCount}</p>
+ <p className="text-xs text-slate-500 mt-0.5">Se importarán</p>
  </div>
- <div className="p-3 rounded-lg bg-[var(--accent-soft)] border border-[var(--accent)]">
- <div className="flex items-center gap-2 mb-1">
- <CheckCircle className="h-4 w-4 text-[var(--accent)]" />
- <span className="text-xs text-[var(--text-secondary)]">Se importarán</span>
+ <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+ <p className="text-xl font-bold text-slate-900">{excludedCount}</p>
+ <p className="text-xs text-slate-500 mt-0.5">Excluidos</p>
  </div>
- <p className="text-2xl font-bold text-[var(--accent)]">{validCount}</p>
- </div>
- <div className="p-3 rounded-lg bg-gray-500/10 border border-gray-500/30">
- <div className="flex items-center gap-2 mb-1">
- <X className="h-4 w-4 text-[var(--text-secondary)]" />
- <span className="text-xs text-[var(--text-secondary)]">Excluidos</span>
- </div>
- <p className="text-2xl font-bold text-[var(--text-secondary)]">{excludedCount}</p>
- </div>
- <div className="p-3 rounded-lg bg-[var(--bg-card)] border border-[var(--border-subtle)]">
- <div className="flex items-center gap-2 mb-1">
- <AlertCircle className="h-4 w-4 text-[var(--text-secondary)]" />
- <span className="text-xs text-[var(--text-secondary)]">Omitidos</span>
- </div>
- <p className="text-2xl font-bold text-[var(--text-secondary)]">{duplicateCount + invalidCount}</p>
+ <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+ <p className="text-xl font-bold text-slate-900">{duplicateCount + invalidCount}</p>
+ <p className="text-xs text-slate-500 mt-0.5">Omitidos</p>
  </div>
  </div>
 
  {/* Table */}
- <div className="border border-[var(--border-subtle)] rounded-lg overflow-hidden">
+ <div className="border border-slate-200 rounded-xl overflow-hidden">
  <div className="max-h-96 overflow-auto">
  <table className="w-full text-sm">
- <thead className="bg-[var(--bg-card)] sticky top-0">
+ <thead className="bg-slate-50 border-b border-slate-200 sticky top-0">
  <tr>
- <th className="px-3 py-2 text-left text-[var(--text-secondary)] font-medium">Estado</th>
- <th className="px-3 py-2 text-left text-[var(--text-secondary)] font-medium">Temperatura</th>
- <th className="px-3 py-2 text-left text-[var(--text-secondary)] font-medium">Nombre</th>
- <th className="px-3 py-2 text-left text-[var(--text-secondary)] font-medium">Email</th>
- <th className="px-3 py-2 text-left text-[var(--text-secondary)] font-medium">Tags</th>
- <th className="px-3 py-2 text-center text-[var(--text-secondary)] font-medium w-10"></th>
+ <th className="px-4 py-3 text-left text-xs uppercase tracking-wider text-slate-500 font-medium">Estado</th>
+ <th className="px-4 py-3 text-left text-xs uppercase tracking-wider text-slate-500 font-medium">Temperatura</th>
+ <th className="px-4 py-3 text-left text-xs uppercase tracking-wider text-slate-500 font-medium">Nombre</th>
+ <th className="px-4 py-3 text-left text-xs uppercase tracking-wider text-slate-500 font-medium">Email</th>
+ <th className="px-4 py-3 text-left text-xs uppercase tracking-wider text-slate-500 font-medium">Tags</th>
+ <th className="px-4 py-3 text-center text-xs uppercase tracking-wider text-slate-500 font-medium w-10"></th>
  </tr>
  </thead>
  <tbody>
  {leads.map((lead, idx) => (
- <tr key={idx} className={`border-t border-[var(--border-subtle)] hover:bg-[var(--bg-card)] transition-all ${lead.excluded ? 'opacity-40' : ''
- }`}>
- <td className="px-3 py-2">
+ <tr key={idx} className={`border-b border-slate-100 hover:bg-slate-50/50 transition-all ${lead.excluded ? 'opacity-40' : ''}`}>
+ <td className="px-4 py-3">
  {lead.status === "valid" && !lead.excluded && (
- <span className="flex items-center gap-1 text-[var(--accent)]">
+ <span className="flex items-center gap-1 text-[#1FA97A]">
  <CheckCircle className="h-3 w-3" />
  <span className="text-xs">Nuevo</span>
  </span>
  )}
  {lead.status === "valid" && lead.excluded && (
- <span className="flex items-center gap-1 text-[var(--text-secondary)]">
+ <span className="flex items-center gap-1 text-slate-400">
  <X className="h-3 w-3" />
  <span className="text-xs">Excluido</span>
  </span>
  )}
  {lead.status === "duplicate" && (
- <span className="flex items-center gap-1 text-[var(--text-secondary)]">
+ <span className="flex items-center gap-1 text-amber-500">
  <AlertCircle className="h-3 w-3" />
  <span className="text-xs">Duplicado</span>
  </span>
  )}
  {lead.status === "invalid" && (
- <span className="flex items-center gap-1 text-[var(--critical)]">
+ <span className="flex items-center gap-1 text-red-500">
  <XCircle className="h-3 w-3" />
  <span className="text-xs">Inválido</span>
  </span>
  )}
  </td>
- <td className="px-3 py-2">
+ <td className="px-4 py-3">
  {lead.status === "valid" && !lead.excluded ? (
  <div className="flex gap-1">
  <button
  onClick={() => changeTemperature(idx, "HOT")}
- className={`px-2 py-0.5 rounded text-xs transition-all ${lead.temperature === "HOT"
- ? 'bg-[var(--bg-card)] border border-[var(--critical)] text-[var(--critical)]'
- : 'bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-card)]'
+ className={`px-2 py-0.5 rounded-full text-xs font-medium transition-all ${lead.temperature === "HOT"
+ ? 'bg-red-50 text-red-600 border border-red-200'
+ : 'bg-slate-50 text-slate-400 border border-slate-200 hover:bg-red-50 hover:text-red-500'
  }`}
  title="HOT"
  >
@@ -397,9 +371,9 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
  </button>
  <button
  onClick={() => changeTemperature(idx, "WARM")}
- className={`px-2 py-0.5 rounded text-xs transition-all ${lead.temperature === "WARM"
- ? 'bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-secondary)]'
- : 'bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-card)]'
+ className={`px-2 py-0.5 rounded-full text-xs font-medium transition-all ${lead.temperature === "WARM"
+ ? 'bg-amber-50 text-amber-600 border border-amber-200'
+ : 'bg-slate-50 text-slate-400 border border-slate-200 hover:bg-amber-50 hover:text-amber-500'
  }`}
  title="WARM"
  >
@@ -407,9 +381,9 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
  </button>
  <button
  onClick={() => changeTemperature(idx, "COLD")}
- className={`px-2 py-0.5 rounded text-xs transition-all ${lead.temperature === "COLD"
- ? 'bg-cyan-500/20 border border-cyan-500/40 text-cyan-400'
- : 'bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-card)]'
+ className={`px-2 py-0.5 rounded-full text-xs font-medium transition-all ${lead.temperature === "COLD"
+ ? 'bg-blue-50 text-blue-600 border border-blue-200'
+ : 'bg-slate-50 text-slate-400 border border-slate-200 hover:bg-blue-50 hover:text-blue-500'
  }`}
  title="COLD"
  >
@@ -417,21 +391,21 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
  </button>
  </div>
  ) : (
- <span className="text-xs text-[var(--text-secondary)]">-</span>
+ <span className="text-xs text-slate-400">-</span>
  )}
  </td>
- <td className={`px-3 py-2 ${lead.excluded ? 'text-gray-500' : 'text-[var(--text-primary)]'}`}>{lead.name || "-"}</td>
- <td className={`px-3 py-2 ${lead.excluded ? 'text-gray-500' : 'text-[var(--text-secondary)]'}`}>{lead.email || "-"}</td>
- <td className="px-3 py-2">
+ <td className="px-4 py-3 text-sm text-slate-700">{lead.name || "-"}</td>
+ <td className="px-4 py-3 text-sm text-slate-500">{lead.email || "-"}</td>
+ <td className="px-4 py-3">
  {lead.tags && lead.tags.length > 0 ? (
  <div className="flex flex-wrap gap-1">
  {lead.tags.slice(0, 3).map((tag, tagIdx) => {
- let tagColor = "bg-gray-500/20 text-[var(--text-secondary)]"
- if (tag.includes("high-intent")) tagColor = "bg-[var(--bg-card)] text-[var(--critical)]"
- if (tag.includes("suspicious")) tagColor = "bg-orange-500/20 text-orange-400"
- if (tag.includes("business-email")) tagColor = "bg-[var(--bg-card)] text-[var(--accent)]"
- if (tag.includes("warm-lead")) tagColor = "bg-[var(--bg-card)] text-[var(--text-secondary)]"
- if (tag.includes("invalid")) tagColor = "bg-[var(--bg-card)] text-[var(--critical)]"
+ let tagColor = "bg-slate-100 text-slate-500"
+ if (tag.includes("high-intent")) tagColor = "bg-red-50 text-red-600"
+ if (tag.includes("suspicious")) tagColor = "bg-amber-50 text-amber-600"
+ if (tag.includes("business-email")) tagColor = "bg-blue-50 text-blue-600"
+ if (tag.includes("warm-lead")) tagColor = "bg-amber-50 text-amber-600"
+ if (tag.includes("invalid")) tagColor = "bg-red-50 text-red-600"
 
  return (
  <span key={tagIdx} className={`px-1.5 py-0.5 rounded text-[10px] ${tagColor}`}>
@@ -440,20 +414,20 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
  )
  })}
  {lead.tags.length > 3 && (
- <span className="text-[10px] text-[var(--text-secondary)]">+{lead.tags.length - 3}</span>
+ <span className="text-[10px] text-slate-400">+{lead.tags.length - 3}</span>
  )}
  </div>
  ) : (
- <span className="text-xs text-[var(--text-secondary)]">-</span>
+ <span className="text-xs text-slate-400">-</span>
  )}
  </td>
- <td className="px-3 py-2 text-center">
+ <td className="px-4 py-3 text-center">
  {lead.status === "valid" && (
  <button
  onClick={() => toggleExclude(idx)}
- className={`p-1 rounded transition-all ${lead.excluded
- ? 'hover:bg-[var(--accent-soft)] text-[var(--accent)]'
- : 'hover:bg-[var(--bg-card)] text-[var(--critical)]'
+ className={`p-1 rounded transition-colors ${lead.excluded
+ ? 'text-[#1FA97A] hover:bg-[#F0FDF8]'
+ : 'text-slate-400 hover:text-red-500'
  }`}
  title={lead.excluded ? "Incluir" : "Excluir"}
  >
@@ -473,31 +447,31 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
  {/* STEP 3: Importing */}
  {step === "importing" && (
  <div className="flex flex-col items-center justify-center py-12 space-y-4">
- <Loader2 className="h-12 w-12 text-cyan-400 animate-spin" />
- <p className="text-[var(--text-secondary)]">Importando {validCount} leads...</p>
+ <Loader2 className="h-12 w-12 text-[#1FA97A] animate-spin" />
+ <p className="text-slate-700">Importando {validCount} leads...</p>
  </div>
  )}
  </div>
 
  <DialogFooter>
  {step === "upload" && (
- <Button variant="outline" onClick={() => onOpenChange(false)}>
+ <button onClick={() => onOpenChange(false)} className="border border-slate-200 text-slate-700 rounded-xl px-5 py-2.5 hover:bg-slate-50 transition-colors text-sm">
  Cancelar
- </Button>
+ </button>
  )}
  {step === "preview" && (
  <>
- <Button variant="outline" onClick={resetDialog}>
+ <button onClick={resetDialog} className="border border-slate-200 text-slate-700 rounded-xl px-5 py-2.5 hover:bg-slate-50 transition-colors text-sm">
  Volver
- </Button>
- <Button
+ </button>
+ <button
  onClick={handleImport}
  disabled={validCount === 0}
- className="bg-[var(--accent-soft)] border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent-soft)]"
+ className="bg-[#1FA97A] text-white rounded-xl px-5 py-2.5 hover:bg-[#178f68] transition-colors text-sm disabled:opacity-50 flex items-center gap-2"
  >
- <CheckCircle className="mr-2 h-4 w-4" />
+ <CheckCircle className="h-4 w-4" />
  Importar {validCount} Lead{validCount !== 1 ? "s" : ""}
- </Button>
+ </button>
  </>
  )}
  </DialogFooter>

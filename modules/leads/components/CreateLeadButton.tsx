@@ -5,10 +5,10 @@ import { Button } from "@shared/ui/button"
 import {
  Dialog,
  DialogContent,
- DialogHeader,
  DialogTitle,
 } from "@/components/ui/dialog"
-import { Plus, FileSpreadsheet, ClipboardPaste, Globe, UserPlus } from "lucide-react"
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden"
+import { Plus, UserPlus, ClipboardList, FileUp } from "lucide-react"
 import { CreateLeadManualDialog } from "./CreateLeadManualDialog"
 import { ImportLeadsDialog } from "./ImportLeadsDialog"
 import { PasteLeadsDialog } from "./PasteLeadsDialog"
@@ -18,25 +18,12 @@ type Mode = "manual" | "import" | "paste" | null
 
 export function CreateLeadButton() {
  const { labels } = useSectorConfig()
- const ui = labels.leads.ui
  const [modeSelectOpen, setModeSelectOpen] = useState(false)
  const [selectedMode, setSelectedMode] = useState<Mode>(null)
-
- const modes = [
- { id: "manual" as const, icon: UserPlus, title: ui.createManual, description: ui.createManualDesc, color: "blue" as const },
- { id: "import" as const, icon: FileSpreadsheet, title: ui.createImport, description: ui.createImportDesc, color: "cyan" as const },
- { id: "paste" as const, icon: ClipboardPaste, title: ui.createPaste, description: ui.createPasteDesc, color: "emerald" as const },
- ]
 
  const handleModeSelect = (mode: Mode) => {
  setModeSelectOpen(false)
  setSelectedMode(mode)
- }
-
- const colorClasses = {
- blue: "bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300",
- cyan: "bg-cyan-50 border-cyan-200 text-cyan-700 hover:bg-cyan-100 hover:border-cyan-300",
- emerald: "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300"
  }
 
  return (
@@ -49,43 +36,60 @@ export function CreateLeadButton() {
  {labels.leads.newButton}
  </Button>
 
- {/* Mode Selector Dialog */}
  <Dialog open={modeSelectOpen} onOpenChange={setModeSelectOpen}>
- <DialogContent className="bg-[var(--color-background-primary,#fff)] border-[var(--color-border-secondary,#e5e7eb)] max-w-2xl" style={{ borderRadius: "var(--border-radius-lg, 12px)", padding: 24 }}>
- <DialogHeader>
- <DialogTitle style={{ fontSize: 18, fontWeight: 500, color: "var(--color-text-primary, #0B1F2A)" }}>{ui.createHowTitle}</DialogTitle>
- </DialogHeader>
+ <DialogContent className="!max-w-[520px] w-full mx-auto bg-white border-slate-200 p-6 rounded-2xl">
+ <VisuallyHidden.Root><DialogTitle>Crear leads</DialogTitle></VisuallyHidden.Root>
+ <div>
+ <h2 className="text-lg font-semibold text-slate-900">¿Cómo quieres crear leads?</h2>
+ <div className="border-b border-slate-100 mt-4 mb-5" />
+ </div>
 
- <div className="grid grid-cols-2 gap-4 py-4">
- {modes.map((mode) => {
- const Icon = mode.icon
- return (
- <button
- key={mode.id}
- onClick={() => handleModeSelect(mode.id)}
- className={`relative p-6 rounded-lg border transition-all duration-200 hover:scale-[1.02] text-left ${colorClasses[mode.color]}`}
+ <div className="grid grid-cols-3 gap-3 mt-5">
+ {/* Manual */}
+ <div
+ className="flex flex-col gap-3 p-5 bg-[#EEF2FF] border border-[#C7D2FE] rounded-xl cursor-pointer hover:bg-[#E0E7FF] transition-all group"
+ onClick={() => handleModeSelect("manual")}
  >
- <Icon className="h-8 w-8 mb-3" />
- <h3 className="font-semibold text-lg mb-1">{mode.title}</h3>
- <p className="text-sm opacity-70">{mode.description}</p>
- </button>
- )
- })}
+ <div className="w-10 h-10 rounded-lg bg-[#E0E7FF] flex items-center justify-center">
+ <UserPlus className="h-5 w-5 text-[#4F46E5]" />
+ </div>
+ <div>
+ <p className="text-sm font-semibold text-slate-900">Manual</p>
+ <p className="text-xs text-slate-500 mt-0.5">Crear un lead manualmente</p>
+ </div>
+ </div>
 
- {/* Scraping — Próximamente */}
- <div className="opacity-50 cursor-not-allowed relative p-6 rounded-lg border bg-emerald-50 border-emerald-200 text-emerald-700 text-left">
- <span className="absolute top-2 right-2 px-2 py-0.5 rounded text-[10px] bg-neutral-100 text-neutral-500">
- Próximamente
- </span>
- <Globe className="h-8 w-8 mb-3" />
- <h3 className="font-semibold text-lg mb-1">{ui.createScraping}</h3>
- <p className="text-sm opacity-70">{ui.createScrapingDesc}</p>
+ {/* Pegar datos */}
+ <div
+ className="flex flex-col gap-3 p-5 bg-[#E8F5F0] border border-[#6EE7B7] rounded-xl cursor-pointer hover:bg-[#D1FAE5] transition-all group"
+ onClick={() => handleModeSelect("paste")}
+ >
+ <div className="w-10 h-10 rounded-lg bg-[#D1FAE5] flex items-center justify-center">
+ <ClipboardList className="h-5 w-5 text-[#1FA97A]" />
+ </div>
+ <div>
+ <p className="text-sm font-semibold text-slate-900">Pegar datos</p>
+ <p className="text-xs text-slate-500 mt-0.5">Copy-paste masivo de texto</p>
+ </div>
+ </div>
+
+ {/* Importar */}
+ <div
+ className="flex flex-col gap-3 p-5 bg-[#FEF3C7] border border-[#FCD34D] rounded-xl cursor-pointer hover:bg-[#FDE68A] transition-all group"
+ onClick={() => handleModeSelect("import")}
+ >
+ <div className="w-10 h-10 rounded-lg bg-[#FDE68A] flex items-center justify-center">
+ <FileUp className="h-5 w-5 text-[#D97706]" />
+ </div>
+ <div>
+ <p className="text-sm font-semibold text-slate-900">Importar archivo</p>
+ <p className="text-xs text-slate-500 mt-0.5">CSV o Excel con múltiples leads</p>
+ </div>
  </div>
  </div>
  </DialogContent>
  </Dialog>
 
- {/* Individual Mode Dialogs */}
  <CreateLeadManualDialog
  open={selectedMode === "manual"}
  onOpenChange={(open) => !open && setSelectedMode(null)}

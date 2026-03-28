@@ -2,15 +2,13 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
 import {
  Dialog,
  DialogContent,
- DialogHeader,
  DialogTitle,
- DialogFooter,
 } from "@/components/ui/dialog"
-import { Loader2 } from "lucide-react"
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden"
+import { Loader2, ChevronDown } from "lucide-react"
 import { createLead } from "../actions"
 import { toast } from "sonner"
 
@@ -63,106 +61,120 @@ export function CreateLeadManualDialog({ open, onOpenChange }: { open: boolean; 
  }
  }
 
- const inputStyle: React.CSSProperties = {
-  border: "0.5px solid var(--color-border-secondary, #e5e7eb)",
-  borderRadius: "var(--border-radius-md, 8px)",
-  padding: "8px 12px",
-  fontSize: 14,
-  width: "100%",
-  color: "var(--color-text-primary, #0B1F2A)",
-  background: "var(--color-background-primary, #fff)",
-  outline: "none",
- }
-
- const labelClass = "text-[11px] uppercase tracking-wider font-semibold text-[var(--color-text-secondary,#6b7280)]"
+ const inputClass = "w-full px-4 py-2.5 rounded-xl border border-slate-200 text-[14px] text-slate-900 placeholder:text-slate-400 bg-slate-50 focus:bg-white focus:border-[#1FA97A] focus:ring-2 focus:ring-[#1FA97A]/10 outline-none transition-all"
+ const selectClass = "w-full px-4 py-2.5 rounded-xl border border-slate-200 text-[14px] text-slate-900 bg-slate-50 focus:bg-white focus:border-[#1FA97A] focus:ring-2 focus:ring-[#1FA97A]/10 outline-none transition-all appearance-none cursor-pointer"
+ const labelClass = "text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500"
 
  return (
  <Dialog open={open} onOpenChange={onOpenChange}>
- <DialogContent
-  className="bg-[var(--color-background-primary,#fff)] border-[var(--color-border-secondary,#e5e7eb)]"
-  style={{ borderRadius: "var(--border-radius-lg, 12px)", padding: 24 }}
- >
- <DialogHeader>
- <DialogTitle style={{ fontSize: 18, fontWeight: 500, color: "var(--color-text-primary, #0B1F2A)" }}>
-  Nuevo lead
- </DialogTitle>
- </DialogHeader>
+ <DialogContent className="bg-white rounded-2xl p-0 !max-w-[480px] w-full overflow-hidden border-0 shadow-xl">
+ <VisuallyHidden.Root><DialogTitle>Nuevo lead</DialogTitle></VisuallyHidden.Root>
+ <div className="px-6 pt-6 pb-5 border-b border-slate-100">
+ <h2 className="text-[17px] font-semibold text-slate-900">Nuevo lead</h2>
+ <p className="text-[13px] text-slate-500 mt-1">Rellena los datos del contacto</p>
+ </div>
+
  <form onSubmit={handleSubmit}>
- <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
- <div>
+ <div className="px-6 py-5 space-y-4">
+ {/* Nombre */}
+ <div className="space-y-1.5">
  <label className={labelClass}>
- Nombre <span className="text-red-500">*</span>
+ NOMBRE <span className="text-[#1FA97A]">*</span>
  </label>
  <input
+ type="text"
  value={formData.name}
  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
- placeholder="Juan Pérez"
+ placeholder="Juan García"
  required
- style={{ ...inputStyle, marginTop: 6 }}
+ className={inputClass}
  />
  </div>
- <div>
- <label className={labelClass}>Email</label>
+
+ {/* Email */}
+ <div className="space-y-1.5">
+ <label className={labelClass}>EMAIL</label>
  <input
  type="email"
  value={formData.email}
  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
- placeholder="juan@example.com"
- style={{ ...inputStyle, marginTop: 6 }}
+ placeholder="juan@empresa.com"
+ className={inputClass}
  />
  </div>
- <div>
- <label className={labelClass}>Teléfono</label>
+
+ {/* Teléfono */}
+ <div className="space-y-1.5">
+ <label className={labelClass}>TELÉFONO</label>
  <input
+ type="tel"
  value={formData.phone}
  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
  placeholder="+34 600 000 000"
- style={{ ...inputStyle, marginTop: 6 }}
+ className={inputClass}
  />
  </div>
- <div>
- <label className={labelClass}>Estado inicial</label>
+
+ {/* Estado + Fuente en grid 2 cols */}
+ <div className="grid grid-cols-2 gap-3">
+ <div className="space-y-1.5">
+ <label className={labelClass}>ESTADO INICIAL</label>
+ <div className="relative">
  <select
  value={formData.leadStatus}
  onChange={(e) => setFormData({ ...formData, leadStatus: e.target.value })}
- style={{ ...inputStyle, marginTop: 6, appearance: "none", backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
+ className={selectClass}
  >
  {STATUS_OPTIONS.map((opt) => (
-  <option key={opt.value} value={opt.value}>{opt.label}</option>
+ <option key={opt.value} value={opt.value}>{opt.label}</option>
  ))}
  </select>
+ <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
  </div>
- <div>
- <label className={labelClass}>Fuente</label>
+ </div>
+
+ <div className="space-y-1.5">
+ <label className={labelClass}>FUENTE</label>
+ <div className="relative">
  <select
  value={formData.source}
  onChange={(e) => setFormData({ ...formData, source: e.target.value })}
- style={{ ...inputStyle, marginTop: 6, appearance: "none", backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
+ className={selectClass}
  >
  <option value="">Seleccionar...</option>
  {SOURCE_OPTIONS.map((opt) => (
-  <option key={opt.value} value={opt.value}>{opt.label}</option>
+ <option key={opt.value} value={opt.value}>{opt.label}</option>
  ))}
  </select>
+ <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
  </div>
  </div>
- <DialogFooter className="mt-6">
- <Button
+ </div>
+ </div>
+
+ <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3">
+ <button
  type="button"
- variant="outline"
  onClick={() => onOpenChange(false)}
+ className="px-5 py-2.5 rounded-xl border border-slate-200 text-[13px] font-medium text-slate-700 hover:bg-slate-50 transition-colors"
  >
  Cancelar
- </Button>
- <Button
+ </button>
+ <button
  type="submit"
  disabled={loading || !formData.name.trim()}
- className="bg-[#1FA97A] text-white hover:bg-[#178f68]"
+ className="px-5 py-2.5 rounded-xl bg-[#1FA97A] text-white text-[13px] font-medium hover:bg-[#178f68] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
  >
- {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
- Crear lead
- </Button>
- </DialogFooter>
+ {loading ? (
+ <>
+ <Loader2 className="h-4 w-4 animate-spin" />
+ Creando...
+ </>
+ ) : (
+ "Crear lead"
+ )}
+ </button>
+ </div>
  </form>
  </DialogContent>
  </Dialog>

@@ -34,6 +34,7 @@ import {
   Trash2,
 } from "lucide-react"
 import { changeLeadStatus, addLeadNote, markLeadLost, convertLeadToClient } from "../actions"
+import { useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { DeleteLeadDialog } from "./DeleteLeadDialog"
 import { useSectorConfig } from "@/hooks/useSectorConfig"
@@ -43,6 +44,7 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
  const ui = labels.leads.ui
  const statusLabels = labels.leads.status as Record<string, string>
  const router = useRouter()
+ const queryClient = useQueryClient()
  const [loading, setLoading] = useState(false)
  const [noteDialog, setNoteDialog] = useState(false)
  const [lostDialog, setLostDialog] = useState(false)
@@ -55,14 +57,36 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
 
  const handleStatusChange = async (status: typeof lead.leadStatus) => {
  setLoading(true)
- const result = await changeLeadStatus(lead.id, status)
- if (result.success) {
- router.refresh()
- toast.success(`${labels.leads.singular} marcado como ${(statusLabels[status] ?? status).toLowerCase()}`)
- } else {
- toast.error(result.error ?? ui.toastErrorStatus)
+ try {
+   queryClient.setQueriesData(
+     { queryKey: ["leads"] },
+     (old: any) => {
+       if (!old?.pages) return old
+       return {
+         ...old,
+         pages: old.pages.map((page: any) => ({
+           ...page,
+           leads: page.leads.map((l: any) =>
+             l.id === lead.id ? { ...l, leadStatus: status } : l
+           )
+         }))
+       }
+     }
+   )
+   const result = await changeLeadStatus(lead.id, status)
+   if (result.success) {
+     toast.success(`${labels.leads.singular} marcado como ${(statusLabels[status] ?? status).toLowerCase()}`)
+   } else {
+     toast.error(result.error ?? ui.toastErrorStatus)
+   }
+   queryClient.invalidateQueries({ queryKey: ["leads"] })
+   queryClient.invalidateQueries({ queryKey: ["leads-kpis"] })
+ } catch {
+   queryClient.invalidateQueries({ queryKey: ["leads"] })
+   toast.error(ui.toastErrorStatus)
+ } finally {
+   setLoading(false)
  }
- setLoading(false)
  }
 
  const handleAddNote = async () => {
@@ -92,32 +116,67 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
  if (!lostReason.trim()) return
  setLoading(true)
  try {
- await markLeadLost(lead.id, lostReason)
- setLostReason("")
- setLostDialog(false)
- router.refresh()
- toast.success(ui.toastMarkedLost)
+   queryClient.setQueriesData(
+     { queryKey: ["leads"] },
+     (old: any) => {
+       if (!old?.pages) return old
+       return {
+         ...old,
+         pages: old.pages.map((page: any) => ({
+           ...page,
+           leads: page.leads.map((l: any) =>
+             l.id === lead.id ? { ...l, leadStatus: "LOST" } : l
+           )
+         }))
+       }
+     }
+   )
+   await markLeadLost(lead.id, lostReason)
+   setLostReason("")
+   setLostDialog(false)
+   toast.success(ui.toastMarkedLost)
+   queryClient.invalidateQueries({ queryKey: ["leads"] })
+   queryClient.invalidateQueries({ queryKey: ["leads-kpis"] })
  } catch (error) {
- console.error(error)
- toast.error(ui.toastErrorConvert)
+   console.error(error)
+   queryClient.invalidateQueries({ queryKey: ["leads"] })
+   toast.error(ui.toastErrorConvert)
  } finally {
- setLoading(false)
+   setLoading(false)
  }
  }
 
  const handleConvert = async () => {
  setLoading(true)
  try {
- const result = await convertLeadToClient(lead.id)
- setConvertDialog(false)
- router.refresh()
- toast.success(result.clientCreated ? ui.toastConverted : ui.toastConvertedLinked)
+   // Optimistic update — quitar de la lista
+   queryClient.setQueriesData(
+     { queryKey: ["leads"] },
+     (old: any) => {
+       if (!old?.pages) return old
+       return {
+         ...old,
+         pages: old.pages.map((page: any) => ({
+           ...page,
+           leads: page.leads.filter(
+             (l: any) => l.id !== lead.id
+           )
+         }))
+       }
+     }
+   )
+   const result = await convertLeadToClient(lead.id)
+   setConvertDialog(false)
+   toast.success(result.clientCreated ? ui.toastConverted : ui.toastConvertedLinked)
+   queryClient.invalidateQueries({ queryKey: ["leads"] })
+   queryClient.invalidateQueries({ queryKey: ["leads-kpis"] })
  } catch (error) {
- console.error(error)
- const message = error instanceof Error ? error.message : ui.toastErrorConvert
- toast.error(message)
+   console.error(error)
+   queryClient.invalidateQueries({ queryKey: ["leads"] })
+   const message = error instanceof Error ? error.message : ui.toastErrorConvert
+   toast.error(message)
  } finally {
- setLoading(false)
+   setLoading(false)
  }
  }
 

@@ -5,7 +5,7 @@ import type { Lead } from "@prisma/client"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { LeadRowActions } from "./LeadRowActions"
-import { changeLeadStatus } from "../actions"
+import { useUpdateLeadStatus } from "@/hooks/useLeads"
 import { toast } from "sonner"
 
 /* ── Status badges ── */
@@ -130,6 +130,7 @@ export function LeadCard({ lead }: LeadCardProps) {
   const [position, setPosition] = useState<"top" | "bottom">("bottom")
   const dropdownRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLDivElement>(null)
+  const statusMutation = useUpdateLeadStatus()
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -158,18 +159,20 @@ export function LeadCard({ lead }: LeadCardProps) {
     setDropdownOpen(!dropdownOpen)
   }
 
-  const handleStatusChange = async (newStatus: string) => {
-    const prev = currentStatus
+  const handleStatusChange = (newStatus: string) => {
     setCurrentStatus(newStatus as any)
     setDropdownOpen(false)
-    const result = await changeLeadStatus(lead.id, newStatus as any)
-    if (result.success) {
-      toast.success(`Estado cambiado a ${STATUS_CONFIG[newStatus]?.label ?? newStatus}`)
-      router.refresh()
-    } else {
-      setCurrentStatus(prev)
-      toast.error(result.error ?? "Error al cambiar estado")
-    }
+    statusMutation.mutate(
+      { leadId: lead.id, status: newStatus },
+      {
+        onSuccess: () => {
+          toast.success(`Estado cambiado a ${STATUS_CONFIG[newStatus]?.label ?? newStatus}`)
+        },
+        onError: () => {
+          setCurrentStatus(currentStatus)
+        },
+      }
+    )
   }
 
   return (

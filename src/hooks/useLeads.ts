@@ -63,6 +63,9 @@ export function useUpdateLeadStatus() {
       }>({ queryKey: ["leads"] })
 
       // Optimistically update every matching query
+      // If converting or losing, remove from list; otherwise update status
+      const shouldRemove = status === "CONVERTED" || status === "LOST"
+
       queryClient.setQueriesData<{
         pages: { leads: Lead[]; pagination: any }[]
         pageParams: any[]
@@ -72,11 +75,13 @@ export function useUpdateLeadStatus() {
           ...old,
           pages: old.pages.map((page) => ({
             ...page,
-            leads: page.leads.map((lead) =>
-              lead.id === leadId
-                ? { ...lead, leadStatus: status as LeadStatus, status, metadata: lead.metadata ?? {} }
-                : lead
-            ),
+            leads: shouldRemove
+              ? page.leads.filter((lead) => lead.id !== leadId)
+              : page.leads.map((lead) =>
+                  lead.id === leadId
+                    ? { ...lead, leadStatus: status as LeadStatus, status, metadata: lead.metadata ?? {} }
+                    : lead
+                ),
           })),
         }
       })
@@ -96,6 +101,7 @@ export function useUpdateLeadStatus() {
 
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["leads"] })
+      queryClient.invalidateQueries({ queryKey: ["leads-kpis"] })
     },
   })
 }

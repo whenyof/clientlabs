@@ -18,6 +18,7 @@ export function TasksView() {
   const [defaultPriority, setDefaultPriority] = useState<TaskPriority>("MEDIUM")
   const [defaultDueDate, setDefaultDueDate] = useState<string | undefined>(undefined)
   const [defaultDueTime, setDefaultDueTime] = useState<string | undefined>(undefined)
+  const [editTask, setEditTask] = useState<DashboardTask | undefined>(undefined)
 
   const { data: tasks = [] } = useQuery<DashboardTask[]>({
     queryKey: ["tasks"],
@@ -41,6 +42,11 @@ export function TasksView() {
     setDefaultPriority("MEDIUM")
     setDefaultDueDate(undefined)
     setDefaultDueTime(undefined)
+    setModalOpen(true)
+  }
+
+  const handleTaskClick = (task: DashboardTask) => {
+    setEditTask(task)
     setModalOpen(true)
   }
 
@@ -76,7 +82,7 @@ export function TasksView() {
             <PriorityView tasks={tasks} search={search} onAddTask={handleAddTask} />
           )}
           {view === "week" && (
-            <WeekView tasks={tasks} onTaskClick={() => {}} onCellClick={handleDayClick} />
+            <WeekView tasks={tasks} onTaskClick={handleTaskClick} onCellClick={handleDayClick} />
           )}
           {view === "month" && (
             <MonthView tasks={tasks} onDayClick={handleDayClick} />
@@ -101,10 +107,11 @@ export function TasksView() {
       {/* New task modal */}
       <NewTaskModal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={() => { setModalOpen(false); setEditTask(undefined) }}
         defaultPriority={defaultPriority}
         defaultDueDate={defaultDueDate}
         defaultDueTime={defaultDueTime}
+        editTask={editTask}
       />
     </div>
   )

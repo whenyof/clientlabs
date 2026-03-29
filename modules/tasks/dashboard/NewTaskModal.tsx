@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { X, Loader2, CheckSquare, ChevronDown } from "lucide-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Dialog, DialogContent, DialogClose, DialogTitle } from "@/components/ui/dialog"
-import type { TaskPriority, TaskStatus } from "./types"
+import type { TaskPriority, TaskStatus, DashboardTask } from "./types"
 import { PRIORITY_CONFIG } from "./types"
 
 interface EntityOption { id: string; name: string }
@@ -15,6 +15,7 @@ interface NewTaskModalProps {
   defaultPriority?: TaskPriority
   defaultDueDate?: string
   defaultDueTime?: string
+  editTask?: DashboardTask
 }
 
 // Fully reset native select styles
@@ -66,7 +67,7 @@ function Label({ children }: { children: React.ReactNode }) {
   )
 }
 
-export function NewTaskModal({ open, onClose, defaultPriority = "MEDIUM", defaultDueDate, defaultDueTime }: NewTaskModalProps) {
+export function NewTaskModal({ open, onClose, defaultPriority = "MEDIUM", defaultDueDate, defaultDueTime, editTask }: NewTaskModalProps) {
   const qc = useQueryClient()
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
@@ -78,14 +79,32 @@ export function NewTaskModal({ open, onClose, defaultPriority = "MEDIUM", defaul
   const [entityId, setEntityId] = useState("")
 
   useEffect(() => {
-    if (open) {
+    if (!open) return
+    if (editTask) {
+      setTitle(editTask.title)
+      setDescription(editTask.description ?? "")
+      setPriority(editTask.priority)
+      const dateStr = editTask.startAt
+        ? new Date(editTask.startAt).toISOString().slice(0, 10)
+        : editTask.dueDate ? editTask.dueDate.slice(0, 10) : ""
+      const timeStr = editTask.startAt
+        ? new Date(editTask.startAt).toTimeString().slice(0, 5)
+        : ""
+      setDueDate(dateStr)
+      setDueTime(timeStr)
+      if (editTask.clientId) { setEntityType("CLIENT"); setEntityId(editTask.clientId) }
+      else if (editTask.leadId) { setEntityType("LEAD"); setEntityId(editTask.leadId) }
+      else { setEntityType(""); setEntityId("") }
+    } else {
+      setTitle("")
+      setDescription("")
       setPriority(defaultPriority)
       setDueDate(defaultDueDate ?? "")
       setDueTime(defaultDueTime ?? "")
       setEntityType("")
       setEntityId("")
     }
-  }, [open, defaultPriority, defaultDueDate, defaultDueTime])
+  }, [open, editTask, defaultPriority, defaultDueDate, defaultDueTime])
 
   const { data: clients = [], isFetching: fetchingClients } = useQuery<EntityOption[]>({
     queryKey: ["clients-list"],
@@ -144,12 +163,14 @@ export function NewTaskModal({ open, onClose, defaultPriority = "MEDIUM", defaul
         entityType: entityType || null,
         entityId: entityId || null,
       }
-      const res = await fetch("/api/tasks", {
-        method: "POST",
+      const url = editTask ? `/api/tasks/${editTask.id}` : "/api/tasks"
+      const method = editTask ? "PATCH" : "POST"
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       })
-      if (!res.ok) throw new Error("Failed to create task")
+      if (!res.ok) throw new Error(editTask ? "Failed to update task" : "Failed to create task")
       return res.json()
     },
     onSuccess: () => {
@@ -170,9 +191,11 @@ export function NewTaskModal({ open, onClose, defaultPriority = "MEDIUM", defaul
           </div>
           <div style={{ flex: 1 }}>
             <DialogTitle style={{ fontSize: 15, fontWeight: 600, margin: 0, color: "var(--text-primary)", lineHeight: 1.2 }}>
-              Nueva tarea
+              {editTask ? "Editar tarea" : "Nueva tarea"}
             </DialogTitle>
-            <p style={{ fontSize: 12, color: "var(--text-secondary)", margin: "2px 0 0" }}>Añade una tarea a tu lista</p>
+            <p style={{ fontSize: 12, color: "var(--text-secondary)", margin: "2px 0 0" }}>
+              {editTask ? "Modifica los datos de la tarea" : "Añade una tarea a tu lista"}
+            </p>
           </div>
           <DialogClose style={{ background: "none", border: "1px solid var(--border-subtle)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", width: 30, height: 30, borderRadius: 8, color: "var(--text-secondary)" }}>
             <X style={{ width: 14, height: 14 }} />
@@ -290,7 +313,7 @@ export function NewTaskModal({ open, onClose, defaultPriority = "MEDIUM", defaul
             }}
           >
             {createMutation.isPending && <Loader2 style={{ width: 14, height: 14 }} className="animate-spin" />}
-            Crear tarea
+            {editTask ? "Guardar cambios" : "Crear tarea"}
           </button>
         </div>
       </DialogContent>

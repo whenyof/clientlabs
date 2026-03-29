@@ -1,20 +1,20 @@
 "use client"
 
-import React, { useState, useRef } from "react"
+import React, { useState, useRef, useMemo } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import type { DashboardTask } from "./types"
 import { PRIORITY_CONFIG } from "./types"
-import { WeekTaskBlock } from "./WeekTaskBlock"
 
 const DAY_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
 const HOURS = Array.from({ length: 14 }, (_, i) => i + 7) // 7am–8pm
-const CELL_H = 48
-const GRID_START = 7 * 60 // minutes from midnight
+const BASE_H = 48  // px, 0 or 1 task
+const TASK_H = 36  // px added per extra task
+const GRID_START = 7 * 60
 
 function getMonday(d: Date): Date {
-  const day = d.getDay()
   const m = new Date(d)
+  const day = d.getDay()
   m.setDate(d.getDate() - day + (day === 0 ? -6 : 1))
   m.setHours(0, 0, 0, 0)
   return m
@@ -25,17 +25,11 @@ function addDays(d: Date, n: number): Date {
 function isSameDay(a: Date, b: Date) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
 }
-function taskPos(task: DashboardTask): { top: number; height: number } | null {
-  if (!task.startAt) return null
-  const s = new Date(task.startAt)
-  const startMins = s.getHours() * 60 + s.getMinutes()
-  if (startMins < GRID_START || startMins >= GRID_START + HOURS.length * 60) return null
-  const end = task.endAt ? new Date(task.endAt) : new Date(s.getTime() + 3_600_000)
-  const durMins = Math.max(30, (end.getTime() - s.getTime()) / 60_000)
-  return {
-    top: ((startMins - GRID_START) / 60) * CELL_H,
-    height: Math.max(CELL_H / 2, (durMins / 60) * CELL_H),
-  }
+function dayKey(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
+}
+function hourKey(d: Date, h: number) {
+  return `${dayKey(d)}-${String(h).padStart(2, "0")}`
 }
 
 interface WeekViewProps {
@@ -48,18 +42,53 @@ export function WeekView({ tasks, onTaskClick, onCellClick }: WeekViewProps) {
   const qc = useQueryClient()
   const [weekStart, setWeekStart] = useState(() => getMonday(new Date()))
   const today = new Date()
-  const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
+  const days = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), [weekStart])
 
   const dragTaskId = useRef<string | null>(null)
   const dragDurMs = useRef(3_600_000)
   const [dropTarget, setDropTarget] = useState<{ hour: number; di: number } | null>(null)
 
   const weekLabel = `${weekStart.toLocaleDateString("es-ES", { day: "numeric", month: "long" })} — ${addDays(weekStart, 6).toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" })}`
-  const timedTasks = (day: Date) => tasks.filter((t) => t.startAt && isSameDay(new Date(t.startAt), day))
-  const allDayTasks = (day: Date) => tasks.filter((t) => t.dueDate && isSameDay(new Date(t.dueDate), day) && !t.startAt)
 
+  // Group timed tasks by day+hour key
+  const tasksByHour = useMemo(() => {
+    const map: Record<string, DashboardTask[]> = {}
+    tasks.forEach((t) => {
+      if (!t.startAt) return
+      const s = new Date(t.startAt)
+      const k = hourKey(s, s.getHours())
+      map[k] = map[k] ?? []
+      map[k].push(t)
+    })
+    return map
+  }, [tasks])
+
+  const allDayTasks = (day: Date) => tasks.filter((t) => t.dueDate && isSameDay(new Date(t.dueDate), day) && !t.startAt)
+  const getCellTasks = (day: Date, hour: number) => tasksByHour[hourKey(day, hour)] ?? []
+
+  // Row heights: determined by the day with most tasks at that hour
+  const rowHeights = useMemo(() => {
+    const heights: Record<number, number> = {}
+    HOURS.forEach((h) => {
+      const max = days.reduce((m, d) => Math.max(m, getCellTasks(d, h).length), 0)
+      heights[h] = max <= 1 ? BASE_H : BASE_H + (max - 1) * TASK_H
+    })
+    return heights
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tasksByHour, weekStart])
+
+  // Now line: cumulative y based on variable row heights
   const nowMins = today.getHours() * 60 + today.getMinutes()
-  const nowTop = ((nowMins - GRID_START) / (HOURS.length * 60)) * (HOURS.length * CELL_H)
+  const nowTop = useMemo(() => {
+    let top = 0
+    for (const h of HOURS) {
+      if (h < today.getHours()) { top += rowHeights[h] ?? BASE_H; continue }
+      if (h === today.getHours()) { top += ((today.getMinutes() / 60)) * (rowHeights[h] ?? BASE_H) }
+      break
+    }
+    return top
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rowHeights])
 
   const patchTask = (taskId: string, body: object) =>
     fetch(`/api/tasks/${taskId}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }).then((r) => { if (!r.ok) throw new Error("Failed") })
@@ -77,26 +106,12 @@ export function WeekView({ tasks, onTaskClick, onCellClick }: WeekViewProps) {
     onSettled: () => qc.invalidateQueries({ queryKey: ["tasks"] }),
   })
 
-  const resizeMutation = useMutation({
-    mutationFn: ({ taskId, newEndAt }: { taskId: string; newEndAt: Date }) =>
-      patchTask(taskId, { endAt: newEndAt.toISOString() }),
-    onMutate: async ({ taskId, newEndAt }) => {
-      await qc.cancelQueries({ queryKey: ["tasks"] })
-      const prev = qc.getQueryData<DashboardTask[]>(["tasks"])
-      qc.setQueryData<DashboardTask[]>(["tasks"], (old) => old?.map((t) => t.id === taskId ? { ...t, endAt: newEndAt.toISOString() } : t))
-      return { prev }
-    },
-    onError: (_e, _v, ctx) => ctx?.prev && qc.setQueryData(["tasks"], ctx.prev),
-    onSettled: () => qc.invalidateQueries({ queryKey: ["tasks"] }),
-  })
-
   const handleDragStart = (e: React.DragEvent, task: DashboardTask) => {
     dragTaskId.current = task.id
     dragDurMs.current = task.startAt && task.endAt ? new Date(task.endAt).getTime() - new Date(task.startAt).getTime() : 3_600_000
     e.dataTransfer.effectAllowed = "move"
     e.dataTransfer.setData("text/plain", task.id)
   }
-
   const handleDrop = (e: React.DragEvent, day: Date, hour: number) => {
     e.preventDefault()
     if (!dragTaskId.current) return
@@ -140,7 +155,7 @@ export function WeekView({ tasks, onTaskClick, onCellClick }: WeekViewProps) {
               const cfg = PRIORITY_CONFIG[t.priority]
               return (
                 <div key={t.id} onClick={() => onTaskClick(t)} draggable onDragStart={(e) => handleDragStart(e, t)}
-                  style={{ fontSize: 11, fontWeight: 500, padding: "2px 6px", borderRadius: 4, background: cfg.bg, color: cfg.color, border: `0.5px solid ${cfg.border}`, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", cursor: "pointer" }}>
+                  style={{ fontSize: 10, fontWeight: 500, padding: "2px 6px", borderRadius: 4, background: cfg.bg, color: cfg.color, border: `0.5px solid ${cfg.border}`, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", cursor: "pointer" }}>
                   {t.title}
                 </div>
               )
@@ -152,70 +167,78 @@ export function WeekView({ tasks, onTaskClick, onCellClick }: WeekViewProps) {
       {/* Time grid */}
       <div style={{ overflowY: "auto", maxHeight: "calc(100vh - 220px)" }}>
         <div style={{ position: "relative" }}>
-          {/* Hour rows grid — clean, no overlay items */}
           <div style={{ display: "grid", gridTemplateColumns: "52px repeat(7,1fr)" }}>
-            {HOURS.map((hour) => (
-              <React.Fragment key={hour}>
-                <div style={{ fontSize: 10, color: "var(--text-secondary)", padding: "0 6px", height: CELL_H, display: "flex", alignItems: "flex-start", paddingTop: 3, justifyContent: "flex-end", borderTop: "0.5px solid var(--border-subtle)", userSelect: "none", flexShrink: 0 }}>
-                  {hour}:00
-                </div>
-                {days.map((day, di) => {
-                  const isDropTarget = dropTarget?.hour === hour && dropTarget?.di === di
-                  return (
-                    <div
-                      key={`${hour}-${di}`}
-                      onClick={() => { const d = new Date(day); d.setHours(hour); onCellClick(d) }}
-                      onDragOver={(e) => { e.preventDefault(); setDropTarget({ hour, di }) }}
-                      onDragLeave={() => setDropTarget(null)}
-                      onDrop={(e) => handleDrop(e, day, hour)}
-                      style={{
-                        borderLeft: "0.5px solid var(--border-subtle)", borderTop: "0.5px solid var(--border-subtle)",
-                        height: CELL_H, cursor: "pointer", position: "relative", flexShrink: 0,
-                        background: isDropTarget ? "#1FA97A10" : "transparent", transition: "background 0.1s",
-                      }}
-                    >
-                      {isDropTarget && <div style={{ position: "absolute", inset: 1, borderRadius: 4, border: "1.5px dashed #1FA97A", pointerEvents: "none" }} />}
-                    </div>
-                  )
-                })}
-              </React.Fragment>
-            ))}
+            {HOURS.map((hour) => {
+              const rh = rowHeights[hour] ?? BASE_H
+              return (
+                <React.Fragment key={hour}>
+                  {/* Hour label */}
+                  <div style={{ fontSize: 10, color: "var(--text-secondary)", padding: "3px 6px 0 0", height: rh, display: "flex", alignItems: "flex-start", justifyContent: "flex-end", borderTop: "0.5px solid var(--border-subtle)", userSelect: "none", transition: "height 0.2s ease", flexShrink: 0 }}>
+                    {hour}:00
+                  </div>
+                  {/* Day cells */}
+                  {days.map((day, di) => {
+                    const cellItems = getCellTasks(day, hour)
+                    const shown = cellItems.slice(0, 5)
+                    const extra = cellItems.length - 5
+                    const isDropTarget = dropTarget?.hour === hour && dropTarget?.di === di
+                    return (
+                      <div
+                        key={`${hour}-${di}`}
+                        onClick={() => { const d = new Date(day); d.setHours(hour); onCellClick(d) }}
+                        onDragOver={(e) => { e.preventDefault(); setDropTarget({ hour, di }) }}
+                        onDragLeave={() => setDropTarget(null)}
+                        onDrop={(e) => handleDrop(e, day, hour)}
+                        style={{
+                          borderLeft: "0.5px solid var(--border-subtle)", borderTop: "0.5px solid var(--border-subtle)",
+                          height: rh, cursor: "pointer", position: "relative", padding: "3px 3px 3px 3px",
+                          display: "flex", flexDirection: "column", gap: 2, overflow: "hidden",
+                          background: isDropTarget ? "#1FA97A10" : "transparent",
+                          transition: "height 0.2s ease, background 0.1s",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {isDropTarget && <div style={{ position: "absolute", inset: 1, borderRadius: 4, border: "1.5px dashed #1FA97A", pointerEvents: "none", zIndex: 1 }} />}
+                        {shown.map((t) => {
+                          const cfg = PRIORITY_CONFIG[t.priority]
+                          return (
+                            <div
+                              key={t.id}
+                              draggable
+                              onDragStart={(e) => { e.stopPropagation(); handleDragStart(e, t) }}
+                              onClick={(e) => { e.stopPropagation(); onTaskClick(t) }}
+                              title={t.title}
+                              style={{
+                                height: 32, borderRadius: 4, padding: "0 6px", fontSize: 10, fontWeight: 500,
+                                background: cfg.bg, color: cfg.color, border: `0.5px solid ${cfg.border}`,
+                                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                                cursor: "pointer", userSelect: "none", display: "flex", alignItems: "center",
+                                flexShrink: 0, zIndex: 2, position: "relative",
+                              }}
+                            >
+                              {t.title}
+                            </div>
+                          )
+                        })}
+                        {extra > 0 && (
+                          <div style={{ height: 20, borderRadius: 4, padding: "0 6px", fontSize: 10, background: "var(--bg-surface)", color: "var(--text-secondary)", display: "flex", alignItems: "center", cursor: "pointer", flexShrink: 0, zIndex: 2, position: "relative" }}>
+                            +{extra} más
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </React.Fragment>
+              )
+            })}
           </div>
 
-          {/* Now line — absolutely over the grid */}
+          {/* Now line */}
           {days.some((d) => isSameDay(d, today)) && nowMins >= GRID_START && (
             <div style={{ position: "absolute", left: 52, right: 0, top: nowTop, height: 1, background: "#EF4444", zIndex: 10, pointerEvents: "none" }}>
               <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#EF4444", position: "absolute", left: -4, top: -3.5 }} />
             </div>
           )}
-
-          {/* Task overlay — absolutely positioned, one column per day */}
-          <div style={{
-            position: "absolute", top: 0, left: 52, right: 0,
-            height: HOURS.length * CELL_H,
-            display: "grid", gridTemplateColumns: "repeat(7,1fr)",
-            pointerEvents: "none", zIndex: 2,
-          }}>
-            {days.map((day, di) => (
-              <div key={di} style={{ position: "relative", pointerEvents: "none" }}>
-                {timedTasks(day).map((task) => {
-                  const pos = taskPos(task)
-                  if (!pos) return null
-                  return (
-                    <WeekTaskBlock
-                      key={task.id}
-                      task={task}
-                      top={pos.top}
-                      height={pos.height}
-                      onDragStart={handleDragStart}
-                      onResizeEnd={(taskId, newEndAt) => resizeMutation.mutate({ taskId, newEndAt })}
-                      onClick={onTaskClick}
-                    />
-                  )
-                })}
-              </div>
-            ))}
-          </div>
         </div>
       </div>
     </div>

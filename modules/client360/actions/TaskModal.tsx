@@ -2,13 +2,11 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { CheckSquare, Loader2, X } from "lucide-react"
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogBody,
-  DialogFooter,
+  DialogClose,
 } from "@/components/ui/dialog"
 import { createTask } from "@/app/dashboard/tasks/actions"
 
@@ -18,12 +16,18 @@ interface TaskModalProps {
   clientId: string
 }
 
+const PRIORITIES = [
+  { value: "low",    label: "Baja",  color: "#6B7280" },
+  { value: "medium", label: "Media", color: "#F59E0B" },
+  { value: "high",   label: "Alta",  color: "#EF4444" },
+] as const
+
 export function TaskModal({ open, onClose, clientId }: TaskModalProps) {
   const router = useRouter()
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [dueDate, setDueDate] = useState("")
-  const [priority, setPriority] = useState<"low" | "medium" | "high" | "">("")
+  const [priority, setPriority] = useState<"low" | "medium" | "high">("medium")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,12 +35,7 @@ export function TaskModal({ open, onClose, clientId }: TaskModalProps) {
     if (!title.trim()) return
     setIsSubmitting(true)
     try {
-      const priorityMap = {
-        low: "LOW" as const,
-        medium: "MEDIUM" as const,
-        high: "HIGH" as const,
-        "": "MEDIUM" as const,
-      }
+      const priorityMap = { low: "LOW" as const, medium: "MEDIUM" as const, high: "HIGH" as const }
       const result = await createTask({
         title: title.trim(),
         description: description.trim() || undefined,
@@ -45,6 +44,7 @@ export function TaskModal({ open, onClose, clientId }: TaskModalProps) {
         clientId,
       })
       if (result && typeof result === "object" && "success" in result && result.success) {
+        setTitle(""); setDescription(""); setDueDate(""); setPriority("medium")
         onClose()
         router.refresh()
       } else {
@@ -61,84 +61,109 @@ export function TaskModal({ open, onClose, clientId }: TaskModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Crear tarea</DialogTitle>
-        </DialogHeader>
-        <DialogBody>
-          <form id="task-modal-form" className="space-y-4" onSubmit={handleSubmit}>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-[var(--text-secondary)]">Título</label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
-                placeholder="Ej. Llamar al cliente"
-              />
+      <DialogContent className="p-0" style={{ maxWidth: "480px", width: "calc(100vw - 32px)" }}>
+        {/* Header */}
+        <div className="flex items-start justify-between px-6 py-5 border-b border-[var(--border-subtle)]">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center shrink-0">
+              <CheckSquare className="w-4 h-4 text-amber-500" />
             </div>
+            <div>
+              <h2 className="text-[15px] font-semibold text-[var(--text-primary)] leading-tight">Nueva tarea</h2>
+              <p className="text-[12px] text-[var(--text-secondary)] mt-0.5">Se vinculará a este cliente</p>
+            </div>
+          </div>
+          <DialogClose className="w-7 h-7 rounded-md flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-colors">
+            <X className="w-4 h-4" />
+            <span className="sr-only">Cerrar</span>
+          </DialogClose>
+        </div>
 
+        {/* Body */}
+        <form id="task-modal-form" onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+              Título <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              autoFocus
+              className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3.5 py-2.5 text-[14px] text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/60 focus:outline-none focus:border-[#1FA97A] focus:ring-2 focus:ring-[#1FA97A]/10 transition-all"
+              placeholder="Ej. Llamar para seguimiento"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+              Descripción
+            </label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3.5 py-2.5 text-[14px] text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/60 focus:outline-none focus:border-[#1FA97A] focus:ring-2 focus:ring-[#1FA97A]/10 transition-all resize-none"
+              placeholder="Detalles opcionales..."
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-[var(--text-secondary)]">
-                Descripción
+              <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+                Fecha límite
               </label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] min-h-[80px]"
-                placeholder="Detalles de la tarea"
+              <input
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3.5 py-2.5 text-[14px] text-[var(--text-primary)] focus:outline-none focus:border-[#1FA97A] focus:ring-2 focus:ring-[#1FA97A]/10 transition-all"
               />
             </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-[var(--text-secondary)]">
-                  Fecha límite
-                </label>
-                <input
-                  type="date"
-                  value={dueDate}
-                  onChange={(e) => setDueDate(e.target.value)}
-                  className="w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-[var(--text-secondary)]">
-                  Prioridad
-                </label>
-                <select
-                  value={priority}
-                  onChange={(e) =>
-                    setPriority(e.target.value as "low" | "medium" | "high" | "")
-                  }
-                  className="w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
-                >
-                  <option value="">Seleccionar</option>
-                  <option value="low">Baja</option>
-                  <option value="medium">Media</option>
-                  <option value="high">Alta</option>
-                </select>
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+                Prioridad
+              </label>
+              <div className="flex gap-1.5">
+                {PRIORITIES.map((p) => (
+                  <button
+                    key={p.value}
+                    type="button"
+                    onClick={() => setPriority(p.value)}
+                    className="flex-1 rounded-lg border py-2 text-[12px] font-medium transition-all"
+                    style={
+                      priority === p.value
+                        ? { background: `${p.color}15`, borderColor: `${p.color}40`, color: p.color }
+                        : { borderColor: "var(--border-subtle)", color: "var(--text-secondary)", background: "var(--bg-surface)" }
+                    }
+                  >
+                    {p.label}
+                  </button>
+                ))}
               </div>
             </div>
-          </form>
-        </DialogBody>
-        <DialogFooter>
+          </div>
+        </form>
+
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-[var(--border-subtle)] bg-[var(--bg-surface)]">
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex items-center rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3 py-1.5 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)] transition-colors"
+            className="px-4 py-2 rounded-lg border border-[var(--border-subtle)] text-[13px] font-medium text-[var(--text-secondary)] hover:bg-white hover:text-[var(--text-primary)] transition-all"
           >
             Cancelar
           </button>
           <button
             type="submit"
             form="task-modal-form"
-            disabled={isSubmitting}
-            className="inline-flex items-center rounded-md bg-[var(--accent)] px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-600 transition-colors disabled:opacity-60"
+            disabled={isSubmitting || !title.trim()}
+            className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-[#1FA97A] text-[13px] font-semibold text-white hover:opacity-90 transition-all disabled:opacity-40"
           >
+            {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
             {isSubmitting ? "Creando..." : "Crear tarea"}
           </button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   )

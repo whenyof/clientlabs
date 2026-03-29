@@ -68,12 +68,10 @@ export async function getClientProfitability(
  `
  SELECT
  COALESCE((
-   SELECT SUM(i."total"::NUMERIC)::FLOAT
-   FROM "Invoice" i
-   WHERE i."userId" = $1
-   AND i."clientId" = $2
-   AND i."type" = 'CUSTOMER'
-   AND i."status" NOT IN ('DRAFT','CANCELED')
+   SELECT SUM(s."total"::NUMERIC)::FLOAT
+   FROM "Sale" s
+   WHERE s."userId" = $1
+   AND s."clientId" = $2
  ),0) AS "totalRevenue",
 
  COALESCE((
@@ -114,14 +112,12 @@ export async function getClientProfitability(
 
  inv_monthly AS (
    SELECT
-   TO_CHAR(i."issueDate",'YYYY-MM') AS "month",
-   SUM(i."total"::NUMERIC)::FLOAT AS "revenue"
-   FROM "Invoice" i
-   WHERE i."userId" = $1
-   AND i."clientId" = $2
-   AND i."type" = 'CUSTOMER'
-   AND i."status" NOT IN ('DRAFT','CANCELED')
-   AND i."issueDate" >= DATE_TRUNC('month', NOW()) - INTERVAL '11 months'
+   TO_CHAR(s."saleDate",'YYYY-MM') AS "month",
+   SUM(s."total"::NUMERIC)::FLOAT AS "revenue"
+   FROM "Sale" s
+   WHERE s."userId" = $1
+   AND s."clientId" = $2
+   AND s."saleDate" >= DATE_TRUNC('month', NOW()) - INTERVAL '11 months'
    GROUP BY 1
  ),
 

@@ -2,293 +2,115 @@
 
 import { useCallback } from "react"
 import { useRouter } from "next/navigation"
-import {
- Eye,
- Pencil,
- FileText,
- FilePlus2,
-} from "lucide-react"
+import { Eye, Pencil, FileText, FilePlus2, ShoppingBag } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import {
- ShoppingBagIcon,
- InboxIcon,
- CurrencyEuroIcon,
- TicketIcon,
- HashtagIcon,
- CalendarDaysIcon,
-} from "@heroicons/react/24/outline"
 import { formatCurrency, formatDate } from "@/app/dashboard/finance/lib/formatters"
 import type { ClientSaleRow, ClientSalesKPIs } from "../services/getClientSales"
 
-// ---------------------------------------------------------------------------
-// Status badge styles (reused from existing SalesList patterns)
-// ---------------------------------------------------------------------------
-
 const STATUS_STYLES: Record<string, { label: string; style: string }> = {
- PAID: { label: "Pagado", style: "bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)]" },
- PAGADO: { label: "Pagado", style: "bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)]" },
- PENDING: { label: "Pendiente", style: "bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border-subtle)]" },
- CANCELED: { label: "Cancelado", style: "bg-[var(--bg-card)] text-[var(--critical)] border-[var(--critical)]" },
- CANCELADO: { label: "Cancelado", style: "bg-[var(--bg-card)] text-[var(--critical)] border-[var(--critical)]" },
+  PAID:      { label: "Pagado",    style: "bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)]"                    },
+  PAGADO:    { label: "Pagado",    style: "bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)]"                    },
+  PENDING:   { label: "Pendiente", style: "bg-amber-50 text-amber-700 border-amber-200"                                            },
+  CANCELED:  { label: "Cancelado", style: "bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-subtle)]" },
+  CANCELADO: { label: "Cancelado", style: "bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-subtle)]" },
 }
 
-const ICON_BTN =
- "h-8 w-8 p-0 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] shrink-0"
-
-// ---------------------------------------------------------------------------
-// Mini-KPI strip (above table)
-// ---------------------------------------------------------------------------
-
-function SalesKpiCards({ kpis }: { kpis: ClientSalesKPIs }) {
- const cards = [
- {
- id: "total-purchased",
- label: "Total comprado",
- value: formatCurrency(kpis.totalPurchased),
- icon: CurrencyEuroIcon,
- gradient: " ",
- bg: " ",
- },
- {
- id: "avg-ticket",
- label: "Ticket medio",
- value: formatCurrency(kpis.averageTicket),
- icon: TicketIcon,
- gradient: " ",
- bg: " ",
- },
- {
- id: "order-count",
- label: "Pedidos",
- value: String(kpis.orderCount),
- icon: HashtagIcon,
- gradient: " ",
- bg: " ",
- },
- {
- id: "last-purchase",
- label: "Última compra",
- value: kpis.lastPurchase ? formatDate(kpis.lastPurchase) : "—",
- icon: CalendarDaysIcon,
- gradient: " ",
- bg: " ",
- },
- ]
-
- return (
- <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 px-6 pb-4">
- {cards.map((c) => {
- const Icon = c.icon
- return (
- <div
- key={c.id}
- className="relative overflow-hidden rounded-xl bg-[var(--bg-card)]/60 border border-[var(--border-subtle)] p-4"
- >
- <div className={`absolute inset-0 bg-[var(--bg-card)] ${c.bg} opacity-40`} />
- <div className="relative flex items-center gap-3">
- <div className={`p-2 rounded-lg bg-[var(--bg-card)] ${c.gradient} shadow-md`}>
- <Icon className="w-4 h-4 text-[var(--text-primary)]" />
- </div>
- <div>
- <div className="text-lg font-bold text-[var(--text-primary)]">{c.value}</div>
- <div className="text-[11px] text-[var(--text-secondary)] font-medium leading-tight">{c.label}</div>
- </div>
- </div>
- </div>
- )
- })}
- </div>
- )
-}
-
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
+const ICON_BTN = "h-8 w-8 p-0 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] shrink-0"
 
 interface ClientSalesListProps {
- sales: ClientSaleRow[]
- kpis: ClientSalesKPIs
- clientId: string
+  sales: ClientSaleRow[]
+  kpis: ClientSalesKPIs
+  clientId: string
 }
 
 export function ClientSalesList({ sales, kpis, clientId }: ClientSalesListProps) {
- const router = useRouter()
+  const router = useRouter()
 
- // ── Actions ──────────────────────────────────────────────────────────
-
- const handleView = useCallback(
- (saleId: string) => {
- router.push(`/dashboard/sales?sale=${saleId}`)
- },
- [router]
- )
-
- const handleEdit = useCallback(
- (saleId: string) => {
- router.push(`/dashboard/sales?sale=${saleId}&edit=true`)
- },
- [router]
- )
-
- const handleViewInvoice = useCallback(
- (invoiceId: string) => {
- router.push(`/dashboard/finance/billing?invoice=${invoiceId}`)
- },
- [router]
- )
-
- const handleCreateInvoice = useCallback(
- (saleId: string) => {
- router.push(`/dashboard/finance/billing?newFromSale=${saleId}&client=${clientId}`)
- },
- [router, clientId]
- )
-
-  // ── Empty state ──────────────────────────────────────────────────────
+  const handleView        = useCallback((id: string) => router.push(`/dashboard/sales?sale=${id}`),                                     [router])
+  const handleEdit        = useCallback((id: string) => router.push(`/dashboard/sales?sale=${id}&edit=true`),                           [router])
+  const handleViewInvoice = useCallback((id: string) => router.push(`/dashboard/finance/billing?invoice=${id}`),                        [router])
+  const handleCreateInvoice = useCallback((id: string) => router.push(`/dashboard/finance/billing?newFromSale=${id}&client=${clientId}`), [router, clientId])
 
   if (sales.length === 0) {
     return (
-      <div className="text-xs text-[var(--text-secondary)]">
-        Este cliente no tiene ventas registradas todavía.
+      <div className="flex flex-col items-center justify-center py-12 gap-2 text-[var(--text-secondary)]">
+        <ShoppingBag className="h-8 w-8 opacity-30" />
+        <p className="text-sm">No hay ventas registradas</p>
       </div>
     )
   }
 
-  // ── Table ────────────────────────────────────────────────────────────
-
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm text-left">
+      <table className="w-full text-left text-sm">
         <thead>
           <tr className="border-b border-[var(--border-subtle)]">
-            <th className="py-3 px-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
-              Producto
-            </th>
-            <th className="py-3 px-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
-              Fecha
-            </th>
-            <th className="py-3 px-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
-              Estado
-            </th>
-            <th className="py-3 px-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider text-right">
-              Total
-            </th>
-            <th className="py-3 px-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider text-center">
-              Factura
-            </th>
-            <th className="py-3 px-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider text-right">
-              Acciones
-            </th>
+            {["Producto", "Fecha", "Estado", "Total", "Factura", ""].map((h) => (
+              <th
+                key={h}
+                className="py-2.5 px-4 text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider whitespace-nowrap last:w-0"
+              >
+                {h}
+              </th>
+            ))}
           </tr>
         </thead>
         <tbody>
           {sales.map((sale) => {
             const st = STATUS_STYLES[sale.status] ?? {
               label: sale.status,
-              style: "bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border-subtle)]",
+              style: "bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-subtle)]",
             }
-            const hasInvoice = !!sale.invoiceId
-
             return (
               <tr
                 key={sale.id}
-                className="border-b border-[var(--border-subtle)] transition-colors hover:bg-neutral-50 cursor-pointer"
                 onClick={() => handleView(sale.id)}
                 role="button"
                 tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault()
-                    handleView(sale.id)
-                  }
-                }}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleView(sale.id) } }}
                 aria-label={`Ver venta ${sale.product}`}
+                className="border-b border-[var(--border-subtle)] transition-colors cursor-pointer hover:bg-[var(--bg-surface)]"
               >
-                {/* Product */}
-                <td className="py-3.5 px-4 text-sm font-medium text-[var(--text-secondary)] max-w-[220px] truncate">
+                <td className="py-3 px-4 font-medium text-[var(--text-primary)] max-w-[220px] truncate">
                   {sale.product}
                 </td>
-
-                {/* Date */}
-                <td className="py-3.5 px-4 text-sm text-[var(--text-secondary)] whitespace-nowrap">
+                <td className="py-3 px-4 text-[var(--text-secondary)] whitespace-nowrap">
                   {formatDate(sale.saleDate)}
                 </td>
-
-                {/* Status */}
-                <td className="py-3.5 px-4">
-                  <span
-                    className={`inline-flex w-fit items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold ${st.style}`}
-                  >
+                <td className="py-3 px-4">
+                  <span className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-semibold ${st.style}`}>
                     {st.label}
                   </span>
                 </td>
-
-                {/* Total */}
-                <td className="py-3.5 px-4 text-sm font-medium tabular-nums text-right whitespace-nowrap text-[var(--text-secondary)]">
+                <td className="py-3 px-4 text-right tabular-nums font-medium text-[var(--text-primary)] whitespace-nowrap">
                   {formatCurrency(sale.total, sale.currency)}
                 </td>
-
-                {/* Invoice association */}
-                <td className="py-3.5 px-4 text-center">
-                  {hasInvoice ? (
-                    <span className="inline-flex items-center gap-1 rounded-md border border-[var(--accent)] bg-[var(--accent-soft)] px-2 py-0.5 text-xs font-semibold text-[var(--accent)]">
+                <td className="py-3 px-4 text-center">
+                  {sale.invoiceId ? (
+                    <span className="inline-flex items-center rounded-md border border-[var(--accent)] bg-[var(--accent-soft)] px-2 py-0.5 text-[11px] font-semibold text-[var(--accent)]">
                       Sí
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card)] px-2 py-0.5 text-xs font-semibold text-gray-500">
+                    <span className="inline-flex items-center rounded-md border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2 py-0.5 text-[11px] font-semibold text-[var(--text-secondary)]">
                       No
                     </span>
                   )}
                 </td>
-
-                {/* Actions */}
-                <td
-                  className="py-3.5 px-4 text-right w-0"
-                  onClick={(e) => e.stopPropagation()}
-                >
+                <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-end gap-0.5">
-                    {/* View */}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className={ICON_BTN}
-                      title="Ver venta"
-                      onClick={() => handleView(sale.id)}
-                    >
-                      <Eye className="h-4 w-4" />
+                    <Button variant="ghost" size="sm" className={ICON_BTN} title="Ver" onClick={() => handleView(sale.id)}>
+                      <Eye className="h-3.5 w-3.5" />
                     </Button>
-
-                    {/* Edit */}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className={ICON_BTN}
-                      title="Editar venta"
-                      onClick={() => handleEdit(sale.id)}
-                    >
-                      <Pencil className="h-4 w-4" />
+                    <Button variant="ghost" size="sm" className={ICON_BTN} title="Editar" onClick={() => handleEdit(sale.id)}>
+                      <Pencil className="h-3.5 w-3.5" />
                     </Button>
-
-                    {/* Invoice: view or create */}
-                    {hasInvoice ? (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className={ICON_BTN}
-                        title="Ver factura asociada"
-                        onClick={() => handleViewInvoice(sale.invoiceId!)}
-                      >
-                        <FileText className="h-4 w-4 text-[var(--accent)]" />
+                    {sale.invoiceId ? (
+                      <Button variant="ghost" size="sm" className={ICON_BTN} title="Ver factura" onClick={() => handleViewInvoice(sale.invoiceId!)}>
+                        <FileText className="h-3.5 w-3.5 text-[var(--accent)]" />
                       </Button>
                     ) : (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className={ICON_BTN}
-                        title="Crear factura"
-                        onClick={() => handleCreateInvoice(sale.id)}
-                      >
-                        <FilePlus2 className="h-4 w-4 text-[var(--accent)]" />
+                      <Button variant="ghost" size="sm" className={ICON_BTN} title="Crear factura" onClick={() => handleCreateInvoice(sale.id)}>
+                        <FilePlus2 className="h-3.5 w-3.5 text-[var(--accent)]" />
                       </Button>
                     )}
                   </div>

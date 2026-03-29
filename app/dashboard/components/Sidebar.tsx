@@ -3,6 +3,7 @@
 import { useRouter, usePathname } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { motion } from "framer-motion"
+import { useEffect, useState } from "react"
 import { useSectorConfig } from "@/hooks/useSectorConfig"
 import {
   LayoutDashboard,
@@ -78,6 +79,15 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
   const nav = labels.nav
   const isAdmin = session?.user?.role === "ADMIN"
 
+  const [urgentCount, setUrgentCount] = useState(0)
+  useEffect(() => {
+    if (!session?.user?.id) return
+    fetch("/api/tasks/kpis")
+      .then((r) => r.json())
+      .then((d) => setUrgentCount(d?.atRisk ?? 0))
+      .catch(() => {})
+  }, [session?.user?.id])
+
   // Show loading state while session is loading
   if (status === "loading") {
     return (
@@ -95,7 +105,7 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
         { label: nav.leads, href: "/dashboard/leads", icon: Target },
         { label: nav.clients, href: "/dashboard/clients", icon: Users },
         { label: nav.providers, href: "/dashboard/providers", icon: Building2 },
-        { label: nav.tasks, href: "/dashboard/tasks", icon: CheckSquare },
+        { label: nav.tasks, href: "/dashboard/tasks", icon: CheckSquare, count: urgentCount || undefined },
         { label: nav.finance, href: "/dashboard/finance", icon: DollarSign },
       ],
     },
@@ -210,7 +220,11 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
 
                         {item.count && (
                           <span
-                            className="bg-[var(--accent-soft)] text-[var(--accent)] text-xs px-2 rounded-full"
+                            className="text-xs px-2 rounded-full font-semibold"
+                            style={{
+                              background: item.href === "/dashboard/tasks" ? "#FEF2F2" : "var(--accent-soft)",
+                              color: item.href === "/dashboard/tasks" ? "#EF4444" : "var(--accent)",
+                            }}
                           >
                             {item.count}
                           </span>

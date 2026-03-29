@@ -1,10 +1,3 @@
-/**
- * Client 360 Page — /dashboard/clients/[clientId]
- *
- * 3-column SaaS layout: Timeline (left) | Profile + Marketing + Insights (center) | KPIs + Transactions (right).
- * No backend or query logic changes.
- */
-
 import { requireOnboardedUser } from "@/lib/auth-guards"
 import { DashboardContainer } from "@/components/layout/DashboardContainer"
 import { getClient360Base } from "@/modules/client360/services/getClient360Base"
@@ -29,14 +22,10 @@ import { Client360ActionsBar } from "@/modules/client360/actions/Client360Action
 
 type Params = Promise<{ clientId: string }>
 
-export default async function Client360Page({
-  params: paramsPromise,
-}: {
-  params: Params
-}) {
+export default async function Client360Page({ params: paramsPromise }: { params: Params }) {
   const { session } = await requireOnboardedUser()
-  const params = await paramsPromise
-  const userId = session.user!.id
+  const params   = await paramsPromise
+  const userId   = session.user!.id
   const clientId = params.clientId
 
   const [client, kpis, invoices, salesData, paymentsData, financialRisk, profitability, timeline] =
@@ -52,69 +41,74 @@ export default async function Client360Page({
     ])
 
   if (!client) {
-    return (
-      <DashboardContainer>
-        <ClientNotFound />
-      </DashboardContainer>
-    )
+    return <DashboardContainer><ClientNotFound /></DashboardContainer>
   }
 
   return (
     <DashboardContainer>
-      {/* HEADER: breadcrumb + client identity */}
-      <div className="mb-2">
-        <a
-          href="/dashboard/clients"
-          className="inline-flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-900 transition-colors"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-          </svg>
-          Clientes
-        </a>
-      </div>
 
-      {/* Client header */}
-      <div className="mt-4">
+      {/* ── Breadcrumb ─────────────────────────────────────────────────── */}
+      <a
+        href="/dashboard/clients"
+        className="inline-flex items-center gap-1 text-[12px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors mb-5"
+      >
+        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+        </svg>
+        Clientes
+      </a>
+
+      {/* ── Header: identidad del cliente ──────────────────────────────── */}
+      <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-subtle)] px-6 py-5 mb-4">
         <ClientHeader
           client={client}
           kpis={kpis}
-          invoiceCount={invoices.length}
           lastActivityAt={timeline[0]?.date ?? null}
         />
       </div>
 
-      {/* Main workspace + context grid */}
-      <div className="mt-8 grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-10 items-start">
-        {/* LEFT: client financial workspace */}
-        <div className="space-y-10 min-w-0">
-          <ClientKpiOverview kpis={kpis} salesKpis={salesData.kpis} />
+      {/* ── 4 KPIs separados ───────────────────────────────────────────── */}
+      <div className="mb-6">
+        <ClientKpiOverview kpis={kpis} salesKpis={salesData.kpis} />
+      </div>
 
-          {/* Quick actions aligned with KPI width */}
+      {/* ── Layout 70 / 30 ─────────────────────────────────────────────── */}
+      <div style={{ display: "flex", gap: "20px", alignItems: "flex-start" }}>
+
+        {/* ── Columna izquierda (70%) ─────────────────────────────────── */}
+        <div style={{ flex: 1, minWidth: 0 }} className="space-y-4">
+
+          {/* Acciones rápidas */}
           <Client360ActionsBar clientId={client.id} defaultEmail={client.email} />
 
-          <ClientTransactionsTabs
-            clientId={clientId}
-            invoices={invoices}
-            salesData={salesData}
-            paymentsData={paymentsData}
-          />
-        </div>
-
-        {/* RIGHT: client context panel */}
-        <aside className="space-y-8 sticky top-6 lg:min-w-0">
-          <ClientProfileCard client={client} />
-
-          <div className="border-t border-[var(--border-subtle)] pt-6">
-            <ClientTimeline events={timeline} />
-          </div>
-
-          <div className="space-y-4 border-t border-[var(--border-subtle)] pt-6">
+          {/* Riesgo + Rentabilidad en dos tarjetas lado a lado */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <ClientFinancialRiskCard risk={financialRisk} />
             <ClientProfitabilityCard profitability={profitability} />
           </div>
+
+          {/* Historial: ventas, facturas y pagos */}
+          <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-subtle)] overflow-hidden">
+            <ClientTransactionsTabs
+              clientId={clientId}
+              invoices={invoices}
+              salesData={salesData}
+              paymentsData={paymentsData}
+            />
+          </div>
+        </div>
+
+        {/* ── Columna derecha (30%) ───────────────────────────────────── */}
+        <aside style={{ width: "300px", flexShrink: 0, position: "sticky", top: "24px" }} className="space-y-4">
+
+          {/* Información del cliente (editable) */}
+          <ClientProfileCard client={client} />
+
+          {/* Timeline: 4 eventos + ver más */}
+          <ClientTimeline events={timeline} />
         </aside>
       </div>
+
     </DashboardContainer>
   )
 }

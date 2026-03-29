@@ -2,13 +2,11 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { StickyNote, Loader2, X } from "lucide-react"
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogBody,
-  DialogFooter,
+  DialogClose,
 } from "@/components/ui/dialog"
 import { addClientNote } from "@/modules/clients/actions"
 
@@ -30,8 +28,8 @@ export function NoteModal({ open, onClose, clientId }: NoteModalProps) {
     try {
       const result = await addClientNote(clientId, note.trim())
       if (result && typeof result === "object" && "success" in result && result.success) {
-        onClose()
         setNote("")
+        onClose()
         router.refresh()
       } else {
         const err = result && typeof result === "object" && "error" in result ? (result as { error?: string }).error : "Error al guardar la nota"
@@ -47,42 +45,56 @@ export function NoteModal({ open, onClose, clientId }: NoteModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Añadir nota</DialogTitle>
-        </DialogHeader>
-        <DialogBody>
-          <form id="note-modal-form" className="space-y-4" onSubmit={handleSubmit}>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-[var(--text-secondary)]">
-                Nota
-              </label>
-              <textarea
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                className="w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] min-h-[120px]"
-                placeholder="Escribe una nota interna sobre este cliente..."
-              />
+      <DialogContent className="p-0" style={{ maxWidth: "480px", width: "calc(100vw - 32px)" }}>
+        {/* Header */}
+        <div className="flex items-start justify-between px-6 py-5 border-b border-[var(--border-subtle)]">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-yellow-50 border border-yellow-100 flex items-center justify-center shrink-0">
+              <StickyNote className="w-4 h-4 text-yellow-500" />
             </div>
-          </form>
-        </DialogBody>
-        <DialogFooter>
+            <div>
+              <h2 className="text-[15px] font-semibold text-[var(--text-primary)] leading-tight">Añadir nota</h2>
+              <p className="text-[12px] text-[var(--text-secondary)] mt-0.5">Nota interna visible solo para ti</p>
+            </div>
+          </div>
+          <DialogClose className="w-7 h-7 rounded-md flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-colors">
+            <X className="w-4 h-4" />
+            <span className="sr-only">Cerrar</span>
+          </DialogClose>
+        </div>
+
+        {/* Body */}
+        <form id="note-modal-form" onSubmit={handleSubmit} className="px-6 py-5">
+          <textarea
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            autoFocus
+            rows={6}
+            className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3.5 py-3 text-[14px] text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/60 focus:outline-none focus:border-[#1FA97A] focus:ring-2 focus:ring-[#1FA97A]/10 transition-all resize-none"
+            placeholder="Escribe una nota interna sobre este cliente..."
+          />
+          <p className="mt-2 text-[11px] text-[var(--text-secondary)]">{note.length} caracteres</p>
+        </form>
+
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-[var(--border-subtle)] bg-[var(--bg-surface)]">
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex items-center rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3 py-1.5 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)] transition-colors"
+            className="px-4 py-2 rounded-lg border border-[var(--border-subtle)] text-[13px] font-medium text-[var(--text-secondary)] hover:bg-white hover:text-[var(--text-primary)] transition-all"
           >
             Cancelar
           </button>
           <button
             type="submit"
             form="note-modal-form"
-            disabled={isSubmitting}
-            className="inline-flex items-center rounded-md bg-[var(--accent)] px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-600 transition-colors disabled:opacity-60"
+            disabled={isSubmitting || !note.trim()}
+            className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-[#1FA97A] text-[13px] font-semibold text-white hover:opacity-90 transition-all disabled:opacity-40"
           >
+            {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
             {isSubmitting ? "Guardando..." : "Guardar nota"}
           </button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   )

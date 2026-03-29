@@ -1,282 +1,155 @@
 "use client"
-import { getBaseUrl } from "@/lib/api/baseUrl"
-
 
 import { useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import {
- Eye,
- Pencil,
- Banknote,
- ArrowDownToLine,
-} from "lucide-react"
+import { Eye, Pencil, Banknote, ArrowDownToLine, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import {
- DocumentTextIcon,
- InboxIcon,
-} from "@heroicons/react/24/outline"
 import { formatCurrency, formatDate } from "@/app/dashboard/finance/lib/formatters"
 import { invoiceStatusLabel } from "@domains/invoicing"
+import { getBaseUrl } from "@/lib/api/baseUrl"
 import type { ClientInvoiceRow } from "../services/getClientInvoices"
 
-// ---------------------------------------------------------------------------
-// Status badge styles (reused from invoicing module)
-// ---------------------------------------------------------------------------
-
 const STATUS_STYLES: Record<string, string> = {
- DRAFT: "bg-gray-500/20 text-[var(--text-secondary)] border-gray-500/30",
- SENT: "bg-[var(--bg-card)] text-[var(--accent)] border-blue-500/30",
- VIEWED: "bg-sky-500/20 text-sky-400 border-sky-500/30",
- PARTIAL: "bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border-subtle)]",
- PAID: "bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)]",
- OVERDUE: "bg-[var(--bg-card)] text-[var(--critical)] border-[var(--critical)]",
- CANCELED: "bg-zinc-700/80 text-zinc-400 border-zinc-600/50",
+  DRAFT:    "bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-subtle)]",
+  SENT:     "bg-blue-50 text-blue-700 border-blue-200",
+  VIEWED:   "bg-sky-50 text-sky-700 border-sky-200",
+  PARTIAL:  "bg-amber-50 text-amber-700 border-amber-200",
+  PAID:     "bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)]",
+  OVERDUE:  "bg-red-50 text-red-700 border-red-200",
+  CANCELED: "bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-subtle)]",
 }
 
-const ICON_BTN =
- "h-8 w-8 p-0 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] shrink-0"
-
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
+const ICON_BTN = "h-8 w-8 p-0 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] shrink-0"
 
 interface ClientInvoiceListProps {
- invoices: ClientInvoiceRow[]
- clientId: string
+  invoices: ClientInvoiceRow[]
+  clientId: string
 }
 
 export function ClientInvoiceList({ invoices, clientId }: ClientInvoiceListProps) {
- const router = useRouter()
- const [downloading, setDownloading] = useState<string | null>(null)
+  const router = useRouter()
+  const [downloading, setDownloading] = useState<string | null>(null)
 
- // ── Actions ──────────────────────────────────────────────────────────
+  const handleView = useCallback((id: string) => {
+    router.push(`/dashboard/finance/billing?invoice=${id}`)
+  }, [router])
 
- const handleView = useCallback(
- (invoiceId: string) => {
- // Navigate to the invoicing view (reuse existing route)
- router.push(`/dashboard/finance/billing?invoice=${invoiceId}`)
- },
- [router]
- )
+  const handleEdit = useCallback((id: string) => {
+    router.push(`/dashboard/finance/billing?invoice=${id}&edit=true`)
+  }, [router])
 
- const handleEdit = useCallback(
- (invoiceId: string) => {
- router.push(`/dashboard/finance/billing?invoice=${invoiceId}&edit=true`)
- },
- [router]
- )
+  const handleRegisterPayment = useCallback((id: string) => {
+    router.push(`/dashboard/finance/billing?invoice=${id}&payment=true`)
+  }, [router])
 
- const handleRegisterPayment = useCallback(
- (invoiceId: string) => {
- router.push(
- `/dashboard/finance/billing?invoice=${invoiceId}&payment=true`
- )
- },
- [router]
- )
+  const handleDownloadPdf = useCallback(async (id: string) => {
+    try {
+      setDownloading(id)
+      const res = await fetch(`${getBaseUrl()}/api/invoicing/${id}/pdf`, { credentials: "include" })
+      if (!res.ok) throw new Error("PDF generation failed")
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `factura-${id}.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      console.error("PDF download error:", err)
+    } finally {
+      setDownloading(null)
+    }
+  }, [])
 
- const handleDownloadPdf = useCallback(
- async (invoiceId: string) => {
- try {
- setDownloading(invoiceId)
- const res = await fetch(`${getBaseUrl()}/api/invoicing/${invoiceId}/pdf`, {
- credentials: "include",
- })
- if (!res.ok) throw new Error("PDF generation failed")
- const blob = await res.blob()
- const url = URL.createObjectURL(blob)
- const a = document.createElement("a")
- a.href = url
- a.download = `factura-${invoiceId}.pdf`
- a.click()
- URL.revokeObjectURL(url)
- } catch (err) {
- console.error("PDF download error:", err)
- } finally {
- setDownloading(null)
- }
- },
- []
- )
-
- // ── Empty state ──────────────────────────────────────────────────────
-
- if (invoices.length === 0) {
- return (
-      <div className="text-xs text-[var(--text-secondary)]">
-        Este cliente no tiene facturas registradas todavía.
+  if (invoices.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 gap-2 text-[var(--text-secondary)]">
+        <FileText className="h-8 w-8 opacity-30" />
+        <p className="text-sm">No hay facturas registradas</p>
       </div>
- )
- }
-
- // ── Table ────────────────────────────────────────────────────────────
+    )
+  }
 
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
- <thead>
- <tr className="border-b border-[var(--border-subtle)]">
- <th className="py-3 px-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
- Número
- </th>
- <th className="py-3 px-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
- Emisión
- </th>
- <th className="py-3 px-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
- Vencimiento
- </th>
- <th className="py-3 px-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
- Estado
- </th>
- <th className="py-3 px-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider text-right">
- Total
- </th>
- <th className="py-3 px-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider text-right">
- Pagado
- </th>
- <th className="py-3 px-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider text-right">
- Pendiente
- </th>
- <th className="py-3 px-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider text-right">
- Acciones
- </th>
- </tr>
- </thead>
- <tbody>
- {invoices.map((inv) => {
- const statusStyle =
- STATUS_STYLES[inv.status] ??
- "bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border-subtle)]"
- const isCanceled = inv.status === "CANCELED"
-
- return (
+        <thead>
+          <tr className="border-b border-[var(--border-subtle)]">
+            {["Número", "Emisión", "Vencimiento", "Estado", "Total", "Pagado", "Pendiente", ""].map((h) => (
+              <th
+                key={h}
+                className="py-2.5 px-4 text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider whitespace-nowrap last:w-0"
+              >
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {invoices.map((inv) => {
+            const statusStyle = STATUS_STYLES[inv.status] ?? STATUS_STYLES["DRAFT"]
+            return (
               <tr
                 key={inv.id}
-                className={`
-            border-b border-[var(--border-subtle)] transition-colors
-            hover:bg-neutral-50 cursor-pointer
-            ${isCanceled ? "opacity-50" : ""}
-            `}
- onClick={() => handleView(inv.id)}
- role="button"
- tabIndex={0}
- onKeyDown={(e) => {
- if (e.key === "Enter" || e.key === " ") {
- e.preventDefault()
- handleView(inv.id)
- }
- }}
- aria-label={`Ver factura ${inv.number}`}
- >
- {/* Number */}
- <td className="py-3.5 px-4 text-sm font-medium text-[var(--text-secondary)] whitespace-nowrap">
- {inv.isDraft ? "Borrador" : inv.number}
- </td>
-
- {/* Issue date */}
- <td className="py-3.5 px-4 text-sm text-[var(--text-secondary)] whitespace-nowrap">
- {formatDate(inv.issueDate)}
- </td>
-
- {/* Due date */}
- <td className="py-3.5 px-4 text-sm text-[var(--text-secondary)] whitespace-nowrap">
- {formatDate(inv.dueDate)}
- </td>
-
- {/* Status */}
- <td className="py-3.5 px-4">
- <span
- className={`inline-flex w-fit items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold ${statusStyle}`}
- >
- {invoiceStatusLabel(inv.status)}
- </span>
- </td>
-
- {/* Total */}
- <td className="py-3.5 px-4 text-sm font-medium tabular-nums text-right whitespace-nowrap text-[var(--text-secondary)]">
- {formatCurrency(inv.total, inv.currency)}
- </td>
-
- {/* Paid */}
- <td className="py-3.5 px-4 text-sm tabular-nums text-right whitespace-nowrap text-[var(--accent)]">
- {formatCurrency(inv.paid, inv.currency)}
- </td>
-
- {/* Pending */}
- <td className="py-3.5 px-4 text-sm font-medium tabular-nums text-right whitespace-nowrap">
- <span
- className={
- inv.pending > 0 ? "text-[var(--text-secondary)]" : "text-[var(--text-secondary)]"
- }
- >
- {formatCurrency(inv.pending, inv.currency)}
- </span>
- </td>
-
- {/* Actions */}
- <td
- className="py-3.5 px-4 text-right w-0"
- onClick={(e) => e.stopPropagation()}
- >
- <div className="flex items-center justify-end gap-0.5">
- {/* View */}
- <Button
- variant="ghost"
- size="sm"
- className={ICON_BTN}
- title="Visualizar"
- onClick={() => handleView(inv.id)}
- >
- <Eye className="h-4 w-4" />
- </Button>
-
- {/* Edit — only drafts */}
- {inv.isDraft && (
- <Button
- variant="ghost"
- size="sm"
- className={ICON_BTN}
- title="Editar"
- onClick={() => handleEdit(inv.id)}
- >
- <Pencil className="h-4 w-4" />
- </Button>
- )}
-
- {/* Register payment — not for paid/canceled */}
- {inv.status !== "PAID" && inv.status !== "CANCELED" && (
- <Button
- variant="ghost"
- size="sm"
- className={ICON_BTN}
- title="Registrar pago"
- onClick={() => handleRegisterPayment(inv.id)}
- >
- <Banknote className="h-4 w-4" />
- </Button>
- )}
-
- {/* Download PDF */}
- <Button
- variant="ghost"
- size="sm"
- className={ICON_BTN}
- title="Descargar PDF"
- disabled={downloading === inv.id}
- onClick={() => handleDownloadPdf(inv.id)}
- >
- <ArrowDownToLine
- className={`h-4 w-4 ${downloading === inv.id ? "animate-pulse" : ""
- }`}
- />
- </Button>
- </div>
- </td>
- </tr>
- )
- })}
- </tbody>
+                onClick={() => handleView(inv.id)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleView(inv.id) } }}
+                aria-label={`Ver factura ${inv.number}`}
+                className={[
+                  "border-b border-[var(--border-subtle)] transition-colors cursor-pointer",
+                  "hover:bg-[var(--bg-surface)]",
+                  inv.status === "CANCELED" ? "opacity-50" : "",
+                ].join(" ")}
+              >
+                <td className="py-3 px-4 font-medium text-[var(--text-primary)] whitespace-nowrap">
+                  {inv.isDraft ? "Borrador" : inv.number}
+                </td>
+                <td className="py-3 px-4 text-[var(--text-secondary)] whitespace-nowrap">
+                  {formatDate(inv.issueDate)}
+                </td>
+                <td className="py-3 px-4 text-[var(--text-secondary)] whitespace-nowrap">
+                  {formatDate(inv.dueDate)}
+                </td>
+                <td className="py-3 px-4">
+                  <span className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-semibold ${statusStyle}`}>
+                    {invoiceStatusLabel(inv.status)}
+                  </span>
+                </td>
+                <td className="py-3 px-4 text-right tabular-nums font-medium text-[var(--text-primary)] whitespace-nowrap">
+                  {formatCurrency(inv.total, inv.currency)}
+                </td>
+                <td className="py-3 px-4 text-right tabular-nums text-[var(--accent)] whitespace-nowrap">
+                  {formatCurrency(inv.paid, inv.currency)}
+                </td>
+                <td className="py-3 px-4 text-right tabular-nums text-[var(--text-secondary)] whitespace-nowrap">
+                  {formatCurrency(inv.pending, inv.currency)}
+                </td>
+                <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex items-center justify-end gap-0.5">
+                    <Button variant="ghost" size="sm" className={ICON_BTN} title="Ver" onClick={() => handleView(inv.id)}>
+                      <Eye className="h-3.5 w-3.5" />
+                    </Button>
+                    {inv.isDraft && (
+                      <Button variant="ghost" size="sm" className={ICON_BTN} title="Editar" onClick={() => handleEdit(inv.id)}>
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
+                    {inv.status !== "PAID" && inv.status !== "CANCELED" && (
+                      <Button variant="ghost" size="sm" className={ICON_BTN} title="Registrar pago" onClick={() => handleRegisterPayment(inv.id)}>
+                        <Banknote className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
+                    <Button variant="ghost" size="sm" className={ICON_BTN} title="Descargar PDF" disabled={downloading === inv.id} onClick={() => handleDownloadPdf(inv.id)}>
+                      <ArrowDownToLine className={`h-3.5 w-3.5 ${downloading === inv.id ? "animate-pulse" : ""}`} />
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
       </table>
     </div>
- )
+  )
 }

@@ -1,269 +1,114 @@
 "use client"
 
-import {
- ArrowTrendingUpIcon,
- ArrowTrendingDownIcon,
- MinusIcon,
- CurrencyEuroIcon,
- ChartBarSquareIcon,
- CalendarDaysIcon,
- SparklesIcon,
-} from "@heroicons/react/24/outline"
+import { TrendingUp, TrendingDown, Minus, BarChart2 } from "lucide-react"
 import type { ClientProfitability, MonthBucket } from "../services/getClientProfitability"
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function formatCurrency(value: number): string {
- return new Intl.NumberFormat("es-ES", {
- style: "currency",
- currency: "EUR",
- minimumFractionDigits: 0,
- maximumFractionDigits: 0,
- }).format(value)
+function formatCurrency(v: number): string {
+  return new Intl.NumberFormat("es-ES", {
+    style: "currency", currency: "EUR",
+    minimumFractionDigits: 0, maximumFractionDigits: 0,
+  }).format(v)
 }
 
-function formatPercent(value: number): string {
- return `${value >= 0 ? "+" : ""}${value.toFixed(1)}%`
+function formatPercent(v: number): string {
+  return `${v >= 0 ? "+" : ""}${v.toFixed(1)}%`
 }
 
-// ---------------------------------------------------------------------------
-// Mini bar chart — last 12 months revenue
-// ---------------------------------------------------------------------------
-
-function MiniBarChart({
- months,
- hasCostData,
-}: {
- months: MonthBucket[]
- hasCostData: boolean
-}) {
- const maxRevenue = Math.max(...months.map((m) => m.revenue), 1)
-
- return (
- <div className="space-y-2">
- <div className="flex items-center justify-between text-[11px] text-gray-500 font-semibold uppercase tracking-wider">
- <span>Últimos 12 meses</span>
- <div className="flex items-center gap-3">
- <span className="flex items-center gap-1">
- <span className="w-2 h-2 rounded-sm bg-blue-500" />
- Ingresos
- </span>
- {hasCostData && (
- <span className="flex items-center gap-1">
- <span className="w-2 h-2 rounded-sm bg-emerald-500/50" />
- Costes
- </span>
- )}
- </div>
- </div>
-
- <div className="flex items-end gap-1 h-24">
- {months.map((m) => {
- const revHeight = Math.max((m.revenue / maxRevenue) * 100, 2)
- const costHeight = hasCostData
- ? Math.max((m.cost / maxRevenue) * 100, m.cost > 0 ? 2 : 0)
- : 0
- const hasActivity = m.revenue > 0 || m.cost > 0
-
- return (
- <div
- key={m.month}
- className="flex-1 flex flex-col items-center gap-0.5 group/bar"
- title={`${m.label}: ${formatCurrency(m.revenue)}${hasCostData ? ` | Coste: ${formatCurrency(m.cost)}` : ""}`}
- >
- <div className="w-full flex flex-col items-center justify-end h-20 relative">
- {/* Revenue bar */}
- <div
- className={`
- w-full rounded-t-sm transition-all duration-500
- ${hasActivity
- ? "bg-[var(--bg-card)] group-hover/bar:bg-blue-400"
- : "bg-[var(--bg-card)] border border-[var(--border-subtle)]"
- }
- `}
- style={{ height: `${revHeight}%` }}
- />
- {/* Cost overlay */}
- {costHeight > 0 && (
- <div
- className="w-full bg-emerald-500/40 absolute bottom-0 rounded-t-sm group-hover/bar:bg-violet-400/50 transition-all duration-500"
- style={{ height: `${costHeight}%` }}
- />
- )}
- </div>
- <span className="text-[9px] text-gray-600 font-medium truncate w-full text-center group-hover/bar:text-[var(--text-secondary)] transition-colors">
- {m.label.slice(0, 3)}
- </span>
- </div>
- )
- })}
- </div>
- </div>
- )
+function MiniBarChart({ months }: { months: MonthBucket[] }) {
+  const max = Math.max(...months.map((m) => m.revenue), 1)
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-end gap-[2px] h-12">
+        {months.map((m, i) => {
+          const h = Math.max((m.revenue / max) * 100, m.revenue > 0 ? 4 : 0)
+          const isLast = i === months.length - 1
+          return (
+            <div key={m.month} className="flex-1 flex flex-col justify-end" title={`${m.label}: ${formatCurrency(m.revenue)}`}>
+              <div
+                className="w-full rounded-[2px] transition-colors"
+                style={{
+                  height: `${h}%`,
+                  minHeight: m.revenue > 0 ? "2px" : "1px",
+                  background: isLast ? "#1FA97A" : m.revenue > 0 ? "rgba(31,169,122,0.25)" : "rgba(0,0,0,0.05)",
+                }}
+              />
+            </div>
+          )
+        })}
+      </div>
+      <div className="flex justify-between text-[9px] text-[var(--text-secondary)] opacity-60">
+        <span>{months[0]?.label.slice(0, 3)}</span>
+        <span className="text-[#1FA97A] opacity-100 font-medium">{months[months.length - 1]?.label}</span>
+      </div>
+    </div>
+  )
 }
-
-// ---------------------------------------------------------------------------
-// Trend badge
-// ---------------------------------------------------------------------------
 
 function TrendBadge({ trend }: { trend: ClientProfitability["trend"] }) {
- const config = {
- up: {
- icon: ArrowTrendingUpIcon,
- label: "Al alza",
- bg: "bg-[var(--accent-soft)]",
- text: "text-[var(--accent)]",
- },
- down: {
- icon: ArrowTrendingDownIcon,
- label: "A la baja",
- bg: "bg-[var(--bg-card)]",
- text: "text-[var(--critical)]",
- },
- stable: {
- icon: MinusIcon,
- label: "Estable",
- bg: "bg-gray-500/15",
- text: "text-[var(--text-secondary)]",
- },
- }
-
- const c = config[trend]
- const Icon = c.icon
-
- return (
- <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${c.bg} ${c.text}`}>
- <Icon className="w-3.5 h-3.5" />
- {c.label}
- </span>
- )
+  const cfg = {
+    up:     { Icon: TrendingUp,   label: "Al alza",  cls: "bg-emerald-50 text-emerald-700" },
+    down:   { Icon: TrendingDown, label: "A la baja", cls: "bg-red-50 text-red-700"         },
+    stable: { Icon: Minus,        label: "Estable",  cls: "bg-neutral-100 text-neutral-500" },
+  }[trend]
+  return (
+    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${cfg.cls}`}>
+      <cfg.Icon className="w-3 h-3" />
+      {cfg.label}
+    </span>
+  )
 }
-
-// ---------------------------------------------------------------------------
-// KPI mini card
-// ---------------------------------------------------------------------------
-
-interface MiniKpiProps {
- icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
- label: string
- value: string
- sublabel?: string
- accent?: string
-}
-
-function MiniKpi({ icon: Icon, label, value, sublabel, accent = "text-[var(--text-primary)]" }: MiniKpiProps) {
- return (
- <div className="flex items-center gap-3 group/kpi">
- <div className="shrink-0 p-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border-subtle)] group-hover/kpi:bg-[var(--bg-card)] border border-[var(--border-subtle)] transition-colors">
- <Icon className="w-4 h-4 text-[var(--text-secondary)] group-hover/kpi:text-[var(--text-primary)] transition-colors" />
- </div>
- <div className="min-w-0">
- <div className="text-[11px] text-gray-500 font-medium uppercase tracking-wider">
- {label}
- </div>
- <div className={`text-sm font-bold ${accent} tabular-nums`}>
- {value}
- {sublabel && (
- <span className="text-xs text-gray-500 font-normal ml-1">{sublabel}</span>
- )}
- </div>
- </div>
- </div>
- )
-}
-
-// ---------------------------------------------------------------------------
-// Month KPI card (best / worst)
-// ---------------------------------------------------------------------------
-
-function MonthKpiCard({
- bucket,
- label,
- accentColor,
-}: {
- bucket: MonthBucket
- label: string
- accentColor: string
-}) {
- return (
- <div className="flex items-center gap-3 group/month">
- <div className={`shrink-0 p-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border-subtle)] group-hover/month:bg-[var(--bg-card)] border border-[var(--border-subtle)] transition-colors`}>
- <CalendarDaysIcon className="w-4 h-4 text-[var(--text-secondary)] group-hover/month:text-[var(--text-primary)] transition-colors" />
- </div>
- <div className="min-w-0">
- <div className="text-[11px] text-gray-500 font-medium uppercase tracking-wider">
- {label}
- </div>
- <div className={`text-sm font-bold ${accentColor} tabular-nums`}>
- {bucket.label}
- <span className="text-xs text-gray-500 font-normal ml-1.5">
- {formatCurrency(bucket.revenue)}
- </span>
- </div>
- </div>
- </div>
- )
-}
-
-// ---------------------------------------------------------------------------
-// Main component
-// ---------------------------------------------------------------------------
 
 interface ClientProfitabilityCardProps {
- profitability: ClientProfitability
+  profitability: ClientProfitability
 }
 
 export function ClientProfitabilityCard({ profitability: p }: ClientProfitabilityCardProps) {
-  const hasData = p.totalRevenue > 0
-
-  const marginColor =
-    p.marginPercent !== null
-      ? p.marginPercent >= 40
-        ? "text-[var(--accent)]"
-        : p.marginPercent >= 20
-          ? "text-[var(--accent)]"
-          : p.marginPercent >= 0
-            ? "text-[var(--text-secondary)]"
-            : "text-[var(--critical)]"
-      : "text-[var(--text-secondary)]"
+  const hasData    = p.totalRevenue > 0
+  const marginColor = p.marginPercent === null ? "text-[var(--text-secondary)]"
+    : p.marginPercent >= 20 ? "text-[#1FA97A]"
+    : p.marginPercent >= 0  ? "text-[var(--text-secondary)]"
+    : "text-red-600"
 
   return (
-    <section id="client360-profitability" className="border-b border-neutral-200 pb-4 space-y-3">
-      <div className="flex items-center gap-2">
-        <ChartBarSquareIcon className="w-4 h-4 text-[var(--text-secondary)]" />
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
-          Rentabilidad
-        </h3>
+    <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-subtle)] overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--border-subtle)]">
+        <div className="flex items-center gap-2">
+          <BarChart2 className="w-3.5 h-3.5 text-[var(--text-secondary)]" aria-hidden="true" />
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+            Rentabilidad
+          </span>
+        </div>
         {hasData && <TrendBadge trend={p.trend} />}
       </div>
 
-      {!hasData ? (
-        <div className="flex items-center gap-3 text-xs text-[var(--text-secondary)]">
-          <SparklesIcon className="w-4 h-4 text-gray-500" />
-          <span>Sin datos suficientes para calcular la rentabilidad del cliente.</span>
-        </div>
-      ) : (
-        <div className="flex items-baseline justify-between text-sm">
-          <div className="space-y-0.5">
-            <div className="text-[11px] uppercase tracking-wider text-gray-500">
-              Ingresos
+      <div className="px-5 py-4">
+        {!hasData ? (
+          <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed">
+            Sin datos suficientes aún.
+          </p>
+        ) : (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <div className="text-[9px] uppercase tracking-wider text-[var(--text-secondary)] mb-1">Ingresos</div>
+                <div className="text-[18px] font-bold tabular-nums text-[var(--text-primary)]">
+                  {formatCurrency(p.totalRevenue)}
+                </div>
+              </div>
+              {p.marginPercent !== null && (
+                <div>
+                  <div className="text-[9px] uppercase tracking-wider text-[var(--text-secondary)] mb-1">Margen</div>
+                  <div className={`text-[18px] font-bold tabular-nums ${marginColor}`}>
+                    {formatPercent(p.marginPercent)}
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="text-lg font-semibold text-[var(--text-primary)] tabular-nums">
-              {formatCurrency(p.totalRevenue)}
-            </div>
+            {p.months && p.months.length > 0 && <MiniBarChart months={p.months} />}
           </div>
-          <div className="text-right space-y-0.5">
-            <div className="text-[11px] uppercase tracking-wider text-gray-500">
-              Margen
-            </div>
-            <div className={`text-lg font-semibold tabular-nums ${marginColor}`}>
-              {p.marginPercent !== null ? formatPercent(p.marginPercent) : "—"}
-            </div>
-          </div>
-        </div>
-      )}
-    </section>
+        )}
+      </div>
+    </div>
   )
 }

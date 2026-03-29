@@ -4,7 +4,7 @@ import React, { useRef, useState } from "react"
 import type { DashboardTask } from "./types"
 import { PRIORITY_CONFIG } from "./types"
 
-const CELL_H = 52
+const CELL_H = 48
 const SNAP = CELL_H / 4 // 15 min
 
 interface WeekTaskBlockProps {

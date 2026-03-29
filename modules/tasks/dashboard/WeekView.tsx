@@ -9,7 +9,7 @@ import { WeekTaskBlock } from "./WeekTaskBlock"
 
 const DAY_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
 const HOURS = Array.from({ length: 14 }, (_, i) => i + 7) // 7am–8pm
-const CELL_H = 52
+const CELL_H = 48
 const GRID_START = 7 * 60 // minutes from midnight
 
 function getMonday(d: Date): Date {
@@ -150,73 +150,72 @@ export function WeekView({ tasks, onTaskClick, onCellClick }: WeekViewProps) {
       </div>
 
       {/* Time grid */}
-      <div style={{ overflowY: "auto", maxHeight: 520 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "52px repeat(7,1fr)", position: "relative" }}>
-          {/* Now line */}
+      <div style={{ overflowY: "auto", maxHeight: "calc(100vh - 220px)" }}>
+        <div style={{ position: "relative" }}>
+          {/* Hour rows grid — clean, no overlay items */}
+          <div style={{ display: "grid", gridTemplateColumns: "52px repeat(7,1fr)" }}>
+            {HOURS.map((hour) => (
+              <React.Fragment key={hour}>
+                <div style={{ fontSize: 10, color: "var(--text-secondary)", padding: "0 6px", height: CELL_H, display: "flex", alignItems: "flex-start", paddingTop: 3, justifyContent: "flex-end", borderTop: "0.5px solid var(--border-subtle)", userSelect: "none", flexShrink: 0 }}>
+                  {hour}:00
+                </div>
+                {days.map((day, di) => {
+                  const isDropTarget = dropTarget?.hour === hour && dropTarget?.di === di
+                  return (
+                    <div
+                      key={`${hour}-${di}`}
+                      onClick={() => { const d = new Date(day); d.setHours(hour); onCellClick(d) }}
+                      onDragOver={(e) => { e.preventDefault(); setDropTarget({ hour, di }) }}
+                      onDragLeave={() => setDropTarget(null)}
+                      onDrop={(e) => handleDrop(e, day, hour)}
+                      style={{
+                        borderLeft: "0.5px solid var(--border-subtle)", borderTop: "0.5px solid var(--border-subtle)",
+                        height: CELL_H, cursor: "pointer", position: "relative", flexShrink: 0,
+                        background: isDropTarget ? "#1FA97A10" : "transparent", transition: "background 0.1s",
+                      }}
+                    >
+                      {isDropTarget && <div style={{ position: "absolute", inset: 1, borderRadius: 4, border: "1.5px dashed #1FA97A", pointerEvents: "none" }} />}
+                    </div>
+                  )
+                })}
+              </React.Fragment>
+            ))}
+          </div>
+
+          {/* Now line — absolutely over the grid */}
           {days.some((d) => isSameDay(d, today)) && nowMins >= GRID_START && (
             <div style={{ position: "absolute", left: 52, right: 0, top: nowTop, height: 1, background: "#EF4444", zIndex: 10, pointerEvents: "none" }}>
               <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#EF4444", position: "absolute", left: -4, top: -3.5 }} />
             </div>
           )}
 
-          {/* Hour rows (click targets + visual lines) */}
-          {HOURS.map((hour) => (
-            <React.Fragment key={hour}>
-              <div style={{ fontSize: 10, color: "var(--text-secondary)", padding: "0 6px", height: CELL_H, display: "flex", alignItems: "flex-start", paddingTop: 4, justifyContent: "flex-end", borderTop: "0.5px solid var(--border-subtle)", userSelect: "none" }}>
-                {hour}:00
+          {/* Task overlay — absolutely positioned, one column per day */}
+          <div style={{
+            position: "absolute", top: 0, left: 52, right: 0,
+            height: HOURS.length * CELL_H,
+            display: "grid", gridTemplateColumns: "repeat(7,1fr)",
+            pointerEvents: "none", zIndex: 2,
+          }}>
+            {days.map((day, di) => (
+              <div key={di} style={{ position: "relative", pointerEvents: "none" }}>
+                {timedTasks(day).map((task) => {
+                  const pos = taskPos(task)
+                  if (!pos) return null
+                  return (
+                    <WeekTaskBlock
+                      key={task.id}
+                      task={task}
+                      top={pos.top}
+                      height={pos.height}
+                      onDragStart={handleDragStart}
+                      onResizeEnd={(taskId, newEndAt) => resizeMutation.mutate({ taskId, newEndAt })}
+                      onClick={onTaskClick}
+                    />
+                  )
+                })}
               </div>
-              {days.map((day, di) => {
-                const isDropTarget = dropTarget?.hour === hour && dropTarget?.di === di
-                return (
-                  <div
-                    key={`${hour}-${di}`}
-                    onClick={() => { const d = new Date(day); d.setHours(hour); onCellClick(d) }}
-                    onDragOver={(e) => { e.preventDefault(); setDropTarget({ hour, di }) }}
-                    onDragLeave={() => setDropTarget(null)}
-                    onDrop={(e) => handleDrop(e, day, hour)}
-                    style={{
-                      borderLeft: "0.5px solid var(--border-subtle)", borderTop: "0.5px solid var(--border-subtle)",
-                      height: CELL_H, cursor: "pointer", position: "relative",
-                      background: isDropTarget ? "#1FA97A10" : "transparent", transition: "background 0.1s",
-                    }}
-                  >
-                    {isDropTarget && <div style={{ position: "absolute", inset: 1, borderRadius: 4, border: "1.5px dashed #1FA97A", pointerEvents: "none" }} />}
-                  </div>
-                )
-              })}
-            </React.Fragment>
-          ))}
-
-          {/* Task overlay — one per day column, spans all rows */}
-          {days.map((day, di) => (
-            <div
-              key={`overlay-${di}`}
-              style={{
-                gridColumn: di + 2,
-                gridRow: `1 / ${HOURS.length + 1}`,
-                position: "relative",
-                height: HOURS.length * CELL_H,
-                pointerEvents: "none",
-                zIndex: 2,
-              }}
-            >
-              {timedTasks(day).map((task) => {
-                const pos = taskPos(task)
-                if (!pos) return null
-                return (
-                  <WeekTaskBlock
-                    key={task.id}
-                    task={task}
-                    top={pos.top}
-                    height={pos.height}
-                    onDragStart={handleDragStart}
-                    onResizeEnd={(taskId, newEndAt) => resizeMutation.mutate({ taskId, newEndAt })}
-                    onClick={onTaskClick}
-                  />
-                )
-              })}
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>

@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { X, Loader2, CheckSquare, ChevronDown } from "lucide-react"
+import { X, Loader2, CheckSquare, ChevronDown, Trash2 } from "lucide-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
 import { Dialog, DialogContent, DialogClose, DialogTitle } from "@/components/ui/dialog"
 import type { TaskPriority, TaskStatus, DashboardTask } from "./types"
 import { PRIORITY_CONFIG } from "./types"
@@ -135,9 +136,39 @@ export function NewTaskModal({ open, onClose, defaultPriority = "MEDIUM", defaul
   const entityOptions: EntityOption[] = entityType === "CLIENT" ? clients : entityType === "LEAD" ? leads : []
   const isFetchingEntities = entityType === "CLIENT" ? fetchingClients : fetchingLeads
 
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+
   const handleClose = () => {
     setTitle(""); setDescription(""); setEntityType(""); setEntityId("")
+    setShowDeleteConfirm(false)
     onClose()
+  }
+
+  const handleDelete = async () => {
+    if (!editTask) return
+    setIsDeleting(true)
+    try {
+      const res = await fetch(`/api/tasks/${editTask.id}`, { method: "DELETE" })
+      if (res.ok) {
+        toast.success("Tarea eliminada")
+        qc.setQueriesData({ queryKey: ["tasks"] }, (old: unknown) => {
+          if (!Array.isArray(old)) return old
+          return old.filter((t: { id: string }) => t.id !== editTask.id)
+        })
+        qc.invalidateQueries({ queryKey: ["tasks"] })
+        qc.invalidateQueries({ queryKey: ["tasks-kpis"] })
+        handleClose()
+      } else {
+        toast.error("Error al eliminar la tarea")
+        setShowDeleteConfirm(false)
+      }
+    } catch {
+      toast.error("Error de conexión")
+      setShowDeleteConfirm(false)
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
   const createMutation = useMutation({
@@ -292,30 +323,52 @@ export function NewTaskModal({ open, onClose, defaultPriority = "MEDIUM", defaul
           </div>
         </div>
 
-        {/* Footer */}
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, padding: "16px 24px", borderTop: "1px solid var(--border-subtle)", background: "var(--bg-surface)" }}>
-          <button type="button" onClick={handleClose} style={{
-            padding: "9px 18px", background: "transparent", border: "1px solid var(--border-subtle)",
-            borderRadius: 8, fontSize: 13, fontWeight: 500, color: "var(--text-secondary)", cursor: "pointer",
-          }}>
-            Cancelar
-          </button>
-          <button
-            type="button"
-            onClick={() => createMutation.mutate()}
-            disabled={!title.trim() || createMutation.isPending}
-            style={{
-              display: "inline-flex", alignItems: "center", gap: 6,
-              padding: "9px 22px", background: "#1FA97A", border: "none",
-              borderRadius: 8, fontSize: 13, fontWeight: 600, color: "#fff", cursor: "pointer",
-              opacity: !title.trim() || createMutation.isPending ? 0.45 : 1,
-              transition: "opacity 0.12s",
-            }}
-          >
-            {createMutation.isPending && <Loader2 style={{ width: 14, height: 14 }} className="animate-spin" />}
-            {editTask ? "Guardar cambios" : "Crear tarea"}
-          </button>
-        </div>
+        {/* Footer — confirmación de borrado */}
+        {showDeleteConfirm ? (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px", borderTop: "1px solid #FECACA", background: "#FFF5F5" }}>
+            <div>
+              <p style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)", margin: 0 }}>¿Eliminar esta tarea?</p>
+              <p style={{ fontSize: 11, color: "var(--text-secondary)", margin: "2px 0 0" }}>Esta acción no se puede deshacer.</p>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <button type="button" onClick={() => setShowDeleteConfirm(false)} style={{ padding: "8px 16px", background: "transparent", border: "1px solid var(--border-subtle)", borderRadius: 8, fontSize: 13, color: "var(--text-secondary)", cursor: "pointer" }}>
+                Cancelar
+              </button>
+              <button type="button" onClick={handleDelete} disabled={isDeleting}
+                style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "#DC2626", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, color: "#fff", cursor: "pointer", opacity: isDeleting ? 0.5 : 1 }}>
+                {isDeleting ? <Loader2 style={{ width: 13, height: 13 }} className="animate-spin" /> : <Trash2 style={{ width: 13, height: 13 }} />}
+                Sí, eliminar
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px", borderTop: "1px solid var(--border-subtle)", background: "var(--bg-surface)" }}>
+            {/* Izquierda — eliminar (solo en modo edición) */}
+            <div>
+              {editTask && (
+                <button type="button" onClick={() => setShowDeleteConfirm(true)} disabled={isDeleting}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 14px", background: "transparent", border: "1px solid transparent", borderRadius: 8, fontSize: 13, color: "#DC2626", cursor: "pointer" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "#FFF5F5"; (e.currentTarget as HTMLButtonElement).style.borderColor = "#FECACA" }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.borderColor = "transparent" }}
+                >
+                  <Trash2 style={{ width: 13, height: 13 }} />
+                  Eliminar tarea
+                </button>
+              )}
+            </div>
+            {/* Derecha — cancelar + guardar */}
+            <div style={{ display: "flex", gap: 8 }}>
+              <button type="button" onClick={handleClose} style={{ padding: "9px 18px", background: "transparent", border: "1px solid var(--border-subtle)", borderRadius: 8, fontSize: 13, fontWeight: 500, color: "var(--text-secondary)", cursor: "pointer" }}>
+                Cancelar
+              </button>
+              <button type="button" onClick={() => createMutation.mutate()} disabled={!title.trim() || createMutation.isPending}
+                style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "9px 22px", background: "#1FA97A", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, color: "#fff", cursor: "pointer", opacity: !title.trim() || createMutation.isPending ? 0.45 : 1, transition: "opacity 0.12s" }}>
+                {createMutation.isPending && <Loader2 style={{ width: 14, height: 14 }} className="animate-spin" />}
+                {editTask ? "Guardar cambios" : "Crear tarea"}
+              </button>
+            </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   )

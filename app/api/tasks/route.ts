@@ -10,6 +10,7 @@ import {
 } from "@/app/api/tasks/utils"
 import { recalculateClientStatus } from "@/modules/clients/actions"
 import { enqueueTaskSyncForAllProviders } from "@/lib/calendar-sync"
+import { syncTaskToGoogle } from "@/lib/google-calendar"
 
 /**
  * GET /api/tasks
@@ -144,6 +145,14 @@ export async function POST(request: NextRequest) {
  enqueueTaskSyncForAllProviders(task.id, userId, "CREATE").catch((err) =>
  console.error("[calendar-sync] enqueue create:", err)
  )
+ syncTaskToGoogle(userId, {
+   id: task.id,
+   title: task.title,
+   description: task.description,
+   dueDate: task.dueDate?.toISOString() ?? null,
+   startAt: task.startAt?.toISOString() ?? null,
+   endAt: task.endAt?.toISOString() ?? null,
+ }).catch((err) => console.error("[google-calendar] sync create:", err))
 
  return NextResponse.json(task, { status: 201 })
  } catch (error) {

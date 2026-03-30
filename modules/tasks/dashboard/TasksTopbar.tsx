@@ -1,7 +1,9 @@
 "use client"
 
+import { Suspense } from "react"
 import { Search, Plus, LayoutList, CalendarDays, Calendar } from "lucide-react"
 import type { ViewMode } from "./types"
+import { GoogleCalendarButton } from "./GoogleCalendarButton"
 
 interface TasksTopbarProps {
   view: ViewMode
@@ -62,6 +64,11 @@ export function TasksTopbar({ view, onViewChange, search, onSearchChange, onNewT
 
       {/* Spacer */}
       <div style={{ flex: 1 }} />
+
+      {/* Google Calendar */}
+      <Suspense fallback={null}>
+        <GoogleCalendarButton />
+      </Suspense>
 
       {/* Search */}
       <div style={{ position: "relative" }}>

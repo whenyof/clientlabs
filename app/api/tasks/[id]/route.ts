@@ -5,6 +5,7 @@ import type { TaskPriorityParam, TaskStatusParam } from "@/app/api/tasks/utils"
 import type { TaskType } from "@prisma/client"
 import { recalculateClientStatus } from "@/modules/clients/actions"
 import { enqueueTaskCalendarSync, enqueueTaskSyncForAllProviders } from "@/lib/calendar-sync"
+import { syncTaskToGoogle, deleteTaskFromGoogle } from "@/lib/google-calendar"
 
 /**
  * GET /api/tasks/[id]
@@ -141,6 +142,14 @@ export async function PATCH(
  enqueueTaskSyncForAllProviders(id, userId, "UPDATE").catch((err) =>
  console.error("[calendar-sync] enqueue update:", err)
  )
+ syncTaskToGoogle(userId, {
+   id: task.id,
+   title: task.title,
+   description: task.description,
+   dueDate: task.dueDate?.toISOString() ?? null,
+   startAt: task.startAt?.toISOString() ?? null,
+   endAt: task.endAt?.toISOString() ?? null,
+ }).catch((err) => console.error("[google-calendar] sync update:", err))
 
  return NextResponse.json(task)
  } catch (error) {
@@ -181,6 +190,10 @@ export async function DELETE(
  externalEventId: sync.externalEventId,
  }).catch((err) => console.error("[calendar-sync] enqueue delete:", err))
  }
+
+ deleteTaskFromGoogle(userId, id).catch((err) =>
+ console.error("[google-calendar] delete:", err)
+ )
 
  await prisma.task.delete({ where: { id } })
 

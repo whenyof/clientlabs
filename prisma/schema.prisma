@@ -916,6 +916,20 @@ model User {
   adminLogs              AdminLog[]              @relation("AdminLogs")
   impersonatedBy         ImpersonationSession[]  @relation("ImpersonatedBy")
   impersonationTarget    ImpersonationSession[]  @relation("ImpersonationTarget")
+  calendarIntegration    CalendarIntegration?
+}
+
+model CalendarIntegration {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  provider     String   @default("google")
+  accessToken  String
+  refreshToken String
+  expiresAt    DateTime
+  calendarId   String   @default("primary")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model UserWorkingHours {

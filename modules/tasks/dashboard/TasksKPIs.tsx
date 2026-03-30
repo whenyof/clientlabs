@@ -10,7 +10,7 @@ const CARDS = [
     label: "PENDIENTES",
     Icon: Clock,
     color: "#3B82F6",
-    sub: (d: TasksKPIsData) => `${d.atRisk} de alta prioridad`,
+    sub: (d: TasksKPIsData) => `${d.urgent} urgentes`,
   },
   {
     key: "completed" as const,
@@ -20,11 +20,11 @@ const CARDS = [
     sub: (d: TasksKPIsData) => `${d.completionRate}% de completitud`,
   },
   {
-    key: "atRisk" as const,
-    label: "EN RIESGO",
+    key: "urgent" as const,
+    label: "URGENTES",
     Icon: AlertTriangle,
     color: "#EF4444",
-    sub: (_d: TasksKPIsData) => "Urgentes sin completar",
+    sub: (_d: TasksKPIsData) => "Sin completar hoy",
     alert: true,
   },
   {
@@ -58,7 +58,7 @@ export function TasksKPIs() {
   })
 
   const kpis: TasksKPIsData = data ?? {
-    pending: 0, completed: 0, atRisk: 0, completionRate: 0, overdue: 0,
+    pending: 0, completed: 0, urgent: 0, completionRate: 0, overdue: 0,
   }
 
   return (

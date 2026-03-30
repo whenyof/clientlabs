@@ -21,7 +21,7 @@ export interface DashboardTask {
 export interface TasksKPIsData {
   pending: number
   completed: number
-  atRisk: number
+  urgent: number
   completionRate: number
   overdue: number
 }

@@ -84,7 +84,7 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
     if (!session?.user?.id) return
     fetch("/api/tasks/kpis")
       .then((r) => r.json())
-      .then((d) => setUrgentCount(d?.atRisk ?? 0))
+      .then((d) => setUrgentCount(d?.urgent ?? 0))
       .catch(() => {})
   }, [session?.user?.id])
 

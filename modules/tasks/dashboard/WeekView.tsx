@@ -235,8 +235,8 @@ export function WeekView({ tasks, onTaskClick, onCellClick }: WeekViewProps) {
 
                 {/* Now line (only on today's column) */}
                 {isToday && nowMins >= GRID_START_MINS && nowMins < (GRID_START_H + HOURS.length) * 60 && (
-                  <div style={{ position: "absolute", left: 0, right: 0, top: nowTop, height: 1, background: "#EF4444", zIndex: 10, pointerEvents: "none" }}>
-                    {di === 0 && <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#EF4444", position: "absolute", left: -4, top: -3.5 }} />}
+                  <div style={{ position: "absolute", left: 0, right: 0, top: nowTop, height: 1.5, background: "#EF4444", zIndex: 20, pointerEvents: "none" }}>
+                    <div style={{ width: 9, height: 9, borderRadius: "50%", background: "#EF4444", position: "absolute", left: -4, top: -4 }} />
                   </div>
                 )}
               </div>

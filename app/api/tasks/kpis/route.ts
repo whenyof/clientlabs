@@ -12,7 +12,7 @@ export async function GET() {
     const now = new Date()
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
 
-    const [pending, completed, atRisk, total, overdue] = await Promise.all([
+    const [pending, completed, urgent, total, overdue] = await Promise.all([
       prisma.task.count({ where: { userId, status: "PENDING" } }),
       prisma.task.count({ where: { userId, status: "DONE" } }),
       prisma.task.count({ where: { userId, status: "PENDING", priority: "HIGH" } }),
@@ -24,7 +24,7 @@ export async function GET() {
 
     const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0
 
-    return NextResponse.json({ pending, completed, atRisk, completionRate, overdue })
+    return NextResponse.json({ pending, completed, urgent, completionRate, overdue })
   } catch (error) {
     console.error("[GET /api/tasks/kpis]:", error)
     return NextResponse.json({ error: "Failed to compute KPIs" }, { status: 500 })

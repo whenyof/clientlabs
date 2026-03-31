@@ -22,7 +22,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="albaran-${id}.pdf"`,
+        "Content-Disposition": `inline; filename="albaran-${id}.pdf"`,
       },
     })
   } catch (e) {

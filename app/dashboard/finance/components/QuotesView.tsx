@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react"
 import {
-  FileText, Send, CheckCircle, Receipt, Package,
-  Trash2, Plus, Search, RefreshCw
+  FileText, Send, CheckCircle, Receipt, Truck,
+  Trash2, Plus, Search, ClipboardList
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { NewQuoteModal } from "./NewQuoteModal"
@@ -66,15 +66,21 @@ function fmtDate(d: string) {
   return new Intl.DateTimeFormat("es-ES", { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(d))
 }
 
-type Props = { clientId?: string; onNavigateToInvoices?: () => void }
+type Props = {
+  clientId?: string
+  onNavigateToInvoices?: () => void
+  onNavigateToPurchaseOrders?: () => void
+  onNavigateToDelivery?: () => void
+}
 
-export function QuotesView({ clientId, onNavigateToInvoices }: Props) {
+export function QuotesView({ clientId, onNavigateToInvoices, onNavigateToPurchaseOrders, onNavigateToDelivery }: Props) {
   const [quotes, setQuotes] = useState<Quote[]>([])
   const [loading, setLoading] = useState(true)
   const [activeFilter, setActiveFilter] = useState("")
   const [search, setSearch] = useState("")
   const [createOpen, setCreateOpen] = useState(false)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
+  const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const fetchQuotes = useCallback(async () => {
     setLoading(true)
@@ -93,14 +99,24 @@ export function QuotesView({ clientId, onNavigateToInvoices }: Props) {
 
   useEffect(() => { fetchQuotes() }, [fetchQuotes])
 
-  const action = async (quoteId: string, endpoint: string) => {
+  const action = async (quoteId: string, endpoint: string, onSuccess?: () => void) => {
     setActionLoading(quoteId + endpoint)
     try {
       const res = await fetch(`/api/quotes/${quoteId}/${endpoint}`, { method: "POST" })
       if (res.ok) {
-        if (endpoint === "convert-invoice") onNavigateToInvoices?.()
+        onSuccess?.()
         fetchQuotes()
       }
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  const convertToPO = async (quoteId: string) => {
+    setActionLoading(quoteId + "po")
+    try {
+      const res = await fetch(`/api/quotes/${quoteId}/convert-purchase-order`, { method: "POST" })
+      if (res.ok) { onNavigateToPurchaseOrders?.(); fetchQuotes() }
     } finally {
       setActionLoading(null)
     }
@@ -190,78 +206,118 @@ export function QuotesView({ clientId, onNavigateToInvoices }: Props) {
               </thead>
               <tbody>
                 {quotes.map((q) => (
-                  <tr key={q.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
-                    <td className="py-3.5 px-4 font-mono text-[12px] text-slate-700 font-medium">{q.number}</td>
-                    <td className="py-3.5 px-4 text-[13px] text-slate-900">{q.client.name ?? q.client.email ?? "—"}</td>
-                    <td className="py-3.5 px-4 text-[12px] text-slate-500">{fmtDate(q.issueDate)}</td>
-                    <td className="py-3.5 px-4 text-[12px] text-slate-500">{fmtDate(q.validUntil)}</td>
-                    <td className="py-3.5 px-4 text-[13px] font-semibold text-slate-900 text-right">{fmt(q.total)}</td>
-                    <td className="py-3.5 px-4">
-                      <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium", STATUS_BADGE[q.status])}>
-                        {STATUS_LABEL[q.status]}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-0.5">
-                        <button
-                          onClick={() => window.open(`/api/quotes/${q.id}/pdf`, "_blank")}
-                          className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
-                          title="Ver PDF"
-                        >
-                          <FileText className="h-3.5 w-3.5" />
-                        </button>
-                        {q.status === "DRAFT" && (
+                  <>
+                    <tr
+                      key={q.id}
+                      className={cn(
+                        "border-b border-slate-100 hover:bg-slate-50/50 transition-colors",
+                        expandedId === q.id && "bg-slate-50/50"
+                      )}
+                    >
+                      <td className="py-3.5 px-4 font-mono text-[12px] text-slate-700 font-medium">{q.number}</td>
+                      <td className="py-3.5 px-4 text-[13px] text-slate-900">{q.client.name ?? q.client.email ?? "—"}</td>
+                      <td className="py-3.5 px-4 text-[12px] text-slate-500">{fmtDate(q.issueDate)}</td>
+                      <td className="py-3.5 px-4 text-[12px] text-slate-500">{fmtDate(q.validUntil)}</td>
+                      <td className="py-3.5 px-4 text-[13px] font-semibold text-slate-900 text-right tabular-nums">{fmt(q.total)}</td>
+                      <td className="py-3.5 px-4">
+                        <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium", STATUS_BADGE[q.status])}>
+                          {STATUS_LABEL[q.status]}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-0.5">
                           <button
-                            onClick={() => action(q.id, "send")}
-                            disabled={actionLoading === q.id + "send"}
-                            className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors disabled:opacity-50"
-                            title="Enviar"
+                            onClick={() => window.open(`/api/quotes/${q.id}/pdf`, "_blank")}
+                            className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+                            title="Ver PDF"
                           >
-                            <Send className="h-3.5 w-3.5" />
+                            <FileText className="h-3.5 w-3.5" />
                           </button>
-                        )}
-                        {q.status === "SENT" && (
-                          <button
-                            onClick={() => action(q.id, "accept")}
-                            disabled={actionLoading === q.id + "accept"}
-                            className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-[#1FA97A] transition-colors disabled:opacity-50"
-                            title="Aceptar"
-                          >
-                            <CheckCircle className="h-3.5 w-3.5" />
-                          </button>
-                        )}
-                        {q.status === "ACCEPTED" && (
-                          <>
+                          {q.status === "DRAFT" && (
                             <button
-                              onClick={() => action(q.id, "convert-invoice")}
-                              disabled={actionLoading === q.id + "convert-invoice"}
-                              className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-blue-600 transition-colors disabled:opacity-50"
-                              title="Convertir a Factura"
+                              onClick={() => action(q.id, "send")}
+                              disabled={actionLoading === q.id + "send"}
+                              className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors disabled:opacity-50"
+                              title="Enviar"
                             >
-                              <Receipt className="h-3.5 w-3.5" />
+                              <Send className="h-3.5 w-3.5" />
                             </button>
+                          )}
+                          {q.status === "SENT" && (
                             <button
-                              onClick={() => action(q.id, "convert-delivery")}
-                              disabled={actionLoading === q.id + "convert-delivery"}
-                              className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-purple-600 transition-colors disabled:opacity-50"
-                              title="Convertir a Albarán"
+                              onClick={() => action(q.id, "accept")}
+                              disabled={actionLoading === q.id + "accept"}
+                              className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-[#1FA97A] transition-colors disabled:opacity-50"
+                              title="Marcar aceptado"
                             >
-                              <Package className="h-3.5 w-3.5" />
+                              <CheckCircle className="h-3.5 w-3.5" />
                             </button>
-                          </>
-                        )}
-                        {q.status === "DRAFT" && (
-                          <button
-                            onClick={() => deleteQuote(q.id)}
-                            className="p-1.5 rounded-md hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors"
-                            title="Eliminar"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
+                          )}
+                          {q.status === "ACCEPTED" && (
+                            <button
+                              onClick={() => setExpandedId(expandedId === q.id ? null : q.id)}
+                              className={cn(
+                                "px-2 py-1 rounded-md text-[11px] font-medium transition-colors",
+                                expandedId === q.id
+                                  ? "bg-[#1FA97A] text-white"
+                                  : "bg-[#E1F5EE] text-[#0F6E56] hover:bg-[#1FA97A] hover:text-white"
+                              )}
+                            >
+                              Generar documento
+                            </button>
+                          )}
+                          {q.status === "DRAFT" && (
+                            <button
+                              onClick={() => deleteQuote(q.id)}
+                              className="p-1.5 rounded-md hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors"
+                              title="Eliminar"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+
+                    {/* Expanded actions panel for ACCEPTED quotes */}
+                    {expandedId === q.id && q.status === "ACCEPTED" && (
+                      <tr key={q.id + "-expand"} className="border-b border-slate-100">
+                        <td colSpan={7} className="px-4 pb-4 pt-1">
+                          <div className="border border-slate-200 rounded-xl p-4 bg-[#F8FAFB]">
+                            <p className="text-[11px] font-medium text-slate-500 mb-3 uppercase tracking-wider">
+                              Presupuesto aceptado — generar documento
+                            </p>
+                            <div className="flex gap-2 flex-wrap">
+                              <button
+                                onClick={() => action(q.id, "convert-invoice", onNavigateToInvoices)}
+                                disabled={actionLoading === q.id + "convert-invoice"}
+                                className="flex items-center gap-2 px-4 py-2 bg-[#1FA97A] text-white rounded-lg text-[12px] font-medium hover:bg-[#178f68] disabled:opacity-50 transition-colors"
+                              >
+                                <Receipt className="h-3.5 w-3.5" />
+                                Generar Factura
+                              </button>
+                              <button
+                                onClick={() => convertToPO(q.id)}
+                                disabled={actionLoading === q.id + "po"}
+                                className="flex items-center gap-2 px-4 py-2 border border-slate-200 text-slate-700 rounded-lg text-[12px] font-medium hover:bg-white disabled:opacity-50 transition-colors"
+                              >
+                                <ClipboardList className="h-3.5 w-3.5" />
+                                Generar Hoja de Pedido
+                              </button>
+                              <button
+                                onClick={() => action(q.id, "convert-delivery", onNavigateToDelivery)}
+                                disabled={actionLoading === q.id + "convert-delivery"}
+                                className="flex items-center gap-2 px-4 py-2 border border-slate-200 text-slate-700 rounded-lg text-[12px] font-medium hover:bg-white disabled:opacity-50 transition-colors"
+                              >
+                                <Truck className="h-3.5 w-3.5" />
+                                Generar Albarán
+                              </button>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </>
                 ))}
               </tbody>
             </table>

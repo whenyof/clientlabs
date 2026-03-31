@@ -387,6 +387,7 @@ model Client {
   transactions        Transaction[]
   quotes              Quote[]
   deliveryNotes       DeliveryNote[]
+  purchaseOrders      PurchaseOrder[]
 
   @@index([createdAt])
   @@index([email])
@@ -922,6 +923,7 @@ model User {
   products               Product[]
   quotes                 Quote[]
   deliveryNotes          DeliveryNote[]
+  purchaseOrders         PurchaseOrder[]
 }
 
 model CalendarIntegration {
@@ -2450,8 +2452,9 @@ model Product {
   updatedAt   DateTime @updatedAt
   deletedAt   DateTime?
   user        User     @relation(fields: [userId], references: [id])
-  quoteItems  QuoteItem[]
+  quoteItems        QuoteItem[]
   deliveryNoteItems DeliveryNoteItem[]
+  purchaseOrderItems PurchaseOrderItem[]
 
   @@index([userId])
   @@index([active])
@@ -2482,6 +2485,7 @@ model Quote {
   client                    Client      @relation(fields: [clientId], references: [id])
   items                     QuoteItem[]
   deliveryNote              DeliveryNote?
+  purchaseOrder             PurchaseOrder?
 
   @@index([userId])
   @@index([clientId])
@@ -2545,4 +2549,60 @@ model DeliveryNoteItem {
 
   @@index([deliveryNoteId])
   @@map("delivery_note_items")
+}
+
+// ─── Purchase Orders ─────────────────────────────────────────────────────────
+
+enum PurchaseOrderStatus {
+  DRAFT
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model PurchaseOrder {
+  id                        String              @id @default(cuid())
+  userId                    String
+  clientId                  String
+  quoteId                   String?             @unique
+  number                    String
+  series                    String              @default("HP")
+  status                    PurchaseOrderStatus @default(DRAFT)
+  issueDate                 DateTime            @default(now())
+  subtotal                  Float               @default(0)
+  taxTotal                  Float               @default(0)
+  total                     Float               @default(0)
+  notes                     String?
+  pdfUrl                    String?
+  convertedToDeliveryNoteId String?
+  convertedToInvoiceId      String?
+  createdAt                 DateTime            @default(now())
+  updatedAt                 DateTime            @updatedAt
+  deletedAt                 DateTime?
+  user                      User                @relation(fields: [userId], references: [id])
+  client                    Client              @relation(fields: [clientId], references: [id])
+  quote                     Quote?              @relation(fields: [quoteId], references: [id])
+  items                     PurchaseOrderItem[]
+
+  @@index([userId])
+  @@index([clientId])
+  @@index([status])
+  @@map("purchase_orders")
+}
+
+model PurchaseOrderItem {
+  id              String        @id @default(cuid())
+  purchaseOrderId String
+  productId       String?
+  description     String
+  quantity        Float         @default(1)
+  unitPrice       Float
+  taxRate         Float         @default(21)
+  subtotal        Float
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  product         Product?      @relation(fields: [productId], references: [id])
+
+  @@index([purchaseOrderId])
+  @@map("purchase_order_items")
 }

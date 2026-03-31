@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { generateQuotePDF } from "@/lib/pdf/quote-generator"
+import { generatePurchaseOrderPDF } from "@/lib/pdf/purchase-order-generator"
 import { readFile } from "fs/promises"
 import path from "path"
 
@@ -12,7 +12,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const regenerate = req.nextUrl.searchParams.get("regenerate") === "1"
 
   try {
-    const result = await generateQuotePDF(id, session.user.id, { forceRegenerate: regenerate })
+    const result = await generatePurchaseOrderPDF(id, session.user.id, { forceRegenerate: regenerate })
     if (!result) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
     const filePath = path.join(process.cwd(), result.url.replace(/^\//, "").split("/").join(path.sep))
@@ -22,11 +22,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `inline; filename="presupuesto-${id}.pdf"`,
+        "Content-Disposition": `attachment; filename="hoja-pedido-${id}.pdf"`,
       },
     })
   } catch (e) {
-    console.error("Quote PDF error:", e)
+    console.error("Purchase order PDF error:", e)
     return NextResponse.json({ error: "Failed to generate PDF", details: String(e) }, { status: 500 })
   }
 }

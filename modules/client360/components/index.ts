@@ -13,6 +13,7 @@ export { ClientFinancialRiskCard } from "./ClientFinancialRiskCard"
 export { ClientProfitabilityCard } from "./ClientProfitabilityCard"
 export { ClientTimeline } from "./ClientTimeline"
 export { ClientQuickActions } from "./ClientQuickActions"
+export { ClientDocumentsList } from "./ClientDocumentsList"
 
 
 

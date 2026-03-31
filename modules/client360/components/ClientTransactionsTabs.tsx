@@ -7,8 +7,9 @@ import type { ClientPaymentsData } from "../services/getClientPayments"
 import { ClientInvoiceList } from "./ClientInvoiceList"
 import { ClientSalesList } from "./ClientSalesList"
 import { ClientPaymentsList } from "./ClientPaymentsList"
+import { ClientDocumentsList } from "./ClientDocumentsList"
 
-type TabId = "ventas" | "facturas" | "pagos"
+type TabId = "ventas" | "facturas" | "pagos" | "documentos"
 
 interface ClientTransactionsTabsProps {
   clientId: string
@@ -26,9 +27,10 @@ export function ClientTransactionsTabs({
   const [activeTab, setActiveTab] = useState<TabId>("ventas")
 
   const TABS: { id: TabId; label: string; count: number }[] = [
-    { id: "ventas",   label: "Ventas",   count: salesData.sales.length    },
-    { id: "facturas", label: "Facturas", count: invoices.length           },
-    { id: "pagos",    label: "Pagos",    count: paymentsData.payments.length },
+    { id: "ventas",      label: "Ventas",      count: salesData.sales.length       },
+    { id: "facturas",    label: "Facturas",    count: invoices.length              },
+    { id: "pagos",       label: "Pagos",       count: paymentsData.payments.length },
+    { id: "documentos",  label: "Documentos",  count: 0                            },
   ]
 
   return (
@@ -77,6 +79,9 @@ export function ClientTransactionsTabs({
         )}
         {activeTab === "pagos" && (
           <ClientPaymentsList payments={paymentsData.payments} kpis={paymentsData.kpis} />
+        )}
+        {activeTab === "documentos" && (
+          <ClientDocumentsList clientId={clientId} />
         )}
       </div>
     </div>

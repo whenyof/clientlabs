@@ -4,14 +4,18 @@ import { useState, useEffect } from "react"
 import { ChevronDown, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { QuotesView } from "./QuotesView"
+import { PurchaseOrdersView } from "./PurchaseOrdersView"
 import { DeliveryNotesView } from "./DeliveryNotesView"
+import { ClientInvoicesView } from "./ClientInvoicesView"
 
 type Client = { id: string; name: string | null; email?: string | null }
-type DocTab = "presupuestos" | "albaranes"
+type DocTab = "presupuestos" | "pedidos" | "albaranes" | "facturas"
 
 const DOC_TABS: { id: DocTab; label: string }[] = [
   { id: "presupuestos", label: "Presupuestos" },
+  { id: "pedidos", label: "Hojas de pedido" },
   { id: "albaranes", label: "Albaranes" },
+  { id: "facturas", label: "Facturas" },
 ]
 
 type Props = {
@@ -40,6 +44,8 @@ export function DocumentsView({ billingNode, onNavigateToInvoices }: Props) {
   )
 
   const clearClient = () => { setClientId(""); setClientSearch("") }
+
+  const handleTabChange = (tab: DocTab) => setActiveTab(tab)
 
   return (
     <div className="space-y-5">
@@ -119,7 +125,7 @@ export function DocumentsView({ billingNode, onNavigateToInvoices }: Props) {
             <button
               key={tab.id}
               type="button"
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => handleTabChange(tab.id)}
               className={cn(
                 "h-8 px-4 rounded-lg text-[13px] font-medium transition-colors",
                 activeTab === tab.id
@@ -138,6 +144,15 @@ export function DocumentsView({ billingNode, onNavigateToInvoices }: Props) {
         <QuotesView
           clientId={clientId || undefined}
           onNavigateToInvoices={onNavigateToInvoices}
+          onNavigateToPurchaseOrders={() => handleTabChange("pedidos")}
+          onNavigateToDelivery={() => handleTabChange("albaranes")}
+        />
+      )}
+      {activeTab === "pedidos" && (
+        <PurchaseOrdersView
+          clientId={clientId || undefined}
+          onNavigateToInvoices={onNavigateToInvoices}
+          onNavigateToDelivery={() => handleTabChange("albaranes")}
         />
       )}
       {activeTab === "albaranes" && (
@@ -145,6 +160,9 @@ export function DocumentsView({ billingNode, onNavigateToInvoices }: Props) {
           clientId={clientId || undefined}
           onNavigateToInvoices={onNavigateToInvoices}
         />
+      )}
+      {activeTab === "facturas" && (
+        <ClientInvoicesView clientId={clientId || undefined} />
       )}
     </div>
   )

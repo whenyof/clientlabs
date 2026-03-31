@@ -11,12 +11,19 @@ import { getToken } from "next-auth/jwt"
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl
 
+  // Redirect root to whitelist landing
+  if (pathname === "/") {
+    return NextResponse.redirect(new URL("/whitelist", req.url))
+  }
+
   if (
-    pathname === "/" ||
     pathname.startsWith("/scan") ||
     pathname.startsWith("/auth") ||
     pathname.startsWith("/register") ||
-    pathname.startsWith("/api/auth")
+    pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/whitelist") ||
+    pathname.startsWith("/preview") ||
+    pathname.startsWith("/api/waitlist")
   ) {
     const res = NextResponse.next()
     if (pathname.startsWith("/scan")) {
@@ -45,5 +52,5 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/dashboard/:path*", "/onboarding/:path*", "/scan/:path*"],
+  matcher: ["/", "/admin/:path*", "/dashboard/:path*", "/onboarding/:path*", "/scan/:path*"],
 }

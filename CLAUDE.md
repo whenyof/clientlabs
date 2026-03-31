@@ -33,6 +33,7 @@
 - No usar librerías nuevas sin avisar
 - No refactorizar código no pedido
 - No asumir cómo está implementado algo sin verificar
+- **NUNCA usar emojis** en ningún componente, página, dato ni texto de UI — ni como iconos, ni como decoración, ni en data arrays. Usar siempre iconos SVG (Lucide React ya instalado) o elementos CSS puros.
 
 ---
 

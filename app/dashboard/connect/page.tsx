@@ -1,233 +1,513 @@
 "use client"
+
+import { useEffect, useRef, useState } from "react"
+import { useRouter } from "next/navigation"
 import { getBaseUrl } from "@/lib/api/baseUrl"
-
-
-import React, { useState, useEffect } from "react"
-import { GlobeAltIcon, ChatBubbleOvalLeftEllipsisIcon } from "@heroicons/react/24/outline"
-import { ShieldCheckIcon } from "@heroicons/react/24/solid"
-// Using simple SVG for Facebook/Meta to avoid adding extra libraries if missing
-const MetaIcon = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
-        <path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12c0-5.523-4.477-10-10-10z" />
-    </svg>
-)
-
-import { WebConnectDialog } from "@/modules/connect/components/WebConnectDialog"
-import { IntegrationModal } from "@/app/dashboard/integrations/components/IntegrationModal"
-import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import {
+  Globe,
+  MessageCircle,
+  Mail,
+  Calendar,
+  Zap,
+  CreditCard,
+  Layers,
+  Search,
+  X,
+  Key,
+  Webhook,
+  ExternalLink,
+  CheckCircle2,
+  AlertCircle,
+  Clock,
+  Copy,
+  ChevronRight,
+  ShieldCheck,
+  Link2,
+} from "lucide-react"
+import {
+  INTEGRATIONS,
+  CATEGORIES,
+  type IntegrationDef,
+  type CategoryId,
+} from "./integrations"
 
-interface IntegrationsStatus {
-    web: { connected: boolean; lastSync: Date | null }
-    whatsapp: { connected: boolean }
-    facebook: { connected: boolean }
-    items?: any[]
+// ─── Category Icons ───────────────────────────────────────────────────────────
+const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+  all: <Layers className="w-3.5 h-3.5" />,
+  leads: <Globe className="w-3.5 h-3.5" />,
+  email: <Mail className="w-3.5 h-3.5" />,
+  calendar: <Calendar className="w-3.5 h-3.5" />,
+  automation: <Zap className="w-3.5 h-3.5" />,
+  payments: <CreditCard className="w-3.5 h-3.5" />,
+  productivity: <MessageCircle className="w-3.5 h-3.5" />,
 }
 
-function IntegrationCard({
-    type,
-    title,
-    description,
-    icon: Icon,
-    status,
-    onConnect,
-    onManage,
+// ─── Connect Modal ────────────────────────────────────────────────────────────
+function ConnectModal({
+  integration,
+  onClose,
+  onConnected,
 }: {
-    type: string
-    title: string
-    description: string
-    icon: React.ElementType
-    status: "connected" | "disconnected" | "error"
-    onConnect: () => void
-    onManage: () => void
+  integration: IntegrationDef
+  onClose: () => void
+  onConnected: (id: string) => void
 }) {
-    return (
-        <div className="bg-white border border-slate-200 rounded-xl p-6 hover:shadow-sm transition flex flex-col justify-between min-h-[160px]">
-            <div className="flex items-start gap-4">
-                <div className="h-10 w-10 min-w-[40px] rounded-lg bg-emerald-50 flex items-center justify-center">
-                    <Icon className="h-5 w-5 text-emerald-600" />
-                </div>
+  const [apiKey, setApiKey] = useState("")
+  const [loading, setLoading] = useState(false)
+  const overlayRef = useRef<HTMLDivElement>(null)
 
-                <div>
-                    <h3 className="text-base font-semibold text-[#0B1F2A]">{title}</h3>
-                    <p className="text-sm text-slate-500 mt-1 line-clamp-2">{description}</p>
-                </div>
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    if (e.target === overlayRef.current) onClose()
+  }
+
+  const handleConnect = async () => {
+    if (integration.connectType === "apikey" && !apiKey.trim()) {
+      toast.error("Introduce tu API Key para continuar.")
+      return
+    }
+    setLoading(true)
+    try {
+      const res = await fetch("/api/integrations/connect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: integration.category,
+          provider: integration.id,
+          config: apiKey ? { apiKey } : {},
+        }),
+      })
+      const data = await res.json()
+      if (res.ok && data.success) {
+        toast.success(`${integration.name} conectado correctamente.`)
+        onConnected(integration.id)
+        onClose()
+      } else {
+        toast.error(data.error ?? "Error al conectar.")
+      }
+    } catch {
+      toast.error("Error de red. Inténtalo de nuevo.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const webhookUrl = `${getBaseUrl()}/api/webhooks/ingest/${integration.id}`
+
+  return (
+    <div
+      ref={overlayRef}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm"
+      onClick={handleOverlayClick}
+    >
+      <div className="bg-white rounded-xl border border-[var(--color-border-secondary)] shadow-sm w-full max-w-md">
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#E2E8ED]">
+          <div className="flex items-center gap-3">
+            <div className={`w-9 h-9 rounded-lg ${integration.color} flex items-center justify-center`}>
+              <span className={`text-xs font-bold ${integration.textColor}`}>
+                {integration.initials}
+              </span>
             </div>
-
-            <div className="mt-6 flex items-center justify-between">
-                {status === "connected" && (
-                    <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded">
-                        Conectado
-                    </span>
-                )}
-                {status === "disconnected" && (
-                    <span className="text-xs text-slate-400">Sin conectar</span>
-                )}
-                {status === "error" && (
-                    <span className="text-xs font-medium text-amber-600 bg-amber-50 px-2 py-1 rounded">
-                        Requiere revisión
-                    </span>
-                )}
-
-                {status === "connected" ? (
-                    <button
-                        onClick={onManage}
-                        className="rounded-lg text-sm font-medium px-4 py-2 border border-slate-200 text-slate-700 hover:bg-slate-50 transition"
-                    >
-                        Gestionar
-                    </button>
-                ) : status === "error" ? (
-                    <button
-                        onClick={onManage}
-                        className="rounded-lg text-sm font-medium px-4 py-2 border border-slate-200 text-slate-700 hover:bg-slate-50 transition"
-                    >
-                        Revisar
-                    </button>
-                ) : (
-                    <button
-                        onClick={onConnect}
-                        className="rounded-lg text-sm font-medium px-4 py-2 bg-[#1FA97A] text-white hover:bg-[#178f68] transition"
-                    >
-                        Conectar
-                    </button>
-                )}
+            <div>
+              <p className="text-sm font-semibold text-[#0B1F2A]">{integration.name}</p>
+              <p className={`text-xs ${integration.textColor} font-medium`}>
+                {integration.connectType === "coming_soon"
+                  ? "Próximamente"
+                  : integration.connectType === "oauth"
+                  ? "OAuth 2.0"
+                  : integration.connectType === "apikey"
+                  ? "API Key"
+                  : integration.connectType === "webhook"
+                  ? "Webhook"
+                  : "SDK"}
+              </p>
             </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg hover:bg-[#F4F7F9] transition-colors"
+          >
+            <X className="w-4 h-4 text-[#5F7280]" />
+          </button>
         </div>
-    )
+
+        {/* Body */}
+        <div className="p-5 space-y-4">
+          {/* Benefit */}
+          <div className="rounded-lg bg-[#F4F7F9] border border-[#E2E8ED] p-3 flex gap-3">
+            <CheckCircle2 className="w-4 h-4 text-[#1FA97A] flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-[#374151] leading-relaxed">{integration.benefit}</p>
+          </div>
+
+          {/* Coming soon */}
+          {integration.connectType === "coming_soon" && (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 flex gap-3">
+              <Clock className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-amber-800">En desarrollo</p>
+                <p className="text-xs text-amber-700 mt-1">
+                  Esta integración llegará próximamente. Te avisaremos cuando esté disponible.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* OAuth */}
+          {integration.connectType === "oauth" && (
+            <div className="space-y-3">
+              <p className="text-xs text-[#5F7280]">
+                Serás redirigido a {integration.name} para autorizar el acceso. ClientLabs solo solicita los permisos estrictamente necesarios.
+              </p>
+              <div className="rounded-lg border border-[#E2E8ED] p-3 space-y-1.5">
+                <p className="text-xs font-medium text-[#0B1F2A]">Permisos solicitados</p>
+                <p className="text-xs text-[#5F7280]">Lectura de datos · Sincronización bidireccional · Webhooks</p>
+              </div>
+            </div>
+          )}
+
+          {/* API Key */}
+          {integration.connectType === "apikey" && (
+            <div className="space-y-3">
+              <p className="text-xs text-[#5F7280]">
+                Introduce tu API Key de {integration.name}. La encontrarás en la configuración de tu cuenta en {integration.name}.
+              </p>
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-[#374151]">API Key</label>
+                <div className="relative">
+                  <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#8FA6B2]" />
+                  <input
+                    type="password"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    placeholder="sk-xxxxxxxxxxxxxxxx"
+                    className="w-full pl-9 pr-4 py-2.5 text-sm rounded-lg border border-[#E2E8ED] bg-white text-[#0B1F2A] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#1FA97A] transition-colors"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Webhook */}
+          {integration.connectType === "webhook" && (
+            <div className="space-y-3">
+              <p className="text-xs text-[#5F7280]">
+                Añade esta URL como webhook en la configuración de {integration.name}. ClientLabs recibirá los eventos en tiempo real.
+              </p>
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-[#374151]">Tu Webhook URL</label>
+                <div className="flex items-center gap-2 bg-[#F4F7F9] rounded-lg border border-[#E2E8ED] px-3 py-2.5">
+                  <Webhook className="w-3.5 h-3.5 text-[#8FA6B2] flex-shrink-0" />
+                  <code className="flex-1 text-xs text-[#0B1F2A] truncate font-mono">{webhookUrl}</code>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(webhookUrl)
+                      toast.success("URL copiada")
+                    }}
+                    className="flex-shrink-0 p-1 hover:bg-[#E2E8ED] rounded transition-colors"
+                  >
+                    <Copy className="w-3 h-3 text-[#5F7280]" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="px-5 pb-5 flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 py-2.5 text-sm font-medium text-[#5F7280] border border-[#E2E8ED] rounded-lg hover:bg-[#F4F7F9] transition-colors"
+          >
+            Cancelar
+          </button>
+          {integration.connectType !== "coming_soon" && (
+            <button
+              onClick={handleConnect}
+              disabled={loading}
+              className="flex-1 py-2.5 text-sm font-semibold text-white bg-[#1FA97A] hover:bg-[#178a64] rounded-lg transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+            >
+              {loading ? "Conectando..." : integration.connectType === "oauth" ? "Autorizar acceso" : "Conectar"}
+              {!loading && <ExternalLink className="w-3.5 h-3.5" />}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
 }
 
+// ─── Integration Card ─────────────────────────────────────────────────────────
+function IntegrationCard({
+  integration,
+  onAction,
+}: {
+  integration: IntegrationDef
+  onAction: (integration: IntegrationDef) => void
+}) {
+  const isConnected = integration.status === "connected"
+  const isComingSoon = integration.status === "coming_soon"
+  const isError = integration.status === "error"
+
+  return (
+    <div
+      className={`bg-white rounded-xl border transition-all flex flex-col gap-4 p-5 ${
+        isConnected
+          ? "border-[#1FA97A]/30"
+          : isError
+          ? "border-amber-200"
+          : "border-[#E2E8ED] hover:border-[#C8D6E0]"
+      }`}
+    >
+      {/* Top row */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start gap-3">
+          <div className={`w-10 h-10 rounded-lg ${integration.color} flex items-center justify-center flex-shrink-0`}>
+            <span className={`text-xs font-bold ${integration.textColor}`}>{integration.initials}</span>
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-[#0B1F2A] leading-tight">{integration.name}</p>
+            <p className="text-xs text-[#5F7280] mt-0.5 line-clamp-2 leading-relaxed">{integration.description}</p>
+          </div>
+        </div>
+
+        {/* Status badge */}
+        {isConnected && (
+          <span className="flex-shrink-0 inline-flex items-center gap-1 text-[10px] font-semibold text-[#1FA97A] bg-[#E8F5EF] px-2 py-0.5 rounded-full">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#1FA97A]" />
+            Activo
+          </span>
+        )}
+        {isError && (
+          <span className="flex-shrink-0 inline-flex items-center gap-1 text-[10px] font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+            <AlertCircle className="w-3 h-3" />
+            Error
+          </span>
+        )}
+        {isComingSoon && (
+          <span className="flex-shrink-0 text-[10px] font-semibold text-[#8FA6B2] bg-[#F4F7F9] px-2 py-0.5 rounded-full">
+            Próx.
+          </span>
+        )}
+      </div>
+
+      {/* Benefit line */}
+      <p className="text-[11px] text-[#8FA6B2] leading-relaxed border-t border-[#F4F7F9] pt-3">
+        {integration.benefit}
+      </p>
+
+      {/* Action */}
+      <div className="flex items-center justify-between pt-0.5">
+        <span className="text-[10px] uppercase tracking-widest text-[#C8D6E0] font-medium">
+          {integration.connectType === "oauth"
+            ? "OAuth"
+            : integration.connectType === "apikey"
+            ? "API Key"
+            : integration.connectType === "webhook"
+            ? "Webhook"
+            : integration.connectType === "web_sdk"
+            ? "SDK"
+            : "—"}
+        </span>
+        <button
+          onClick={() => onAction(integration)}
+          disabled={false}
+          className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors ${
+            isConnected
+              ? "text-[#5F7280] border border-[#E2E8ED] hover:bg-[#F4F7F9]"
+              : isComingSoon
+              ? "text-[#8FA6B2] border border-[#E2E8ED] cursor-default"
+              : "text-white bg-[#1FA97A] hover:bg-[#178a64]"
+          }`}
+        >
+          {isConnected ? "Gestionar" : isComingSoon ? "Ver" : "Conectar"}
+          <ChevronRight className="w-3 h-3" />
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 export default function ConnectPage() {
-    const [integrations, setIntegrations] = useState<IntegrationsStatus | null>(null)
-    const [loading, setLoading] = useState(true)
-    const [openWebModal, setOpenWebModal] = useState(false)
-    const [selectedIntegration, setSelectedIntegration] = useState<any>(null)
-    const [openIntegrationModal, setOpenIntegrationModal] = useState(false)
+  const router = useRouter()
+  const [activeCategory, setActiveCategory] = useState<CategoryId | "all">("all")
+  const [search, setSearch] = useState("")
+  const [integrations, setIntegrations] = useState<IntegrationDef[]>(INTEGRATIONS)
+  const [selectedIntegration, setSelectedIntegration] = useState<IntegrationDef | null>(null)
+  const [loadingStatus, setLoadingStatus] = useState(true)
 
-    // Fetch status on mount
-    useEffect(() => {
-        const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), 8000)
+  // Fetch real status for web / whatsapp / facebook
+  useEffect(() => {
+    const controller = new AbortController()
+    fetch(getBaseUrl() + "/api/integrations", { signal: controller.signal })
+      .then((r) => r.json())
+      .then((data) => {
+        setIntegrations((prev) =>
+          prev.map((int) => {
+            if (int.id === "web") return { ...int, status: data.web?.connected ? "connected" : "disconnected" }
+            if (int.id === "whatsapp") return { ...int, status: data.whatsapp?.connected ? "connected" : "disconnected" }
+            if (int.id === "facebook") return { ...int, status: data.facebook?.connected ? "connected" : "disconnected" }
+            // Check generic items
+            const item = data.items?.find(
+              (i: { provider: string; status: string }) =>
+                i.provider.toLowerCase() === int.id.toLowerCase()
+            )
+            if (item) return { ...int, status: item.status === "CONNECTED" ? "connected" : "disconnected" }
+            return int
+          })
+        )
+      })
+      .catch(() => {})
+      .finally(() => setLoadingStatus(false))
+    return () => controller.abort()
+  }, [])
 
-        fetch(getBaseUrl() + "/api/integrations", { signal: controller.signal })
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.web || data.whatsapp || data.facebook) {
-                    setIntegrations(data)
-                }
-            })
-            .catch((err) => {
-                console.error("Failed to load integrations status", err)
-                if (err.name !== 'AbortError') {
-                    toast.error("Error al cargar estados de conexión")
-                }
-            })
-            .finally(() => {
-                clearTimeout(timeoutId)
-                setLoading(false)
-            })
-            
-        return () => {
-            clearTimeout(timeoutId)
-            controller.abort()
-        }
-    }, [])
-
-    const handleConnect = (type: string) => {
-        if (type === "web") {
-            setOpenWebModal(true)
-        } else {
-            const config = type === "whatsapp" 
-                ? { name: "WhatsApp Business", description: "Conecta tu cuenta oficial de WhatsApp.", action: "connect", logo: "💬" }
-                : { name: "Facebook Lead Ads", description: "Sincroniza tus campañas de Meta.", action: "connect", logo: "📱" }
-            
-            setSelectedIntegration(config)
-            setOpenIntegrationModal(true)
-            toast.info(`Iniciando conexión con ${config.name}`)
-        }
+  const handleAction = (integration: IntegrationDef) => {
+    if (integration.id === "web") {
+      router.push("/dashboard/connect/web")
+      return
     }
+    setSelectedIntegration(integration)
+  }
 
-    const handleManage = (type: string) => {
-        if (type === "web") {
-            setOpenWebModal(true) // Re-use the same modal for managing SDK domains
-        } else {
-            // Find current integration data if available, or use defaults
-            const currentItem = integrations?.items?.find(i => i.provider.toLowerCase() === type)
-            const config = {
-                name: type === "whatsapp" ? "WhatsApp Business" : "Facebook Lead Ads",
-                description: "Gestiona tu integración activa.",
-                action: "configure",
-                status: "connected",
-                logo: type === "whatsapp" ? "💬" : "📱",
-                ...currentItem
-            }
-            setSelectedIntegration(config)
-            setOpenIntegrationModal(true)
-        }
-    }
-
-    // Derived statuses safely avoiding null on initial render
-    const webStatus = integrations?.web?.connected ? "connected" : "disconnected"
-    const whatsappStatus = integrations?.whatsapp?.connected ? "connected" : "disconnected"
-    const fbStatus = integrations?.facebook?.connected ? "connected" : "disconnected"
-
-    return (
-        <section className="space-y-8 animate-in fade-in duration-500 pb-12">
-            {/* Header Institucional */}
-            <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-6">
-                <div>
-                    <h1 className="text-2xl font-semibold text-[#0B1F2A]">Centro de Conexiones</h1>
-                    <p className="text-sm text-slate-500 mt-1">
-                        Gestiona y monitoriza todos tus canales de entrada en tiempo real.
-                    </p>
-                </div>
-
-                <span className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full border border-emerald-100 bg-emerald-50 text-emerald-600 whitespace-nowrap">
-                    <ShieldCheckIcon className="w-3.5 h-3.5" />
-                    SSL Activo
-                </span>
-            </header>
-
-            {/* Grid Modular Enterprise */}
-            <div className={cn("grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 transition-opacity", loading && "opacity-60")}>
-                <IntegrationCard
-                    type="web"
-                    title="Web Ingestion"
-                    description="Captura leads desde tu sitio web o landings."
-                    icon={GlobeAltIcon}
-                    status={webStatus}
-                    onConnect={() => handleConnect("web")}
-                    onManage={() => handleManage("web")}
-                />
-
-                <IntegrationCard
-                    type="whatsapp"
-                    title="WhatsApp Messenger"
-                    description="Captura leads directamente desde tus chats oficiales."
-                    icon={ChatBubbleOvalLeftEllipsisIcon}
-                    status={whatsappStatus}
-                    onConnect={() => handleConnect("whatsapp")}
-                    onManage={() => handleManage("whatsapp")}
-                />
-
-                <IntegrationCard
-                    type="facebook"
-                    title="Meta Ads & Social"
-                    description="Sincroniza tus campañas de Lead Gen en tiempo real."
-                    icon={MetaIcon}
-                    status={fbStatus}
-                    onConnect={() => handleConnect("facebook")}
-                    onManage={() => handleManage("facebook")}
-                />
-            </div>
-
-            {/* Dialogs */}
-            <WebConnectDialog open={openWebModal} onOpenChange={setOpenWebModal} />
-            
-            <IntegrationModal 
-                isOpen={openIntegrationModal} 
-                onClose={() => setOpenIntegrationModal(false)}
-                integration={selectedIntegration}
-            />
-        </section>
+  const handleConnected = (id: string) => {
+    setIntegrations((prev) =>
+      prev.map((i) => (i.id === id ? { ...i, status: "connected" } : i))
     )
+  }
+
+  const filtered = integrations.filter((i) => {
+    const matchCat = activeCategory === "all" || i.category === activeCategory
+    const matchSearch =
+      !search ||
+      i.name.toLowerCase().includes(search.toLowerCase()) ||
+      i.description.toLowerCase().includes(search.toLowerCase())
+    return matchCat && matchSearch
+  })
+
+  const connected = integrations.filter((i) => i.status === "connected").length
+  const total = integrations.filter((i) => i.status !== "coming_soon").length
+
+  return (
+    <section className="space-y-6 pb-12">
+      {/* Header */}
+      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E2E8ED] pb-5">
+        <div>
+          <h1 className="text-xl font-semibold text-[#0B1F2A]">Centro de Conexiones</h1>
+          <p className="text-sm text-[#5F7280] mt-0.5">
+            Conecta tus herramientas para que ClientLabs trabaje con tu stack actual.
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border border-[#1FA97A]/30 bg-[#E8F5EF] text-[#1FA97A]">
+            <ShieldCheck className="w-3.5 h-3.5" />
+            SSL activo
+          </span>
+          <span
+            className={`text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
+              loadingStatus ? "border-[#E2E8ED] text-[#8FA6B2]" : "border-[#E2E8ED] text-[#5F7280]"
+            }`}
+          >
+            {loadingStatus ? "Cargando..." : `${connected} de ${total} conectadas`}
+          </span>
+        </div>
+      </header>
+
+      {/* Search + Category Filter */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1 max-w-xs">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8FA6B2]" />
+          <input
+            type="text"
+            placeholder="Buscar integración..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 text-sm rounded-lg border border-[#E2E8ED] bg-white text-[#0B1F2A] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#1FA97A] transition-colors"
+          />
+        </div>
+
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setActiveCategory(cat.id)}
+              className={`inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg border transition-colors ${
+                activeCategory === cat.id
+                  ? "bg-[#0B1F2A] text-white border-[#0B1F2A]"
+                  : "bg-white text-[#5F7280] border-[#E2E8ED] hover:border-[#C8D6E0] hover:text-[#0B1F2A]"
+              }`}
+            >
+              {CATEGORY_ICONS[cat.id]}
+              {cat.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Connected section (pinned to top when any connected) */}
+      {connected > 0 && activeCategory === "all" && !search && (
+        <div>
+          <p className="text-xs uppercase tracking-widest text-[#8FA6B2] font-medium mb-3 flex items-center gap-2">
+            <Link2 className="w-3.5 h-3.5" />
+            Conectadas
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {integrations
+              .filter((i) => i.status === "connected")
+              .map((i) => (
+                <IntegrationCard key={i.id} integration={i} onAction={handleAction} />
+              ))}
+          </div>
+        </div>
+      )}
+
+      {/* Main grid */}
+      <div>
+        {(activeCategory !== "all" || search || connected === 0) && (
+          <p className="text-xs uppercase tracking-widest text-[#8FA6B2] font-medium mb-3">
+            {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
+          </p>
+        )}
+        {(!search && activeCategory === "all" && connected > 0) && (
+          <p className="text-xs uppercase tracking-widest text-[#8FA6B2] font-medium mb-3">
+            Disponibles
+          </p>
+        )}
+        <div
+          className={`grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 transition-opacity ${
+            loadingStatus ? "opacity-50" : ""
+          }`}
+        >
+          {(activeCategory === "all" && !search
+            ? filtered.filter((i) => i.status !== "connected")
+            : filtered
+          ).map((integration) => (
+            <IntegrationCard
+              key={integration.id}
+              integration={integration}
+              onAction={handleAction}
+            />
+          ))}
+        </div>
+
+        {filtered.length === 0 && (
+          <div className="text-center py-16 text-[#8FA6B2]">
+            <Search className="w-8 h-8 mx-auto mb-3 opacity-40" />
+            <p className="text-sm">No se encontraron integraciones para "{search}"</p>
+          </div>
+        )}
+      </div>
+
+      {/* Modal */}
+      {selectedIntegration && (
+        <ConnectModal
+          integration={selectedIntegration}
+          onClose={() => setSelectedIntegration(null)}
+          onConnected={handleConnected}
+        />
+      )}
+    </section>
+  )
 }

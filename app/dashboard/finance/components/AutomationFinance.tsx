@@ -1,315 +1,269 @@
 "use client"
 
 import { useState } from "react"
-import { motion } from "framer-motion"
-import {
-  CogIcon,
-  PlayIcon,
-  PauseIcon,
-  PlusIcon,
-  ArrowPathIcon,
-  BellIcon,
-  ChartBarIcon,
-  CurrencyEuroIcon
-} from "@heroicons/react/24/outline"
+import { Settings, Play, Pause, Plus, RefreshCw, Bell, BarChart3, Euro, X } from "lucide-react"
+
+type AutomationType = "monitoring" | "reminder" | "reporting" | "classification"
+
+interface Automation {
+  id: string
+  name: string
+  description: string
+  type: AutomationType
+  status: "active" | "paused"
+  triggers: string[]
+  actions: string[]
+}
+
+const INITIAL_AUTOMATIONS: Automation[] = [
+  {
+    id: "1",
+    name: "Detección de gastos inusuales",
+    description: "Identifica automáticamente transacciones por encima del promedio",
+    type: "monitoring",
+    status: "active",
+    triggers: ["Transacción > 2x promedio mensual"],
+    actions: ["Enviar notificación", "Marcar para revisión"],
+  },
+  {
+    id: "2",
+    name: "Recordatorios de pagos recurrentes",
+    description: "Notifica 3 días antes de vencimiento de gastos fijos",
+    type: "reminder",
+    status: "active",
+    triggers: ["3 días antes de pago recurrente"],
+    actions: ["Enviar email recordatorio", "Crear tarea pendiente"],
+  },
+  {
+    id: "3",
+    name: "Análisis semanal de presupuesto",
+    description: "Genera reporte semanal de cumplimiento presupuestario",
+    type: "reporting",
+    status: "paused",
+    triggers: ["Cada lunes a las 9:00"],
+    actions: ["Generar reporte PDF", "Enviar por email"],
+  },
+  {
+    id: "4",
+    name: "Clasificación automática de gastos",
+    description: "Asigna categorías automáticamente basándose en patrones",
+    type: "classification",
+    status: "active",
+    triggers: ["Nueva transacción sin categoría"],
+    actions: ["Analizar descripción", "Asignar categoría", "Actualizar registro"],
+  },
+]
+
+const TYPE_ICON: Record<AutomationType, React.ComponentType<{ className?: string }>> = {
+  monitoring: BarChart3,
+  reminder: Bell,
+  reporting: RefreshCw,
+  classification: Settings,
+}
+
+const TYPE_COLOR: Record<AutomationType, string> = {
+  monitoring: "text-red-400 bg-red-500/10 border-red-500/20",
+  reminder: "text-blue-400 bg-blue-500/10 border-blue-500/20",
+  reporting: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+  classification: "text-violet-400 bg-violet-500/10 border-violet-500/20",
+}
 
 export function AutomationFinance() {
-  const [automations, setAutomations] = useState([
-    {
-      id: '1',
-      name: 'Detección de gastos inusuales',
-      description: 'Identifica automáticamente transacciones por encima del promedio',
-      type: 'monitoring',
-      status: 'active',
-      triggers: ['Transacción > 2x promedio mensual'],
-      actions: ['Enviar notificación', 'Marcar para revisión']
-    },
-    {
-      id: '2',
-      name: 'Recordatorios de pagos recurrentes',
-      description: 'Notifica 3 días antes de vencimiento de gastos fijos',
-      type: 'reminder',
-      status: 'active',
-      triggers: ['3 días antes de pago recurrente'],
-      actions: ['Enviar email recordatorio', 'Crear tarea pendiente']
-    },
-    {
-      id: '3',
-      name: 'Análisis semanal de presupuesto',
-      description: 'Genera reporte semanal de cumplimiento presupuestario',
-      type: 'reporting',
-      status: 'paused',
-      triggers: ['Cada lunes a las 9:00'],
-      actions: ['Generar reporte PDF', 'Enviar por email']
-    },
-    {
-      id: '4',
-      name: 'Clasificación automática de gastos',
-      description: 'Asigna categorías automáticamente basándose en patrones',
-      type: 'classification',
-      status: 'active',
-      triggers: ['Nueva transacción sin categoría'],
-      actions: ['Analizar descripción', 'Asignar categoría', 'Actualizar registro']
-    }
-  ])
-
+  const [automations, setAutomations] = useState<Automation[]>(INITIAL_AUTOMATIONS)
   const [showCreateModal, setShowCreateModal] = useState(false)
 
-  const handleToggleAutomation = (automationId: string) => {
-    setAutomations(prev =>
-      prev.map(auto =>
-        auto.id === automationId
-          ? { ...auto, status: auto.status === 'active' ? 'paused' : 'active' }
-          : auto
-      )
+  const toggleAutomation = (id: string) => {
+    setAutomations((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, status: a.status === "active" ? "paused" : "active" } : a))
     )
   }
 
-  const getAutomationIcon = (type: string) => {
-    switch (type) {
-      case 'monitoring':
-        return ChartBarIcon
-      case 'reminder':
-        return BellIcon
-      case 'reporting':
-        return ArrowPathIcon
-      case 'classification':
-        return CogIcon
-      default:
-        return CogIcon
-    }
-  }
-
-  const getAutomationColor = (type: string) => {
-    switch (type) {
-      case 'monitoring':
-        return 'text-red-400 bg-red-500/10 border-red-500/20'
-      case 'reminder':
-        return 'text-blue-400 bg-blue-500/10 border-blue-500/20'
-      case 'reporting':
-        return 'text-green-400 bg-green-500/10 border-green-500/20'
-      case 'classification':
-        return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
-      default:
-        return 'text-[var(--text-secondary)] bg-[var(--bg-main)]0/10 border-[var(--border-subtle)]'
-    }
-  }
+  const activeCount = automations.filter((a) => a.status === "active").length
+  const triggerCount = automations.reduce((s, a) => s + a.triggers.length, 0)
+  const actionCount = automations.reduce((s, a) => s + a.actions.length, 0)
 
   return (
-    <motion.div
-      className="bg-[var(--bg-main)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)] p-6"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.9, duration: 0.5 }}
-    >
-      <div className="flex items-center justify-between mb-6">
+    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] border-[var(--border-subtle)] p-5">
+      <div className="flex items-center justify-between mb-5">
         <div>
-          <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">Automatizaciones Financieras</h3>
-          <p className="text-[var(--text-secondary)] text-sm">Procesos inteligentes que optimizan tu gestión</p>
+          <h3 className="text-sm font-semibold text-[var(--text-primary)]">Automatizaciones financieras</h3>
+          <p className="text-xs text-[var(--text-secondary)]">Procesos inteligentes para tu gestión</p>
         </div>
-
-        <motion.button
+        <button
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700 text-[var(--text-primary)] font-semibold rounded-xl transition-all duration-300 shadow-[var(--shadow-card)] hover:shadow-emerald-500/25"
-          whileHover={{ scale: 1.05, y: -2 }}
-          whileTap={{ scale: 0.95 }}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1FA97A] hover:bg-[#1a9068] text-white text-xs font-medium rounded-lg transition-colors"
         >
-          <PlusIcon className="w-5 h-5" />
-          Nueva Automatización
-        </motion.button>
+          <Plus className="w-3.5 h-3.5" />
+          Nueva
+        </button>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <motion.div className="p-4 bg-[var(--bg-card)] rounded-xl text-center">
-          <div className="text-2xl font-bold text-green-400 mb-1">
-            {automations.filter(a => a.status === 'active').length}
+      <div className="grid grid-cols-4 gap-2 mb-4">
+        {[
+          { value: activeCount, label: "Activas", color: "text-emerald-400" },
+          { value: triggerCount, label: "Triggers", color: "text-blue-400" },
+          { value: actionCount, label: "Acciones", color: "text-violet-400" },
+          { value: "—", label: "Precisión", color: "text-[var(--text-secondary)]" },
+        ].map((stat) => (
+          <div key={stat.label} className="p-3 bg-[var(--bg-card)] rounded-xl text-center border border-[var(--border-subtle)]">
+            <div className={`text-lg font-bold ${stat.color}`}>{stat.value}</div>
+            <div className="text-[10px] text-[var(--text-secondary)]">{stat.label}</div>
           </div>
-          <div className="text-sm text-[var(--text-secondary)]">Activas</div>
-        </motion.div>
-        <motion.div className="p-4 bg-[var(--bg-card)] rounded-xl text-center">
-          <div className="text-2xl font-bold text-blue-400 mb-1">
-            {automations.reduce((sum, a) => sum + a.triggers.length, 0)}
-          </div>
-          <div className="text-sm text-[var(--text-secondary)]">Triggers</div>
-        </motion.div>
-        <motion.div className="p-4 bg-[var(--bg-card)] rounded-xl text-center">
-          <div className="text-2xl font-bold text-emerald-400 mb-1">
-            {automations.reduce((sum, a) => sum + a.actions.length, 0)}
-          </div>
-          <div className="text-sm text-[var(--text-secondary)]">Acciones</div>
-        </motion.div>
-        <motion.div className="p-4 bg-[var(--bg-card)] rounded-xl text-center">
-          <div className="text-2xl font-bold text-orange-400 mb-1">
-            94%
-          </div>
-          <div className="text-sm text-[var(--text-secondary)]">Precisión</div>
-        </motion.div>
+        ))}
       </div>
 
-      {/* Automations List */}
-      <div className="space-y-4">
-        {automations.map((automation, index) => {
-          const AutomationIcon = getAutomationIcon(automation.type)
-          const colorClasses = getAutomationColor(automation.type)
-
+      {/* Automations list */}
+      <div className="space-y-2.5">
+        {automations.map((automation) => {
+          const AutoIcon = TYPE_ICON[automation.type]
+          const colorClass = TYPE_COLOR[automation.type]
           return (
-            <motion.div
+            <div
               key={automation.id}
-              className="p-6 bg-[var(--bg-card)] rounded-xl border border-[var(--border-subtle)] hover:border-[var(--border-subtle)] transition-all duration-300"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.0 + (index * 0.1), duration: 0.3 }}
-              whileHover={{ y: -2 }}
+              className="p-4 bg-[var(--bg-card)] rounded-xl border border-[var(--border-subtle)]"
             >
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-4">
-                  <div className={`p-3 rounded-lg ${colorClasses}`}>
-                    <AutomationIcon className="w-6 h-6" />
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="flex items-start gap-3">
+                  <div className={`p-2 rounded-lg border shrink-0 ${colorClass}`}>
+                    <AutoIcon className="w-4 h-4" />
                   </div>
-
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-1">
-                      <h4 className="text-[var(--text-primary)] font-semibold">{automation.name}</h4>
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        automation.status === 'active'
-                          ? 'bg-green-500/20 text-green-400'
-                          : 'bg-yellow-500/20 text-yellow-400'
+                  <div>
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <h4 className="text-sm font-semibold text-[var(--text-primary)]">{automation.name}</h4>
+                      <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
+                        automation.status === "active"
+                          ? "bg-emerald-500/15 text-emerald-400"
+                          : "bg-yellow-500/15 text-yellow-400"
                       }`}>
-                        {automation.status === 'active' ? 'Activa' : 'Pausada'}
+                        {automation.status === "active" ? "Activa" : "Pausada"}
                       </span>
                     </div>
-                    <p className="text-[var(--text-secondary)] text-sm">{automation.description}</p>
+                    <p className="text-xs text-[var(--text-secondary)]">{automation.description}</p>
                   </div>
                 </div>
-
-                <motion.button
-                  onClick={() => handleToggleAutomation(automation.id)}
-                  className={`p-3 rounded-lg transition-colors ${
-                    automation.status === 'active'
-                      ? 'text-green-400 hover:bg-green-600/20'
-                      : 'text-[var(--text-secondary)] hover:bg-[var(--border-subtle)]'
+                <button
+                  onClick={() => toggleAutomation(automation.id)}
+                  className={`p-2 rounded-lg transition-colors shrink-0 ${
+                    automation.status === "active"
+                      ? "text-emerald-400 hover:bg-emerald-500/10"
+                      : "text-[var(--text-secondary)] hover:bg-[var(--bg-surface)]"
                   }`}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
+                  aria-label={automation.status === "active" ? "Pausar" : "Activar"}
                 >
-                  {automation.status === 'active' ? (
-                    <PauseIcon className="w-5 h-5" />
-                  ) : (
-                    <PlayIcon className="w-5 h-5" />
-                  )}
-                </motion.button>
+                  {automation.status === "active" ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                </button>
               </div>
 
-              {/* Triggers and Actions */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 gap-3 text-xs">
                 <div>
-                  <div className="text-sm text-[var(--text-secondary)] mb-2">Triggers:</div>
-                  <div className="space-y-1">
-                    {automation.triggers.map((trigger, triggerIndex) => (
-                      <div key={triggerIndex} className="flex items-center gap-2 text-sm">
-                        <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                        <span className="text-[var(--text-secondary)]">{trigger}</span>
+                  <div className="text-[var(--text-secondary)] mb-1">Triggers</div>
+                  <div className="space-y-0.5">
+                    {automation.triggers.map((t, i) => (
+                      <div key={i} className="flex items-center gap-1.5">
+                        <div className="w-1.5 h-1.5 bg-blue-400 rounded-full shrink-0" />
+                        <span className="text-[var(--text-secondary)] leading-tight">{t}</span>
                       </div>
                     ))}
                   </div>
                 </div>
-
                 <div>
-                  <div className="text-sm text-[var(--text-secondary)] mb-2">Acciones:</div>
-                  <div className="space-y-1">
-                    {automation.actions.map((action, actionIndex) => (
-                      <div key={actionIndex} className="flex items-center gap-2 text-sm">
-                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                        <span className="text-[var(--text-secondary)]">{action}</span>
+                  <div className="text-[var(--text-secondary)] mb-1">Acciones</div>
+                  <div className="space-y-0.5">
+                    {automation.actions.map((a, i) => (
+                      <div key={i} className="flex items-center gap-1.5">
+                        <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full shrink-0" />
+                        <span className="text-[var(--text-secondary)] leading-tight">{a}</span>
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
 
-              {/* Performance */}
-              <div className="mt-4 pt-4 border-t border-[var(--border-subtle)]">
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  <div>
-                    <div className="text-lg font-bold text-[var(--text-primary)]">127</div>
-                    <div className="text-xs text-[var(--text-secondary)]">Ejecuciones</div>
-                  </div>
-                  <div>
-                    <div className="text-lg font-bold text-green-400">95%</div>
-                    <div className="text-xs text-[var(--text-secondary)]">Éxito</div>
-                  </div>
-                  <div>
-                    <div className="text-lg font-bold text-blue-400">2.3s</div>
-                    <div className="text-xs text-[var(--text-secondary)]">Tiempo promedio</div>
-                  </div>
+              <div className="mt-3 pt-3 border-t border-[var(--border-subtle)] grid grid-cols-3 gap-2 text-center text-xs">
+                <div>
+                  <div className="font-bold text-[var(--text-secondary)]">—</div>
+                  <div className="text-[var(--text-secondary)]">Ejecuciones</div>
+                </div>
+                <div>
+                  <div className="font-bold text-[var(--text-secondary)]">—</div>
+                  <div className="text-[var(--text-secondary)]">Éxito</div>
+                </div>
+                <div>
+                  <div className="font-bold text-[var(--text-secondary)]">—</div>
+                  <div className="text-[var(--text-secondary)]">Promedio</div>
                 </div>
               </div>
-            </motion.div>
+            </div>
           )
         })}
       </div>
 
-      {/* AI Insights */}
-      <motion.div
-        className="mt-6 p-4 bg-gradient-to-r from-emerald-500/10 to-blue-500/10 border border-emerald-500/20 rounded-xl"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.2, duration: 0.5 }}
-      >
-        <div className="flex items-center gap-3 mb-3">
-          <CurrencyEuroIcon className="w-5 h-5 text-emerald-400" />
-          <span className="text-emerald-400 font-semibold">Recomendación IA</span>
+      {/* AI recommendation */}
+      <div className="mt-4 p-4 bg-emerald-500/[0.07] border border-emerald-500/15 rounded-xl">
+        <div className="flex items-center gap-2 mb-2">
+          <Euro className="w-4 h-4 text-emerald-400" />
+          <span className="text-xs font-semibold text-emerald-400">Recomendación IA</span>
         </div>
-        <p className="text-[var(--text-secondary)] text-sm">
-          Basándome en tus patrones, recomiendo crear una automatización para categorizar gastos de "Viajes y representación"
-          automáticamente. Esto reduciría el tiempo de revisión manual en un 40%.
+        <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+          Basándome en tus patrones, recomiendo crear una automatización para categorizar gastos de
+          &quot;Viajes y representación&quot; automáticamente. Reduciría el tiempo de revisión manual en un 40%.
         </p>
-        <div className="mt-3 flex gap-3">
-          <button className="px-4 py-2 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 hover:text-emerald-300 text-sm rounded-lg transition-colors">
+        <div className="mt-3 flex gap-2">
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="px-3 py-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 text-xs rounded-lg transition-colors"
+          >
             Crear automatización
           </button>
-          <button className="px-4 py-2 bg-[var(--border-subtle)] hover:bg-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-secondary)] text-sm rounded-lg transition-colors">
+          <button className="px-3 py-1.5 bg-[var(--bg-surface)] hover:bg-gray-100 text-[var(--text-secondary)] text-xs rounded-lg transition-colors">
             Ignorar
           </button>
         </div>
-      </motion.div>
+      </div>
 
-      {/* Create Modal Placeholder */}
+      {/* Create Modal */}
       {showCreateModal && (
-        <motion.div
-          className="fixed inset-0 bg-[var(--bg-card)]/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
-          <motion.div
-            className="bg-[var(--bg-card)] rounded-xl p-6 max-w-md w-full"
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
+        <>
+          <div
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50"
+            onClick={() => setShowCreateModal(false)}
+            aria-hidden="true"
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white border border-[var(--border-subtle)] rounded-xl p-6 max-w-md w-full z-50 shadow-2xl"
           >
-            <h3 className="text-xl font-bold text-[var(--text-primary)] mb-4">Crear Automatización</h3>
-            <p className="text-[var(--text-secondary)] mb-6">
-              Esta funcionalidad estará disponible próximamente con el módulo de IA avanzada.
-            </p>
-            <div className="flex gap-3">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-bold text-[var(--text-primary)]">Crear automatización</h3>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="flex-1 px-4 py-2 bg-[var(--bg-surface)] hover:bg-[var(--bg-surface)] text-[var(--text-primary)] rounded-lg transition-colors"
+                className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] rounded-lg transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <p className="text-sm text-[var(--text-secondary)] mb-5">
+              Esta funcionalidad estará disponible próximamente con el módulo de IA avanzada.
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="flex-1 px-4 py-2.5 bg-[var(--bg-surface)] hover:bg-gray-100 border border-[var(--border-subtle)] text-[var(--text-primary)] rounded-lg transition-colors text-sm"
               >
                 Cancelar
               </button>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-600 text-[var(--text-primary)] rounded-lg transition-colors"
+                className="flex-1 px-4 py-2.5 bg-[#1FA97A] hover:bg-[#1a9068] text-white rounded-lg transition-colors text-sm font-medium"
               >
-                Crear
+                Entendido
               </button>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </>
       )}
-    </motion.div>
+    </div>
   )
 }

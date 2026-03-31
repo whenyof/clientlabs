@@ -29,8 +29,8 @@ function MovementRowComponent({ movement, isSelected, onSelect }: MovementRowPro
       onClick={onSelect}
       className={`
         border-b border-[var(--border-subtle)] transition-colors cursor-pointer
-        hover:bg-[var(--bg-card)]/[0.04]
-        ${isSelected ? "bg-[var(--bg-card)]/[0.06]" : ""}
+        hover:bg-[var(--bg-card)]
+        ${isSelected ? "bg-[var(--bg-card)]" : ""}
       `}
       role="button"
       tabIndex={0}

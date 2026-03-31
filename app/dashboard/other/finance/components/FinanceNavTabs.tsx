@@ -1,14 +1,14 @@
 "use client"
 
 import {
-  ChartBarIcon,
-  CreditCardIcon,
-  BanknotesIcon,
-  CurrencyEuroIcon,
-  FlagIcon,
-  BellIcon,
-  Cog6ToothIcon,
-} from "@heroicons/react/24/outline"
+  BarChart3,
+  CreditCard,
+  Banknote,
+  Euro,
+  Flag,
+  Bell,
+  Settings,
+} from "lucide-react"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 
 export type FinanceTabId =
@@ -20,16 +20,14 @@ export type FinanceTabId =
   | "alerts"
   | "automation"
 
-const TABS: { id: FinanceTabId; label: string; icon: typeof ChartBarIcon }[] = [
-  { id: "overview", label: "Vista General", icon: ChartBarIcon },
-  // Tesorería: caja y movimientos
-  { id: "transactions", label: "Tesorería", icon: CreditCardIcon },
-  // Compras: presupuestos y control de gasto
-  { id: "budgets", label: "Compras", icon: BanknotesIcon },
-  { id: "forecast", label: "Pronóstico", icon: CurrencyEuroIcon },
-  { id: "goals", label: "Objetivos", icon: FlagIcon },
-  { id: "alerts", label: "Alertas", icon: BellIcon },
-  { id: "automation", label: "Automatización", icon: Cog6ToothIcon },
+const TABS: { id: FinanceTabId; label: string; icon: React.ElementType }[] = [
+  { id: "overview", label: "Vista General", icon: BarChart3 },
+  { id: "transactions", label: "Tesorería", icon: CreditCard },
+  { id: "budgets", label: "Compras", icon: Banknote },
+  { id: "forecast", label: "Pronóstico", icon: Euro },
+  { id: "goals", label: "Objetivos", icon: Flag },
+  { id: "alerts", label: "Alertas", icon: Bell },
+  { id: "automation", label: "Automatización", icon: Settings },
 ]
 
 interface FinanceNavTabsProps {
@@ -38,42 +36,36 @@ interface FinanceNavTabsProps {
 }
 
 export function FinanceNavTabs({ activeTab, onTabChange }: FinanceNavTabsProps) {
-  // Original behavior for internal finance sections
   return (
-    <nav
-      className="flex justify-center w-full"
-      aria-label="Navegación financiera"
-    >
-      <div className="w-full flex items-center justify-center gap-2 flex-wrap">
-        {TABS.map((tab) => {
-          const isActive = activeTab === tab.id
-          const Icon = tab.icon
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => onTabChange(tab.id)}
-              className={`
-                h-9 px-4 rounded-xl text-sm font-medium
-                flex items-center gap-2 shrink-0
-                transition-all duration-150
-                ${isActive
-                  ? "bg-white/10 text-white shadow-sm"
-                  : "text-white/60 hover:text-white hover:bg-white/5"}
-              `}
-              aria-current={isActive ? "page" : undefined}
-            >
-              <Icon className="w-4 h-4 shrink-0" aria-hidden />
-              <span className="whitespace-nowrap">{tab.label}</span>
-            </button>
-          )
-        })}
-      </div>
+    <nav className="flex items-center gap-1 flex-wrap" aria-label="Navegación financiera">
+      {TABS.map((tab) => {
+        const isActive = activeTab === tab.id
+        const Icon = tab.icon
+        return (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => onTabChange(tab.id)}
+            className={`
+              h-8 px-3 rounded-lg text-sm font-medium
+              flex items-center gap-1.5 shrink-0
+              transition-colors duration-150
+              ${isActive
+                ? "bg-[var(--accent)] text-white"
+                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"}
+            `}
+            aria-current={isActive ? "page" : undefined}
+          >
+            <Icon className="w-3.5 h-3.5 shrink-0" aria-hidden />
+            <span className="whitespace-nowrap">{tab.label}</span>
+          </button>
+        )
+      })}
     </nav>
   )
 }
 
-// Hub-level tabs for /dashboard/finance — view= param; billing is the only invoice entry (BillingView)
+// Hub-level tabs — view= param
 const HUB_TABS = [
   { id: "overview", label: "Vista General", view: undefined },
   { id: "movements", label: "Movimientos", view: "transactions" },
@@ -84,8 +76,6 @@ const HUB_TABS = [
   { id: "automation", label: "Automatización", view: "automation" },
 ] as const
 
-type HubTabId = (typeof HUB_TABS)[number]["id"]
-
 export function FinanceHubTabs({ period }: { period?: string }) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -94,15 +84,11 @@ export function FinanceHubTabs({ period }: { period?: string }) {
   const currentView = searchParams.get("view") || "overview"
 
   const isActive = (tab: (typeof HUB_TABS)[number]) => {
-    const href = "href" in tab && typeof (tab as { href?: string }).href === "string" ? (tab as { href: string }).href : null
-    if (href) return pathname === href
     if (!tab.view && (currentView === "overview" || !currentView)) return true
     return tab.view === currentView
   }
 
   const buildHref = (tab: (typeof HUB_TABS)[number]) => {
-    const href = "href" in tab && typeof (tab as { href?: string }).href === "string" ? (tab as { href: string }).href : null
-    if (href) return href
     const params = new URLSearchParams()
     if (tab.view) params.set("view", tab.view)
     if (period && period !== "month") params.set("period", period)
@@ -110,40 +96,28 @@ export function FinanceHubTabs({ period }: { period?: string }) {
     return qs ? `/dashboard/finance?${qs}` : "/dashboard/finance"
   }
 
-  const handleClick = (tab: (typeof HUB_TABS)[number]) => {
-    router.push(buildHref(tab))
-  }
-
   return (
-    <nav
-      className="flex justify-center w-full"
-      aria-label="Navegación principal de Finanzas"
-    >
-      <div className="w-full flex items-center justify-center gap-2 flex-wrap">
-        {HUB_TABS.map((tab) => {
-          const active = isActive(tab)
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => handleClick(tab)}
-              className={`
-                h-9 px-4 rounded-xl text-sm font-medium
-                flex items-center gap-2 shrink-0
-                transition-all duration-150
-                ${
-                  active
-                    ? "bg-white/10 text-white shadow-sm"
-                    : "text-white/60 hover:text-white hover:bg-white/5"
-                }
-              `}
-              aria-current={active ? "page" : undefined}
-            >
-              <span className="whitespace-nowrap">{tab.label}</span>
-            </button>
-          )
-        })}
-      </div>
+    <nav className="flex items-center gap-1 flex-wrap" aria-label="Navegación principal de Finanzas">
+      {HUB_TABS.map((tab) => {
+        const active = isActive(tab)
+        return (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => router.push(buildHref(tab))}
+            className={`
+              h-8 px-3 rounded-lg text-sm font-medium shrink-0
+              transition-colors duration-150
+              ${active
+                ? "bg-[var(--accent)] text-white"
+                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"}
+            `}
+            aria-current={active ? "page" : undefined}
+          >
+            <span className="whitespace-nowrap">{tab.label}</span>
+          </button>
+        )
+      })}
     </nav>
   )
 }

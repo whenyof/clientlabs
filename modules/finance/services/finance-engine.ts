@@ -147,17 +147,6 @@ export async function getFinanceKPIs(
  const monthlyTrendOut =
  trend.length >= 6 ? trend : [...trend, ...ZERO_MONTHLY_TREND().slice(trend.length, 6)]
 
- // DEBUG: temporary log so we can verify real data is used (remove after verification)
- console.log("[getFinanceKPIs] computed", {
- userId,
- from: from.toISOString(),
- to: to.toISOString(),
- income: incomeVal,
- expenses: expensesVal,
- pending: safe(pending),
- profit: profitVal,
- })
-
  return {
  income: incomeVal,
  expenses: expensesVal,
@@ -172,7 +161,6 @@ export async function getFinanceKPIs(
  monthlyTrend: monthlyTrendOut,
  }
  } catch (err) {
- console.error("getFinanceKPIs error:", err)
  return {
  income: 0,
  expenses: 0,

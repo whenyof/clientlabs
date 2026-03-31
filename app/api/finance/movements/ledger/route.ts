@@ -42,9 +42,6 @@ function getDateRange(period: string, startDate?: string | null, endDate?: strin
 
 export async function GET(request: NextRequest) {
  const session = await getServerSession(authOptions)
- if (typeof process !== "undefined") {
- console.log("SESSION USER:", session?.user?.id ?? null)
- }
  if (!session?.user?.id) {
  return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
  }
@@ -74,9 +71,6 @@ export async function GET(request: NextRequest) {
  sortBy,
  sortDir,
  })
- if (typeof process !== "undefined") {
- console.log("API MOVEMENTS:", movements.length)
- }
  return NextResponse.json({
  success: true,
  movements,

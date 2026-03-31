@@ -3,17 +3,11 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { loadFinancePageData } from "@/app/dashboard/finance/lib/server-data"
 import { FinanceView } from "@/app/dashboard/finance/FinanceView"
-import SalesPage from "@/app/dashboard/other/sales/page"
 import { BillingView } from "@domains/billing"
 import PurchasesPage from "./purchases/page"
 
-type PageSearchParams = {
-  period?: string
-  view?: string
-}
-
 type PageProps = {
-  searchParams: Promise<PageSearchParams>
+  searchParams: Promise<{ period?: string; view?: string }>
 }
 
 export default async function FinancePage({ searchParams }: PageProps) {
@@ -23,43 +17,15 @@ export default async function FinancePage({ searchParams }: PageProps) {
   }
 
   const { period = "month", view } = await searchParams
+  const initialData = await loadFinancePageData(session.user.id, period)
 
-  const isFinanceView =
-    !view ||
-    view === "overview" ||
-    view === "transactions" ||
-    view === "alerts" ||
-    view === "automation"
-  const initialData = isFinanceView
-    ? await loadFinancePageData(session.user.id, period)
-    : null
-
-  let content: React.ReactNode
-
-  switch (view) {
-    case "income":
-    case "sales":
-      content = <SalesPage />
-      break
-    case "purchases":
-      content = <PurchasesPage />
-      break
-    case "billing":
-      content = <BillingView />
-      break
-    case "transactions":
-    case "alerts":
-    case "automation":
-    case "overview":
-    default:
-      content =
-        initialData != null ? (
-          <FinanceView initialData={initialData} period={period} view={view} />
-        ) : null
-      break
-  }
-
-  return <>{content}</>
+  return (
+    <FinanceView
+      initialData={initialData}
+      period={period}
+      view={view}
+      billingNode={<BillingView />}
+      purchasesNode={<PurchasesPage />}
+    />
+  )
 }
-
-

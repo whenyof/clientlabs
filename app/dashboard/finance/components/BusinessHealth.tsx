@@ -1,7 +1,7 @@
 "use client"
 
+import { CheckCircle2, AlertTriangle } from "lucide-react"
 import { useFinanceData } from "../context/FinanceDataContext"
-import { CheckCircleIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline"
 
 export function BusinessHealth() {
   const { analytics } = useFinanceData()
@@ -34,26 +34,34 @@ export function BusinessHealth() {
     {
       label: "Concentración",
       status: topShare < 50,
-      text: topShare >= 50 ? "Riesgo concentración" : "Diversificado",
+      text: topShare >= 50 ? "Riesgo de concentración" : "Cartera diversificada",
     },
   ]
 
+  const healthScore = items.filter((i) => i.status).length
+  const scoreColor =
+    healthScore === 4 ? "text-emerald-400" :
+    healthScore >= 2 ? "text-amber-400" : "text-red-400"
+
   return (
-    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)]/[0.03] p-5">
-      <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-4">Salud del negocio</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-5">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-sm font-semibold text-[var(--text-primary)]">Salud del negocio</h3>
+        <span className={`text-xs font-bold ${scoreColor}`}>{healthScore}/4</span>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
         {items.map((item) => (
           <div
             key={item.label}
-            className="flex items-center gap-3 p-3 rounded-lg bg-[var(--bg-card)]/[0.02] border border-[var(--border-subtle)]/[0.06]"
+            className="flex items-center gap-3 p-3 rounded-lg border border-[var(--border-subtle)]/60 bg-[var(--bg-card)] border-[var(--border-subtle)]"
           >
             {item.status ? (
-              <CheckCircleIcon className="w-5 h-5 text-emerald-400 shrink-0" aria-hidden />
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" aria-hidden />
             ) : (
-              <ExclamationTriangleIcon className="w-5 h-5 text-amber-400 shrink-0" aria-hidden />
+              <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" aria-hidden />
             )}
             <div className="min-w-0">
-              <p className="text-xs text-[var(--text-secondary)]">{item.label}</p>
+              <p className="text-[11px] text-[var(--text-secondary)]">{item.label}</p>
               <p className={`text-sm font-medium ${item.status ? "text-[var(--text-primary)]" : "text-amber-400/90"}`}>
                 {item.text}
               </p>

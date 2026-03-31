@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { XMarkIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline"
+import { X, ExternalLink } from "lucide-react"
 import { formatCurrency, formatDate, getAmountColor } from "../../lib/formatters"
 import type { Movement } from "@domains/finance"
 
@@ -69,7 +69,7 @@ export function MovementDetailsDrawer({ movement, open, onClose }: MovementDetai
         aria-label="Detalle del movimiento"
         className={`
           fixed top-0 right-0 z-50 h-full w-full max-w-md
-          bg-[#0f0f12] border-l border-[var(--border-subtle)]
+          bg-white border-l border-[var(--border-subtle)]
           shadow-[var(--shadow-card)] flex flex-col
           transition-transform duration-200 ease-out
           ${open ? "translate-x-0" : "translate-x-full"}
@@ -83,7 +83,7 @@ export function MovementDetailsDrawer({ movement, open, onClose }: MovementDetai
             className="p-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-colors"
             aria-label="Cerrar"
           >
-            <XMarkIcon className="w-5 h-5" />
+            <X className="w-5 h-5" />
           </button>
         </div>
         <div className="flex-1 overflow-y-auto px-5 py-6 space-y-6">
@@ -128,7 +128,7 @@ export function MovementDetailsDrawer({ movement, open, onClose }: MovementDetai
                 onClick={handleJumpToOrigin}
                 className="flex items-center gap-2 text-sm font-medium text-emerald-400 hover:text-violet-300 transition-colors"
               >
-                <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                <ExternalLink className="w-4 h-4" />
                 Ir al {ORIGIN_LABELS[movement.originModule]}
               </button>
             </div>

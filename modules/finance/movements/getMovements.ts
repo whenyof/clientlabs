@@ -23,9 +23,39 @@ function matchesSearch(text: string | null | undefined, q: string): boolean {
   return text.trim().toLowerCase().includes(q.trim().toLowerCase())
 }
 
-/** Invoices: no Invoice model in DB yet; extend here when added. */
-async function fetchInvoices(_userId: string, _from: Date, _to: Date): Promise<Movement[]> {
-  return []
+async function fetchInvoices(userId: string, from: Date, to: Date): Promise<Movement[]> {
+  const invoices = await prisma.invoice.findMany({
+    where: {
+      userId,
+      issueDate: { gte: from, lte: to },
+      status: "PAID",
+      type: "CUSTOMER",
+    },
+    select: {
+      id: true,
+      total: true,
+      issueDate: true,
+      number: true,
+      series: true,
+      status: true,
+      Client: { select: { name: true } },
+    },
+    orderBy: { issueDate: "desc" },
+  })
+
+  return invoices.map((inv) => ({
+    id: `invoice-${inv.id}`,
+    date: inv.issueDate.toISOString(),
+    type: "income" as const,
+    amount: Number(inv.total),
+    contactName: (inv.Client as { name?: string } | null)?.name ?? null,
+    contactType: "client" as const,
+    concept: `Factura ${inv.series}${inv.number}`,
+    category: "Facturación",
+    status: "paid" as const,
+    originModule: "invoice" as const,
+    originId: inv.id,
+  }))
 }
 
 /**

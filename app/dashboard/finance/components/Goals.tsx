@@ -1,257 +1,187 @@
-// @ts-nocheck
 "use client"
 
-import { motion } from "framer-motion"
+import { Trophy, Tag, Clock, CheckCircle2, AlertTriangle } from "lucide-react"
 import { formatCurrency } from "../lib/formatters"
 import { useFinanceData } from "../context/FinanceDataContext"
-import {
-  TrophyIcon,
-  TagIcon,
-  ClockIcon,
-  CheckCircleIcon,
-  ExclamationTriangleIcon
-} from "@heroicons/react/24/outline"
 
 function getGoalProgress(current: number, target: number): number {
   return target ? (current / target) * 100 : 0
+}
+
+type GoalStatus = {
+  status: "completed" | "overdue" | "urgent" | "on_track"
+  color: string
+  bg: string
+  border: string
+}
+
+function getGoalStatus(current: number, target: number, deadline: Date | string): GoalStatus {
+  const d = typeof deadline === "string" ? new Date(deadline) : deadline
+  const progress = getGoalProgress(current, target)
+  const daysRemaining = Math.ceil((d.getTime() - Date.now()) / 86400000)
+
+  if (progress >= 100) return { status: "completed", color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" }
+  if (daysRemaining < 0) return { status: "overdue", color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/20" }
+  if (daysRemaining <= 30) return { status: "urgent", color: "text-orange-400", bg: "bg-orange-500/10", border: "border-orange-500/20" }
+  return { status: "on_track", color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20" }
+}
+
+const STATUS_ICON = {
+  completed: CheckCircle2,
+  overdue: AlertTriangle,
+  urgent: Clock,
+  on_track: Tag,
+}
+
+const STATUS_TEXT: Record<string, string> = {
+  completed: "Completado",
+  overdue: "Vencido",
+  urgent: "Urgente",
+  on_track: "En curso",
 }
 
 export function Goals() {
   const { analytics, loading } = useFinanceData()
   const goals = analytics?.financialGoals ?? []
 
-  const getGoalStatus = (current: number, target: number, deadline: Date | string) => {
-    const d = typeof deadline === 'string' ? new Date(deadline) : deadline
-    const progress = getGoalProgress(current, target)
-    const daysRemaining = Math.ceil((d.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
-
-    if (progress >= 100) return { status: 'completed', color: 'text-green-400', bg: 'bg-green-500/10', border: 'border-green-500/20' }
-    if (daysRemaining < 0) return { status: 'overdue', color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/20' }
-    if (daysRemaining <= 30) return { status: 'urgent', color: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/20' }
-    return { status: 'on_track', color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' }
-  }
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return CheckCircleIcon
-      case 'overdue':
-        return ExclamationTriangleIcon
-      case 'urgent':
-        return ClockIcon
-      default:
-        return TagIcon
-    }
-  }
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return 'Completado'
-      case 'overdue':
-        return 'Vencido'
-      case 'urgent':
-        return 'Urgente'
-      default:
-        return 'En curso'
-    }
-  }
-
   if (loading) {
-    return <div className="bg-[var(--bg-main)] rounded-xl border border-[var(--border-subtle)] p-6 animate-pulse h-48" />
+    return <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] border-[var(--border-subtle)] p-5 animate-pulse h-48" />
   }
 
   if (goals.length === 0) {
     return (
-      <div className="bg-[var(--bg-main)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)] p-6">
-        <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">Objetivos Financieros</h3>
-        <p className="text-[var(--text-secondary)] text-sm mb-4">Metas y hitos a alcanzar</p>
-        <div className="py-8 text-center text-[var(--text-secondary)]">
-          <p className="text-[var(--text-secondary)]">Sin objetivos</p>
-          <p className="text-sm mt-1">Crea objetivos financieros para hacer seguimiento.</p>
-        </div>
+      <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] border-[var(--border-subtle)] p-5">
+        <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-1">Objetivos financieros</h3>
+        <p className="text-xs text-[var(--text-secondary)] mb-4">Metas y hitos a alcanzar</p>
+        <div className="py-6 text-center text-[var(--text-secondary)] text-sm">Sin objetivos configurados</div>
       </div>
     )
   }
 
+  const completed = goals.filter((g) => getGoalProgress(g.current, g.target) >= 100).length
+  const pending = goals.length - completed
+
   return (
-    <motion.div
-      className="bg-[var(--bg-main)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)] p-6"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.7, duration: 0.5 }}
-    >
-      <div className="flex items-center justify-between mb-6">
+    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] border-[var(--border-subtle)] p-5">
+      <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">Objetivos Financieros</h3>
-          <p className="text-[var(--text-secondary)] text-sm">Metas y hitos a alcanzar</p>
+          <h3 className="text-sm font-semibold text-[var(--text-primary)]">Objetivos financieros</h3>
+          <p className="text-xs text-[var(--text-secondary)]">Metas y hitos a alcanzar</p>
         </div>
-        <div className="text-sm text-[var(--text-secondary)]">
-          {goals.filter(g => getGoalProgress(g.current, g.target) < 100).length} pendientes
-        </div>
+        <span className="text-xs text-[var(--text-secondary)]">{pending} pendientes</span>
       </div>
 
-      <div className="space-y-6">
-        {goals.map((goal, index) => {
-          const deadlineDate = typeof goal.deadline === 'string' ? new Date(goal.deadline) : goal.deadline
+      <div className="space-y-3">
+        {goals.map((goal) => {
+          const deadlineDate = typeof goal.deadline === "string" ? new Date(goal.deadline) : goal.deadline
           const progress = getGoalProgress(goal.current, goal.target)
           const status = getGoalStatus(goal.current, goal.target, goal.deadline)
-          const StatusIcon = getStatusIcon(status.status)
-          const daysRemaining = Math.ceil((deadlineDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+          const StatusIcon = STATUS_ICON[status.status]
+          const daysRemaining = Math.ceil((deadlineDate.getTime() - Date.now()) / 86400000)
 
           return (
-            <motion.div
+            <div
               key={goal.id}
-              className={`p-6 rounded-xl border ${status.bg} ${status.border} transition-all duration-300 hover:scale-105`}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 + (index * 0.1), duration: 0.3 }}
+              className={`p-4 rounded-xl border ${status.bg} ${status.border}`}
             >
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-start gap-4">
-                  <div className={`p-3 rounded-lg ${status.bg}`}>
-                    <StatusIcon className={`w-6 h-6 ${status.color}`} />
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-start gap-3">
+                  <div className={`p-2 rounded-lg ${status.bg} shrink-0`}>
+                    <StatusIcon className={`w-4 h-4 ${status.color}`} />
                   </div>
-
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h4 className="text-xl font-bold text-[var(--text-primary)]">{goal.title}</h4>
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${status.bg} ${status.border} ${status.color}`}>
-                        {getStatusText(status.status)}
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <h4 className="text-sm font-semibold text-[var(--text-primary)]">{goal.title}</h4>
+                      <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${status.bg} ${status.color}`}>
+                        {STATUS_TEXT[status.status]}
                       </span>
                     </div>
-
-                    {(goal as { description?: string }).description && (
-                      <p className="text-[var(--text-secondary)] text-sm mb-3">{(goal as { description?: string }).description}</p>
-                    )}
-
-                    <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="grid grid-cols-2 gap-3 text-xs mt-1">
                       <div>
-                        <div className="text-[var(--text-secondary)]">Progreso actual</div>
-                        <div className="text-[var(--text-primary)] font-semibold">
-                          {formatCurrency(goal.current)}
-                        </div>
+                        <div className="text-[var(--text-secondary)]">Actual</div>
+                        <div className="text-[var(--text-primary)] font-semibold">{formatCurrency(goal.current)}</div>
                       </div>
                       <div>
-                        <div className="text-[var(--text-secondary)]">Objetivo total</div>
-                        <div className="text-[var(--text-primary)] font-semibold">
-                          {formatCurrency(goal.target)}
-                        </div>
+                        <div className="text-[var(--text-secondary)]">Objetivo</div>
+                        <div className="text-[var(--text-primary)] font-semibold">{formatCurrency(goal.target)}</div>
                       </div>
                     </div>
                   </div>
                 </div>
-
-                <div className="text-right">
-                  <div className="text-3xl font-bold text-[var(--text-primary)] mb-1">
-                    {progress.toFixed(0)}%
-                  </div>
-                  <div className="text-sm text-[var(--text-secondary)]">completado</div>
+                <div className="text-right shrink-0 ml-2">
+                  <div className={`text-xl font-bold ${status.color}`}>{progress.toFixed(0)}%</div>
                 </div>
               </div>
 
               {/* Progress Bar */}
-              <div className="mb-4">
-                <div className="flex items-center justify-between text-sm mb-2">
-                  <span className="text-[var(--text-secondary)]">Progreso</span>
-                  <span className="text-[var(--text-primary)] font-semibold">
-                    {formatCurrency(goal.current)} / {formatCurrency(goal.target)}
-                  </span>
-                </div>
-
-                <div className="w-full bg-[var(--bg-surface)] rounded-full h-3">
-                  <motion.div
-                    className={`h-3 rounded-full ${status.color.replace('text-', 'bg-')}`}
+              <div className="mb-2">
+                <div className="w-full bg-[var(--bg-surface)] rounded-full h-1.5">
+                  <div
+                    className={`h-1.5 rounded-full transition-all duration-500 ${status.color.replace("text-", "bg-")}`}
                     style={{ width: `${Math.min(progress, 100)}%` }}
-                    initial={{ width: 0 }}
-                    animate={{ width: `${Math.min(progress, 100)}%` }}
-                    transition={{ delay: 1.0 + (index * 0.1), duration: 1.0 }}
                   />
                 </div>
               </div>
 
-              {/* Timeline */}
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <ClockIcon className="w-4 h-4 text-[var(--text-secondary)]" />
-                  <span className="text-[var(--text-secondary)]">
+              <div className="flex items-center justify-between text-xs text-[var(--text-secondary)]">
+                <div className="flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  <span>
                     {daysRemaining > 0
                       ? `${daysRemaining} días restantes`
                       : daysRemaining === 0
-                        ? 'Vence hoy'
-                        : `${Math.abs(daysRemaining)} días vencido`
-                    }
+                        ? "Vence hoy"
+                        : `${Math.abs(daysRemaining)} días vencido`}
                   </span>
                 </div>
-
-                <div className="text-[var(--text-secondary)]">
-                  Vence: {goal.deadline.toLocaleDateString('es-ES')}
-                </div>
+                {progress >= 100 && (
+                  <span className="flex items-center gap-1 text-yellow-400 font-medium">
+                    <Trophy className="w-3 h-3" />
+                    Alcanzado
+                  </span>
+                )}
               </div>
-
-              {/* Achievement Badge */}
-              {progress >= 100 && (
-                <motion.div
-                  className="mt-4 flex items-center justify-center gap-2 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 1.2, duration: 0.5 }}
-                >
-                  <TrophyIcon className="w-5 h-5 text-yellow-400" />
-                  <span className="text-yellow-400 font-semibold">¡Objetivo alcanzado!</span>
-                </motion.div>
-              )}
-            </motion.div>
+            </div>
           )
         })}
       </div>
 
-      {/* Summary */}
-      <motion.div
-        className="mt-6 p-4 bg-[var(--bg-card)] rounded-xl border border-[var(--border-subtle)]"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.0, duration: 0.5 }}
-      >
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-          <div>
-            <div className="text-2xl font-bold text-green-400">
-              {goals.filter(g => getGoalProgress(g.current, g.target) >= 100).length}
-            </div>
-            <div className="text-xs text-[var(--text-secondary)]">Completados</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-blue-400">
-              {goals.filter(g => {
-                const progress = getGoalProgress(g.current, g.target)
-                const daysRemaining = Math.ceil((g.deadline.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
-                return progress < 100 && daysRemaining > 30
-              }).length}
-            </div>
-            <div className="text-xs text-[var(--text-secondary)]">En curso</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-orange-400">
-              {goals.filter(g => {
-                const progress = getGoalProgress(g.current, g.target)
-                const daysRemaining = Math.ceil((g.deadline.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
-                return progress < 100 && daysRemaining <= 30 && daysRemaining >= 0
-              }).length}
-            </div>
-            <div className="text-xs text-[var(--text-secondary)]">Urgentes</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-red-400">
-              {goals.filter(g => {
-                const progress = getGoalProgress(g.current, g.target)
-                const daysRemaining = Math.ceil((g.deadline.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
-                return progress < 100 && daysRemaining < 0
-              }).length}
-            </div>
-            <div className="text-xs text-[var(--text-secondary)]">Vencidos</div>
-          </div>
+      <div className="mt-4 pt-3 border-t border-[var(--border-subtle)] grid grid-cols-4 gap-2 text-center text-xs">
+        <div>
+          <div className="font-bold text-emerald-400">{completed}</div>
+          <div className="text-[var(--text-secondary)]">Completados</div>
         </div>
-      </motion.div>
-    </motion.div>
+        <div>
+          <div className="font-bold text-blue-400">
+            {goals.filter((g) => {
+              const p = getGoalProgress(g.current, g.target)
+              const d = Math.ceil((new Date(g.deadline).getTime() - Date.now()) / 86400000)
+              return p < 100 && d > 30
+            }).length}
+          </div>
+          <div className="text-[var(--text-secondary)]">En curso</div>
+        </div>
+        <div>
+          <div className="font-bold text-orange-400">
+            {goals.filter((g) => {
+              const p = getGoalProgress(g.current, g.target)
+              const d = Math.ceil((new Date(g.deadline).getTime() - Date.now()) / 86400000)
+              return p < 100 && d >= 0 && d <= 30
+            }).length}
+          </div>
+          <div className="text-[var(--text-secondary)]">Urgentes</div>
+        </div>
+        <div>
+          <div className="font-bold text-red-400">
+            {goals.filter((g) => {
+              const p = getGoalProgress(g.current, g.target)
+              const d = Math.ceil((new Date(g.deadline).getTime() - Date.now()) / 86400000)
+              return p < 100 && d < 0
+            }).length}
+          </div>
+          <div className="text-[var(--text-secondary)]">Vencidos</div>
+        </div>
+      </div>
+    </div>
   )
 }

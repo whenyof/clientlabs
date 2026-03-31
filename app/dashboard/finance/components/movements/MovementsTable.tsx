@@ -14,7 +14,7 @@ interface MovementsTableProps {
 function MovementsTableComponent({ movements, selectedId, onSelectMovement, loading }: MovementsTableProps) {
   if (loading) {
     return (
-      <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)]/[0.02] overflow-hidden">
+      <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-hidden">
         <div className="px-4 py-8 text-center text-[var(--text-secondary)] text-sm">
           Cargando movimientos…
         </div>
@@ -24,7 +24,7 @@ function MovementsTableComponent({ movements, selectedId, onSelectMovement, load
 
   if (movements.length === 0) {
     return (
-      <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)]/[0.02] overflow-hidden">
+      <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-hidden">
         <div className="px-4 py-12 text-center text-[var(--text-secondary)]">
           <p className="text-sm font-medium text-[var(--text-secondary)]">No hay movimientos en este período</p>
           <p className="text-xs mt-1">Ajusta filtros o rango de fechas.</p>
@@ -34,11 +34,11 @@ function MovementsTableComponent({ movements, selectedId, onSelectMovement, load
   }
 
   return (
-    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)]/[0.02] overflow-hidden">
+    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[640px]" role="table" aria-label="Movimientos">
           <thead>
-            <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-card)]/[0.03]">
+            <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-card)] border-[var(--border-subtle)]">
               <th className="py-3 px-4 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
                 Fecha
               </th>

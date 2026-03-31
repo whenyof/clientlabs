@@ -2,7 +2,49 @@
 
 import { useSectorConfig } from "@/hooks/useSectorConfig"
 import { formatSaleCurrency } from "../utils"
-import { FinanceStatCard, KpiVariant } from "@/app/dashboard/finance/components/FinanceStatCard"
+import { TrendingUp, TrendingDown } from "lucide-react"
+
+export type KpiVariant = "emerald" | "red" | "violet" | "blue"
+
+const VARIANT_COLOR: Record<KpiVariant, string> = {
+  emerald: "text-emerald-400",
+  red: "text-red-400",
+  violet: "text-violet-400",
+  blue: "text-blue-400",
+}
+
+function FinanceStatCard({
+  label,
+  value,
+  variant,
+  delta,
+  deltaUp,
+  tooltip,
+}: {
+  index: number
+  label: string
+  value: string
+  variant: KpiVariant
+  delta?: string
+  deltaUp?: boolean | null
+  tooltip?: string
+}) {
+  return (
+    <div
+      className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-4"
+      title={tooltip}
+    >
+      <p className="text-xs text-[var(--text-secondary)] mb-1 truncate">{label}</p>
+      <p className={`text-xl font-bold tabular-nums ${VARIANT_COLOR[variant]}`}>{value}</p>
+      {delta != null && delta !== "—" && deltaUp != null && (
+        <div className={`flex items-center gap-0.5 mt-1 text-xs font-medium ${deltaUp ? "text-emerald-400" : "text-red-400"}`}>
+          {deltaUp ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+          {delta}
+        </div>
+      )}
+    </div>
+  )
+}
 
 export type SalesKPIData = {
   revenue: number

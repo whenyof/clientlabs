@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useCallback, useRef, useEffect } from "react"
+import { useMemo, useCallback, useRef } from "react"
 import {
   AreaChart,
   Area,
@@ -10,10 +10,9 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts"
-import { motion } from "framer-motion"
+import { TrendingUp, TrendingDown } from "lucide-react"
 import { formatCurrency } from "../lib/formatters"
 import { useFinanceData } from "../context/FinanceDataContext"
-import { ArrowTrendingUpIcon, ArrowTrendingDownIcon } from "@heroicons/react/24/outline"
 
 const RANGE_OPTIONS = [
   { value: "today", label: "Hoy" },
@@ -40,16 +39,10 @@ export function MainChart() {
     [setPeriod, refetch]
   )
 
-  const rawData = useMemo(() => {
-    return chartSeries.map((d) => ({
-      label: d.label,
-      income: d.income,
-      expense: d.expense,
-      profit: d.profit,
-    }))
-  }, [chartSeries])
-
-  const hasRealData = rawData && rawData.length > 0
+  const rawData = useMemo(
+    () => chartSeries.map((d) => ({ label: d.label, income: d.income, expense: d.expense, profit: d.profit })),
+    [chartSeries]
+  )
 
   const demoData = useMemo(
     () => [
@@ -61,11 +54,9 @@ export function MainChart() {
     []
   )
 
-  const chartData = hasRealData ? rawData : demoData
-
-  // Hard fallback: guarantee plottable data so chart never shows blank (keys must match: label, income, expense, profit)
+  const chartData = rawData.length > 0 ? rawData : demoData
   const finalData =
-    chartData && chartData.length > 0
+    chartData.length > 0
       ? chartData
       : [
           { label: "A", income: 1000, expense: 600, profit: 400 },
@@ -81,193 +72,115 @@ export function MainChart() {
     return [Math.floor(min - pad), Math.ceil(max + pad)]
   }, [finalData])
 
-  const chartContainerRef = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    // Read container height if needed for future layout logic, but avoid debug logging in production.
-    void chartContainerRef.current?.clientHeight
-  }, [])
-
   const periodProfit = kpis?.netProfit ?? 0
   const profitGrowth = trends?.profitGrowth ?? 0
 
   return (
-    <motion.div
-      className="rounded-xl border border-[var(--border-subtle)] bg-gradient-to-b from-white/[0.06] to-transparent p-5 flex flex-col h-[560px] w-full overflow-hidden"
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
+    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-5 flex flex-col w-full overflow-hidden">
       {/* Range selector */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-2 shrink-0">
-        <div className="flex items-center gap-1 rounded-xl bg-[var(--bg-main)] border border-[var(--border-subtle)] p-0.5">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4 shrink-0">
+        <div className="flex items-center gap-1 rounded-lg bg-[var(--bg-card)] border border-[var(--border-subtle)] p-0.5">
           {RANGE_OPTIONS.map((opt) => (
             <button
               key={opt.value}
               type="button"
               onClick={() => handleRangeChange(opt.value)}
               className={`
-                px-4 py-2 rounded-lg text-sm font-medium transition-all
+                px-3 py-1.5 rounded-md text-sm font-medium transition-all
                 ${range === opt.value
-                  ? "bg-[var(--bg-card)]/15 text-[var(--text-primary)] shadow-sm"
-                  : "text-[var(--text-secondary)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-main)]"}
+                  ? "bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-sm"
+                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"}
               `}
             >
               {opt.label}
             </button>
           ))}
         </div>
-      </div>
 
-      {/* Executive summary — profit hero, above the chart */}
-      <div className="shrink-0 mb-4 px-0.5">
-        <p className="text-xs uppercase tracking-wider text-[var(--text-secondary)] font-medium mb-0.5">
-          Beneficio del período
-        </p>
-        <div className="flex items-baseline gap-3 flex-wrap">
-          <span
-            className={`text-3xl font-bold tabular-nums tracking-tight ${
-              periodProfit >= 0 ? "text-emerald-400" : "text-red-400"
-            }`}
-          >
-            {formatCurrency(periodProfit)}
-          </span>
-          {profitGrowth != null && (
-            <span
-              className={`flex items-center gap-1 text-sm font-medium ${
-                profitGrowth >= 0 ? "text-emerald-400" : "text-red-400"
-              }`}
-            >
-              {profitGrowth >= 0 ? (
-                <ArrowTrendingUpIcon className="w-4 h-4" />
-              ) : (
-                <ArrowTrendingDownIcon className="w-4 h-4" />
+        {/* Profit hero */}
+        <div className="flex items-baseline gap-3">
+          <div>
+            <p className="text-[10px] uppercase tracking-wider text-[var(--text-secondary)] font-medium">
+              Beneficio período
+            </p>
+            <div className="flex items-baseline gap-2">
+              <span className={`text-2xl font-bold tabular-nums tracking-tight ${periodProfit >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                {formatCurrency(periodProfit)}
+              </span>
+              {profitGrowth != null && (
+                <span className={`flex items-center gap-0.5 text-xs font-medium ${profitGrowth >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                  {profitGrowth >= 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
+                  {profitGrowth >= 0 ? "+" : ""}{profitGrowth.toFixed(1)}%
+                </span>
               )}
-              {profitGrowth >= 0 ? "+" : ""}
-              {profitGrowth.toFixed(1)}% vs anterior
-            </span>
-          )}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Chart area — explicit height so ResponsiveContainer can render */}
-      <div ref={chartContainerRef} className="w-full mt-4" style={{ height: 420 }}>
-        <ResponsiveContainer width="100%" height={420}>
-          <AreaChart
-            data={finalData}
-            margin={{ top: 12, right: 12, left: 4, bottom: 12 }}
-          >
-                  <defs>
-                    <linearGradient id="chartIncome" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#10b981" stopOpacity={0.35} />
-                      <stop offset="100%" stopColor="#10b981" stopOpacity={0.02} />
-                    </linearGradient>
-                    <linearGradient id="chartExpense" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#ef4444" stopOpacity={0.2} />
-                      <stop offset="100%" stopColor="#ef4444" stopOpacity={0.02} />
-                    </linearGradient>
-                    <linearGradient id="chartProfit" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#a78bfa" stopOpacity={0.45} />
-                      <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.05} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid
-                    strokeDasharray="2 2"
-                    stroke="rgba(255,255,255,0.04)"
-                    vertical={false}
-                  />
-                  <XAxis
-                    dataKey="label"
-                    stroke="rgba(255,255,255,0.35)"
-                    fontSize={10}
-                    tickLine={false}
-                    axisLine={false}
-                    tickMargin={6}
-                  />
-                  <YAxis
-                    stroke="rgba(255,255,255,0.35)"
-                    fontSize={10}
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(v) => `${(v / 1000).toFixed(0)}k€`}
-                    domain={yDomain}
-                    width={40}
-                    tickMargin={2}
-                  />
-                  <Tooltip
-                    content={
-                      <ChartTooltip
-                    trends={trends}
-                    previousPoints={finalData}
-                  />
-                }
-                    cursor={{ stroke: "rgba(255,255,255,0.18)", strokeWidth: 1 }}
-                    isAnimationActive={false}
-                  />
-                  {/* Income — base reference, thicker + soft gradient */}
-                  <Area
-                    type="monotone"
-                    dataKey="income"
-                    stroke="#10b981"
-                    strokeWidth={3}
-                    fill="url(#chartIncome)"
-                    isAnimationActive
-                    animationDuration={600}
-                    animationEasing="ease-out"
-                    dot={false}
-                    activeDot={{ r: 5, fill: "#10b981", stroke: "rgba(255,255,255,0.4)", strokeWidth: 2 }}
-                  />
-                  {/* Expenses — contextual, thin */}
-                  <Area
-                    type="monotone"
-                    dataKey="expense"
-                    stroke="#f87171"
-                    strokeWidth={1.5}
-                    fill="url(#chartExpense)"
-                    isAnimationActive
-                    animationDuration={600}
-                    animationEasing="ease-out"
-                    dot={false}
-                    activeDot={{ r: 4, fill: "#ef4444", stroke: "rgba(255,255,255,0.3)", strokeWidth: 2 }}
-                  />
-                  {/* Profit — hero, thicker + glow */}
-                  <Area
-                    type="monotone"
-                    dataKey="profit"
-                    stroke="#a78bfa"
-                    strokeWidth={3.5}
-                    fill="url(#chartProfit)"
-                    isAnimationActive
-                    animationDuration={600}
-                    animationEasing="ease-out"
-                    dot={false}
-                    activeDot={{
-                      r: 6,
-                      fill: "#a78bfa",
-                      stroke: "rgba(255,255,255,0.5)",
-                      strokeWidth: 2,
-                      style: { filter: "drop-shadow(0 0 6px rgba(167,139,250,0.6))" },
-                    }}
-                  />
+      {/* Chart */}
+      <div style={{ height: 300 }}>
+        <ResponsiveContainer width="100%" height={300}>
+          <AreaChart data={finalData} margin={{ top: 8, right: 8, left: 0, bottom: 8 }}>
+            <defs>
+              <linearGradient id="chartIncome" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#10b981" stopOpacity={0.3} />
+                <stop offset="100%" stopColor="#10b981" stopOpacity={0.02} />
+              </linearGradient>
+              <linearGradient id="chartExpense" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#ef4444" stopOpacity={0.2} />
+                <stop offset="100%" stopColor="#ef4444" stopOpacity={0.02} />
+              </linearGradient>
+              <linearGradient id="chartProfit" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#a78bfa" stopOpacity={0.4} />
+                <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.04} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="2 2" stroke="rgba(0,0,0,0.06)" vertical={false} />
+            <XAxis
+              dataKey="label"
+              stroke="rgba(0,0,0,0.25)"
+              fontSize={10}
+              tickLine={false}
+              axisLine={false}
+              tickMargin={6}
+            />
+            <YAxis
+              stroke="rgba(0,0,0,0.25)"
+              fontSize={10}
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(v) => `${(v / 1000).toFixed(0)}k€`}
+              domain={yDomain}
+              width={38}
+              tickMargin={2}
+            />
+            <Tooltip
+              content={<ChartTooltip trends={trends} previousPoints={finalData} />}
+              cursor={{ stroke: "rgba(0,0,0,0.1)", strokeWidth: 1 }}
+              isAnimationActive={false}
+            />
+            <Area type="monotone" dataKey="income" stroke="#10b981" strokeWidth={2.5} fill="url(#chartIncome)" isAnimationActive animationDuration={500} dot={false} activeDot={{ r: 4, fill: "#10b981", strokeWidth: 0 }} />
+            <Area type="monotone" dataKey="expense" stroke="#f87171" strokeWidth={1.5} fill="url(#chartExpense)" isAnimationActive animationDuration={500} dot={false} activeDot={{ r: 3, fill: "#ef4444", strokeWidth: 0 }} />
+            <Area type="monotone" dataKey="profit" stroke="#a78bfa" strokeWidth={3} fill="url(#chartProfit)" isAnimationActive animationDuration={500} dot={false} activeDot={{ r: 5, fill: "#a78bfa", strokeWidth: 0 }} />
           </AreaChart>
         </ResponsiveContainer>
       </div>
 
       {/* Legend */}
-      <div className="flex items-center justify-center gap-6 mt-3 shrink-0 pt-3 border-t border-[var(--border-subtle)]">
-        <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-          <span className="text-xs font-medium text-[var(--text-secondary)]">Ingresos</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
-          <span className="text-xs font-medium text-[var(--text-secondary)]">Gastos</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-violet-400 shadow-[0_0_8px_rgba(167,139,250,0.5)]" />
-          <span className="text-xs font-medium text-[var(--text-secondary)]">Beneficio</span>
-        </div>
+      <div className="flex items-center justify-center gap-5 mt-3 pt-3 border-t border-[var(--border-subtle)] shrink-0">
+        {[
+          { color: "bg-emerald-500", label: "Ingresos" },
+          { color: "bg-red-500/80", label: "Gastos" },
+          { color: "bg-violet-400", label: "Beneficio" },
+        ].map((l) => (
+          <div key={l.label} className="flex items-center gap-1.5">
+            <div className={`w-2 h-2 rounded-full ${l.color}`} />
+            <span className="text-xs font-medium text-[var(--text-secondary)]">{l.label}</span>
+          </div>
+        ))}
       </div>
-    </motion.div>
+    </div>
   )
 }
 
@@ -294,92 +207,33 @@ function ChartTooltip({
 
   const idx = previousPoints.findIndex((p) => p.label === label)
   const prev = idx > 0 ? previousPoints[idx - 1] : null
-  const deltaIncome = prev != null && prev.income !== 0 ? ((income - prev.income) / prev.income) * 100 : null
-  const deltaExpense = prev != null && prev.expense !== 0 ? ((expense - prev.expense) / prev.expense) * 100 : null
-  const deltaProfit = prev != null && prev.profit !== 0 ? ((profit - prev.profit) / Math.abs(prev.profit)) * 100 : null
+  const deltaIncome = prev && prev.income !== 0 ? ((income - prev.income) / prev.income) * 100 : null
+  const deltaExpense = prev && prev.expense !== 0 ? ((expense - prev.expense) / prev.expense) * 100 : null
 
   return (
-    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] shadow-[var(--shadow-card)] backdrop-blur-xl overflow-hidden min-w-[220px] ring-1 ring-white/10">
-      <div className="px-4 pt-3.5 pb-2.5 border-b border-[var(--border-subtle)]">
+    <div className="rounded-xl border border-[var(--border-subtle)] bg-white shadow-xl min-w-[200px]">
+      <div className="px-4 pt-3 pb-2 border-b border-[var(--border-subtle)]">
         <p className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">{label}</p>
       </div>
-      <div className="px-4 py-3.5 space-y-2.5">
+      <div className="px-4 py-3 space-y-2">
         <div className="flex justify-between items-baseline gap-6">
-          <span className="text-sm text-[var(--text-secondary)]">Ingresos</span>
-          <span className="text-base font-semibold tabular-nums text-emerald-400">
-            {formatCurrency(income)}
-          </span>
+          <span className="text-xs text-[var(--text-secondary)]">Ingresos</span>
+          <span className="text-sm font-semibold tabular-nums text-emerald-400">{formatCurrency(income)}</span>
         </div>
         {deltaIncome != null && (
-          <p className="text-[11px] text-[var(--text-secondary)] -mt-1">
-            {deltaIncome >= 0 ? "+" : ""}{deltaIncome.toFixed(1)}% vs anterior
-          </p>
+          <p className="text-[10px] text-[var(--text-secondary)] -mt-1">{deltaIncome >= 0 ? "+" : ""}{deltaIncome.toFixed(1)}% vs anterior</p>
         )}
         <div className="flex justify-between items-baseline gap-6">
-          <span className="text-sm text-[var(--text-secondary)]">Gastos</span>
-          <span className="text-base font-semibold tabular-nums text-red-400">
-            {formatCurrency(expense)}
-          </span>
+          <span className="text-xs text-[var(--text-secondary)]">Gastos</span>
+          <span className="text-sm font-semibold tabular-nums text-red-400">{formatCurrency(expense)}</span>
         </div>
         {deltaExpense != null && (
-          <p className="text-[11px] text-[var(--text-secondary)] -mt-1">
-            {deltaExpense >= 0 ? "+" : ""}{deltaExpense.toFixed(1)}% vs anterior
-          </p>
+          <p className="text-[10px] text-[var(--text-secondary)] -mt-1">{deltaExpense >= 0 ? "+" : ""}{deltaExpense.toFixed(1)}% vs anterior</p>
         )}
-        <div className="flex justify-between items-baseline gap-6 pt-2 border-t border-[var(--border-subtle)]">
-          <span className="text-sm text-[var(--text-secondary)]">Beneficio</span>
-          <span className="text-base font-semibold tabular-nums text-emerald-400">
-            {formatCurrency(profit)}
-          </span>
+        <div className="flex justify-between items-baseline gap-6 pt-1.5 border-t border-[var(--border-subtle)]">
+          <span className="text-xs text-[var(--text-secondary)]">Beneficio</span>
+          <span className="text-sm font-semibold tabular-nums text-violet-400">{formatCurrency(profit)}</span>
         </div>
-        {deltaProfit != null && (
-          <p className="text-[11px] text-[var(--text-secondary)] -mt-1">
-            {deltaProfit >= 0 ? "+" : ""}{deltaProfit.toFixed(1)}% vs anterior
-          </p>
-        )}
-        {trends && (trends.incomeGrowth != null || trends.profitGrowth != null) && (
-          <div className="pt-2 mt-2 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-2 text-[11px] text-[var(--text-secondary)]">
-            <span>Resumen período:</span>
-            {trends.incomeGrowth != null && (
-              <span className={trends.incomeGrowth >= 0 ? "text-emerald-400" : "text-red-400"}>
-                Ingresos {trends.incomeGrowth >= 0 ? "+" : ""}{trends.incomeGrowth.toFixed(1)}%
-              </span>
-            )}
-            {trends.profitGrowth != null && (
-              <span className={trends.profitGrowth >= 0 ? "text-emerald-400" : "text-red-400"}>
-                Resultado {trends.profitGrowth >= 0 ? "+" : ""}{trends.profitGrowth.toFixed(1)}%
-              </span>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
-function EmptyChartWithAxes() {
-  const emptyData = useMemo(() => [{ label: "", income: 0, expense: 0, profit: 0 }], [])
-  return (
-    <div className="relative w-full h-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={emptyData} margin={{ top: 12, right: 12, left: 4, bottom: 12 }}>
-          <CartesianGrid strokeDasharray="2 2" stroke="rgba(255,255,255,0.05)" vertical={false} />
-          <XAxis dataKey="label" stroke="rgba(255,255,255,0.25)" fontSize={10} tickLine={false} axisLine={false} />
-          <YAxis
-            stroke="rgba(255,255,255,0.25)"
-            fontSize={10}
-            tickLine={false}
-            axisLine={false}
-            tickFormatter={(v) => `${(v / 1000).toFixed(0)}k€`}
-            domain={[0, 100]}
-            width={40}
-          />
-        </AreaChart>
-      </ResponsiveContainer>
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <p className="text-sm text-[var(--text-secondary)] text-center max-w-[260px]">
-          Sin datos en este período. Cambia el rango o registra movimientos.
-        </p>
       </div>
     </div>
   )

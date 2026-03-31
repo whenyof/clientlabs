@@ -151,7 +151,6 @@ export async function getFinanceSummary(
  pendingIncome,
  }
  } catch (err) {
- console.error("[finance-aggregator] getFinanceSummary error:", err)
  return {
  income: 0,
  expenses: 0,

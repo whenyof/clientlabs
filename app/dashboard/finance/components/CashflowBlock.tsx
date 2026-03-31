@@ -1,7 +1,6 @@
 "use client"
 
-import { motion } from "framer-motion"
-import { ArrowUpIcon, ArrowDownIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/outline"
+import { ArrowUp, ArrowDown, ArrowLeftRight } from "lucide-react"
 import { formatCurrency } from "../lib/formatters"
 import { useFinanceData } from "../context/FinanceDataContext"
 
@@ -13,17 +12,15 @@ export function CashflowBlock() {
   const outflow = Math.abs(k?.totalExpenses ?? 0)
 
   if (loading) {
-    return (
-      <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)]/[0.03] p-5 animate-pulse h-56" />
-    )
+    return <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-5 animate-pulse h-56" />
   }
 
   if (inflow === 0 && outflow === 0) {
     return (
-      <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)]/[0.03] p-5">
+      <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-5">
         <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-1">Flujo de caja</h3>
         <p className="text-xs text-[var(--text-secondary)] mb-4">Entradas, salidas y neto</p>
-        <div className="py-6 text-center text-[var(--text-secondary)] text-sm">Sin datos</div>
+        <div className="py-6 text-center text-[var(--text-secondary)] text-sm">Sin datos en este período</div>
       </div>
     )
   }
@@ -32,43 +29,38 @@ export function CashflowBlock() {
     {
       label: "Entradas",
       amount: inflow,
-      icon: ArrowUpIcon,
+      icon: ArrowUp,
       color: "text-green-400",
       bgColor: "bg-green-500/10",
-      borderColor: "border-green-500/20"
+      borderColor: "border-green-500/20",
     },
     {
       label: "Salidas",
       amount: outflow,
-      icon: ArrowDownIcon,
+      icon: ArrowDown,
       color: "text-red-400",
       bgColor: "bg-red-500/10",
-      borderColor: "border-red-500/20"
+      borderColor: "border-red-500/20",
     },
     {
       label: "Flujo Neto",
       amount: cashFlow,
-      icon: ArrowsRightLeftIcon,
+      icon: ArrowLeftRight,
       color: cashFlow >= 0 ? "text-blue-400" : "text-orange-400",
       bgColor: cashFlow >= 0 ? "bg-blue-500/10" : "bg-orange-500/10",
-      borderColor: cashFlow >= 0 ? "border-blue-500/20" : "border-orange-500/20"
-    }
+      borderColor: cashFlow >= 0 ? "border-blue-500/20" : "border-orange-500/20",
+    },
   ]
 
   const total = Math.max(inflow, outflow, 1)
   const percentage = (v: number) => (Math.abs(v) / total) * 100
 
   return (
-    <motion.div
-      className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)]/[0.03] p-5"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.25 }}
-    >
+    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-5">
       <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-1">Flujo de caja</h3>
       <p className="text-xs text-[var(--text-secondary)] mb-4">Entradas, salidas y neto</p>
 
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         {flowItems.map((item) => {
           const Icon = item.icon
           const pct = item.label === "Flujo Neto" ? undefined : percentage(item.amount)
@@ -96,13 +88,13 @@ export function CashflowBlock() {
         })}
       </div>
 
-      <div className={`mt-4 flex items-center justify-between p-3 rounded-lg ${cashFlow >= 0 ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-rose-500/10 border border-rose-500/20'}`}>
+      <div className={`mt-3 flex items-center justify-between px-3 py-2.5 rounded-lg ${cashFlow >= 0 ? "bg-emerald-500/10 border border-emerald-500/20" : "bg-rose-500/10 border border-rose-500/20"}`}>
         <span className="text-xs font-medium text-[var(--text-secondary)]">Estado</span>
-        <span className={`text-sm font-semibold ${cashFlow >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-          {cashFlow >= 0 ? 'Positivo' : 'Negativo'}
+        <span className={`text-sm font-semibold ${cashFlow >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+          {cashFlow >= 0 ? "Positivo" : "Negativo"}
         </span>
         <span className="text-xs text-[var(--text-secondary)]">{formatCurrency(Math.abs(cashFlow))}</span>
       </div>
-    </motion.div>
+    </div>
   )
 }

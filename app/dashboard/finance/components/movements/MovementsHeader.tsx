@@ -1,6 +1,6 @@
 "use client"
 
-import { MagnifyingGlassIcon, ArrowsUpDownIcon } from "@heroicons/react/24/outline"
+import { Search } from "lucide-react"
 import { FilterDropdown } from "@/components/ui/FilterDropdown"
 import type { MovementSortField, MovementSortDir } from "@domains/finance"
 
@@ -71,7 +71,7 @@ export function MovementsHeader({
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="relative flex-1 max-w-md">
-        <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)] pointer-events-none" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)] pointer-events-none" />
         <input
           type="search"
           placeholder="Buscar por contacto o concepto..."

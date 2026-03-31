@@ -184,9 +184,6 @@ export async function loadFinancePageData(
     const income = summary.income
     const expenses = summary.expenses
     const netProfit = summary.profit
-    if (typeof process !== "undefined") {
-      console.log("KPI income:", income, "KPI expenses:", expenses, "Movements:", ledgerMovements.length)
-    }
     const cashFlow = summary.profit
     const pendingPayments = summary.pendingIncome
     const incomeGrowth = growthRate(income, prevSummary.income)
@@ -315,8 +312,7 @@ export async function loadFinancePageData(
       movements: serializedMovements,
       ledgerMovements,
     }
-  } catch (err) {
-    console.error("[loadFinancePageData] error:", err)
+  } catch {
     return {
       analytics: {
         success: false,

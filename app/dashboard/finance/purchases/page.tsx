@@ -142,8 +142,6 @@ export default async function PurchasesPage() {
   // Orders (primary expense source) + Standalone Payments (direct) + Expenses (transactions)
   const purchasesAsSales: Sale[] = [...ordersAsSales, ...paymentsAsSales, ...expensesAsSales]
 
-  console.log("PURCHASE KPI SOURCE:", purchasesAsSales.length)
-
   return (
     <SalesDashboard
       mode="purchases"

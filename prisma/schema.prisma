@@ -385,6 +385,8 @@ model Client {
   Sale                Sale[]
   Task                Task[]
   transactions        Transaction[]
+  quotes              Quote[]
+  deliveryNotes       DeliveryNote[]
 
   @@index([createdAt])
   @@index([email])
@@ -917,6 +919,9 @@ model User {
   impersonatedBy         ImpersonationSession[]  @relation("ImpersonatedBy")
   impersonationTarget    ImpersonationSession[]  @relation("ImpersonationTarget")
   calendarIntegration    CalendarIntegration?
+  products               Product[]
+  quotes                 Quote[]
+  deliveryNotes          DeliveryNote[]
 }
 
 model CalendarIntegration {
@@ -2410,4 +2415,134 @@ enum BillingInvoiceStatus {
 enum BillingReminderType {
   BEFORE
   AFTER
+}
+
+// ─── Commercial documents ────────────────────────────────────────────────────
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  CONVERTED
+}
+
+enum DeliveryNoteStatus {
+  DRAFT
+  DELIVERED
+  SIGNED
+  CONVERTED
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  price       Float
+  taxRate     Float    @default(21)
+  unit        String   @default("ud")
+  category    String?
+  isService   Boolean  @default(false)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+  user        User     @relation(fields: [userId], references: [id])
+  quoteItems  QuoteItem[]
+  deliveryNoteItems DeliveryNoteItem[]
+
+  @@index([userId])
+  @@index([active])
+  @@map("products")
+}
+
+model Quote {
+  id                        String      @id @default(cuid())
+  userId                    String
+  clientId                  String
+  number                    String
+  series                    String      @default("P")
+  status                    QuoteStatus @default(DRAFT)
+  issueDate                 DateTime    @default(now())
+  validUntil                DateTime
+  notes                     String?
+  terms                     String?
+  subtotal                  Float       @default(0)
+  taxTotal                  Float       @default(0)
+  total                     Float       @default(0)
+  pdfUrl                    String?
+  convertedToInvoiceId      String?
+  convertedToDeliveryNoteId String?
+  createdAt                 DateTime    @default(now())
+  updatedAt                 DateTime    @updatedAt
+  deletedAt                 DateTime?
+  user                      User        @relation(fields: [userId], references: [id])
+  client                    Client      @relation(fields: [clientId], references: [id])
+  items                     QuoteItem[]
+  deliveryNote              DeliveryNote?
+
+  @@index([userId])
+  @@index([clientId])
+  @@index([status])
+  @@map("quotes")
+}
+
+model QuoteItem {
+  id          String   @id @default(cuid())
+  quoteId     String
+  productId   String?
+  description String
+  quantity    Float    @default(1)
+  unitPrice   Float
+  taxRate     Float    @default(21)
+  subtotal    Float
+  quote       Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  product     Product? @relation(fields: [productId], references: [id])
+
+  @@index([quoteId])
+  @@map("quote_items")
+}
+
+model DeliveryNote {
+  id                   String             @id @default(cuid())
+  userId               String
+  clientId             String
+  quoteId              String?            @unique
+  number               String
+  series               String             @default("A")
+  status               DeliveryNoteStatus @default(DRAFT)
+  issueDate            DateTime           @default(now())
+  deliveryDate         DateTime?
+  notes                String?
+  pdfUrl               String?
+  convertedToInvoiceId String?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  deletedAt            DateTime?
+  user                 User               @relation(fields: [userId], references: [id])
+  client               Client             @relation(fields: [clientId], references: [id])
+  quote                Quote?             @relation(fields: [quoteId], references: [id])
+  items                DeliveryNoteItem[]
+
+  @@index([userId])
+  @@index([clientId])
+  @@index([status])
+  @@map("delivery_notes")
+}
+
+model DeliveryNoteItem {
+  id             String       @id @default(cuid())
+  deliveryNoteId String
+  productId      String?
+  description    String
+  quantity       Float        @default(1)
+  unitPrice      Float        @default(0)
+  delivered      Boolean      @default(true)
+  deliveryNote   DeliveryNote @relation(fields: [deliveryNoteId], references: [id], onDelete: Cascade)
+  product        Product?     @relation(fields: [productId], references: [id])
+
+  @@index([deliveryNoteId])
+  @@map("delivery_note_items")
 }

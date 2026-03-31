@@ -13,6 +13,7 @@ import { BillingHistory } from "./components/BillingHistory"
 import { UsageLimits } from "./components/UsageLimits"
 import { AppearanceSettings } from "./components/AppearanceSettings"
 import { DangerZone } from "./components/DangerZone"
+import { ProductCatalog } from "./components/ProductCatalog"
 
 export default function SettingsPage() {
   const searchParams = useSearchParams()
@@ -29,6 +30,7 @@ export default function SettingsPage() {
     { id: 'billing', component: BillingHistory },
     { id: 'usage', component: UsageLimits },
     { id: 'appearance', component: AppearanceSettings },
+    { id: 'catalog', component: ProductCatalog },
     { id: 'danger', component: DangerZone },
   ]
 

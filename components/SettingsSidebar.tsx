@@ -15,7 +15,8 @@ import {
     ChartBarIcon,
     PaintBrushIcon,
     ExclamationTriangleIcon,
-    CommandLineIcon
+    CommandLineIcon,
+    ArchiveBoxIcon,
 } from "@heroicons/react/24/outline"
 
 export function SettingsSidebar() {
@@ -36,6 +37,7 @@ export function SettingsSidebar() {
         { id: 'billing', label: s.billing, icon: ChartBarIcon, href: '/dashboard/settings?section=billing' },
         { id: 'usage', label: s.usage, icon: ChartBarIcon, href: '/dashboard/settings?section=usage' },
         { id: 'appearance', label: s.appearance, icon: PaintBrushIcon, href: '/dashboard/settings?section=appearance' },
+        { id: 'catalog', label: 'Catálogo', icon: ArchiveBoxIcon, href: '/dashboard/settings?section=catalog' },
         { id: 'api', label: s.api, icon: CommandLineIcon, href: '/dashboard/settings/api' },
         { id: 'danger', label: s.dangerZone, icon: ExclamationTriangleIcon, href: '/dashboard/settings?section=danger', danger: true },
     ]

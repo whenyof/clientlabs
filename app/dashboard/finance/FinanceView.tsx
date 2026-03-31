@@ -16,16 +16,17 @@ import { AutomationFinance } from "./components/AutomationFinance"
 import { Budgets } from "./components/Budgets"
 import { Goals } from "./components/Goals"
 import { CreateTransactionModal } from "./components/CreateTransactionModal"
+import { DocumentsView } from "./components/DocumentsView"
 import type { FinancePageData } from "./lib/server-data"
 
-type FinanceTab = "resumen" | "tesoreria" | "facturas" | "compras" | "presupuestos"
+type FinanceTab = "resumen" | "tesoreria" | "documentos" | "ventas" | "compras"
 
 const TABS: { id: FinanceTab; label: string }[] = [
   { id: "resumen", label: "Resumen" },
   { id: "tesoreria", label: "Tesorería" },
-  { id: "facturas", label: "Facturas" },
+  { id: "documentos", label: "Documentos" },
+  { id: "ventas", label: "Ventas" },
   { id: "compras", label: "Compras" },
-  { id: "presupuestos", label: "Presupuestos y Objetivos" },
 ]
 
 type Props = {
@@ -103,13 +104,17 @@ export function FinanceView({ initialData, period, view, billingNode, purchasesN
     overview: "resumen",
     tesoreria: "tesoreria",
     transactions: "tesoreria",
-    facturas: "facturas",
-    billing: "facturas",
+    documentos: "documentos",
+    documents: "documentos",
+    presupuestos: "documentos",
+    quotes: "documentos",
+    albaranes: "documentos",
+    facturas: "ventas",
+    billing: "ventas",
+    ventas: "ventas",
+    sales: "ventas",
     compras: "compras",
     purchases: "compras",
-    presupuestos: "presupuestos",
-    budgets: "presupuestos",
-    goals: "presupuestos",
   }
 
   const urlView = searchParams.get("view") ?? view ?? "resumen"
@@ -217,7 +222,14 @@ export function FinanceView({ initialData, period, view, billingNode, purchasesN
             </div>
           )}
 
-          {activeTab === "facturas" && (
+          {activeTab === "documentos" && (
+            <DocumentsView
+              billingNode={billingNode}
+              onNavigateToInvoices={() => handleTabChange("ventas")}
+            />
+          )}
+
+          {activeTab === "ventas" && (
             <Suspense fallback={<div className="h-48 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] animate-pulse" />}>
               {billingNode}
             </Suspense>
@@ -227,13 +239,6 @@ export function FinanceView({ initialData, period, view, billingNode, purchasesN
             <Suspense fallback={<div className="h-48 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] animate-pulse" />}>
               {purchasesNode}
             </Suspense>
-          )}
-
-          {activeTab === "presupuestos" && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-              <Budgets />
-              <Goals />
-            </div>
           )}
         </div>
 

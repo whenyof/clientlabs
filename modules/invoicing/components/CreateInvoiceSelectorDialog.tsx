@@ -27,40 +27,36 @@ export function CreateInvoiceSelectorDialog({
       <div
         role="dialog"
         aria-label="Crear factura"
-        className="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl border border-white/10 bg-[#0f0f12] shadow-2xl overflow-hidden"
+        className="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl border border-slate-200 bg-white shadow-lg overflow-hidden"
       >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
-          <div>
-            <h2 className="text-lg font-semibold text-white">Crear factura</h2>
-            <p className="text-sm text-white/60 mt-0.5">Elige cómo quieres generarla</p>
-          </div>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+          <h2 className="text-[17px] font-semibold text-slate-900">Crear factura</h2>
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-lg text-white/60 hover:text-white hover:bg-white/10"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
             aria-label="Cerrar"
           >
-            <XMarkIcon className="w-5 h-5" />
+            <XMarkIcon className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="p-5 flex flex-col sm:flex-row gap-4">
+        <div className="px-6 py-5 flex flex-col sm:flex-row gap-4">
           <button
             type="button"
             onClick={() => {
               onClose()
               onManual()
             }}
-            className="flex-1 flex flex-col items-start gap-2 rounded-xl border border-white/10 bg-white/[0.02] p-4 text-left hover:bg-white/[0.06] hover:border-white/20 transition-colors"
+            className="flex-1 flex flex-col items-start gap-2 rounded-xl border border-slate-200 bg-white p-4 text-left hover:border-[#1FA97A]/40 hover:shadow-[0_2px_8px_rgba(31,169,122,0.08)] transition-all"
           >
-            <span className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-white/10 text-white">
-              <PencilSquareIcon className="w-5 h-5" />
+            <span className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-slate-50 border border-slate-100 text-slate-500">
+              <PencilSquareIcon className="w-4 h-4" />
             </span>
-            <span className="text-sm font-medium text-white">Manual</span>
-            <p className="text-xs text-white/60">
+            <span className="text-[13px] font-medium text-slate-900">Manual</span>
+            <p className="text-[12px] text-slate-500">
               Crea la factura introduciendo los datos manualmente.
             </p>
-            <span className="text-sm font-medium text-white/90 mt-1">Continuar manual</span>
           </button>
 
           <button
@@ -69,16 +65,25 @@ export function CreateInvoiceSelectorDialog({
               onClose()
               onFromSale()
             }}
-            className="flex-1 flex flex-col items-start gap-2 rounded-xl border border-white/10 bg-white/[0.02] p-4 text-left hover:bg-white/[0.06] hover:border-white/20 transition-colors"
+            className="flex-1 flex flex-col items-start gap-2 rounded-xl border border-slate-200 bg-white p-4 text-left hover:border-[#1FA97A]/40 hover:shadow-[0_2px_8px_rgba(31,169,122,0.08)] transition-all"
           >
-            <span className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-white/10 text-white">
-              <ShoppingCartIcon className="w-5 h-5" />
+            <span className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-slate-50 border border-slate-100 text-slate-500">
+              <ShoppingCartIcon className="w-4 h-4" />
             </span>
-            <span className="text-sm font-medium text-white">Desde venta</span>
-            <p className="text-xs text-white/60">
+            <span className="text-[13px] font-medium text-slate-900">Desde venta</span>
+            <p className="text-[12px] text-slate-500">
               Genera automáticamente la factura usando una venta existente.
             </p>
-            <span className="text-sm font-medium text-white/90 mt-1">Elegir venta</span>
+          </button>
+        </div>
+
+        <div className="px-6 py-4 border-t border-slate-100 flex justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            className="border border-slate-200 text-slate-700 rounded-xl px-5 py-2.5 text-[13px] hover:bg-slate-50 transition-colors"
+          >
+            Cancelar
           </button>
         </div>
       </div>

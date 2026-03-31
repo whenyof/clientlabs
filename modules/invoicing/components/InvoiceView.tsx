@@ -412,15 +412,23 @@ export function InvoiceView() {
   const editable = isInvoiceEditable(selectedInvoice)
 
   return (
-    <div className="w-full space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-lg font-semibold text-white">Facturación</h2>
+    <div className="w-full space-y-5">
+      {/* Header bar */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="flex items-center gap-3">
+          <h2 className="text-[15px] font-semibold text-slate-900">Facturas</h2>
+          {!loading && (
+            <span className="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
+              {invoices.length} {invoices.length === 1 ? "factura" : "facturas"}
+            </span>
+          )}
+        </div>
         <button
           type="button"
           onClick={handleOpenNewInvoice}
-          className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/15 transition-colors shrink-0"
+          className="flex items-center gap-2 px-4 py-2 bg-[#1FA97A] text-white rounded-lg text-[12px] font-medium hover:bg-[#178f68] transition-colors shrink-0"
         >
-          <PlusIcon className="w-4 h-4" /> Nueva factura
+          <PlusIcon className="w-3.5 h-3.5" /> Nueva factura
         </button>
       </div>
 
@@ -431,19 +439,19 @@ export function InvoiceView() {
         return <InvoiceKPIs kpis={kpis} loading={loading} />
       })()}
 
-      {/* Step 10 — Header totals: Total facturado, Pendiente, Vencido */}
+      {/* Totals summary bar */}
       {!loading && invoices.length > 0 && (() => {
         const totals = computeHeaderTotals(invoices)
         return (
-          <div className="flex flex-wrap items-center gap-6 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3 text-sm">
-            <span className="text-white/60">
-              Total facturado: <strong className="text-white/90">{formatCurrency(totals.totalFacturado, "EUR")}</strong>
+          <div className="flex flex-wrap items-center gap-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm">
+            <span className="text-slate-500">
+              Total facturado: <strong className="text-slate-900">{formatCurrency(totals.totalFacturado, "EUR")}</strong>
             </span>
-            <span className="text-white/60">
-              Pendiente: <strong className="text-amber-400">{formatCurrency(totals.pendiente, "EUR")}</strong>
+            <span className="text-slate-500">
+              Pendiente: <strong className="text-amber-600">{formatCurrency(totals.pendiente, "EUR")}</strong>
             </span>
-            <span className="text-white/60">
-              Vencido: <strong className="text-red-400">{totals.vencido} facturas</strong>
+            <span className="text-slate-500">
+              Vencido: <strong className="text-red-500">{totals.vencido} {totals.vencido === 1 ? "factura" : "facturas"}</strong>
             </span>
           </div>
         )

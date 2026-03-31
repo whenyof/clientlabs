@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronRight, Download, Upload } from "lucide-react"
+import { ShoppingCart, Download, Upload, ChevronRight } from "lucide-react"
 import { useSectorConfig } from "@/hooks/useSectorConfig"
 import { cn } from "@/lib/utils"
 import { formatSaleCurrency, getPaymentStatusLabel, formatSaleDateDisplay, parseSaleDate } from "../utils"
@@ -25,9 +25,9 @@ function getPaymentVariant(sale: Sale): "paid" | "pending" | "overdue" {
 }
 
 const pillClass = {
-  paid: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-  pending: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-  overdue: "bg-rose-500/20 text-rose-400 border-rose-500/30",
+  paid: "bg-[#E1F5EE] text-[#0F6E56] border border-[#9FE1CB]",
+  pending: "bg-amber-50 text-amber-700 border border-amber-200",
+  overdue: "bg-red-50 text-red-700 border border-red-200",
 }
 
 export function SalesLedger({ mode = "sales", sales, onSelectSale }: Props) {
@@ -37,162 +37,156 @@ export function SalesLedger({ mode = "sales", sales, onSelectSale }: Props) {
 
   if (sales.length === 0) {
     return (
-      <div className="rounded-xl border border-white/10 bg-white/5 p-12 text-center backdrop-blur">
-        <p className="text-white/60">{labels.common?.noResults ?? "No hay resultados"}</p>
-        <p className="text-sm text-white/40 mt-1">{isPurchases ? "Registro de compras" : (sl?.pageSubtitle ?? "")}</p>
+      <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center mb-4">
+            <ShoppingCart className="h-5 w-5 text-slate-400" />
+          </div>
+          <p className="text-[14px] font-medium text-slate-700 mb-1">
+            {isPurchases ? "No hay compras todavía" : (labels.common?.noResults ?? "No hay resultados")}
+          </p>
+          <p className="text-[12px] text-slate-400">
+            {isPurchases ? "Registra tus gastos y compras a proveedores" : (sl?.pageSubtitle ?? "")}
+          </p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div>
-      <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur overflow-hidden">
-        <div className="px-4 py-3 border-b border-white/10">
-          <h3 className="text-sm font-medium text-white/70">
-            {isPurchases ? "Registro de compras" : (sl?.table?.registerTitle ?? "Registro de ventas")}
-          </h3>
-        </div>
-
-        {/* Mobile View: Stacked Cards */}
-        <div className="md:hidden p-4 space-y-3">
-          {sales.map((sale) => {
-            const variant = getPaymentVariant(sale)
-            const statusLabel = getPaymentStatusLabel(sale.status, sl)
-            return (
-              <div
-                key={sale.id}
-                onClick={() => onSelectSale(sale)}
-                className="bg-white/5 border border-white/10 rounded-xl p-4 active:scale-[0.98] transition-transform"
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <p className="font-semibold text-white text-base">{sale.clientName}</p>
-                    {sale.product && <p className="text-xs text-white/50 mt-0.5 max-w-[180px] truncate">{sale.product}</p>}
-                  </div>
-                  <p className="text-lg font-bold text-emerald-300 tabular-nums">
-                    {formatSaleCurrency(Number(sale.total), sale.currency)}
-                  </p>
+    <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+      {/* Mobile View: Stacked Cards */}
+      <div className="md:hidden p-4 space-y-3">
+        {sales.map((sale) => {
+          const variant = getPaymentVariant(sale)
+          const statusLabel = getPaymentStatusLabel(sale.status, sl)
+          return (
+            <div
+              key={sale.id}
+              onClick={() => onSelectSale(sale)}
+              className="border border-slate-200 rounded-xl p-4 cursor-pointer hover:border-slate-300 transition-colors"
+            >
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <p className="font-semibold text-slate-900 text-[13px]">{sale.clientName}</p>
+                  {sale.product && (
+                    <p className="text-[11px] text-slate-500 mt-0.5 max-w-[180px] truncate">{sale.product}</p>
+                  )}
                 </div>
+                <p className="text-[15px] font-semibold text-slate-900 tabular-nums">
+                  {formatSaleCurrency(Number(sale.total), sale.currency)}
+                </p>
+              </div>
+              <div className="flex justify-between items-center mt-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] text-slate-400">{formatSaleDateDisplay(sale.saleDate)}</span>
+                  <span
+                    className={cn(
+                      "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium",
+                      pillClass[variant]
+                    )}
+                  >
+                    {statusLabel}
+                  </span>
+                </div>
+                <ChevronRight className="h-4 w-4 text-slate-300" />
+              </div>
+            </div>
+          )
+        })}
+      </div>
 
-                <div className="flex justify-between items-center mt-3">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-xs text-white/40">{formatSaleDateDisplay(sale.saleDate)}</span>
+      {/* Desktop View: Table */}
+      <div className="hidden md:block overflow-x-auto max-h-[480px] overflow-y-auto">
+        <table className="w-full">
+          <thead className="sticky top-0 bg-slate-50 z-[1]">
+            <tr className="border-b border-slate-100">
+              <th className="text-left text-[10px] font-medium text-slate-400 uppercase tracking-wider py-3 px-4">
+                {isPurchases ? "Proveedor" : (sl?.table?.client ?? "Cliente")}
+              </th>
+              <th className="text-left text-[10px] font-medium text-slate-400 uppercase tracking-wider py-3 px-4">
+                {sl?.table?.date ?? "Fecha"}
+              </th>
+              <th className="text-left text-[10px] font-medium text-slate-400 uppercase tracking-wider py-3 px-4">
+                {sl?.table?.state ?? "Estado"}
+              </th>
+              <th className="text-right text-[10px] font-medium text-slate-400 uppercase tracking-wider py-3 px-4">
+                {isPurchases ? "Importe" : (sl?.table?.amount ?? "Total")}
+              </th>
+              <th className="text-center text-[10px] font-medium text-slate-400 uppercase tracking-wider py-3 px-4 w-[100px]">
+                {isPurchases ? "Documento" : "Factura"}
+              </th>
+              <th className="w-10 px-2" />
+            </tr>
+          </thead>
+          <tbody>
+            {sales.map((sale) => {
+              const variant = getPaymentVariant(sale)
+              const statusLabel = getPaymentStatusLabel(sale.status, sl)
+              return (
+                <tr
+                  key={sale.id}
+                  onClick={() => onSelectSale(sale)}
+                  className="border-b border-slate-100 transition-colors cursor-pointer hover:bg-slate-50/50"
+                >
+                  <td className="py-3.5 px-4">
+                    <p className="font-medium text-slate-900 text-[13px] truncate max-w-[200px]">
+                      {sale.clientName}
+                    </p>
+                    {sale.product ? (
+                      <p className="text-[11px] text-slate-400 truncate max-w-[200px] mt-0.5">{sale.product}</p>
+                    ) : null}
+                  </td>
+                  <td className="py-3.5 px-4 text-[12px] text-slate-500 whitespace-nowrap">
+                    {formatSaleDateDisplay(sale.saleDate)}
+                  </td>
+                  <td className="py-3.5 px-4">
                     <span
                       className={cn(
-                        "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border w-fit",
+                        "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium",
                         pillClass[variant]
                       )}
                     >
                       {statusLabel}
                     </span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
+                  </td>
+                  <td className="py-3.5 px-4 text-right">
+                    <span className="text-[13px] font-semibold text-slate-900 tabular-nums">
+                      {formatSaleCurrency(Number(sale.total), sale.currency)}
+                    </span>
+                  </td>
+                  <td className="py-3.5 px-4 text-center">
                     {sale.invoiceUrl ? (
-                      <div className="p-2 bg-white/5 rounded-lg text-emerald-400" onClick={(e) => { e.stopPropagation(); if (sale.invoiceUrl) window.open(sale.invoiceUrl, '_blank') }}>
-                        <Download className="h-4 w-4" />
-                      </div>
-                    ) : null}
-                    <ChevronRight className="h-5 w-5 text-white/30" />
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-
-        {/* Desktop View: Table */}
-        <div className="hidden md:block overflow-x-auto max-h-[400px] overflow-y-auto">
-          <table className="w-full">
-            <thead className="sticky top-0 bg-zinc-900/95 backdrop-blur z-[1]">
-              <tr className="border-b border-white/10">
-                <th className="text-left text-[11px] font-medium text-white/50 uppercase tracking-wider py-3 px-4">
-                  {isPurchases ? "Proveedor" : (sl?.table?.client ?? "Cliente")}
-                </th>
-                <th className="text-left text-[11px] font-medium text-white/50 uppercase tracking-wider py-3 px-4">
-                  {sl?.table?.date ?? "Fecha"}
-                </th>
-                <th className="text-left text-[11px] font-medium text-white/50 uppercase tracking-wider py-3 px-4">
-                  {sl?.table?.state ?? "Estado"}
-                </th>
-                <th className="text-right text-[11px] font-medium text-white/50 uppercase tracking-wider py-3 px-4">
-                  {isPurchases ? "Importe" : (sl?.table?.amount ?? "Total")}
-                </th>
-                <th className="text-center text-[11px] font-medium text-white/50 uppercase tracking-wider py-3 px-4 w-[100px]">
-                  {isPurchases ? "Documento" : "Factura"}
-                </th>
-                <th className="w-10 px-2" />
-              </tr>
-            </thead>
-            <tbody>
-              {sales.map((sale) => {
-                const variant = getPaymentVariant(sale)
-                const statusLabel = getPaymentStatusLabel(sale.status, sl)
-                return (
-                  <tr
-                    key={sale.id}
-                    onClick={() => onSelectSale(sale)}
-                    className="border-b border-white/5 transition-colors cursor-pointer group hover:bg-emerald-500/10"
-                  >
-                    <td className="py-3.5 px-4">
-                      <p className="font-semibold text-white text-sm truncate max-w-[200px] group-hover:text-violet-200">
-                        {sale.clientName}
-                      </p>
-                      {sale.product ? (
-                        <p className="text-xs text-white/50 truncate max-w-[200px] mt-0.5">{sale.product}</p>
-                      ) : null}
-                    </td>
-                    <td className="py-3.5 px-4 text-white/70 text-sm whitespace-nowrap">
-                      {formatSaleDateDisplay(sale.saleDate)}
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span
-                        className={cn(
-                          "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border",
-                          pillClass[variant]
-                        )}
+                      <a
+                        href={sale.invoiceUrl}
+                        download
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="inline-flex items-center gap-1.5 justify-center min-w-[60px] py-1.5 px-2 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors text-[11px] font-medium"
+                        title="Descargar documento"
                       >
-                        {statusLabel}
+                        <Download className="h-3.5 w-3.5 shrink-0" />
+                        Ver
+                      </a>
+                    ) : (
+                      <span
+                        className="inline-flex items-center gap-1.5 justify-center min-w-[60px] py-1.5 px-2 rounded-lg text-slate-300 text-[11px] cursor-default"
+                        title="Sin documento"
+                      >
+                        <Upload className="h-3.5 w-3.5 shrink-0" />
+                        Subir
                       </span>
-                    </td>
-                    <td className="py-3.5 px-4 text-right">
-                      <span className="text-base font-semibold text-emerald-300 tabular-nums">
-                        {formatSaleCurrency(Number(sale.total), sale.currency)}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 text-center">
-                      {sale.invoiceUrl ? (
-                        <a
-                          href={sale.invoiceUrl}
-                          download
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="inline-flex items-center gap-1.5 justify-center min-w-[72px] py-1.5 px-2 rounded-lg text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/20 transition-colors text-xs font-medium"
-                          title="Descargar factura"
-                        >
-                          <Download className="h-3.5 w-3.5 shrink-0" />
-                          Ver
-                        </a>
-                      ) : (
-                        <span
-                          className="inline-flex items-center gap-1.5 justify-center min-w-[72px] py-1.5 px-2 rounded-lg text-white/50 text-xs cursor-default"
-                          title="Sin factura (subir en el panel)"
-                        >
-                          <Upload className="h-3.5 w-3.5 shrink-0" />
-                          Subir
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-3.5 px-2">
-                      <ChevronRight className="h-4 w-4 text-white/40 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all" />
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+                    )}
+                  </td>
+                  <td className="py-3.5 px-2">
+                    <ChevronRight className="h-4 w-4 text-slate-300" />
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
       </div>
     </div>
   )

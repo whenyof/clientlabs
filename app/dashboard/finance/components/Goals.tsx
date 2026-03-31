@@ -1,6 +1,6 @@
 "use client"
 
-import { Trophy, Tag, Clock, CheckCircle2, AlertTriangle } from "lucide-react"
+import { Pencil, Trash2, Plus, Flag, Clock, Trophy, CheckCircle2 } from "lucide-react"
 import { formatCurrency } from "../lib/formatters"
 import { useFinanceData } from "../context/FinanceDataContext"
 
@@ -8,36 +8,14 @@ function getGoalProgress(current: number, target: number): number {
   return target ? (current / target) * 100 : 0
 }
 
-type GoalStatus = {
-  status: "completed" | "overdue" | "urgent" | "on_track"
-  color: string
-  bg: string
-  border: string
-}
-
-function getGoalStatus(current: number, target: number, deadline: Date | string): GoalStatus {
+function formatDeadline(deadline: Date | string): string {
   const d = typeof deadline === "string" ? new Date(deadline) : deadline
-  const progress = getGoalProgress(current, target)
-  const daysRemaining = Math.ceil((d.getTime() - Date.now()) / 86400000)
-
-  if (progress >= 100) return { status: "completed", color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" }
-  if (daysRemaining < 0) return { status: "overdue", color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/20" }
-  if (daysRemaining <= 30) return { status: "urgent", color: "text-orange-400", bg: "bg-orange-500/10", border: "border-orange-500/20" }
-  return { status: "on_track", color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20" }
+  return d.toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })
 }
 
-const STATUS_ICON = {
-  completed: CheckCircle2,
-  overdue: AlertTriangle,
-  urgent: Clock,
-  on_track: Tag,
-}
-
-const STATUS_TEXT: Record<string, string> = {
-  completed: "Completado",
-  overdue: "Vencido",
-  urgent: "Urgente",
-  on_track: "En curso",
+function getDaysRemaining(deadline: Date | string): number {
+  const d = typeof deadline === "string" ? new Date(deadline) : deadline
+  return Math.ceil((d.getTime() - Date.now()) / 86400000)
 }
 
 export function Goals() {
@@ -45,16 +23,8 @@ export function Goals() {
   const goals = analytics?.financialGoals ?? []
 
   if (loading) {
-    return <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] border-[var(--border-subtle)] p-5 animate-pulse h-48" />
-  }
-
-  if (goals.length === 0) {
     return (
-      <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] border-[var(--border-subtle)] p-5">
-        <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-1">Objetivos financieros</h3>
-        <p className="text-xs text-[var(--text-secondary)] mb-4">Metas y hitos a alcanzar</p>
-        <div className="py-6 text-center text-[var(--text-secondary)] text-sm">Sin objetivos configurados</div>
-      </div>
+      <div className="rounded-xl border border-slate-200 bg-white p-5 animate-pulse h-48" />
     )
   }
 
@@ -62,126 +32,143 @@ export function Goals() {
   const pending = goals.length - completed
 
   return (
-    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] border-[var(--border-subtle)] p-5">
+    <div className="rounded-xl border border-slate-200 bg-white p-5">
       <div className="flex items-center justify-between mb-4">
-        <div>
-          <h3 className="text-sm font-semibold text-[var(--text-primary)]">Objetivos financieros</h3>
-          <p className="text-xs text-[var(--text-secondary)]">Metas y hitos a alcanzar</p>
+        <div className="flex items-center gap-2">
+          <h3 className="text-[13px] font-semibold text-slate-900">Objetivos financieros</h3>
+          {goals.length > 0 && (
+            <span className="text-[11px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">
+              {pending} pendientes
+            </span>
+          )}
         </div>
-        <span className="text-xs text-[var(--text-secondary)]">{pending} pendientes</span>
+        <button className="flex items-center gap-1.5 text-[11px] text-[#1FA97A] font-medium hover:underline">
+          <Plus className="h-3.5 w-3.5" />
+          Nuevo objetivo
+        </button>
       </div>
 
-      <div className="space-y-3">
-        {goals.map((goal) => {
-          const deadlineDate = typeof goal.deadline === "string" ? new Date(goal.deadline) : goal.deadline
-          const progress = getGoalProgress(goal.current, goal.target)
-          const status = getGoalStatus(goal.current, goal.target, goal.deadline)
-          const StatusIcon = STATUS_ICON[status.status]
-          const daysRemaining = Math.ceil((deadlineDate.getTime() - Date.now()) / 86400000)
+      {goals.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-10 text-center">
+          <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center mb-3">
+            <Flag className="h-4 w-4 text-slate-400" />
+          </div>
+          <p className="text-[13px] font-medium text-slate-700 mb-1">Sin objetivos configurados</p>
+          <p className="text-[11px] text-slate-400">Define metas financieras y haz seguimiento</p>
+        </div>
+      ) : (
+        <div>
+          {goals.map((goal) => {
+            const progress = getGoalProgress(goal.current, goal.target)
+            const daysRemaining = getDaysRemaining(goal.deadline)
+            const isCompleted = progress >= 100
+            const isOverdue = !isCompleted && daysRemaining < 0
+            const isUrgent = !isCompleted && !isOverdue && daysRemaining <= 30
 
-          return (
-            <div
-              key={goal.id}
-              className={`p-4 rounded-xl border ${status.bg} ${status.border}`}
-            >
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-start gap-3">
-                  <div className={`p-2 rounded-lg ${status.bg} shrink-0`}>
-                    <StatusIcon className={`w-4 h-4 ${status.color}`} />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <h4 className="text-sm font-semibold text-[var(--text-primary)]">{goal.title}</h4>
-                      <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${status.bg} ${status.color}`}>
-                        {STATUS_TEXT[status.status]}
+            return (
+              <div
+                key={goal.id}
+                className="border border-slate-200 rounded-xl p-4 bg-white mb-3 last:mb-0 hover:border-slate-300 transition-colors"
+              >
+                <div className="flex justify-between mb-2">
+                  <span className="text-[13px] font-medium text-slate-900">{goal.title}</span>
+                  <div className="flex items-center gap-1">
+                    {isCompleted && (
+                      <span className="text-[9px] uppercase tracking-wider bg-[#E1F5EE] text-[#0F6E56] px-2 py-0.5 rounded-full border border-[#9FE1CB]">
+                        Completado
                       </span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3 text-xs mt-1">
-                      <div>
-                        <div className="text-[var(--text-secondary)]">Actual</div>
-                        <div className="text-[var(--text-primary)] font-semibold">{formatCurrency(goal.current)}</div>
-                      </div>
-                      <div>
-                        <div className="text-[var(--text-secondary)]">Objetivo</div>
-                        <div className="text-[var(--text-primary)] font-semibold">{formatCurrency(goal.target)}</div>
-                      </div>
-                    </div>
+                    )}
+                    {isOverdue && !isCompleted && (
+                      <span className="text-[9px] uppercase tracking-wider bg-red-50 text-red-600 px-2 py-0.5 rounded-full border border-red-200">
+                        Vencido
+                      </span>
+                    )}
+                    {isUrgent && (
+                      <span className="text-[9px] uppercase tracking-wider bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full border border-amber-200">
+                        Alta
+                      </span>
+                    )}
+                    <button className="p-1 rounded hover:bg-slate-100 transition-colors ml-1">
+                      <Pencil className="h-3 w-3 text-slate-400" />
+                    </button>
+                    <button className="p-1 rounded hover:bg-red-50 transition-colors">
+                      <Trash2 className="h-3 w-3 text-slate-400 hover:text-red-500" />
+                    </button>
                   </div>
                 </div>
-                <div className="text-right shrink-0 ml-2">
-                  <div className={`text-xl font-bold ${status.color}`}>{progress.toFixed(0)}%</div>
-                </div>
-              </div>
 
-              {/* Progress Bar */}
-              <div className="mb-2">
-                <div className="w-full bg-[var(--bg-surface)] rounded-full h-1.5">
+                <div className="flex items-center justify-between text-[11px] text-slate-500 mb-2">
+                  <span>{formatCurrency(goal.current)}</span>
+                  <span className="font-medium text-slate-700">Meta: {formatCurrency(goal.target)}</span>
+                </div>
+
+                <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
                   <div
-                    className={`h-1.5 rounded-full transition-all duration-500 ${status.color.replace("text-", "bg-")}`}
+                    className="h-full bg-[#1FA97A] rounded-full transition-all"
                     style={{ width: `${Math.min(progress, 100)}%` }}
                   />
                 </div>
-              </div>
 
-              <div className="flex items-center justify-between text-xs text-[var(--text-secondary)]">
-                <div className="flex items-center gap-1">
-                  <Clock className="w-3 h-3" />
-                  <span>
-                    {daysRemaining > 0
-                      ? `${daysRemaining} días restantes`
-                      : daysRemaining === 0
-                        ? "Vence hoy"
-                        : `${Math.abs(daysRemaining)} días vencido`}
-                  </span>
+                <div className="flex items-center justify-between mt-2">
+                  {goal.deadline && (
+                    <p className="text-[10px] text-slate-400 flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {daysRemaining > 0
+                        ? `${daysRemaining} días restantes`
+                        : daysRemaining === 0
+                          ? "Vence hoy"
+                          : `${Math.abs(daysRemaining)} días vencido`}
+                    </p>
+                  )}
+                  {isCompleted && (
+                    <span className="text-[10px] text-[#1FA97A] font-medium flex items-center gap-1 ml-auto">
+                      <Trophy className="h-3 w-3" />
+                      Alcanzado
+                    </span>
+                  )}
                 </div>
-                {progress >= 100 && (
-                  <span className="flex items-center gap-1 text-yellow-400 font-medium">
-                    <Trophy className="w-3 h-3" />
-                    Alcanzado
-                  </span>
-                )}
               </div>
-            </div>
-          )
-        })}
-      </div>
+            )
+          })}
 
-      <div className="mt-4 pt-3 border-t border-[var(--border-subtle)] grid grid-cols-4 gap-2 text-center text-xs">
-        <div>
-          <div className="font-bold text-emerald-400">{completed}</div>
-          <div className="text-[var(--text-secondary)]">Completados</div>
-        </div>
-        <div>
-          <div className="font-bold text-blue-400">
-            {goals.filter((g) => {
-              const p = getGoalProgress(g.current, g.target)
-              const d = Math.ceil((new Date(g.deadline).getTime() - Date.now()) / 86400000)
-              return p < 100 && d > 30
-            }).length}
+          <div className="mt-3 pt-3 border-t border-slate-100 grid grid-cols-4 gap-2 text-center text-[11px]">
+            <div>
+              <div className="font-bold text-[#1FA97A]">{completed}</div>
+              <div className="text-slate-400">Completados</div>
+            </div>
+            <div>
+              <div className="font-bold text-slate-600">
+                {goals.filter((g) => {
+                  const p = getGoalProgress(g.current, g.target)
+                  const d = getDaysRemaining(g.deadline)
+                  return p < 100 && d > 30
+                }).length}
+              </div>
+              <div className="text-slate-400">En curso</div>
+            </div>
+            <div>
+              <div className="font-bold text-amber-500">
+                {goals.filter((g) => {
+                  const p = getGoalProgress(g.current, g.target)
+                  const d = getDaysRemaining(g.deadline)
+                  return p < 100 && d >= 0 && d <= 30
+                }).length}
+              </div>
+              <div className="text-slate-400">Urgentes</div>
+            </div>
+            <div>
+              <div className="font-bold text-red-500">
+                {goals.filter((g) => {
+                  const p = getGoalProgress(g.current, g.target)
+                  const d = getDaysRemaining(g.deadline)
+                  return p < 100 && d < 0
+                }).length}
+              </div>
+              <div className="text-slate-400">Vencidos</div>
+            </div>
           </div>
-          <div className="text-[var(--text-secondary)]">En curso</div>
         </div>
-        <div>
-          <div className="font-bold text-orange-400">
-            {goals.filter((g) => {
-              const p = getGoalProgress(g.current, g.target)
-              const d = Math.ceil((new Date(g.deadline).getTime() - Date.now()) / 86400000)
-              return p < 100 && d >= 0 && d <= 30
-            }).length}
-          </div>
-          <div className="text-[var(--text-secondary)]">Urgentes</div>
-        </div>
-        <div>
-          <div className="font-bold text-red-400">
-            {goals.filter((g) => {
-              const p = getGoalProgress(g.current, g.target)
-              const d = Math.ceil((new Date(g.deadline).getTime() - Date.now()) / 86400000)
-              return p < 100 && d < 0
-            }).length}
-          </div>
-          <div className="text-[var(--text-secondary)]">Vencidos</div>
-        </div>
-      </div>
+      )}
     </div>
   )
 }

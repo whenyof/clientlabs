@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth"
 import { redirect } from "next/navigation"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { SalesDashboard } from "@/modules/sales/components/SalesView"
+import { PurchasesView } from "./PurchasesView"
 import type { Sale } from "@/modules/sales/types"
 
 
@@ -108,7 +108,7 @@ export default async function PurchasesPage() {
       `order-${o.id}`,
       userId,
       o.Provider?.name ?? "",
-      hasPayment ? `${label} ✓ Pagada` : label,
+      hasPayment ? `${label} (Pagada)` : label,
       Number(o.amount),
       status,
       o.orderDate
@@ -143,10 +143,7 @@ export default async function PurchasesPage() {
   const purchasesAsSales: Sale[] = [...ordersAsSales, ...paymentsAsSales, ...expensesAsSales]
 
   return (
-    <SalesDashboard
-      mode="purchases"
-      initialSales={purchasesAsSales}
-    />
+    <PurchasesView initialSales={purchasesAsSales} />
   )
 }
 

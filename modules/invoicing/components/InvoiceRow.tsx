@@ -16,21 +16,19 @@ import {
 import type { InvoiceListItem } from "./types"
 import { INVOICE_STATUS, isInvoiceEditable, invoiceStatusLabel } from "@domains/invoicing"
 
-// Step 5 — Status badge: draft → gray, sent → blue, paid → green, overdue → red, cancelled → dark
 const STATUS_STYLES: Record<string, string> = {
-  DRAFT: "bg-gray-500/20 text-gray-400 border-gray-500/30",
-  SENT: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-  VIEWED: "bg-sky-500/20 text-sky-400 border-sky-500/30",
-  PARTIAL: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-  PAID: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-  OVERDUE: "bg-red-500/20 text-red-400 border-red-500/30",
-  CANCELED: "bg-zinc-700/80 text-zinc-400 border-zinc-600/50",
+  DRAFT: "bg-slate-100 text-slate-600",
+  SENT: "bg-blue-50 text-blue-700 border border-blue-200",
+  VIEWED: "bg-sky-50 text-sky-700 border border-sky-200",
+  PARTIAL: "bg-amber-50 text-amber-700 border border-amber-200",
+  PAID: "bg-[#E1F5EE] text-[#0F6E56] border border-[#9FE1CB]",
+  OVERDUE: "bg-red-50 text-red-700 border border-red-200",
+  CANCELED: "bg-slate-100 text-slate-500",
 }
 
-// Step 4 — Type badge: customer → blue Cliente, vendor → purple Proveedor
 const TYPE_STYLES: Record<string, string> = {
-  CUSTOMER: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-  VENDOR: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+  CUSTOMER: "bg-blue-50 text-blue-700 border border-blue-200",
+  VENDOR: "bg-[#E1F5EE] text-[#0F6E56] border border-[#9FE1CB]",
 }
 
 const TYPE_LABELS: Record<string, string> = {
@@ -39,9 +37,7 @@ const TYPE_LABELS: Record<string, string> = {
 }
 
 export interface InvoiceRowActionCallbacks {
-  /** Row click: open drawer */
   onView: () => void
-  /** View (eye) button: open document preview page */
   onPreview: (invoiceId: string) => void
   onEdit: (invoice: InvoiceListItem) => void
   onDuplicate: (invoice: InvoiceListItem) => void
@@ -58,19 +54,17 @@ interface InvoiceRowProps {
 }
 
 function InvoiceRowComponent({ invoice, isSelected, actions }: InvoiceRowProps) {
-  const paid = invoice.payments.reduce((s, p) => s + p.amount, 0)
-  const remaining = Math.max(0, invoice.total - paid)
-  const statusStyle = STATUS_STYLES[invoice.status] ?? "bg-white/10 text-white/70 border-white/20"
+  const statusStyle = STATUS_STYLES[invoice.status] ?? "bg-slate-100 text-slate-600"
   const statusLabel = invoiceStatusLabel(invoice.status)
-  const typeStyle = TYPE_STYLES[invoice.type] ?? "bg-white/10 text-white/70 border-white/20"
+  const typeStyle = TYPE_STYLES[invoice.type] ?? "bg-slate-100 text-slate-600"
   const typeLabel = TYPE_LABELS[invoice.type] ?? invoice.type
   const isDraft = invoice.status === INVOICE_STATUS.DRAFT
   const editable = isInvoiceEditable(invoice)
   const isPaidOrCanceled =
     invoice.status === INVOICE_STATUS.PAID || invoice.status === INVOICE_STATUS.CANCELED
   const dueInfo = invoice.dueInfo
+  const isOverdue = invoice.status === INVOICE_STATUS.OVERDUE
 
-  // Step 8 — Contact: customer → client.name, vendor → provider.name
   const contactName =
     invoice.type === "VENDOR"
       ? invoice.Provider?.name ?? "—"
@@ -79,44 +73,24 @@ function InvoiceRowComponent({ invoice, isSelected, actions }: InvoiceRowProps) 
   const handleRowClick = () => actions.onView()
 
   const iconButtonClass =
-    "h-8 w-8 p-0 text-white/50 hover:text-white hover:bg-white/10 shrink-0"
+    "h-8 w-8 p-0 text-slate-400 hover:text-slate-600 hover:bg-slate-100 shrink-0"
 
-  const handleEdit = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    actions.onEdit(invoice)
-  }
-  const handleDuplicate = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    actions.onDuplicate(invoice)
-  }
-  const handlePdf = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    actions.onDownloadPdf(invoice.id)
-  }
-  const handleRegisterPayment = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    actions.onRegisterPayment(invoice)
-  }
-  const handleCancel = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    actions.onCancel(invoice)
-  }
-  const handleDelete = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    actions.onDelete(invoice.id)
-  }
-  const handlePreview = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    actions.onPreview(invoice.id)
-  }
+  const handleEdit = (e: React.MouseEvent) => { e.stopPropagation(); actions.onEdit(invoice) }
+  const handleDuplicate = (e: React.MouseEvent) => { e.stopPropagation(); actions.onDuplicate(invoice) }
+  const handlePdf = (e: React.MouseEvent) => { e.stopPropagation(); actions.onDownloadPdf(invoice.id) }
+  const handleRegisterPayment = (e: React.MouseEvent) => { e.stopPropagation(); actions.onRegisterPayment(invoice) }
+  const handleCancel = (e: React.MouseEvent) => { e.stopPropagation(); actions.onCancel(invoice) }
+  const handleDelete = (e: React.MouseEvent) => { e.stopPropagation(); actions.onDelete(invoice.id) }
+  const handlePreview = (e: React.MouseEvent) => { e.stopPropagation(); actions.onPreview(invoice.id) }
 
   return (
     <tr
       onClick={handleRowClick}
       className={cn(
-        "border-b border-white/6 transition-colors cursor-pointer",
-        "hover:bg-white/[0.04]",
-        isSelected && "bg-white/[0.06]"
+        "border-b border-slate-100 transition-colors cursor-pointer",
+        "hover:bg-slate-50/50",
+        isSelected && "bg-slate-50",
+        isOverdue && "bg-red-50/30"
       )}
       role="button"
       tabIndex={0}
@@ -132,42 +106,39 @@ function InvoiceRowComponent({ invoice, isSelected, actions }: InvoiceRowProps) 
         <div className="flex flex-wrap items-center gap-1.5">
           <span
             className={cn(
-              "inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold",
+              "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium",
               typeStyle
             )}
           >
             {typeLabel}
           </span>
           {invoice.isRectification && (
-            <span className="inline-flex items-center rounded-md border border-amber-500/40 bg-amber-500/20 px-2 py-0.5 text-xs font-semibold text-amber-400">
-              RECTIFICATIVA
+            <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700">
+              RECT.
             </span>
           )}
         </div>
       </td>
-      <td className="py-3.5 px-4 text-sm font-medium text-white/90 whitespace-nowrap">
+      <td className="py-3.5 px-4 font-mono text-[12px] text-slate-700 font-medium whitespace-nowrap">
         {isDraft ? invoiceStatusLabel("DRAFT") : invoice.number}
       </td>
-      <td
-        className="py-3.5 px-4 text-sm text-white/90 max-w-[180px] truncate"
-        title={contactName}
-      >
+      <td className="py-3.5 px-4 text-[13px] text-slate-900 max-w-[180px] truncate" title={contactName}>
         {contactName}
       </td>
-      <td className="py-3.5 px-4 text-sm text-white/90 whitespace-nowrap">
+      <td className="py-3.5 px-4 text-[12px] text-slate-500 whitespace-nowrap">
         {formatDate(invoice.issueDate)}
       </td>
-      <td className="py-3.5 px-4 text-sm text-white/90 whitespace-nowrap">
+      <td className="py-3.5 px-4 text-[12px] text-slate-500 whitespace-nowrap">
         {formatDate(invoice.dueDate)}
       </td>
-      <td className="py-3.5 px-4 text-sm font-medium tabular-nums text-right whitespace-nowrap text-white/90">
+      <td className="py-3.5 px-4 text-[13px] font-semibold tabular-nums text-right whitespace-nowrap text-slate-900">
         {formatCurrency(invoice.total, invoice.currency)}
       </td>
       <td className="py-3.5 px-4">
         <div className="flex flex-col gap-1">
           <span
             className={cn(
-              "inline-flex w-fit items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold",
+              "inline-flex w-fit items-center rounded-full px-2 py-0.5 text-[10px] font-medium",
               statusStyle
             )}
           >
@@ -176,18 +147,18 @@ function InvoiceRowComponent({ invoice, isSelected, actions }: InvoiceRowProps) 
           {dueInfo && !isPaidOrCanceled && (
             <>
               {dueInfo.isOverdue && dueInfo.daysOverdue != null && (
-                <span className="inline-flex w-fit rounded-md border border-red-500/30 bg-red-500/20 px-2 py-0.5 text-xs font-medium text-red-400">
+                <span className="inline-flex w-fit rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-[10px] font-medium text-red-700">
                   {dueInfo.daysOverdue}{" "}
                   {dueInfo.daysOverdue === 1 ? "día de retraso" : "días de retraso"}
                 </span>
               )}
               {dueInfo.isDueToday && (
-                <span className="inline-flex w-fit rounded-md border border-amber-500/30 bg-amber-500/20 px-2 py-0.5 text-xs font-medium text-amber-400">
+                <span className="inline-flex w-fit rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700">
                   Vence hoy
                 </span>
               )}
               {dueInfo.state === "upcoming" && dueInfo.daysRemaining > 0 && (
-                <span className="text-xs text-white/50">
+                <span className="text-[10px] text-slate-400">
                   En {dueInfo.daysRemaining}{" "}
                   {dueInfo.daysRemaining === 1 ? "día" : "días"}
                 </span>
@@ -258,11 +229,11 @@ function InvoiceRowComponent({ invoice, isSelected, actions }: InvoiceRowProps) 
             <Button
               variant="ghost"
               size="sm"
-              className={iconButtonClass}
+              className="h-8 w-8 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 shrink-0"
               title="Eliminar"
               onClick={handleDelete}
             >
-              <Trash2 className="h-4 w-4 text-red-400 hover:text-red-300" />
+              <Trash2 className="h-4 w-4" />
             </Button>
           )}
         </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline"
+import { Search } from "lucide-react"
 import { FilterDropdown } from "@/components/ui/FilterDropdown"
 import { invoiceStatusLabel } from "@domains/invoicing"
 import type { ClientOption } from "./types"
@@ -45,15 +45,15 @@ export function InvoiceFilters({ filters, onFiltersChange, clients }: InvoiceFil
   ]
 
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="relative flex-1 max-w-md">
-        <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
         <input
           type="search"
           placeholder="Buscar por número o cliente"
           value={filters.search}
           onChange={(e) => onFiltersChange({ ...filters, search: e.target.value })}
-          className="w-full rounded-xl border border-white/10 bg-white/5 pl-9 pr-4 py-2.5 text-sm text-white placeholder-white/40 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/20 transition-colors"
+          className="w-full rounded-lg border border-slate-200 bg-white pl-8 pr-4 py-2 text-[12px] text-slate-700 placeholder-slate-400 focus:border-[#1FA97A] focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/20 transition-colors"
           aria-label="Buscar facturas"
         />
       </div>
@@ -84,7 +84,7 @@ export function InvoiceFilters({ filters, onFiltersChange, clients }: InvoiceFil
           placeholder="Importe mínimo"
           value={filters.minAmount}
           onChange={(e) => onFiltersChange({ ...filters, minAmount: e.target.value })}
-          className="w-24 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-white/40 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/20"
+          className="w-28 rounded-lg border border-slate-200 bg-white px-3 py-2 text-[12px] text-slate-700 placeholder-slate-400 focus:border-[#1FA97A] focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/20"
           aria-label="Importe mínimo"
         />
         <input
@@ -92,7 +92,7 @@ export function InvoiceFilters({ filters, onFiltersChange, clients }: InvoiceFil
           placeholder="Importe máximo"
           value={filters.maxAmount}
           onChange={(e) => onFiltersChange({ ...filters, maxAmount: e.target.value })}
-          className="w-24 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-white/40 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/20"
+          className="w-28 rounded-lg border border-slate-200 bg-white px-3 py-2 text-[12px] text-slate-700 placeholder-slate-400 focus:border-[#1FA97A] focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/20"
           aria-label="Importe máximo"
         />
       </div>

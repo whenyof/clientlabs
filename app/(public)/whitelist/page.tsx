@@ -313,10 +313,27 @@ const OFERTA_ITEMS = [
 
 function OfertaSection() {
   useGSAP(() => {
-    gsap.from(".offer-card", {
-      y: 30, opacity: 0, stagger: 0.12, duration: 0.6, ease: "power2.out",
-      scrollTrigger: { trigger: ".offer-section", start: "top 80%" },
+    const cards = gsap.utils.toArray<Element>(".offer-card")
+    if (cards.length === 0) return
+
+    gsap.set(cards, { opacity: 0, y: 30 })
+
+    ScrollTrigger.create({
+      trigger: ".offer-section",
+      start: "top bottom",
+      once: true,
+      onEnter: () => {
+        gsap.to(cards, {
+          opacity: 1,
+          y: 0,
+          stagger: 0.12,
+          duration: 0.6,
+          ease: "power2.out",
+        })
+      },
     })
+
+    ScrollTrigger.refresh()
   }, [])
 
   return (
@@ -448,10 +465,27 @@ const TAG_STYLES: Record<TagColor, string> = {
 
 function QueIncluyeSection() {
   useGSAP(() => {
-    gsap.from(".feature-item", {
-      y: 24, opacity: 0, stagger: 0.06, duration: 0.5, ease: "power2.out",
-      scrollTrigger: { trigger: ".features-section", start: "top 80%" },
+    const items = gsap.utils.toArray<Element>(".feature-item")
+    if (items.length === 0) return
+
+    gsap.set(items, { opacity: 0, y: 24 })
+
+    ScrollTrigger.create({
+      trigger: ".features-section",
+      start: "top bottom",
+      once: true,
+      onEnter: () => {
+        gsap.to(items, {
+          opacity: 1,
+          y: 0,
+          stagger: 0.06,
+          duration: 0.5,
+          ease: "power2.out",
+        })
+      },
     })
+
+    ScrollTrigger.refresh()
   }, [])
 
   return (
@@ -509,10 +543,21 @@ function QueIncluyeSection() {
 
 function CtaFinalSection() {
   useGSAP(() => {
-    gsap.from(".cta-final", {
-      scale: 0.97, opacity: 0, duration: 0.6, ease: "power2.out",
-      scrollTrigger: { trigger: ".cta-section", start: "top 85%" },
+    const el = document.querySelector(".cta-final")
+    if (!el) return
+
+    gsap.set(el, { opacity: 0, scale: 0.97 })
+
+    ScrollTrigger.create({
+      trigger: ".cta-section",
+      start: "top bottom",
+      once: true,
+      onEnter: () => {
+        gsap.to(el, { opacity: 1, scale: 1, duration: 0.6, ease: "power2.out" })
+      },
     })
+
+    ScrollTrigger.refresh()
   }, [])
 
   return (

@@ -9,6 +9,7 @@ import {
   Users, FileText, BarChart2, Package,
   CheckSquare, Globe, Sparkles, Shield,
   Smartphone, Rocket, Bot, Workflow,
+  Tag, HeadphonesIcon,
 } from "lucide-react"
 import Link from "next/link"
 
@@ -232,7 +233,7 @@ function HeroSection() {
 
   return (
     <section
-      className="relative min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 py-20 overflow-hidden"
+      className="relative min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 pt-10 pb-8 sm:py-20 overflow-hidden"
       style={{ background: "#0B1F2A" }}
     >
       <div
@@ -245,19 +246,19 @@ function HeroSection() {
       />
 
       <div className="relative z-10 w-full max-w-2xl mx-auto text-center">
-        <div className="hero-logo mb-10">
-          <span className="text-[22px] font-bold tracking-tight" style={{ color: "#1FA97A" }}>
+        <div className="hero-logo mb-5 sm:mb-10">
+          <span className="text-[20px] sm:text-[22px] font-bold tracking-tight" style={{ color: "#1FA97A" }}>
             ClientLabs
           </span>
         </div>
 
-        <div className="hero-word inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#1FA97A]/30 bg-[#1FA97A]/10 mb-8">
+        <div className="hero-word inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#1FA97A]/30 bg-[#1FA97A]/10 mb-4 sm:mb-8">
           <div className="w-1.5 h-1.5 rounded-full bg-[#1FA97A]" />
           <span className="text-[11px] font-medium text-[#1FA97A] uppercase tracking-widest">Pre-lanzamiento</span>
         </div>
 
         <h1
-          className="text-[36px] sm:text-[48px] md:text-[58px] lg:text-[68px] font-bold leading-[1.05] text-white mb-6"
+          className="text-[32px] sm:text-[48px] md:text-[58px] lg:text-[68px] font-bold leading-[1.08] text-white mb-3 sm:mb-6"
           style={{ fontFamily: "var(--font-geist-sans), system-ui" }}
         >
           {"Gestiona tu negocio.".split(" ").map((w, i) => (
@@ -273,10 +274,10 @@ function HeroSection() {
           ))}
         </h1>
 
-        <p className="hero-sub text-[14px] sm:text-[16px] text-white/50 leading-relaxed mb-10 max-w-lg mx-auto">
+        <p className="hero-sub text-[13px] sm:text-[16px] text-white/50 leading-relaxed mb-5 sm:mb-10 max-w-lg mx-auto">
           La plataforma todo-en-uno para autónomos y pequeños negocios españoles.
           <br />
-          <span className="text-white/30 text-[13px]">CRM · Leads · Facturación · Finanzas.</span>
+          <span className="text-white/30 text-[12px] sm:text-[13px]">CRM · Leads · Facturación · Finanzas.</span>
         </p>
 
         <div className="hero-form flex justify-center">
@@ -309,6 +310,16 @@ const OFERTA_ITEMS = [
     title: "Acceso prioritario",
     desc: "Eres de los primeros en entrar\ncuando abramos en Junio 2026.",
   },
+  {
+    icon: Tag,
+    title: "Ofertas exclusivas",
+    desc: "Acceso a descuentos y acuerdos\nexclusivos con herramientas para autónomos.",
+  },
+  {
+    icon: HeadphonesIcon,
+    title: "Soporte directo al equipo",
+    desc: "Canal privado con los fundadores.\nTu feedback moldea el producto.",
+  },
 ]
 
 function OfertaSection() {
@@ -334,11 +345,11 @@ function OfertaSection() {
   return (
     <section className="offer-section bg-white py-20 px-4 sm:px-6 md:px-8">
       <div className="max-w-4xl mx-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {OFERTA_ITEMS.map(({ icon: Icon, title, desc }) => (
             <div
               key={title}
-              className="offer-card rounded-xl border border-slate-100 bg-slate-50 p-8 text-center cursor-default"
+              className="offer-card rounded-xl border border-slate-100 bg-slate-50 p-6 text-center cursor-default"
               onMouseEnter={e => gsap.to(e.currentTarget, { y: -4, duration: 0.2, ease: "power2.out" })}
               onMouseLeave={e => gsap.to(e.currentTarget, { y: 0, duration: 0.2, ease: "power2.out" })}
             >

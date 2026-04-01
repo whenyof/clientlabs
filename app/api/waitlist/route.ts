@@ -29,11 +29,7 @@ export async function POST(req: NextRequest) {
     const realCount = await prisma.waitlistEntry.count()
     const position = realCount + BASE_COUNT
 
-    try {
-      await sendWaitlistEmail(email, position)
-    } catch (e) {
-      console.error("Waitlist email error:", e)
-    }
+    sendWaitlistEmail(email, position).catch(err => console.error("Email error:", err))
 
     return NextResponse.json({ success: true, position })
   } catch (error) {

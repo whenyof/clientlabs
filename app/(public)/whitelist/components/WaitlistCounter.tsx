@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 
 export function WaitlistCounter() {
-  const [count, setCount] = useState<number | null>(null)
+  const [count, setCount] = useState(17)
 
   const fetchCount = async () => {
     try {
@@ -20,8 +20,6 @@ export function WaitlistCounter() {
     window.addEventListener("waitlist-joined", handler)
     return () => window.removeEventListener("waitlist-joined", handler)
   }, [])
-
-  if (count === null) return null
 
   return (
     <div className="hero-counter inline-flex items-center gap-3 bg-white/8 border border-white/15 rounded-full px-5 py-2.5 mt-8">

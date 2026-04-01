@@ -27,8 +27,8 @@ export function TasksView() {
       if (!res.ok) throw new Error("Failed to fetch tasks")
       return res.json()
     },
-    staleTime: 30_000,
-    refetchInterval: 60_000,
+    staleTime: 120_000,
+    refetchInterval: 300_000,
   })
 
   const handleAddTask = (priority: TaskPriority) => {

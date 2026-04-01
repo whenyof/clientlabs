@@ -78,7 +78,7 @@ export function LeadFeed() {
         .finally(() => setLoading(false))
     }
     fetchFeed()
-    const interval = setInterval(fetchFeed, 60000)
+    const interval = setInterval(fetchFeed, 30000)
     return () => clearInterval(interval)
   }, [])
 

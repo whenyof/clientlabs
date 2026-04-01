@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { buildWaitlistEmail } from "@/lib/email/waitlist-template"
 
+const BASE_COUNT = 17
+
 export async function GET() {
-  const count = await prisma.waitlistEntry.count()
-  return NextResponse.json({ count })
+  const real = await prisma.waitlistEntry.count()
+  return NextResponse.json({ count: real + BASE_COUNT })
 }
 
 export async function POST(req: NextRequest) {
@@ -17,29 +19,30 @@ export async function POST(req: NextRequest) {
 
     const existing = await prisma.waitlistEntry.findUnique({ where: { email } })
     if (existing) {
-      return NextResponse.json({ error: "Este email ya está en lista", alreadyIn: true }, { status: 409 })
+      return NextResponse.json({ error: "Este email ya está registrado" }, { status: 409 })
     }
 
     await prisma.waitlistEntry.create({
       data: { email, source: source ?? "whitelist" },
     })
 
-    const position = await prisma.waitlistEntry.count()
+    const realCount = await prisma.waitlistEntry.count()
+    const position = realCount + BASE_COUNT
 
     try {
-      await sendWaitlistConfirmation(email, position)
+      await sendWaitlistEmail(email, position)
     } catch (e) {
       console.error("Waitlist email error:", e)
     }
 
     return NextResponse.json({ success: true, position })
-  } catch (e) {
-    console.error("POST /api/waitlist:", e)
+  } catch (error) {
+    console.error("Waitlist error:", error)
     return NextResponse.json({ error: "Error interno" }, { status: 500 })
   }
 }
 
-async function sendWaitlistConfirmation(email: string, position: number) {
+async function sendWaitlistEmail(email: string, position: number) {
   if (!process.env.RESEND_API_KEY) return
 
   await fetch("https://api.resend.com/emails", {

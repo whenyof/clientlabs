@@ -1,6 +1,5 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
 import { useGSAP } from "@gsap/react"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
@@ -12,6 +11,9 @@ import {
   Tag, HeadphonesIcon,
 } from "lucide-react"
 import Link from "next/link"
+import { useEffect, useState } from "react"
+import { WaitlistForm } from "./components/WaitlistForm"
+import { WaitlistCounter } from "./components/WaitlistCounter"
 
 gsap.registerPlugin(ScrollTrigger, useGSAP)
 
@@ -72,140 +74,6 @@ function LaunchCountdown() {
         </div>
       </div>
     </div>
-  )
-}
-
-/* ── Waitlist Counter ─────────────────────────────────────────────────────── */
-
-function WaitlistCounter() {
-  const [count, setCount] = useState(0)
-  const countRef = useRef<HTMLSpanElement>(null)
-
-  useEffect(() => {
-    fetch("/api/waitlist")
-      .then(r => r.json())
-      .then(d => setCount(d.count ?? 0))
-      .catch(() => {})
-  }, [])
-
-  const displayCount = count + 17
-
-  useGSAP(() => {
-    const obj = { val: 0 }
-    gsap.to(obj, {
-      val: displayCount,
-      duration: 1.5,
-      delay: 1.4,
-      ease: "power2.out",
-      onUpdate: function () {
-        if (countRef.current) {
-          countRef.current.textContent = Math.round(obj.val).toString()
-        }
-      },
-    })
-
-    gsap.to(".counter-dot", {
-      boxShadow: "0 0 8px 3px rgba(31,169,122,0.4)",
-      repeat: -1,
-      yoyo: true,
-      duration: 1.5,
-      ease: "sine.inOut",
-      delay: 1.5,
-    })
-  }, [displayCount])
-
-  return (
-    <div className="hero-counter inline-flex items-center gap-3 bg-white/8 border border-white/15 rounded-full px-5 py-2.5 mt-8">
-      <div className="counter-dot w-2.5 h-2.5 rounded-full bg-[#1FA97A] animate-pulse" />
-      <span className="text-[14px] text-white/70">
-        <span ref={countRef} className="text-white font-bold text-[16px] mr-1">
-          {displayCount}
-        </span>
-        profesionales ya esperando
-      </span>
-    </div>
-  )
-}
-
-/* ── Waitlist Form ────────────────────────────────────────────────────────── */
-
-type FormState = "idle" | "loading" | "success" | "error" | "duplicate"
-
-function WaitlistForm({ source = "whitelist", dark = true }: { source?: string; dark?: boolean }) {
-  const [email, setEmail] = useState("")
-  const [state, setState] = useState<FormState>("idle")
-  const [position, setPosition] = useState<number | null>(null)
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!email || !email.includes("@")) return
-    setState("loading")
-    try {
-      const res = await fetch("/api/waitlist", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, source }),
-      })
-      const data = await res.json()
-      if (res.status === 409) { setState("duplicate"); return }
-      if (!res.ok) { setState("error"); return }
-      setPosition((data.position ?? 0) + 17)
-      setState("success")
-    } catch {
-      setState("error")
-    }
-  }
-
-  if (state === "success") {
-    return (
-      <div className="max-w-md mx-auto text-center py-4">
-        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#1FA97A]/20 border border-[#1FA97A]/40 mb-4">
-          <span className="text-[#1FA97A] text-xl font-bold">✓</span>
-        </div>
-        <p className={`font-semibold text-[16px] mb-1 ${dark ? "text-white" : "text-[#0B1F2A]"}`}>
-          Estás dentro.
-        </p>
-        <p className={`text-[13px] ${dark ? "text-white/50" : "text-slate-500"}`}>
-          {position ? `Eres el número ${position} en la lista.` : "Revisa tu email para confirmar."}
-          {" "}Te avisamos cuando abramos.
-        </p>
-      </div>
-    )
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-3 w-full">
-      <div className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto w-full">
-        <input
-          type="email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          placeholder="tu@email.com"
-          required
-          className={`w-full sm:flex-1 px-5 py-3.5 rounded-xl text-[14px] transition-colors focus:outline-none focus:border-[#1FA97A] ${
-            dark
-              ? "bg-white/10 border border-white/20 text-white placeholder:text-white/40"
-              : "bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400"
-          }`}
-        />
-        <button
-          type="submit"
-          disabled={state === "loading"}
-          className="w-full sm:w-auto min-h-[44px] px-6 py-3.5 bg-[#1FA97A] text-white font-semibold rounded-xl text-[14px] hover:bg-[#178f68] transition-colors whitespace-nowrap disabled:opacity-70"
-        >
-          {state === "loading" ? "Enviando..." : "Quiero acceso"}
-        </button>
-      </div>
-      {state === "duplicate" && (
-        <p className="text-center text-[12px] text-amber-400">Este email ya está apuntado. Te avisamos cuando abramos.</p>
-      )}
-      {state === "error" && (
-        <p className="text-center text-[12px] text-red-400">Algo ha fallado. Inténtalo de nuevo.</p>
-      )}
-      <p className={`text-center text-[12px] mt-3 ${dark ? "text-white/40" : "text-slate-400"}`}>
-        Sin tarjeta · Cancela cuando quieras · 1 mes gratis garantizado
-      </p>
-    </form>
   )
 }
 
@@ -281,9 +149,7 @@ function HeroSection() {
         </p>
 
         <div className="hero-form flex justify-center">
-          <div className="w-full max-w-md">
-            <WaitlistForm source="hero" />
-          </div>
+          <WaitlistForm source="hero" />
         </div>
 
         <WaitlistCounter />
@@ -577,7 +443,7 @@ function CtaFinalSection() {
         <p className="text-white/50 text-[15px] sm:text-[16px] mb-10">
           Únete antes del lanzamiento.
         </p>
-        <WaitlistForm source="cta_final" />
+        <WaitlistForm source="cta_final" dark={true} />
       </div>
     </section>
   )

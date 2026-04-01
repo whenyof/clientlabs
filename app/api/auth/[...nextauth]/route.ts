@@ -1,8 +1,8 @@
 import NextAuth from "next-auth"
 import { authOptions } from "@/lib/auth"
 
-// 🚀 HARDENING: Force Node.js runtime to avoid Edge Runtime / Prisma connection issues
 export const runtime = "nodejs"
+export const maxDuration = 30
 
 const handler = NextAuth(authOptions)
 

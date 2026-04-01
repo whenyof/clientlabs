@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { buildWaitlistEmail } from "@/lib/email/waitlist-template"
 
-export const maxDuration = 10
+export const maxDuration = 30
 
 const BASE_COUNT = 17
 
@@ -33,12 +33,14 @@ export async function POST(req: NextRequest) {
     }
 
     console.log("Creando registro en DB...")
-    await prisma.waitlistEntry.create({
-      data: { email, source: source ?? "whitelist" },
-    })
-    console.log("Registro creado OK")
+    const [entry, realCount] = await Promise.all([
+      prisma.waitlistEntry.create({
+        data: { email, source: source ?? "whitelist" },
+      }),
+      prisma.waitlistEntry.count(),
+    ])
+    console.log("Registro creado OK, entry:", entry.id)
 
-    const realCount = await prisma.waitlistEntry.count()
     const position = realCount + BASE_COUNT
     console.log("Posición:", position)
 

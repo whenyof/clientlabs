@@ -1,8 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 type Status = "idle" | "loading" | "success" | "error" | "duplicate"
+
+const STORAGE_KEY = "cl-waitlist"
 
 interface Props {
   source?: string
@@ -13,6 +15,17 @@ export function WaitlistForm({ source = "whitelist", dark = true }: Props) {
   const [email, setEmail] = useState("")
   const [status, setStatus] = useState<Status>("idle")
   const [position, setPosition] = useState<number | null>(null)
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY)
+      if (stored) {
+        const { position: pos } = JSON.parse(stored)
+        setPosition(pos ?? null)
+        setStatus("success")
+      }
+    } catch {}
+  }, [])
 
   const handleSubmit = async () => {
     if (!email || !email.includes("@")) return
@@ -27,8 +40,12 @@ export function WaitlistForm({ source = "whitelist", dark = true }: Props) {
       const data = await res.json()
 
       if (res.ok) {
+        const pos = data.position ?? null
         setStatus("success")
-        setPosition(data.position)
+        setPosition(pos)
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ position: pos }))
+        } catch {}
         window.dispatchEvent(new CustomEvent("waitlist-joined"))
       } else if (res.status === 409) {
         setStatus("duplicate")

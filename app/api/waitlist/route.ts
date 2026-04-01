@@ -11,37 +11,55 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, source } = await req.json()
+    console.log("WAITLIST POST iniciado")
+
+    const body = await req.json()
+    console.log("Body recibido:", body)
+
+    const { email, source } = body
 
     if (!email || !email.includes("@")) {
+      console.log("Email inválido:", email)
       return NextResponse.json({ error: "Email inválido" }, { status: 400 })
     }
 
+    console.log("Verificando duplicado...")
     const existing = await prisma.waitlistEntry.findUnique({ where: { email } })
     if (existing) {
+      console.log("Email duplicado:", email)
       return NextResponse.json({ error: "Este email ya está registrado" }, { status: 409 })
     }
 
+    console.log("Creando registro en DB...")
     await prisma.waitlistEntry.create({
       data: { email, source: source ?? "whitelist" },
     })
+    console.log("Registro creado OK")
 
     const realCount = await prisma.waitlistEntry.count()
     const position = realCount + BASE_COUNT
+    console.log("Posición:", position)
 
-    sendWaitlistEmail(email, position).catch(err => console.error("Email error:", err))
+    sendWaitlistEmail(email, position).catch(err =>
+      console.error("Email error:", JSON.stringify(err), String(err))
+    )
 
+    console.log("Respondiendo success...")
     return NextResponse.json({ success: true, position })
   } catch (error) {
-    console.error("Waitlist error:", error)
-    return NextResponse.json({ error: "Error interno" }, { status: 500 })
+    console.error("WAITLIST ERROR:", JSON.stringify(error), String(error))
+    return NextResponse.json({ error: String(error) }, { status: 500 })
   }
 }
 
 async function sendWaitlistEmail(email: string, position: number) {
-  if (!process.env.RESEND_API_KEY) return
+  if (!process.env.RESEND_API_KEY) {
+    console.log("RESEND_API_KEY no configurada — email omitido")
+    return
+  }
 
-  await fetch("https://api.resend.com/emails", {
+  console.log("Enviando email a:", email, "posición:", position)
+  const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
@@ -54,4 +72,6 @@ async function sendWaitlistEmail(email: string, position: number) {
       html: buildWaitlistEmail(position),
     }),
   })
+  const data = await res.json()
+  console.log("Resend response:", res.status, JSON.stringify(data))
 }

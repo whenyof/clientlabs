@@ -221,7 +221,7 @@ export async function generateInvoicePDF(
   const logoDataUrl = branding.logoUrl
     ? await fetchLogoAsDataUrl(branding.logoUrl).catch(() => null)
     : null
-  const buffer = renderInvoiceToBuffer(doc, {
+  const buffer = await renderInvoiceToBuffer(doc, {
     primaryColorHex: primaryColor,
     logoDataUrl,
   })

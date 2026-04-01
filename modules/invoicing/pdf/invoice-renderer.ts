@@ -3,7 +3,6 @@
  * Uses layout from styles.ts; no inline styles in template data.
  */
 
-import { jsPDF } from "jspdf"
 import type { InvoiceDocumentModel } from "./invoice-template"
 import { PDF_LAYOUT, getPdfColors } from "./styles"
 
@@ -25,10 +24,11 @@ export type RenderOptions = {
 /**
  * Renders the invoice document to a jsPDF instance and returns the PDF as Buffer.
  */
-export function renderInvoiceToBuffer(
+export async function renderInvoiceToBuffer(
   doc: InvoiceDocumentModel,
   options: RenderOptions = {}
-): Buffer {
+): Promise<Buffer> {
+  const { jsPDF } = await import("jspdf")
   const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" })
   const colors = getPdfColors(options.primaryColorHex ?? "#1e3a5f")
   let y = TOP

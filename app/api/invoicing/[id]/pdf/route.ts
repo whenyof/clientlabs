@@ -5,6 +5,9 @@ import { generateInvoicePDF } from "@/modules/invoicing/pdf/generator"
 import { readFile } from "fs/promises"
 import path from "path"
 
+export const runtime = "nodejs"
+export const maxDuration = 30
+
 /**
  * GET /api/invoicing/[id]/pdf
  * Returns the invoice PDF. Uses stored file if valid; otherwise generates, saves, and streams.

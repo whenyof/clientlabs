@@ -4,7 +4,6 @@
  */
 import { mkdir, writeFile, readFile } from "fs/promises"
 import path from "path"
-import { jsPDF } from "jspdf"
 import { prisma } from "@/lib/prisma"
 import { getBrandingForUser } from "@/modules/invoicing/pdf/branding"
 import { PDF_LAYOUT, getPdfColors } from "@/modules/invoicing/pdf/styles"
@@ -70,6 +69,7 @@ export async function generatePurchaseOrderPDF(
   const logoDataUrl = branding.logoUrl ? await fetchLogoAsDataUrl(branding.logoUrl).catch(() => null) : null
   const colors = getPdfColors(branding.primaryColor ?? "#1e3a5f")
 
+  const { jsPDF } = await import("jspdf")
   const M = PDF_LAYOUT.page.marginHorizontal
   const W = PDF_LAYOUT.page.width - 2 * M
   const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" })

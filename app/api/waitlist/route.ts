@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { waitUntil } from "@vercel/functions"
 import { prisma } from "@/lib/prisma"
 import { buildWaitlistEmail } from "@/lib/email/waitlist-template"
 
@@ -44,9 +45,9 @@ export async function POST(req: NextRequest) {
     const position = realCount + BASE_COUNT
     console.log("Posición:", position)
 
-    sendWaitlistEmail(email, position).catch(err =>
+    waitUntil(sendWaitlistEmail(email, position).catch(err =>
       console.error("Email error:", JSON.stringify(err), String(err))
-    )
+    ))
 
     console.log("Respondiendo success...")
     return NextResponse.json({ success: true, position })

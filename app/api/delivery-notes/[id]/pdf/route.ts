@@ -5,6 +5,9 @@ import { generateDeliveryNotePDF } from "@/lib/pdf/delivery-note-generator"
 import { readFile } from "fs/promises"
 import path from "path"
 
+export const runtime = "nodejs"
+export const maxDuration = 30
+
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })

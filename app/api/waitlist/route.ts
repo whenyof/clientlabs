@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { buildWaitlistEmail } from "@/lib/email/waitlist-template"
 
+export const maxDuration = 10
+
 const BASE_COUNT = 17
 
 export async function GET() {

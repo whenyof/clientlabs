@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server"
 
+export const maxDuration = 30
+export const runtime = "nodejs"
+
 function buildWaitlistEmail(position: number): string {
   const displayPosition = position + 17
 
@@ -72,20 +75,31 @@ export async function GET() {
     return NextResponse.json({ error: "RESEND_API_KEY no configurada" }, { status: 500 })
   }
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: "ClientLabs <hola@clientlabs.io>",
-      to: "iyanrimada@gmail.com",
-      subject: "Ya estás dentro — Acceso anticipado a ClientLabs",
-      html: buildWaitlistEmail(23),
-    }),
-  })
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 9000)
 
-  const data = await res.json()
-  return NextResponse.json(data)
+  try {
+    const html = buildWaitlistEmail(23)
+
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      signal: controller.signal,
+      headers: {
+        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "ClientLabs <hola@clientlabs.io>",
+        to: "iyanrimada@gmail.com",
+        subject: "Ya estás dentro — Acceso anticipado a ClientLabs",
+        html,
+      }),
+    })
+    clearTimeout(timeout)
+    const data = await res.json()
+    return NextResponse.json({ success: res.ok, data })
+  } catch (error) {
+    clearTimeout(timeout)
+    return NextResponse.json({ error: String(error) }, { status: 500 })
+  }
 }

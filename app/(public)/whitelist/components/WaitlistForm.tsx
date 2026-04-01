@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
+import gsap from "gsap"
 
 type Status = "idle" | "loading" | "success" | "error" | "duplicate"
 
@@ -15,6 +16,8 @@ export function WaitlistForm({ source = "whitelist", dark = true }: Props) {
   const [email, setEmail] = useState("")
   const [status, setStatus] = useState<Status>("idle")
   const [position, setPosition] = useState<number | null>(null)
+  const successRef = useRef<HTMLDivElement>(null)
+  const posNumRef = useRef<HTMLSpanElement>(null)
 
   useEffect(() => {
     try {
@@ -26,6 +29,82 @@ export function WaitlistForm({ source = "whitelist", dark = true }: Props) {
       }
     } catch {}
   }, [])
+
+  useEffect(() => {
+    if (status !== "success" || !successRef.current) return
+
+    const el = successRef.current
+    const check = el.querySelector(".success-check")
+    const title = el.querySelector(".success-title")
+    const badge = el.querySelector(".success-badge")
+    const sub = el.querySelector(".success-sub")
+
+    const tl = gsap.timeline({ defaults: { ease: "power3.out" } })
+
+    // Container fade in
+    tl.fromTo(el, { opacity: 0, scale: 0.92 }, { opacity: 1, scale: 1, duration: 0.45 })
+
+    // Checkmark circle: elastic pop
+    if (check) {
+      tl.fromTo(
+        check,
+        { scale: 0, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.55, ease: "back.out(2.2)" },
+        "-=0.15"
+      )
+    }
+
+    // Title slides up
+    if (title) {
+      tl.fromTo(
+        title,
+        { y: 18, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.4 },
+        "-=0.2"
+      )
+    }
+
+    // Position badge slides up
+    if (badge) {
+      tl.fromTo(
+        badge,
+        { y: 14, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.4 },
+        "-=0.15"
+      )
+    }
+
+    // Count-up on the position number
+    if (posNumRef.current && position) {
+      const obj = { val: 0 }
+      tl.to(
+        obj,
+        {
+          val: position,
+          duration: 0.7,
+          ease: "power2.out",
+          onUpdate: () => {
+            if (posNumRef.current) {
+              posNumRef.current.textContent = `#${Math.round(obj.val)}`
+            }
+          },
+        },
+        "-=0.3"
+      )
+    }
+
+    // Subtitle
+    if (sub) {
+      tl.fromTo(
+        sub,
+        { y: 10, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.35 },
+        "-=0.4"
+      )
+    }
+
+    return () => { tl.kill() }
+  }, [status, position])
 
   const handleSubmit = async () => {
     if (!email || !email.includes("@")) return
@@ -41,8 +120,8 @@ export function WaitlistForm({ source = "whitelist", dark = true }: Props) {
 
       if (res.ok) {
         const pos = data.position ?? null
-        setStatus("success")
         setPosition(pos)
+        setStatus("success")
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify({ position: pos }))
         } catch {}
@@ -59,21 +138,21 @@ export function WaitlistForm({ source = "whitelist", dark = true }: Props) {
 
   if (status === "success") {
     return (
-      <div className="max-w-md mx-auto text-center">
-        <div className="w-14 h-14 rounded-full bg-[#1FA97A]/15 border-2 border-[#1FA97A]/40 flex items-center justify-center mx-auto mb-4 text-[#1FA97A] text-2xl font-bold">
+      <div ref={successRef} className="max-w-md mx-auto text-center" style={{ opacity: 0 }}>
+        <div className="success-check w-14 h-14 rounded-full bg-[#1FA97A]/15 border-2 border-[#1FA97A]/40 flex items-center justify-center mx-auto mb-4 text-[#1FA97A] text-2xl font-bold">
           ✓
         </div>
-        <h3 className={`font-bold text-[18px] mb-2 ${dark ? "text-white" : "text-[#0B1F2A]"}`}>
+        <h3 className={`success-title font-bold text-[18px] mb-2 ${dark ? "text-white" : "text-[#0B1F2A]"}`}>
           ¡Ya estás dentro!
         </h3>
         {position && (
-          <p className={`text-[14px] mb-1 ${dark ? "text-white/60" : "text-slate-500"}`}>
+          <p className={`success-badge text-[14px] mb-1 ${dark ? "text-white/60" : "text-slate-500"}`}>
             Eres el{" "}
-            <span className="text-[#1FA97A] font-bold text-[16px]">#{position}</span>
+            <span ref={posNumRef} className="text-[#1FA97A] font-bold text-[16px]">#0</span>
             {" "}en la lista
           </p>
         )}
-        <p className={`text-[12px] ${dark ? "text-white/40" : "text-slate-400"}`}>
+        <p className={`success-sub text-[12px] ${dark ? "text-white/40" : "text-slate-400"}`}>
           Revisa tu email — te hemos enviado los detalles de tu acceso anticipado
         </p>
       </div>

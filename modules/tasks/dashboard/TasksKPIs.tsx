@@ -53,8 +53,8 @@ export function TasksKPIs() {
       if (!res.ok) throw new Error("Failed")
       return res.json()
     },
-    staleTime: 0,
-    refetchInterval: 30_000,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
   })
 
   const kpis: TasksKPIsData = data ?? {

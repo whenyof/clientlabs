@@ -8,7 +8,7 @@ import {
   Users, FileText, BarChart2, Package,
   CheckSquare, Globe, Sparkles, Shield,
   Smartphone, Rocket, Bot, Workflow,
-  Tag, HeadphonesIcon,
+  Tag, HeadphonesIcon, Pencil,
 } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
@@ -185,6 +185,11 @@ const OFERTA_ITEMS = [
     icon: HeadphonesIcon,
     title: "Soporte directo al equipo",
     desc: "Canal privado con los fundadores.\nTu feedback moldea el producto.",
+  },
+  {
+    icon: Pencil,
+    title: "Influencia en el producto",
+    desc: "Las features que pidas en beta tienen\nprioridad real en el roadmap.",
   },
 ]
 

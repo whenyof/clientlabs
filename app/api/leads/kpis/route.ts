@@ -5,6 +5,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { getCached, setCached } from "@/lib/cache"
 
 export async function GET() {
   const session = await getServerSession(authOptions)
@@ -13,6 +14,9 @@ export async function GET() {
   }
 
   const userId = session.user.id
+  const cacheKey = `leads-kpis-${userId}`
+  const cached = getCached(cacheKey)
+  if (cached) return NextResponse.json(cached, { headers: { "X-Cache": "HIT" } })
   const now = new Date()
 
   const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
@@ -68,13 +72,7 @@ export async function GET() {
   const hotDelta = hotNow - hotYesterday
   const conversionRate = totalThisMonth > 0 ? Math.round((convertedThisMonth / totalThisMonth) * 100) : 0
 
-  return NextResponse.json({
-    total,
-    hot,
-    converted,
-    stalled,
-    newThisWeek,
-    hotDelta,
-    conversionRate,
-  })
+  const result = { total, hot, converted, stalled, newThisWeek, hotDelta, conversionRate }
+  setCached(cacheKey, result, 60)
+  return NextResponse.json(result)
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { invalidateCache } from "@/lib/cache"
 import {
  getSessionUserId,
  buildTaskWhere,
@@ -154,6 +155,8 @@ export async function POST(request: NextRequest) {
    endAt: task.endAt?.toISOString() ?? null,
  }).catch((err) => console.error("[google-calendar] sync create:", err))
 
+ invalidateCache(`tasks-kpis-${userId}`)
+ invalidateCache(`dashboard-summary-${userId}`)
  return NextResponse.json(task, { status: 201 })
  } catch (error) {
  console.error("[POST /api/tasks]:", error)

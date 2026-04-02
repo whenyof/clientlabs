@@ -20,7 +20,7 @@ function buildDatabaseUrl(): string {
   const url = process.env.DATABASE_URL ?? ""
   if (!url) return url
   const separator = url.includes("?") ? "&" : "?"
-  return `${url}${separator}connect_timeout=20&pool_timeout=20`
+  return `${url}${separator}pgbouncer=true&connect_timeout=20&pool_timeout=20`
 }
 
 const globalForPrisma = globalThis as typeof globalThis & { __prisma?: PrismaClient }

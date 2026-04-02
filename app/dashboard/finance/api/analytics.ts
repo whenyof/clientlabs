@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { getFinanceSummary, getFinanceMonthlyTrend } from "@domains/finance"
 import { getSalesComparisons } from "@/modules/sales/services/salesAnalytics"
 import { predictMonthlyRevenue, predictMonthlyExpenses, predictCashFlow } from "../lib/predictors"
+import { getCached, setCached } from "@/lib/cache"
 
 function growthRate(current: number, previous: number): number {
   if (previous === 0) return 0
@@ -93,6 +94,10 @@ export async function GET(request: NextRequest) {
   const period = searchParams.get("period") || "month"
   const startDate = searchParams.get("startDate")
   const endDate = searchParams.get("endDate")
+
+  const cacheKey = `finance-analytics-${userId}-${period}-${startDate ?? ""}-${endDate ?? ""}`
+  const cached = getCached(cacheKey)
+  if (cached) return NextResponse.json(cached, { headers: { "X-Cache": "HIT" } })
 
   const { from, to } = getDateRange(period, startDate, endDate)
   const { from: prevFrom, to: prevTo } = getPreviousRange(period, from, to)
@@ -224,7 +229,7 @@ export async function GET(request: NextRequest) {
     )
     const predictedCashFlow = predictCashFlow(predictedRevenue, predictedExpenses, netProfit)
 
-    return NextResponse.json({
+    const analyticsResult = {
       success: true,
       period,
       fixedExpenses,
@@ -251,7 +256,9 @@ export async function GET(request: NextRequest) {
       budgets: budgetPerformance,
       alerts,
       transactionCount: transactions.length,
-    })
+    }
+    setCached(cacheKey, analyticsResult, 120)
+    return NextResponse.json(analyticsResult)
   } catch (error) {
     console.error("Error getting analytics:", error)
     return fallbackResponse()

@@ -21,25 +21,31 @@ export const dynamic = 'force-dynamic'
  */
 
 function withCors(response: NextResponse, origin: string | null): NextResponse {
-    response.headers.set('Access-Control-Allow-Origin', origin || '*')
+    if (origin) {
+        response.headers.set('Access-Control-Allow-Origin', origin)
+        response.headers.set('Access-Control-Allow-Credentials', 'true')
+    } else {
+        response.headers.set('Access-Control-Allow-Origin', '*')
+    }
     response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
     response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-    response.headers.set('Access-Control-Allow-Credentials', 'true')
     return response
 }
 
 export async function OPTIONS(request: NextRequest) {
     const origin = request.headers.get('origin')
-    return new NextResponse(null, {
-        status: 204,
-        headers: {
-            'Access-Control-Allow-Origin': origin || '*',
-            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-            'Access-Control-Allow-Credentials': 'true',
-            'Access-Control-Max-Age': '86400',
-        }
-    })
+    const headers: Record<string, string> = {
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Max-Age': '86400',
+    }
+    if (origin) {
+        headers['Access-Control-Allow-Origin'] = origin
+        headers['Access-Control-Allow-Credentials'] = 'true'
+    } else {
+        headers['Access-Control-Allow-Origin'] = '*'
+    }
+    return new NextResponse(null, { status: 204, headers })
 }
 
 export async function GET(request: NextRequest) {

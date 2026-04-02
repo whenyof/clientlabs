@@ -15,9 +15,8 @@ export default function QueryProvider({
           queries: {
             staleTime: 60_000,
             refetchOnWindowFocus: false,
-            refetchOnMount: true,
-            retry: 2,
-            retryDelay: 1000,
+            refetchOnMount: false,
+            retry: 0,
           },
         },
       }),

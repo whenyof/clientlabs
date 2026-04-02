@@ -114,7 +114,7 @@ export function useLeads(filters: UseLeadsFilters = {}) {
     setSize,
     mutate,
   } = useSWRInfinite<LeadsApiResponse>(getKey, fetcher, {
-    refreshInterval: 5000,
+    refreshInterval: 300_000,
     revalidateFirstPage: true,
     revalidateOnFocus: true,
     dedupingInterval: 2000,
@@ -156,7 +156,7 @@ export function useLeadsSimple(filters: UseLeadsFilters = {}) {
     url,
     fetcher,
     {
-      refreshInterval: 5000,
+      refreshInterval: 300_000,
       revalidateOnFocus: true,
     }
   )

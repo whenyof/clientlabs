@@ -106,7 +106,7 @@ export function LeadTimeline({ leadId, createdAt }: LeadTimelineProps) {
   const [error, setError] = useState(false)
 
   const fetchActivities = useCallback(async (signal?: AbortSignal) => {
-    const res = await fetch(`${getBaseUrl()}/api/leads/${leadId}/activity`, { signal })
+    const res = await fetch(`/api/leads/${leadId}/activity`, { signal })
     if (!res.ok) return []
     const data = await res.json()
     return data as ActivityItem[]
@@ -114,7 +114,7 @@ export function LeadTimeline({ leadId, createdAt }: LeadTimelineProps) {
 
   const fetchInsights = useCallback(async (signal?: AbortSignal) => {
     try {
-      const res = await fetch(`${getBaseUrl()}/api/leads/${leadId}/insights?page=1&pageSize=20`, { signal })
+      const res = await fetch(`/api/leads/${leadId}/insights?page=1&pageSize=20`, { signal })
       if (!res.ok) throw new Error("Failed to fetch")
       const data = await res.json()
       return (data.timeline ?? []) as TimelineSession[]

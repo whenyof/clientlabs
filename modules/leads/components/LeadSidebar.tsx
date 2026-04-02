@@ -49,7 +49,7 @@ export function LeadSidebar({ leadId, lead }: LeadSidebarProps) {
   const [statusLoading, setStatusLoading] = useState(false)
 
   useEffect(() => {
-    fetch(`${getBaseUrl()}/api/leads/${leadId}/insights`)
+    fetch(`/api/leads/${leadId}/insights`)
       .then((res) => res.json())
       .then((data) => setInsights(data))
       .catch((err) => console.error("Error fetching sidebar insights:", err))

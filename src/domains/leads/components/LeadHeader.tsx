@@ -56,7 +56,7 @@ function Badge({ children, style }: { children: React.ReactNode; style?: React.C
 
 async function logActivity(leadId: string, type: string, content: string) {
   try {
-    await fetch(`${getBaseUrl()}/api/leads/${leadId}/activity`, {
+    await fetch(`/api/leads/${leadId}/activity`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ type, title: content, description: content }),

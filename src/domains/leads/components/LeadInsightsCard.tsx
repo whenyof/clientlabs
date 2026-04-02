@@ -19,7 +19,7 @@ export function LeadInsightsCard({ leadId, score = 0 }: LeadInsightsCardProps) {
   const [insights, setInsights] = useState<InsightsData | null>(null)
 
   useEffect(() => {
-    fetch(`${getBaseUrl()}/api/leads/${leadId}/insights`)
+    fetch(`/api/leads/${leadId}/insights`)
       .then((res) => res.json())
       .then((data) => setInsights(data))
       .catch(() => setInsights(null))

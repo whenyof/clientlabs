@@ -138,7 +138,7 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
  const phones = validatedLeads.filter(l => l.phone).map(l => l.phone!)
 
  try {
- const response = await fetch(getBaseUrl() + "/api/leads/check-duplicates", {
+ const response = await fetch("/api/leads/check-duplicates", {
  method: "POST",
  headers: { "Content-Type": "application/json" },
  body: JSON.stringify({ emails, phones })

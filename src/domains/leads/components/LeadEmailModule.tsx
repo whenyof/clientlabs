@@ -71,7 +71,7 @@ export function LeadEmailModule({ leadId, leadEmail, leadName }: LeadEmailModule
   useEffect(() => {
     if (activeTab === "sent") {
       setSentLoading(true)
-      fetch(`${getBaseUrl()}/api/leads/${leadId}/activity`)
+      fetch(`/api/leads/${leadId}/activity`)
         .then((r) => r.json())
         .then((data: SentEmail[]) => {
           setSentEmails((Array.isArray(data) ? data : []).filter((a) => a.type === "EMAIL"))
@@ -111,7 +111,7 @@ export function LeadEmailModule({ leadId, leadEmail, leadName }: LeadEmailModule
     if (!subject.trim() || !message.trim() || sendLoading) return
     setSendLoading(true)
     try {
-      await fetch(`${getBaseUrl()}/api/leads/${leadId}/activity`, {
+      await fetch(`/api/leads/${leadId}/activity`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ type: "EMAIL", title: subject, description: message }),

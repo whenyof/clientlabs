@@ -26,7 +26,7 @@ export function LeadNotesCard({ leadId }: LeadNotesCardProps) {
 
   const fetchNotes = async () => {
     try {
-      const data = await fetch(`${getBaseUrl()}/api/leads/${leadId}/activity`).then((r) => r.json())
+      const data = await fetch(`/api/leads/${leadId}/activity`).then((r) => r.json())
       setNotes((Array.isArray(data) ? data : []).filter((a: ActivityItem) => a.type === "NOTE"))
     } catch {
       setNotes([])
@@ -42,7 +42,7 @@ export function LeadNotesCard({ leadId }: LeadNotesCardProps) {
     if (!text || loading) return
     setLoading(true)
     try {
-      const res = await fetch(`${getBaseUrl()}/api/leads/${leadId}/activity`, {
+      const res = await fetch(`/api/leads/${leadId}/activity`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ type: "NOTE", title: "Nota", description: text }),
@@ -60,7 +60,7 @@ export function LeadNotesCard({ leadId }: LeadNotesCardProps) {
   const deleteNote = async (id: string) => {
     setDeletingId(id)
     try {
-      await fetch(`${getBaseUrl()}/api/leads/${leadId}/activity?activityId=${id}`, { method: "DELETE" })
+      await fetch(`/api/leads/${leadId}/activity?activityId=${id}`, { method: "DELETE" })
       setNotes((prev) => prev.filter((n) => n.id !== id))
     } finally {
       setDeletingId(null)

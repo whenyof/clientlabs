@@ -1,5 +1,4 @@
-import { Suspense } from "react"
-import { prisma } from "@/lib/prisma"
+import { prisma } from "@infra/database/prisma"
 import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
@@ -9,6 +8,7 @@ import { LeadsFilters } from "@domains/leads/components/LeadsFilters"
 import { LeadsTable } from "@domains/leads/components/LeadsTable"
 import { LeadsCharts } from "@domains/leads/components/LeadsCharts"
 export const dynamic = "force-dynamic"
+export const revalidate = 10
 
 type SearchParams = Promise<{
   status?: string
@@ -80,31 +80,21 @@ export default async function LeadsPage({
     <div className="space-y-6">
       <LeadsHeader />
       <LeadsKpisClient initial={kpis} />
-      <Suspense fallback={<div className="h-12 animate-pulse rounded-xl bg-slate-100" />}>
-        <LeadsFilters
-          currentFilters={{
-            status: searchParams.status ?? "all",
-            temperature: searchParams.temperature ?? "all",
-            source: searchParams.source ?? "all",
-            search: searchParams.search ?? "",
-            sortBy: searchParams.sortBy ?? "score",
-            sortOrder: searchParams.sortOrder ?? "desc",
-            showConverted: searchParams.showConverted === "true",
-            showLost: searchParams.showLost === "true",
-          }}
-          sources={sources}
-        />
-      </Suspense>
+      <LeadsFilters
+        currentFilters={{
+          status: searchParams.status ?? "all",
+          temperature: searchParams.temperature ?? "all",
+          source: searchParams.source ?? "all",
+          search: searchParams.search ?? "",
+          sortBy: searchParams.sortBy ?? "score",
+          sortOrder: searchParams.sortOrder ?? "desc",
+          showConverted: searchParams.showConverted === "true",
+          showLost: searchParams.showLost === "true",
+        }}
+        sources={sources}
+      />
       <LeadsCharts />
-      <Suspense fallback={
-        <div className="rounded-xl border border-slate-200 bg-white">
-          {[1,2,3,4,5].map((i) => (
-            <div key={i} className="h-14 animate-pulse border-b border-slate-100 last:border-0" />
-          ))}
-        </div>
-      }>
-        <LeadsTable />
-      </Suspense>
+      <LeadsTable />
     </div>
   )
 }

@@ -173,19 +173,21 @@ export async function getFinanceMonthlyTrend(
  userId: string
 ): Promise<MonthlyTrendPoint[]> {
  const now = new Date()
- const points: MonthlyTrendPoint[] = []
- for (let i = 5; i >= 0; i--) {
+ const months = Array.from({ length: 6 }, (_, idx) => {
+ const i = 5 - idx
  const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1)
  const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0)
- const s = await getFinanceSummary(userId, monthStart, monthEnd)
- points.push({
- month: monthStart.toLocaleDateString("es-ES", { month: "short", year: "numeric" }),
+ return { monthStart, monthEnd }
+ })
+ const summaries = await Promise.all(
+ months.map(({ monthStart, monthEnd }) => getFinanceSummary(userId, monthStart, monthEnd))
+ )
+ return summaries.map((s, idx) => ({
+ month: months[idx].monthStart.toLocaleDateString("es-ES", { month: "short", year: "numeric" }),
  income: s.income,
  expenses: s.expenses,
  profit: s.profit,
- })
- }
- return points
+ }))
 }
 
 export type ChartSeriesPoint = {
@@ -261,16 +263,12 @@ export async function getFinanceChartSeries(
  }
  }
 
- const series: ChartSeriesPoint[] = []
- for (const b of buckets) {
- const s = await getFinanceSummary(userId, b.from, b.to)
- series.push({
- date: b.from.toISOString(),
- label: b.label,
+ const summaries = await Promise.all(buckets.map((b) => getFinanceSummary(userId, b.from, b.to)))
+ return summaries.map((s, idx) => ({
+ date: buckets[idx].from.toISOString(),
+ label: buckets[idx].label,
  income: s.income,
  expense: s.expenses,
  profit: s.profit,
- })
- }
- return series
+ }))
 }

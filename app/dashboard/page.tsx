@@ -2,14 +2,12 @@
 
 import { useState, useEffect } from "react"
 import { DashboardView } from "./components/DashboardView"
-import { DashboardKPIsSkeleton } from "./components/DashboardKPIs"
-import { DashboardTasksSkeleton } from "./components/DashboardTasks"
-import { DashboardLeadsSkeleton } from "./components/DashboardLeads"
 
-interface SummaryData {
+export interface SummaryData {
   kpis: {
     leadsActive: number
     leadsNewThisWeek: number
+    leadsThisMonth: number
     invoicedThisMonth: number
     invoicedPrevMonth: number
     pendingCobro: number
@@ -18,6 +16,13 @@ interface SummaryData {
     tasksOverdue: number
     invoicesOverdue: number
     clientsActive: number
+  }
+  leadsByStatus: {
+    NEW: number
+    CONTACTED: number
+    QUALIFIED: number
+    CONVERTED: number
+    LOST: number
   }
   leadsRecent: Array<{
     id: string
@@ -47,13 +52,12 @@ interface SummaryData {
 function DashboardSkeleton() {
   return (
     <div className="mx-auto w-full max-w-[1400px]">
-      <div className="flex gap-6">
-        <div className="min-w-0 flex-1 space-y-5">
-          {/* Header skeleton */}
+      <div className="flex gap-5">
+        <div className="min-w-0 flex-1 space-y-4">
           <div className="flex items-start justify-between">
             <div className="space-y-2">
-              <div className="h-7 w-56 animate-pulse rounded-lg bg-slate-100" />
-              <div className="h-4 w-40 animate-pulse rounded-lg bg-slate-100" />
+              <div className="h-6 w-52 animate-pulse rounded-lg bg-slate-100" />
+              <div className="h-3.5 w-36 animate-pulse rounded-lg bg-slate-100" />
             </div>
             <div className="flex gap-2">
               {[1, 2, 3].map((i) => (
@@ -61,23 +65,21 @@ function DashboardSkeleton() {
               ))}
             </div>
           </div>
-
-          <DashboardKPIsSkeleton />
-
-          {/* Chart skeleton */}
-          <div className="h-[320px] animate-pulse rounded-xl bg-slate-100" />
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <DashboardTasksSkeleton />
-            <DashboardLeadsSkeleton />
+          <div className="h-[108px] animate-pulse rounded-xl bg-slate-100" />
+          <div className="grid grid-cols-3 gap-4">
+            <div className="h-[130px] animate-pulse rounded-xl bg-slate-100" />
+            <div className="h-[130px] animate-pulse rounded-xl bg-slate-100" />
+            <div className="h-[130px] animate-pulse rounded-xl bg-slate-100" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="h-[240px] animate-pulse rounded-xl bg-slate-100" />
+            <div className="h-[240px] animate-pulse rounded-xl bg-slate-100" />
           </div>
         </div>
-
-        {/* Sidebar skeleton */}
-        <div className="hidden w-[272px] flex-shrink-0 space-y-4 lg:block">
+        <div className="hidden w-[248px] flex-shrink-0 space-y-4 lg:block">
+          <div className="h-[220px] animate-pulse rounded-xl bg-slate-100" />
+          <div className="h-[160px] animate-pulse rounded-xl bg-slate-100" />
           <div className="h-[200px] animate-pulse rounded-xl bg-slate-100" />
-          <div className="h-[240px] animate-pulse rounded-xl bg-slate-100" />
-          <div className="h-[180px] animate-pulse rounded-xl bg-slate-100" />
         </div>
       </div>
     </div>
@@ -95,9 +97,7 @@ export default function DashboardPage() {
         if (!r.ok) throw new Error("Error")
         return r.json()
       })
-      .then((json: SummaryData) => {
-        setData(json)
-      })
+      .then((json: SummaryData) => setData(json))
       .catch(() => setError(true))
       .finally(() => setLoading(false))
   }, [])

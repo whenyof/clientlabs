@@ -26,7 +26,9 @@ export async function GET() {
     const [
       leadsActive,
       leadsNewThisWeek,
+      leadsThisMonth,
       leadsRecent,
+      leadsByStatusRaw,
       invoicesPaid,
       invoicesPaidPrevMonth,
       invoicesPending,
@@ -53,6 +55,10 @@ export async function GET() {
           createdAt: { gte: startOfWeek },
         },
       }),
+      // Leads este mes
+      prisma.lead.count({
+        where: { userId, createdAt: { gte: startOfMonth } },
+      }),
       // Últimos 5 leads
       prisma.lead.findMany({
         where: { userId },
@@ -65,6 +71,12 @@ export async function GET() {
           leadStatus: true,
           createdAt: true,
         },
+      }),
+      // Leads por estado
+      prisma.lead.groupBy({
+        by: ["leadStatus"],
+        where: { userId },
+        _count: true,
       }),
       // Facturado este mes
       prisma.invoice.aggregate({
@@ -165,10 +177,23 @@ export async function GET() {
     const invoicedThisMonth = Number(invoicesPaid._sum.total ?? 0)
     const invoicedPrevMonth = Number(invoicesPaidPrevMonth._sum.total ?? 0)
 
+    const leadsByStatusMap: Record<string, number> = {}
+    for (const row of leadsByStatusRaw) {
+      leadsByStatusMap[row.leadStatus] = row._count
+    }
+    const leadsByStatus = {
+      NEW: leadsByStatusMap["NEW"] ?? 0,
+      CONTACTED: leadsByStatusMap["CONTACTED"] ?? 0,
+      QUALIFIED: leadsByStatusMap["QUALIFIED"] ?? 0,
+      CONVERTED: leadsByStatusMap["CONVERTED"] ?? 0,
+      LOST: leadsByStatusMap["LOST"] ?? 0,
+    }
+
     const result = {
       kpis: {
         leadsActive,
         leadsNewThisWeek,
+        leadsThisMonth,
         invoicedThisMonth,
         invoicedPrevMonth,
         pendingCobro: Number(invoicesPending._sum.total ?? 0),
@@ -178,6 +203,7 @@ export async function GET() {
         invoicesOverdue,
         clientsActive,
       },
+      leadsByStatus,
       leadsRecent,
       tasksHighPriority,
       activityFeed: {

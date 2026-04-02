@@ -69,43 +69,43 @@ export function DashboardSidebar({ activityFeed, kpis, leadsThisMonth, invoicedT
           <div className="text-[32px] font-bold leading-none tracking-[-0.04em] text-white">
             {pad(now.getHours())}:{pad(now.getMinutes())}
           </div>
-          <div className="mt-1 text-[10px] text-white/40 mb-4 capitalize">
+          <div className="mt-1 text-[10px] text-white/70 mb-4 capitalize">
             {now.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" })}
           </div>
 
-          <div className="rounded-lg border border-[#1FA97A]/20 bg-[#1FA97A]/10 p-3">
+          <div className="rounded-lg border border-[#1FA97A]/30 bg-[#1FA97A]/15 p-3">
             <div className="mb-2 flex items-center justify-between">
-              <span className="text-[9px] uppercase tracking-[0.1em] text-white/35">
+              <span className="text-[9px] uppercase tracking-[0.1em] text-white/70">
                 {currentMonth} · día {dayOfMonth} de {daysInMonth}
               </span>
               <span className="text-[11px] font-semibold text-[#1FA97A]">{progress}%</span>
             </div>
-            <div className="mb-2 h-[2px] overflow-hidden rounded-full bg-white/10">
+            <div className="mb-2 h-[2px] overflow-hidden rounded-full bg-white/20">
               <div
                 className="h-full rounded-full bg-[#1FA97A] transition-all"
                 style={{ width: `${progress}%` }}
               />
             </div>
             <div className="flex justify-between">
-              <span className="text-[9px] text-white/35">Progreso del mes</span>
-              <span className="text-[9px] text-white/35">Quedan {daysLeft} días</span>
+              <span className="text-[9px] text-white/60">Progreso del mes</span>
+              <span className="text-[9px] text-white/60">Quedan {daysLeft} días</span>
             </div>
           </div>
 
           <div className="mt-3 flex gap-4">
             <div>
-              <div className="text-[9px] uppercase tracking-wider text-white/40 mb-0.5">Leads mes</div>
+              <div className="text-[9px] uppercase tracking-wider text-white/60 mb-0.5">Leads mes</div>
               <div className="text-[15px] font-bold text-[#1FA97A]">{leadsThisMonth}</div>
             </div>
             <div>
-              <div className="text-[9px] uppercase tracking-wider text-white/40 mb-0.5">Facturado</div>
-              <div className={cn("text-[15px] font-bold", invoicedThisMonth > 0 ? "text-white" : "text-white/40")}>
+              <div className="text-[9px] uppercase tracking-wider text-white/60 mb-0.5">Facturado</div>
+              <div className={cn("text-[15px] font-bold", invoicedThisMonth > 0 ? "text-white" : "text-white/50")}>
                 {currencyFmt.format(invoicedThisMonth)}
               </div>
             </div>
           </div>
 
-          <p className="mt-3 text-[9px] text-white/20">
+          <p className="mt-3 text-[9px] text-white/50">
             Quedan {daysLeft} días para {nextMonth}
           </p>
         </div>

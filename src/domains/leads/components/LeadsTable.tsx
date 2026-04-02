@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation"
 import { useMemo, useRef, useCallback, useEffect } from "react"
 import { LeadCard } from "@/modules/leads/components/LeadCard"
 import { Upload, Globe, Zap, Loader2 } from "lucide-react"
+import type { Lead } from "@prisma/client"
 
 function EmptyState() {
   return (
@@ -42,7 +43,12 @@ function EmptyState() {
   )
 }
 
-export function LeadsTable() {
+interface LeadsTableProps {
+  initialLeads?: Lead[]
+  initialTotal?: number
+}
+
+export function LeadsTable({ initialLeads, initialTotal }: LeadsTableProps = {}) {
   const searchParams = useSearchParams()
 
   const filters = useMemo(() => ({
@@ -65,7 +71,7 @@ export function LeadsTable() {
     hasNextPage,
     fetchNextPage,
     error,
-  } = useLeads(filters)
+  } = useLeads(filters, { initialLeads, initialTotal })
 
   // ── Infinite scroll ──
   const observerRef = useRef<IntersectionObserver | null>(null)

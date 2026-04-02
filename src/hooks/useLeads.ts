@@ -7,16 +7,39 @@ import type { Lead, LeadStatus } from "@prisma/client"
 import { changeLeadStatus } from "@/modules/leads/actions"
 import { toast } from "sonner"
 
+interface UseLeadsOptions {
+  initialLeads?: Lead[]
+  initialTotal?: number
+}
+
 /**
  * Optimized React-Query hook for leads list.
  * Supports cursor-based infinite scroll and server-side filtering.
+ * Accepts server-fetched initialLeads to show data immediately without an API call.
  */
-export function useLeads(filters: GetLeadsParams = {}) {
+export function useLeads(filters: GetLeadsParams = {}, options?: UseLeadsOptions) {
+  const initialData = options?.initialLeads?.length
+    ? {
+        pages: [
+          {
+            leads: options.initialLeads,
+            pagination: {
+              nextCursor: null as string | null,
+              hasNext: false,
+              total: options.initialTotal ?? options.initialLeads.length,
+            },
+          },
+        ],
+        pageParams: [undefined as string | undefined],
+      }
+    : undefined
+
   const query = useInfiniteQuery({
     queryKey: ["leads", filters],
     queryFn: ({ pageParam }) => getLeads({ ...filters, cursor: pageParam }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.pagination?.nextCursor,
+    initialData,
     refetchInterval: 120_000,
     staleTime: 60_000,
   })
@@ -63,7 +86,6 @@ export function useUpdateLeadStatus() {
       }>({ queryKey: ["leads"] })
 
       // Optimistically update every matching query
-      // If converting or losing, remove from list; otherwise update status
       const shouldRemove = status === "CONVERTED" || status === "LOST"
 
       queryClient.setQueriesData<{

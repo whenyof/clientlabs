@@ -20,8 +20,14 @@ interface StatusCount {
   color: string
 }
 
+interface ChartInitialData {
+  daily: DailyLead[]
+  byStatus: StatusCount[]
+}
+
 interface LeadsChartsProps {
   userId?: string
+  initialData?: ChartInitialData
 }
 
 // ── Tooltip personalizado barra ─────────
@@ -52,10 +58,10 @@ function PieTooltip({ active, payload }: any) {
   )
 }
 
-export function LeadsCharts({}: LeadsChartsProps) {
+export function LeadsCharts({ initialData }: LeadsChartsProps) {
   const [isOpen, setIsOpen] = useState(true)
-  const [dailyData, setDailyData] = useState<DailyLead[]>([])
-  const [statusData, setStatusData] = useState<StatusCount[]>([])
+  const [dailyData, setDailyData] = useState<DailyLead[]>(initialData?.daily ?? [])
+  const [statusData, setStatusData] = useState<StatusCount[]>(initialData?.byStatus ?? [])
   const [isLoading, setIsLoading] = useState(false)
 
   // Persistir estado colapsado en localStorage

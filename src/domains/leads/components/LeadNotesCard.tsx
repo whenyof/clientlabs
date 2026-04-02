@@ -1,5 +1,4 @@
 "use client"
-import { getBaseUrl } from "@/lib/api/baseUrl"
 
 import { useState, useEffect } from "react"
 import { Loader2, Trash2 } from "lucide-react"

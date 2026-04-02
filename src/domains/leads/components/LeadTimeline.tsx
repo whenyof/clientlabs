@@ -1,5 +1,4 @@
 "use client"
-import { getBaseUrl } from "@/lib/api/baseUrl"
 
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { format } from "date-fns"

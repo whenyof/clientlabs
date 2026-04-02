@@ -60,9 +60,8 @@ function PieTooltip({ active, payload }: any) {
 
 export function LeadsCharts({ initialData }: LeadsChartsProps) {
   const [isOpen, setIsOpen] = useState(true)
-  const [dailyData, setDailyData] = useState<DailyLead[]>(initialData?.daily ?? [])
-  const [statusData, setStatusData] = useState<StatusCount[]>(initialData?.byStatus ?? [])
-  const [isLoading, setIsLoading] = useState(false)
+  const [dailyData] = useState<DailyLead[]>(initialData?.daily ?? [])
+  const [statusData] = useState<StatusCount[]>(initialData?.byStatus ?? [])
 
   // Persistir estado colapsado en localStorage
   useEffect(() => {
@@ -81,29 +80,6 @@ export function LeadsCharts({ initialData }: LeadsChartsProps) {
     const next = !isOpen
     setIsOpen(next)
     localStorage.setItem("leads-charts-open", String(next))
-  }
-
-  useEffect(() => {
-    if (!isOpen) {
-      setIsLoading(false)
-      return
-    }
-    fetchChartData()
-  }, [isOpen])
-
-  const fetchChartData = async () => {
-    setIsLoading(true)
-    try {
-      const res = await fetch("/api/leads/charts")
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      const data = await res.json()
-      setDailyData(data.daily || [])
-      setStatusData(data.byStatus || [])
-    } catch (err) {
-      console.error('[LeadsCharts] fetch error:', err)
-    } finally {
-      setIsLoading(false)
-    }
   }
 
   const totalLeads = statusData.reduce(
@@ -142,19 +118,7 @@ export function LeadsCharts({ initialData }: LeadsChartsProps) {
       {/* ── Contenido ── */}
       {isOpen && (
         <div className="border-t border-slate-100 px-5 py-5">
-          {isLoading ? (
-            <div className="flex items-center justify-center h-[160px]">
-              <div className="flex gap-1">
-                {[0,1,2].map(i => (
-                  <div key={i}
-                    className="w-1.5 h-1.5 rounded-full bg-[#1FA97A] animate-bounce"
-                    style={{ animationDelay: `${i * 0.15}s` }}
-                  />
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "180px 1fr", gap: "24px", alignItems: "center" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "180px 1fr", gap: "24px", alignItems: "center" }}>
 
               {/* ── Donut + leyenda (IZQUIERDA) ── */}
               <div>
@@ -295,7 +259,6 @@ export function LeadsCharts({ initialData }: LeadsChartsProps) {
               </div>
 
             </div>
-          )}
         </div>
       )}
     </div>

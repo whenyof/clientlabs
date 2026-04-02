@@ -1,5 +1,4 @@
 "use client"
-import { getBaseUrl } from "@/lib/api/baseUrl"
 
 
 import { useEffect, useState } from "react"

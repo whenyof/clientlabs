@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import { Loader2, Send } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
-import { getBaseUrl } from "@/lib/api/baseUrl"
 import { formatTimeAgo } from "@domains/leads/utils/formatting"
 
 interface LeadEmailModuleProps {

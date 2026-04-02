@@ -1,4 +1,5 @@
-import { prisma, safePrismaQuery } from "@infra/database/prisma"
+import { prisma } from "@/lib/prisma"
+import { safePrismaQuery } from "@infra/database/prisma"
 import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"

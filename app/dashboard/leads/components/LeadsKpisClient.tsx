@@ -7,15 +7,19 @@ export function LeadsKpisClient({ initial }: { initial: KpisData }) {
   const [kpis, setKpis] = useState(initial)
 
   useEffect(() => {
-    const fetchKpis = () => {
-      fetch("/api/leads/kpis", { cache: "no-store" })
-        .then((res) => (res.ok ? res.json() : Promise.reject(res)))
-        .then((data: KpisData) => setKpis(data))
-        .catch(() => {})
+    const fetchKpis = async () => {
+      try {
+        const res = await fetch("/api/leads/kpis", { cache: "no-store" })
+        if (!res.ok) return
+        const data: KpisData = await res.json()
+        setKpis(data)
+      } catch {
+        return
+      }
     }
 
     fetchKpis()
-    const interval = setInterval(fetchKpis, 120000)
+    const interval = setInterval(fetchKpis, 300_000)
     return () => clearInterval(interval)
   }, [])
 

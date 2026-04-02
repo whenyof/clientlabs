@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma"
 import { getCached, setCached } from "@/lib/cache"
 
 export async function GET() {
+  try {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -75,4 +76,8 @@ export async function GET() {
   const result = { total, hot, converted, stalled, newThisWeek, hotDelta, conversionRate }
   setCached(cacheKey, result, 60)
   return NextResponse.json(result)
+  } catch (error) {
+    console.error('[api/leads/kpis] GET error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }

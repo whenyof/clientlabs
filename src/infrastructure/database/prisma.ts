@@ -1,33 +1,5 @@
-import { PrismaClient } from "@prisma/client"
-
-declare global {
-  // eslint-disable-next-line no-var
-  var __prisma: PrismaClient | undefined
-}
-
-if (!process.env.DATABASE_URL) {
-  console.warn("DATABASE_URL is not defined in environment variables")
-}
-
-/**
- * Prisma singleton: one client per process.
- * - globalThis prevents multiple instances on Next.js hot reload in dev.
- * - Single read+assign so no race when the module is first loaded.
- * - Neon/pgbouncer: set DATABASE_URL to the pooled endpoint (e.g. *-pooler.region.neon.tech)
- * so serverless does not exhaust the connection limit.
- */
-const globalForPrisma = globalThis as typeof globalThis & { __prisma?: PrismaClient }
-export const prisma =
-  globalForPrisma.__prisma ??
-  (globalForPrisma.__prisma = new PrismaClient({
-    log: ["error"],
-  }))
-
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.__prisma = prisma
-}
-
-export default prisma
+// Re-export from the canonical singleton to avoid duplicate PrismaClient instances
+export { prisma, default, safeDbCheck, safePrismaQuery } from "@/lib/prisma"
 
 /**
  * Checks if the database is available. Never throws; short timeout.

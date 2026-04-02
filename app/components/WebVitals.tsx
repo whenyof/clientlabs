@@ -1,7 +1,4 @@
 "use client"
-import { getBaseUrl } from "@/lib/api/baseUrl"
-
-
 import { useEffect } from "react"
 
 type VitalsMetric = {
@@ -21,7 +18,7 @@ export function WebVitals() {
  return
  }
 
- fetch(getBaseUrl() + "/api/vitals", {
+ fetch("/api/vitals", {
  method: "POST",
  body,
  keepalive: true,

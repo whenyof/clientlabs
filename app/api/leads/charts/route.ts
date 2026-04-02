@@ -8,6 +8,7 @@ import { format, subDays, eachDayOfInterval } from "date-fns"
 import { es } from "date-fns/locale"
 
 export async function GET() {
+  try {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
     return NextResponse.json(
@@ -108,4 +109,8 @@ export async function GET() {
     daily: dailyFiltered,
     byStatus,
   })
+  } catch (error) {
+    console.error('[api/leads/charts] GET error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }

@@ -89,12 +89,12 @@ export function LeadsCharts({}: LeadsChartsProps) {
     setIsLoading(true)
     try {
       const res = await fetch("/api/leads/charts")
-      if (!res.ok) throw new Error()
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data = await res.json()
       setDailyData(data.daily || [])
       setStatusData(data.byStatus || [])
-    } catch {
-      // silently fail — charts are non-critical
+    } catch (err) {
+      console.error('[LeadsCharts] fetch error:', err)
     } finally {
       setIsLoading(false)
     }

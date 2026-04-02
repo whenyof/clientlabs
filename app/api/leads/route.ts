@@ -198,10 +198,7 @@ export async function GET(request: NextRequest) {
       },
     }), origin)
   } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
-      console.error('[api/leads] error:', error)
-    }
-
+    console.error('[api/leads] GET error:', error)
     return withCors(NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

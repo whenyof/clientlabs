@@ -64,6 +64,7 @@ export function LeadsTable() {
     isFetchingNextPage,
     hasNextPage,
     fetchNextPage,
+    error,
   } = useLeads(filters)
 
   // ── Infinite scroll ──
@@ -80,6 +81,21 @@ export function LeadsTable() {
   useEffect(() => {
     return () => observerRef.current?.disconnect()
   }, [])
+
+  if (error) {
+    console.error('[LeadsTable] query error:', error)
+    return (
+      <div style={{ background: "var(--bg-card)", border: "0.5px solid var(--border-subtle)", borderRadius: 12, padding: 32, textAlign: "center" }}>
+        <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 8 }}>Error al cargar leads</p>
+        <button
+          onClick={() => window.location.reload()}
+          style={{ fontSize: 12, color: "#1FA97A", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}
+        >
+          Reintentar
+        </button>
+      </div>
+    )
+  }
 
   if (isLoading) {
     return (

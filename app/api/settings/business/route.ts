@@ -106,6 +106,5 @@ export async function PATCH(request: NextRequest) {
     },
   })
 
-  console.log("BUSINESS PROFILE UPDATED")
   return NextResponse.json({ success: true })
 }

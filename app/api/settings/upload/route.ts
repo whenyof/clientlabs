@@ -55,7 +55,6 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    console.log("LOGO SAVED:", url)
     return NextResponse.json({ url, name: file.name })
   } catch (err) {
     console.error("Settings upload error:", err)

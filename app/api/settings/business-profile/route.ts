@@ -88,17 +88,12 @@ export async function GET() {
   const session = await getServerSession(authOptions)
   const userId = session?.user?.id
   if (!userId) {
-    console.log("PROFILE LOADED: no session userId")
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-
-  console.log("LOADING PROFILE FOR:", userId)
 
   const profile = await prisma.businessProfile.findUnique({
     where: { userId },
   })
-
-  console.log("PROFILE LOADED", profile ? { id: profile.id, companyName: profile.companyName ?? profile.name } : null)
 
   return NextResponse.json({
     success: true,
@@ -111,10 +106,8 @@ export async function GET() {
  * Upsert BusinessProfile. If exists → update; else → create. Return updated object.
  */
 export async function PUT(request: NextRequest) {
-  console.log("API HIT")
   const session = await getServerSession(authOptions)
   const userId = session?.user?.id
-  console.log("USER:", userId)
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
@@ -122,11 +115,9 @@ export async function PUT(request: NextRequest) {
   let body: Record<string, unknown>
   try {
     body = await request.json()
-  } catch (e) {
-    console.log("PUT parse error:", e)
+  } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 })
   }
-  console.log("BODY RECEIVED:", body)
 
   const data = toProfilePayload(body)
   const updatePayload = { ...data, updatedAt: new Date() }
@@ -158,16 +149,10 @@ export async function PUT(request: NextRequest) {
         defaultTermsTemplate: (data.defaultTermsTemplate as string) ?? null,
       },
     })
-    console.log("UPSERT DONE:", { id: profile.id, userId: profile.userId, companyName: profile.companyName ?? profile.name })
   } catch (err) {
     console.error("UPSERT ERROR:", err)
     return NextResponse.json({ error: "Failed to save profile" }, { status: 500 })
   }
-
-  const check = await prisma.businessProfile.findUnique({
-    where: { userId },
-  })
-  console.log("DB AFTER SAVE:", check ? { id: check.id, companyName: check.companyName ?? check.name, logoUrl: check.logoUrl } : null)
 
   return NextResponse.json({
     success: true,

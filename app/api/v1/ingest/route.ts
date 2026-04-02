@@ -3,9 +3,7 @@ export const dynamic = "force-dynamic"
 
 import { NextRequest, NextResponse } from "next/server"
 
-if (typeof process !== "undefined") {
-  console.log("INGEST REDIS URL:", process.env.UPSTASH_REDIS_REST_URL ?? "(missing)")
-}
+
 import { prisma } from "@/lib/prisma"
 import { ApiKeyType } from "@prisma/client"
 import { buildCorsHeaders } from "@/lib/track/originValidator"
@@ -148,8 +146,6 @@ export async function POST(request: NextRequest) {
       return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }), corsHeaders)
     }
 
-    console.log("[ingest] received apiKey:", api_key)
-
     const { events } = payload
 
     if (!Array.isArray(events) || events.length === 0) {
@@ -221,11 +217,6 @@ export async function POST(request: NextRequest) {
         )
       }
     }
-
-    console.log(
-      "[ingest] apiKeyRecord:",
-      keyRecord ? { id: keyRecord.id, type: keyRecord.type, domain: keyRecord.domain } : null
-    )
 
     const now = Date.now()
     const isInactive =
@@ -312,7 +303,6 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    console.log("[ingest] enqueueing events:", validEvents.length)
     let queued = false
     try {
       await enqueueEvents(validEvents)

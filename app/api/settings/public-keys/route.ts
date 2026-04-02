@@ -183,8 +183,6 @@ export async function POST(req: NextRequest) {
             }
         })
 
-        console.log("[apikey] created:", rawKey)
-
         return NextResponse.json({
             ok: true,
             apiKey: rawKey,

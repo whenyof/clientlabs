@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { prisma } from "@/lib/prisma"
-console.log("DB URL RUNTIME:", process.env.DATABASE_URL)
 type Params = { params: Promise<{ id: string }> }
 
 const completeSchema = z.object({

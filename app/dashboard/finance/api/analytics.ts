@@ -144,8 +144,6 @@ export async function GET(request: NextRequest) {
         "to:",
         to.toISOString()
       )
-    } else {
-      console.log("[Finance validation] OK: Sales total = Finance income =", income)
     }
     const pendingPayments = summary.pendingIncome
     const netProfit = summary.profit

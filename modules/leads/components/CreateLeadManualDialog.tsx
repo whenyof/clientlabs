@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { useQueryClient } from "@tanstack/react-query"
 import {
  Dialog,
  DialogContent,
@@ -11,6 +12,7 @@ import * as VisuallyHidden from "@radix-ui/react-visually-hidden"
 import { Loader2, ChevronDown } from "lucide-react"
 import { createLead } from "../actions"
 import { toast } from "sonner"
+import type { Lead } from "@prisma/client"
 
 const STATUS_OPTIONS = [
  { value: "NEW", label: "Nuevo" },
@@ -33,6 +35,7 @@ const SOURCE_OPTIONS = [
 
 export function CreateLeadManualDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
  const router = useRouter()
+ const queryClient = useQueryClient()
  const [loading, setLoading] = useState(false)
  const [formData, setFormData] = useState({
  name: "",
@@ -48,7 +51,46 @@ export function CreateLeadManualDialog({ open, onOpenChange }: { open: boolean; 
 
  setLoading(true)
  try {
- await createLead(formData)
+ const result = await createLead(formData)
+ const now = new Date()
+ const optimisticLead = {
+  id: result.leadId,
+  userId: "",
+  name: formData.name,
+  email: formData.email || null,
+  phone: formData.phone || null,
+  source: formData.source || "manual",
+  leadStatus: (formData.leadStatus as Lead["leadStatus"]) || "NEW",
+  status: (formData.leadStatus as Lead["status"]) || "NEW",
+  temperature: "COLD",
+  score: 0,
+  priority: null,
+  tags: [],
+  notes: null,
+  converted: false,
+  clientId: null,
+  lastActionAt: now,
+  createdAt: now,
+  updatedAt: now,
+  conversionProbability: null,
+  aiSegment: null,
+  metadata: {},
+ } as unknown as Lead
+ // Insert the new lead into all matching React Query cache entries immediately
+ queryClient.setQueriesData<{
+  pages: { leads: Lead[]; pagination: any }[]
+  pageParams: any[]
+ }>({ queryKey: ["leads"] }, (old) => {
+  if (!old) return old
+  return {
+   ...old,
+   pages: old.pages.map((page, i) =>
+    i === 0
+     ? { ...page, leads: [optimisticLead, ...page.leads], pagination: { ...page.pagination, total: (page.pagination?.total ?? 0) + 1 } }
+     : page
+   ),
+  }
+ })
  setFormData({ name: "", email: "", phone: "", source: "", leadStatus: "NEW" })
  onOpenChange(false)
  router.refresh()

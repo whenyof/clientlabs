@@ -56,12 +56,19 @@ export function LeadsCharts({}: LeadsChartsProps) {
   const [isOpen, setIsOpen] = useState(true)
   const [dailyData, setDailyData] = useState<DailyLead[]>([])
   const [statusData, setStatusData] = useState<StatusCount[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
 
   // Persistir estado colapsado en localStorage
   useEffect(() => {
-    const saved = localStorage.getItem("leads-charts-open")
-    if (saved !== null) setIsOpen(saved === "true")
+    try {
+      const saved = localStorage.getItem("leads-charts-open")
+      if (saved !== null) {
+        setIsOpen(JSON.parse(saved))
+      }
+    } catch {
+      localStorage.removeItem("leads-charts-open")
+      setIsOpen(true)
+    }
   }, [])
 
   const toggleOpen = () => {
@@ -71,7 +78,10 @@ export function LeadsCharts({}: LeadsChartsProps) {
   }
 
   useEffect(() => {
-    if (!isOpen) return
+    if (!isOpen) {
+      setIsLoading(false)
+      return
+    }
     fetchChartData()
   }, [isOpen])
 

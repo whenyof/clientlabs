@@ -16,19 +16,11 @@ if (!process.env.DATABASE_URL) {
  * - Neon/pgbouncer: set DATABASE_URL to the pooled endpoint (e.g. *-pooler.region.neon.tech)
  * so serverless does not exhaust the connection limit.
  */
-function buildDatabaseUrl(): string {
-  const url = process.env.DATABASE_URL ?? ""
-  if (!url) return url
-  const separator = url.includes("?") ? "&" : "?"
-  return `${url}${separator}pgbouncer=true&connect_timeout=20&pool_timeout=20`
-}
-
 const globalForPrisma = globalThis as typeof globalThis & { __prisma?: PrismaClient }
 export const prisma =
   globalForPrisma.__prisma ??
   (globalForPrisma.__prisma = new PrismaClient({
     log: ["error"],
-    datasources: { db: { url: buildDatabaseUrl() } },
   }))
 
 if (process.env.NODE_ENV !== "production") {

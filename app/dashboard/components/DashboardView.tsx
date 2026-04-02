@@ -18,7 +18,7 @@ export function DashboardView({ data }: Props) {
 
   return (
     <div className="mx-auto w-full max-w-[1400px]">
-      <div className="flex gap-5">
+      <div className="flex items-start gap-5">
         {/* Contenido principal */}
         <div className="min-w-0 flex-1 space-y-4">
           <DashboardHeader userName={meta.userName} currentDate={meta.currentDate} />

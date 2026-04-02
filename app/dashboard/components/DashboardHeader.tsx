@@ -54,7 +54,7 @@ export function DashboardHeader({ userName, currentDate }: Props) {
         </button>
         <button
           onClick={() => router.push("/dashboard/finance")}
-          className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-[12px] font-medium text-white transition-colors hover:bg-slate-800"
+          className="flex items-center gap-1.5 rounded-lg border border-[#1FA97A] bg-[#1FA97A] px-3 py-1.5 text-[12px] font-medium text-white transition-colors hover:bg-[#178f68]"
         >
           <FileText className="h-3.5 w-3.5" />
           Nueva factura

@@ -57,7 +57,7 @@ export function DashboardSidebar({ activityFeed, kpis, leadsThisMonth, invoicedT
   return (
     <aside className="hidden w-[248px] flex-shrink-0 lg:flex lg:flex-col gap-4">
       {/* Clock + Progreso del mes */}
-      <div className="relative overflow-hidden rounded-xl bg-[#0B1F2A]">
+      <div className="relative overflow-hidden rounded-xl bg-[#1E3A4A]">
         <div
           className="absolute inset-0"
           style={{
@@ -69,7 +69,7 @@ export function DashboardSidebar({ activityFeed, kpis, leadsThisMonth, invoicedT
           <div className="text-[32px] font-bold leading-none tracking-[-0.04em] text-white">
             {pad(now.getHours())}:{pad(now.getMinutes())}
           </div>
-          <div className="mt-1 text-[10px] text-white/30 mb-4 capitalize">
+          <div className="mt-1 text-[10px] text-white/40 mb-4 capitalize">
             {now.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" })}
           </div>
 
@@ -87,19 +87,19 @@ export function DashboardSidebar({ activityFeed, kpis, leadsThisMonth, invoicedT
               />
             </div>
             <div className="flex justify-between">
-              <span className="text-[9px] text-white/25">Progreso del mes</span>
-              <span className="text-[9px] text-white/25">Quedan {daysLeft} días</span>
+              <span className="text-[9px] text-white/35">Progreso del mes</span>
+              <span className="text-[9px] text-white/35">Quedan {daysLeft} días</span>
             </div>
           </div>
 
           <div className="mt-3 flex gap-4">
             <div>
-              <div className="text-[9px] uppercase tracking-wider text-white/30 mb-0.5">Leads mes</div>
+              <div className="text-[9px] uppercase tracking-wider text-white/40 mb-0.5">Leads mes</div>
               <div className="text-[15px] font-bold text-[#1FA97A]">{leadsThisMonth}</div>
             </div>
             <div>
-              <div className="text-[9px] uppercase tracking-wider text-white/30 mb-0.5">Facturado</div>
-              <div className={cn("text-[15px] font-bold", invoicedThisMonth > 0 ? "text-white" : "text-white/30")}>
+              <div className="text-[9px] uppercase tracking-wider text-white/40 mb-0.5">Facturado</div>
+              <div className={cn("text-[15px] font-bold", invoicedThisMonth > 0 ? "text-white" : "text-white/40")}>
                 {currencyFmt.format(invoicedThisMonth)}
               </div>
             </div>

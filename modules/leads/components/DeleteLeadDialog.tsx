@@ -14,6 +14,7 @@ import {
 import { deleteLead } from "../actions"
 import { toast } from "sonner"
 import { useQueryClient } from "@tanstack/react-query"
+import { useLeadsOptimistic } from "../context/LeadsOptimisticContext"
 import { useSectorConfig } from "@/hooks/useSectorConfig"
 
 type DeleteLeadDialogProps = {
@@ -28,14 +29,14 @@ export function DeleteLeadDialog({ open, onClose, leadId, leadName, onDeleted }:
  const { labels } = useSectorConfig()
  const ui = labels.leads.ui
  const queryClient = useQueryClient()
+ const { removeLead } = useLeadsOptimistic()
  const [loading, setLoading] = useState(false)
 
  const handleDelete = async () => {
  setLoading(true)
  try {
  await deleteLead(leadId)
- // Instantly remove from UI (mirrors providers pattern)
- window.dispatchEvent(new CustomEvent("lead-deleted", { detail: { leadId } }))
+ removeLead(leadId)
  queryClient.invalidateQueries({ queryKey: ["leads"] })
  queryClient.invalidateQueries({ queryKey: ["leads-kpis"] })
  toast.success(ui.toastDeleted)

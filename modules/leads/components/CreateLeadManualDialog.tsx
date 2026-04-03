@@ -12,6 +12,7 @@ import { Loader2, ChevronDown } from "lucide-react"
 import { createLead } from "../actions"
 import { toast } from "sonner"
 import type { Lead } from "@prisma/client"
+import { useLeadsOptimistic } from "../context/LeadsOptimisticContext"
 
 const STATUS_OPTIONS = [
  { value: "NEW", label: "Nuevo" },
@@ -34,6 +35,7 @@ const SOURCE_OPTIONS = [
 
 export function CreateLeadManualDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
  const queryClient = useQueryClient()
+ const { addLead } = useLeadsOptimistic()
  const [loading, setLoading] = useState(false)
  const [formData, setFormData] = useState({
  name: "",
@@ -74,10 +76,9 @@ export function CreateLeadManualDialog({ open, onOpenChange }: { open: boolean; 
   aiSegment: null,
   metadata: {},
  } as unknown as Lead
- // Instantly update the UI (mirrors providers pattern — no React Query race)
- window.dispatchEvent(new CustomEvent("lead-created", { detail: newLead }))
- // Background sync — does not block UI, does NOT call router.refresh()
- // (router.refresh re-mounts Suspense boundary and destroys extraLeads state)
+ // Instantly update the UI via shared React context (same tree, no event bus race)
+ addLead(newLead)
+ // Background sync
  queryClient.invalidateQueries({ queryKey: ["leads"] })
  queryClient.invalidateQueries({ queryKey: ["leads-kpis"] })
  setFormData({ name: "", email: "", phone: "", source: "", leadStatus: "NEW" })

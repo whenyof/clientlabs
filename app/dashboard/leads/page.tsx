@@ -7,6 +7,7 @@ import { LeadsKpisClient } from "./components/LeadsKpisClient"
 import { LeadsFilters } from "@domains/leads/components/LeadsFilters"
 import { LeadsTable } from "@domains/leads/components/LeadsTable"
 import { LeadsCharts } from "@domains/leads/components/LeadsCharts"
+import { LeadsClientShell } from "./components/LeadsClientShell"
 import { Suspense } from "react"
 import { format, subDays, eachDayOfInterval } from "date-fns"
 import { es } from "date-fns/locale"
@@ -169,29 +170,29 @@ export default async function LeadsPage({
   const chartInitial = { daily: dailyFiltered, byStatus }
 
   return (
-    <div className="space-y-6">
-      <LeadsHeader />
-      <LeadsKpisClient initial={kpis} />
-      <LeadsFilters
-        currentFilters={{
-          status: searchParams.status ?? "all",
-          temperature: searchParams.temperature ?? "all",
-          source: searchParams.source ?? "all",
-          search: searchParams.search ?? "",
-          sortBy: searchParams.sortBy ?? "score",
-          sortOrder: searchParams.sortOrder ?? "desc",
-          showConverted: searchParams.showConverted === "true",
-          showLost: searchParams.showLost === "true",
-        }}
-        sources={sources}
-      />
-      <LeadsCharts initialData={chartInitial} />
-      <Suspense fallback={null}>
+    <LeadsClientShell>
+      <div className="space-y-6">
+        <LeadsHeader />
+        <LeadsKpisClient initial={kpis} />
+        <LeadsFilters
+          currentFilters={{
+            status: searchParams.status ?? "all",
+            temperature: searchParams.temperature ?? "all",
+            source: searchParams.source ?? "all",
+            search: searchParams.search ?? "",
+            sortBy: searchParams.sortBy ?? "score",
+            sortOrder: searchParams.sortOrder ?? "desc",
+            showConverted: searchParams.showConverted === "true",
+            showLost: searchParams.showLost === "true",
+          }}
+          sources={sources}
+        />
+        <LeadsCharts initialData={chartInitial} />
         <LeadsTable
           initialLeads={initialLeadsData as Lead[]}
           initialTotal={initialLeadsCount}
         />
-      </Suspense>
-    </div>
+      </div>
+    </LeadsClientShell>
   )
 }

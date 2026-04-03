@@ -78,10 +78,9 @@ export function useUpdateLeadStatus() {
       return result
     },
 
-    onMutate: async ({ leadId, status }) => {
-      // Instantly update UI via event bus (mirrors providers pattern — no RQ race)
-      window.dispatchEvent(new CustomEvent("lead-status-changed", { detail: { leadId, status } }))
-      return { leadId, status }
+    onMutate: async () => {
+      // LeadCard handles instant local state update directly
+      return {}
     },
 
     onError: (_err, _vars, _context) => {

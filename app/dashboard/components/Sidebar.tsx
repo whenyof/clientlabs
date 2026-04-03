@@ -24,7 +24,9 @@ import {
   Building2,
   Sparkles,
   Crown,
-  Link2
+  Link2,
+  Lock,
+  Receipt,
 } from "lucide-react"
 
 interface SidebarProps {
@@ -184,58 +186,94 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
       </div>
 
       {/* NAV */}
-      <nav className="flex-1 px-3 py-4 space-y-6">
-        {menu.map((group) => (
-          <div key={group.title}>
+      <nav className="flex-1 px-3 py-4 space-y-6 overflow-y-auto">
+        {/* CORE + rest of menu groups */}
+        {menu.map((group, groupIdx) => (
+          <>
+            <div key={group.title}>
+              {!isCollapsed && (
+                <p className="text-xs uppercase tracking-widest text-[var(--text-secondary)] mb-2 px-2">
+                  {group.title}
+                </p>
+              )}
 
-            {!isCollapsed && (
-              <p className="text-xs uppercase tracking-widest text-[var(--text-secondary)] mb-2 px-2">
-                {group.title}
-              </p>
-            )}
+              <div className="space-y-1">
+                {group.items.map((item) => {
+                  const active = pathname === item.href
+                  const Icon = item.icon
 
-            <div className="space-y-1">
-              {group.items.map((item) => {
-                const active = pathname === item.href
-                const Icon = item.icon
+                  return (
+                    <button
+                      key={`${group.title}-${item.href}`}
+                      onClick={() => router.push(item.href)}
+                      className={`
+                        w-full flex items-center gap-3 px-3 py-2 text-sm rounded-r-md
+                        transition-all
+                        ${active
+                          ? "bg-[var(--accent-soft)] text-[var(--accent)] font-medium border-l-[4px] border-[var(--accent)]"
+                          : "text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)] border-l-[4px] border-transparent"
+                        }
+                      `}
+                    >
+                      <Icon size={18} />
 
-                return (
-                  <button
-                    key={`${group.title}-${item.href}`}
-                    onClick={() => router.push(item.href)}
-                    className={`
-                      w-full flex items-center gap-3 px-3 py-2 text-sm rounded-r-md
-                      transition-all
-                      ${active
-                        ? "bg-[var(--accent-soft)] text-[var(--accent)] font-medium border-l-[4px] border-[var(--accent)]"
-                        : "text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)] border-l-[4px] border-transparent"
-                      }
-                    `}
-                  >
-                    <Icon size={18} />
+                      {!isCollapsed && (
+                        <div className="flex justify-between w-full">
+                          <span>{item.label}</span>
 
-                    {!isCollapsed && (
-                      <div className="flex justify-between w-full">
-                        <span>{item.label}</span>
-
-                        {item.count && (
-                          <span
-                            className="text-xs px-2 rounded-full font-semibold"
-                            style={{
-                              background: item.href === "/dashboard/tasks" ? "#FEF2F2" : "var(--accent-soft)",
-                              color: item.href === "/dashboard/tasks" ? "#EF4444" : "var(--accent)",
-                            }}
-                          >
-                            {item.count}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </button>
-                )
-              })}
+                          {item.count && (
+                            <span
+                              className="text-xs px-2 rounded-full font-semibold"
+                              style={{
+                                background: item.href === "/dashboard/tasks" ? "#FEF2F2" : "var(--accent-soft)",
+                                color: item.href === "/dashboard/tasks" ? "#EF4444" : "var(--accent)",
+                              }}
+                            >
+                              {item.count}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
-          </div>
+
+            {/* PRÓXIMAMENTE — inserted after CORE (index 0) */}
+            {groupIdx === 0 && (
+              <div key="proximamente">
+                {!isCollapsed && (
+                  <p className="text-xs uppercase tracking-widest text-[var(--text-secondary)] mb-2 px-2 opacity-60">
+                    Próximamente
+                  </p>
+                )}
+                <div
+                  title={isCollapsed ? "Verifactu — Próximamente" : undefined}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm rounded-r-md border-l-[4px] border-transparent opacity-45 cursor-not-allowed select-none"
+                  style={{ color: "var(--text-secondary)" }}
+                >
+                  <Receipt size={18} />
+                  {!isCollapsed && (
+                    <div className="flex justify-between w-full items-center">
+                      <span>Verifactu</span>
+                      <span style={{
+                        display: "flex", alignItems: "center", gap: 3,
+                        fontSize: 10, fontWeight: 600, letterSpacing: "0.04em",
+                        padding: "2px 6px", borderRadius: 4,
+                        background: "var(--bg-surface)",
+                        border: "0.5px solid var(--border-subtle)",
+                        color: "var(--text-secondary)",
+                      }}>
+                        <Lock size={9} />
+                        Pronto
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </>
         ))}
       </nav>
 

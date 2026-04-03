@@ -1,289 +1,241 @@
 "use client"
 
 import { useState, memo } from "react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import {
-    ShoppingBag,
-    CheckSquare,
-    Mail,
-    Package,
-    Wrench,
-    Code,
-    HelpCircle
-} from "lucide-react"
+import { ShoppingBag, CheckSquare, Mail, Package, Building2 } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"
-import { cn } from "@/lib/utils"
 import { RegisterOrderDialog } from "./RegisterOrderDialog"
 import { CreateTaskDialog } from "./CreateTaskDialog"
 
-import { useSectorConfig } from "@/hooks/useSectorConfig"
-
 type Provider = {
-    id: string
-    name: string
-    type: string | null
-    monthlyCost: number | null
-    dependencyLevel: string
-    status: string
-    isCritical: boolean
-    operationalState: string
-    createdAt: Date
-    updatedAt: Date
-    payments: any[]
-    tasks: any[]
-    contactEmail?: string | null
-    _count: {
-        payments: number
-        tasks: number
-    }
+  id: string
+  name: string
+  type: string | null
+  monthlyCost: number | null
+  dependencyLevel: string
+  status: string
+  isCritical: boolean
+  operationalState: string
+  createdAt: Date
+  updatedAt: Date
+  payments: any[]
+  tasks: any[]
+  contactEmail?: string | null
+  _count: { payments: number; tasks: number }
 }
 
-type ProvidersTableProps = {
-    providers: Provider[]
-    onProviderClick: (provider: Provider) => void
-    onProviderUpdate: (providerId: string, data: any) => void
-    resultCount?: number
-    totalCount?: number
-    hasActiveFilters?: boolean
-    embedded?: boolean
-    labels?: {
-        singular?: string
-        plural?: string
-        types?: Record<string, string>
-        status?: Record<string, string>
-        dependency?: Record<string, string>
-        fields?: Record<string, string>
-        actions?: Record<string, string>
-        emptyState?: string
-    }
+type Props = {
+  providers: Provider[]
+  onProviderClick: (p: Provider) => void
+  onProviderUpdate: (id: string, data: any) => void
+  resultCount?: number
+  totalCount?: number
+  hasActiveFilters?: boolean
+  onCreateClick?: () => void
 }
 
-const TYPE_ICONS = {
-    SERVICE: Wrench,
-    PRODUCT: Package,
-    SOFTWARE: Code,
-    OTHER: HelpCircle
+const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string }> = {
+  OK:      { label: "Estable",    bg: "#DCFCE7", text: "#166534" },
+  ACTIVE:  { label: "Activo",     bg: "#DCFCE7", text: "#166534" },
+  PAUSED:  { label: "Pausado",    bg: "#F1F5F9", text: "#475569" },
+  PENDING: { label: "Pendiente",  bg: "#FEF9C3", text: "#854D0E" },
+  ISSUE:   { label: "Incidencia", bg: "#FEF3C7", text: "#92400E" },
+  BLOCKED: { label: "Bloqueado",  bg: "#FEE2E2", text: "#991B1B" },
 }
 
-function ProvidersTableComponent({
-    providers,
-    onProviderClick,
-    onProviderUpdate,
-    resultCount,
-    totalCount,
-    hasActiveFilters,
-    embedded,
-    labels: labelsProp,
-}: ProvidersTableProps) {
-    const sectorLabels = useSectorConfig().labels
-    const labels = labelsProp ?? sectorLabels.providers
+const DEP_CONFIG: Record<string, { label: string; bg: string; text: string }> = {
+  LOW:      { label: "Baja",     bg: "#F1F5F9", text: "#475569" },
+  MEDIUM:   { label: "Media",    bg: "#DBEAFE", text: "#1E40AF" },
+  HIGH:     { label: "Alta",     bg: "#FEE2E2", text: "#991B1B" },
+  CRITICAL: { label: "Crítica",  bg: "#FEE2E2", text: "#7F1D1D" },
+}
 
-    const TYPE_LABELS = labels.types ?? { SERVICE: "Servicio", PRODUCT: "Producto", SOFTWARE: "Software", OTHER: "Otro" }
-    const statusLabels = labels.status ?? {}
-    const dependencyLabels = labels.dependency ?? {}
-    const STATUS_CONFIG: Record<string, { label: string, color: string }> = {
-        OK: { label: statusLabels.ACTIVE ?? "Estable", color: "bg-emerald-100 text-emerald-800 border-emerald-200" },
-        ACTIVE: { label: statusLabels.ACTIVE ?? "Activo", color: "bg-emerald-100 text-emerald-800 border-emerald-200" },
-        PAUSED: { label: statusLabels.PAUSED ?? "Pausado", color: "bg-amber-100 text-amber-800 border-amber-200" },
-        PENDING: { label: "Pendiente", color: "bg-amber-100 text-amber-800 border-amber-200" },
-        ISSUE: { label: "Problema", color: "bg-red-100 text-red-800 border-red-200" },
-        BLOCKED: { label: statusLabels.BLOCKED ?? "Bloqueado", color: "bg-red-100 text-red-800 border-red-200" }
-    }
+const TYPE_LABELS: Record<string, string> = {
+  SERVICE: "Servicio", PRODUCT: "Producto", SOFTWARE: "Software", OTHER: "Otro",
+}
 
-    const DEPENDENCY_CONFIG: Record<string, { label: string, color: string }> = {
-        LOW: { label: dependencyLabels.LOW ?? "Baja", color: "bg-neutral-100 text-neutral-700 border-neutral-200" },
-        MEDIUM: { label: dependencyLabels.MEDIUM ?? "Media", color: "bg-sky-100 text-sky-800 border-sky-200" },
-        HIGH: { label: dependencyLabels.HIGH ?? "Alta", color: "bg-red-100 text-red-800 border-red-200" },
-        CRITICAL: { label: dependencyLabels.CRITICAL ?? "Crítica", color: "bg-red-100 text-red-900 border-red-300" }
-    }
+function initials(name: string) {
+  return name
+    .split(" ")
+    .slice(0, 2)
+    .map(w => w[0])
+    .join("")
+    .toUpperCase()
+}
 
-    const [orderDialogProvider, setOrderDialogProvider] = useState<Provider | null>(null)
-    const [taskDialogProvider, setTaskDialogProvider] = useState<Provider | null>(null)
+function formatEUR(n: number) {
+  return new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n)
+}
 
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('es-ES', {
-            style: 'currency',
-            currency: 'EUR',
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
-        }).format(amount)
-    }
+function Badge({ bg, text, label }: { bg: string; text: string; label: string }) {
+  return (
+    <span style={{ background: bg, color: text, fontSize: 11, fontWeight: 600, borderRadius: 6, padding: "2px 8px", display: "inline-block", whiteSpace: "nowrap" }}>
+      {label}
+    </span>
+  )
+}
 
-    if (providers.length === 0 && !embedded) {
-        return (
-            <div className="rounded-xl bg-white p-8 text-center shadow-sm">
-                <Package className="h-12 w-12 mx-auto text-neutral-400 mb-4" />
-                <p className="text-[var(--text-primary)] text-lg font-medium mb-2">{labels.emptyState ?? "No hay resultados"}</p>
-                <p className="text-sm text-[var(--text-secondary)]">Ajusta los filtros para ver más</p>
-            </div>
-        )
-    }
+function ProvidersTableComponent({ providers, onProviderClick, onProviderUpdate, resultCount, totalCount, hasActiveFilters, onCreateClick }: Props) {
+  const [orderDialog, setOrderDialog] = useState<Provider | null>(null)
+  const [taskDialog, setTaskDialog] = useState<Provider | null>(null)
 
+  if (providers.length === 0) {
     return (
-        <>
-            <div className={cn(embedded ? "overflow-hidden" : "rounded-xl bg-white overflow-hidden shadow-sm")}>
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead>
-                            <tr className="bg-neutral-50/80">
-                                <th className="text-left p-3.5 text-xs font-medium uppercase tracking-wide text-neutral-500">{labels.singular ?? "Proveedor"}</th>
-                                <th className="text-left p-3.5 text-xs font-medium uppercase tracking-wide text-neutral-500">{labels.fields?.monthlyCost ?? "Coste mensual"}</th>
-                                <th className="text-left p-3.5 text-xs font-medium uppercase tracking-wide text-neutral-500">{labels.fields?.status ?? "Estado"}</th>
-                                <th className="text-left p-3.5 text-xs font-medium uppercase tracking-wide text-neutral-500">{labels.fields?.dependencyLevel ?? "Dependencia"}</th>
-                                <th className="text-left p-3.5 text-xs font-medium uppercase tracking-wide text-neutral-500">Última acción</th>
-                                <th className="text-right p-3.5 text-xs font-medium uppercase tracking-wide text-neutral-500">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {providers.map((provider) => {
-                                const TypeIcon = TYPE_ICONS[provider.type as keyof typeof TYPE_ICONS] || HelpCircle
-                                const statusConfig = STATUS_CONFIG[provider.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.OK
-                                const dependencyConfig = DEPENDENCY_CONFIG[provider.dependencyLevel as keyof typeof DEPENDENCY_CONFIG] || DEPENDENCY_CONFIG.LOW
-
-                                return (
-                                    <tr
-                                        key={provider.id}
-                                        className="border-b border-neutral-100/80 hover:bg-white/60 transition-colors duration-150 cursor-pointer group"
-                                        onClick={() => onProviderClick(provider)}
-                                    >
-                                        {/* Provider Name */}
-                                        <td className="p-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="h-10 w-10 rounded-lg bg-neutral-100/80 flex items-center justify-center">
-                                                    <TypeIcon className="h-5 w-5 text-[var(--text-secondary)]" />
-                                                </div>
-                                                <div>
-                                                    <p className="font-semibold text-[var(--text-primary)]">{provider.name}</p>
-                                                    <p className="text-xs text-[var(--text-secondary)]">
-                                                        {TYPE_LABELS[provider.type as keyof typeof TYPE_LABELS]}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </td>
-
-                                        {/* Monthly Cost */}
-                                        <td className="p-4">
-                                            {provider.monthlyCost ? (
-                                                <div>
-                                                    <p className="font-semibold text-[var(--text-primary)]">
-                                                        {formatCurrency(provider.monthlyCost)}
-                                                    </p>
-                                                    <p className="text-xs text-[var(--text-secondary)]">
-                                                        {formatCurrency(provider.monthlyCost * 12)}/año
-                                                    </p>
-                                                </div>
-                                            ) : (
-                                                <span className="text-sm text-[var(--text-secondary)]">Sin definir</span>
-                                            )}
-                                        </td>
-
-                                        {/* Status */}
-                                        <td className="p-4">
-                                            <Badge className={cn("text-xs border", statusConfig.color)}>
-                                                {statusConfig.label}
-                                            </Badge>
-                                        </td>
-
-                                        {/* Dependency */}
-                                        <td className="p-4">
-                                            <Badge variant="outline" className={cn("text-xs", dependencyConfig.color)}>
-                                                {dependencyConfig.label}
-                                            </Badge>
-                                        </td>
-
-                                        {/* Last Activity */}
-                                        <td className="p-4">
-                                            <span className="text-sm text-[var(--text-secondary)]">
-                                                {formatDistanceToNow(new Date(provider.updatedAt), {
-                                                    addSuffix: true,
-                                                    locale: es
-                                                })}
-                                            </span>
-                                        </td>
-
-                                        {/* Acciones rápidas */}
-                                        <td className="p-4" onClick={(e) => e.stopPropagation()}>
-                                            <div className="flex items-center justify-end gap-1">
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    title={labels.actions?.newOrder ?? "Nuevo pedido"}
-                                                    className="h-8 w-8 p-0 text-[var(--accent)] hover:bg-[var(--accent-soft)]"
-                                                    onClick={(e) => { e.stopPropagation(); setOrderDialogProvider(provider) }}
-                                                >
-                                                    <ShoppingBag className="h-4 w-4" />
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    title={labels.actions?.newTask ?? "Nueva tarea"}
-                                                    className="h-8 w-8 p-0 text-amber-600 hover:bg-amber-50"
-                                                    onClick={(e) => { e.stopPropagation(); setTaskDialogProvider(provider) }}
-                                                >
-                                                    <CheckSquare className="h-4 w-4" />
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    title="Enviar email"
-                                                    className="h-8 w-8 p-0 text-emerald-600 hover:bg-emerald-50"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation()
-                                                        if (provider.contactEmail) {
-                                                            window.location.href = `mailto:${provider.contactEmail}`
-                                                        } else {
-                                                            onProviderClick(provider)
-                                                        }
-                                                    }}
-                                                >
-                                                    <Mail className="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                )
-                            })}
-                        </tbody>
-                    </table>
-                </div>
-
-                {/* Results count + hint */}
-                <div className="flex flex-wrap items-center justify-between gap-2 border-t border-neutral-100 bg-white/50 px-4 py-2.5">
-                    <span className="text-sm text-neutral-500">
-                        {totalCount != null && hasActiveFilters
-                            ? `Mostrando ${resultCount ?? providers.length} de ${totalCount}`
-                            : `Mostrando ${providers.length}`}{" "}
-                        {providers.length === 1 ? labels.singular?.toLowerCase() : labels.plural?.toLowerCase()}
-                    </span>
-                    <span className="text-xs text-neutral-400">Clic en fila para ver detalle</span>
-                </div>
-            </div>
-
-            {/* Dialogs */}
-            {orderDialogProvider && (
-                <RegisterOrderDialog
-                    providerId={orderDialogProvider.id}
-                    providerName={orderDialogProvider.name}
-                    open={!!orderDialogProvider}
-                    onOpenChange={(open) => !open && setOrderDialogProvider(null)}
-                    onSuccess={() => onProviderUpdate(orderDialogProvider.id, {})}
-                />
-            )}
-
-            {taskDialogProvider && (
-                <CreateTaskDialog
-                    providerId={taskDialogProvider.id}
-                    providerName={taskDialogProvider.name}
-                    open={!!taskDialogProvider}
-                    onOpenChange={(open) => !open && setTaskDialogProvider(null)}
-                    onSuccess={() => onProviderUpdate(taskDialogProvider.id, {})}
-                />
-            )}
-
-        </>
+      <div style={{ background: "var(--bg-card)", border: "0.5px solid var(--border-subtle)", borderRadius: 12, padding: 48, textAlign: "center" }}>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+          <div style={{ padding: 12, borderRadius: 8, background: "var(--bg-surface)", border: "0.5px solid var(--border-subtle)" }}>
+            <Package size={24} style={{ color: "var(--text-secondary)" }} />
+          </div>
+        </div>
+        <h3 style={{ fontSize: 16, fontWeight: 600, color: "var(--text-primary)", margin: "0 0 4px" }}>
+          {hasActiveFilters ? "Sin resultados" : "Sin proveedores"}
+        </h3>
+        <p style={{ fontSize: 13, color: "var(--text-secondary)", margin: 0 }}>
+          {hasActiveFilters ? "Ajusta los filtros para ver más." : "Añade el primer proveedor para empezar."}
+        </p>
+        {!hasActiveFilters && onCreateClick && (
+          <button onClick={onCreateClick} style={{ marginTop: 16, padding: "8px 20px", borderRadius: 8, background: "#1FA97A", color: "#fff", fontSize: 13, fontWeight: 500, border: "none", cursor: "pointer" }}>
+            Nuevo proveedor
+          </button>
+        )}
+      </div>
     )
+  }
+
+  return (
+    <>
+      <div style={{ background: "var(--bg-card)", border: "0.5px solid var(--border-subtle)", borderRadius: 12, overflow: "hidden" }}>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ background: "var(--bg-surface)", borderBottom: "0.5px solid var(--border-subtle)" }}>
+                {["PROVEEDOR", "TIPO", "COSTE / MES", "ESTADO", "DEPENDENCIA", "ÚLTIMA ACCIÓN", ""].map((h, i) => (
+                  <th key={i} style={{ padding: "11px 16px", textAlign: i === 6 ? "right" : "left", fontSize: 11, fontWeight: 500, letterSpacing: "0.06em", color: "var(--text-secondary)", whiteSpace: "nowrap" }}>
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {providers.map(p => {
+                const isIncident = p.status === "ISSUE"
+                const isInactive = p.status === "PAUSED" || p.status === "BLOCKED"
+                const statusCfg = STATUS_CONFIG[p.status] ?? STATUS_CONFIG.ACTIVE
+                const depCfg = DEP_CONFIG[p.dependencyLevel] ?? DEP_CONFIG.LOW
+
+                return (
+                  <tr
+                    key={p.id}
+                    onClick={() => onProviderClick(p)}
+                    style={{
+                      borderBottom: "0.5px solid var(--border-subtle)",
+                      cursor: "pointer",
+                      transition: "background 0.12s",
+                      background: isIncident ? "rgba(245,158,11,0.04)" : "transparent",
+                      opacity: isInactive ? 0.6 : 1,
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = isIncident ? "rgba(245,158,11,0.08)" : "var(--bg-surface)")}
+                    onMouseLeave={e => (e.currentTarget.style.background = isIncident ? "rgba(245,158,11,0.04)" : "transparent")}
+                  >
+                    {/* Proveedor */}
+                    <td style={{ padding: "12px 16px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <div style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(31,169,122,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: "#1FA97A" }}>{initials(p.name)}</span>
+                        </div>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>{p.name}</span>
+                        {p.isCritical && (
+                          <span style={{ fontSize: 10, fontWeight: 600, background: "#FEE2E2", color: "#991B1B", borderRadius: 4, padding: "1px 5px" }}>CRÍTICO</span>
+                        )}
+                      </div>
+                    </td>
+                    {/* Tipo */}
+                    <td style={{ padding: "12px 16px" }}>
+                      <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>{TYPE_LABELS[p.type ?? "OTHER"] ?? p.type ?? "—"}</span>
+                    </td>
+                    {/* Coste */}
+                    <td style={{ padding: "12px 16px" }}>
+                      {p.monthlyCost ? (
+                        <div>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>{formatEUR(p.monthlyCost)}</span>
+                          <span style={{ fontSize: 11, color: "var(--text-secondary)", display: "block" }}>{formatEUR(p.monthlyCost * 12)}/año</span>
+                        </div>
+                      ) : (
+                        <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>—</span>
+                      )}
+                    </td>
+                    {/* Estado */}
+                    <td style={{ padding: "12px 16px" }}>
+                      <Badge bg={statusCfg.bg} text={statusCfg.text} label={statusCfg.label} />
+                    </td>
+                    {/* Dependencia */}
+                    <td style={{ padding: "12px 16px" }}>
+                      <Badge bg={depCfg.bg} text={depCfg.text} label={depCfg.label} />
+                    </td>
+                    {/* Última acción */}
+                    <td style={{ padding: "12px 16px" }}>
+                      <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>
+                        {formatDistanceToNow(new Date(p.updatedAt), { addSuffix: true, locale: es })}
+                      </span>
+                    </td>
+                    {/* Acciones */}
+                    <td style={{ padding: "12px 16px" }} onClick={e => e.stopPropagation()}>
+                      <div style={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
+                        {[
+                          { Icon: ShoppingBag, title: "Nuevo pedido", color: "#1FA97A", bg: "rgba(31,169,122,0.08)", fn: () => setOrderDialog(p) },
+                          { Icon: CheckSquare, title: "Nueva tarea", color: "#D97706", bg: "rgba(217,119,6,0.08)", fn: () => setTaskDialog(p) },
+                          {
+                            Icon: Mail, title: "Enviar email", color: "#0EA5E9", bg: "rgba(14,165,233,0.08)",
+                            fn: () => p.contactEmail ? window.open(`mailto:${p.contactEmail}`) : onProviderClick(p),
+                          },
+                        ].map(({ Icon, title, color, bg, fn }) => (
+                          <button key={title} title={title} onClick={fn}
+                            style={{ width: 30, height: 30, borderRadius: 6, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color, transition: "background 0.12s" }}
+                            onMouseEnter={e => (e.currentTarget.style.background = bg)}
+                            onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                          >
+                            <Icon size={15} />
+                          </button>
+                        ))}
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Footer */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 16px", borderTop: "0.5px solid var(--border-subtle)", fontSize: 12, color: "var(--text-secondary)" }}>
+          <span>
+            Mostrando {hasActiveFilters ? `${resultCount ?? providers.length} de ${totalCount}` : providers.length}{" "}
+            {providers.length === 1 ? "proveedor" : "proveedores"}
+          </span>
+          <span>Clic en fila para ver detalle</span>
+        </div>
+      </div>
+
+      {orderDialog && (
+        <RegisterOrderDialog
+          providerId={orderDialog.id}
+          providerName={orderDialog.name}
+          open
+          onOpenChange={open => !open && setOrderDialog(null)}
+          onSuccess={() => onProviderUpdate(orderDialog.id, {})}
+        />
+      )}
+      {taskDialog && (
+        <CreateTaskDialog
+          providerId={taskDialog.id}
+          providerName={taskDialog.name}
+          open
+          onOpenChange={open => !open && setTaskDialog(null)}
+          onSuccess={() => onProviderUpdate(taskDialog.id, {})}
+        />
+      )}
+    </>
+  )
 }
 
 export const ProvidersTable = memo(ProvidersTableComponent)

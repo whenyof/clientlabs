@@ -1,235 +1,158 @@
 "use client"
 
 import { useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden"
+import { Loader2, ChevronDown } from "lucide-react"
 import { toast } from "sonner"
 import { createProvider } from "../actions"
 
-import { useSectorConfig } from "@/hooks/useSectorConfig"
-
-type CreateProviderDialogProps = {
- open: boolean
- onOpenChange: (open: boolean) => void
- onProviderCreated: (provider: any) => void
+type Props = {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onProviderCreated: (provider: any) => void
 }
 
-export function CreateProviderDialog({ open, onOpenChange, onProviderCreated }: CreateProviderDialogProps) {
- const { labels } = useSectorConfig()
- const [loading, setLoading] = useState(false)
- const [formData, setFormData] = useState({
- name: "",
- type: "OTHER" as "SERVICE" | "PRODUCT" | "SOFTWARE" | "OTHER",
- monthlyCost: "",
- dependency: "LOW" as "LOW" | "MEDIUM" | "HIGH" | "CRITICAL",
- contactEmail: "",
- contactPhone: "",
- website: "",
- notes: ""
- })
+const TYPE_OPTIONS = [
+  { value: "SERVICE",  label: "Servicio" },
+  { value: "PRODUCT",  label: "Producto" },
+  { value: "SOFTWARE", label: "Software" },
+  { value: "OTHER",    label: "Otro" },
+]
 
- const handleSubmit = async (e: React.FormEvent) => {
- e.preventDefault()
+const DEPENDENCY_OPTIONS = [
+  { value: "LOW",      label: "Baja" },
+  { value: "MEDIUM",   label: "Media" },
+  { value: "HIGH",     label: "Alta" },
+  { value: "CRITICAL", label: "Crítica" },
+]
 
- if (!formData.name.trim()) {
- toast.error("El nombre es obligatorio")
- return
- }
+const inputClass = "w-full px-4 py-2.5 rounded-xl border border-slate-200 text-[14px] text-slate-900 placeholder:text-slate-400 bg-slate-50 focus:bg-white focus:border-[#1FA97A] focus:ring-2 focus:ring-[#1FA97A]/10 outline-none transition-all"
+const selectClass = "w-full px-4 py-2.5 rounded-xl border border-slate-200 text-[14px] text-slate-900 bg-slate-50 focus:bg-white focus:border-[#1FA97A] focus:ring-2 focus:ring-[#1FA97A]/10 outline-none transition-all appearance-none cursor-pointer"
+const labelClass = "text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500"
 
- setLoading(true)
+const empty = { name: "", type: "OTHER", monthlyCost: "", dependency: "LOW", contactEmail: "", contactPhone: "", website: "", notes: "" }
 
- try {
- const result = await createProvider({
- name: formData.name,
- type: formData.type,
- monthlyCost: formData.monthlyCost ? parseFloat(formData.monthlyCost) : null,
- dependency: formData.dependency,
- isCritical: formData.dependency === 'CRITICAL' || formData.dependency === 'HIGH',
- contactEmail: formData.contactEmail || null,
- contactPhone: formData.contactPhone || null,
- website: formData.website || null,
- notes: formData.notes || null,
- status: "ACTIVE"
- })
+export function CreateProviderDialog({ open, onOpenChange, onProviderCreated }: Props) {
+  const [loading, setLoading] = useState(false)
+  const [form, setForm] = useState(empty)
 
- if (result.success && result.provider) {
- toast.success(labels.common.success)
- onProviderCreated(result.provider)
- onOpenChange(false)
- // Reset form
- setFormData({
- name: "",
- type: "OTHER",
- monthlyCost: "",
- dependency: "LOW",
- contactEmail: "",
- contactPhone: "",
- website: "",
- notes: ""
- })
- } else {
- toast.error(result.error || labels.common.error)
- }
- } catch (error) {
- toast.error(labels.common.error)
- } finally {
- setLoading(false)
- }
- }
+  const set = (k: string, v: string) => setForm(prev => ({ ...prev, [k]: v }))
 
- return (
- <Dialog open={open} onOpenChange={onOpenChange}>
- <DialogContent className="bg-zinc-900 border-[var(--border-subtle)] max-w-2xl">
- <DialogHeader>
- <DialogTitle className="text-[var(--text-primary)]">{labels.providers.newButton}</DialogTitle>
- </DialogHeader>
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!form.name.trim()) return
 
- <form onSubmit={handleSubmit} className="space-y-4">
- {/* Name */}
- <div>
- <Label htmlFor="name" className="text-[var(--text-secondary)]">{labels.providers.fields.name} *</Label>
- <Input
- id="name"
- value={formData.name}
- onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
- className="bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-primary)]"
- placeholder="Ej: AWS, Google Workspace, etc."
- required
- />
- </div>
+    setLoading(true)
+    try {
+      const result = await createProvider({
+        name: form.name,
+        type: form.type,
+        monthlyCost: form.monthlyCost ? parseFloat(form.monthlyCost) : null,
+        dependency: form.dependency as "LOW" | "MEDIUM" | "HIGH" | "CRITICAL",
+        isCritical: form.dependency === "CRITICAL" || form.dependency === "HIGH",
+        contactEmail: form.contactEmail || null,
+        contactPhone: form.contactPhone || null,
+        website: form.website || null,
+        notes: form.notes || null,
+        status: "ACTIVE",
+      })
+      if (result.success && result.provider) {
+        toast.success("Proveedor creado correctamente")
+        onProviderCreated(result.provider)
+        onOpenChange(false)
+        setForm(empty)
+      } else {
+        toast.error(result.error || "Error al crear proveedor")
+      }
+    } catch {
+      toast.error("Error al crear proveedor")
+    } finally {
+      setLoading(false)
+    }
+  }
 
- <div className="grid grid-cols-2 gap-4">
- {/* Type */}
- <div>
- <Label htmlFor="type" className="text-[var(--text-secondary)]">{labels.providers.fields.type}</Label>
- <Select
- value={formData.type}
- onValueChange={(value: any) => setFormData(prev => ({ ...prev, type: value }))}
- >
- <SelectTrigger className="bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-primary)]">
- <SelectValue />
- </SelectTrigger>
- <SelectContent className="bg-zinc-900 border-[var(--border-subtle)]">
- <SelectItem value="SERVICE">{labels.providers.types.SERVICE}</SelectItem>
- <SelectItem value="PRODUCT">{labels.providers.types.PRODUCT}</SelectItem>
- <SelectItem value="SOFTWARE">{labels.providers.types.SOFTWARE}</SelectItem>
- <SelectItem value="OTHER">{labels.providers.types.OTHER}</SelectItem>
- </SelectContent>
- </Select>
- </div>
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="bg-white rounded-2xl p-0 !max-w-[520px] w-full overflow-hidden border-0 shadow-xl">
+        <VisuallyHidden.Root><DialogTitle>Nuevo proveedor</DialogTitle></VisuallyHidden.Root>
+        <div className="px-6 pt-6 pb-5 border-b border-slate-100">
+          <h2 className="text-[17px] font-semibold text-slate-900">Nuevo proveedor</h2>
+          <p className="text-[13px] text-slate-500 mt-1">Rellena los datos del proveedor</p>
+        </div>
 
- {/* Monthly Cost */}
- <div>
- <Label htmlFor="monthlyCost" className="text-[var(--text-secondary)]">{labels.providers.fields.monthlyCost} (€)</Label>
- <Input
- id="monthlyCost"
- type="number"
- step="0.01"
- value={formData.monthlyCost}
- onChange={(e) => setFormData(prev => ({ ...prev, monthlyCost: e.target.value }))}
- className="bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-primary)]"
- placeholder="0.00"
- />
- </div>
- </div>
+        <form onSubmit={handleSubmit}>
+          <div className="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
 
- {/* Dependency */}
- <div>
- <Label htmlFor="dependency" className="text-[var(--text-secondary)]">{labels.providers.fields.dependencyLevel}</Label>
- <Select
- value={formData.dependency}
- onValueChange={(value: any) => setFormData(prev => ({ ...prev, dependency: value }))}
- >
- <SelectTrigger className="bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-primary)]">
- <SelectValue />
- </SelectTrigger>
- <SelectContent className="bg-zinc-900 border-[var(--border-subtle)]">
- <SelectItem value="LOW">{labels.providers.dependency.LOW}</SelectItem>
- <SelectItem value="MEDIUM">{labels.providers.dependency.MEDIUM}</SelectItem>
- <SelectItem value="HIGH">{labels.providers.dependency.HIGH}</SelectItem>
- <SelectItem value="CRITICAL">{labels.providers.dependency.CRITICAL}</SelectItem>
- </SelectContent>
- </Select>
- </div>
+            {/* Nombre */}
+            <div className="space-y-1.5">
+              <label className={labelClass}>NOMBRE <span className="text-[#1FA97A]">*</span></label>
+              <input type="text" value={form.name} onChange={e => set("name", e.target.value)} placeholder="AWS, Google Workspace, etc." required className={inputClass} />
+            </div>
 
- <div className="grid grid-cols-2 gap-4">
- {/* Contact Email */}
- <div>
- <Label htmlFor="contactEmail" className="text-[var(--text-secondary)]">{labels.providers.fields.contactEmail}</Label>
- <Input
- id="contactEmail"
- type="email"
- value={formData.contactEmail}
- onChange={(e) => setFormData(prev => ({ ...prev, contactEmail: e.target.value }))}
- className="bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-primary)]"
- placeholder="soporte@proveedor.com"
- />
- </div>
+            {/* Tipo + Coste */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className={labelClass}>TIPO</label>
+                <div className="relative">
+                  <select value={form.type} onChange={e => set("type", e.target.value)} className={selectClass}>
+                    {TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <label className={labelClass}>COSTE MENSUAL (€)</label>
+                <input type="number" step="0.01" min="0" value={form.monthlyCost} onChange={e => set("monthlyCost", e.target.value)} placeholder="0.00" className={inputClass} />
+              </div>
+            </div>
 
- {/* Contact Phone */}
- <div>
- <Label htmlFor="contactPhone" className="text-[var(--text-secondary)]">{labels.providers.fields.contactPhone}</Label>
- <Input
- id="contactPhone"
- value={formData.contactPhone}
- onChange={(e) => setFormData(prev => ({ ...prev, contactPhone: e.target.value }))}
- className="bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-primary)]"
- placeholder="+34 600 000 000"
- />
- </div>
- </div>
+            {/* Dependencia */}
+            <div className="space-y-1.5">
+              <label className={labelClass}>NIVEL DE DEPENDENCIA</label>
+              <div className="relative">
+                <select value={form.dependency} onChange={e => set("dependency", e.target.value)} className={selectClass}>
+                  {DEPENDENCY_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+              </div>
+            </div>
 
- {/* Website */}
- <div>
- <Label htmlFor="website" className="text-[var(--text-secondary)]">{labels.providers.fields.website}</Label>
- <Input
- id="website"
- type="url"
- value={formData.website}
- onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
- className="bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-primary)]"
- placeholder="https://proveedor.com"
- />
- </div>
+            {/* Email + Teléfono */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className={labelClass}>EMAIL CONTACTO</label>
+                <input type="email" value={form.contactEmail} onChange={e => set("contactEmail", e.target.value)} placeholder="soporte@proveedor.com" className={inputClass} />
+              </div>
+              <div className="space-y-1.5">
+                <label className={labelClass}>TELÉFONO</label>
+                <input type="tel" value={form.contactPhone} onChange={e => set("contactPhone", e.target.value)} placeholder="+34 600 000 000" className={inputClass} />
+              </div>
+            </div>
 
- {/* Notes */}
- <div>
- <Label htmlFor="notes" className="text-[var(--text-secondary)]">Notas</Label>
- <Textarea
- id="notes"
- value={formData.notes}
- onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
- className="bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-primary)] resize-none"
- placeholder="Información adicional sobre el proveedor..."
- rows={3}
- />
- </div>
+            {/* Website */}
+            <div className="space-y-1.5">
+              <label className={labelClass}>WEBSITE</label>
+              <input type="url" value={form.website} onChange={e => set("website", e.target.value)} placeholder="https://proveedor.com" className={inputClass} />
+            </div>
 
- {/* Actions */}
- <div className="flex justify-end gap-3 pt-4">
- <Button
- type="button"
- variant="ghost"
- onClick={() => onOpenChange(false)}
- className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)]"
- >
- {labels.common.cancel}
- </Button>
- <Button
- type="submit"
- disabled={loading}
- className="bg-blue-500 hover:bg-blue-600 text-[var(--text-primary)]"
- >
- {loading ? labels.common.loading : labels.common.create}
- </Button>
- </div>
- </form>
- </DialogContent>
- </Dialog>
- )
+            {/* Notas */}
+            <div className="space-y-1.5">
+              <label className={labelClass}>NOTAS</label>
+              <textarea value={form.notes} onChange={e => set("notes", e.target.value)} placeholder="Información adicional..." rows={3} className={`${inputClass} resize-none`} />
+            </div>
+          </div>
+
+          <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3">
+            <button type="button" onClick={() => onOpenChange(false)} className="px-5 py-2.5 rounded-xl border border-slate-200 text-[13px] font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+              Cancelar
+            </button>
+            <button type="submit" disabled={loading || !form.name.trim()} className="px-5 py-2.5 rounded-xl bg-[#1FA97A] text-white text-[13px] font-medium hover:bg-[#178f68] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+              {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Creando...</> : "Crear proveedor"}
+            </button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
 }
-

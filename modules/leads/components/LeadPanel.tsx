@@ -7,6 +7,7 @@ import { LeadAIRecommendations } from "@domains/leads/components/LeadAIRecommend
 import { LeadNextActionCard } from "@domains/leads/components/LeadNextActionCard"
 import { LeadNotesCard } from "@domains/leads/components/LeadNotesCard"
 import { LeadEmailModule } from "@domains/leads/components/LeadEmailModule"
+import { LeadQuickTaskCard } from "@/modules/leads/components/LeadQuickTaskCard"
 
 interface LeadPanelProps {
   lead: {
@@ -72,6 +73,7 @@ export function LeadPanel({ lead }: LeadPanelProps) {
           className="lead-panel-sidebar"
         >
           <LeadInfoCard lead={lead} />
+          <LeadQuickTaskCard leadId={lead.id} />
           <LeadAIRecommendations score={lead.score} phone={lead.phone} leadStatus={lead.leadStatus} />
           <LeadNextActionCard leadId={lead.id} leadStatus={lead.leadStatus} />
         </div>

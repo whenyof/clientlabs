@@ -16,6 +16,8 @@ interface NewTaskModalProps {
   defaultPriority?: TaskPriority
   defaultDueDate?: string
   defaultDueTime?: string
+  defaultEntityType?: "CLIENT" | "LEAD" | "PROVIDER"
+  defaultEntityId?: string
   editTask?: DashboardTask
 }
 
@@ -68,7 +70,7 @@ function Label({ children }: { children: React.ReactNode }) {
   )
 }
 
-export function NewTaskModal({ open, onClose, defaultPriority = "MEDIUM", defaultDueDate, defaultDueTime, editTask }: NewTaskModalProps) {
+export function NewTaskModal({ open, onClose, defaultPriority = "MEDIUM", defaultDueDate, defaultDueTime, defaultEntityType, defaultEntityId, editTask }: NewTaskModalProps) {
   const qc = useQueryClient()
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
@@ -76,7 +78,7 @@ export function NewTaskModal({ open, onClose, defaultPriority = "MEDIUM", defaul
   const [status] = useState<TaskStatus>("PENDING")
   const [dueDate, setDueDate] = useState(defaultDueDate ?? "")
   const [dueTime, setDueTime] = useState(defaultDueTime ?? "")
-  const [entityType, setEntityType] = useState<"" | "CLIENT" | "LEAD">("")
+  const [entityType, setEntityType] = useState<"" | "CLIENT" | "LEAD" | "PROVIDER">("")
   const [entityId, setEntityId] = useState("")
 
   useEffect(() => {
@@ -96,14 +98,15 @@ export function NewTaskModal({ open, onClose, defaultPriority = "MEDIUM", defaul
       if (editTask.clientId) { setEntityType("CLIENT"); setEntityId(editTask.clientId) }
       else if (editTask.leadId) { setEntityType("LEAD"); setEntityId(editTask.leadId) }
       else { setEntityType(""); setEntityId("") }
+      // Note: PROVIDER tasks use sourceModule/sourceId — no direct field to restore
     } else {
       setTitle("")
       setDescription("")
       setPriority(defaultPriority)
       setDueDate(defaultDueDate ?? "")
       setDueTime(defaultDueTime ?? "")
-      setEntityType("")
-      setEntityId("")
+      setEntityType(defaultEntityType ?? "")
+      setEntityId(defaultEntityId ?? "")
     }
   }, [open, editTask, defaultPriority, defaultDueDate, defaultDueTime])
 
@@ -129,12 +132,29 @@ export function NewTaskModal({ open, onClose, defaultPriority = "MEDIUM", defaul
     staleTime: 60_000,
   })
 
+  const { data: providers = [], isFetching: fetchingProviders } = useQuery<EntityOption[]>({
+    queryKey: ["providers-list"],
+    queryFn: async () => {
+      const res = await fetch("/api/providers")
+      if (!res.ok) throw new Error("Failed")
+      return res.json()
+    },
+    enabled: entityType === "PROVIDER" && open,
+    staleTime: 60_000,
+  })
+
   const leads: EntityOption[] = Array.isArray(leadsRaw)
     ? leadsRaw
     : (leadsRaw?.leads ?? leadsRaw?.data ?? [])
 
-  const entityOptions: EntityOption[] = entityType === "CLIENT" ? clients : entityType === "LEAD" ? leads : []
-  const isFetchingEntities = entityType === "CLIENT" ? fetchingClients : fetchingLeads
+  const entityOptions: EntityOption[] =
+    entityType === "CLIENT" ? clients :
+    entityType === "LEAD" ? leads :
+    entityType === "PROVIDER" ? providers : []
+  const isFetchingEntities =
+    entityType === "CLIENT" ? fetchingClients :
+    entityType === "LEAD" ? fetchingLeads :
+    entityType === "PROVIDER" ? fetchingProviders : false
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -205,9 +225,13 @@ export function NewTaskModal({ open, onClose, defaultPriority = "MEDIUM", defaul
       return res.json()
     },
     onSuccess: () => {
+      toast.success(editTask ? "Tarea actualizada" : "Tarea creada")
       qc.invalidateQueries({ queryKey: ["tasks"] })
       qc.invalidateQueries({ queryKey: ["tasks-kpis"] })
       handleClose()
+    },
+    onError: () => {
+      toast.error(editTask ? "Error al actualizar la tarea" : "Error al crear la tarea")
     },
   })
 
@@ -300,10 +324,11 @@ export function NewTaskModal({ open, onClose, defaultPriority = "MEDIUM", defaul
             <Label>Vinculada a</Label>
             <div style={{ display: "grid", gridTemplateColumns: entityType ? "1fr 1.6fr" : "1fr", gap: 10 }}>
               <SelectWrapper>
-                <select value={entityType} onChange={(e) => { setEntityType(e.target.value as "" | "CLIENT" | "LEAD"); setEntityId("") }} style={selectResetStyle}>
+                <select value={entityType} onChange={(e) => { setEntityType(e.target.value as "" | "CLIENT" | "LEAD" | "PROVIDER"); setEntityId("") }} style={selectResetStyle}>
                   <option value="">Ninguno</option>
                   <option value="CLIENT">Cliente</option>
                   <option value="LEAD">Lead</option>
+                  <option value="PROVIDER">Proveedor</option>
                 </select>
               </SelectWrapper>
 

@@ -27,7 +27,13 @@ export function WeekView({ tasks, onTaskClick, onCellClick }: WeekViewProps) {
   const qc = useQueryClient()
   const [weekStart, setWeekStart] = useState(() => getMonday(new Date()))
   const today = new Date()
+  const [currentTime, setCurrentTime] = useState(new Date())
   const days = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), [weekStart])
+
+  useEffect(() => {
+    const interval = setInterval(() => setCurrentTime(new Date()), 60_000)
+    return () => clearInterval(interval)
+  }, [])
   const dayColRefs = useRef<(HTMLDivElement | null)[]>([])
 
   // Drag to move
@@ -86,7 +92,7 @@ export function WeekView({ tasks, onTaskClick, onCellClick }: WeekViewProps) {
   const timedTasksForDay = (day: Date) => tasks.filter(t => t.startAt && isSameDay(new Date(t.startAt), day))
   const allDayTasks = (day: Date) => tasks.filter(t => t.dueDate && isSameDay(new Date(t.dueDate), day) && !t.startAt)
 
-  const nowMins = today.getHours() * 60 + today.getMinutes()
+  const nowMins = currentTime.getHours() * 60 + currentTime.getMinutes()
   const nowTop = ((nowMins - GRID_START_MINS) / 60) * CELL_H
 
   const handleDragStart = (e: React.DragEvent, task: DashboardTask) => {
@@ -235,10 +241,11 @@ export function WeekView({ tasks, onTaskClick, onCellClick }: WeekViewProps) {
                   )
                 })}
 
-                {/* Now line (only on today's column) */}
+                {/* Now line — updates every minute, green */}
                 {isToday && nowMins >= GRID_START_MINS && nowMins < (GRID_START_H + HOURS.length) * 60 && (
-                  <div style={{ position: "absolute", left: 0, right: 0, top: nowTop, height: 1.5, background: "#EF4444", zIndex: 20, pointerEvents: "none" }}>
-                    <div style={{ width: 9, height: 9, borderRadius: "50%", background: "#EF4444", position: "absolute", left: -4, top: -4 }} />
+                  <div style={{ position: "absolute", left: 0, right: 0, top: nowTop, zIndex: 20, pointerEvents: "none", display: "flex", alignItems: "center" }}>
+                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#1FA97A", flexShrink: 0, marginLeft: -4 }} />
+                    <div style={{ flex: 1, height: 1.5, background: "#1FA97A", opacity: 0.6 }} />
                   </div>
                 )}
               </div>

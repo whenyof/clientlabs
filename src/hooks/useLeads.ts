@@ -40,6 +40,9 @@ export function useLeads(filters: GetLeadsParams = {}, options?: UseLeadsOptions
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.pagination?.nextCursor,
     initialData,
+    // Tell React Query the SSR data is fresh — prevents immediate background
+    // refetch on mount that would race against and overwrite optimistic updates
+    initialDataUpdatedAt: initialData ? Date.now() : undefined,
     refetchInterval: 300_000,
     staleTime: 60_000,
   })

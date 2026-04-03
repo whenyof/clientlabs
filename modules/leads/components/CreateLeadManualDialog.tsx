@@ -50,6 +50,8 @@ export function CreateLeadManualDialog({ open, onOpenChange }: { open: boolean; 
  if (!formData.name.trim()) return
 
  setLoading(true)
+ // Cancel any in-flight refetch so it can't overwrite the optimistic update
+ await queryClient.cancelQueries({ queryKey: ["leads"] })
  try {
  const result = await createLead(formData)
  const now = new Date()
@@ -91,6 +93,8 @@ export function CreateLeadManualDialog({ open, onOpenChange }: { open: boolean; 
    ),
   }
  })
+ // Trigger a fresh fetch so server-confirmed data replaces the optimistic lead
+ queryClient.invalidateQueries({ queryKey: ["leads"] })
  queryClient.invalidateQueries({ queryKey: ["leads-kpis"] })
  setFormData({ name: "", email: "", phone: "", source: "", leadStatus: "NEW" })
  onOpenChange(false)

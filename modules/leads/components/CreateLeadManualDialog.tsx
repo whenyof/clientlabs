@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { useQueryClient } from "@tanstack/react-query"
 import {
  Dialog,
@@ -34,7 +33,6 @@ const SOURCE_OPTIONS = [
 ]
 
 export function CreateLeadManualDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
- const router = useRouter()
  const queryClient = useQueryClient()
  const [loading, setLoading] = useState(false)
  const [formData, setFormData] = useState({
@@ -78,12 +76,12 @@ export function CreateLeadManualDialog({ open, onOpenChange }: { open: boolean; 
  } as unknown as Lead
  // Instantly update the UI (mirrors providers pattern — no React Query race)
  window.dispatchEvent(new CustomEvent("lead-created", { detail: newLead }))
- // Background sync — does not block UI
+ // Background sync — does not block UI, does NOT call router.refresh()
+ // (router.refresh re-mounts Suspense boundary and destroys extraLeads state)
  queryClient.invalidateQueries({ queryKey: ["leads"] })
  queryClient.invalidateQueries({ queryKey: ["leads-kpis"] })
  setFormData({ name: "", email: "", phone: "", source: "", leadStatus: "NEW" })
  onOpenChange(false)
- router.refresh()
  toast.success("Lead creado correctamente")
  } catch (error) {
  console.error(error)

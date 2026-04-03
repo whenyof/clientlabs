@@ -3,7 +3,6 @@ import { getBaseUrl } from "@/lib/api/baseUrl"
 
 
 import { useState, useRef } from "react"
-import { useRouter } from "next/navigation"
 import { useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import {
@@ -39,7 +38,6 @@ type LeadRow = {
 }
 
 export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
- const router = useRouter()
  const queryClient = useQueryClient()
  const fileInputRef = useRef<HTMLInputElement>(null)
  const [step, setStep] = useState<"upload" | "preview" | "importing">("upload")
@@ -204,7 +202,6 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
  queryClient.invalidateQueries({ queryKey: ["leads"] })
  queryClient.invalidateQueries({ queryKey: ["leads-kpis"] })
  onOpenChange(false)
- router.refresh()
  resetDialog()
  } else {
  toast.error(`Error: ${result.error}`)

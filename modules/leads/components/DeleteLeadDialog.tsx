@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dialog"
 import { deleteLead } from "../actions"
 import { toast } from "sonner"
-import { useRouter } from "next/navigation"
 import { useQueryClient } from "@tanstack/react-query"
 import { useSectorConfig } from "@/hooks/useSectorConfig"
 
@@ -28,7 +27,6 @@ type DeleteLeadDialogProps = {
 export function DeleteLeadDialog({ open, onClose, leadId, leadName, onDeleted }: DeleteLeadDialogProps) {
  const { labels } = useSectorConfig()
  const ui = labels.leads.ui
- const router = useRouter()
  const queryClient = useQueryClient()
  const [loading, setLoading] = useState(false)
 
@@ -44,8 +42,6 @@ export function DeleteLeadDialog({ open, onClose, leadId, leadName, onDeleted }:
  onClose()
  if (onDeleted) {
  onDeleted()
- } else {
- router.refresh()
  }
  } catch (error: any) {
  toast.error(error.message || ui.toastErrorDelete)

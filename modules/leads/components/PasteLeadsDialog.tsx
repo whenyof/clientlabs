@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import {
@@ -27,7 +26,6 @@ type ParsedLead = {
 }
 
 export function PasteLeadsDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
- const router = useRouter()
  const queryClient = useQueryClient()
  const [step, setStep] = useState<"paste" | "preview" | "importing">("paste")
  const [pastedText, setPastedText] = useState("")
@@ -107,7 +105,6 @@ export function PasteLeadsDialog({ open, onOpenChange }: { open: boolean; onOpen
  queryClient.invalidateQueries({ queryKey: ["leads"] })
  queryClient.invalidateQueries({ queryKey: ["leads-kpis"] })
  onOpenChange(false)
- router.refresh()
  resetDialog()
  } else {
  toast.error(`Error: ${result.error}`)

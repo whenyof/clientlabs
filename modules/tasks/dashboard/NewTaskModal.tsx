@@ -111,51 +111,54 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
     }
   }, [open, editTask, defaultPriority, defaultDueDate, defaultDueTime])
 
-  const { data: clients = [], isFetching: fetchingClients } = useQuery<EntityOption[]>({
+  const { data: clients = [], isLoading: loadingClients } = useQuery<EntityOption[]>({
     queryKey: ["clients-list"],
     queryFn: async () => {
-      const res = await fetch("/api/clients")
-      if (!res.ok) throw new Error("Failed")
+      const res = await fetch("/api/clients", { signal: AbortSignal.timeout(15_000) })
+      if (!res.ok) throw new Error(`${res.status}`)
       return res.json()
     },
     enabled: entityType === "CLIENT" && open,
     staleTime: 60_000,
+    retry: false,
   })
 
-  const { data: leadsRaw, isFetching: fetchingLeads } = useQuery({
+  const { data: leadsRaw, isLoading: loadingLeads } = useQuery({
     queryKey: ["leads-list"],
     queryFn: async () => {
-      const res = await fetch("/api/leads?limit=200")
-      if (!res.ok) throw new Error("Failed")
+      const res = await fetch("/api/leads?limit=100&sortBy=name&sortOrder=asc", { signal: AbortSignal.timeout(15_000) })
+      if (!res.ok) throw new Error(`${res.status}`)
       return res.json()
     },
     enabled: entityType === "LEAD" && open,
     staleTime: 60_000,
+    retry: false,
   })
 
-  const { data: providers = [], isFetching: fetchingProviders } = useQuery<EntityOption[]>({
+  const { data: providers = [], isLoading: loadingProviders } = useQuery<EntityOption[]>({
     queryKey: ["providers-list"],
     queryFn: async () => {
-      const res = await fetch("/api/providers")
-      if (!res.ok) throw new Error("Failed")
+      const res = await fetch("/api/providers", { signal: AbortSignal.timeout(15_000) })
+      if (!res.ok) throw new Error(`${res.status}`)
       return res.json()
     },
     enabled: entityType === "PROVIDER" && open,
     staleTime: 60_000,
+    retry: false,
   })
 
   const leads: EntityOption[] = Array.isArray(leadsRaw)
-    ? leadsRaw
-    : (leadsRaw?.leads ?? leadsRaw?.data ?? [])
+    ? leadsRaw.map((l: { id: string; name?: string | null }) => ({ id: l.id, name: l.name ?? "Sin nombre" }))
+    : (leadsRaw?.leads ?? []).map((l: { id: string; name?: string | null }) => ({ id: l.id, name: l.name ?? "Sin nombre" }))
 
   const entityOptions: EntityOption[] =
     entityType === "CLIENT" ? clients :
     entityType === "LEAD" ? leads :
     entityType === "PROVIDER" ? providers : []
-  const isFetchingEntities =
-    entityType === "CLIENT" ? fetchingClients :
-    entityType === "LEAD" ? fetchingLeads :
-    entityType === "PROVIDER" ? fetchingProviders : false
+  const isLoadingEntities =
+    entityType === "CLIENT" ? loadingClients :
+    entityType === "LEAD" ? loadingLeads :
+    entityType === "PROVIDER" ? loadingProviders : false
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -221,8 +224,12 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
+        signal: AbortSignal.timeout(20_000),
       })
-      if (!res.ok) throw new Error(editTask ? "Failed to update task" : "Failed to create task")
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error((err as { error?: string }).error ?? (editTask ? "Failed to update task" : "Failed to create task"))
+      }
       return res.json()
     },
     onSuccess: () => {
@@ -232,8 +239,13 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
       onSuccess?.()
       handleClose()
     },
-    onError: () => {
-      toast.error(editTask ? "Error al actualizar la tarea" : "Error al crear la tarea")
+    onError: (err: Error) => {
+      const msg = err?.name === "TimeoutError"
+        ? "La solicitud tardó demasiado. Inténtalo de nuevo."
+        : err?.message && !err.message.startsWith("Failed")
+          ? err.message
+          : editTask ? "Error al actualizar la tarea" : "Error al crear la tarea"
+      toast.error(msg)
     },
   })
 
@@ -336,9 +348,9 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
 
               {entityType && (
                 <SelectWrapper>
-                  <select value={entityId} onChange={(e) => setEntityId(e.target.value)} style={selectResetStyle} disabled={isFetchingEntities || entityOptions.length === 0}>
+                  <select value={entityId} onChange={(e) => setEntityId(e.target.value)} style={selectResetStyle} disabled={isLoadingEntities || entityOptions.length === 0}>
                     <option value="">
-                      {isFetchingEntities ? "Cargando..." : entityOptions.length === 0 ? "Sin resultados" : "Seleccionar..."}
+                      {isLoadingEntities ? "Cargando..." : entityOptions.length === 0 ? "Sin resultados" : "Seleccionar..."}
                     </option>
                     {entityOptions.map((o) => (
                       <option key={o.id} value={o.id}>{o.name}</option>

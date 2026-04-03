@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Plus, CheckSquare, Mail, StickyNote, MessageCircle } from "lucide-react"
 import { NewOrderModal }     from "./NewOrderModal"
-import { TaskModal }         from "./TaskModal"
+import { NewTaskModal }      from "@/modules/tasks/dashboard/NewTaskModal"
 import { EmailModal }        from "./EmailModal"
 import { NoteModal }         from "./NoteModal"
 import { InteractionModal }  from "./InteractionModal"
@@ -55,7 +55,7 @@ export function Client360ActionsBar({ clientId, defaultEmail }: Client360Actions
       </div>
 
       <NewOrderModal    open={active === "order"}        onClose={close} clientId={clientId} />
-      <TaskModal        open={active === "task"}         onClose={close} clientId={clientId} />
+      <NewTaskModal     open={active === "task"}         onClose={close} defaultEntityType="CLIENT" defaultEntityId={clientId} />
       <EmailModal       open={active === "email"}        onClose={close} clientId={clientId} defaultTo={defaultEmail} />
       <NoteModal        open={active === "note"}         onClose={close} clientId={clientId} />
       <InteractionModal open={active === "interaction"}  onClose={close} clientId={clientId} />

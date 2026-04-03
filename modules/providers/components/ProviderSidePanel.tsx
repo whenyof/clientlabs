@@ -53,7 +53,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { AddNoteDialog } from "./AddNoteDialog"
-import { CreateTaskDialog } from "./CreateTaskDialog"
+import { NewTaskModal } from "@/modules/tasks/dashboard/NewTaskModal"
 import { CreateProviderProductDialog } from "./CreateProviderProductDialog"
 import { CreateEditTemplateDialog, type ProviderEmailTemplateRow } from "./CreateEditTemplateDialog"
 import { RegisterOrderDialog } from "./RegisterOrderDialog"
@@ -1346,11 +1346,11 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
                 loading={confirmSendLoading}
             />
 
-            <CreateTaskDialog
+            <NewTaskModal
                 open={showTaskDialog}
-                onOpenChange={setShowTaskDialog}
-                providerId={provider.id}
-                providerName={provider.name}
+                onClose={() => setShowTaskDialog(false)}
+                defaultEntityType="PROVIDER"
+                defaultEntityId={provider.id}
                 onSuccess={loadData}
             />
 

@@ -25,7 +25,7 @@ import { usePanelConfig } from "@/core/panel-contract/usePanelConfig"
 import { PROVIDER_PANEL_CONFIG } from "@/core/panel-contract/registry"
 
 import { AddNoteDialog } from "./AddNoteDialog"
-import { CreateTaskDialog } from "./CreateTaskDialog"
+import { NewTaskModal } from "@/modules/tasks/dashboard/NewTaskModal"
 import { RegisterOrderDialog } from "./RegisterOrderDialog"
 import { FilePreviewModal } from "./FilePreviewModal"
 import { FileUploadDialog } from "./FileUploadDialog"
@@ -1047,11 +1047,11 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
                 onSuccess={loadData}
             />
 
-            <CreateTaskDialog
+            <NewTaskModal
                 open={showTaskDialog}
-                onOpenChange={setShowTaskDialog}
-                providerId={provider.id}
-                providerName={provider.name}
+                onClose={() => setShowTaskDialog(false)}
+                defaultEntityType="PROVIDER"
+                defaultEntityId={provider.id}
                 onSuccess={loadData}
             />
 

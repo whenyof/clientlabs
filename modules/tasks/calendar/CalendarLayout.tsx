@@ -5,7 +5,7 @@ import { format, startOfWeek, startOfDay, endOfDay, endOfWeek } from "date-fns"
 import { CalendarHeader } from "./CalendarHeader"
 import { CalendarGrid } from "./CalendarGrid"
 import { CalendarSidePanel } from "./CalendarSidePanel"
-import { TaskDialog } from "@/components/tasks/TaskDialog"
+import { NewTaskModal } from "@/modules/tasks/dashboard/NewTaskModal"
 import { parseCalendarEvents, type CalendarEvent, type CalendarEventAPI } from "./calendar-event-types"
 import { updateCalendarTask } from "./calendar-api"
 import { snapMinutes } from "./calendar-snap"
@@ -218,15 +218,12 @@ export function CalendarLayout() {
  fetchEvents()
  }, [fetchEvents])
 
- const createTaskPrefill = useMemo(() => {
- if (!createSlot) return undefined
- return {
- dueDate: createSlot.start.toISOString(),
- startAt: createSlot.start.toISOString(),
- endAt: createSlot.end.toISOString(),
- assignedToId: createSlot.assignedTo ?? undefined,
- }
- }, [createSlot])
+ const createDefaultDueDate = createSlot
+ ? format(createSlot.start, "yyyy-MM-dd")
+ : undefined
+ const createDefaultDueTime = createSlot
+ ? format(createSlot.start, "HH:mm")
+ : undefined
 
  const violationsByTask = useMemo(() => {
  const violations = evaluateConflictRules(events)
@@ -295,10 +292,11 @@ export function CalendarLayout() {
  onSaved={handleSaved}
  />
 
- <TaskDialog
+ <NewTaskModal
  open={!!createSlot}
- onOpenChange={(open) => !open && setCreateSlot(null)}
- task={createTaskPrefill}
+ onClose={() => setCreateSlot(null)}
+ defaultDueDate={createDefaultDueDate}
+ defaultDueTime={createDefaultDueTime}
  onSuccess={handleCreateSuccess}
  />
  </div>

@@ -13,6 +13,7 @@ interface EntityOption { id: string; name: string }
 interface NewTaskModalProps {
   open: boolean
   onClose: () => void
+  onSuccess?: () => void
   defaultPriority?: TaskPriority
   defaultDueDate?: string
   defaultDueTime?: string
@@ -70,7 +71,7 @@ function Label({ children }: { children: React.ReactNode }) {
   )
 }
 
-export function NewTaskModal({ open, onClose, defaultPriority = "MEDIUM", defaultDueDate, defaultDueTime, defaultEntityType, defaultEntityId, editTask }: NewTaskModalProps) {
+export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDIUM", defaultDueDate, defaultDueTime, defaultEntityType, defaultEntityId, editTask }: NewTaskModalProps) {
   const qc = useQueryClient()
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
@@ -228,6 +229,7 @@ export function NewTaskModal({ open, onClose, defaultPriority = "MEDIUM", defaul
       toast.success(editTask ? "Tarea actualizada" : "Tarea creada")
       qc.invalidateQueries({ queryKey: ["tasks"] })
       qc.invalidateQueries({ queryKey: ["tasks-kpis"] })
+      onSuccess?.()
       handleClose()
     },
     onError: () => {

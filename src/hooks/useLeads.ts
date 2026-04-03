@@ -40,7 +40,7 @@ export function useLeads(filters: GetLeadsParams = {}, options?: UseLeadsOptions
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.pagination?.nextCursor,
     initialData,
-    refetchInterval: 120_000,
+    refetchInterval: 300_000,
     staleTime: 60_000,
   })
 

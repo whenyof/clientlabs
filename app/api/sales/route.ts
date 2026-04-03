@@ -17,7 +17,6 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const clientId = searchParams.get('clientId') ?? undefined
 
-    console.log('FETCH SALES FOR CLIENT:', clientId, 'USER:', userId)
 
     // STEP 3 — Hard DB check before any transformation
     const raw = await prisma.sale.findMany({
@@ -26,8 +25,6 @@ export async function GET(request: NextRequest) {
         ...(clientId ? { clientId } : {}),
       },
     })
-    console.log('RAW SALES FOUND:', raw.length)
-    console.log(raw.map((s) => ({ id: s.id, clientId: s.clientId, total: s.total })))
 
     // STEP 4 — If no sales by clientId, check if any sales exist for user (field name / relation check)
     if (clientId && raw.length === 0) {
@@ -35,9 +32,7 @@ export async function GET(request: NextRequest) {
         where: { userId },
         take: 5,
       })
-      console.log('ALL SALES (user):', allForUser.length)
       if (allForUser.length > 0) {
-        console.log('Sample sale clientId:', allForUser[0].clientId, 'clientName:', allForUser[0].clientName)
       }
     }
 
@@ -61,7 +56,6 @@ export async function GET(request: NextRequest) {
             orderBy: { saleDate: 'desc' },
             take: 200,
           })
-          console.log('SALES BY CLIENT NAME (clientId null):', byName.length)
           sales = byName
         }
       }
@@ -143,8 +137,6 @@ export async function POST(request: NextRequest) {
         },
       },
     })
-    console.log("SALE CREATED:", sale.id)
-    console.log("CALLING createInvoiceFromSale")
     try {
       void generateInvoiceFromSale(sale.id).catch((err) => {
         console.error('Auto invoice from sale failed', sale.id, err)

@@ -5,7 +5,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { getCached, setCached } from "@/lib/cache"
+import { getCachedData, setCachedData } from "@/lib/redis-cache"
 
 export async function GET() {
   try {
@@ -16,7 +16,7 @@ export async function GET() {
 
   const userId = session.user.id
   const cacheKey = `leads-kpis-${userId}`
-  const cached = getCached(cacheKey)
+  const cached = await getCachedData(cacheKey)
   if (cached) return NextResponse.json(cached, { headers: { "X-Cache": "HIT" } })
   const now = new Date()
 
@@ -74,7 +74,7 @@ export async function GET() {
   const conversionRate = totalThisMonth > 0 ? Math.round((convertedThisMonth / totalThisMonth) * 100) : 0
 
   const result = { total, hot, converted, stalled, newThisWeek, hotDelta, conversionRate }
-  setCached(cacheKey, result, 60)
+  await setCachedData(cacheKey, result, 60)
   return NextResponse.json(result)
   } catch (error) {
     console.error('[api/leads/kpis] GET error:', error)

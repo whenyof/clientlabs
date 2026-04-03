@@ -1,3 +1,4 @@
+export const maxDuration = 20
 import { NextRequest, NextResponse } from "next/server"
 import type { UploadApiResponse } from "cloudinary"
 import cloudinary from "@/lib/cloudinary"

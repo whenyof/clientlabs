@@ -35,8 +35,6 @@ export async function PATCH(
         updatedAt: new Date(),
       },
     })
-    console.log("SALE UPDATED:", id)
-    console.log("CALLING createInvoiceFromSale")
     try {
       void generateInvoiceFromSale(id).catch((err) => {
         console.error('Auto invoice from sale failed', id, err)

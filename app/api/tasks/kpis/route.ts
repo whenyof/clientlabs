@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getSessionUserId } from "@/app/api/tasks/utils"
-import { getCached, setCached } from "@/lib/cache"
+import { getCachedData, setCachedData } from "@/lib/redis-cache"
 
 export const dynamic = "force-dynamic"
 
@@ -11,7 +11,7 @@ export async function GET() {
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
     const cacheKey = `tasks-kpis-${userId}`
-    const cached = getCached(cacheKey)
+    const cached = await getCachedData(cacheKey)
     if (cached) return NextResponse.json(cached, { headers: { "X-Cache": "HIT" } })
 
     const now = new Date()
@@ -30,7 +30,7 @@ export async function GET() {
     const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0
 
     const result = { pending, completed, urgent, completionRate, overdue }
-    setCached(cacheKey, result, 60)
+    await setCachedData(cacheKey, result, 60)
     return NextResponse.json(result)
   } catch (error) {
     console.error("[GET /api/tasks/kpis]:", error)

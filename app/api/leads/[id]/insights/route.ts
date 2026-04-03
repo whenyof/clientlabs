@@ -1,3 +1,4 @@
+export const maxDuration = 30
 /**
  * Lead Insights Endpoint: GET /api/leads/[id]/insights
  * 

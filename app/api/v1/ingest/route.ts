@@ -1,3 +1,4 @@
+export const maxDuration = 30
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
@@ -134,13 +135,6 @@ export async function POST(request: NextRequest) {
     ).trim()
     const api_key = headerKey || queryKey || bodyKey
 
-    if (process.env.NODE_ENV !== "production") {
-      console.log("[ingest] apiKey source:", {
-        header: !!headerKey,
-        query: !!queryKey,
-        body: !!bodyKey,
-      })
-    }
 
     if (!api_key) {
       return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }), corsHeaders)
@@ -189,7 +183,6 @@ export async function POST(request: NextRequest) {
 
     if (!keyRecord) {
       if (process.env.NODE_ENV === "development") {
-        console.log("[ingest] creating dev apiKey:", api_key)
         const devUserId =
           process.env.DEV_INGEST_USER_ID ??
           (await prisma.user.findFirst({ select: { id: true } }))?.id

@@ -15,7 +15,6 @@ const MAX_SIZE = 10 * 1024 * 1024 // 10MB
  */
 export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions)
-    console.log("SESSION:", session ? { userId: session.user?.id, email: session.user?.email } : null)
     if (!session?.user?.id) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }

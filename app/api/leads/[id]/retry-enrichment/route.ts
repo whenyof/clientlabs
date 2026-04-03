@@ -1,3 +1,4 @@
+export const maxDuration = 30
 /**
  * API Route: POST /api/leads/[id]/retry-enrichment
  * Retriggers enrichment for a lead in background.

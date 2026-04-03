@@ -134,12 +134,6 @@ export async function GET(request: NextRequest) {
     const customersCount = sorted.filter((i) => i.type === "CUSTOMER").length
     const vendorsCount = sorted.filter((i) => i.type === "VENDOR").length
     if (process.env.NODE_ENV === "development") {
-      console.log("INVOICE LIST LOADED")
-      console.log("customers count", customersCount)
-      console.log("vendors count", vendorsCount)
-      console.log("OVERDUE COUNT:", overdueCount)
-      console.log("DUE TODAY:", dueTodayCount)
-      console.log("UPCOMING:", upcomingCount)
     }
 
     return NextResponse.json({

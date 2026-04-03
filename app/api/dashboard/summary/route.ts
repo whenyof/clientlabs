@@ -5,7 +5,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { getCached, setCached } from "@/lib/cache"
+import { getCachedData, setCachedData } from "@/lib/redis-cache"
 
 export async function GET() {
   const session = await getServerSession(authOptions)
@@ -15,7 +15,7 @@ export async function GET() {
 
   const userId = session.user.id
   const cacheKey = `dashboard-summary-${userId}`
-  const cached = getCached(cacheKey)
+  const cached = await getCachedData(cacheKey)
   if (cached) return NextResponse.json(cached, { headers: { "X-Cache": "HIT" } })
   const now = new Date()
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
@@ -216,7 +216,7 @@ export async function GET() {
         currentDate: now.toISOString(),
       },
     }
-    setCached(cacheKey, result, 60)
+    await setCachedData(cacheKey, result, 60)
     return NextResponse.json(result)
   } catch (err) {
     console.error("[GET /api/dashboard/summary]:", err)

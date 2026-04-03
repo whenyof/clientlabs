@@ -15,7 +15,6 @@ export async function POST(
   try {
     const existing = await invoiceService.getInvoice(id, session.user.id)
     if (existing && existing.status !== "DRAFT") {
-      console.log("LOCKED INVOICE BLOCKED EDIT:", id)
       return NextResponse.json(
         { error: "Factura emitida. No se puede eliminar." },
         { status: 400 }

@@ -1,3 +1,4 @@
+export const maxDuration = 20
 import { NextRequest, NextResponse } from "next/server"
 import { getSessionUserId } from "@/app/api/tasks/utils"
 import { getUserAvailability } from "@/modules/calendar/services/availability.service"

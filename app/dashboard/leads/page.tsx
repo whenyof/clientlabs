@@ -64,15 +64,26 @@ export default async function LeadsPage({
   const thirtyDaysAgo = subDays(now, 30)
 
   const [
-    totalLeads, hotLeads, convertedLeads, stalledLeads,
-    newThisWeek, hotYesterday, convertedThisMonth, totalThisMonth,
+    totalLeads, potenciales, convertedLeads, stalledLeads,
+    newThisWeek, hotNow, hotYesterday, convertedThisMonth, totalThisMonth,
     distinctSources,
     initialLeadsData, initialLeadsCount,
     recentLeadsRaw, allLeadsRaw,
   ] = await Promise.all([
     // ── KPIs ──
     prisma.lead.count({ where: { userId: uid } }),
-    prisma.lead.count({ where: { userId: uid, temperature: "HOT" } }),
+    // Potenciales = score >= 40 OR QUALIFIED OR CONTACTED (igual que /api/leads/kpis)
+    prisma.lead.count({
+      where: {
+        userId: uid,
+        NOT: { leadStatus: { in: ["CONVERTED", "LOST"] } },
+        OR: [
+          { score: { gte: 40 } },
+          { leadStatus: "QUALIFIED" },
+          { leadStatus: "CONTACTED" },
+        ],
+      },
+    }),
     prisma.lead.count({ where: { userId: uid, leadStatus: "CONVERTED" } }),
     prisma.lead.count({
       where: {
@@ -85,6 +96,7 @@ export default async function LeadsPage({
       },
     }),
     prisma.lead.count({ where: { userId: uid, createdAt: { gte: weekAgo } } }),
+    prisma.lead.count({ where: { userId: uid, temperature: "HOT" } }),
     prisma.lead.count({ where: { userId: uid, temperature: "HOT", createdAt: { lt: dayAgo } } }),
     prisma.lead.count({ where: { userId: uid, leadStatus: "CONVERTED", updatedAt: { gte: monthStart } } }),
     prisma.lead.count({ where: { userId: uid, createdAt: { gte: monthStart } } }),
@@ -117,11 +129,11 @@ export default async function LeadsPage({
   // ── Build KPIs ──
   const kpis = {
     total: totalLeads,
-    hot: hotLeads,
+    hot: potenciales,
     converted: convertedLeads,
     stalled: stalledLeads,
     newThisWeek,
-    hotDelta: hotLeads - hotYesterday,
+    hotDelta: hotNow - hotYesterday,
     conversionRate: totalThisMonth > 0 ? Math.round((convertedThisMonth / totalThisMonth) * 100) : 0,
   }
 

@@ -67,8 +67,8 @@ export function MonthView({ tasks, onDayClick }: MonthViewProps) {
 
       {/* Day labels */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", borderBottom: "0.5px solid var(--border-subtle)" }}>
-        {DAY_LABELS.map((d) => (
-          <div key={d} style={{ padding: "8px 0", textAlign: "center", fontSize: 11, fontWeight: 600, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+        {DAY_LABELS.map((d, i) => (
+          <div key={d} style={{ padding: "8px 0", textAlign: "center", fontSize: 11, fontWeight: 600, color: (i === 5 || i === 6) ? "#94a3b8" : "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", background: (i === 5 || i === 6) ? "#f8fafc" : "transparent" }}>
             {d}
           </div>
         ))}
@@ -79,9 +79,17 @@ export function MonthView({ tasks, onDayClick }: MonthViewProps) {
         {days.map((day, i) => {
           const isCurrentMonth = day.getMonth() === month
           const isToday = isSameDay(day, today)
+          const isWeekend = i % 7 === 5 || i % 7 === 6
           const dayTasks = tasksForDay(day)
           const visible = dayTasks.slice(0, 3)
           const overflow = dayTasks.length - 3
+
+          const cellBg = isToday
+            ? "#1FA97A06"
+            : isWeekend
+              ? isCurrentMonth ? "#f8fafc" : "#f1f5f9"
+              : !isCurrentMonth ? "#fafafa"
+              : "transparent"
 
           return (
             <div
@@ -93,7 +101,7 @@ export function MonthView({ tasks, onDayClick }: MonthViewProps) {
                 minHeight: 88,
                 padding: "6px 6px",
                 cursor: "pointer",
-                background: isToday ? "#1FA97A06" : "transparent",
+                background: cellBg,
                 position: "relative",
               }}
             >
@@ -106,7 +114,7 @@ export function MonthView({ tasks, onDayClick }: MonthViewProps) {
               }}>
                 <span style={{
                   fontSize: 12, fontWeight: isToday ? 700 : 400,
-                  color: isToday ? "#fff" : isCurrentMonth ? "var(--text-primary)" : "var(--text-secondary)",
+                  color: isToday ? "#fff" : isWeekend && isCurrentMonth ? "#94a3b8" : isCurrentMonth ? "var(--text-primary)" : "var(--text-secondary)",
                   opacity: isCurrentMonth ? 1 : 0.4,
                 }}>
                   {day.getDate()}

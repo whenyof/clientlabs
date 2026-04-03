@@ -133,10 +133,11 @@ export function WeekView({ tasks, onTaskClick, onCellClick }: WeekViewProps) {
         <div />
         {days.map((day, i) => {
           const isToday = isSameDay(day, today)
+          const isWeekend = i === 5 || i === 6
           return (
-            <div key={i} style={{ padding: "10px 0", textAlign: "center", background: isToday ? "#1FA97A08" : "transparent", borderLeft: "0.5px solid var(--border-subtle)" }}>
-              <p style={{ fontSize: 11, color: "var(--text-secondary)", margin: 0, textTransform: "uppercase", letterSpacing: "0.05em" }}>{DAY_LABELS[i]}</p>
-              <p style={{ fontSize: 18, fontWeight: isToday ? 700 : 400, color: isToday ? "#1FA97A" : "var(--text-primary)", margin: "2px 0 0", lineHeight: 1 }}>{day.getDate()}</p>
+            <div key={i} style={{ padding: "10px 0", textAlign: "center", background: isToday ? "#1FA97A08" : isWeekend ? "#f8fafc" : "transparent", borderLeft: "0.5px solid var(--border-subtle)" }}>
+              <p style={{ fontSize: 11, color: isWeekend && !isToday ? "#94a3b8" : "var(--text-secondary)", margin: 0, textTransform: "uppercase", letterSpacing: "0.05em" }}>{DAY_LABELS[i]}</p>
+              <p style={{ fontSize: 18, fontWeight: isToday ? 700 : 400, color: isToday ? "#1FA97A" : isWeekend ? "#94a3b8" : "var(--text-primary)", margin: "2px 0 0", lineHeight: 1 }}>{day.getDate()}</p>
             </div>
           )
         })}
@@ -146,7 +147,7 @@ export function WeekView({ tasks, onTaskClick, onCellClick }: WeekViewProps) {
       <div style={{ display: "grid", gridTemplateColumns: "52px repeat(7,1fr)", borderBottom: "0.5px solid var(--border-subtle)", minHeight: 36 }}>
         <div style={{ fontSize: 10, color: "var(--text-secondary)", padding: "8px 4px", textAlign: "right" }}>Todo el día</div>
         {days.map((day, i) => (
-          <div key={i} style={{ borderLeft: "0.5px solid var(--border-subtle)", padding: "3px 4px", display: "flex", flexDirection: "column", gap: 2 }}>
+          <div key={i} style={{ borderLeft: "0.5px solid var(--border-subtle)", padding: "3px 4px", display: "flex", flexDirection: "column", gap: 2, background: (i === 5 || i === 6) ? "#f8fafc" : "transparent" }}>
             {allDayTasks(day).slice(0, 3).map(t => {
               const cfg = PRIORITY_CONFIG[t.priority]
               return <div key={t.id} onClick={() => onTaskClick(t)} draggable onDragStart={e => handleDragStart(e, t)} style={{ fontSize: 10, fontWeight: 500, padding: "2px 6px", borderRadius: 4, background: cfg.bg, color: cfg.color, border: `0.5px solid ${cfg.border}`, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", cursor: "pointer" }}>{t.title}</div>
@@ -172,6 +173,7 @@ export function WeekView({ tasks, onTaskClick, onCellClick }: WeekViewProps) {
             const dayTasks = timedTasksForDay(day)
             const layout = layoutTasks(dayTasks, localEndAts)
             const isToday = isSameDay(day, today)
+            const isWeekend = di === 5 || di === 6
             return (
               <div
                 key={di}
@@ -180,7 +182,7 @@ export function WeekView({ tasks, onTaskClick, onCellClick }: WeekViewProps) {
                 onDragOver={e => handleDayDragOver(e, di)}
                 onDragLeave={() => setDropTarget(null)}
                 onDrop={e => handleDayDrop(e, day, di)}
-                style={{ position: "relative", height: HOURS.length * CELL_H, borderLeft: "0.5px solid var(--border-subtle)", cursor: "pointer" }}
+                style={{ position: "relative", height: HOURS.length * CELL_H, borderLeft: "0.5px solid var(--border-subtle)", cursor: "pointer", background: isWeekend ? "#f8fafc" : "transparent" }}
               >
                 {/* Hour lines */}
                 {HOURS.map((_, i) => <div key={i} style={{ position: "absolute", top: i * CELL_H, left: 0, right: 0, height: CELL_H, borderTop: "0.5px solid var(--border-subtle)", pointerEvents: "none" }} />)}

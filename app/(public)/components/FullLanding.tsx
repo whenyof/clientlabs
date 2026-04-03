@@ -7,7 +7,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { ScrollToPlugin } from "gsap/ScrollToPlugin"
 import Link from "next/link"
 import { Navbar } from "@/app/ui/chrome"
-import { Calendar, Link2, Zap, Bot, Sparkles, TrendingUp, Clock, BarChart2, CheckCircle2, Users, CreditCard, Brain } from "lucide-react"
+import { Calendar, Link2, Zap, Bot, Sparkles, TrendingUp, Clock, BarChart2, CheckCircle2, Users, CreditCard, Brain, FileText, FileSpreadsheet, Calculator, CheckSquare, Receipt, Puzzle, ArrowRight } from "lucide-react"
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin, useGSAP)
 
@@ -21,6 +21,7 @@ const SECTIONS = [
   { id: "ia",             label: "IA" },
   { id: "automatizaciones", label: "Automatizaciones" },
   { id: "stats",          label: "Resultados" },
+  { id: "recursos",       label: "Recursos" },
   { id: "precios",        label: "Precios" },
   { id: "cta",            label: "Empieza" },
 ]
@@ -979,6 +980,167 @@ function ComparativaSection() {
 }
 
 /* ══════════════════════════════════════════
+   RECURSOS
+══════════════════════════════════════════ */
+
+const RECURSOS = [
+  {
+    Icon: FileText,
+    tag: "Guía gratuita",
+    title: "Cómo captar tus primeros 10 clientes como autónomo",
+    desc: "Estrategias probadas para conseguir clientes sin presupuesto de marketing.",
+    cta: "Descargar gratis",
+    href: "/whitelist?ref=recurso-guia-clientes",
+    featured: false,
+  },
+  {
+    Icon: FileSpreadsheet,
+    tag: "Plantilla Excel",
+    title: "Plantilla de seguimiento de clientes y ventas",
+    desc: "La plantilla que usaban nuestros usuarios antes de descubrir ClientLabs.",
+    cta: "Descargar gratis",
+    href: "/whitelist?ref=recurso-plantilla-clientes",
+    featured: false,
+  },
+  {
+    Icon: Calculator,
+    tag: "Herramienta gratuita",
+    title: "Calculadora de tarifa hora para autónomos",
+    desc: "Calcula cuánto deberías cobrar por hora según tus gastos y objetivos de ingresos.",
+    cta: "Usar gratis",
+    href: "/whitelist?ref=recurso-calculadora-tarifa",
+    featured: false,
+  },
+  {
+    Icon: CheckSquare,
+    tag: "Checklist",
+    title: "Checklist cierre de mes para autónomos",
+    desc: "24 tareas que todo autónomo debería hacer antes de cerrar el mes. Nunca más te olvides nada.",
+    cta: "Descargar gratis",
+    href: "/whitelist?ref=recurso-checklist-mes",
+    featured: false,
+  },
+  {
+    Icon: Receipt,
+    tag: "Guía práctica",
+    title: "IVA trimestral para autónomos: guía paso a paso",
+    desc: "Todo lo que necesitas saber sobre el modelo 303 sin morir en el intento.",
+    cta: "Leer guía",
+    href: "/whitelist?ref=recurso-guia-iva",
+    featured: false,
+  },
+  {
+    Icon: Puzzle,
+    tag: "Plugin gratuito",
+    title: "Plugin WordPress para captar leads automáticamente",
+    desc: "Instala en 2 minutos y todos los formularios de tu web llegarán directamente a ClientLabs.",
+    cta: "Descargar plugin",
+    href: "/api/downloads/wordpress-plugin",
+    featured: true,
+  },
+]
+
+function RecursosSection() {
+  const ref = useRef<HTMLElement>(null)
+
+  useGSAP(() => {
+    gsap.from(".rec-landing-header", {
+      y: 30, opacity: 0, duration: 0.6, stagger: 0.1, ease: "power3.out",
+      scrollTrigger: { trigger: ".rec-landing-header", start: "top 82%", once: true },
+    })
+    gsap.from(".rec-landing-card", {
+      y: 40, opacity: 0, scale: 0.97, duration: 0.55, stagger: 0.08, ease: "back.out(1.3)",
+      scrollTrigger: { trigger: ".rec-landing-grid", start: "top 80%", once: true },
+    })
+    gsap.from(".rec-landing-banner", {
+      y: 25, opacity: 0, duration: 0.6, ease: "power2.out",
+      scrollTrigger: { trigger: ".rec-landing-banner", start: "top 85%", once: true },
+    })
+  }, { scope: ref })
+
+  return (
+    <section ref={ref} id="recursos" className="py-20 bg-white">
+      <div className="max-w-6xl mx-auto px-6">
+
+        {/* Header */}
+        <div className="text-center mb-14">
+          <span className="rec-landing-header text-[11px] font-semibold text-[#1FA97A] uppercase tracking-[0.15em] mb-3 block">
+            Recursos gratuitos
+          </span>
+          <h2 className="rec-landing-header text-[36px] font-bold text-[#0B1F2A] tracking-tight leading-tight mb-4">
+            Todo lo que necesitas para<br />
+            <span className="text-[#1FA97A]">gestionar tu negocio</span>
+          </h2>
+          <p className="rec-landing-header text-[16px] text-slate-500 max-w-xl mx-auto leading-relaxed">
+            Guías, plantillas y herramientas gratuitas para autónomos y pequeños negocios en España.
+          </p>
+        </div>
+
+        {/* Grid */}
+        <div className="rec-landing-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+          {RECURSOS.map((r) => {
+            const RIcon = r.Icon
+            return (
+              <a
+                key={r.tag + r.title}
+                href={r.href}
+                className={`rec-landing-card group border rounded-xl p-6 transition-all duration-200 cursor-pointer ${
+                  r.featured
+                    ? "border-[#1FA97A]/20 border-2 bg-[#E1F5EE]/30 hover:border-[#1FA97A]/50 hover:bg-[#E1F5EE]/50"
+                    : "border-slate-200 bg-white hover:border-[#1FA97A]/40 hover:shadow-[0_4px_20px_rgba(31,169,122,0.08)]"
+                }`}
+              >
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-colors ${
+                  r.featured
+                    ? "bg-[#1FA97A]"
+                    : "bg-[#E1F5EE] group-hover:bg-[#1FA97A]"
+                }`}>
+                  <RIcon className={`h-5 w-5 transition-colors ${
+                    r.featured ? "text-white" : "text-[#1FA97A] group-hover:text-white"
+                  }`} />
+                </div>
+                <span className="text-[10px] font-semibold text-[#1FA97A] uppercase tracking-wider mb-2 block">
+                  {r.tag}
+                </span>
+                <h3 className="text-[16px] font-semibold text-[#0B1F2A] mb-2 leading-snug">
+                  {r.title}
+                </h3>
+                <p className="text-[13px] text-slate-500 leading-relaxed mb-4">
+                  {r.desc}
+                </p>
+                <div className="flex items-center gap-1.5 text-[#1FA97A] text-[13px] font-medium">
+                  {r.cta}
+                  <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </a>
+            )
+          })}
+        </div>
+
+        {/* CTA Banner */}
+        <div className="rec-landing-banner bg-[#0B1F2A] rounded-2xl p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div>
+            <h3 className="text-[20px] font-bold text-white mb-1">
+              ¿Quieres acceso a todos los recursos?
+            </h3>
+            <p className="text-[14px] text-white/50">
+              Apúntate a la whitelist y te los enviamos antes del lanzamiento.
+            </p>
+          </div>
+          <a
+            href="/whitelist"
+            className="flex-shrink-0 px-6 py-3 bg-[#1FA97A] text-white rounded-xl text-[14px] font-semibold hover:bg-[#178f68] transition-colors whitespace-nowrap"
+          >
+            Apuntarme gratis →
+          </a>
+        </div>
+
+      </div>
+    </section>
+  )
+}
+
+/* ══════════════════════════════════════════
    PRECIOS
 ══════════════════════════════════════════ */
 
@@ -1218,6 +1380,7 @@ export function FullLandingPage() {
       <IASection />
       <AutomatizacionesSection />
       <ComparativaSection />
+      <RecursosSection />
       <PricingSection />
       <CtaSection />
       <SectionDots />

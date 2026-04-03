@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect, memo } from "react"
+import { createPortal } from "react-dom"
 import { ShoppingBag, CheckSquare, Mail, Package } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"
@@ -47,16 +48,18 @@ const TYPE_LABELS: Record<string, string> = { SERVICE: "Servicio", PRODUCT: "Pro
 const initials = (n: string) => n.split(" ").slice(0, 2).map(w => w[0]).join("").toUpperCase()
 const fEUR = (n: number) => new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n)
 
-// ── Inline dropdown ──────────────────────────────────────────────────────────
-function InlineSelect({ current, opts, onChange, zBase = 30 }: { current: string; opts: Record<string, DropOpt>; onChange: (v: string) => void; zBase?: number }) {
+// ── Inline dropdown (portal para evitar clipping por overflow:hidden) ────────
+function InlineSelect({ current, opts, onChange }: { current: string; opts: Record<string, DropOpt>; onChange: (v: string) => void }) {
   const [open, setOpen] = useState(false)
-  const [pos, setPos] = useState<"top" | "bottom">("bottom")
-  const wrapRef = useRef<HTMLDivElement>(null)
+  const [rect, setRect] = useState<DOMRect | null>(null)
   const trigRef = useRef<HTMLButtonElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!open) return
-    const h = (e: MouseEvent) => { if (!wrapRef.current?.contains(e.target as Node)) setOpen(false) }
+    const h = (e: MouseEvent) => {
+      if (!menuRef.current?.contains(e.target as Node) && !trigRef.current?.contains(e.target as Node)) setOpen(false)
+    }
     document.addEventListener("mousedown", h)
     return () => document.removeEventListener("mousedown", h)
   }, [open])
@@ -65,15 +68,16 @@ function InlineSelect({ current, opts, onChange, zBase = 30 }: { current: string
 
   const handleOpen = (e: React.MouseEvent) => {
     e.stopPropagation()
-    if (trigRef.current) {
-      const r = trigRef.current.getBoundingClientRect()
-      setPos(window.innerHeight - r.bottom < 220 && r.top > 220 ? "top" : "bottom")
-    }
+    if (trigRef.current) setRect(trigRef.current.getBoundingClientRect())
     setOpen(v => !v)
   }
 
+  const spaceBelow = rect ? window.innerHeight - rect.bottom : 999
+  const top = rect ? (spaceBelow < 220 ? rect.top - 8 : rect.bottom + 6) : 0
+  const translateY = rect && spaceBelow < 220 ? "-100%" : "0"
+
   return (
-    <div ref={wrapRef} style={{ position: "relative", display: "inline-block" }}>
+    <>
       <button
         ref={trigRef}
         onClick={handleOpen}
@@ -82,13 +86,17 @@ function InlineSelect({ current, opts, onChange, zBase = 30 }: { current: string
         <span style={{ width: 6, height: 6, borderRadius: "50%", background: cfg.dot, flexShrink: 0 }} />
         {cfg.label}
       </button>
-      {open && (
-        <div style={{ position: "absolute", ...(pos === "top" ? { bottom: "calc(100% + 6px)" } : { top: "calc(100% + 6px)" }), left: 0, zIndex: zBase + 20, minWidth: 150, background: "white", border: "1px solid #E5E7EB", borderRadius: 10, boxShadow: "0 8px 24px rgba(0,0,0,0.12)", overflow: "hidden" }}>
+      {open && rect && typeof document !== "undefined" && createPortal(
+        <div
+          ref={menuRef}
+          onClick={e => e.stopPropagation()}
+          style={{ position: "fixed", top, left: rect.left, transform: `translateY(${translateY})`, zIndex: 9999, minWidth: 160, background: "white", border: "1px solid #E5E7EB", borderRadius: 10, boxShadow: "0 8px 28px rgba(0,0,0,0.14)", overflow: "hidden" }}
+        >
           {Object.entries(opts).map(([key, o]) => (
             <button
               key={key}
               onClick={e => { e.stopPropagation(); onChange(key); setOpen(false) }}
-              style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "7px 12px", fontSize: 12, color: key === current ? o.text : "#334155", background: key === current ? o.bg : "transparent", border: "none", cursor: "pointer", fontWeight: key === current ? 600 : 400, textAlign: "left" }}
+              style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "8px 12px", fontSize: 12, color: key === current ? o.text : "#334155", background: key === current ? o.bg : "transparent", border: "none", cursor: "pointer", fontWeight: key === current ? 600 : 400, textAlign: "left" }}
               onMouseEnter={e => { if (key !== current) e.currentTarget.style.background = "#F8FAFB" }}
               onMouseLeave={e => { if (key !== current) e.currentTarget.style.background = "transparent" }}
             >
@@ -96,9 +104,10 @@ function InlineSelect({ current, opts, onChange, zBase = 30 }: { current: string
               {o.label}
             </button>
           ))}
-        </div>
+        </div>,
+        document.body
       )}
-    </div>
+    </>
   )
 }
 
@@ -154,7 +163,7 @@ function ProviderRow({ p, onProviderClick, onProviderUpdate, onOrder, onTask }: 
         <InlineSelect current={status} opts={S} onChange={changeStatus} />
       </td>
       <td style={{ padding: "12px 16px" }} onClick={e => e.stopPropagation()}>
-        <InlineSelect current={dep} opts={D} onChange={changeDep} zBase={20} />
+        <InlineSelect current={dep} opts={D} onChange={changeDep} />
       </td>
       <td style={{ padding: "12px 16px" }}><span style={{ fontSize: 12, color: "var(--text-secondary)" }}>{formatDistanceToNow(new Date(p.updatedAt), { addSuffix: true, locale: es })}</span></td>
       <td style={{ padding: "12px 16px" }} onClick={e => e.stopPropagation()}>

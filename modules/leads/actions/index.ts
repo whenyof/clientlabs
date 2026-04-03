@@ -6,6 +6,7 @@ import { authOptions } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
 import type { LeadStatus, LeadTemp } from "@prisma/client"
 import { ensureUserExists } from "@/lib/ensure-user"
+import { invalidateCachedData } from "@/lib/redis-cache"
 
 /* ==================== SCORING & TEMPERATURE ==================== */
 
@@ -487,6 +488,7 @@ export async function createLead(data: {
     revalidatePath("/dashboard/leads")
     revalidatePath("/dashboard/other/leads")
     revalidatePath("/dashboard/other")
+    await invalidateCachedData(`leads-kpis-${session.user.id}`)
     return { success: true, leadId: lead.id }
 }
 
@@ -595,6 +597,7 @@ export async function importLeads(
     revalidatePath("/dashboard/leads")
     revalidatePath("/dashboard/other/leads")
     revalidatePath("/dashboard/other")
+    await invalidateCachedData(`leads-kpis-${session.user.id}`)
     return { success: true, created, skipped, invalid }
 }
 
@@ -704,5 +707,6 @@ export async function deleteLead(leadId: string) {
     revalidatePath("/dashboard/leads")
     revalidatePath("/dashboard/other/leads")
     revalidatePath("/dashboard/other")
+    await invalidateCachedData(`leads-kpis-${session.user.id}`)
     return { success: true }
 }

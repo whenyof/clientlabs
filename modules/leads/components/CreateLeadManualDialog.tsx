@@ -91,6 +91,7 @@ export function CreateLeadManualDialog({ open, onOpenChange }: { open: boolean; 
    ),
   }
  })
+ queryClient.invalidateQueries({ queryKey: ["leads-kpis"] })
  setFormData({ name: "", email: "", phone: "", source: "", leadStatus: "NEW" })
  onOpenChange(false)
  router.refresh()

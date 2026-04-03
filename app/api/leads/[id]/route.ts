@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { invalidateCachedData } from "@/lib/redis-cache"
 
 export async function PATCH(
   request: NextRequest,
@@ -48,6 +49,7 @@ export async function PATCH(
       data,
     })
 
+    await invalidateCachedData(`leads-kpis-${session.user.id}`)
     return NextResponse.json(updated)
   } catch (error) {
     console.error("Error updating lead:", error)

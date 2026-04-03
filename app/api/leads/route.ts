@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
+import { invalidateCachedData } from '@/lib/redis-cache'
 
 export const dynamic = 'force-dynamic'
 
@@ -275,6 +276,7 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    await invalidateCachedData(`leads-kpis-${session.user.id}`)
     return withCors(NextResponse.json(updatedLead, { status: 201 }), origin)
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {

@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import {
  Dialog,
@@ -27,6 +28,7 @@ type ParsedLead = {
 
 export function PasteLeadsDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
  const router = useRouter()
+ const queryClient = useQueryClient()
  const [step, setStep] = useState<"paste" | "preview" | "importing">("paste")
  const [pastedText, setPastedText] = useState("")
  const [leads, setLeads] = useState<ParsedLead[]>([])
@@ -102,6 +104,8 @@ export function PasteLeadsDialog({ open, onOpenChange }: { open: boolean; onOpen
  toast.success("Importación completada", {
  description: `${result.created} leads creados • ${result.skipped} duplicados omitidos • ${result.invalid} inválidos omitidos`
  })
+ queryClient.invalidateQueries({ queryKey: ["leads"] })
+ queryClient.invalidateQueries({ queryKey: ["leads-kpis"] })
  onOpenChange(false)
  router.refresh()
  resetDialog()

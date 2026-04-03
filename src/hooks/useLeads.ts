@@ -2,8 +2,8 @@
 
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { getLeads, type GetLeadsParams } from "@/api/leads"
-import { useMemo, useCallback } from "react"
-import type { Lead, LeadStatus } from "@prisma/client"
+import { useMemo } from "react"
+import type { Lead } from "@prisma/client"
 import { changeLeadStatus } from "@/modules/leads/actions"
 import { toast } from "sonner"
 
@@ -79,48 +79,12 @@ export function useUpdateLeadStatus() {
     },
 
     onMutate: async ({ leadId, status }) => {
-      // Cancel in-flight queries so they don't overwrite our optimistic update
-      await queryClient.cancelQueries({ queryKey: ["leads"] })
-
-      // Snapshot all current leads queries for rollback
-      const previousQueries = queryClient.getQueriesData<{
-        pages: { leads: Lead[]; pagination: any }[]
-        pageParams: any[]
-      }>({ queryKey: ["leads"] })
-
-      // Optimistically update every matching query
-      const shouldRemove = status === "CONVERTED" || status === "LOST"
-
-      queryClient.setQueriesData<{
-        pages: { leads: Lead[]; pagination: any }[]
-        pageParams: any[]
-      }>({ queryKey: ["leads"] }, (old) => {
-        if (!old) return old
-        return {
-          ...old,
-          pages: old.pages.map((page) => ({
-            ...page,
-            leads: shouldRemove
-              ? page.leads.filter((lead) => lead.id !== leadId)
-              : page.leads.map((lead) =>
-                  lead.id === leadId
-                    ? { ...lead, leadStatus: status as LeadStatus, status, metadata: lead.metadata ?? {} }
-                    : lead
-                ),
-          })),
-        }
-      })
-
-      return { previousQueries }
+      // Instantly update UI via event bus (mirrors providers pattern — no RQ race)
+      window.dispatchEvent(new CustomEvent("lead-status-changed", { detail: { leadId, status } }))
+      return { leadId, status }
     },
 
-    onError: (_err, _vars, context) => {
-      // Roll back to snapshot
-      if (context?.previousQueries) {
-        for (const [key, data] of context.previousQueries) {
-          queryClient.setQueryData(key, data)
-        }
-      }
+    onError: (_err, _vars, _context) => {
       toast.error("Error al cambiar estado")
     },
 

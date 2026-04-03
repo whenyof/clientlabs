@@ -2,7 +2,7 @@
 
 import { useLeads } from "@/hooks/useLeads"
 import { useSearchParams } from "next/navigation"
-import { useMemo, useRef, useCallback, useEffect } from "react"
+import { useMemo, useRef, useCallback, useEffect, useState } from "react"
 import { LeadCard } from "@/modules/leads/components/LeadCard"
 import { Upload, Globe, Zap, Loader2 } from "lucide-react"
 import type { Lead } from "@prisma/client"
@@ -64,7 +64,7 @@ export function LeadsTable({ initialLeads, initialTotal }: LeadsTableProps = {})
   }), [searchParams])
 
   const {
-    leads,
+    leads: rqLeads,
     total,
     isLoading,
     isFetchingNextPage,
@@ -72,6 +72,45 @@ export function LeadsTable({ initialLeads, initialTotal }: LeadsTableProps = {})
     fetchNextPage,
     error,
   } = useLeads(filters, { initialLeads, initialTotal })
+
+  // ── Local instant-update state (mirrors providers pattern) ──
+  const [extraLeads, setExtraLeads] = useState<Lead[]>([])
+  const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set())
+  const [statusOverrides, setStatusOverrides] = useState<Map<string, string>>(new Map())
+
+  useEffect(() => {
+    const onCreated = (e: Event) => {
+      const lead = (e as CustomEvent<Lead>).detail
+      setExtraLeads(prev => prev.some(l => l.id === lead.id) ? prev : [lead, ...prev])
+    }
+    const onDeleted = (e: Event) => {
+      const { leadId } = (e as CustomEvent<{ leadId: string }>).detail
+      setDeletedIds(prev => new Set([...prev, leadId]))
+      setExtraLeads(prev => prev.filter(l => l.id !== leadId))
+    }
+    const onStatusChanged = (e: Event) => {
+      const { leadId, status } = (e as CustomEvent<{ leadId: string; status: string }>).detail
+      setStatusOverrides(prev => new Map(prev).set(leadId, status))
+    }
+    window.addEventListener("lead-created", onCreated as EventListener)
+    window.addEventListener("lead-deleted", onDeleted as EventListener)
+    window.addEventListener("lead-status-changed", onStatusChanged as EventListener)
+    return () => {
+      window.removeEventListener("lead-created", onCreated as EventListener)
+      window.removeEventListener("lead-deleted", onDeleted as EventListener)
+      window.removeEventListener("lead-status-changed", onStatusChanged as EventListener)
+    }
+  }, [])
+
+  // When React Query refreshes, clear local overrides for IDs now in the cache
+  const rqIds = useMemo(() => new Set(rqLeads.map((l: Lead) => l.id)), [rqLeads])
+  const leads = useMemo(() => {
+    const fresh = extraLeads.filter((l: Lead) => !rqIds.has(l.id) && !deletedIds.has(l.id))
+    const base = rqLeads
+      .filter((l: Lead) => !deletedIds.has(l.id))
+      .map((l: Lead) => statusOverrides.has(l.id) ? { ...l, leadStatus: statusOverrides.get(l.id) as Lead["leadStatus"] } : l)
+    return [...fresh, ...base]
+  }, [extraLeads, rqLeads, deletedIds, statusOverrides, rqIds])
 
   // ── Infinite scroll ──
   const observerRef = useRef<IntersectionObserver | null>(null)

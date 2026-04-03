@@ -50,12 +50,10 @@ export function CreateLeadManualDialog({ open, onOpenChange }: { open: boolean; 
  if (!formData.name.trim()) return
 
  setLoading(true)
- // Cancel any in-flight refetch so it can't overwrite the optimistic update
- await queryClient.cancelQueries({ queryKey: ["leads"] })
  try {
  const result = await createLead(formData)
  const now = new Date()
- const optimisticLead = {
+ const newLead = {
   id: result.leadId,
   userId: "",
   name: formData.name,
@@ -78,22 +76,9 @@ export function CreateLeadManualDialog({ open, onOpenChange }: { open: boolean; 
   aiSegment: null,
   metadata: {},
  } as unknown as Lead
- // Insert the new lead into all matching React Query cache entries immediately
- queryClient.setQueriesData<{
-  pages: { leads: Lead[]; pagination: any }[]
-  pageParams: any[]
- }>({ queryKey: ["leads"] }, (old) => {
-  if (!old) return old
-  return {
-   ...old,
-   pages: old.pages.map((page, i) =>
-    i === 0
-     ? { ...page, leads: [optimisticLead, ...page.leads], pagination: { ...page.pagination, total: (page.pagination?.total ?? 0) + 1 } }
-     : page
-   ),
-  }
- })
- // Trigger a fresh fetch so server-confirmed data replaces the optimistic lead
+ // Instantly update the UI (mirrors providers pattern — no React Query race)
+ window.dispatchEvent(new CustomEvent("lead-created", { detail: newLead }))
+ // Background sync — does not block UI
  queryClient.invalidateQueries({ queryKey: ["leads"] })
  queryClient.invalidateQueries({ queryKey: ["leads-kpis"] })
  setFormData({ name: "", email: "", phone: "", source: "", leadStatus: "NEW" })

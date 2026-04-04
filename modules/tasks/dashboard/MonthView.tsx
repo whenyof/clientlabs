@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import type { DashboardTask } from "./types"
 import { PRIORITY_CONFIG } from "./types"
 
@@ -32,19 +33,62 @@ function getCalendarDays(year: number, month: number): Date[] {
 interface MonthViewProps {
   tasks: DashboardTask[]
   onDayClick: (date: Date) => void
+  onTaskClick: (task: DashboardTask) => void
 }
 
-export function MonthView({ tasks, onDayClick }: MonthViewProps) {
+export function MonthView({ tasks, onDayClick, onTaskClick }: MonthViewProps) {
+  const qc = useQueryClient()
   const today = new Date()
   const [year, setYear] = useState(today.getFullYear())
   const [month, setMonth] = useState(today.getMonth())
+  const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null)
+  const dragTaskId = useRef<string | null>(null)
 
   const prevMonth = () => { if (month === 0) { setYear(y => y - 1); setMonth(11) } else setMonth(m => m - 1) }
   const nextMonth = () => { if (month === 11) { setYear(y => y + 1); setMonth(0) } else setMonth(m => m + 1) }
 
-  const days = getCalendarDays(year, month)
-  const currentMonthStart = new Date(year, month, 1)
+  const moveMutation = useMutation({
+    mutationFn: ({ taskId, newDate }: { taskId: string; newDate: string }) =>
+      fetch(`/api/tasks/${taskId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dueDate: new Date(newDate + "T12:00:00").toISOString() }),
+      }).then(r => { if (!r.ok) throw new Error("Failed") }),
+    onMutate: async ({ taskId, newDate }) => {
+      await qc.cancelQueries({ queryKey: ["tasks"] })
+      const prev = qc.getQueryData<DashboardTask[]>(["tasks"])
+      qc.setQueryData<DashboardTask[]>(["tasks"], old =>
+        old?.map(t => t.id === taskId ? { ...t, dueDate: new Date(newDate + "T12:00:00").toISOString() } : t)
+      )
+      return { prev }
+    },
+    onError: (_e, _v, ctx) => ctx?.prev && qc.setQueryData(["tasks"], ctx.prev),
+    onSettled: () => qc.invalidateQueries({ queryKey: ["tasks"] }),
+  })
 
+  const handleDragStart = (e: React.DragEvent, task: DashboardTask) => {
+    dragTaskId.current = task.id
+    e.dataTransfer.effectAllowed = "move"
+    e.dataTransfer.setData("text/plain", task.id)
+  }
+
+  const handleDragOver = (e: React.DragEvent, cellIndex: number) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = "move"
+    setDropTargetIndex(cellIndex)
+  }
+
+  const handleDrop = (e: React.DragEvent, day: Date) => {
+    e.preventDefault()
+    setDropTargetIndex(null)
+    if (!dragTaskId.current) return
+    const pad = (n: number) => String(n).padStart(2, "0")
+    const newDate = `${day.getFullYear()}-${pad(day.getMonth() + 1)}-${pad(day.getDate())}`
+    moveMutation.mutate({ taskId: dragTaskId.current, newDate })
+    dragTaskId.current = null
+  }
+
+  const days = getCalendarDays(year, month)
   const tasksForDay = (d: Date) => tasks.filter((t) => t.dueDate && isSameDay(new Date(t.dueDate), d))
 
   return (
@@ -80,21 +124,25 @@ export function MonthView({ tasks, onDayClick }: MonthViewProps) {
           const isCurrentMonth = day.getMonth() === month
           const isToday = isSameDay(day, today)
           const isWeekend = i % 7 === 5 || i % 7 === 6
+          const isDrop = dropTargetIndex === i
           const dayTasks = tasksForDay(day)
           const visible = dayTasks.slice(0, 3)
           const overflow = dayTasks.length - 3
 
-          const cellBg = isToday
-            ? "#1FA97A06"
-            : isWeekend
-              ? isCurrentMonth ? "#f8fafc" : "#f1f5f9"
-              : !isCurrentMonth ? "#fafafa"
-              : "transparent"
+          const cellBg = isDrop
+            ? "#1FA97A08"
+            : isToday ? "#1FA97A06"
+            : isWeekend ? isCurrentMonth ? "#f8fafc" : "#f1f5f9"
+            : !isCurrentMonth ? "#fafafa"
+            : "transparent"
 
           return (
             <div
               key={i}
               onClick={() => onDayClick(day)}
+              onDragOver={e => handleDragOver(e, i)}
+              onDragLeave={() => setDropTargetIndex(null)}
+              onDrop={e => handleDrop(e, day)}
               style={{
                 borderTop: i >= 7 ? "0.5px solid var(--border-subtle)" : undefined,
                 borderLeft: i % 7 !== 0 ? "0.5px solid var(--border-subtle)" : undefined,
@@ -103,6 +151,9 @@ export function MonthView({ tasks, onDayClick }: MonthViewProps) {
                 cursor: "pointer",
                 background: cellBg,
                 position: "relative",
+                outline: isDrop ? "1.5px dashed #1FA97A" : undefined,
+                outlineOffset: isDrop ? -1 : undefined,
+                transition: "background 0.1s",
               }}
             >
               {/* Day number */}
@@ -126,13 +177,21 @@ export function MonthView({ tasks, onDayClick }: MonthViewProps) {
                 {visible.map((t) => {
                   const cfg = PRIORITY_CONFIG[t.priority]
                   return (
-                    <div key={t.id} style={{
-                      fontSize: 10, fontWeight: 500, padding: "1px 5px", borderRadius: 4,
-                      background: cfg.bg, color: cfg.color, border: `0.5px solid ${cfg.border}`,
-                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                      opacity: t.status === "DONE" ? 0.5 : 1,
-                      textDecoration: t.status === "DONE" ? "line-through" : "none",
-                    }}>
+                    <div
+                      key={t.id}
+                      draggable
+                      onDragStart={e => { e.stopPropagation(); handleDragStart(e, t) }}
+                      onClick={e => { e.stopPropagation(); onTaskClick(t) }}
+                      style={{
+                        fontSize: 10, fontWeight: 500, padding: "2px 5px", borderRadius: 4,
+                        background: cfg.bg, color: cfg.color, border: `0.5px solid ${cfg.border}`,
+                        overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                        opacity: t.status === "DONE" ? 0.5 : 1,
+                        textDecoration: t.status === "DONE" ? "line-through" : "none",
+                        cursor: "grab",
+                        userSelect: "none",
+                      }}
+                    >
                       {t.title}
                     </div>
                   )

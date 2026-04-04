@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { X, Loader2, CheckSquare, ChevronDown, Trash2, RotateCcw } from "lucide-react"
+import { DatePickerField } from "./DatePickerField"
+import { TimePickerField } from "./TimePickerField"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { Dialog, DialogContent, DialogClose, DialogTitle } from "@/components/ui/dialog"
@@ -317,11 +319,11 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <div>
               <Label>Fecha límite</Label>
-              <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} style={inputStyle} />
+              <DatePickerField value={dueDate} onChange={setDueDate} />
             </div>
             <div>
               <Label>Hora</Label>
-              <input type="time" value={dueTime} onChange={(e) => setDueTime(e.target.value)} style={inputStyle} />
+              <TimePickerField value={dueTime} onChange={setDueTime} />
             </div>
           </div>
 

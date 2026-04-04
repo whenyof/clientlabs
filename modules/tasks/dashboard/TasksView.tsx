@@ -85,7 +85,7 @@ export function TasksView() {
             <WeekView tasks={tasks} onTaskClick={handleTaskClick} onCellClick={handleDayClick} />
           )}
           {view === "month" && (
-            <MonthView tasks={tasks} onDayClick={handleDayClick} />
+            <MonthView tasks={tasks} onDayClick={handleDayClick} onTaskClick={handleTaskClick} />
           )}
         </div>
 

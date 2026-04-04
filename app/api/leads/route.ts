@@ -6,6 +6,7 @@ import { Prisma } from '@prisma/client'
 import { invalidateCachedData } from '@/lib/redis-cache'
 
 export const dynamic = 'force-dynamic'
+export const maxDuration = 30
 
 /**
  * GET /api/leads
@@ -50,8 +51,10 @@ export async function OPTIONS(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   const origin = request.headers.get('origin')
+  console.warn("[api/leads] handler invoked")
   try {
     const session = await getServerSession(authOptions)
+    console.warn("[api/leads] userId:", session?.user?.id ?? "NULL")
 
     if (!session?.user?.id) {
       return withCors(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }), origin)

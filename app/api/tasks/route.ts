@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 
 export const dynamic = "force-dynamic"
+export const maxDuration = 30
 import { prisma } from "@/lib/prisma"
 import { invalidateCache } from "@/lib/cache"
 import {
@@ -21,8 +22,10 @@ import { syncTaskToGoogle } from "@/lib/google-calendar"
  * Query: status, priority, from, to, assignedTo, entityType, entityId
  */
 export async function GET(request: NextRequest) {
+ console.warn("[api/tasks] GET handler invoked")
  try {
  const userId = await getSessionUserId()
+ console.warn("[api/tasks] userId:", userId ?? "NULL")
  if (!userId) {
  return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
  }
@@ -80,8 +83,10 @@ export type CreateTaskBody = {
  * Create a new task. Always scoped to session user.
  */
 export async function POST(request: NextRequest) {
+ console.warn("[api/tasks] POST handler invoked")
  try {
  const userId = await getSessionUserId()
+ console.warn("[api/tasks] POST userId:", userId ?? "NULL")
  if (!userId) {
  return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
  }

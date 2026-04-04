@@ -113,3 +113,155 @@ Interpret creatively and make unexpected choices that feel genuinely designed fo
 **IMPORTANT**: Match implementation complexity to the aesthetic vision. Maximalist designs need elaborate code with extensive animations and effects. Minimalist or refined designs need restraint, precision, and careful attention to spacing, typography, and subtle details. Elegance comes from executing the vision well.
 
 Remember: Claude is capable of extraordinary creative work. Don't hold back, show what can truly be created when thinking outside the box and committing fully to a distinctive vision.
+
+---
+
+## REGLAS CRITICAS DE RENDIMIENTO
+(NO NEGOCIABLES — NUNCA SALTARSE)
+
+### VERCEL — maxDuration OBLIGATORIO en cada route
+
+TODA ruta nueva `app/api/**/route.ts` DEBE incluir al principio del archivo:
+
+```ts
+export const maxDuration = 10 // default
+```
+
+Valores permitidos por tipo:
+- APIs normales: 10s
+- Auth: 15s
+- PDF generation: 25s
+- AI/OpenAI calls: 30s
+- Stripe/webhooks: 30s
+- Ingest/ingesta: 30s
+- Cron jobs: 60s
+
+NUNCA crear una ruta sin `maxDuration`. NUNCA usar un valor mayor sin justificación.
+
+### Polling — NUNCA menos de 30 segundos
+
+Cualquier `setInterval` o `refetchInterval` que llame a una API DEBE ser >= 30_000ms.
+
+Prohibido:
+- `setInterval(fn, 1000)`
+- `setInterval(fn, 5000)`
+- `refetchInterval: 5000`
+
+Permitido:
+- `setInterval(fn, 30_000)` — mínimo
+- `refetchInterval: 120_000` — recomendado
+- `refetchInterval: 300_000` — óptimo
+
+Excepcion UNICA: modales de espera activa (WebConnectDialog, ScanWithMobileDialog) pueden usar 10_000ms como mínimo absoluto.
+
+### Cache Redis — SIEMPRE en endpoints de polling
+
+Cualquier endpoint que se llame con polling DEBE tener caché Redis:
+
+```ts
+import { getCachedData, setCachedData } from "@/lib/redis-cache"
+
+const cached = await getCachedData(key)
+if (cached) return NextResponse.json(cached)
+// ... calcular ...
+await setCachedData(key, data, TTL)
+```
+
+TTL mínimos recomendados:
+- KPIs: 60s
+- Listas: 30s
+- Status checks: 10s
+- Dashboard summary: 60s
+
+### Streams y SSE — PROHIBIDOS
+
+NUNCA crear endpoints con:
+- `ReadableStream` abierto indefinidamente
+- `text/event-stream` sin timeout
+- `keepAlive` sin límite
+- `EventSource` sin `maxDuration`
+
+Si necesitas tiempo real usa polling con `refetchInterval >= 30_000ms`.
+
+### React Query — configuracion obligatoria
+
+Toda nueva query con `useQuery` o `useInfiniteQuery` DEBE tener:
+
+```ts
+refetchOnWindowFocus: false,
+refetchOnMount: false,
+retry: 0,
+staleTime: /* mínimo */ 60_000,
+```
+
+NUNCA usar los defaults de React Query sin especificar estos valores.
+
+### Imports pesados — SIEMPRE dinamicos en API routes
+
+```ts
+// MAL
+import { jsPDF } from "jspdf"
+
+// BIEN
+const { jsPDF } = await import("jspdf")
+```
+
+Librerias que requieren import dinámico: jsPDF, pdf-lib, html2canvas, sharp, puppeteer, playwright, cualquier librería > 1MB.
+
+---
+
+### Prisma — UN solo cliente
+
+NUNCA instanciar `PrismaClient` fuera de `lib/prisma.ts`:
+
+```ts
+// MAL
+new PrismaClient()
+
+// BIEN
+import { prisma } from "@/lib/prisma"
+```
+
+### Select — SIEMPRE especifico
+
+NUNCA hacer `findMany` sin `select`:
+
+```ts
+// MAL
+prisma.lead.findMany({ where: { userId } })
+
+// BIEN
+prisma.lead.findMany({ where: { userId }, select: { id: true, name: true, email: true } })
+```
+
+### console.log — PROHIBIDO en produccion
+
+NUNCA añadir `console.log` en `app/api/`. Solo `console.error` en bloques catch.
+
+---
+
+### CHECKLIST ANTES DE CADA COMMIT
+
+- [ ] Cada ruta nueva tiene `export const maxDuration`
+- [ ] Ningun `setInterval` < 30_000ms
+- [ ] Ningun import estatico de librería pesada en API routes
+- [ ] Ningun `new PrismaClient()` fuera de `lib/`
+- [ ] Ningun `console.log` en `app/api/`
+- [ ] Queries con `select` especifico
+- [ ] `npx tsc --noEmit` → 0 errores
+- [ ] `npm run build` → sin errores
+
+---
+
+### SENALES DE ALARMA — PARAR Y AVISAR
+
+Si aparece cualquiera de esto, detener y notificar al usuario antes de continuar:
+
+- Ruta nueva sin `export const maxDuration`
+- `setInterval` con valor < 30_000 (excepto modales de espera activa)
+- Import estatico de jsPDF/puppeteer/sharp en API route
+- `new PrismaClient()` fuera de `lib/prisma.ts`
+- `ReadableStream` o `EventSource` nuevo sin timeout
+- `refetchInterval` < 30_000
+
+**Contexto:** En 6 dias se consumieron 1.091 GB-Hrs de Vercel (limite: 360 GB-Hrs/mes) causando la pausa del proyecto. La causa principal fue 163 rutas API sin `maxDuration` explícito — el `vercel.json` functions config NO aplica a App Router route handlers.

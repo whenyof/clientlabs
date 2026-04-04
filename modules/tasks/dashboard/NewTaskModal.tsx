@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { X, Loader2, CheckSquare, ChevronDown, Trash2 } from "lucide-react"
+import { X, Loader2, CheckSquare, ChevronDown, Trash2, RotateCcw } from "lucide-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { Dialog, DialogContent, DialogClose, DialogTitle } from "@/components/ui/dialog"
@@ -111,40 +111,40 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
     }
   }, [open, editTask, defaultPriority, defaultDueDate, defaultDueTime])
 
-  const { data: clients = [], isLoading: loadingClients } = useQuery<EntityOption[]>({
+  const { data: clients = [], isLoading: loadingClients, isError: errorClients, refetch: refetchClients } = useQuery<EntityOption[]>({
     queryKey: ["clients-list"],
     queryFn: async () => {
-      const res = await fetch("/api/clients", { signal: AbortSignal.timeout(15_000) })
-      if (!res.ok) throw new Error(`${res.status}`)
+      const res = await fetch("/api/clients")
+      if (!res.ok) throw new Error(`Error ${res.status}`)
       return res.json()
     },
     enabled: entityType === "CLIENT" && open,
     staleTime: 60_000,
-    retry: false,
+    retry: 1,
   })
 
-  const { data: leadsRaw, isLoading: loadingLeads } = useQuery({
+  const { data: leadsRaw, isLoading: loadingLeads, isError: errorLeads, refetch: refetchLeads } = useQuery({
     queryKey: ["leads-list"],
     queryFn: async () => {
-      const res = await fetch("/api/leads?limit=100&sortBy=name&sortOrder=asc", { signal: AbortSignal.timeout(15_000) })
-      if (!res.ok) throw new Error(`${res.status}`)
+      const res = await fetch("/api/leads?limit=100&sortBy=name&sortOrder=asc")
+      if (!res.ok) throw new Error(`Error ${res.status}`)
       return res.json()
     },
     enabled: entityType === "LEAD" && open,
     staleTime: 60_000,
-    retry: false,
+    retry: 1,
   })
 
-  const { data: providers = [], isLoading: loadingProviders } = useQuery<EntityOption[]>({
+  const { data: providers = [], isLoading: loadingProviders, isError: errorProviders, refetch: refetchProviders } = useQuery<EntityOption[]>({
     queryKey: ["providers-list"],
     queryFn: async () => {
-      const res = await fetch("/api/providers", { signal: AbortSignal.timeout(15_000) })
-      if (!res.ok) throw new Error(`${res.status}`)
+      const res = await fetch("/api/providers")
+      if (!res.ok) throw new Error(`Error ${res.status}`)
       return res.json()
     },
     enabled: entityType === "PROVIDER" && open,
     staleTime: 60_000,
-    retry: false,
+    retry: 1,
   })
 
   const leads: EntityOption[] = Array.isArray(leadsRaw)
@@ -159,6 +159,14 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
     entityType === "CLIENT" ? loadingClients :
     entityType === "LEAD" ? loadingLeads :
     entityType === "PROVIDER" ? loadingProviders : false
+  const isErrorEntities =
+    entityType === "CLIENT" ? errorClients :
+    entityType === "LEAD" ? errorLeads :
+    entityType === "PROVIDER" ? errorProviders : false
+  const refetchEntities =
+    entityType === "CLIENT" ? refetchClients :
+    entityType === "LEAD" ? refetchLeads :
+    entityType === "PROVIDER" ? refetchProviders : undefined
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -347,16 +355,27 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
               </SelectWrapper>
 
               {entityType && (
-                <SelectWrapper>
-                  <select value={entityId} onChange={(e) => setEntityId(e.target.value)} style={selectResetStyle} disabled={isLoadingEntities || entityOptions.length === 0}>
-                    <option value="">
-                      {isLoadingEntities ? "Cargando..." : entityOptions.length === 0 ? "Sin resultados" : "Seleccionar..."}
-                    </option>
-                    {entityOptions.map((o) => (
-                      <option key={o.id} value={o.id}>{o.name}</option>
-                    ))}
-                  </select>
-                </SelectWrapper>
+                isErrorEntities ? (
+                  <button
+                    type="button"
+                    onClick={() => refetchEntities?.()}
+                    style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid #FECACA", background: "#FFF5F5", color: "#DC2626", fontSize: 12, cursor: "pointer" }}
+                  >
+                    <RotateCcw style={{ width: 12, height: 12 }} />
+                    Error al cargar. Reintentar
+                  </button>
+                ) : (
+                  <SelectWrapper>
+                    <select value={entityId} onChange={(e) => setEntityId(e.target.value)} style={selectResetStyle} disabled={isLoadingEntities}>
+                      <option value="">
+                        {isLoadingEntities ? "Cargando..." : entityOptions.length === 0 ? "Sin resultados" : "Seleccionar..."}
+                      </option>
+                      {entityOptions.map((o) => (
+                        <option key={o.id} value={o.id}>{o.name}</option>
+                      ))}
+                    </select>
+                  </SelectWrapper>
+                )
               )}
             </div>
           </div>

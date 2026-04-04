@@ -102,7 +102,7 @@ export function useLeads(filters: UseLeadsFilters = {}) {
       // Use cursor from previous page
       return `/api/leads${buildQueryString(filters, previousPageData.pagination.nextCursor!)}`
     },
-    [filters.status, filters.temperature, filters.source, filters.search, filters.sortBy, filters.sortOrder]
+    [filters.status, filters.temperature, filters.source, filters.search, filters.sortBy, filters.sortOrder, filters.stale, filters.showConverted, filters.showLost]
   )
 
   const {

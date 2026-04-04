@@ -44,6 +44,9 @@ export function LeadsTable() {
       search: searchParams.get("search") ?? "",
       sortBy: searchParams.get("sortBy") ?? "createdAt",
       sortOrder: searchParams.get("sortOrder") ?? "desc",
+      stale: searchParams.get("stale") ?? undefined,
+      showConverted: searchParams.get("showConverted") ?? undefined,
+      showLost: searchParams.get("showLost") ?? undefined,
     }),
     [searchParams]
   )

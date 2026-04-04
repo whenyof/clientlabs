@@ -29,19 +29,26 @@ export function LeadsKPIs({ kpis }: LeadsKPIsProps) {
     if (key === "total") {
       params.delete("temperature")
       params.delete("showConverted")
+      params.delete("showLost")
       params.delete("stale")
+      params.delete("status")
     } else if (key === "hot") {
       params.set("temperature", "HOT")
       params.delete("showConverted")
+      params.delete("showLost")
       params.delete("stale")
+      params.delete("status")
     } else if (key === "converted") {
       params.set("showConverted", "true")
+      params.set("status", "CONVERTED")
       params.delete("temperature")
       params.delete("stale")
     } else if (key === "stalled") {
       params.set("stale", "true")
       params.delete("temperature")
       params.delete("showConverted")
+      params.delete("showLost")
+      params.delete("status")
     }
     router.push(`?${params.toString()}`)
   }

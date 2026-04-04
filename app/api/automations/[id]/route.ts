@@ -1,3 +1,4 @@
+export const maxDuration = 10
 /**
  * API Route: GET/PUT/DELETE /api/automations/[id]
  * Single automation rule operations with multi-tenant enforcement.

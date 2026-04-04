@@ -1,3 +1,4 @@
+export const maxDuration = 10
 // API route for integration logs
 
 import { NextRequest, NextResponse } from 'next/server'

@@ -1,3 +1,4 @@
+export const maxDuration = 10
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getSessionUserId } from "@/app/api/tasks/utils"

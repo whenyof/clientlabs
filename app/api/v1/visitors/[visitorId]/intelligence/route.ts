@@ -1,3 +1,4 @@
+export const maxDuration = 10
 /**
  * GET /api/v1/visitors/:visitorId/intelligence
  * Lead Intelligence Engine — computes visitor intent score and signals from events.

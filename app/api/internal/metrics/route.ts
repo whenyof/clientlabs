@@ -1,3 +1,4 @@
+export const maxDuration = 10
 /**
  * Internal Metrics Endpoint: GET /api/internal/metrics
  *

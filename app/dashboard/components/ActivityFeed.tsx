@@ -32,7 +32,12 @@ export function ActivityFeed() {
   }, [fetchActivities])
 
   useEffect(() => {
+    let lastFocusFetch = 0
+    const FOCUS_DEBOUNCE = 60_000
     const onFocus = () => {
+      const now = Date.now()
+      if (now - lastFocusFetch < FOCUS_DEBOUNCE) return
+      lastFocusFetch = now
       setLoading(true)
       fetchActivities()
     }

@@ -1,3 +1,4 @@
+export const maxDuration = 10
 /**
  * GET /api/invoicing/kpis
  *

@@ -1,3 +1,4 @@
+export const maxDuration = 10
 // API route for connecting/disconnecting integrations
 
 import { NextRequest, NextResponse } from 'next/server'

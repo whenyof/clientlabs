@@ -1,3 +1,4 @@
+export const maxDuration = 10
 /**
  * GET /api/debug/invoice-duplicates
  * Returns duplicate (userId, saleId) groups and total count.

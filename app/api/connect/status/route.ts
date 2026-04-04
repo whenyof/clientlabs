@@ -1,3 +1,4 @@
+export const maxDuration = 10
 /**
  * API Route: GET /api/connect/status
  * 

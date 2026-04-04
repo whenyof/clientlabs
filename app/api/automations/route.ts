@@ -1,3 +1,4 @@
+export const maxDuration = 10
 /**
  * API Route: GET/POST /api/automations
  * Multi-tenant CRUD for automation rules.

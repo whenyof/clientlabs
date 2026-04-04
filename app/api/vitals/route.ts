@@ -1,3 +1,4 @@
+export const maxDuration = 10
 export async function POST(request: Request) {
  // Intentionally minimal to avoid blocking render
  // Metrics can be forwarded to analytics later

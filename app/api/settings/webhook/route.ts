@@ -1,3 +1,4 @@
+export const maxDuration = 10
 // Stripe webhook handler
 
 import { NextRequest, NextResponse } from 'next/server'

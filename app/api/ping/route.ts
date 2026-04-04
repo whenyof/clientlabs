@@ -1,3 +1,4 @@
+export const maxDuration = 10
 import { NextResponse } from "next/server"
 
 export async function GET() {

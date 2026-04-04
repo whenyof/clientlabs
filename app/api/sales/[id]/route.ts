@@ -1,3 +1,4 @@
+export const maxDuration = 10
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { revalidatePath } from 'next/cache'

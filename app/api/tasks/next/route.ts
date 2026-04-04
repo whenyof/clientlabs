@@ -1,3 +1,4 @@
+export const maxDuration = 10
 import { NextResponse } from "next/server"
 import { getSessionUserId } from "@/app/api/tasks/utils"
 import { getNextActions } from "@/modules/tasks/services/next-actions.service"

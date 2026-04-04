@@ -1,3 +1,4 @@
+export const maxDuration = 10
 /**
  * Cron Endpoint: POST /api/cron/scoring-decay
  *

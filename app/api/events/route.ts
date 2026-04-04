@@ -1,3 +1,4 @@
+export const maxDuration = 10
 /**
  * API Route: POST /api/events — Register a lead event
  *             GET  /api/events — List events for a lead

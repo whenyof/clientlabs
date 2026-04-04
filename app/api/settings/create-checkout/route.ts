@@ -1,3 +1,4 @@
+export const maxDuration = 10
 // API route for creating Stripe checkout sessions
 
 import { NextRequest, NextResponse } from 'next/server'

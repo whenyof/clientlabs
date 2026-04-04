@@ -283,7 +283,7 @@ export function WebConnectDialog({ open, onOpenChange }: WebConnectDialogProps) 
 
         // Initial check + interval
         checkOnce()
-        const id = setInterval(checkOnce, 5000)
+        const id = setInterval(checkOnce, 30_000)
         return () => {
             cancelled = true
             clearInterval(id)

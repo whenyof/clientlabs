@@ -1,13 +1,16 @@
 {
   "functions": {
     "app/api/**/*.ts": {
-      "maxDuration": 20
+      "maxDuration": 10
     },
     "app/api/**/pdf/**/*.ts": {
       "maxDuration": 25
     },
     "app/api/auth/**/*.ts": {
       "maxDuration": 15
+    },
+    "app/api/v1/ingest/**/*.ts": {
+      "maxDuration": 30
     },
     "app/api/cron/**/*.ts": {
       "maxDuration": 60

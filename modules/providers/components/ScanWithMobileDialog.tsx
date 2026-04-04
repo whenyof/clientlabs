@@ -155,7 +155,7 @@ export function ScanWithMobileDialog({
           setError("Error al consultar la sesión de escaneo.")
         }
       }
-    }, 2500)
+    }, 10_000)
 
     return () => {
       cancelled = true

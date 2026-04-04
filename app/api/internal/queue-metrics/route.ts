@@ -1,3 +1,4 @@
+export const maxDuration = 10
 /**
  * Internal Queue Metrics: GET /api/internal/queue-metrics
  * Returns Redis queue lengths (LLEN) for event ingestion pipeline.

@@ -1,3 +1,4 @@
+export const maxDuration = 10
 /**
  * Analytics Overview Endpoint: GET /api/analytics/overview
  *

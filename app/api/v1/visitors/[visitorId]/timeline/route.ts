@@ -1,3 +1,4 @@
+export const maxDuration = 10
 /**
  * GET /api/v1/visitors/:visitorId/timeline
  * Returns the last sessions of a visitor with events grouped chronologically.

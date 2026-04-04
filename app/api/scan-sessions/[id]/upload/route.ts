@@ -1,3 +1,4 @@
+export const maxDuration = 10
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { prisma } from "@/lib/prisma"

@@ -1,3 +1,4 @@
+export const maxDuration = 10
 /**
  * Health Endpoint: GET /api/health
  *

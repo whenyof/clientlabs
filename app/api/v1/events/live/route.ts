@@ -1,3 +1,4 @@
+export const maxDuration = 10
 /**
  * GET /api/v1/events/live
  * Disabled — SSE long-polling kept Vercel Fluid Memory provisioned indefinitely.

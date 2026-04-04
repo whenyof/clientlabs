@@ -1,3 +1,4 @@
+export const maxDuration = 10
 // API route for Stripe customer portal
 
 import { NextRequest, NextResponse } from 'next/server'

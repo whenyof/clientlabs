@@ -1,3 +1,4 @@
+export const maxDuration = 30
 import { NextRequest, NextResponse } from "next/server"
 import { prisma, safePrismaQuery } from "@/lib/prisma"
 import { logger } from "@/lib/logger"

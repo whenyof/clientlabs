@@ -44,25 +44,37 @@ const cards = [
     key: "total" as const,
     label: "TOTAL LEADS",
     renderSub: (kpis: KpisData) => <DeltaText value={kpis.newThisWeek ?? 0} suffix="esta semana" />,
-    filter: (p: URLSearchParams) => { p.delete("temperature"); p.delete("showConverted"); p.delete("stale") },
+    filter: (p: URLSearchParams) => {
+      p.delete("temperature"); p.delete("showConverted"); p.delete("showLost")
+      p.delete("stale"); p.delete("status")
+    },
   },
   {
     key: "hot" as const,
     label: "POTENCIALES",
     renderSub: (kpis: KpisData) => <DeltaText value={kpis.hotDelta ?? 0} suffix="respecto ayer" />,
-    filter: (p: URLSearchParams) => { p.set("temperature", "HOT"); p.delete("showConverted"); p.delete("stale") },
+    filter: (p: URLSearchParams) => {
+      p.set("temperature", "HOT")
+      p.delete("showConverted"); p.delete("showLost"); p.delete("stale"); p.delete("status")
+    },
   },
   {
     key: "converted" as const,
     label: "CONVERTIDOS",
     renderSub: (kpis: KpisData) => <RateText value={kpis.conversionRate ?? 0} suffix="este mes" />,
-    filter: (p: URLSearchParams) => { p.set("showConverted", "true"); p.delete("temperature"); p.delete("stale") },
+    filter: (p: URLSearchParams) => {
+      p.set("status", "CONVERTED"); p.set("showConverted", "true")
+      p.delete("temperature"); p.delete("showLost"); p.delete("stale")
+    },
   },
   {
     key: "stalled" as const,
     label: "ESTANCADOS",
     renderSub: (kpis: KpisData) => <DeltaText value={kpis.stalled} suffix="sin actividad >7d" invert />,
-    filter: (p: URLSearchParams) => { p.set("stale", "true"); p.delete("temperature"); p.delete("showConverted") },
+    filter: (p: URLSearchParams) => {
+      p.set("stale", "true")
+      p.delete("temperature"); p.delete("showConverted"); p.delete("showLost"); p.delete("status")
+    },
   },
 ]
 

@@ -66,7 +66,8 @@ export function useLeads(filters: GetLeadsParams = {}, options?: UseLeadsOptions
 
 /**
  * Optimistic mutation for changing lead status.
- * Updates the UI immediately, rolls back on error.
+ * Updates the UI immediately without re-sorting the list.
+ * Only refetches KPIs — leads list refreshes on next stale interval.
  */
 export function useUpdateLeadStatus() {
   const queryClient = useQueryClient()
@@ -78,17 +79,48 @@ export function useUpdateLeadStatus() {
       return result
     },
 
-    onMutate: async () => {
-      // LeadCard handles instant local state update directly
-      return {}
+    onMutate: async ({ leadId, status }) => {
+      // Cancel any in-flight refetches so they don't overwrite the optimistic update
+      await queryClient.cancelQueries({ queryKey: ["leads"] })
+
+      // Snapshot all current lead query data for rollback
+      const snapshot = queryClient.getQueriesData<{
+        pages: Array<{ leads: Lead[]; pagination: unknown }>
+        pageParams: unknown[]
+      }>({ queryKey: ["leads"] })
+
+      // Surgically update the specific lead's status across all cached pages
+      queryClient.setQueriesData(
+        { queryKey: ["leads"] },
+        (old: { pages: Array<{ leads: Lead[]; pagination: unknown }>; pageParams: unknown[] } | undefined) => {
+          if (!old?.pages) return old
+          return {
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              leads: page.leads.map((l) =>
+                l.id === leadId ? { ...l, leadStatus: status as Lead["leadStatus"] } : l
+              ),
+            })),
+          }
+        }
+      )
+
+      return { snapshot }
     },
 
-    onError: (_err, _vars, _context) => {
+    onError: (_err, _vars, context) => {
+      // Rollback all affected queries to their pre-mutation state
+      if (context?.snapshot) {
+        context.snapshot.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data)
+        })
+      }
       toast.error("Error al cambiar estado")
     },
 
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["leads"] })
+      // Only refresh KPIs immediately — leads order stays stable until next interval
       queryClient.invalidateQueries({ queryKey: ["leads-kpis"] })
     },
   })

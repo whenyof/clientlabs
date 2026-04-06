@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { X, Loader2, CheckSquare, ChevronDown, Trash2, RotateCcw } from "lucide-react"
-import { DatePickerField } from "./DatePickerField"
-import { TimePickerField } from "./TimePickerField"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { Dialog, DialogContent, DialogClose, DialogTitle } from "@/components/ui/dialog"
@@ -75,9 +73,6 @@ function Label({ children }: { children: React.ReactNode }) {
 
 export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDIUM", defaultDueDate, defaultDueTime, defaultEntityType, defaultEntityId, editTask }: NewTaskModalProps) {
   const qc = useQueryClient()
-  // useState callback ref — triggers re-render with the actual DOM node so pickers
-  // can portal inside DialogContent before Radix's outside-click handler blocks them.
-  const [portalContainer, setPortalContainer] = useState<HTMLDivElement | null>(null)
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [priority, setPriority] = useState<TaskPriority>(defaultPriority)
@@ -249,8 +244,7 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
   return (
     <Dialog open={open} onOpenChange={(next) => !next && handleClose()}>
       <DialogContent className="p-0" style={{ maxWidth: 520, width: "calc(100vw - 32px)" }}>
-        {/* Portal container: pickers render here so Radix treats clicks as inside-dialog */}
-        <div ref={setPortalContainer} style={{ position: "relative" }}>
+        <div>
 
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "20px 24px", borderBottom: "1px solid var(--border-subtle)" }}>
@@ -324,11 +318,21 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <div>
               <Label>Fecha límite</Label>
-              <DatePickerField value={dueDate} onChange={setDueDate} portalTarget={portalContainer} />
+              <input
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                style={{ ...inputStyle, cursor: "pointer" }}
+              />
             </div>
             <div>
               <Label>Hora</Label>
-              <TimePickerField value={dueTime} onChange={setDueTime} portalTarget={portalContainer} />
+              <input
+                type="time"
+                value={dueTime}
+                onChange={(e) => setDueTime(e.target.value)}
+                style={{ ...inputStyle, cursor: "pointer" }}
+              />
             </div>
           </div>
 

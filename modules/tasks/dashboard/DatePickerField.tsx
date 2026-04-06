@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { createPortal } from "react-dom"
 import { Calendar, ChevronLeft, ChevronRight, X } from "lucide-react"
 
 const MONTHS_ES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
@@ -25,15 +24,13 @@ function getCalendarDays(year: number, month: number): Date[] {
 interface DatePickerFieldProps {
   value: string
   onChange: (v: string) => void
-  /** Target DOM element for the portal. Pass a container inside Dialog to avoid Radix outside-click blocking. Defaults to document.body. */
-  portalTarget?: HTMLElement | null
 }
 
-export function DatePickerField({ value, onChange, portalTarget }: DatePickerFieldProps) {
+export function DatePickerField({ value, onChange }: DatePickerFieldProps) {
   const [open, setOpen] = useState(false)
   const [rect, setRect] = useState<DOMRect | null>(null)
-  const [mounted, setMounted] = useState(false)
   const btnRef = useRef<HTMLButtonElement>(null)
+  const popupRef = useRef<HTMLDivElement>(null)
 
   const selected = value ? new Date(value + "T12:00:00") : null
   const today = new Date()
@@ -41,14 +38,11 @@ export function DatePickerField({ value, onChange, portalTarget }: DatePickerFie
   const [year, setYear] = useState(selected?.getFullYear() ?? today.getFullYear())
   const [month, setMonth] = useState(selected?.getMonth() ?? today.getMonth())
 
-  useEffect(() => { setMounted(true) }, [])
-
   useEffect(() => {
     if (!open) return
     const close = (e: MouseEvent) => {
       const target = e.target as Node
-      const popup = document.getElementById("date-picker-portal")
-      if (btnRef.current?.contains(target) || popup?.contains(target)) return
+      if (btnRef.current?.contains(target) || popupRef.current?.contains(target)) return
       setOpen(false)
     }
     document.addEventListener("mousedown", close)
@@ -100,11 +94,11 @@ export function DatePickerField({ value, onChange, portalTarget }: DatePickerFie
         )}
       </button>
 
-      {open && mounted && createPortal(
-        <div id="date-picker-portal" style={{
+      {open && (
+        <div ref={popupRef} style={{
           position: "fixed", top, left: rect?.left ?? 0,
           width: Math.max(rect?.width ?? 0, 220),
-          zIndex: 9999, background: "#fff",
+          zIndex: 99999, background: "#fff",
           border: "1px solid var(--border-subtle)",
           borderRadius: 10, boxShadow: "0 8px 24px rgba(0,0,0,0.10)",
           padding: 12,
@@ -168,8 +162,7 @@ export function DatePickerField({ value, onChange, portalTarget }: DatePickerFie
               </button>
             )}
           </div>
-        </div>,
-        portalTarget ?? document.body
+        </div>
       )}
     </div>
   )

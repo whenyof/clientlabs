@@ -322,7 +322,7 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
-                style={{ ...inputStyle, cursor: "pointer" }}
+                style={{ ...inputStyle, appearance: "auto", WebkitAppearance: "textfield", cursor: "pointer" }}
               />
             </div>
             <div>
@@ -331,7 +331,7 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
                 type="time"
                 value={dueTime}
                 onChange={(e) => setDueTime(e.target.value)}
-                style={{ ...inputStyle, cursor: "pointer" }}
+                style={{ ...inputStyle, appearance: "auto", WebkitAppearance: "textfield", cursor: "pointer" }}
               />
             </div>
           </div>

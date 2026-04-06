@@ -7,7 +7,6 @@ import { LeadsKpisClient } from "./components/LeadsKpisClient"
 import { LeadsFilters } from "@domains/leads/components/LeadsFilters"
 import { LeadsCharts } from "@domains/leads/components/LeadsCharts"
 import { LeadsClientShell } from "./components/LeadsClientShell"
-import { LeadsKPIContainer } from "./components/LeadsKPIContainer"
 import { Suspense } from "react"
 import { format, subDays, eachDayOfInterval } from "date-fns"
 import { es } from "date-fns/locale"
@@ -173,25 +172,26 @@ export default async function LeadsPage({
     <LeadsClientShell>
       <div className="space-y-6">
         <LeadsHeader />
-        <LeadsKpisClient initial={kpis} />
-        <LeadsFilters
-          currentFilters={{
-            status: searchParams.status ?? "all",
-            temperature: searchParams.temperature ?? "all",
-            source: searchParams.source ?? "all",
-            search: searchParams.search ?? "",
-            sortBy: searchParams.sortBy ?? "score",
-            sortOrder: searchParams.sortOrder ?? "desc",
-            showConverted: searchParams.showConverted === "true",
-            showLost: searchParams.showLost === "true",
-          }}
-          sources={sources}
-        />
-        <LeadsCharts initialData={chartInitial} />
-        <LeadsKPIContainer
+        <LeadsKpisClient
+          initial={kpis}
           initialLeads={initialLeadsData as Lead[]}
           initialTotal={initialLeadsCount}
-        />
+        >
+          <LeadsFilters
+            currentFilters={{
+              status: searchParams.status ?? "all",
+              temperature: searchParams.temperature ?? "all",
+              source: searchParams.source ?? "all",
+              search: searchParams.search ?? "",
+              sortBy: searchParams.sortBy ?? "score",
+              sortOrder: searchParams.sortOrder ?? "desc",
+              showConverted: searchParams.showConverted === "true",
+              showLost: searchParams.showLost === "true",
+            }}
+            sources={sources}
+          />
+          <LeadsCharts initialData={chartInitial} />
+        </LeadsKpisClient>
       </div>
     </LeadsClientShell>
   )

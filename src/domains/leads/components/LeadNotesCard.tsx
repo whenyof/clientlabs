@@ -14,9 +14,10 @@ interface ActivityItem {
 
 interface LeadNotesCardProps {
   leadId: string
+  onActivityCreated?: () => void
 }
 
-export function LeadNotesCard({ leadId }: LeadNotesCardProps) {
+export function LeadNotesCard({ leadId, onActivityCreated }: LeadNotesCardProps) {
   const [notes, setNotes] = useState<ActivityItem[]>([])
   const [newNote, setNewNote] = useState("")
   const [loading, setLoading] = useState(false)
@@ -60,6 +61,7 @@ export function LeadNotesCard({ leadId }: LeadNotesCardProps) {
       // Optimistically prepend the new note — don't block on re-fetching the list
       setNotes(prev => [created, ...prev])
       setNewNote("")
+      setTimeout(() => onActivityCreated?.(), 400)
     } catch (err) {
       console.error(err)
     } finally {

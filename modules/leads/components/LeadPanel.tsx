@@ -61,7 +61,7 @@ export function LeadPanel({ lead }: LeadPanelProps) {
         >
           <LeadEmailModule leadId={lead.id} leadEmail={lead.email} leadName={lead.name} />
           <LeadTimeline key={timelineKey} leadId={lead.id} createdAt={lead.createdAt} />
-          <LeadNotesCard leadId={lead.id} />
+          <LeadNotesCard leadId={lead.id} onActivityCreated={() => setTimeout(() => setTimelineKey(k => k + 1), 400)} />
         </div>
 
         {/* Right column */}

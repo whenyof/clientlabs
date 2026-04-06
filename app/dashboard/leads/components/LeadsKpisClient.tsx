@@ -40,6 +40,8 @@ interface LeadsKpisClientProps {
 export function LeadsKpisClient({ initial, initialLeads, initialTotal, children }: LeadsKpisClientProps) {
   const [kpis, setKpis] = useState(initial)
   const [activeKpi, setActiveKpi] = useState<string | null>(null)
+  const [convertedLeads, setConvertedLeads] = useState<Lead[] | null>(null)
+  const [loadingConverted, setLoadingConverted] = useState(false)
 
   useEffect(() => {
     const fetchKpis = async () => {
@@ -58,15 +60,27 @@ export function LeadsKpisClient({ initial, initialLeads, initialTotal, children 
     return () => clearInterval(interval)
   }, [])
 
+  // Fetch converted leads on demand (excluded from initialLeads by the server query)
+  useEffect(() => {
+    if (activeKpi !== "converted") return
+    if (convertedLeads !== null) return // already fetched
+    setLoadingConverted(true)
+    fetch("/api/leads?showConverted=true&status=CONVERTED&limit=100", { cache: "no-store" })
+      .then(r => r.json())
+      .then(data => setConvertedLeads(data.leads ?? []))
+      .catch(() => setConvertedLeads([]))
+      .finally(() => setLoadingConverted(false))
+  }, [activeKpi, convertedLeads])
+
   const { leads } = useLeads({}, { initialLeads, initialTotal })
 
   const filteredLeads = useMemo(() => {
     if (!activeKpi || activeKpi === "total") return undefined
     if (activeKpi === "hot") return leads.filter(isPotencial)
-    if (activeKpi === "converted") return leads.filter((l: Lead) => l.leadStatus === "CONVERTED")
+    if (activeKpi === "converted") return convertedLeads ?? []
     if (activeKpi === "stalled") return leads.filter(isStalled)
     return undefined
-  }, [leads, activeKpi])
+  }, [leads, activeKpi, convertedLeads])
 
   const handleKpiClick = (key: string) => {
     setActiveKpi(prev => prev === key ? null : key)
@@ -90,8 +104,10 @@ export function LeadsKpisClient({ initial, initialLeads, initialTotal, children 
         }}>
           <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--text-secondary)" }}>
             <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#1FA97A", flexShrink: 0 }} />
-            Mostrando <strong style={{ color: "var(--text-primary)", fontWeight: 500 }}>{filteredLeads?.length ?? 0} leads</strong>
-            &nbsp;&middot; {activeLabel}
+            {loadingConverted
+              ? "Cargando convertidos..."
+              : <>Mostrando <strong style={{ color: "var(--text-primary)", fontWeight: 500 }}>{filteredLeads?.length ?? 0} leads</strong> &middot; {activeLabel}</>
+            }
           </span>
           <button
             type="button"

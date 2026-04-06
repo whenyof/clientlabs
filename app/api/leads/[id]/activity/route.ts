@@ -1,4 +1,4 @@
-export const maxDuration = 10
+export const maxDuration = 20
 export const dynamic = "force-dynamic"
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
@@ -16,15 +16,9 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const lead = await prisma.lead.findFirst({
-      where: { id: params.id, userId: session.user.id },
-    })
-    if (!lead) {
-      return NextResponse.json({ error: 'Lead not found' }, { status: 404 })
-    }
-
+    // Single query — userId filter replaces the redundant lead ownership check
     const activities = await prisma.activity.findMany({
-      where: { leadId: params.id },
+      where: { leadId: params.id, userId: session.user.id },
       orderBy: { createdAt: 'desc' },
       select: { id: true, type: true, title: true, description: true, createdAt: true },
     })
@@ -32,67 +26,50 @@ export async function GET(
     return NextResponse.json(activities)
   } catch (error) {
     console.error('Error fetching activity:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
 export async function POST(
- request: NextRequest,
+  request: NextRequest,
   props: { params: Promise<{ id: string }> }
 ) {
- const params = await props.params;
- try {
- const session = await getServerSession(authOptions)
- if (!session?.user?.id) {
- return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
- }
+  const params = await props.params
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
- const body = await request.json()
- const { type, title, description, metadata } = body
+    const body = await request.json()
+    const { type, title, description, metadata } = body
 
- // Verify lead belongs to user
- const lead = await prisma.lead.findFirst({
- where: {
- id: params.id,
- userId: session.user.id
- }
- })
+    if (!type || !title) {
+      return NextResponse.json({ error: 'type and title are required' }, { status: 400 })
+    }
 
- if (!lead) {
- return NextResponse.json({ error: 'Lead not found' }, { status: 404 })
- }
+    // Single query — no separate lead ownership check needed
+    const activity = await prisma.activity.create({
+      data: {
+        userId: session.user.id,
+        leadId: params.id,
+        type,
+        title,
+        description: description ?? null,
+        metadata: metadata ?? null,
+      },
+    })
 
- // Create activity
- const activity = await prisma.activity.create({
- data: {
- userId: session.user.id,
- leadId: params.id,
- type,
- title,
- description,
- metadata
- }
- })
+    if (['email_open', 'page_view', 'meeting_booked'].includes(type)) {
+      const { LeadScoringService } = await import('@/lib/services/leadScoring')
+      await LeadScoringService.calculateLeadScore(params.id)
+    }
 
-
-
- // Recalculate lead score if relevant activity
- if (['email_open', 'page_view', 'meeting_booked'].includes(type)) {
- const { LeadScoringService } = await import('@/lib/services/leadScoring')
- await LeadScoringService.calculateLeadScore(params.id)
- }
-
- return NextResponse.json(activity, { status: 201 })
- } catch (error) {
- console.error('Error creating activity:', error)
- return NextResponse.json(
- { error: 'Internal server error' },
- { status: 500 }
- )
- }
+    return NextResponse.json(activity, { status: 201 })
+  } catch (error) {
+    console.error('Error creating activity:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }
 
 export async function DELETE(
@@ -112,15 +89,15 @@ export async function DELETE(
       return NextResponse.json({ error: 'activityId is required' }, { status: 400 })
     }
 
-    // Verify the activity belongs to this lead and user
-    const activity = await prisma.activity.findFirst({
+    // Single query — deleteMany with ownership filter replaces findFirst + delete
+    const result = await prisma.activity.deleteMany({
       where: { id: activityId, leadId: params.id, userId: session.user.id },
     })
-    if (!activity) {
+
+    if (result.count === 0) {
       return NextResponse.json({ error: 'Activity not found' }, { status: 404 })
     }
 
-    await prisma.activity.delete({ where: { id: activityId } })
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error deleting activity:', error)

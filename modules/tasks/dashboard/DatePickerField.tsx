@@ -106,6 +106,7 @@ export function DatePickerField({ value, onChange }: DatePickerFieldProps) {
           border: "1px solid var(--border-subtle)",
           borderRadius: 10, boxShadow: "0 8px 24px rgba(0,0,0,0.10)",
           padding: 12,
+          pointerEvents: "auto",
         }}>
           {/* Month nav */}
           <div style={{ display: "flex", alignItems: "center", marginBottom: 10 }}>

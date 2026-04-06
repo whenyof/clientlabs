@@ -110,6 +110,7 @@ export function TimePickerField({ value, onChange }: TimePickerFieldProps) {
           border: "1px solid var(--border-subtle)",
           borderRadius: 10, boxShadow: "0 8px 24px rgba(0,0,0,0.10)",
           padding: 12,
+          pointerEvents: "auto",
         }}>
           <p style={{ fontSize: 10, fontWeight: 600, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.07em", margin: "0 0 6px" }}>
             Hora

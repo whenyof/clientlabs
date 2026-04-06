@@ -76,7 +76,7 @@ export function LeadPanel({ lead }: LeadPanelProps) {
           className="lead-panel-sidebar"
         >
           <LeadInfoCard lead={lead} />
-          <LeadQuickTaskCard leadId={lead.id} onTaskCreated={() => setTimelineKey(k => k + 1)} />
+          <LeadQuickTaskCard leadId={lead.id} onTaskCreated={() => setTimeout(() => setTimelineKey(k => k + 1), 400)} />
           <LeadAIRecommendations score={lead.score} phone={lead.phone} leadStatus={lead.leadStatus} />
           <LeadNextActionCard leadId={lead.id} leadStatus={lead.leadStatus} />
         </div>

@@ -60,8 +60,8 @@ export function LeadPanel({ lead }: LeadPanelProps) {
           }}
         >
           <LeadEmailModule leadId={lead.id} leadEmail={lead.email} leadName={lead.name} />
-          <LeadTimeline key={timelineKey} leadId={lead.id} createdAt={lead.createdAt} />
-          <LeadNotesCard leadId={lead.id} onActivityCreated={() => setTimeout(() => setTimelineKey(k => k + 1), 400)} />
+          <LeadTimeline refreshTrigger={timelineKey} leadId={lead.id} createdAt={lead.createdAt} />
+          <LeadNotesCard leadId={lead.id} onActivityCreated={() => setTimelineKey(k => k + 1)} />
         </div>
 
         {/* Right column */}
@@ -76,7 +76,7 @@ export function LeadPanel({ lead }: LeadPanelProps) {
           className="lead-panel-sidebar"
         >
           <LeadInfoCard lead={lead} />
-          <LeadQuickTaskCard leadId={lead.id} onTaskCreated={() => setTimeout(() => setTimelineKey(k => k + 1), 400)} />
+          <LeadQuickTaskCard leadId={lead.id} onTaskCreated={() => setTimelineKey(k => k + 1)} />
           <LeadAIRecommendations score={lead.score} phone={lead.phone} leadStatus={lead.leadStatus} />
           <LeadNextActionCard leadId={lead.id} leadStatus={lead.leadStatus} />
         </div>

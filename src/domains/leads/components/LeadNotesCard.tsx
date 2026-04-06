@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Loader2, Trash2 } from "lucide-react"
+import { toast } from "sonner"
 import { formatTimeAgo } from "@domains/leads/utils/formatting"
 
 interface ActivityItem {
@@ -58,12 +59,12 @@ export function LeadNotesCard({ leadId, onActivityCreated }: LeadNotesCardProps)
       })
       if (!res.ok) throw new Error("Failed to create note")
       const created: ActivityItem = await res.json()
-      // Optimistically prepend the new note — don't block on re-fetching the list
       setNotes(prev => [created, ...prev])
       setNewNote("")
-      setTimeout(() => onActivityCreated?.(), 400)
+      onActivityCreated?.()
     } catch (err) {
       console.error(err)
+      toast.error("Error al guardar la nota. Inténtalo de nuevo.")
     } finally {
       setLoading(false)
     }

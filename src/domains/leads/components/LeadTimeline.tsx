@@ -96,16 +96,17 @@ function EventIcon({ type }: { type: string }) {
 interface LeadTimelineProps {
   leadId: string
   createdAt?: Date
+  refreshTrigger?: number
 }
 
-export function LeadTimeline({ leadId, createdAt }: LeadTimelineProps) {
+export function LeadTimeline({ leadId, createdAt, refreshTrigger = 0 }: LeadTimelineProps) {
   const [insightsSessions, setInsightsSessions] = useState<TimelineSession[]>([])
   const [activities, setActivities] = useState<ActivityItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
   const fetchActivities = useCallback(async (signal?: AbortSignal) => {
-    const res = await fetch(`/api/leads/${leadId}/activity`, { signal })
+    const res = await fetch(`/api/leads/${leadId}/activity?_t=${Date.now()}`, { signal, cache: "no-store" })
     if (!res.ok) return []
     const data = await res.json()
     return data as ActivityItem[]
@@ -134,7 +135,8 @@ export function LeadTimeline({ leadId, createdAt }: LeadTimelineProps) {
       .catch((err) => { if (err?.name !== "AbortError") setError(true) })
       .finally(() => setLoading(false))
     return () => controller.abort()
-  }, [leadId, fetchInsights, fetchActivities])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [leadId, refreshTrigger])
 
   const flatEvents = useMemo((): TimelineEvent[] => {
     const list: TimelineEvent[] = []

@@ -5,9 +5,9 @@ import { authOptions } from "@/lib/auth"
 import { LeadsHeader } from "@domains/leads/components/LeadsHeader"
 import { LeadsKpisClient } from "./components/LeadsKpisClient"
 import { LeadsFilters } from "@domains/leads/components/LeadsFilters"
-import { LeadsTable } from "@domains/leads/components/LeadsTable"
 import { LeadsCharts } from "@domains/leads/components/LeadsCharts"
 import { LeadsClientShell } from "./components/LeadsClientShell"
+import { LeadsKPIContainer } from "./components/LeadsKPIContainer"
 import { Suspense } from "react"
 import { format, subDays, eachDayOfInterval } from "date-fns"
 import { es } from "date-fns/locale"
@@ -188,7 +188,7 @@ export default async function LeadsPage({
           sources={sources}
         />
         <LeadsCharts initialData={chartInitial} />
-        <LeadsTable
+        <LeadsKPIContainer
           initialLeads={initialLeadsData as Lead[]}
           initialTotal={initialLeadsCount}
         />

@@ -1,10 +1,10 @@
 "use client"
 
 import { useLeads } from "@/hooks/useLeads"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import { useMemo, useRef, useCallback, useEffect } from "react"
 import { LeadCard } from "@/modules/leads/components/LeadCard"
-import { Upload, Globe, Zap, Loader2, X } from "lucide-react"
+import { Upload, Globe, Zap, Loader2 } from "lucide-react"
 import type { Lead } from "@prisma/client"
 import { useLeadsOptimistic } from "@/modules/leads/context/LeadsOptimisticContext"
 
@@ -47,19 +47,12 @@ function EmptyState() {
 interface LeadsTableProps {
   initialLeads?: Lead[]
   initialTotal?: number
+  /** When provided, skips the internal useLeads call and renders these leads directly (used by KPI container). */
+  leads?: Lead[]
 }
 
-const FILTER_LABELS: Record<string, string> = {
-  HOT: "Potenciales",
-  CONVERTED: "Convertidos",
-  stale: "Estancados",
-  NEW: "Nuevos",
-  LOST: "Perdidos",
-}
-
-export function LeadsTable({ initialLeads, initialTotal }: LeadsTableProps = {}) {
+export function LeadsTable({ initialLeads, initialTotal, leads: leadsOverride }: LeadsTableProps = {}) {
   const searchParams = useSearchParams()
-  const router = useRouter()
 
   const filters = useMemo(() => ({
     status: searchParams.get("status") ?? "all",
@@ -73,23 +66,6 @@ export function LeadsTable({ initialLeads, initialTotal }: LeadsTableProps = {})
     showLost: searchParams.get("showLost") ?? "false",
   }), [searchParams])
 
-  const isDefaultView = useMemo(() =>
-    !searchParams.get("temperature") &&
-    searchParams.get("showConverted") !== "true" &&
-    searchParams.get("stale") !== "true" &&
-    searchParams.get("showLost") !== "true" &&
-    !searchParams.get("status"),
-  [searchParams])
-
-  const activeFilterLabel = useMemo(() => {
-    if (filters.temperature === "HOT") return FILTER_LABELS.HOT
-    if (filters.showConverted === "true") return FILTER_LABELS.CONVERTED
-    if (filters.stale === "true") return FILTER_LABELS.stale
-    if (filters.status === "NEW") return FILTER_LABELS.NEW
-    if (filters.showLost === "true" || filters.status === "LOST") return FILTER_LABELS.LOST
-    return null
-  }, [filters])
-
   const {
     leads: rqLeads,
     total,
@@ -99,8 +75,8 @@ export function LeadsTable({ initialLeads, initialTotal }: LeadsTableProps = {})
     fetchNextPage,
     error,
   } = useLeads(filters, {
-    initialLeads: isDefaultView ? initialLeads : undefined,
-    initialTotal: isDefaultView ? initialTotal : undefined,
+    initialLeads: leadsOverride ? undefined : initialLeads,
+    initialTotal: leadsOverride ? undefined : initialTotal,
   })
 
   // ── Optimistic state from shared context (same React tree — no event bus race) ──
@@ -109,23 +85,26 @@ export function LeadsTable({ initialLeads, initialTotal }: LeadsTableProps = {})
   // When React Query refreshes, clear local overrides for IDs now in the cache
   const rqIds = useMemo(() => new Set(rqLeads.map((l: Lead) => l.id)), [rqLeads])
   const leads = useMemo(() => {
+    const base = leadsOverride ?? rqLeads
     const fresh = extraLeads.filter((l: Lead) => !rqIds.has(l.id) && !deletedIds.has(l.id))
-    const base = rqLeads
-      .filter((l: Lead) => !deletedIds.has(l.id))
-      .map((l: Lead) => statusOverrides.has(l.id) ? { ...l, leadStatus: statusOverrides.get(l.id) as Lead["leadStatus"] } : l)
-    return [...fresh, ...base]
-  }, [extraLeads, rqLeads, deletedIds, statusOverrides, rqIds])
+    return [
+      ...fresh,
+      ...base
+        .filter((l: Lead) => !deletedIds.has(l.id))
+        .map((l: Lead) => statusOverrides.has(l.id) ? { ...l, leadStatus: statusOverrides.get(l.id) as Lead["leadStatus"] } : l),
+    ]
+  }, [leadsOverride, extraLeads, rqLeads, deletedIds, statusOverrides, rqIds])
 
-  // ── Infinite scroll ──
+  // ── Infinite scroll (only when not in override mode) ──
   const observerRef = useRef<IntersectionObserver | null>(null)
   const lastLeadRef = useCallback((node: HTMLDivElement | null) => {
-    if (isFetchingNextPage) return
+    if (isFetchingNextPage || leadsOverride) return
     if (observerRef.current) observerRef.current.disconnect()
     observerRef.current = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting && hasNextPage) fetchNextPage()
     })
     if (node) observerRef.current.observe(node)
-  }, [isFetchingNextPage, hasNextPage, fetchNextPage])
+  }, [isFetchingNextPage, hasNextPage, fetchNextPage, leadsOverride])
 
   useEffect(() => {
     return () => observerRef.current?.disconnect()
@@ -146,7 +125,7 @@ export function LeadsTable({ initialLeads, initialTotal }: LeadsTableProps = {})
     )
   }
 
-  if (isLoading) {
+  if (!leadsOverride && isLoading) {
     return (
       <div
         style={{
@@ -171,71 +150,11 @@ export function LeadsTable({ initialLeads, initialTotal }: LeadsTableProps = {})
     )
   }
 
-  const clearFilters = () => {
-    const params = new URLSearchParams(searchParams.toString())
-    params.delete("temperature"); params.delete("showConverted"); params.delete("showLost")
-    params.delete("stale"); params.delete("status")
-    router.push(`?${params.toString()}`)
-  }
-
-  if (leads.length === 0 && !isLoading) {
-    return (
-      <>
-        {activeFilterLabel && (
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            background: "rgba(31,169,122,0.06)",
-            border: "0.5px solid rgba(31,169,122,0.25)",
-            borderRadius: 8,
-            padding: "8px 16px",
-            marginBottom: 12,
-          }}>
-            <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>
-              Filtrando por: <strong style={{ color: "var(--text-primary)" }}>{activeFilterLabel}</strong>
-            </span>
-            <button
-              type="button"
-              onClick={clearFilters}
-              style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: "#1FA97A", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}
-            >
-              <X size={12} />
-              Ver todos
-            </button>
-          </div>
-        )}
-        <EmptyState />
-      </>
-    )
+  if (leads.length === 0) {
+    return <EmptyState />
   }
 
   return (
-    <>
-    {activeFilterLabel && (
-      <div style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        background: "rgba(31,169,122,0.06)",
-        border: "0.5px solid rgba(31,169,122,0.25)",
-        borderRadius: 8,
-        padding: "8px 16px",
-        marginBottom: 12,
-      }}>
-        <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>
-          Filtrando por: <strong style={{ color: "var(--text-primary)" }}>{activeFilterLabel}</strong>
-        </span>
-        <button
-          type="button"
-          onClick={clearFilters}
-          style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: "#1FA97A", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}
-        >
-          <X size={12} />
-          Ver todos
-        </button>
-      </div>
-    )}
     <div
       style={{
         background: "var(--bg-card)",
@@ -294,22 +213,23 @@ export function LeadsTable({ initialLeads, initialTotal }: LeadsTableProps = {})
         }}
       >
         <span>
-          Mostrando {leads.length} de {total} {total === 1 ? "lead" : "leads"}
+          Mostrando {leads.length}{!leadsOverride && ` de ${total}`} {leads.length === 1 ? "lead" : "leads"}
         </span>
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-          <span
-            style={{
-              width: 6,
-              height: 6,
-              borderRadius: "50%",
-              background: "#1FA97A",
-              animation: "pulse-dot 2s ease-in-out infinite",
-            }}
-          />
-          Actualizando en tiempo real
-        </span>
+        {!leadsOverride && (
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+            <span
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: "#1FA97A",
+                animation: "pulse-dot 2s ease-in-out infinite",
+              }}
+            />
+            Actualizando en tiempo real
+          </span>
+        )}
       </div>
     </div>
-    </>
   )
 }

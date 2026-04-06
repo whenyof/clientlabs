@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { X, Loader2, CheckSquare, ChevronDown, Trash2, RotateCcw } from "lucide-react"
 import { DatePickerField } from "./DatePickerField"
 import { TimePickerField } from "./TimePickerField"
@@ -75,10 +75,9 @@ function Label({ children }: { children: React.ReactNode }) {
 
 export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDIUM", defaultDueDate, defaultDueTime, defaultEntityType, defaultEntityId, editTask }: NewTaskModalProps) {
   const qc = useQueryClient()
-  // Ref for the portal container inside DialogContent — allows DatePickerField/TimePickerField
-  // to portal inside the dialog instead of document.body, preventing Radix's outside-click
-  // handler from calling event.preventDefault() and swallowing picker clicks.
-  const portalContainerRef = useRef<HTMLDivElement>(null)
+  // useState callback ref — triggers re-render with the actual DOM node so pickers
+  // can portal inside DialogContent before Radix's outside-click handler blocks them.
+  const [portalContainer, setPortalContainer] = useState<HTMLDivElement | null>(null)
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [priority, setPriority] = useState<TaskPriority>(defaultPriority)
@@ -251,7 +250,7 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
     <Dialog open={open} onOpenChange={(next) => !next && handleClose()}>
       <DialogContent className="p-0" style={{ maxWidth: 520, width: "calc(100vw - 32px)" }}>
         {/* Portal container: pickers render here so Radix treats clicks as inside-dialog */}
-        <div ref={portalContainerRef} style={{ position: "relative" }}>
+        <div ref={setPortalContainer} style={{ position: "relative" }}>
 
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "20px 24px", borderBottom: "1px solid var(--border-subtle)" }}>
@@ -325,11 +324,11 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <div>
               <Label>Fecha límite</Label>
-              <DatePickerField value={dueDate} onChange={setDueDate} portalTarget={portalContainerRef.current} />
+              <DatePickerField value={dueDate} onChange={setDueDate} portalTarget={portalContainer} />
             </div>
             <div>
               <Label>Hora</Label>
-              <TimePickerField value={dueTime} onChange={setDueTime} portalTarget={portalContainerRef.current} />
+              <TimePickerField value={dueTime} onChange={setDueTime} portalTarget={portalContainer} />
             </div>
           </div>
 

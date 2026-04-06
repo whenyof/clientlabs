@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { LeadHeader } from "@domains/leads/components/LeadHeader"
 import { LeadTimeline } from "@domains/leads/components/LeadTimeline"
 import { LeadInfoCard } from "@domains/leads/components/LeadInfoCard"
@@ -25,6 +26,8 @@ interface LeadPanelProps {
 }
 
 export function LeadPanel({ lead }: LeadPanelProps) {
+  const [timelineKey, setTimelineKey] = useState(0)
+
   return (
     <div
       style={{
@@ -57,7 +60,7 @@ export function LeadPanel({ lead }: LeadPanelProps) {
           }}
         >
           <LeadEmailModule leadId={lead.id} leadEmail={lead.email} leadName={lead.name} />
-          <LeadTimeline leadId={lead.id} createdAt={lead.createdAt} />
+          <LeadTimeline key={timelineKey} leadId={lead.id} createdAt={lead.createdAt} />
           <LeadNotesCard leadId={lead.id} />
         </div>
 
@@ -73,7 +76,7 @@ export function LeadPanel({ lead }: LeadPanelProps) {
           className="lead-panel-sidebar"
         >
           <LeadInfoCard lead={lead} />
-          <LeadQuickTaskCard leadId={lead.id} />
+          <LeadQuickTaskCard leadId={lead.id} onTaskCreated={() => setTimelineKey(k => k + 1)} />
           <LeadAIRecommendations score={lead.score} phone={lead.phone} leadStatus={lead.leadStatus} />
           <LeadNextActionCard leadId={lead.id} leadStatus={lead.leadStatus} />
         </div>

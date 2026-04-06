@@ -6,9 +6,10 @@ import { NewTaskModal } from "@/modules/tasks/dashboard/NewTaskModal"
 
 interface LeadQuickTaskCardProps {
   leadId: string
+  onTaskCreated?: () => void
 }
 
-export function LeadQuickTaskCard({ leadId }: LeadQuickTaskCardProps) {
+export function LeadQuickTaskCard({ leadId, onTaskCreated }: LeadQuickTaskCardProps) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -54,6 +55,7 @@ export function LeadQuickTaskCard({ leadId }: LeadQuickTaskCardProps) {
         onClose={() => setOpen(false)}
         defaultEntityType="LEAD"
         defaultEntityId={leadId}
+        onSuccess={onTaskCreated}
       />
     </>
   )

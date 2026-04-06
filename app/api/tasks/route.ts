@@ -150,6 +150,20 @@ export async function POST(request: NextRequest) {
  await recalculateClientStatus(task.clientId)
  }
 
+ // Create a lead activity so the task appears in the lead timeline
+ if (entityType === "LEAD" && entityId) {
+ prisma.activity.create({
+   data: {
+   userId,
+   leadId: entityId,
+   type: "TASK",
+   title: `Nueva tarea: ${title.trim()}`,
+   description: null,
+   metadata: { taskId: task.id },
+   },
+ }).catch(err => console.error("[tasks/route] lead activity create:", err))
+ }
+
  enqueueTaskSyncForAllProviders(task.id, userId, "CREATE").catch((err) =>
  console.error("[calendar-sync] enqueue create:", err)
  )

@@ -33,7 +33,16 @@ export function LeadNotesCard({ leadId }: LeadNotesCardProps) {
   }
 
   useEffect(() => {
-    fetchNotes().finally(() => setLoadingNotes(false))
+    let cancelled = false
+    const controller = new AbortController()
+    fetch(`/api/leads/${leadId}/activity`, { signal: controller.signal })
+      .then(r => r.json())
+      .then(data => {
+        if (!cancelled) setNotes((Array.isArray(data) ? data : []).filter((a: ActivityItem) => a.type === "NOTE"))
+      })
+      .catch(() => { if (!cancelled) setNotes([]) })
+      .finally(() => { if (!cancelled) setLoadingNotes(false) })
+    return () => { cancelled = true; controller.abort() }
   }, [leadId])
 
   const submitNote = async () => {
@@ -47,8 +56,10 @@ export function LeadNotesCard({ leadId }: LeadNotesCardProps) {
         body: JSON.stringify({ type: "NOTE", title: "Nota", description: text }),
       })
       if (!res.ok) throw new Error("Failed to create note")
+      const created: ActivityItem = await res.json()
+      // Optimistically prepend the new note — don't block on re-fetching the list
+      setNotes(prev => [created, ...prev])
       setNewNote("")
-      await fetchNotes()
     } catch (err) {
       console.error(err)
     } finally {

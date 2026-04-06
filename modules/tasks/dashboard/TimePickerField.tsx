@@ -10,9 +10,11 @@ const MINUTES = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
 interface TimePickerFieldProps {
   value: string
   onChange: (v: string) => void
+  /** Target DOM element for the portal. Pass a container inside Dialog to avoid Radix outside-click blocking. Defaults to document.body. */
+  portalTarget?: HTMLElement | null
 }
 
-export function TimePickerField({ value, onChange }: TimePickerFieldProps) {
+export function TimePickerField({ value, onChange, portalTarget }: TimePickerFieldProps) {
   const [open, setOpen] = useState(false)
   const [rect, setRect] = useState<DOMRect | null>(null)
   const [mounted, setMounted] = useState(false)
@@ -137,7 +139,7 @@ export function TimePickerField({ value, onChange }: TimePickerFieldProps) {
             ))}
           </div>
         </div>,
-        document.body
+        portalTarget ?? document.body
       )}
     </div>
   )

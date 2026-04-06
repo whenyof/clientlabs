@@ -89,7 +89,8 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
         body: JSON.stringify({ leadStatus: "CONVERTED", converted: true }),
       })
       if (res.ok) {
-        await logActivity(lead.id, "STATUS_CHANGE", "Lead convertido a cliente")
+        // Fire-and-forget — don't block the success toast waiting for the activity log
+        logActivity(lead.id, "STATUS_CHANGE", "Lead convertido a cliente")
         toast.success("Lead convertido a cliente")
         router.refresh()
       } else {
@@ -112,7 +113,7 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
         body: JSON.stringify({ leadStatus: "LOST" }),
       })
       if (res.ok) {
-        await logActivity(lead.id, "STATUS_CHANGE", "Lead marcado como perdido")
+        logActivity(lead.id, "STATUS_CHANGE", "Lead marcado como perdido")
         toast.success("Lead marcado como perdido")
         router.refresh()
       } else {

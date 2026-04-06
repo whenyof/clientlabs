@@ -25,9 +25,11 @@ function getCalendarDays(year: number, month: number): Date[] {
 interface DatePickerFieldProps {
   value: string
   onChange: (v: string) => void
+  /** Target DOM element for the portal. Pass a container inside Dialog to avoid Radix outside-click blocking. Defaults to document.body. */
+  portalTarget?: HTMLElement | null
 }
 
-export function DatePickerField({ value, onChange }: DatePickerFieldProps) {
+export function DatePickerField({ value, onChange, portalTarget }: DatePickerFieldProps) {
   const [open, setOpen] = useState(false)
   const [rect, setRect] = useState<DOMRect | null>(null)
   const [mounted, setMounted] = useState(false)
@@ -167,7 +169,7 @@ export function DatePickerField({ value, onChange }: DatePickerFieldProps) {
             )}
           </div>
         </div>,
-        document.body
+        portalTarget ?? document.body
       )}
     </div>
   )

@@ -50,7 +50,8 @@ export async function PATCH(
       data,
     })
 
-    await invalidateCachedData(`leads-kpis-${session.user.id}`)
+    // Fire-and-forget — don't let a slow/down Redis block the response
+    invalidateCachedData(`leads-kpis-${session.user.id}`).catch(() => {})
     return NextResponse.json(updated)
   } catch (error) {
     console.error("Error updating lead:", error)

@@ -51,6 +51,8 @@ export function CreateLeadManualDialog({ open, onOpenChange }: { open: boolean; 
 
  setLoading(true)
  try {
+ // Cancel any in-flight leads fetches to prevent stale data from overwriting the optimistic update
+ await queryClient.cancelQueries({ queryKey: ["leads"] })
  const result = await createLead(formData)
  const now = new Date()
  const newLead = {

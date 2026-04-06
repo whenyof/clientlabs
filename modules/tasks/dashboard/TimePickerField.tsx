@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
+import { createPortal } from "react-dom"
 import { Clock, X } from "lucide-react"
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i)
@@ -14,8 +15,8 @@ interface TimePickerFieldProps {
 export function TimePickerField({ value, onChange }: TimePickerFieldProps) {
   const [open, setOpen] = useState(false)
   const [rect, setRect] = useState<DOMRect | null>(null)
+  const [mounted, setMounted] = useState(false)
   const btnRef = useRef<HTMLButtonElement>(null)
-  const popupRef = useRef<HTMLDivElement>(null)
 
   const parsed = value && /^\d{2}:\d{2}$/.test(value)
     ? { h: parseInt(value.slice(0, 2)), m: parseInt(value.slice(3, 5)) }
@@ -23,6 +24,8 @@ export function TimePickerField({ value, onChange }: TimePickerFieldProps) {
 
   const [selHour, setSelHour] = useState<number | null>(parsed?.h ?? null)
   const [selMin, setSelMin] = useState<number | null>(parsed?.m ?? null)
+
+  useEffect(() => { setMounted(true) }, [])
 
   useEffect(() => {
     if (value && /^\d{2}:\d{2}$/.test(value)) {
@@ -37,7 +40,8 @@ export function TimePickerField({ value, onChange }: TimePickerFieldProps) {
     if (!open) return
     const close = (e: MouseEvent) => {
       const target = e.target as Node
-      if (btnRef.current?.contains(target) || popupRef.current?.contains(target)) return
+      const popup = document.getElementById("time-picker-portal")
+      if (btnRef.current?.contains(target) || popup?.contains(target)) return
       setOpen(false)
     }
     document.addEventListener("mousedown", close)
@@ -98,16 +102,15 @@ export function TimePickerField({ value, onChange }: TimePickerFieldProps) {
         )}
       </button>
 
-      {open && (
-        <div ref={popupRef} style={{
+      {open && mounted && createPortal(
+        <div id="time-picker-portal" style={{
           position: "fixed", top, left: rect?.left ?? 0,
           width: Math.max(rect?.width ?? 0, 200),
-          zIndex: 99999, background: "#fff",
+          zIndex: 9999, background: "#fff",
           border: "1px solid var(--border-subtle)",
           borderRadius: 10, boxShadow: "0 8px 24px rgba(0,0,0,0.10)",
           padding: 12,
         }}>
-          {/* Hours */}
           <p style={{ fontSize: 10, fontWeight: 600, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.07em", margin: "0 0 6px" }}>
             Hora
           </p>
@@ -119,7 +122,6 @@ export function TimePickerField({ value, onChange }: TimePickerFieldProps) {
             ))}
           </div>
 
-          {/* Minutes */}
           <p style={{ fontSize: 10, fontWeight: 600, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.07em", margin: "0 0 6px" }}>
             Minutos
           </p>
@@ -130,7 +132,8 @@ export function TimePickerField({ value, onChange }: TimePickerFieldProps) {
               </button>
             ))}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )

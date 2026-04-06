@@ -245,7 +245,19 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && handleClose()}>
-      <DialogContent className="p-0" style={{ maxWidth: 520, width: "calc(100vw - 32px)" }}>
+      <DialogContent
+        className="p-0"
+        style={{ maxWidth: 520, width: "calc(100vw - 32px)" }}
+        onPointerDownOutside={(e) => {
+          const target = e.target as Element
+          if (
+            target?.closest?.("#date-picker-portal") ||
+            target?.closest?.("#time-picker-portal")
+          ) {
+            e.preventDefault()
+          }
+        }}
+      >
         <div>
 
         {/* Header */}

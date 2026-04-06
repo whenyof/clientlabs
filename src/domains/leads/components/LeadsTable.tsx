@@ -1,10 +1,10 @@
 "use client"
 
 import { useLeads } from "@/hooks/useLeads"
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useMemo, useRef, useCallback, useEffect } from "react"
 import { LeadCard } from "@/modules/leads/components/LeadCard"
-import { Upload, Globe, Zap, Loader2 } from "lucide-react"
+import { Upload, Globe, Zap, Loader2, X } from "lucide-react"
 import type { Lead } from "@prisma/client"
 import { useLeadsOptimistic } from "@/modules/leads/context/LeadsOptimisticContext"
 
@@ -49,8 +49,17 @@ interface LeadsTableProps {
   initialTotal?: number
 }
 
+const FILTER_LABELS: Record<string, string> = {
+  HOT: "Potenciales",
+  CONVERTED: "Convertidos",
+  stale: "Estancados",
+  NEW: "Nuevos",
+  LOST: "Perdidos",
+}
+
 export function LeadsTable({ initialLeads, initialTotal }: LeadsTableProps = {}) {
   const searchParams = useSearchParams()
+  const router = useRouter()
 
   const filters = useMemo(() => ({
     status: searchParams.get("status") ?? "all",
@@ -64,6 +73,23 @@ export function LeadsTable({ initialLeads, initialTotal }: LeadsTableProps = {})
     showLost: searchParams.get("showLost") ?? "false",
   }), [searchParams])
 
+  const isDefaultView = useMemo(() =>
+    !searchParams.get("temperature") &&
+    searchParams.get("showConverted") !== "true" &&
+    searchParams.get("stale") !== "true" &&
+    searchParams.get("showLost") !== "true" &&
+    !searchParams.get("status"),
+  [searchParams])
+
+  const activeFilterLabel = useMemo(() => {
+    if (filters.temperature === "HOT") return FILTER_LABELS.HOT
+    if (filters.showConverted === "true") return FILTER_LABELS.CONVERTED
+    if (filters.stale === "true") return FILTER_LABELS.stale
+    if (filters.status === "NEW") return FILTER_LABELS.NEW
+    if (filters.showLost === "true" || filters.status === "LOST") return FILTER_LABELS.LOST
+    return null
+  }, [filters])
+
   const {
     leads: rqLeads,
     total,
@@ -72,7 +98,10 @@ export function LeadsTable({ initialLeads, initialTotal }: LeadsTableProps = {})
     hasNextPage,
     fetchNextPage,
     error,
-  } = useLeads(filters, { initialLeads, initialTotal })
+  } = useLeads(filters, {
+    initialLeads: isDefaultView ? initialLeads : undefined,
+    initialTotal: isDefaultView ? initialTotal : undefined,
+  })
 
   // ── Optimistic state from shared context (same React tree — no event bus race) ──
   const { extraLeads, deletedIds, statusOverrides } = useLeadsOptimistic()
@@ -142,11 +171,71 @@ export function LeadsTable({ initialLeads, initialTotal }: LeadsTableProps = {})
     )
   }
 
-  if (leads.length === 0) {
-    return <EmptyState />
+  const clearFilters = () => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete("temperature"); params.delete("showConverted"); params.delete("showLost")
+    params.delete("stale"); params.delete("status")
+    router.push(`?${params.toString()}`)
+  }
+
+  if (leads.length === 0 && !isLoading) {
+    return (
+      <>
+        {activeFilterLabel && (
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            background: "rgba(31,169,122,0.06)",
+            border: "0.5px solid rgba(31,169,122,0.25)",
+            borderRadius: 8,
+            padding: "8px 16px",
+            marginBottom: 12,
+          }}>
+            <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>
+              Filtrando por: <strong style={{ color: "var(--text-primary)" }}>{activeFilterLabel}</strong>
+            </span>
+            <button
+              type="button"
+              onClick={clearFilters}
+              style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: "#1FA97A", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}
+            >
+              <X size={12} />
+              Ver todos
+            </button>
+          </div>
+        )}
+        <EmptyState />
+      </>
+    )
   }
 
   return (
+    <>
+    {activeFilterLabel && (
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        background: "rgba(31,169,122,0.06)",
+        border: "0.5px solid rgba(31,169,122,0.25)",
+        borderRadius: 8,
+        padding: "8px 16px",
+        marginBottom: 12,
+      }}>
+        <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>
+          Filtrando por: <strong style={{ color: "var(--text-primary)" }}>{activeFilterLabel}</strong>
+        </span>
+        <button
+          type="button"
+          onClick={clearFilters}
+          style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: "#1FA97A", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}
+        >
+          <X size={12} />
+          Ver todos
+        </button>
+      </div>
+    )}
     <div
       style={{
         background: "var(--bg-card)",
@@ -221,5 +310,6 @@ export function LeadsTable({ initialLeads, initialTotal }: LeadsTableProps = {})
         </span>
       </div>
     </div>
+    </>
   )
 }

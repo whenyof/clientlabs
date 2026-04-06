@@ -82,59 +82,98 @@ export function LeadsKPIs({ kpis }: LeadsKPIsProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
 
+  const isActiveMap: Record<typeof cards[number]["key"], boolean> = {
+    total:
+      !searchParams.get("temperature") &&
+      searchParams.get("showConverted") !== "true" &&
+      searchParams.get("stale") !== "true" &&
+      searchParams.get("showLost") !== "true" &&
+      !searchParams.get("status"),
+    hot: searchParams.get("temperature") === "HOT",
+    converted: searchParams.get("showConverted") === "true",
+    stalled: searchParams.get("stale") === "true",
+  }
+
   const handleClick = (card: typeof cards[number]) => {
     const params = new URLSearchParams(searchParams.toString())
-    card.filter(params)
+    if (isActiveMap[card.key] && card.key !== "total") {
+      // Toggle off — go back to default view
+      cards[0].filter(params)
+    } else {
+      card.filter(params)
+    }
     router.push(`?${params.toString()}`)
   }
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      {cards.map((card) => (
-        <button
-          key={card.key}
-          type="button"
-          onClick={() => handleClick(card)}
-          style={{
-            background: "var(--bg-card)",
-            border: "0.5px solid var(--border-subtle)",
-            borderRadius: 12,
-            padding: "20px 24px",
-            textAlign: "left",
-            cursor: "pointer",
-            transition: "background 0.15s",
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-surface)")}
-          onMouseLeave={(e) => (e.currentTarget.style.background = "var(--bg-card)")}
-        >
-          <p style={{
-            fontSize: 11,
-            fontWeight: 500,
-            color: "var(--text-secondary)",
-            letterSpacing: "0.06em",
-            margin: 0,
-          }}>
-            {card.label}
-          </p>
-          <p style={{
-            fontSize: 32,
-            fontWeight: 500,
-            color: "var(--text-primary)",
-            margin: "4px 0 0",
-            lineHeight: 1.1,
-          }}>
-            {kpis[card.key].toLocaleString()}
-          </p>
-          <div style={{
-            height: 1,
-            background: "var(--border-subtle)",
-            margin: "12px 0",
-          }} />
-          <p style={{ fontSize: 12, margin: 0, lineHeight: 1.4 }}>
-            {card.renderSub(kpis)}
-          </p>
-        </button>
-      ))}
+      {cards.map((card) => {
+        const active = isActiveMap[card.key]
+        return (
+          <button
+            key={card.key}
+            type="button"
+            onClick={() => handleClick(card)}
+            style={{
+              background: active ? "rgba(31,169,122,0.06)" : "var(--bg-card)",
+              border: active ? "1px solid #1FA97A" : "0.5px solid var(--border-subtle)",
+              boxShadow: active ? "0 0 0 3px rgba(31,169,122,0.10)" : "none",
+              borderRadius: 12,
+              padding: "20px 24px",
+              textAlign: "left",
+              cursor: "pointer",
+              transition: "background 0.15s, border 0.15s, box-shadow 0.15s",
+              position: "relative",
+            }}
+            onMouseEnter={(e) => {
+              if (!active) e.currentTarget.style.background = "var(--bg-surface)"
+            }}
+            onMouseLeave={(e) => {
+              if (!active) e.currentTarget.style.background = "var(--bg-card)"
+            }}
+          >
+            {active && (
+              <span
+                style={{
+                  position: "absolute",
+                  top: 10,
+                  right: 12,
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  background: "#1FA97A",
+                }}
+              />
+            )}
+            <p style={{
+              fontSize: 11,
+              fontWeight: 500,
+              color: active ? "#1FA97A" : "var(--text-secondary)",
+              letterSpacing: "0.06em",
+              margin: 0,
+            }}>
+              {card.label}
+            </p>
+            <p style={{
+              fontSize: 32,
+              fontWeight: 500,
+              color: "var(--text-primary)",
+              margin: "4px 0 0",
+              lineHeight: 1.1,
+            }}>
+              {kpis[card.key].toLocaleString()}
+            </p>
+            <div style={{
+              height: 1,
+              background: active ? "rgba(31,169,122,0.2)" : "var(--border-subtle)",
+              margin: "12px 0",
+            }} />
+            <p style={{ fontSize: 12, margin: 0, lineHeight: 1.4 }}>
+              {card.renderSub(kpis)}
+            </p>
+          </button>
+        )
+      })}
     </div>
   )
 }

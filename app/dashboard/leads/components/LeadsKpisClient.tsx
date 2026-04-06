@@ -14,10 +14,20 @@ const KPI_LABELS: Record<string, string> = {
   stalled:   "Estancados",
 }
 
+// Mirrors the server query: lastActionAt IS NULL OR lastActionAt < (now - 7d), NOT CONVERTED/LOST
 function isStalled(lead: Lead): boolean {
-  const ref = lead.lastActionAt ?? lead.updatedAt
-  const days = Math.floor((Date.now() - new Date(ref).getTime()) / 86400000)
-  return days > 7 && lead.leadStatus !== "CONVERTED" && lead.leadStatus !== "LOST"
+  const staleMs = 7 * 24 * 60 * 60 * 1000
+  const isOldOrNull = !lead.lastActionAt || (Date.now() - new Date(lead.lastActionAt).getTime() > staleMs)
+  return isOldOrNull && lead.leadStatus !== "CONVERTED" && lead.leadStatus !== "LOST"
+}
+
+// Mirrors the server query: score >= 40 OR QUALIFIED OR CONTACTED, NOT CONVERTED/LOST
+function isPotencial(lead: Lead): boolean {
+  return (
+    lead.leadStatus !== "CONVERTED" &&
+    lead.leadStatus !== "LOST" &&
+    (lead.score >= 40 || lead.leadStatus === "QUALIFIED" || lead.leadStatus === "CONTACTED")
+  )
 }
 
 interface LeadsKpisClientProps {
@@ -52,7 +62,7 @@ export function LeadsKpisClient({ initial, initialLeads, initialTotal, children 
 
   const filteredLeads = useMemo(() => {
     if (!activeKpi || activeKpi === "total") return undefined
-    if (activeKpi === "hot") return leads.filter((l: Lead) => l.temperature === "HOT")
+    if (activeKpi === "hot") return leads.filter(isPotencial)
     if (activeKpi === "converted") return leads.filter((l: Lead) => l.leadStatus === "CONVERTED")
     if (activeKpi === "stalled") return leads.filter(isStalled)
     return undefined

@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Loader2, Send } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { Loader2, Send, Mail, Megaphone, ExternalLink } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 import { formatTimeAgo } from "@domains/leads/utils/formatting"
 
@@ -59,6 +60,7 @@ const AI_ACTIONS = [
 ] as const
 
 export function LeadEmailModule({ leadId, leadEmail, leadName }: LeadEmailModuleProps) {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<Tab>("suggestions")
   const [subject, setSubject] = useState("")
   const [message, setMessage] = useState("")
@@ -224,6 +226,8 @@ export function LeadEmailModule({ leadId, leadEmail, leadName }: LeadEmailModule
               sendLoading={sendLoading}
               onAI={handleAI}
               onSend={handleSend}
+              leadEmail={leadEmail}
+              onOpenMarketing={() => router.push("/dashboard/marketing")}
             />
           </>
         )}
@@ -239,6 +243,8 @@ export function LeadEmailModule({ leadId, leadEmail, leadName }: LeadEmailModule
             sendLoading={sendLoading}
             onAI={handleAI}
             onSend={handleSend}
+            leadEmail={leadEmail}
+            onOpenMarketing={() => router.push("/dashboard/marketing")}
           />
         )}
 
@@ -296,14 +302,34 @@ interface ComposeAreaProps {
   sendLoading: boolean
   onAI: (action: "improve" | "shorter" | "tone") => void
   onSend: () => void
+  leadEmail?: string | null
+  onOpenMarketing: () => void
 }
 
-function ComposeArea({ subject, message, onSubjectChange, onMessageChange, aiLoading, sendLoading, onAI, onSend }: ComposeAreaProps) {
+function ComposeArea({ subject, message, onSubjectChange, onMessageChange, aiLoading, sendLoading, onAI, onSend, leadEmail, onOpenMarketing }: ComposeAreaProps) {
+  const [showChoice, setShowChoice] = useState(false)
+
   const AI_ACTIONS = [
     { key: "improve" as const, label: "Mejorar con IA" },
     { key: "shorter" as const, label: "Hacer más corto" },
     { key: "tone" as const, label: "Cambiar tono" },
   ]
+
+  const canSend = subject.trim() && message.trim()
+
+  const handleDirectEmail = () => {
+    const mailto = `mailto:${leadEmail ?? ""}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`
+    window.location.href = mailto
+    onSend()
+    setShowChoice(false)
+  }
+
+  const handleGmail = () => {
+    const url = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(leadEmail ?? "")}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`
+    window.open(url, "_blank", "noopener")
+    onSend()
+    setShowChoice(false)
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -331,57 +357,115 @@ function ComposeArea({ subject, message, onSubjectChange, onMessageChange, aiLoa
         rows={4}
         style={{ resize: "none", fontSize: 13 }}
       />
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-          {AI_ACTIONS.map((a) => (
-            <button
-              key={a.key}
-              type="button"
-              onClick={() => onAI(a.key)}
-              disabled={aiLoading || !message.trim()}
-              style={{
-                fontSize: 11,
-                padding: "5px 10px",
-                borderRadius: 8,
-                border: "0.5px solid var(--green-badge-border)",
-                background: "var(--green-badge-bg)",
-                color: "var(--green-badge-text)",
-                cursor: aiLoading || !message.trim() ? "not-allowed" : "pointer",
-                opacity: aiLoading || !message.trim() ? 0.5 : 1,
-                display: "flex",
-                alignItems: "center",
-                gap: 4,
-                fontWeight: 500,
-              }}
-            >
-              {aiLoading ? <Loader2 style={{ width: 10, height: 10 }} className="animate-spin" /> : null}
-              {a.label}
-            </button>
-          ))}
-        </div>
-        <button
-          type="button"
-          onClick={onSend}
-          disabled={sendLoading || !subject.trim() || !message.trim()}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            padding: "7px 16px",
-            fontSize: 13,
-            fontWeight: 500,
-            borderRadius: 8,
-            border: "none",
-            background: "var(--green-btn)",
-            color: "#fff",
-            cursor: sendLoading || !subject.trim() || !message.trim() ? "not-allowed" : "pointer",
-            opacity: sendLoading || !subject.trim() || !message.trim() ? 0.5 : 1,
-          }}
-        >
-          {sendLoading ? <Loader2 style={{ width: 14, height: 14 }} className="animate-spin" /> : <Send style={{ width: 14, height: 14 }} />}
-          Enviar
-        </button>
+
+      {/* AI actions row */}
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+        {AI_ACTIONS.map((a) => (
+          <button
+            key={a.key}
+            type="button"
+            onClick={() => onAI(a.key)}
+            disabled={aiLoading || !message.trim()}
+            style={{
+              fontSize: 11, padding: "5px 10px", borderRadius: 8,
+              border: "0.5px solid var(--green-badge-border)",
+              background: "var(--green-badge-bg)", color: "var(--green-badge-text)",
+              cursor: aiLoading || !message.trim() ? "not-allowed" : "pointer",
+              opacity: aiLoading || !message.trim() ? 0.5 : 1,
+              display: "flex", alignItems: "center", gap: 4, fontWeight: 500,
+            }}
+          >
+            {aiLoading ? <Loader2 style={{ width: 10, height: 10 }} className="animate-spin" /> : null}
+            {a.label}
+          </button>
+        ))}
       </div>
+
+      {/* Send choice */}
+      {showChoice ? (
+        <div style={{
+          display: "flex", flexDirection: "column", gap: 8,
+          padding: 12, borderRadius: 10,
+          background: "var(--bg-surface)", border: "0.5px solid var(--border-subtle)",
+        }}>
+          <p style={{ fontSize: 11, fontWeight: 600, color: "var(--text-secondary)", margin: 0, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+            ¿Cómo quieres enviar?
+          </p>
+          <button
+            type="button"
+            onClick={handleDirectEmail}
+            style={{
+              display: "flex", alignItems: "center", gap: 10,
+              padding: "10px 14px", borderRadius: 8,
+              border: "0.5px solid var(--border-subtle)",
+              background: "var(--bg-card)", cursor: "pointer", textAlign: "left",
+            }}
+          >
+            <Mail style={{ width: 16, height: 16, color: "#1FA97A", flexShrink: 0 }} />
+            <div>
+              <p style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)", margin: 0 }}>Enviar email</p>
+              <p style={{ fontSize: 11, color: "var(--text-secondary)", margin: "1px 0 0" }}>Abre tu cliente de email con el mensaje</p>
+            </div>
+          </button>
+          <button
+            type="button"
+            onClick={handleGmail}
+            style={{
+              display: "flex", alignItems: "center", gap: 10,
+              padding: "10px 14px", borderRadius: 8,
+              border: "0.5px solid var(--border-subtle)",
+              background: "var(--bg-card)", cursor: "pointer", textAlign: "left",
+            }}
+          >
+            <ExternalLink style={{ width: 16, height: 16, color: "#4285F4", flexShrink: 0 }} />
+            <div>
+              <p style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)", margin: 0 }}>Abrir en Gmail</p>
+              <p style={{ fontSize: 11, color: "var(--text-secondary)", margin: "1px 0 0" }}>Abre Gmail en el navegador con todo preparado</p>
+            </div>
+          </button>
+          <button
+            type="button"
+            onClick={() => { onOpenMarketing(); setShowChoice(false) }}
+            style={{
+              display: "flex", alignItems: "center", gap: 10,
+              padding: "10px 14px", borderRadius: 8,
+              border: "0.5px solid var(--border-subtle)",
+              background: "var(--bg-card)", cursor: "pointer", textAlign: "left",
+            }}
+          >
+            <Megaphone style={{ width: 16, height: 16, color: "#8B5CF6", flexShrink: 0 }} />
+            <div>
+              <p style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)", margin: 0 }}>Email marketing</p>
+              <p style={{ fontSize: 11, color: "var(--text-secondary)", margin: "1px 0 0" }}>Ir a la sección de campañas de marketing</p>
+            </div>
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowChoice(false)}
+            style={{ fontSize: 12, color: "var(--text-secondary)", background: "none", border: "none", cursor: "pointer", padding: "4px 0", textAlign: "left" }}
+          >
+            Cancelar
+          </button>
+        </div>
+      ) : (
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <button
+            type="button"
+            onClick={() => canSend && setShowChoice(true)}
+            disabled={sendLoading || !canSend}
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "7px 16px", fontSize: 13, fontWeight: 500, borderRadius: 8,
+              border: "none", background: "var(--green-btn)", color: "#fff",
+              cursor: sendLoading || !canSend ? "not-allowed" : "pointer",
+              opacity: sendLoading || !canSend ? 0.5 : 1,
+            }}
+          >
+            {sendLoading ? <Loader2 style={{ width: 14, height: 14 }} className="animate-spin" /> : <Send style={{ width: 14, height: 14 }} />}
+            Enviar
+          </button>
+        </div>
+      )}
     </div>
   )
 }

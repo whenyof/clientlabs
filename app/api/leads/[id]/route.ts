@@ -50,6 +50,26 @@ export async function PATCH(
       data,
     })
 
+    // Register activity for the update (fire-and-forget)
+    const fieldLabels: Record<string, string> = {
+      name: "Nombre", email: "Email", phone: "Teléfono",
+      source: "Fuente", leadStatus: "Estado",
+    }
+    const changed = Object.keys(data)
+      .filter(f => f !== "lastActionAt" && f !== "status")
+      .map(f => fieldLabels[f] ?? f)
+    if (changed.length > 0) {
+      prisma.activity.create({
+        data: {
+          userId: session.user.id,
+          leadId: params.id,
+          type: "LEAD_UPDATE",
+          title: `Datos actualizados: ${changed.join(", ")}`,
+          description: null,
+        },
+      }).catch(() => {})
+    }
+
     // Fire-and-forget — don't let a slow/down Redis block the response
     invalidateCachedData(`leads-kpis-${session.user.id}`).catch(() => {})
     return NextResponse.json(updated)

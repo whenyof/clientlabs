@@ -27,6 +27,7 @@ import {
   Link2,
   Lock,
   Receipt,
+  Megaphone,
 } from "lucide-react"
 
 interface SidebarProps {
@@ -116,6 +117,7 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
       items: [
         { label: labels.automations.title, href: "/dashboard/automations", icon: Zap },
         { label: labels.aiAssistant.title, href: "/dashboard/ai-assistant", icon: Sparkles },
+        { label: "Marketing", href: "/dashboard/marketing", icon: Megaphone },
         { label: "Conectar", href: "/dashboard/connect", icon: Link2 },
       ],
     },

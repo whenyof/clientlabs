@@ -19,6 +19,7 @@ import {
   UserPlus,
   ChevronDown,
   ChevronUp,
+  PencilLine,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { formatTimeAgo } from "@domains/leads/utils/formatting"
@@ -56,6 +57,7 @@ const EVENT_LABELS: Record<string, string> = {
   CALL: "Llamada",
   EMAIL: "Email enviado",
   TASK: "Tarea",
+  LEAD_UPDATE: "Datos actualizados",
   lead_created: "Lead creado",
 }
 
@@ -88,6 +90,8 @@ function EventIcon({ type }: { type: string }) {
       return <Phone style={{ width: 14, height: 14, color: "#1FA97A", flexShrink: 0 }} />
     case "TASK":
       return <CheckSquare style={{ width: 14, height: 14, color: "#8B5CF6", flexShrink: 0 }} />
+    case "LEAD_UPDATE":
+      return <PencilLine style={{ width: 14, height: 14, color: "#8B5CF6", flexShrink: 0 }} />
     case "lead_created":
       return <UserPlus style={{ width: 14, height: 14, color: "var(--text-secondary)", flexShrink: 0 }} />
     default:

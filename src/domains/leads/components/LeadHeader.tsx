@@ -2,7 +2,7 @@
 
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
-import { ArrowLeft, Mail, StickyNote } from "lucide-react"
+import { ArrowLeft, Mail, StickyNote, Megaphone, ExternalLink, X } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -69,6 +69,7 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
   const router = useRouter()
   const [converting, setConverting] = useState(false)
   const [markingLost, setMarkingLost] = useState(false)
+  const [showEmailChoice, setShowEmailChoice] = useState(false)
 
   const initials = getInitials(lead.name, lead.email)
   const statusLabel = STATUS_LABELS[lead.leadStatus] ?? lead.leadStatus
@@ -76,7 +77,25 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
 
   const handleEmail = () => {
     if (!lead.email) return
+    setShowEmailChoice(v => !v)
+  }
+
+  const handleDirectEmail = () => {
     window.location.href = `mailto:${lead.email}?subject=Contacto`
+    setShowEmailChoice(false)
+  }
+
+  const handleGmail = () => {
+    window.open(
+      `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(lead.email ?? "")}`,
+      "_blank", "noopener"
+    )
+    setShowEmailChoice(false)
+  }
+
+  const handleMarketing = () => {
+    router.push("/dashboard/marketing")
+    setShowEmailChoice(false)
   }
 
   const handleConvert = async () => {
@@ -196,17 +215,71 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
 
           {/* Right: action buttons */}
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleEmail}
-              disabled={!lead.email}
-              style={{ display: "flex", alignItems: "center", gap: 6 }}
-            >
-              <Mail style={{ width: 14, height: 14 }} />
-              Email
-            </Button>
+            {/* Email button + choice dropdown */}
+            <div style={{ position: "relative" }}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleEmail}
+                disabled={!lead.email}
+                style={{
+                  display: "flex", alignItems: "center", gap: 6,
+                  borderColor: showEmailChoice ? "#1FA97A" : undefined,
+                  color: showEmailChoice ? "#1FA97A" : undefined,
+                }}
+              >
+                <Mail style={{ width: 14, height: 14 }} />
+                Email
+              </Button>
+
+              {showEmailChoice && (
+                <div style={{
+                  position: "absolute", top: "calc(100% + 8px)", right: 0,
+                  width: 240, zIndex: 100,
+                  background: "var(--bg-card)",
+                  border: "0.5px solid var(--border-subtle)",
+                  borderRadius: 10,
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.10)",
+                  overflow: "hidden",
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px 8px", borderBottom: "0.5px solid var(--border-subtle)" }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                      Enviar a {lead.name || lead.email}
+                    </span>
+                    <button type="button" onClick={() => setShowEmailChoice(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-secondary)", display: "flex", padding: 0 }}>
+                      <X style={{ width: 13, height: 13 }} />
+                    </button>
+                  </div>
+                  {[
+                    { icon: <Mail style={{ width: 15, height: 15, color: "#1FA97A" }} />, label: "Enviar email", sub: "Abre tu cliente de email", action: handleDirectEmail },
+                    { icon: <ExternalLink style={{ width: 15, height: 15, color: "#4285F4" }} />, label: "Abrir en Gmail", sub: "Abre Gmail en el navegador", action: handleGmail },
+                    { icon: <Megaphone style={{ width: 15, height: 15, color: "#8B5CF6" }} />, label: "Email marketing", sub: "Ir a campañas de marketing", action: handleMarketing },
+                  ].map((opt) => (
+                    <button
+                      key={opt.label}
+                      type="button"
+                      onClick={opt.action}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 10,
+                        width: "100%", padding: "10px 14px",
+                        background: "none", border: "none", cursor: "pointer",
+                        borderBottom: "0.5px solid var(--border-subtle)",
+                        textAlign: "left",
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-surface)")}
+                      onMouseLeave={e => (e.currentTarget.style.background = "none")}
+                    >
+                      <div style={{ flexShrink: 0 }}>{opt.icon}</div>
+                      <div>
+                        <p style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)", margin: 0 }}>{opt.label}</p>
+                        <p style={{ fontSize: 11, color: "var(--text-secondary)", margin: 0 }}>{opt.sub}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <Button
               type="button"
               variant="outline"

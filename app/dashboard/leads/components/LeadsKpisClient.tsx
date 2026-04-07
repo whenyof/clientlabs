@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
+import { useSearchParams } from "next/navigation"
 import { useLeads } from "@/hooks/useLeads"
 import { LeadsKPIs, type KpisData } from "@domains/leads/components/LeadsKPIs"
 import { LeadsTable } from "@domains/leads/components/LeadsTable"
@@ -72,15 +73,32 @@ export function LeadsKpisClient({ initial, initialLeads, initialTotal, children 
       .finally(() => setLoadingConverted(false))
   }, [activeKpi, convertedLeads])
 
+  const searchParams = useSearchParams()
+  const searchTerm = searchParams.get("search")?.trim().toLowerCase() ?? ""
+
   const { leads } = useLeads({}, { initialLeads, initialTotal })
 
   const filteredLeads = useMemo(() => {
-    if (!activeKpi || activeKpi === "total") return undefined
-    if (activeKpi === "hot") return leads.filter(isPotencial)
-    if (activeKpi === "converted") return convertedLeads ?? []
-    if (activeKpi === "stalled") return leads.filter(isStalled)
-    return undefined
-  }, [leads, activeKpi, convertedLeads])
+    let result: Lead[] | undefined
+
+    if (!activeKpi || activeKpi === "total") result = undefined
+    else if (activeKpi === "hot") result = leads.filter(isPotencial)
+    else if (activeKpi === "converted") result = convertedLeads ?? []
+    else if (activeKpi === "stalled") result = leads.filter(isStalled)
+
+    // Apply search on top of any KPI filter — runs on whichever list is active
+    if (searchTerm) {
+      const base = result ?? leads
+      result = base.filter(l =>
+        l.name?.toLowerCase().includes(searchTerm) ||
+        l.email?.toLowerCase().includes(searchTerm) ||
+        l.phone?.toLowerCase().includes(searchTerm) ||
+        l.source?.toLowerCase().includes(searchTerm)
+      )
+    }
+
+    return result
+  }, [leads, activeKpi, convertedLeads, searchTerm])
 
   const handleKpiClick = (key: string) => {
     setActiveKpi(prev => prev === key ? null : key)
@@ -106,7 +124,7 @@ export function LeadsKpisClient({ initial, initialLeads, initialTotal, children 
             <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#1FA97A", flexShrink: 0 }} />
             {loadingConverted
               ? "Cargando convertidos..."
-              : <>Mostrando <strong style={{ color: "var(--text-primary)", fontWeight: 500 }}>{filteredLeads?.length ?? 0} leads</strong> &middot; {activeLabel}</>
+              : <>Mostrando <strong style={{ color: "var(--text-primary)", fontWeight: 500 }}>{filteredLeads?.length ?? 0} leads</strong> &middot; {activeLabel}{searchTerm && ` · "${searchTerm}"`}</>
             }
           </span>
           <button

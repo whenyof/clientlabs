@@ -1,10 +1,10 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { useSearchParams } from "next/navigation"
 import { useLeads } from "@/hooks/useLeads"
 import { LeadsKPIs, type KpisData } from "@domains/leads/components/LeadsKPIs"
 import { LeadsTable } from "@domains/leads/components/LeadsTable"
+import { LeadsSearchProvider, useLeadsSearch } from "./LeadsSearchContext"
 import type { Lead } from "@prisma/client"
 import { X } from "lucide-react"
 
@@ -38,7 +38,16 @@ interface LeadsKpisClientProps {
   children?: React.ReactNode
 }
 
-export function LeadsKpisClient({ initial, initialLeads, initialTotal, children }: LeadsKpisClientProps) {
+export function LeadsKpisClient(props: LeadsKpisClientProps) {
+  return (
+    <LeadsSearchProvider>
+      <LeadsKpisClientInner {...props} />
+    </LeadsSearchProvider>
+  )
+}
+
+function LeadsKpisClientInner({ initial, initialLeads, initialTotal, children }: LeadsKpisClientProps) {
+  const { searchTerm } = useLeadsSearch()
   const [kpis, setKpis] = useState(initial)
   const [activeKpi, setActiveKpi] = useState<string | null>(null)
   const [convertedLeads, setConvertedLeads] = useState<Lead[] | null>(null)
@@ -73,9 +82,6 @@ export function LeadsKpisClient({ initial, initialLeads, initialTotal, children 
       .finally(() => setLoadingConverted(false))
   }, [activeKpi, convertedLeads])
 
-  const searchParams = useSearchParams()
-  const searchTerm = searchParams.get("search")?.trim().toLowerCase() ?? ""
-
   const { leads } = useLeads({}, { initialLeads, initialTotal })
 
   const filteredLeads = useMemo(() => {
@@ -87,13 +93,14 @@ export function LeadsKpisClient({ initial, initialLeads, initialTotal, children 
     else if (activeKpi === "stalled") result = leads.filter(isStalled)
 
     // Apply search on top of any KPI filter — runs on whichever list is active
-    if (searchTerm) {
+    const term = searchTerm.trim().toLowerCase()
+    if (term) {
       const base = result ?? leads
       result = base.filter(l =>
-        l.name?.toLowerCase().includes(searchTerm) ||
-        l.email?.toLowerCase().includes(searchTerm) ||
-        l.phone?.toLowerCase().includes(searchTerm) ||
-        l.source?.toLowerCase().includes(searchTerm)
+        l.name?.toLowerCase().includes(term) ||
+        l.email?.toLowerCase().includes(term) ||
+        l.phone?.toLowerCase().includes(term) ||
+        l.source?.toLowerCase().includes(term)
       )
     }
 

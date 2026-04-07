@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useLeadsSearch } from "@/app/dashboard/leads/components/LeadsSearchContext"
 import {
   Select,
   SelectContent,
@@ -37,17 +37,7 @@ export function LeadsFilters({
   const ui = labels.leads.ui
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [searchTerm, setSearchTerm] = useState(currentFilters.search)
-
-  useEffect(() => {
-    const t = setTimeout(() => {
-      const p = new URLSearchParams(searchParams.toString())
-      if (searchTerm.trim()) p.set("search", searchTerm.trim())
-      else p.delete("search")
-      router.push(`?${p.toString()}`)
-    }, 300)
-    return () => clearTimeout(t)
-  }, [searchTerm, router, searchParams])
+  const { searchTerm, setSearchTerm } = useLeadsSearch()
 
   const update = (updates: Partial<Filters>) => {
     const p = new URLSearchParams(searchParams.toString())

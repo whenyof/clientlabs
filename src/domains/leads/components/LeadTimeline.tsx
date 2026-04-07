@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useMemo } from "react"
+import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import {
@@ -17,6 +17,8 @@ import {
   RefreshCcw,
   Clock,
   UserPlus,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { formatTimeAgo } from "@domains/leads/utils/formatting"
@@ -99,11 +101,15 @@ interface LeadTimelineProps {
   refreshTrigger?: number
 }
 
+const VISIBLE_LIMIT = 8
+
 export function LeadTimeline({ leadId, createdAt, refreshTrigger = 0 }: LeadTimelineProps) {
   const [insightsSessions, setInsightsSessions] = useState<TimelineSession[]>([])
   const [activities, setActivities] = useState<ActivityItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  const [expanded, setExpanded] = useState(false)
+  const expandRef = useRef<HTMLDivElement>(null)
 
   const fetchActivities = useCallback(async (signal?: AbortSignal) => {
     const res = await fetch(`/api/leads/${leadId}/activity?_t=${Date.now()}`, { signal, cache: "no-store" })
@@ -219,36 +225,64 @@ export function LeadTimeline({ leadId, createdAt, refreshTrigger = 0 }: LeadTime
           <p style={{ fontSize: 13, fontWeight: 500, margin: 0 }}>Sin actividad registrada</p>
           <p style={{ fontSize: 12, margin: "4px 0 0" }}>Las interacciones aparecerán aquí.</p>
         </div>
-      ) : (
-        <div>
-          {flatEvents.map((event, index) => (
-            <div key={event.id}>
-              <div style={{ display: "flex", gap: 10, alignItems: "flex-start", padding: "10px 0" }}>
-                {/* Dot */}
-                <div style={{
-                  width: 8, height: 8, borderRadius: "50%", flexShrink: 0, marginTop: 4,
-                  background: POSITIVE_EVENTS.has(event.type) ? "#1FA97A" : "var(--border-main)",
-                }} />
-                {/* Content */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
-                    <EventIcon type={event.type} />
-                    <p style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {getEventLabel(event.type, event.title)}
+      ) : (() => {
+        const visible = expanded ? flatEvents : flatEvents.slice(0, VISIBLE_LIMIT)
+        const hidden = flatEvents.length - VISIBLE_LIMIT
+        return (
+          <div>
+            {visible.map((event, index) => (
+              <div key={event.id}>
+                <div style={{ display: "flex", gap: 10, alignItems: "flex-start", padding: "10px 0" }}>
+                  <div style={{
+                    width: 8, height: 8, borderRadius: "50%", flexShrink: 0, marginTop: 4,
+                    background: POSITIVE_EVENTS.has(event.type) ? "#1FA97A" : "var(--border-main)",
+                  }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
+                      <EventIcon type={event.type} />
+                      <p style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {getEventLabel(event.type, event.title)}
+                      </p>
+                    </div>
+                    <p style={{ fontSize: 11, color: "var(--text-secondary)", margin: 0 }}>
+                      {event.description ? `${event.description} · ` : ""}{formatTimeAgo(event.createdAt)}
                     </p>
                   </div>
-                  <p style={{ fontSize: 11, color: "var(--text-secondary)", margin: 0 }}>
-                    {event.description ? `${event.description} · ` : ""}{formatTimeAgo(event.createdAt)}
-                  </p>
                 </div>
+                {index < visible.length - 1 && (
+                  <div style={{ height: "0.5px", background: "var(--border-subtle)", margin: "0 0 0 18px" }} />
+                )}
               </div>
-              {index < flatEvents.length - 1 && (
+            ))}
+
+            {flatEvents.length > VISIBLE_LIMIT && (
+              <div ref={expandRef}>
                 <div style={{ height: "0.5px", background: "var(--border-subtle)", margin: "0 0 0 18px" }} />
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (expanded && expandRef.current) {
+                      expandRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" })
+                    }
+                    setExpanded(v => !v)
+                  }}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 6,
+                    width: "100%", padding: "10px 0",
+                    background: "none", border: "none", cursor: "pointer",
+                    fontSize: 12, fontWeight: 500, color: "#1FA97A",
+                  }}
+                >
+                  {expanded
+                    ? <><ChevronUp style={{ width: 13, height: 13 }} /> Mostrar menos</>
+                    : <><ChevronDown style={{ width: 13, height: 13 }} /> Ver {hidden} más</>
+                  }
+                </button>
+              </div>
+            )}
+          </div>
+        )
+      })()}
     </div>
   )
 }

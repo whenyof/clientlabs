@@ -1,6 +1,5 @@
 "use client"
 
-import { useRouter, useSearchParams } from "next/navigation"
 import { useLeadsSearch } from "@/app/dashboard/leads/components/LeadsSearchContext"
 import {
   Select,
@@ -12,44 +11,22 @@ import {
 import { Search, ArrowUpDown } from "lucide-react"
 import { useSectorConfig } from "@shared/hooks/useSectorConfig"
 
-type Filters = {
-  status: string
-  temperature: string
-  source: string
-  search: string
-  sortBy: string
-  sortOrder: string
-  showConverted: boolean
-  showLost: boolean
-}
+const triggerStyle = "rounded-lg px-3 py-2 text-sm h-10 min-w-0"
 
-const triggerStyle =
-  "rounded-lg px-3 py-2 text-sm h-10 min-w-0"
-
-export function LeadsFilters({
-  currentFilters,
-  sources,
-}: {
-  currentFilters: Filters
-  sources: string[]
-}) {
+export function LeadsFilters({ sources }: { sources: string[] }) {
   const { labels } = useSectorConfig()
   const ui = labels.leads.ui
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const { searchTerm, setSearchTerm } = useLeadsSearch()
 
-  const update = (updates: Partial<Filters>) => {
-    const p = new URLSearchParams(searchParams.toString())
-    Object.entries(updates).forEach(([key, value]) => {
-      if (value != null && value !== "" && value !== "all" && value !== "false")
-        p.set(key, String(value))
-      else p.delete(key)
-    })
-    router.push(`?${p.toString()}`)
-  }
+  const {
+    searchTerm, setSearchTerm,
+    sortBy, setSortBy,
+    sortOrder, setSortOrder,
+    filterStatus, setFilterStatus,
+    filterSource, setFilterSource,
+    filterTemperature, setFilterTemperature,
+  } = useLeadsSearch()
 
-  const sortValue = `${currentFilters.sortBy}-${currentFilters.sortOrder}`
+  const sortValue = `${sortBy}-${sortOrder}`
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
@@ -86,7 +63,7 @@ export function LeadsFilters({
 
       {/* Filters */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginLeft: "auto" }}>
-        <Select value={currentFilters.status} onValueChange={(v) => update({ status: v })}>
+        <Select value={filterStatus} onValueChange={setFilterStatus}>
           <SelectTrigger className={triggerStyle} style={{ width: 150, border: "0.5px solid var(--border-subtle)", background: "var(--bg-card)", color: "var(--text-primary)" }}>
             <SelectValue placeholder={ui.filterStatus} />
           </SelectTrigger>
@@ -105,7 +82,7 @@ export function LeadsFilters({
           </SelectContent>
         </Select>
 
-        <Select value={currentFilters.source} onValueChange={(v) => update({ source: v })}>
+        <Select value={filterSource} onValueChange={setFilterSource}>
           <SelectTrigger className={triggerStyle} style={{ width: 150, border: "0.5px solid var(--border-subtle)", background: "var(--bg-card)", color: "var(--text-primary)" }}>
             <SelectValue placeholder={ui.filterSource} />
           </SelectTrigger>
@@ -123,7 +100,7 @@ export function LeadsFilters({
           </SelectContent>
         </Select>
 
-        <Select value={currentFilters.temperature} onValueChange={(v) => update({ temperature: v })}>
+        <Select value={filterTemperature} onValueChange={setFilterTemperature}>
           <SelectTrigger className={triggerStyle} style={{ width: 150, border: "0.5px solid var(--border-subtle)", background: "var(--bg-card)", color: "var(--text-primary)" }}>
             <SelectValue placeholder={ui.filterTemperature} />
           </SelectTrigger>
@@ -144,8 +121,9 @@ export function LeadsFilters({
         <Select
           value={sortValue}
           onValueChange={(v) => {
-            const [sortBy, sortOrder] = v.split("-")
-            update({ sortBy, sortOrder })
+            const lastDash = v.lastIndexOf("-")
+            setSortBy(v.substring(0, lastDash))
+            setSortOrder(v.substring(lastDash + 1) as "asc" | "desc")
           }}
         >
           <SelectTrigger className={triggerStyle} style={{ width: 150, border: "0.5px solid var(--border-subtle)", background: "var(--bg-card)", color: "var(--text-primary)" }}>

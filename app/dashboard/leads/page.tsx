@@ -177,19 +177,7 @@ export default async function LeadsPage({
           initialLeads={initialLeadsData as Lead[]}
           initialTotal={initialLeadsCount}
         >
-          <LeadsFilters
-            currentFilters={{
-              status: searchParams.status ?? "all",
-              temperature: searchParams.temperature ?? "all",
-              source: searchParams.source ?? "all",
-              search: searchParams.search ?? "",
-              sortBy: searchParams.sortBy ?? "score",
-              sortOrder: searchParams.sortOrder ?? "desc",
-              showConverted: searchParams.showConverted === "true",
-              showLost: searchParams.showLost === "true",
-            }}
-            sources={sources}
-          />
+          <LeadsFilters sources={sources} />
           <LeadsCharts initialData={chartInitial} />
         </LeadsKpisClient>
       </div>

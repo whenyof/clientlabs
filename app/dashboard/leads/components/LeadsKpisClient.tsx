@@ -15,14 +15,14 @@ const KPI_LABELS: Record<string, string> = {
   stalled:   "Estancados",
 }
 
-// Mirrors the server query: lastActionAt IS NULL OR lastActionAt < (now - 7d), NOT CONVERTED/LOST
+const TEMP_ORDER: Record<string, number> = { HOT: 2, WARM: 1, COLD: 0 }
+
 function isStalled(lead: Lead): boolean {
   const staleMs = 7 * 24 * 60 * 60 * 1000
   const isOldOrNull = !lead.lastActionAt || (Date.now() - new Date(lead.lastActionAt).getTime() > staleMs)
   return isOldOrNull && lead.leadStatus !== "CONVERTED" && lead.leadStatus !== "LOST"
 }
 
-// Mirrors the server query: score >= 40 OR QUALIFIED OR CONTACTED, NOT CONVERTED/LOST
 function isPotencial(lead: Lead): boolean {
   return (
     lead.leadStatus !== "CONVERTED" &&
@@ -47,7 +47,12 @@ export function LeadsKpisClient(props: LeadsKpisClientProps) {
 }
 
 function LeadsKpisClientInner({ initial, initialLeads, initialTotal, children }: LeadsKpisClientProps) {
-  const { searchTerm } = useLeadsSearch()
+  const {
+    searchTerm,
+    sortBy, sortOrder,
+    filterStatus, filterSource, filterTemperature,
+  } = useLeadsSearch()
+
   const [kpis, setKpis] = useState(initial)
   const [activeKpi, setActiveKpi] = useState<string | null>(null)
   const [convertedLeads, setConvertedLeads] = useState<Lead[] | null>(null)
@@ -64,16 +69,14 @@ function LeadsKpisClientInner({ initial, initialLeads, initialTotal, children }:
         return
       }
     }
-
     fetchKpis()
     const interval = setInterval(fetchKpis, 300_000)
     return () => clearInterval(interval)
   }, [])
 
-  // Fetch converted leads on demand (excluded from initialLeads by the server query)
   useEffect(() => {
     if (activeKpi !== "converted") return
-    if (convertedLeads !== null) return // already fetched
+    if (convertedLeads !== null) return
     setLoadingConverted(true)
     fetch("/api/leads?showConverted=true&status=CONVERTED&limit=100", { cache: "no-store" })
       .then(r => r.json())
@@ -84,19 +87,40 @@ function LeadsKpisClientInner({ initial, initialLeads, initialTotal, children }:
 
   const { leads } = useLeads({}, { initialLeads, initialTotal })
 
-  const filteredLeads = useMemo(() => {
-    let result: Lead[] | undefined
+  const leadsProcesados = useMemo(() => {
+    // 1 — Base: KPI filter
+    let result: Lead[]
+    if (!activeKpi || activeKpi === "total") {
+      result = [...leads]
+    } else if (activeKpi === "hot") {
+      result = leads.filter(isPotencial)
+    } else if (activeKpi === "converted") {
+      result = [...(convertedLeads ?? [])]
+    } else if (activeKpi === "stalled") {
+      result = leads.filter(isStalled)
+    } else {
+      result = [...leads]
+    }
 
-    if (!activeKpi || activeKpi === "total") result = undefined
-    else if (activeKpi === "hot") result = leads.filter(isPotencial)
-    else if (activeKpi === "converted") result = convertedLeads ?? []
-    else if (activeKpi === "stalled") result = leads.filter(isStalled)
+    // 2 — Status filter
+    if (filterStatus && filterStatus !== "all") {
+      result = result.filter(l => l.leadStatus === filterStatus)
+    }
 
-    // Apply search on top of any KPI filter — runs on whichever list is active
+    // 3 — Source filter
+    if (filterSource && filterSource !== "all") {
+      result = result.filter(l => l.source === filterSource)
+    }
+
+    // 4 — Temperature filter
+    if (filterTemperature && filterTemperature !== "all") {
+      result = result.filter(l => l.temperature === filterTemperature)
+    }
+
+    // 5 — Text search
     const term = searchTerm.trim().toLowerCase()
     if (term) {
-      const base = result ?? leads
-      result = base.filter(l =>
+      result = result.filter(l =>
         l.name?.toLowerCase().includes(term) ||
         l.email?.toLowerCase().includes(term) ||
         l.phone?.toLowerCase().includes(term) ||
@@ -104,20 +128,59 @@ function LeadsKpisClientInner({ initial, initialLeads, initialTotal, children }:
       )
     }
 
+    // 6 — Sort
+    result = [...result].sort((a, b) => {
+      let valA: number | string
+      let valB: number | string
+
+      if (sortBy === "score") {
+        valA = a.score || 0
+        valB = b.score || 0
+      } else if (sortBy === "lastActionAt") {
+        valA = a.lastActionAt ? new Date(a.lastActionAt).getTime() : 0
+        valB = b.lastActionAt ? new Date(b.lastActionAt).getTime() : 0
+      } else if (sortBy === "name") {
+        valA = a.name?.toLowerCase() || ""
+        valB = b.name?.toLowerCase() || ""
+      } else if (sortBy === "temperature") {
+        // "temperature-asc" = hot first → higher TEMP_ORDER value first = desc numeric
+        const ta = TEMP_ORDER[a.temperature || "COLD"] ?? 0
+        const tb = TEMP_ORDER[b.temperature || "COLD"] ?? 0
+        return sortOrder === "asc" ? tb - ta : ta - tb
+      } else {
+        // createdAt (default)
+        valA = new Date(a.createdAt).getTime()
+        valB = new Date(b.createdAt).getTime()
+      }
+
+      if (valA < valB) return sortOrder === "asc" ? -1 : 1
+      if (valA > valB) return sortOrder === "asc" ? 1 : -1
+      return 0
+    })
+
     return result
-  }, [leads, activeKpi, convertedLeads, searchTerm])
+  }, [leads, activeKpi, convertedLeads, searchTerm, filterStatus, filterSource, filterTemperature, sortBy, sortOrder])
 
   const handleKpiClick = (key: string) => {
     setActiveKpi(prev => prev === key ? null : key)
   }
 
   const activeLabel = activeKpi ? KPI_LABELS[activeKpi] : null
+  const hasActiveFilter = !!(
+    activeKpi ||
+    (filterStatus && filterStatus !== "all") ||
+    (filterSource && filterSource !== "all") ||
+    (filterTemperature && filterTemperature !== "all") ||
+    searchTerm.trim()
+  )
 
   return (
     <>
       <LeadsKPIs kpis={kpis} activeKpi={activeKpi} onKpiClick={handleKpiClick} />
       {children}
-      {activeKpi && activeKpi !== "total" && activeLabel && (
+
+      {/* Filter status bar */}
+      {hasActiveFilter && (
         <div style={{
           display: "flex",
           alignItems: "center",
@@ -131,7 +194,16 @@ function LeadsKpisClientInner({ initial, initialLeads, initialTotal, children }:
             <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#1FA97A", flexShrink: 0 }} />
             {loadingConverted
               ? "Cargando convertidos..."
-              : <>Mostrando <strong style={{ color: "var(--text-primary)", fontWeight: 500 }}>{filteredLeads?.length ?? 0} leads</strong> &middot; {activeLabel}{searchTerm && ` · "${searchTerm}"`}</>
+              : (
+                <>
+                  Mostrando{" "}
+                  <strong style={{ color: "var(--text-primary)", fontWeight: 500 }}>
+                    {leadsProcesados.length} leads
+                  </strong>
+                  {activeLabel && <> &middot; {activeLabel}</>}
+                  {searchTerm && ` · "${searchTerm}"`}
+                </>
+              )
             }
           </span>
           <button
@@ -144,11 +216,8 @@ function LeadsKpisClientInner({ initial, initialLeads, initialTotal, children }:
           </button>
         </div>
       )}
-      <LeadsTable
-        leads={filteredLeads}
-        initialLeads={filteredLeads ? undefined : initialLeads}
-        initialTotal={filteredLeads ? undefined : initialTotal}
-      />
+
+      <LeadsTable leads={leadsProcesados} initialLeads={initialLeads} initialTotal={initialTotal} />
     </>
   )
 }

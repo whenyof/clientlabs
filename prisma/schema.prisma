@@ -573,6 +573,7 @@ model Lead {
   priority              String          @default("MEDIUM")
   tags                  String[]        @default([])
   notes                 String?
+  additionalInfo        String?
   ip                    String?
   country               String?
   device                String?

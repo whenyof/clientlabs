@@ -22,6 +22,7 @@ interface LeadPanelProps {
     score: number
     source: string
     temperature?: string | null
+    additionalInfo?: string | null
   }
 }
 

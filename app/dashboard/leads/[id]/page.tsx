@@ -33,6 +33,7 @@ export default async function LeadPage({
             score: true,
             source: true,
             temperature: true,
+            additionalInfo: true,
         },
     })
 

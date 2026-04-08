@@ -500,6 +500,7 @@ export async function importLeads(
         phone?: string
         source?: string
         temperature?: LeadTemp
+        additionalInfo?: string
     }>,
     fileType: "csv" | "excel"
 ) {
@@ -579,10 +580,11 @@ export async function importLeads(
                     source,
                     leadStatus: "NEW",
                     status: "NEW", // @deprecated — kept in sync
-                    temperature: leadData.temperature || "COLD", // Use provided temperature or default to COLD
+                    temperature: leadData.temperature || "COLD",
                     score: 0,
                     converted: false,
                     tags,
+                    additionalInfo: leadData.additionalInfo?.trim() || null,
                     lastActionAt: new Date(),
                 }
             })

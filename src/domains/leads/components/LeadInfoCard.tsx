@@ -28,6 +28,7 @@ export interface LeadInfoCardLead {
   score: number
   temperature?: string | null
   createdAt: Date
+  additionalInfo?: string | null
 }
 
 interface LeadInfoCardProps {
@@ -177,6 +178,14 @@ export function LeadInfoCard({ lead, onUpdate }: LeadInfoCardProps) {
             )}
           </div>
         ))}
+
+        {/* Additional info from import (read-only) */}
+        {lead.additionalInfo && (
+          <div className="flex flex-col gap-0.5 py-3 border-b border-slate-100">
+            <span className="text-[10px] uppercase tracking-[0.1em] text-slate-400 font-medium">Info adicional</span>
+            <span className="text-[13px] text-slate-900">{lead.additionalInfo}</span>
+          </div>
+        )}
 
         {/* Read-only fields */}
         <div className="flex flex-col gap-0.5 py-3 border-b border-slate-100">

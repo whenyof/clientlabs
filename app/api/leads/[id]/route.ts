@@ -70,6 +70,14 @@ export async function PATCH(
       }).catch(() => {})
     }
 
+    // Re-score if status changed
+    if (data.leadStatus) {
+      const uid = session.user!.id
+      import('@/lib/scoring/updateLeadScore')
+        .then(({ updateLeadScore }) => updateLeadScore(params.id, uid))
+        .catch(() => {})
+    }
+
     // Fire-and-forget — don't let a slow/down Redis block the response
     invalidateCachedData(`leads-kpis-${session.user.id}`).catch(() => {})
     return NextResponse.json(updated)

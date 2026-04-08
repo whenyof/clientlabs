@@ -60,9 +60,16 @@ export async function POST(
       },
     })
 
-    if (['email_open', 'page_view', 'meeting_booked'].includes(type)) {
-      const { LeadScoringService } = await import('@/lib/services/leadScoring')
-      await LeadScoringService.calculateLeadScore(params.id)
+    const ACTION_MAP: Record<string, string> = {
+      CALL: 'call_registered',
+      NOTE: 'note_added',
+      EMAIL: 'email_sent',
+      MEETING: 'meeting_done',
+    }
+    const scoringAction = ACTION_MAP[type]
+    if (scoringAction) {
+      const { updateLeadScore } = await import('@/lib/scoring/updateLeadScore')
+      await updateLeadScore(params.id, session.user.id, scoringAction)
     }
 
     return NextResponse.json(activity, { status: 201 })

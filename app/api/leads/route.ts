@@ -258,13 +258,11 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    const { LeadScoringService } = await import('@/lib/services/leadScoring')
+    const { updateLeadScore } = await import('@/lib/scoring/updateLeadScore')
+    await updateLeadScore(lead.id, session.user.id, 'manual_import')
 
-    const initialScore = await LeadScoringService.calculateLeadScore(lead.id)
-
-    const updatedLead = await prisma.lead.update({
+    const updatedLead = await prisma.lead.findUnique({
       where: { id: lead.id },
-      data: { score: initialScore },
       include: { stage: true },
     })
 

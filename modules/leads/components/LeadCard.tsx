@@ -6,6 +6,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { LeadRowActions } from "./LeadRowActions"
 import { useUpdateLeadStatus } from "@/hooks/useLeads"
+import { useLeadsOptimistic } from "../context/LeadsOptimisticContext"
 import { toast } from "sonner"
 
 /* ── Status badges ── */
@@ -132,6 +133,7 @@ export function LeadCard({ lead }: LeadCardProps) {
   const dropdownRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLDivElement>(null)
   const statusMutation = useUpdateLeadStatus()
+  const { overrideStatus } = useLeadsOptimistic()
 
   // Sync local status when prop changes (e.g. after markLeadLost / cache update)
   useEffect(() => {
@@ -167,6 +169,7 @@ export function LeadCard({ lead }: LeadCardProps) {
 
   const handleStatusChange = (newStatus: string) => {
     setCurrentStatus(newStatus as any)
+    overrideStatus(lead.id, newStatus)
     setDropdownOpen(false)
     statusMutation.mutate(
       { leadId: lead.id, status: newStatus },

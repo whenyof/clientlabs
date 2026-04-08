@@ -20,6 +20,7 @@ type ParsedLead = {
   email?: string
   phone?: string
   source: string
+  status: string
   temperature: LeadTemp
   excluded: boolean
   additionalInfo?: string
@@ -27,14 +28,20 @@ type ParsedLead = {
 
 // ─── Parser ────────────────────────────────────────────────────────────────
 
-const STATUS_WORDS = [
-  "CUALIFICADO", "CUALIFICADA", "QUALIFIED",
-  "CONTACTADO", "CONTACTADA", "CONTACTED",
-  "INTERESADO", "INTERESADA", "INTERESTED",
-  "NUEVO", "NUEVA", "NEW",
-  "CONVERTIDO", "CONVERTIDA", "CONVERTED",
-  "PERDIDO", "PERDIDA", "LOST",
-]
+const STATUS_MAP: Record<string, string> = {
+  NUEVO: "NEW", NUEVA: "NEW", NEW: "NEW",
+  CONTACTADO: "CONTACTED", CONTACTADA: "CONTACTED", CONTACTED: "CONTACTED",
+  INTERESADO: "INTERESTED", INTERESADA: "INTERESTED", INTERESTED: "INTERESTED",
+  CUALIFICADO: "QUALIFIED", CUALIFICADA: "QUALIFIED", QUALIFIED: "QUALIFIED",
+  POTENCIAL: "QUALIFIED", potencial: "QUALIFIED",
+  CONVERTIDO: "CONVERTED", CONVERTIDA: "CONVERTED", CONVERTED: "CONVERTED",
+  PERDIDO: "LOST", PERDIDA: "LOST", LOST: "LOST",
+}
+
+function parseStatus(s: string): string {
+  if (!s) return "NEW"
+  return STATUS_MAP[s.trim()] ?? STATUS_MAP[s.trim().toUpperCase()] ?? "NEW"
+}
 
 const SOURCE_KEYWORDS = [
   "facebook", "instagram", "linkedin", "google", "web", "referido",
@@ -46,6 +53,8 @@ const TEMP_MAP: Record<string, LeadTemp> = {
   WARM: "WARM", TIBIO: "WARM", TEMPLADO: "WARM",
   COLD: "COLD", FRÍO: "COLD", FRIO: "COLD",
 }
+
+const STATUS_REGEX = /\b(NUEVO|NUEVA|NEW|CONTACTADO|CONTACTADA|CONTACTED|INTERESADO|INTERESADA|INTERESTED|CUALIFICADO|CUALIFICADA|QUALIFIED|POTENCIAL|CONVERTIDO|CONVERTIDA|CONVERTED|PERDIDO|PERDIDA|LOST)\b/gi
 
 function normalizeSource(s: string): string {
   const lower = s?.toLowerCase().trim()
@@ -64,19 +73,19 @@ function isCSV(text: string): boolean {
 }
 
 function parseCSVLine(line: string): ParsedLead | null {
-  const parts = line.split(",").map((p) => p.trim())
-  const [name, email, phone, source, , ...rest] = parts
-  // 5th column (status) is skipped — all imports start as NEW
+  // Expected columns: name, email, phone, company(ignored), source, status, additionalInfo
+  const cols = line.split(",").map((p) => p.trim())
+  const [name, email, phone, , source, statusRaw, ...rest] = cols
   if (!name && !email && !phone) return null
-  const additionalInfo = rest.join(" ").trim() || undefined
   return {
     name: name || undefined,
     email: email || undefined,
     phone: phone || undefined,
     source: normalizeSource(source),
+    status: parseStatus(statusRaw),
     temperature: "COLD",
     excluded: false,
-    additionalInfo,
+    additionalInfo: rest.join(" ").trim() || undefined,
   }
 }
 
@@ -100,9 +109,10 @@ function parseFreeLine(line: string): ParsedLead | null {
     remaining = remaining.replace(tempMatch[0], " ")
   }
 
-  // Remove status keywords
-  const statusPattern = new RegExp(`\\b(${STATUS_WORDS.join("|")})\\b`, "i")
-  remaining = remaining.replace(statusPattern, " ")
+  // Extract status — capture before removing
+  const statusMatch = remaining.match(STATUS_REGEX)
+  const status = statusMatch ? parseStatus(statusMatch[0]) : "NEW"
+  remaining = remaining.replace(STATUS_REGEX, " ")
 
   // Extract source
   let source = "paste"
@@ -115,14 +125,14 @@ function parseFreeLine(line: string): ParsedLead | null {
     }
   }
 
-  // Clean up
-  remaining = remaining.replace(/\s+/g, " ").trim()
+  // Clean up commas and extra spaces
+  remaining = remaining.replace(/,+/g, " ").replace(/\s+/g, " ").trim()
 
   // Split into name (leading title-case words) + additionalInfo (rest)
   const tokens = remaining.split(/\s+/).filter(Boolean)
   let nameCount = 0
   for (let i = 0; i < Math.min(4, tokens.length); i++) {
-    if (/^[A-ZÁÉÍÓÚÑÜ][a-záéíóúñü]/.test(tokens[i])) {
+    if (/^[A-ZÁÉÍÓÚÑÜ][a-záéíóúñü]/.test(tokens[i]) && !/^\d/.test(tokens[i])) {
       nameCount = i + 1
     } else {
       break
@@ -131,7 +141,6 @@ function parseFreeLine(line: string): ParsedLead | null {
 
   const name = nameCount > 0 ? tokens.slice(0, nameCount).join(" ") : undefined
   const infoRest = tokens.slice(nameCount).join(" ").trim()
-  const additionalInfo = infoRest || undefined
 
   if (!emails[0] && !phones[0] && !name) return null
 
@@ -140,9 +149,10 @@ function parseFreeLine(line: string): ParsedLead | null {
     email: emails[0] || undefined,
     phone: phones[0] || undefined,
     source,
+    status,
     temperature,
     excluded: false,
-    additionalInfo,
+    additionalInfo: infoRest || undefined,
   }
 }
 
@@ -264,13 +274,13 @@ export function PasteLeadsDialog({
               <textarea
                 value={pastedText}
                 onChange={(e) => setPastedText(e.target.value)}
-                placeholder={"CSV (nombre, email, tel, fuente, estado, notas):\nRoberto García,roberto@empresa.com,699123456,Facebook,CUALIFICADO,Consultor que busca CRM\n\nTexto libre:\nAna López 612345678 instagram ana@negocio.es INTERESADA Autónoma sector salud"}
+                placeholder={"CSV (nombre, email, tel, empresa, fuente, estado, notas):\nMaría García,maria@empresa.com,699123456,Empresa SL,Facebook,CUALIFICADO,Diseñadora freelance\n\nTexto libre:\nAna López 612345678 instagram ana@negocio.es INTERESADA Autónoma sector salud"}
                 className="w-full min-h-[260px] border border-slate-200 rounded-xl p-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#1FA97A] focus:ring-2 focus:ring-[#1FA97A]/10 outline-none resize-none font-mono bg-slate-50 focus:bg-white transition-colors"
               />
               <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg border border-blue-100">
                 <Info className="h-3.5 w-3.5 text-blue-400 mt-0.5 flex-shrink-0" />
                 <p className="text-xs text-blue-600">
-                  Detectamos CSV (con comas) o texto libre. CSV: nombre, email, teléfono, fuente, estado, notas extras.
+                  Detectamos CSV (con comas) o texto libre. CSV: nombre, email, teléfono, empresa, fuente, estado, notas.
                 </p>
               </div>
             </div>
@@ -308,7 +318,7 @@ export function PasteLeadsDialog({
                           <th className="px-3 py-2.5 text-left text-xs uppercase tracking-wider text-slate-500 font-medium">Nombre</th>
                           <th className="px-3 py-2.5 text-left text-xs uppercase tracking-wider text-slate-500 font-medium">Email</th>
                           <th className="px-3 py-2.5 text-left text-xs uppercase tracking-wider text-slate-500 font-medium">Teléfono</th>
-                          <th className="px-3 py-2.5 text-left text-xs uppercase tracking-wider text-slate-500 font-medium">Fuente</th>
+                          <th className="px-3 py-2.5 text-left text-xs uppercase tracking-wider text-slate-500 font-medium">Estado</th>
                           <th className="px-3 py-2.5 text-left text-xs uppercase tracking-wider text-slate-500 font-medium">Info adicional</th>
                           <th className="px-3 py-2.5 w-8"></th>
                         </tr>
@@ -379,8 +389,8 @@ export function PasteLeadsDialog({
                               />
                             </td>
 
-                            {/* Source */}
-                            <td className="px-3 py-2.5 text-xs text-slate-500 capitalize">{lead.source}</td>
+                            {/* Status */}
+                            <td className="px-3 py-2.5 text-xs text-slate-500">{lead.status}</td>
 
                             {/* Additional Info */}
                             <td className="px-3 py-2.5 text-xs text-slate-400 max-w-[160px]">

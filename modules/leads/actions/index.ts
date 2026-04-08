@@ -493,12 +493,22 @@ export async function createLead(data: {
 }
 
 // Import leads from CSV/Excel
+const VALID_STATUSES = ["NEW", "CONTACTED", "INTERESTED", "QUALIFIED", "CONVERTED", "LOST"] as const
+type ImportLeadStatus = typeof VALID_STATUSES[number]
+
+function sanitizeStatus(s?: string): ImportLeadStatus {
+    if (!s) return "NEW"
+    const upper = s.trim().toUpperCase() as ImportLeadStatus
+    return VALID_STATUSES.includes(upper) ? upper : "NEW"
+}
+
 export async function importLeads(
     leads: Array<{
         name?: string
         email?: string
         phone?: string
         source?: string
+        status?: string
         temperature?: LeadTemp
         additionalInfo?: string
     }>,
@@ -570,6 +580,8 @@ export async function importLeads(
 
             tags.push(`batch:${batchDate}`)
 
+            const leadStatus = sanitizeStatus(leadData.status)
+
             // Create lead with safe defaults
             await prisma.lead.create({
                 data: {
@@ -578,11 +590,11 @@ export async function importLeads(
                     email,
                     phone,
                     source,
-                    leadStatus: "NEW",
-                    status: "NEW", // @deprecated — kept in sync
+                    leadStatus,
+                    status: leadStatus, // @deprecated — kept in sync
                     temperature: leadData.temperature || "COLD",
                     score: 0,
-                    converted: false,
+                    converted: leadStatus === "CONVERTED",
                     tags,
                     additionalInfo: leadData.additionalInfo?.trim() || null,
                     lastActionAt: new Date(),

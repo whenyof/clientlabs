@@ -187,9 +187,16 @@ function LeadsKpisClientInner({ initial, initialLeads, initialTotal, children }:
     searchTerm.trim()
   )
 
+  // Compute live KPIs from in-memory leads (zero API calls, instant update)
+  const liveKpis = useMemo(() => ({
+    ...kpis,
+    stalled: leads.filter(l => l.leadStatus === "STALLED").length,
+    hot: leads.filter(isPotencial).length,
+  }), [kpis, leads])
+
   return (
     <>
-      <LeadsKPIs kpis={kpis} activeKpi={activeKpi} onKpiClick={handleKpiClick} />
+      <LeadsKPIs kpis={liveKpis} activeKpi={activeKpi} onKpiClick={handleKpiClick} />
       {children}
 
       {/* Filter status bar */}

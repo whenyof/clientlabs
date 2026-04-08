@@ -40,6 +40,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { DeleteLeadDialog } from "./DeleteLeadDialog"
 import { useSectorConfig } from "@/hooks/useSectorConfig"
+import { useLeadsOptimistic } from "../context/LeadsOptimisticContext"
 
 export function LeadRowActions({ lead }: { lead: Lead }) {
  const { labels } = useSectorConfig()
@@ -47,6 +48,7 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
  const statusLabels = labels.leads.status as Record<string, string>
  const router = useRouter()
  const queryClient = useQueryClient()
+ const { overrideStatus } = useLeadsOptimistic()
  const [loading, setLoading] = useState(false)
  const [noteDialog, setNoteDialog] = useState(false)
  const [lostDialog, setLostDialog] = useState(false)
@@ -118,6 +120,8 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
  if (!lostReason.trim()) return
  setLoading(true)
  try {
+   // Instant visual update via context — LeadsTable reads this directly
+   overrideStatus(lead.id, "LOST")
    queryClient.setQueriesData(
      { queryKey: ["leads"] },
      (old: any) => {

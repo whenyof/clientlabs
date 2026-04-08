@@ -68,6 +68,7 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
   const [showEmailChoice, setShowEmailChoice] = useState(false)
   const [showInteractionModal, setShowInteractionModal] = useState(false)
   const [localScore, setLocalScore] = useState(lead.score)
+  const [localStatus, setLocalStatus] = useState(lead.leadStatus)
   const [convertDialog, setConvertDialog] = useState(false)
   const [lostDialog, setLostDialog] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState(false)
@@ -75,7 +76,7 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
   const [lostReason, setLostReason] = useState("")
 
   const initials = getInitials(lead.name, lead.email)
-  const statusLabel = STATUS_LABELS[lead.leadStatus] ?? lead.leadStatus
+  const statusLabel = STATUS_LABELS[localStatus] ?? localStatus
   const tempLabel = lead.temperature ? TEMP_LABELS[lead.temperature] ?? lead.temperature : null
 
   const handleEmail = () => {
@@ -107,6 +108,7 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
     setConverting(true)
     try {
       await convertLeadToClient(lead.id)
+      setLocalStatus("CONVERTED")
       setConvertDialog(false)
       toast.success("Lead convertido a cliente")
       router.refresh()
@@ -123,6 +125,7 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
     setMarkingLost(true)
     try {
       await markLeadLost(lead.id, lostReason || "Sin motivo especificado")
+      setLocalStatus("LOST")
       setLostDialog(false)
       setLostReason("")
       toast.success("Lead marcado como perdido")
@@ -153,8 +156,8 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
     ? format(new Date(lead.lastActionAt), "d MMM yyyy", { locale: es })
     : "Sin actividad"
 
-  const showConvert = lead.leadStatus !== "CONVERTED"
-  const showLost = lead.leadStatus !== "LOST" && lead.leadStatus !== "CONVERTED"
+  const showConvert = localStatus !== "CONVERTED"
+  const showLost = localStatus !== "LOST" && localStatus !== "CONVERTED"
 
   return (
     <div>

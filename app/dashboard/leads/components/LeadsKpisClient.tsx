@@ -1,12 +1,14 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useCallback } from "react"
 import { useLeads } from "@/hooks/useLeads"
 import { LeadsKPIs, type KpisData } from "@domains/leads/components/LeadsKPIs"
 import { LeadsTable } from "@domains/leads/components/LeadsTable"
 import { LeadsSearchProvider, useLeadsSearch } from "./LeadsSearchContext"
 import type { Lead } from "@prisma/client"
 import { X } from "lucide-react"
+
+const PAGE_SIZE = 20
 
 const KPI_LABELS: Record<string, string> = {
   total:     "Total leads",
@@ -57,6 +59,7 @@ function LeadsKpisClientInner({ initial, initialLeads, initialTotal, children }:
   const [activeKpi, setActiveKpi] = useState<string | null>(null)
   const [convertedLeads, setConvertedLeads] = useState<Lead[] | null>(null)
   const [loadingConverted, setLoadingConverted] = useState(false)
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
   useEffect(() => {
     const fetchKpis = async () => {
@@ -84,6 +87,11 @@ function LeadsKpisClientInner({ initial, initialLeads, initialTotal, children }:
       .catch(() => setConvertedLeads([]))
       .finally(() => setLoadingConverted(false))
   }, [activeKpi, convertedLeads])
+
+  // Reset visible count when any filter changes
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE)
+  }, [activeKpi, searchTerm, sortBy, sortOrder, filterStatus, filterSource, filterTemperature])
 
   const { leads } = useLeads({}, { initialLeads, initialTotal })
 
@@ -161,9 +169,15 @@ function LeadsKpisClientInner({ initial, initialLeads, initialTotal, children }:
     return result
   }, [leads, activeKpi, convertedLeads, searchTerm, filterStatus, filterSource, filterTemperature, sortBy, sortOrder])
 
-  const handleKpiClick = (key: string) => {
+  const leadsVisibles = useMemo(
+    () => leadsProcesados.slice(0, visibleCount),
+    [leadsProcesados, visibleCount]
+  )
+  const hayMas = leadsProcesados.length > visibleCount
+
+  const handleKpiClick = useCallback((key: string) => {
     setActiveKpi(prev => prev === key ? null : key)
-  }
+  }, [])
 
   const activeLabel = activeKpi ? KPI_LABELS[activeKpi] : null
   const hasActiveFilter = !!(
@@ -217,7 +231,41 @@ function LeadsKpisClientInner({ initial, initialLeads, initialTotal, children }:
         </div>
       )}
 
-      <LeadsTable leads={leadsProcesados} initialLeads={initialLeads} initialTotal={initialTotal} />
+      <LeadsTable leads={leadsVisibles} initialLeads={initialLeads} initialTotal={initialTotal} />
+
+      {hayMas && (
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, paddingTop: 16, paddingBottom: 8 }}>
+          <button
+            onClick={() => setVisibleCount(prev => prev + PAGE_SIZE)}
+            style={{
+              padding: "8px 24px",
+              fontSize: 12,
+              fontWeight: 500,
+              color: "#64748b",
+              border: "0.5px solid #e2e8f0",
+              borderRadius: 8,
+              background: "#fff",
+              cursor: "pointer",
+              transition: "border-color 0.15s, color 0.15s",
+            }}
+            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "#1FA97A"; (e.currentTarget as HTMLButtonElement).style.color = "#1FA97A" }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "#e2e8f0"; (e.currentTarget as HTMLButtonElement).style.color = "#64748b" }}
+          >
+            Ver {Math.min(PAGE_SIZE, leadsProcesados.length - visibleCount)} leads más
+          </button>
+          <span style={{ fontSize: 10, color: "#94a3b8" }}>
+            Mostrando {leadsVisibles.length} de {leadsProcesados.length} leads
+          </span>
+        </div>
+      )}
+
+      {!hayMas && leadsProcesados.length > PAGE_SIZE && (
+        <div style={{ textAlign: "center", paddingTop: 12, paddingBottom: 8 }}>
+          <span style={{ fontSize: 10, color: "#94a3b8" }}>
+            Todos los leads cargados · {leadsProcesados.length} en total
+          </span>
+        </div>
+      )}
     </>
   )
 }

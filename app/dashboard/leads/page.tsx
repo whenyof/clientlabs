@@ -105,7 +105,6 @@ export default async function LeadsPage({
     prisma.lead.findMany({
       where: { userId: uid, leadStatus: { notIn: ["CONVERTED", "LOST"] } },
       orderBy: { score: "desc" },
-      take: 20,
       select: {
         id: true, userId: true, email: true, name: true, phone: true,
         source: true, leadStatus: true, temperature: true, score: true,

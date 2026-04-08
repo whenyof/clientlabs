@@ -19,6 +19,7 @@ import {
   TEMP_LABELS,
 } from "@domains/leads/utils/formatting"
 import { LeadInteractionModal } from "@domains/leads/components/LeadInteractionModal"
+import { convertLeadToClient, markLeadLost, deleteLead } from "@/modules/leads/actions"
 
 export interface LeadHeaderLead {
   id: string
@@ -59,17 +60,6 @@ function Badge({ children, style }: { children: React.ReactNode; style?: React.C
   )
 }
 
-async function logActivity(leadId: string, type: string, content: string) {
-  try {
-    await fetch(`/api/leads/${leadId}/activity`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type, title: content, description: content }),
-    })
-  } catch {
-    // non-blocking
-  }
-}
 
 export function LeadHeader({ lead }: LeadHeaderProps) {
   const router = useRouter()
@@ -80,6 +70,8 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
   const [localScore, setLocalScore] = useState(lead.score)
   const [convertDialog, setConvertDialog] = useState(false)
   const [lostDialog, setLostDialog] = useState(false)
+  const [deleteDialog, setDeleteDialog] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [lostReason, setLostReason] = useState("")
 
   const initials = getInitials(lead.name, lead.email)
@@ -114,21 +106,12 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
   const doConvert = async () => {
     setConverting(true)
     try {
-      const res = await fetch(`/api/leads/${lead.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ leadStatus: "CONVERTED", converted: true }),
-      })
-      if (res.ok) {
-        logActivity(lead.id, "STATUS_CHANGE", "Lead convertido a cliente")
-        setConvertDialog(false)
-        toast.success("Lead convertido a cliente")
-        router.refresh()
-      } else {
-        toast.error("Error al convertir")
-      }
-    } catch {
-      toast.error("Error de conexión")
+      await convertLeadToClient(lead.id)
+      setConvertDialog(false)
+      toast.success("Lead convertido a cliente")
+      router.refresh()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Error al convertir")
     } finally {
       setConverting(false)
     }
@@ -139,24 +122,29 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
   const doLost = async () => {
     setMarkingLost(true)
     try {
-      const res = await fetch(`/api/leads/${lead.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ leadStatus: "LOST" }),
-      })
-      if (res.ok) {
-        logActivity(lead.id, "STATUS_CHANGE", lostReason ? `Lead perdido: ${lostReason}` : "Lead marcado como perdido")
-        setLostDialog(false)
-        setLostReason("")
-        toast.success("Lead marcado como perdido")
-        router.refresh()
-      } else {
-        toast.error("Error al cambiar estado")
-      }
-    } catch {
-      toast.error("Error de conexión")
+      await markLeadLost(lead.id, lostReason || "Sin motivo especificado")
+      setLostDialog(false)
+      setLostReason("")
+      toast.success("Lead marcado como perdido")
+      router.refresh()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Error al cambiar estado")
     } finally {
       setMarkingLost(false)
+    }
+  }
+
+  const doDelete = async () => {
+    setDeleting(true)
+    try {
+      await deleteLead(lead.id)
+      setDeleteDialog(false)
+      toast.success("Lead eliminado")
+      router.push("/dashboard/leads")
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Error al eliminar")
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -364,6 +352,28 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
                 {markingLost ? "Marcando..." : "Perdido"}
               </button>
             )}
+            {lead.leadStatus !== "CONVERTED" && (
+              <button
+                type="button"
+                onClick={() => setDeleteDialog(true)}
+                title="Eliminar lead"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 32,
+                  height: 32,
+                  borderRadius: 8,
+                  border: "0.5px solid #fca5a5",
+                  background: "#fff5f5",
+                  color: "#EF4444",
+                  cursor: "pointer",
+                  flexShrink: 0,
+                }}
+              >
+                <Trash2 style={{ width: 14, height: 14 }} />
+              </button>
+            )}
           </div>
         </div>
 
@@ -497,6 +507,61 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
             >
               {markingLost && <Loader2 style={{ width: 14, height: 14 }} className="animate-spin" />}
               {markingLost ? "Marcando..." : "Marcar como perdido"}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete dialog */}
+      <Dialog open={deleteDialog} onOpenChange={setDeleteDialog}>
+        <DialogContent className="bg-white border-[0.5px] border-slate-200 rounded-xl p-0 overflow-hidden max-w-md shadow-sm">
+          <div className="flex items-start gap-4 p-6 pb-4">
+            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-50 border border-red-100 flex items-center justify-center">
+              <Trash2 style={{ width: 18, height: 18 }} className="text-red-500" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <DialogTitle className="text-[15px] font-semibold text-slate-900 leading-snug">
+                Eliminar lead
+              </DialogTitle>
+              <p className="text-[13px] text-slate-500 mt-0.5">Esta acción no se puede deshacer</p>
+            </div>
+          </div>
+          <div className="mx-6 mb-4 px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl">
+            <p className="text-[13px] text-slate-500 mb-0.5">Lead a eliminar</p>
+            <p className="text-[14px] font-semibold text-slate-900">{lead.name || "Sin nombre"}</p>
+            {lead.email && <p className="text-[12px] text-slate-400 mt-0.5">{lead.email}</p>}
+          </div>
+          <div className="mx-6 mb-5 flex items-start gap-2.5 px-3.5 py-3 bg-red-50 border border-red-100 rounded-xl">
+            <AlertTriangle style={{ width: 15, height: 15 }} className="text-red-500 flex-shrink-0 mt-0.5" />
+            <p className="text-[12.5px] text-red-700 leading-relaxed">
+              Se eliminarán el lead y todo su historial de actividad de forma permanente.
+            </p>
+          </div>
+          <div className="flex items-center justify-end gap-2.5 px-6 py-4 border-t border-slate-100 bg-slate-50/50">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialog(false)}
+              disabled={deleting}
+              className="h-9 px-4 text-[13px] font-medium border-slate-200 text-slate-700 bg-white hover:bg-slate-50"
+            >
+              Cancelar
+            </Button>
+            <button
+              type="button"
+              onClick={doDelete}
+              disabled={deleting}
+              style={{
+                display: "flex", alignItems: "center", gap: 6,
+                height: 36, padding: "0 16px",
+                fontSize: 13, fontWeight: 500, borderRadius: 8,
+                background: deleting ? "#fca5a5" : "#EF4444",
+                color: "#fff", border: "none",
+                cursor: deleting ? "not-allowed" : "pointer",
+                transition: "background 0.15s",
+              }}
+            >
+              {deleting && <Loader2 style={{ width: 14, height: 14 }} className="animate-spin" />}
+              {deleting ? "Eliminando..." : "Eliminar lead"}
             </button>
           </div>
         </DialogContent>

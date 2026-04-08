@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { updateLeadScore } from '@/lib/scoring/updateLeadScore'
 
 export async function POST() {
   try {
@@ -17,7 +18,6 @@ export async function POST() {
     })
 
     const uid = session.user!.id
-    const { updateLeadScore } = await import('@/lib/scoring/updateLeadScore')
     await Promise.all(leads.map((l) => updateLeadScore(l.id, uid)))
 
     return NextResponse.json({ success: true, count: leads.length })

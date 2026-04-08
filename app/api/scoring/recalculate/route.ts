@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { updateLeadScore } from '@/lib/scoring/updateLeadScore'
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,7 +14,6 @@ export async function POST(request: NextRequest) {
 
     const { leadId } = await request.json()
     const uid = session.user!.id
-    const { updateLeadScore } = await import('@/lib/scoring/updateLeadScore')
 
     if (leadId) {
       await updateLeadScore(leadId, uid)

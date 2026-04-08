@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { updateLeadScore } from '@/lib/scoring/updateLeadScore'
 
 export async function GET(
   _req: NextRequest,
@@ -68,7 +69,6 @@ export async function POST(
     }
     const scoringAction = ACTION_MAP[type]
     if (scoringAction) {
-      const { updateLeadScore } = await import('@/lib/scoring/updateLeadScore')
       await updateLeadScore(params.id, session.user.id, scoringAction)
     }
 

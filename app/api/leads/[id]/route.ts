@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { invalidateCachedData } from "@/lib/redis-cache"
+import { updateLeadScore } from "@/lib/scoring/updateLeadScore"
 
 export async function PATCH(
   request: NextRequest,
@@ -73,9 +74,7 @@ export async function PATCH(
     // Re-score if status changed
     if (data.leadStatus) {
       const uid = session.user!.id
-      import('@/lib/scoring/updateLeadScore')
-        .then(({ updateLeadScore }) => updateLeadScore(params.id, uid))
-        .catch(() => {})
+      updateLeadScore(params.id, uid).catch(() => {})
     }
 
     // Fire-and-forget — don't let a slow/down Redis block the response

@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 import { invalidateCachedData } from '@/lib/redis-cache'
+import { updateLeadScore } from '@/lib/scoring/updateLeadScore'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 30
@@ -258,7 +259,6 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    const { updateLeadScore } = await import('@/lib/scoring/updateLeadScore')
     await updateLeadScore(lead.id, session.user.id, 'manual_import')
 
     const updatedLead = await prisma.lead.findUnique({

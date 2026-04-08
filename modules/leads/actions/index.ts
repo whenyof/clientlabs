@@ -11,9 +11,9 @@ import { invalidateCachedData } from "@/lib/redis-cache"
 /* ==================== SCORING & TEMPERATURE ==================== */
 
 // Global trigger for lead scoring (unified engine)
-async function triggerLeadScoring(leadId: string) {
-    const { LeadScoringService } = await import("@/lib/services/leadScoring")
-    await LeadScoringService.calculateLeadScore(leadId)
+async function triggerLeadScoring(leadId: string, userId: string, action?: string) {
+    const { updateLeadScore } = await import("@/lib/scoring/updateLeadScore")
+    await updateLeadScore(leadId, userId, action)
 }
 
 /* ==================== ACTIONS ==================== */
@@ -47,7 +47,7 @@ export async function changeLeadStatus(leadId: string, status: LeadStatus) {
 
         // Recalculate score and temperature — non-blocking, don't fail the status change
         try {
-            await triggerLeadScoring(leadId)
+            await triggerLeadScoring(leadId, session.user.id)
         } catch (scoringError) {
             console.error("[changeLeadStatus] Scoring failed (non-blocking):", scoringError)
         }
@@ -83,7 +83,7 @@ export async function changeLeadTemperature(leadId: string, temperature: LeadTem
     })
 
     // Recalculate score using global engine
-    await triggerLeadScoring(leadId)
+    await triggerLeadScoring(leadId, session.user.id)
 
     revalidatePath("/dashboard/leads")
     revalidatePath("/dashboard/other/leads")
@@ -277,8 +277,8 @@ export async function addLeadNote(leadId: string, text: string) {
     })
 
     // Recalculate score using global engine
-    await triggerLeadScoring(leadId)
-    
+    await triggerLeadScoring(leadId, session.user.id, "note_added")
+
     revalidatePath("/dashboard/leads")
     revalidatePath("/dashboard/other/leads")
     revalidatePath("/dashboard/other")
@@ -314,7 +314,7 @@ export async function registerLeadCall(leadId: string, notes: string) {
     })
 
     // Recalculate score using global engine
-    await triggerLeadScoring(leadId)
+    await triggerLeadScoring(leadId, session.user.id, "call_registered")
 
     revalidatePath("/dashboard/leads")
     revalidatePath("/dashboard/other/leads")

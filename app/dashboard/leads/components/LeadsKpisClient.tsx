@@ -55,6 +55,8 @@ function LeadsKpisClientInner({ initial, initialLeads, initialTotal, children }:
   const [activeKpi, setActiveKpi] = useState<string | null>(null)
   const [convertedLeads, setConvertedLeads] = useState<Lead[] | null>(null)
   const [loadingConverted, setLoadingConverted] = useState(false)
+  const [lostLeads, setLostLeads] = useState<Lead[] | null>(null)
+  const [loadingLost, setLoadingLost] = useState(false)
 
   useEffect(() => {
     const fetchKpis = async () => {
@@ -83,6 +85,17 @@ function LeadsKpisClientInner({ initial, initialLeads, initialTotal, children }:
       .finally(() => setLoadingConverted(false))
   }, [activeKpi, convertedLeads])
 
+  useEffect(() => {
+    if (filterStatus !== "LOST") return
+    if (lostLeads !== null) return
+    setLoadingLost(true)
+    fetch("/api/leads?showLost=true&status=LOST&limit=200", { cache: "no-store" })
+      .then(r => r.json())
+      .then(data => setLostLeads(data.leads ?? []))
+      .catch(() => setLostLeads([]))
+      .finally(() => setLoadingLost(false))
+  }, [filterStatus, lostLeads])
+
   const { leads } = useLeads({}, { initialLeads, initialTotal })
 
   const leadsProcesados = useMemo(() => {
@@ -100,8 +113,10 @@ function LeadsKpisClientInner({ initial, initialLeads, initialTotal, children }:
       result = [...leads]
     }
 
-    // 2 — Status filter
-    if (filterStatus && filterStatus !== "all") {
+    // 2 — Status filter (LOST leads are fetched separately)
+    if (filterStatus === "LOST") {
+      result = [...(lostLeads ?? [])]
+    } else if (filterStatus && filterStatus !== "all") {
       result = result.filter(l => l.leadStatus === filterStatus)
     }
 
@@ -157,7 +172,7 @@ function LeadsKpisClientInner({ initial, initialLeads, initialTotal, children }:
     })
 
     return result
-  }, [leads, activeKpi, convertedLeads, searchTerm, filterStatus, filterSource, filterTemperature, sortBy, sortOrder])
+  }, [leads, activeKpi, convertedLeads, lostLeads, searchTerm, filterStatus, filterSource, filterTemperature, sortBy, sortOrder])
 
   const handleKpiClick = useCallback((key: string) => {
     setActiveKpi(prev => prev === key ? null : key)
@@ -190,8 +205,8 @@ function LeadsKpisClientInner({ initial, initialLeads, initialTotal, children }:
         }}>
           <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--text-secondary)" }}>
             <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#1FA97A", flexShrink: 0 }} />
-            {loadingConverted
-              ? "Cargando convertidos..."
+            {(loadingConverted || loadingLost)
+              ? `Cargando ${loadingLost ? "perdidos" : "convertidos"}...`
               : (
                 <>
                   Mostrando{" "}

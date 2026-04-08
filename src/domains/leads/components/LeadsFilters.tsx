@@ -79,6 +79,8 @@ export function LeadsFilters({ sources }: { sources: string[] }) {
             <SelectItem value="CONTACTED">{labels.leads.status.CONTACTED}</SelectItem>
             <SelectItem value="INTERESTED">{labels.leads.status.INTERESTED}</SelectItem>
             <SelectItem value="QUALIFIED">{labels.leads.status.QUALIFIED}</SelectItem>
+            <SelectItem value="STALLED">Estancado</SelectItem>
+            <SelectItem value="LOST">Perdido</SelectItem>
           </SelectContent>
         </Select>
 

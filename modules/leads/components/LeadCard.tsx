@@ -15,7 +15,7 @@ const STATUS_CONFIG: Record<string, { label: string; bg: string; color: string; 
   CONTACTED: { label: "Contactado", bg: "#E6F1FB", color: "#185FA5", border: "#B5D4F4", dot: "#378ADD" },
   QUALIFIED: { label: "Cualificado", bg: "#FAEEDA", color: "#854F0B", border: "#FAC775", dot: "#EF9F27" },
   INTERESTED: { label: "Interesado", bg: "#FAEEDA", color: "#854F0B", border: "#FAC775", dot: "#EF9F27" },
-  STALLED: { label: "Estancado", bg: "#FEF3C7", color: "#92400E", border: "#FCD34D", dot: "#F59E0B" },
+  STALLED: { label: "Estancado", bg: "#F1F5F9", color: "#475569", border: "#CBD5E1", dot: "#94A3B8" },
   LOST: { label: "Perdido", bg: "#FCEBEB", color: "#A32D2D", border: "#F7C1C1", dot: "#E24B4A" },
   CONVERTED: { label: "Convertido", bg: "#EEEDFE", color: "#3C3489", border: "#CECBF6", dot: "#6C63FF" },
 }
@@ -132,6 +132,11 @@ export function LeadCard({ lead }: LeadCardProps) {
   const dropdownRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLDivElement>(null)
   const statusMutation = useUpdateLeadStatus()
+
+  // Sync local status when prop changes (e.g. after markLeadLost / cache update)
+  useEffect(() => {
+    setCurrentStatus(lead.leadStatus)
+  }, [lead.leadStatus])
 
   // Close dropdown on click outside
   useEffect(() => {

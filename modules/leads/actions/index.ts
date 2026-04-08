@@ -356,6 +356,7 @@ export async function markLeadLost(leadId: string, reason: string) {
     })
 
     revalidatePath("/dashboard/leads")
+    revalidatePath(`/dashboard/leads/${leadId}`)
     revalidatePath("/dashboard/other/leads")
     revalidatePath("/dashboard/other")
     return { success: true }
@@ -438,6 +439,7 @@ export async function convertLeadToClient(leadId: string) {
     })
 
     revalidatePath("/dashboard/leads")
+    revalidatePath(`/dashboard/leads/${leadId}`)
     revalidatePath("/dashboard/other/leads")
     revalidatePath("/dashboard/clients")
     revalidatePath("/dashboard/other")

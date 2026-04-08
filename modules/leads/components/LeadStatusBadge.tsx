@@ -20,7 +20,7 @@ const statusClassNames: Record<LeadStatus, string> = {
  CONTACTED: "bg-[#E6F1FB] text-[#185FA5] border-[#185FA5]/30 font-medium",
  INTERESTED: "bg-[#FAEEDA] text-[#854F0B] border-[#854F0B]/30 font-medium",
  QUALIFIED: "bg-[#FAEEDA] text-[#854F0B] border-[#854F0B]/30 font-medium",
- STALLED: "bg-[#FEF3C7] text-[#92400E] border-[#92400E]/30 font-medium",
+ STALLED: "bg-[#F1F5F9] text-[#475569] border-[#CBD5E1] font-medium",
  CONVERTED: "bg-[#EEEDFE] text-[#3C3489] border-[#CECBF6] font-medium",
  LOST: "bg-[#FCEBEB] text-[#A32D2D] border-[#A32D2D]/30 font-medium",
 }

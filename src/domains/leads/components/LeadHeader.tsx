@@ -2,10 +2,15 @@
 
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
-import { ArrowLeft, Mail, StickyNote, Megaphone, ExternalLink, X, MessageSquare } from "lucide-react"
+import { ArrowLeft, Mail, StickyNote, Megaphone, ExternalLink, X, MessageSquare, UserCheck, AlertTriangle, Check, Trash2, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { toast } from "sonner"
 import {
   formatSource,
@@ -73,6 +78,9 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
   const [showEmailChoice, setShowEmailChoice] = useState(false)
   const [showInteractionModal, setShowInteractionModal] = useState(false)
   const [localScore, setLocalScore] = useState(lead.score)
+  const [convertDialog, setConvertDialog] = useState(false)
+  const [lostDialog, setLostDialog] = useState(false)
+  const [lostReason, setLostReason] = useState("")
 
   const initials = getInitials(lead.name, lead.email)
   const statusLabel = STATUS_LABELS[lead.leadStatus] ?? lead.leadStatus
@@ -101,8 +109,9 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
     setShowEmailChoice(false)
   }
 
-  const handleConvert = async () => {
-    if (!confirm("¿Convertir este lead en cliente?")) return
+  const handleConvert = () => setConvertDialog(true)
+
+  const doConvert = async () => {
     setConverting(true)
     try {
       const res = await fetch(`/api/leads/${lead.id}`, {
@@ -111,8 +120,8 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
         body: JSON.stringify({ leadStatus: "CONVERTED", converted: true }),
       })
       if (res.ok) {
-        // Fire-and-forget — don't block the success toast waiting for the activity log
         logActivity(lead.id, "STATUS_CHANGE", "Lead convertido a cliente")
+        setConvertDialog(false)
         toast.success("Lead convertido a cliente")
         router.refresh()
       } else {
@@ -125,8 +134,9 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
     }
   }
 
-  const handleLost = async () => {
-    if (!confirm("¿Marcar este lead como perdido?")) return
+  const handleLost = () => setLostDialog(true)
+
+  const doLost = async () => {
     setMarkingLost(true)
     try {
       const res = await fetch(`/api/leads/${lead.id}`, {
@@ -135,7 +145,9 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
         body: JSON.stringify({ leadStatus: "LOST" }),
       })
       if (res.ok) {
-        logActivity(lead.id, "STATUS_CHANGE", "Lead marcado como perdido")
+        logActivity(lead.id, "STATUS_CHANGE", lostReason ? `Lead perdido: ${lostReason}` : "Lead marcado como perdido")
+        setLostDialog(false)
+        setLostReason("")
         toast.success("Lead marcado como perdido")
         router.refresh()
       } else {
@@ -364,6 +376,131 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
           router.refresh()
         }}
       />
+
+      {/* Convert to client dialog */}
+      <Dialog open={convertDialog} onOpenChange={setConvertDialog}>
+        <DialogContent className="bg-white border-[0.5px] border-slate-200 rounded-xl p-0 overflow-hidden max-w-md shadow-sm">
+          <div className="flex items-start gap-4 p-6 pb-4">
+            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#E6F6F1] border border-[#9FE1CB] flex items-center justify-center">
+              <UserCheck style={{ width: 18, height: 18, color: "#1FA97A" }} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <DialogTitle className="text-[15px] font-semibold text-slate-900 leading-snug">
+                Convertir en cliente
+              </DialogTitle>
+              <p className="text-[13px] text-slate-500 mt-0.5">Esta acción es permanente y no se puede deshacer</p>
+            </div>
+          </div>
+          <div className="mx-6 mb-4 px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl">
+            <p className="text-[14px] font-semibold text-slate-900">{lead.name || "Sin nombre"}</p>
+            {lead.email && <p className="text-[12px] text-slate-500 mt-0.5">{lead.email}</p>}
+          </div>
+          <div className="mx-6 mb-5 space-y-2">
+            {[
+              "Se creará un nuevo cliente con los datos de este lead",
+              "El historial de actividad quedará registrado",
+              "El lead se marcará como Convertido",
+            ].map((bullet, i) => (
+              <div key={i} className="flex items-start gap-2.5">
+                <div className="flex-shrink-0 w-4 h-4 rounded-full bg-[#E6F6F1] border border-[#9FE1CB] flex items-center justify-center mt-0.5">
+                  <Check style={{ width: 9, height: 9, color: "#1FA97A" }} />
+                </div>
+                <p className="text-[12.5px] text-slate-600 leading-relaxed">{bullet}</p>
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center justify-end gap-2.5 px-6 py-4 border-t border-slate-100 bg-slate-50/50">
+            <Button
+              variant="outline"
+              onClick={() => setConvertDialog(false)}
+              disabled={converting}
+              className="h-9 px-4 text-[13px] font-medium border-slate-200 text-slate-700 bg-white hover:bg-slate-50"
+            >
+              Cancelar
+            </Button>
+            <button
+              type="button"
+              onClick={doConvert}
+              disabled={converting}
+              style={{
+                display: "flex", alignItems: "center", gap: 6,
+                height: 36, padding: "0 16px",
+                fontSize: 13, fontWeight: 500, borderRadius: 8,
+                background: converting ? "#9FE1CB" : "#1FA97A",
+                color: "#fff", border: "none",
+                cursor: converting ? "not-allowed" : "pointer",
+                transition: "background 0.15s",
+              }}
+            >
+              {converting && <Loader2 style={{ width: 14, height: 14 }} className="animate-spin" />}
+              {converting ? "Convirtiendo..." : "Confirmar conversión"}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Mark as lost dialog */}
+      <Dialog open={lostDialog} onOpenChange={setLostDialog}>
+        <DialogContent className="bg-white border-[0.5px] border-slate-200 rounded-xl p-0 overflow-hidden max-w-md shadow-sm">
+          <div className="flex items-start gap-4 p-6 pb-4">
+            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-50 border border-amber-100 flex items-center justify-center">
+              <AlertTriangle style={{ width: 18, height: 18 }} className="text-amber-500" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <DialogTitle className="text-[15px] font-semibold text-slate-900 leading-snug">
+                Marcar como perdido
+              </DialogTitle>
+              <p className="text-[13px] text-slate-500 mt-0.5">{lead.name || lead.email || "Lead"}</p>
+            </div>
+          </div>
+          <div className="px-6 pb-5">
+            <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide block mb-2">
+              Motivo (opcional)
+            </label>
+            <input
+              type="text"
+              value={lostReason}
+              onChange={(e) => setLostReason(e.target.value)}
+              placeholder="Ej: Presupuesto insuficiente, eligió a la competencia..."
+              onKeyDown={(e) => { if (e.key === "Enter") doLost() }}
+              style={{
+                width: "100%", height: 40, padding: "0 12px",
+                fontSize: 13, color: "#1e293b",
+                background: "#f8fafc", border: "1px solid #e2e8f0",
+                borderRadius: 8, outline: "none",
+                boxSizing: "border-box",
+              }}
+            />
+          </div>
+          <div className="flex items-center justify-end gap-2.5 px-6 py-4 border-t border-slate-100 bg-slate-50/50">
+            <Button
+              variant="outline"
+              onClick={() => { setLostDialog(false); setLostReason("") }}
+              disabled={markingLost}
+              className="h-9 px-4 text-[13px] font-medium border-slate-200 text-slate-700 bg-white hover:bg-slate-50"
+            >
+              Cancelar
+            </Button>
+            <button
+              type="button"
+              onClick={doLost}
+              disabled={markingLost}
+              style={{
+                display: "flex", alignItems: "center", gap: 6,
+                height: 36, padding: "0 16px",
+                fontSize: 13, fontWeight: 500, borderRadius: 8,
+                background: markingLost ? "#fbbf24" : "#D97706",
+                color: "#fff", border: "none",
+                cursor: markingLost ? "not-allowed" : "pointer",
+                transition: "background 0.15s",
+              }}
+            >
+              {markingLost && <Loader2 style={{ width: 14, height: 14 }} className="animate-spin" />}
+              {markingLost ? "Marcando..." : "Marcar como perdido"}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
         {/* Stats bar */}
         <div

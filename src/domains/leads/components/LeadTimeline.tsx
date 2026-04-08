@@ -20,6 +20,8 @@ import {
   ChevronDown,
   ChevronUp,
   PencilLine,
+  Video,
+  MessageCircle,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { formatTimeAgo } from "@domains/leads/utils/formatting"
@@ -56,6 +58,8 @@ const EVENT_LABELS: Record<string, string> = {
   NOTE: "Nota",
   CALL: "Llamada",
   EMAIL: "Email enviado",
+  MEETING: "Reunión",
+  WHATSAPP: "WhatsApp",
   TASK: "Tarea",
   LEAD_UPDATE: "Datos actualizados",
   lead_created: "Lead creado",
@@ -88,6 +92,10 @@ function EventIcon({ type }: { type: string }) {
       return <StickyNote style={{ width: 14, height: 14, color: "#EF9F27", flexShrink: 0 }} />
     case "CALL":
       return <Phone style={{ width: 14, height: 14, color: "#1FA97A", flexShrink: 0 }} />
+    case "MEETING":
+      return <Video style={{ width: 14, height: 14, color: "#8B5CF6", flexShrink: 0 }} />
+    case "WHATSAPP":
+      return <MessageCircle style={{ width: 14, height: 14, color: "#22C55E", flexShrink: 0 }} />
     case "TASK":
       return <CheckSquare style={{ width: 14, height: 14, color: "#8B5CF6", flexShrink: 0 }} />
     case "LEAD_UPDATE":

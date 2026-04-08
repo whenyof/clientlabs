@@ -66,6 +66,7 @@ export async function POST(
       NOTE: 'note_added',
       EMAIL: 'email_sent',
       MEETING: 'meeting_done',
+      WHATSAPP: 'note_added',
     }
     const scoringAction = ACTION_MAP[type]
     if (scoringAction) {

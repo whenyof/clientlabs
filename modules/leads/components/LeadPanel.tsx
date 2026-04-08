@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { MessageCircle } from "lucide-react"
 import { LeadHeader } from "@domains/leads/components/LeadHeader"
 import { LeadTimeline } from "@domains/leads/components/LeadTimeline"
 import { LeadInfoCard } from "@domains/leads/components/LeadInfoCard"
@@ -9,6 +10,7 @@ import { LeadNextActionCard } from "@domains/leads/components/LeadNextActionCard
 import { LeadNotesCard } from "@domains/leads/components/LeadNotesCard"
 import { LeadEmailModule } from "@domains/leads/components/LeadEmailModule"
 import { LeadQuickTaskCard } from "@/modules/leads/components/LeadQuickTaskCard"
+import { LeadInteractionModal } from "@domains/leads/components/LeadInteractionModal"
 
 interface LeadPanelProps {
   lead: {
@@ -28,6 +30,7 @@ interface LeadPanelProps {
 
 export function LeadPanel({ lead }: LeadPanelProps) {
   const [timelineKey, setTimelineKey] = useState(0)
+  const [interactionOpen, setInteractionOpen] = useState(false)
 
   return (
     <div
@@ -39,6 +42,38 @@ export function LeadPanel({ lead }: LeadPanelProps) {
     >
       {/* Hero */}
       <LeadHeader lead={lead} />
+
+      {/* Actions bar */}
+      <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+        <button
+          type="button"
+          onClick={() => setInteractionOpen(true)}
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 6,
+            padding: "7px 14px", borderRadius: 7, fontSize: 13, fontWeight: 500,
+            border: "0.5px solid var(--border-subtle)", background: "var(--bg-card)",
+            color: "var(--text-secondary)", cursor: "pointer", transition: "all 0.12s",
+          }}
+          onMouseEnter={e => {
+            (e.currentTarget as HTMLButtonElement).style.borderColor = "#1FA97A"
+            ;(e.currentTarget as HTMLButtonElement).style.color = "#1FA97A"
+          }}
+          onMouseLeave={e => {
+            (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--border-subtle)"
+            ;(e.currentTarget as HTMLButtonElement).style.color = "var(--text-secondary)"
+          }}
+        >
+          <MessageCircle style={{ width: 14, height: 14 }} />
+          Registrar interacción
+        </button>
+      </div>
+
+      <LeadInteractionModal
+        open={interactionOpen}
+        onClose={() => setInteractionOpen(false)}
+        leadId={lead.id}
+        onSuccess={() => setTimelineKey(k => k + 1)}
+      />
 
       {/* Two-column layout */}
       <div

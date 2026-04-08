@@ -35,6 +35,7 @@ export const STATUS_LABELS: Record<string, string> = {
   CONTACTED: "Contactado",
   INTERESTED: "Interesado",
   QUALIFIED: "Calificado",
+  STALLED: "Estancado",
   CONVERTED: "Cliente",
   LOST: "Perdido",
 }

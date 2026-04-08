@@ -493,7 +493,7 @@ export async function createLead(data: {
 }
 
 // Import leads from CSV/Excel
-const VALID_STATUSES = ["NEW", "CONTACTED", "INTERESTED", "QUALIFIED", "CONVERTED", "LOST"] as const
+const VALID_STATUSES = ["NEW", "CONTACTED", "INTERESTED", "QUALIFIED", "STALLED", "CONVERTED", "LOST"] as const
 type ImportLeadStatus = typeof VALID_STATUSES[number]
 
 function sanitizeStatus(s?: string): ImportLeadStatus {

@@ -5,6 +5,7 @@ export const SCORE_BY_STATUS: Record<string, number> = {
   CONTACTED: 25,
   INTERESTED: 35,
   QUALIFIED: 50,
+  STALLED: 15,
   CONVERTED: 100,
   LOST: 0,
 }
@@ -31,3 +32,11 @@ export function PRIORITY_BY_SCORE(score: number): string {
   if (score >= 25) return "MEDIUM"
   return "LOW"
 }
+
+// ── Automatic status transition rules ──
+// CONVERTED and LOST are never changed automatically.
+
+export const STALLED_DAYS_THRESHOLD = 14
+export const QUALIFIED_SCORE_THRESHOLD = 45
+
+export const INTERACTION_TYPES = new Set(["CALL", "EMAIL", "MEETING", "WHATSAPP"])

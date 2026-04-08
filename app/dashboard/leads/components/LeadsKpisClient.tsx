@@ -18,9 +18,10 @@ const KPI_LABELS: Record<string, string> = {
 const TEMP_ORDER: Record<string, number> = { HOT: 2, WARM: 1, COLD: 0 }
 
 function isStalled(lead: Lead): boolean {
+  if (lead.leadStatus === "STALLED") return true
+  if (lead.leadStatus === "CONVERTED" || lead.leadStatus === "LOST") return false
   const staleMs = 7 * 24 * 60 * 60 * 1000
-  const isOldOrNull = !lead.lastActionAt || (Date.now() - new Date(lead.lastActionAt).getTime() > staleMs)
-  return isOldOrNull && lead.leadStatus !== "CONVERTED" && lead.leadStatus !== "LOST"
+  return !lead.lastActionAt || (Date.now() - new Date(lead.lastActionAt).getTime() > staleMs)
 }
 
 function isPotencial(lead: Lead): boolean {

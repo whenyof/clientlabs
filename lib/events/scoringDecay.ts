@@ -89,6 +89,19 @@ export async function applyGlobalDailyDecay(): Promise<{
         totalDecayed += result.leadsDecayed
     }
 
+    // Mark STALLED all active leads inactive for > 14 days
+    const stalledThreshold = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
+    await prisma.lead.updateMany({
+        where: {
+            leadStatus: { notIn: ["CONVERTED", "LOST", "STALLED"] },
+            OR: [
+                { lastActionAt: null },
+                { lastActionAt: { lt: stalledThreshold } },
+            ],
+        },
+        data: { leadStatus: "STALLED", status: "STALLED" },
+    })
+
     return {
         tenants: tenants.length,
         totalDecayed,

@@ -15,11 +15,12 @@ const STATUS_CONFIG: Record<string, { label: string; bg: string; color: string; 
   CONTACTED: { label: "Contactado", bg: "#E6F1FB", color: "#185FA5", border: "#B5D4F4", dot: "#378ADD" },
   QUALIFIED: { label: "Cualificado", bg: "#FAEEDA", color: "#854F0B", border: "#FAC775", dot: "#EF9F27" },
   INTERESTED: { label: "Interesado", bg: "#FAEEDA", color: "#854F0B", border: "#FAC775", dot: "#EF9F27" },
+  STALLED: { label: "Estancado", bg: "#FEF3C7", color: "#92400E", border: "#FCD34D", dot: "#F59E0B" },
   LOST: { label: "Perdido", bg: "#FCEBEB", color: "#A32D2D", border: "#F7C1C1", dot: "#E24B4A" },
   CONVERTED: { label: "Convertido", bg: "#EEEDFE", color: "#3C3489", border: "#CECBF6", dot: "#6C63FF" },
 }
 
-const STATUS_ORDER = ["NEW", "CONTACTED", "QUALIFIED", "CONVERTED", "LOST"]
+const STATUS_ORDER = ["NEW", "CONTACTED", "QUALIFIED", "STALLED", "CONVERTED", "LOST"]
 
 function StatusBadge({ status, onClick }: { status?: string | null; onClick?: () => void }) {
   const cfg = STATUS_CONFIG[status ?? ""] ?? { label: status ?? "—", bg: "var(--bg-surface)", color: "var(--text-secondary)", border: "var(--border-subtle)", dot: "var(--text-secondary)" }

@@ -31,6 +31,7 @@ const STATUS_COLORS: Record<string, string> = {
   NEW:       "#1FA97A",
   CONTACTED: "#3B82F6",
   QUALIFIED: "#D9A441",
+  STALLED:   "#F59E0B",
   CONVERTED: "#8B5CF6",
   LOST:      "#EF4444",
 }
@@ -39,6 +40,7 @@ const STATUS_LABELS: Record<string, string> = {
   NEW:       "Nuevo",
   CONTACTED: "Contactado",
   QUALIFIED: "Cualificado",
+  STALLED:   "Estancado",
   CONVERTED: "Convertido",
   LOST:      "Perdido",
 }
@@ -90,6 +92,7 @@ export default async function LeadsPage({
         userId: uid,
         NOT: { leadStatus: { in: ["CONVERTED", "LOST"] } },
         OR: [
+          { leadStatus: "STALLED" },
           { lastActionAt: null },
           { lastActionAt: { lt: new Date(now.getTime() - staleDays) } },
         ],

@@ -8,7 +8,7 @@ interface LeadInteractionModalProps {
   open: boolean
   onClose: () => void
   leadId: string
-  onSuccess?: () => void
+  onSuccess?: (score?: number) => void
 }
 
 const TYPES = [
@@ -55,10 +55,11 @@ export function LeadInteractionModal({ open, onClose, leadId, onSuccess }: LeadI
         }),
       })
       if (!res.ok) throw new Error("Error al registrar")
+      const data = await res.json()
       setType("")
       setDescription("")
       onClose()
-      onSuccess?.()
+      onSuccess?.(data.score ?? undefined)
     } catch {
       // silent — user can retry
     } finally {

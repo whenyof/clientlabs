@@ -73,7 +73,17 @@ export async function POST(
       await updateLeadScore(params.id, session.user.id, scoringAction)
     }
 
-    return NextResponse.json(activity, { status: 201 })
+    const updatedLead = scoringAction
+      ? await prisma.lead.findUnique({
+          where: { id: params.id },
+          select: { score: true, temperature: true, priority: true },
+        })
+      : null
+
+    return NextResponse.json(
+      { activity, score: updatedLead?.score ?? null, temperature: updatedLead?.temperature ?? null, priority: updatedLead?.priority ?? null },
+      { status: 201 }
+    )
   } catch (error) {
     console.error('Error creating activity:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

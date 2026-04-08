@@ -2,7 +2,7 @@
 
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
-import { ArrowLeft, Mail, StickyNote, Megaphone, ExternalLink, X } from "lucide-react"
+import { ArrowLeft, Mail, StickyNote, Megaphone, ExternalLink, X, MessageSquare } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -13,6 +13,7 @@ import {
   STATUS_LABELS,
   TEMP_LABELS,
 } from "@domains/leads/utils/formatting"
+import { LeadInteractionModal } from "@domains/leads/components/LeadInteractionModal"
 
 export interface LeadHeaderLead {
   id: string
@@ -70,6 +71,8 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
   const [converting, setConverting] = useState(false)
   const [markingLost, setMarkingLost] = useState(false)
   const [showEmailChoice, setShowEmailChoice] = useState(false)
+  const [showInteractionModal, setShowInteractionModal] = useState(false)
+  const [localScore, setLocalScore] = useState(lead.score)
 
   const initials = getInitials(lead.name, lead.email)
   const statusLabel = STATUS_LABELS[lead.leadStatus] ?? lead.leadStatus
@@ -208,7 +211,7 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
                 <Badge>{statusLabel}</Badge>
                 {tempLabel && <Badge>{tempLabel}</Badge>}
-                <Badge>{lead.score} pts</Badge>
+                <Badge>{localScore} pts</Badge>
               </div>
             </div>
           </div>
@@ -293,6 +296,16 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
               <StickyNote style={{ width: 14, height: 14 }} />
               Nota
             </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setShowInteractionModal(true)}
+              style={{ display: "flex", alignItems: "center", gap: 6 }}
+            >
+              <MessageSquare style={{ width: 14, height: 14 }} />
+              Interacción
+            </Button>
             {showConvert && (
               <button
                 type="button"
@@ -341,6 +354,16 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
             )}
           </div>
         </div>
+
+      <LeadInteractionModal
+        open={showInteractionModal}
+        onClose={() => setShowInteractionModal(false)}
+        leadId={lead.id}
+        onSuccess={(newScore) => {
+          if (newScore !== undefined) setLocalScore(newScore)
+          router.refresh()
+        }}
+      />
 
         {/* Stats bar */}
         <div

@@ -58,7 +58,8 @@ export function LeadNotesCard({ leadId, onActivityCreated }: LeadNotesCardProps)
         body: JSON.stringify({ type: "NOTE", title: "Nota", description: text }),
       })
       if (!res.ok) throw new Error("Failed to create note")
-      const created: ActivityItem = await res.json()
+      const data = await res.json()
+      const created: ActivityItem = data.activity ?? data
       setNotes(prev => [created, ...prev])
       setNewNote("")
       onActivityCreated?.()

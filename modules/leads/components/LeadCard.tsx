@@ -189,6 +189,7 @@ export function LeadCard({ lead }: LeadCardProps) {
         position: "relative",
         zIndex: dropdownOpen ? 30 : 1,
       }}
+      onClick={() => router.push(`/dashboard/leads/${lead.id}`)}
       onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-surface)")}
       onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
     >
@@ -240,7 +241,7 @@ export function LeadCard({ lead }: LeadCardProps) {
       </div>
 
       {/* Estado — clickable dropdown */}
-      <div ref={dropdownRef} style={{ width: 120, flexShrink: 0, position: "relative" }}>
+      <div ref={dropdownRef} style={{ width: 120, flexShrink: 0, position: "relative" }} onClick={(e) => e.stopPropagation()}>
         <div ref={triggerRef}>
           <StatusBadge status={currentStatus} onClick={handleOpen} />
         </div>
@@ -308,7 +309,7 @@ export function LeadCard({ lead }: LeadCardProps) {
       {/* Actions */}
       <div
         style={{ marginLeft: "auto", flexShrink: 0 }}
-        onClick={(e) => e.preventDefault()}
+        onClick={(e) => e.stopPropagation()}
       >
         <LeadRowActions lead={lead} />
       </div>

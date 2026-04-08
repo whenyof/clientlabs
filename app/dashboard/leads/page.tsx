@@ -88,15 +88,7 @@ export default async function LeadsPage({
     }),
     prisma.lead.count({ where: { userId: uid, leadStatus: "CONVERTED" } }),
     prisma.lead.count({
-      where: {
-        userId: uid,
-        NOT: { leadStatus: { in: ["CONVERTED", "LOST"] } },
-        OR: [
-          { leadStatus: "STALLED" },
-          { lastActionAt: null },
-          { lastActionAt: { lt: new Date(now.getTime() - staleDays) } },
-        ],
-      },
+      where: { userId: uid, leadStatus: "STALLED" },
     }),
     prisma.lead.count({ where: { userId: uid, createdAt: { gte: weekAgo } } }),
     prisma.lead.count({ where: { userId: uid, temperature: "HOT" } }),

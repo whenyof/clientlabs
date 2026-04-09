@@ -1,6 +1,7 @@
 "use client"
 
 import { CreateClientButton } from "@/modules/clients/components/CreateClientButton"
+import { ImportClients } from "@/modules/clients/components/ImportClients"
 
 export function ClientsHeader() {
   return (
@@ -13,10 +14,9 @@ export function ClientsHeader() {
           Gestión de relaciones e ingresos de clientes
         </p>
       </div>
-      <div className="flex items-center gap-3">
-        <div className="[&>button]:bg-emerald-600 [&>button]:hover:bg-emerald-700 [&>button]:text-white">
-          <CreateClientButton />
-        </div>
+      <div className="flex items-center gap-2">
+        <ImportClients />
+        <CreateClientButton />
       </div>
     </div>
   )

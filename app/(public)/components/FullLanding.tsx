@@ -1356,9 +1356,9 @@ function CtaSection() {
             <Link href="/producto" className="hover:text-[#E6F1F5] transition-colors">Producto</Link>
             <Link href="/precios" className="hover:text-[#E6F1F5] transition-colors">Precios</Link>
             <Link href="/contacto" className="hover:text-[#E6F1F5] transition-colors">Contacto</Link>
-            <Link href="/terms" className="hover:text-[#E6F1F5] transition-colors">Términos</Link>
-            <Link href="/privacy" className="hover:text-[#E6F1F5] transition-colors">Privacidad</Link>
-            <Link href="/cookies" className="hover:text-[#E6F1F5] transition-colors">Cookies</Link>
+            <Link href="/terms" className="hover:text-[#E6F1F5] transition-colors">Términos y Condiciones</Link>
+            <Link href="/privacy" className="hover:text-[#E6F1F5] transition-colors">Política de Privacidad</Link>
+            <Link href="/cookies" className="hover:text-[#E6F1F5] transition-colors">Política de Cookies</Link>
           </div>
           <p className="text-[12px] text-[#8FA6B2]/40">© {new Date().getFullYear()} ClientLabs</p>
         </div>

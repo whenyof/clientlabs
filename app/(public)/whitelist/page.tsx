@@ -471,9 +471,9 @@ function Footer() {
           </a>
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 text-[12px] text-white/30">
-          <Link href="/legal" className="hover:text-white/60 transition-colors">Aviso legal</Link>
-          <Link href="/privacidad" className="hover:text-white/60 transition-colors">Privacidad</Link>
-          <Link href="/cookies" className="hover:text-white/60 transition-colors">Cookies</Link>
+          <Link href="/terms" className="hover:text-white/60 transition-colors">Términos y Condiciones</Link>
+          <Link href="/privacy" className="hover:text-white/60 transition-colors">Política de Privacidad</Link>
+          <Link href="/cookies" className="hover:text-white/60 transition-colors">Política de Cookies</Link>
         </div>
       </div>
     </footer>

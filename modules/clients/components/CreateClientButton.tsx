@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useQueryClient } from "@tanstack/react-query"
 import { Plus, X, User, Building2, Mail, Phone, MapPin, FileText, ChevronDown, ChevronUp, Euro } from "lucide-react"
@@ -24,6 +24,7 @@ export function CreateClientButton() {
   const [isLoading, setIsLoading] = useState(false)
   const [showExtra, setShowExtra] = useState(false)
   const [form, setForm] = useState(EMPTY_FORM)
+  const isSubmitting = useRef(false)
 
   const set = (k: string, v: string) => setForm(prev => ({ ...prev, [k]: v }))
 
@@ -34,16 +35,14 @@ export function CreateClientButton() {
   }
 
   const handleCreate = async () => {
+    if (isSubmitting.current) return
     if (!form.name.trim()) {
       toast.error("El nombre es obligatorio")
       return
     }
-    setIsLoading(true)
 
-    const timeoutId = setTimeout(() => {
-      setIsLoading(false)
-      toast.error("Tiempo de espera agotado. Inténtalo de nuevo.")
-    }, 25000)
+    isSubmitting.current = true
+    setIsLoading(true)
 
     try {
       const res = await fetch("/api/clients", {
@@ -57,8 +56,6 @@ export function CreateClientButton() {
         }),
       })
 
-      clearTimeout(timeoutId)
-
       const data = await res.json()
 
       if (!res.ok) {
@@ -70,11 +67,10 @@ export function CreateClientButton() {
       await queryClient.invalidateQueries({ queryKey: ["clients"] })
       router.refresh()
     } catch (err: any) {
-      clearTimeout(timeoutId)
       toast.error(err.message || "Error al crear cliente")
     } finally {
-      clearTimeout(timeoutId)
       setIsLoading(false)
+      isSubmitting.current = false
     }
   }
 
@@ -283,6 +279,7 @@ export function CreateClientButton() {
                 Cancelar
               </button>
               <button
+                type="button"
                 onClick={handleCreate}
                 disabled={isLoading || !form.name.trim()}
                 className={cn(

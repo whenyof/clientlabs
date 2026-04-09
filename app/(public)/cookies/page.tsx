@@ -110,10 +110,11 @@ export default function CookiesPage() {
           </section>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-white/10 flex items-center gap-6 text-[12px] text-white/30">
-          <Link href="/whitelist" className="hover:text-white/60 transition-colors">Inicio</Link>
-          <Link href="/legal" className="hover:text-white/60 transition-colors">Aviso legal</Link>
-          <Link href="/privacidad" className="hover:text-white/60 transition-colors">Privacidad</Link>
+        <div className="mt-12 pt-8 border-t border-white/10 flex flex-wrap items-center gap-6 text-[12px] text-white/30">
+          <Link href="/terms" className="hover:text-white/60 transition-colors">Términos y Condiciones</Link>
+          <Link href="/privacy" className="hover:text-white/60 transition-colors">Política de Privacidad</Link>
+          <Link href="/legal" className="hover:text-white/60 transition-colors">Legal</Link>
+          <Link href="/" className="hover:text-white/60 transition-colors">← Inicio</Link>
         </div>
       </div>
     </main>

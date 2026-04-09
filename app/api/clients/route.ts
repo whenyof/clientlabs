@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { prisma, safePrismaQuery } from "@/lib/prisma"
+import { prisma } from "@/lib/prisma"
 
 export const dynamic = "force-dynamic"
-export const maxDuration = 10
+export const maxDuration = 15
 
 /** GET /api/clients — returns id + name list for the current user. Supports ?q= for name search. */
 export async function GET(request: NextRequest) {
@@ -28,47 +28,34 @@ export async function GET(request: NextRequest) {
 }
 
 /** POST /api/clients — creates a client manually */
-export async function POST(request: NextRequest) {
+export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions)
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 })
     }
 
-    const body = await request.json()
+    const body = await req.json()
 
     if (!body.name?.trim()) {
-      return NextResponse.json({ error: "El nombre es obligatorio" }, { status: 400 })
+      return NextResponse.json({ error: "Nombre requerido" }, { status: 400 })
     }
 
-    const userId = session.user!.id
-    const client = await safePrismaQuery(() =>
-      prisma.client.create({
-        data: {
-          userId,
-          name: body.name.trim(),
-          email: body.email?.trim() || null,
-          phone: body.phone?.trim() || null,
-          notes: body.notes?.trim() || null,
-          legalType: body.legalType || null,
-          taxId: body.taxId?.trim() || null,
-          address: body.address?.trim() || null,
-          city: body.city?.trim() || null,
-          postalCode: body.postalCode?.trim() || null,
-          country: body.country?.trim() || "España",
-          companyName: body.companyName?.trim() || null,
-          legalName: body.legalName?.trim() || null,
-          source: "manual",
-          status: "ACTIVE",
-          totalSpent: body.estimatedValue ? parseFloat(body.estimatedValue) : 0,
-        },
-        select: { id: true, name: true, email: true, phone: true, status: true, createdAt: true },
-      })
-    )
+    const client = await prisma.client.create({
+      data: {
+        userId: session.user.id,
+        name: body.name.trim(),
+        email: body.email?.trim() || null,
+        phone: body.phone?.trim() || null,
+        status: "ACTIVE",
+        totalSpent: body.totalSpent ? parseFloat(body.totalSpent) : 0,
+      },
+    })
 
     return NextResponse.json(client)
   } catch (err: any) {
-    console.error("Error POST /api/clients:", err)
-    return NextResponse.json({ error: err.message || "Error interno del servidor" }, { status: 500 })
+    console.error("POST /api/clients error:", err)
+    return NextResponse.json({ error: err.message || "Error interno" }, { status: 500 })
   }
 }

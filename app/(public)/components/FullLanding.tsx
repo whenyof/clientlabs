@@ -1356,7 +1356,6 @@ function CtaSection() {
             <Link href="/producto" className="hover:text-[#E6F1F5] transition-colors">Producto</Link>
             <Link href="/precios" className="hover:text-[#E6F1F5] transition-colors">Precios</Link>
             <Link href="/contacto" className="hover:text-[#E6F1F5] transition-colors">Contacto</Link>
-            <Link href="/legal" className="hover:text-[#E6F1F5] transition-colors">Legal</Link>
             <Link href="/terms" className="hover:text-[#E6F1F5] transition-colors">Términos</Link>
             <Link href="/privacy" className="hover:text-[#E6F1F5] transition-colors">Privacidad</Link>
             <Link href="/cookies" className="hover:text-[#E6F1F5] transition-colors">Cookies</Link>

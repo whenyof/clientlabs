@@ -39,12 +39,16 @@ export function CreateClientButton() {
       return
     }
     setIsLoading(true)
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 9000)
     try {
       const res = await fetch("/api/clients", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
+        signal: controller.signal,
       })
+      clearTimeout(timeoutId)
       const data = await res.json()
       if (!res.ok) {
         throw new Error(data.error || "Error al crear cliente")
@@ -55,8 +59,12 @@ export function CreateClientButton() {
       queryClient.invalidateQueries({ queryKey: ["clients-kpis"] })
       router.refresh()
     } catch (err: any) {
-      console.error("CreateClientButton error:", err)
-      toast.error(err.message || "Error al crear cliente")
+      clearTimeout(timeoutId)
+      if (err.name === "AbortError") {
+        toast.error("La solicitud tardó demasiado. Inténtalo de nuevo.")
+      } else {
+        toast.error(err.message || "Error al crear cliente")
+      }
     } finally {
       setIsLoading(false)
     }

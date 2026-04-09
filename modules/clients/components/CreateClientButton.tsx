@@ -3,17 +3,18 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useQueryClient } from "@tanstack/react-query"
-import { Plus, X, User, Building2, Mail, Phone, MapPin, FileText, ChevronDown, ChevronUp } from "lucide-react"
+import { Plus, X, User, Building2, Mail, Phone, MapPin, FileText, ChevronDown, ChevronUp, Euro } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 
 const EMPTY_FORM = {
   name: "", email: "", phone: "",
+  estimatedValue: "",
   legalType: "", taxId: "",
   companyName: "", legalName: "",
   address: "", city: "",
   postalCode: "", country: "España",
-  source: "", notes: "",
+  notes: "",
 }
 
 export function CreateClientButton() {
@@ -42,7 +43,7 @@ export function CreateClientButton() {
       const res = await fetch("/api/clients", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, totalSpent: form.estimatedValue ? parseFloat(form.estimatedValue) : 0 }),
       })
       if (!res.ok) {
         const err = await res.json()
@@ -135,6 +136,25 @@ export function CreateClientButton() {
                 </div>
               </div>
 
+              {/* Valor Estimado */}
+              <div>
+                <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">
+                  Valor Estimado (€)
+                </label>
+                <div className="relative">
+                  <Euro className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300" />
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={form.estimatedValue}
+                    onChange={e => set("estimatedValue", e.target.value)}
+                    placeholder="0.00"
+                    className={cn(inputClass, "pl-9 pr-4")}
+                  />
+                </div>
+              </div>
+
               {/* Tipo + NIF */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -159,26 +179,6 @@ export function CreateClientButton() {
                     className={cn(inputClass, "px-4")}
                   />
                 </div>
-              </div>
-
-              {/* Origen */}
-              <div>
-                <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">Origen</label>
-                <select
-                  value={form.source}
-                  onChange={e => set("source", e.target.value)}
-                  className={cn(inputClass, "px-3 bg-white")}
-                >
-                  <option value="">Seleccionar origen...</option>
-                  <option value="manual">Manual</option>
-                  <option value="referido">Referido</option>
-                  <option value="web">Web</option>
-                  <option value="instagram">Instagram</option>
-                  <option value="facebook">Facebook</option>
-                  <option value="linkedin">LinkedIn</option>
-                  <option value="google">Google</option>
-                  <option value="whatsapp">WhatsApp</option>
-                </select>
               </div>
 
               {/* Toggle datos extra */}

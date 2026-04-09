@@ -43,18 +43,19 @@ export function CreateClientButton() {
       const res = await fetch("/api/clients", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, totalSpent: form.estimatedValue ? parseFloat(form.estimatedValue) : 0 }),
+        body: JSON.stringify(form),
       })
+      const data = await res.json()
       if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || "Error al crear cliente")
+        throw new Error(data.error || "Error al crear cliente")
       }
       toast.success("Cliente creado correctamente")
       handleClose()
-      await queryClient.invalidateQueries({ queryKey: ["clients"] })
-      await queryClient.invalidateQueries({ queryKey: ["clients-kpis"] })
+      queryClient.invalidateQueries({ queryKey: ["clients"] })
+      queryClient.invalidateQueries({ queryKey: ["clients-kpis"] })
       router.refresh()
     } catch (err: any) {
+      console.error("CreateClientButton error:", err)
       toast.error(err.message || "Error al crear cliente")
     } finally {
       setIsLoading(false)

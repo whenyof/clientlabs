@@ -6,6 +6,15 @@ import { prisma } from "@/lib/prisma"
 export const dynamic = "force-dynamic"
 export const maxDuration = 15
 
+function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    p,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error("Database timeout — inténtalo de nuevo")), ms)
+    ),
+  ])
+}
+
 /** GET /api/clients — returns id + name list for the current user. Supports ?q= for name search. */
 export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions)
@@ -42,16 +51,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Nombre requerido" }, { status: 400 })
     }
 
-    const client = await prisma.client.create({
-      data: {
-        userId: session.user.id,
-        name: body.name.trim(),
-        email: body.email?.trim() || null,
-        phone: body.phone?.trim() || null,
-        status: "ACTIVE",
-        totalSpent: body.totalSpent ? parseFloat(body.totalSpent) : 0,
-      },
-    })
+    const client = await withTimeout(
+      prisma.client.create({
+        data: {
+          userId: session.user.id,
+          name: body.name.trim(),
+          email: body.email?.trim() || null,
+          phone: body.phone?.trim() || null,
+          status: "ACTIVE",
+          totalSpent: body.totalSpent ? parseFloat(body.totalSpent) : 0,
+        },
+      }),
+      12000
+    )
 
     return NextResponse.json(client)
   } catch (err: any) {

@@ -5,7 +5,7 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 
-type Params = Promise<{ clientId: string }>
+type Params = Promise<{ id: string }>
 
 // Rejects after ms — ensures Prisma cold-start hangs don't block the response
 function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
@@ -24,7 +24,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Params }) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 })
     }
 
-    const { clientId } = await params
+    const { id: clientId } = await params
     const body = await req.json()
     const { email, phone, company, country } = body
 
@@ -49,7 +49,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Params }) {
     return NextResponse.json(updated)
   } catch (err: any) {
     const isNotFound = err?.code === "P2025"
-    console.error("Error PATCH /api/clients/[clientId]:", err)
+    console.error("Error PATCH /api/clients/[id]:", err)
     return NextResponse.json(
       { error: isNotFound ? "Cliente no encontrado" : (err.message || "Error interno") },
       { status: isNotFound ? 404 : 500 }

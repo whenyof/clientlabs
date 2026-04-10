@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Pencil, Loader2, Mail, Phone, Building2, Globe, Compass, Calendar } from "lucide-react"
 import { toast } from "sonner"
 import type { Client360Base } from "../types"
@@ -25,6 +25,7 @@ interface ClientProfileCardProps {
 export function ClientProfileCard({ client }: ClientProfileCardProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving,  setIsSaving]  = useState(false)
+  const isSubmitting = useRef(false)
   const [form, setForm] = useState({
     email:   client.email       ?? "",
     phone:   client.phone       ?? "",
@@ -38,6 +39,8 @@ export function ClientProfileCard({ client }: ClientProfileCardProps) {
   }
 
   const handleSave = async () => {
+    if (isSubmitting.current) return
+    isSubmitting.current = true
     setIsSaving(true)
     try {
       const res = await fetch(`/api/clients/${client.id}`, {
@@ -45,12 +48,14 @@ export function ClientProfileCard({ client }: ClientProfileCardProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       })
+      const data = await res.json()
       if (res.ok) { toast.success("Guardado"); setIsEditing(false) }
-      else          toast.error("Error al guardar")
+      else toast.error(data.error || "Error al guardar")
     } catch {
       toast.error("Error de conexión")
     } finally {
       setIsSaving(false)
+      isSubmitting.current = false
     }
   }
 

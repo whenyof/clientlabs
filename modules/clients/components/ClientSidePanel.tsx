@@ -583,7 +583,8 @@ export function ClientSidePanel({ client, isOpen, onClose, onClientUpdate }: Cli
         if (!client) return
         onClientUpdate?.(client.id, { clientTraits: newTraits })
         try {
-            await updateClientData(client.id, { clientTraits: newTraits })
+            const result = await updateClientData(client.id, { clientTraits: newTraits })
+            if (!result.success) toast.error((result as any).error || "Error al actualizar perfil")
         } catch (error) {
             toast.error("Error al actualizar perfil")
         }
@@ -593,14 +594,15 @@ export function ClientSidePanel({ client, isOpen, onClose, onClientUpdate }: Cli
         if (!client) return
         onClientUpdate?.(client.id, { riskLevel: newRisk })
         try {
-            const riskLabels = { LOW: "🟢 Buen momento", MEDIUM: "🟠 Sin contacto", HIGH: "🔴 Riesgo perderlo" }
+            const riskLabels: Record<string, string> = { LOW: "Buen momento", MEDIUM: "Sin contacto", HIGH: "Riesgo perderlo" }
             const timestamp = new Date().toISOString()
-            const logEntry = `\n[SYSTEM:${timestamp}] Cambio de Riesgo: ${riskLabels[newRisk as keyof typeof riskLabels]}`
-            await updateClientData(client.id, {
+            const logEntry = `\n[SYSTEM:${timestamp}] Cambio de Riesgo: ${riskLabels[newRisk] ?? newRisk}`
+            const result = await updateClientData(client.id, {
                 riskLevel: newRisk,
                 notes: (client.notes || "") + logEntry
             })
-            toast.success("Prioridad actualizada")
+            if (result.success) toast.success("Prioridad actualizada")
+            else toast.error((result as any).error || "Error al actualizar prioridad")
         } catch (error) {
             toast.error("Error al actualizar prioridad")
         }

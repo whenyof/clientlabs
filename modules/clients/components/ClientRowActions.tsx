@@ -45,14 +45,17 @@ export function ClientRowActions({ client }: { client: Client }) {
  const handleUpdateInfo = async () => {
  setLoading(true)
  try {
- await updateClientInfo(client.id, editData)
+ const result = await updateClientInfo(client.id, editData)
+ if (!result.success) {
+ toast.error((result as any).error || "Error al actualizar " + labels.clients.singular.toLowerCase())
+ return
+ }
  setEditDialog(false)
  router.refresh()
  toast.success(labels.clients.singular + " actualizado correctamente")
  } catch (error) {
  console.error(error)
- const message = error instanceof Error ? error.message : "Error al actualizar " + labels.clients.singular.toLowerCase()
- toast.error(message)
+ toast.error("Error al actualizar " + labels.clients.singular.toLowerCase())
  } finally {
  setLoading(false)
  }

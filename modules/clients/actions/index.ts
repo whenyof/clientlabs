@@ -13,26 +13,29 @@ export async function updateClientData(
     clientId: string,
     data: any
 ) {
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.id) return { success: false, error: "Unauthorized" }
+    try {
+        const session = await getServerSession(authOptions)
+        if (!session?.user?.id) return { success: false, error: "No autorizado" }
 
-    const client = await prisma.client.findUnique({
-        where: { id: clientId, userId: session.user.id },
-    })
+        const updated = await Promise.race([
+            prisma.client.update({
+                where: { id: clientId, userId: session.user.id },
+                data: { ...data, updatedAt: new Date() },
+            }),
+            new Promise<never>((_, reject) =>
+                setTimeout(() => reject(new Error("Timeout — inténtalo de nuevo")), 8000)
+            ),
+        ])
 
-    if (!client) return { success: false, error: "Client not found" }
-
-    const updated = await prisma.client.update({
-        where: { id: clientId },
-        data: {
-            ...data,
-            updatedAt: new Date()
-        },
-    })
-
-    revalidatePath("/dashboard/clients")
-    revalidatePath("/dashboard/other")
-    return updated
+        revalidatePath(`/dashboard/clients/${clientId}`)
+        revalidatePath("/dashboard/clients")
+        revalidatePath("/dashboard/other")
+        return { success: true, client: updated }
+    } catch (err: any) {
+        const isNotFound = err?.code === "P2025"
+        console.error("Error updateClientData:", err)
+        return { success: false, error: isNotFound ? "Cliente no encontrado" : (err.message || "Error al guardar") }
+    }
 }
 
 // Update client info
@@ -44,29 +47,35 @@ export async function updateClientInfo(
         phone?: string
     }
 ) {
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.id) return { success: false, error: "Unauthorized" }
+    try {
+        const session = await getServerSession(authOptions)
+        if (!session?.user?.id) return { success: false, error: "No autorizado" }
 
-    const client = await prisma.client.findUnique({
-        where: { id: clientId, userId: session.user.id },
-    })
+        // Build update data — only overwrite fields that were provided
+        const updateData: Record<string, string | null | undefined> = { updatedAt: new Date() as any }
+        if (data.name !== undefined) updateData.name = data.name.trim() || undefined
+        if (data.email !== undefined) updateData.email = data.email.trim() || null
+        if (data.phone !== undefined) updateData.phone = data.phone.trim() || null
 
-    if (!client) return { success: false, error: "Client not found" }
+        await Promise.race([
+            prisma.client.update({
+                where: { id: clientId, userId: session.user.id },
+                data: updateData,
+            }),
+            new Promise<never>((_, reject) =>
+                setTimeout(() => reject(new Error("Timeout — inténtalo de nuevo")), 8000)
+            ),
+        ])
 
-    await prisma.client.update({
-        where: { id: clientId },
-        data: {
-            name: data.name?.trim() || client.name,
-            email: data.email?.trim() || client.email,
-            phone: data.phone?.trim() || client.phone,
-            updatedAt: new Date(),
-        },
-    })
-
-    revalidatePath("/dashboard/clients")
-    revalidatePath("/dashboard/other")
-    revalidatePath("/dashboard/other/sales")
-    return { success: true }
+        revalidatePath("/dashboard/clients")
+        revalidatePath("/dashboard/other")
+        revalidatePath("/dashboard/other/sales")
+        return { success: true }
+    } catch (err: any) {
+        const isNotFound = err?.code === "P2025"
+        console.error("Error updateClientInfo:", err)
+        return { success: false, error: isNotFound ? "Cliente no encontrado" : (err.message || "Error al guardar") }
+    }
 }
 
 // Add note to client

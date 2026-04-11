@@ -94,8 +94,8 @@ export default function BlogArticlePage({ params }: Props) {
           <div className="mt-16 p-6 bg-[#E1F5EE] rounded-xl border border-[#1FA97A]/20">
             <p className="text-[14px] font-semibold text-[#0B1F2A] mb-1">Gestiona todo esto desde un solo panel</p>
             <p className="text-[13px] text-slate-600 mb-4">ClientLabs centraliza leads, clientes y facturación para autónomos españoles.</p>
-            <Link href="/whitelist" className="inline-block px-5 py-2 bg-[#1FA97A] text-white text-[13px] font-semibold rounded-lg hover:bg-[#1a9068] transition-colors">
-              Unirse a la whitelist
+            <Link href="/register" className="inline-block px-5 py-2 bg-[#1FA97A] text-white text-[13px] font-semibold rounded-lg hover:bg-[#1a9068] transition-colors">
+              Empezar gratis 14 días
             </Link>
           </div>
         </article>

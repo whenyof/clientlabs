@@ -18,7 +18,6 @@ import {
   ClientProfileCard,
   ClientNotFound,
 } from "@/modules/client360/components"
-import { Client360ActionsBar } from "@/modules/client360/actions/Client360ActionsBar"
 
 type Params = Promise<{ clientId: string }>
 
@@ -70,11 +69,6 @@ export default async function Client360Page({ params: paramsPromise }: { params:
       {/* ── 4 KPIs separados ───────────────────────────────────────────── */}
       <div className="mb-4">
         <ClientKpiOverview kpis={kpis} salesKpis={salesData.kpis} />
-      </div>
-
-      {/* ── Acciones rápidas (ancho completo, siempre visible) ─────────── */}
-      <div className="mb-4">
-        <Client360ActionsBar clientId={client.id} defaultEmail={client.email} />
       </div>
 
       {/* ── Layout 70 / 30 ─────────────────────────────────────────────── */}

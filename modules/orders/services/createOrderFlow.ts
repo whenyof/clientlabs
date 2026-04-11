@@ -3,6 +3,7 @@
 import { prismaDirect as prisma } from "@/lib/prisma-direct"
 import { Prisma } from "@prisma/client"
 import { v4 as uuid } from "uuid"
+import { recalculateClientTotalSpent } from "@/modules/sales/actions/sales.actions"
 
 export type CreateOrderFlowItem = {
   product: string
@@ -103,7 +104,7 @@ export async function createOrderFlow(
     throw new Error("Total cannot be negative")
   }
 
-  return prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx) => {
 
     const now = new Date()
 
@@ -124,7 +125,7 @@ export async function createOrderFlow(
         currency: "EUR",
         provider: "MANUAL",
         paymentMethod: "manual",
-        status: "PENDIENTE",
+        status: registerPayment ? "PAGADO" : "PENDIENTE",
         stripePaymentId: null,
         stripeCustomerId: null,
         metadata: Prisma.JsonNull,
@@ -272,4 +273,10 @@ export async function createOrderFlow(
     }
 
   })
+
+  if (registerPayment) {
+    await recalculateClientTotalSpent(clientId)
+  }
+
+  return result
 }

@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { generateInvoiceFromSale, createInvoiceFromSale } from '@domains/billing'
+import { recalculateClientTotalSpent } from '@/modules/sales/actions/sales.actions'
 
 /**
  * PATCH /api/sales/[id] - Update sale (e.g. status). Real persistence.
@@ -36,6 +37,9 @@ export async function PATCH(
         updatedAt: new Date(),
       },
     })
+    if ((updated.status === 'PAID' || updated.status === 'PAGADO') && updated.clientId) {
+      await recalculateClientTotalSpent(updated.clientId)
+    }
     try {
       void generateInvoiceFromSale(id).catch((err) => {
         console.error('Auto invoice from sale failed', id, err)

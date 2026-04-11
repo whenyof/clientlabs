@@ -1,8 +1,8 @@
 "use client"
 
-import { useCallback } from "react"
+import { useCallback, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Eye, Pencil, FileText, FilePlus2, ShoppingBag } from "lucide-react"
+import { Eye, Pencil, FileText, FilePlus2, ShoppingBag, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { formatCurrency, formatDate } from "@/app/dashboard/finance/lib/formatters"
 import type { ClientSaleRow, ClientSalesKPIs } from "../services/getClientSales"
@@ -11,9 +11,12 @@ const STATUS_STYLES: Record<string, { label: string; style: string }> = {
   PAID:      { label: "Pagado",    style: "bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)]"                    },
   PAGADO:    { label: "Pagado",    style: "bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)]"                    },
   PENDING:   { label: "Pendiente", style: "bg-amber-50 text-amber-700 border-amber-200"                                            },
+  PENDIENTE: { label: "Pendiente", style: "bg-amber-50 text-amber-700 border-amber-200"                                            },
   CANCELED:  { label: "Cancelado", style: "bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-subtle)]" },
   CANCELADO: { label: "Cancelado", style: "bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-subtle)]" },
 }
+
+const PAID_STATUSES = new Set(["PAID", "PAGADO", "CANCELED", "CANCELADO"])
 
 const ICON_BTN = "h-8 w-8 p-0 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] shrink-0"
 
@@ -25,11 +28,29 @@ interface ClientSalesListProps {
 
 export function ClientSalesList({ sales, kpis, clientId }: ClientSalesListProps) {
   const router = useRouter()
+  const [markingPaid, setMarkingPaid] = useState<string | null>(null)
 
-  const handleView        = useCallback((id: string) => router.push(`/dashboard/sales?sale=${id}`),                                     [router])
-  const handleEdit        = useCallback((id: string) => router.push(`/dashboard/sales?sale=${id}&edit=true`),                           [router])
-  const handleViewInvoice = useCallback((id: string) => router.push(`/dashboard/finance/billing?invoice=${id}`),                        [router])
+  const handleView          = useCallback((id: string) => router.push(`/dashboard/sales?sale=${id}`),                                     [router])
+  const handleEdit          = useCallback((id: string) => router.push(`/dashboard/sales?sale=${id}&edit=true`),                           [router])
+  const handleViewInvoice   = useCallback((id: string) => router.push(`/dashboard/finance/billing?invoice=${id}`),                        [router])
   const handleCreateInvoice = useCallback((id: string) => router.push(`/dashboard/finance/billing?newFromSale=${id}&client=${clientId}`), [router, clientId])
+
+  const handleMarkPaid = useCallback(async (saleId: string) => {
+    setMarkingPaid(saleId)
+    try {
+      const res = await fetch(`/api/sales/${saleId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "PAGADO" }),
+      })
+      if (!res.ok) throw new Error("Failed")
+      router.refresh()
+    } catch (_) {
+      // silently fail — user can retry
+    } finally {
+      setMarkingPaid(null)
+    }
+  }, [router])
 
   if (sales.length === 0) {
     return (
@@ -98,6 +119,18 @@ export function ClientSalesList({ sales, kpis, clientId }: ClientSalesListProps)
                 </td>
                 <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-end gap-0.5">
+                    {!PAID_STATUSES.has(sale.status) && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className={`${ICON_BTN} text-[var(--accent)] hover:text-[var(--accent)]`}
+                        title="Marcar como pagado"
+                        disabled={markingPaid === sale.id}
+                        onClick={() => handleMarkPaid(sale.id)}
+                      >
+                        <CheckCircle className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
                     <Button variant="ghost" size="sm" className={ICON_BTN} title="Ver" onClick={() => handleView(sale.id)}>
                       <Eye className="h-3.5 w-3.5" />
                     </Button>

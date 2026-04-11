@@ -211,7 +211,7 @@ export async function recalculateClientTotalSpent(clientId: string) {
   const agg = await prisma.sale.aggregate({
     where: {
       clientId,
-      OR: [{ status: "PAID" }, { status: "PAGADO" }],
+      NOT: { status: { in: ["CANCELED", "CANCELADO"] } },
     },
     _sum: { total: true },
   })

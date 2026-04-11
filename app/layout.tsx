@@ -32,9 +32,31 @@ const geistMono = Geist_Mono({
 ================================ */
 
 export const metadata: Metadata = {
-  title: "ClientLabs - SaaS para Profesionales",
-  description:
-    "Plataforma SaaS completa para gestión de clientes, ventas y automatizaciones.",
+  title: "ClientLabs — El CRM para autónomos españoles",
+  description: "Gestiona leads, clientes, facturas y automatizaciones en un solo panel. Diseñado para autónomos y pequeños negocios españoles.",
+  keywords: ["CRM autónomos", "gestión clientes España", "facturación autónomos", "software autónomos España"],
+  authors: [{ name: "ClientLabs" }],
+  creator: "ClientLabs",
+  openGraph: {
+    title: "ClientLabs — El CRM para autónomos españoles",
+    description: "Leads automáticos, CRM, facturas y automatizaciones. Todo en un panel.",
+    url: "https://clientlabs.io",
+    siteName: "ClientLabs",
+    locale: "es_ES",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ClientLabs — El CRM para autónomos españoles",
+    description: "Leads automáticos, CRM, facturas y automatizaciones. Todo en un panel.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  alternates: {
+    canonical: "https://clientlabs.io",
+  },
 }
 
 /* ================================

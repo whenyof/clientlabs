@@ -990,7 +990,7 @@ const RECURSOS = [
     title: "Cómo captar tus primeros 10 clientes como autónomo",
     desc: "Estrategias probadas para conseguir clientes sin presupuesto de marketing.",
     cta: "Descargar gratis",
-    href: "/whitelist?ref=recurso-guia-clientes",
+    href: "/register",
     featured: false,
   },
   {
@@ -999,7 +999,7 @@ const RECURSOS = [
     title: "Plantilla de seguimiento de clientes y ventas",
     desc: "La plantilla que usaban nuestros usuarios antes de descubrir ClientLabs.",
     cta: "Descargar gratis",
-    href: "/whitelist?ref=recurso-plantilla-clientes",
+    href: "/register",
     featured: false,
   },
   {
@@ -1008,7 +1008,7 @@ const RECURSOS = [
     title: "Calculadora de tarifa hora para autónomos",
     desc: "Calcula cuánto deberías cobrar por hora según tus gastos y objetivos de ingresos.",
     cta: "Usar gratis",
-    href: "/whitelist?ref=recurso-calculadora-tarifa",
+    href: "/register",
     featured: false,
   },
   {
@@ -1017,7 +1017,7 @@ const RECURSOS = [
     title: "Checklist cierre de mes para autónomos",
     desc: "24 tareas que todo autónomo debería hacer antes de cerrar el mes. Nunca más te olvides nada.",
     cta: "Descargar gratis",
-    href: "/whitelist?ref=recurso-checklist-mes",
+    href: "/register",
     featured: false,
   },
   {
@@ -1026,7 +1026,7 @@ const RECURSOS = [
     title: "IVA trimestral para autónomos: guía paso a paso",
     desc: "Todo lo que necesitas saber sobre el modelo 303 sin morir en el intento.",
     cta: "Leer guía",
-    href: "/whitelist?ref=recurso-guia-iva",
+    href: "/register",
     featured: false,
   },
   {
@@ -1121,17 +1121,17 @@ function RecursosSection() {
         <div className="rec-landing-banner bg-[#0B1F2A] rounded-2xl p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div>
             <h3 className="text-[20px] font-bold text-white mb-1">
-              ¿Quieres acceso a todos los recursos?
+              ¿Quieres usar ClientLabs gratis?
             </h3>
             <p className="text-[14px] text-white/50">
-              Apúntate a la whitelist y te los enviamos antes del lanzamiento.
+              Crea tu cuenta y accede a todos los recursos de forma gratuita.
             </p>
           </div>
           <a
-            href="/whitelist"
+            href="/register"
             className="flex-shrink-0 px-6 py-3 bg-[#1FA97A] text-white rounded-xl text-[14px] font-semibold hover:bg-[#178f68] transition-colors whitespace-nowrap"
           >
-            Apuntarme gratis →
+            Empezar gratis 14 días →
           </a>
         </div>
 

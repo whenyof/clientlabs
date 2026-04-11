@@ -13,22 +13,10 @@ type ChangeItem = { type: "new" | "improved" | "fixed"; text: string }
 type Version = {
   version: string
   date: string
-  upcoming?: boolean
   items: ChangeItem[]
 }
 
 const VERSIONS: Version[] = [
-  {
-    version: "1.0.0",
-    date: "Junio 2026",
-    upcoming: true,
-    items: [
-      { type: "new", text: "Planes de pago con Stripe — elige el plan que mejor se adapta a tu negocio" },
-      { type: "new", text: "Email marketing básico — envía campañas a tus clientes desde ClientLabs" },
-      { type: "new", text: "Automatizaciones configurables — define reglas para que ClientLabs trabaje solo" },
-      { type: "new", text: "Factura electrónica con Verifactu — cumple con la normativa de la AEAT" },
-    ],
-  },
   {
     version: "0.8.0",
     date: "Abril 2026",
@@ -114,13 +102,8 @@ export default function ChangelogPage() {
 
               {/* Version header */}
               <div className="flex items-center gap-3 mb-4">
-                <span className={`text-sm font-bold px-3 py-1 rounded-full ${
-                  version.upcoming
-                    ? "border-2 border-dashed border-[#1FA97A] text-[#1FA97A] bg-[#E1F5EE]/50"
-                    : "bg-[#E1F5EE] text-[#1FA97A]"
-                }`}>
+                <span className="text-sm font-bold px-3 py-1 rounded-full bg-[#E1F5EE] text-[#1FA97A]">
                   v{version.version}
-                  {version.upcoming && " — Próximamente"}
                 </span>
                 <span className="text-sm text-slate-400">{version.date}</span>
               </div>

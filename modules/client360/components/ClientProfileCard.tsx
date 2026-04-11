@@ -127,24 +127,25 @@ export function ClientProfileCard({ client }: ClientProfileCardProps) {
         </div>
 
         {/* Info adicional */}
-        {(isEditing || client.additionalInfo) && (
-          <div className="px-5 py-3">
-            <span className="text-[11px] text-[var(--text-secondary)] block mb-1.5">Info adicional</span>
-            {isEditing ? (
-              <textarea
-                value={form.additionalInfo}
-                onChange={(e) => setForm((p) => ({ ...p, additionalInfo: e.target.value }))}
-                placeholder="Información extra del cliente..."
-                rows={3}
-                className="w-full text-[13px] text-[var(--text-primary)] bg-[var(--bg-surface)] rounded-md px-2.5 py-1.5 border border-[var(--border-subtle)] focus:outline-none focus:border-[#1FA97A] focus:ring-1 focus:ring-[#1FA97A]/20 transition-all resize-none placeholder:text-[var(--text-secondary)]"
-              />
-            ) : (
-              <p className="text-[13px] text-[var(--text-primary)] leading-relaxed whitespace-pre-wrap">
-                {client.additionalInfo}
-              </p>
-            )}
-          </div>
-        )}
+        <div className="px-5 py-3">
+          <span className="text-[11px] text-[var(--text-secondary)] block mb-1.5">Info adicional</span>
+          {isEditing ? (
+            <textarea
+              value={form.additionalInfo}
+              onChange={(e) => setForm((p) => ({ ...p, additionalInfo: e.target.value }))}
+              placeholder="Información extra del cliente..."
+              rows={3}
+              className="w-full text-[13px] text-[var(--text-primary)] bg-[var(--bg-surface)] rounded-md px-2.5 py-1.5 border border-[var(--border-subtle)] focus:outline-none focus:border-[#1FA97A] focus:ring-1 focus:ring-[#1FA97A]/20 transition-all resize-none placeholder:text-[var(--text-secondary)]"
+            />
+          ) : (
+            <p className="text-[13px] leading-relaxed whitespace-pre-wrap">
+              {client.additionalInfo
+                ? <span className="text-[var(--text-primary)]">{client.additionalInfo}</span>
+                : <span className="text-[var(--text-secondary)]">—</span>
+              }
+            </p>
+          )}
+        </div>
       </div>
     </div>
   )

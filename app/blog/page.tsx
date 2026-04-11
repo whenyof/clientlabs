@@ -1,45 +1,31 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import { ImageIcon } from "lucide-react"
 import { Navbar } from "../ui/chrome"
+import { ARTICLES } from "./data"
 
-const posts = [
-  {
-    slug: "como-no-perder-clientes-seguimiento",
-    title: "Cómo no perder clientes por no hacer seguimiento",
-    category: "Gestión de clientes",
-    categoryColor: "bg-[#E1F5EE] text-[#1FA97A]",
-    readTime: "5 min",
-    date: "1 de abril de 2026",
-    excerpt: "El error más común de los autónomos es conseguir un cliente potencial y luego olvidarse de él. Te explicamos cómo evitarlo.",
-  },
-  {
-    slug: "facturacion-autonomos-espana-2026",
-    title: "Facturación para autónomos en España en 2026: todo lo que necesitas saber",
-    category: "Fiscalidad",
-    categoryColor: "bg-blue-50 text-blue-600",
-    readTime: "8 min",
-    date: "25 de marzo de 2026",
-    excerpt: "IVA, IRPF, Verifactu, franquicia de IVA... La normativa fiscal para autónomos cambia cada año. Aquí tienes todo actualizado.",
-  },
-  {
-    slug: "herramientas-gestion-autonomos",
-    title: "Las 5 herramientas que todo autónomo necesita en 2026",
-    category: "Productividad",
-    categoryColor: "bg-purple-50 text-purple-600",
-    readTime: "6 min",
-    date: "15 de marzo de 2026",
-    excerpt: "Desde el CRM hasta la facturación, estas son las herramientas que te van a ahorrar más tiempo cada semana.",
-  },
-  {
-    slug: "como-conseguir-primeros-clientes",
-    title: "Cómo conseguir tus primeros 10 clientes como autónomo",
-    category: "Captación",
-    categoryColor: "bg-orange-50 text-orange-600",
-    readTime: "7 min",
-    date: "5 de marzo de 2026",
-    excerpt: "La guía práctica que nadie te da cuando empiezas. Sin teoría, sin humo. Solo lo que realmente funciona.",
-  },
-]
+export const revalidate = 3600
+
+export const metadata: Metadata = {
+  title: "Blog para autónomos | ClientLabs",
+  description: "Consejos, guías y recursos prácticos para autónomos y freelancers españoles. Gestión, fiscalidad, clientes y productividad.",
+  alternates: { canonical: "https://clientlabs.io/blog" },
+}
+
+const sortedArticles = [...ARTICLES].sort((a, b) => {
+  const months: Record<string, number> = {
+    enero: 0, febrero: 1, marzo: 2, abril: 3, mayo: 4, junio: 5,
+    julio: 6, agosto: 7, septiembre: 8, octubre: 9, noviembre: 10, diciembre: 11,
+  }
+  const parseDate = (d: string) => {
+    const parts = d.split(" de ")
+    const day = parseInt(parts[0])
+    const month = months[parts[1].toLowerCase()] ?? 0
+    const year = parseInt(parts[2])
+    return new Date(year, month, day)
+  }
+  return parseDate(b.date).getTime() - parseDate(a.date).getTime()
+})
 
 export default function BlogPage() {
   return (
@@ -57,7 +43,7 @@ export default function BlogPage() {
       {/* Articles grid */}
       <section className="mx-auto max-w-5xl px-6 pb-24">
         <div className="grid gap-6 md:grid-cols-2">
-          {posts.map((post) => (
+          {sortedArticles.map((post) => (
             <article key={post.slug} className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:border-slate-300 transition-colors">
               <div className="bg-slate-100 h-48 flex items-center justify-center">
                 <ImageIcon className="w-8 h-8 text-slate-400" />

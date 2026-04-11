@@ -24,6 +24,7 @@ export interface Client360Base {
   source: string | null
   status: string
   riskLevel: string | null
+  additionalInfo: string | null
   createdAt: string
 }
 

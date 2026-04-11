@@ -375,6 +375,7 @@ model Client {
   country             String?
   companyName         String?
   legalName           String?
+  additionalInfo      String?
   isFiscalComplete    Boolean?
   BillingInvoice      BillingInvoice[]
   CalendarEvent       CalendarEvent[]

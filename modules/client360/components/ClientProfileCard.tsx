@@ -27,14 +27,15 @@ export function ClientProfileCard({ client }: ClientProfileCardProps) {
   const [isSaving,  setIsSaving]  = useState(false)
   const isSubmitting = useRef(false)
   const [form, setForm] = useState({
-    email:   client.email       ?? "",
-    phone:   client.phone       ?? "",
-    company: client.companyName ?? "",
-    country: client.country     ?? "",
+    email:          client.email          ?? "",
+    phone:          client.phone          ?? "",
+    company:        client.companyName    ?? "",
+    country:        client.country        ?? "",
+    additionalInfo: client.additionalInfo ?? "",
   })
 
   const handleCancel = () => {
-    setForm({ email: client.email ?? "", phone: client.phone ?? "", company: client.companyName ?? "", country: client.country ?? "" })
+    setForm({ email: client.email ?? "", phone: client.phone ?? "", company: client.companyName ?? "", country: client.country ?? "", additionalInfo: client.additionalInfo ?? "" })
     setIsEditing(false)
   }
 
@@ -46,7 +47,13 @@ export function ClientProfileCard({ client }: ClientProfileCardProps) {
       const res = await fetch(`/api/clients/${client.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          email:          form.email          || null,
+          phone:          form.phone          || null,
+          company:        form.company        || null,
+          country:        form.country        || null,
+          additionalInfo: form.additionalInfo || null,
+        }),
       })
       const data = await res.json()
       if (res.ok) { toast.success("Guardado"); setIsEditing(false) }
@@ -118,6 +125,26 @@ export function ClientProfileCard({ client }: ClientProfileCardProps) {
           <span className="text-[11px] text-[var(--text-secondary)] w-16 shrink-0">Desde</span>
           <span className="text-[13px] text-[var(--text-primary)]">{formatDate(client.createdAt)}</span>
         </div>
+
+        {/* Info adicional */}
+        {(isEditing || client.additionalInfo) && (
+          <div className="px-5 py-3">
+            <span className="text-[11px] text-[var(--text-secondary)] block mb-1.5">Info adicional</span>
+            {isEditing ? (
+              <textarea
+                value={form.additionalInfo}
+                onChange={(e) => setForm((p) => ({ ...p, additionalInfo: e.target.value }))}
+                placeholder="Información extra del cliente..."
+                rows={3}
+                className="w-full text-[13px] text-[var(--text-primary)] bg-[var(--bg-surface)] rounded-md px-2.5 py-1.5 border border-[var(--border-subtle)] focus:outline-none focus:border-[#1FA97A] focus:ring-1 focus:ring-[#1FA97A]/20 transition-all resize-none placeholder:text-[var(--text-secondary)]"
+              />
+            ) : (
+              <p className="text-[13px] text-[var(--text-primary)] leading-relaxed whitespace-pre-wrap">
+                {client.additionalInfo}
+              </p>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )

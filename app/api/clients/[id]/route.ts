@@ -26,13 +26,14 @@ export async function PATCH(req: NextRequest, { params }: { params: Params }) {
 
     const { id: clientId } = await params
     const body = await req.json()
-    const { email, phone, company, country } = body
+    const { email, phone, company, country, additionalInfo } = body
 
     const data: Record<string, string | null> = {}
     if (email !== undefined) data.email = email || null
     if (phone !== undefined) data.phone = phone || null
     if (company !== undefined) data.companyName = company || null
     if (country !== undefined) data.country = country || null
+    if (additionalInfo !== undefined) data.additionalInfo = additionalInfo?.trim() || null
 
     // Single query — ownership validated via where clause (throws P2025 if not found/owned)
     const updated = await withTimeout(

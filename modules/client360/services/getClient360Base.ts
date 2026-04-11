@@ -32,6 +32,7 @@ export async function getClient360Base(
    source: true,
    status: true,
    riskLevel: true,
+   additionalInfo: true,
    createdAt: true,
  },
  })

@@ -1,12 +1,12 @@
 "use client"
 
-import { useState, useMemo, useEffect, useCallback, memo } from "react"
+import { useState, useEffect, useCallback, memo } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import type { Client } from "@prisma/client"
 import { useSectorConfig } from "@/hooks/useSectorConfig"
 import { Checkbox } from "@/components/ui/checkbox"
-import { AlertTriangle, ArrowUp } from "lucide-react"
+import { AlertTriangle } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"
 import { ClientRowActions } from "@/modules/clients/components/ClientRowActions"
@@ -61,8 +61,6 @@ function ClientsTableComponent({ clients }: ClientsTableProps) {
   const { labels } = useSectorConfig()
   const [selectedClients, setSelectedClients] = useState<string[]>([])
   const [isMounted, setIsMounted] = useState(false)
-  const [sort, setSort] = useState<{ key: string; dir: "asc" | "desc" }>({ key: "updatedAt", dir: "desc" })
-
   useEffect(() => setIsMounted(true), [])
 
   const handleSelectAll = (checked: boolean) => {
@@ -73,47 +71,6 @@ function ClientsTableComponent({ clients }: ClientsTableProps) {
     setSelectedClients((prev) => (checked ? [...prev, clientId] : prev.filter((id) => id !== clientId)))
   }, [])
 
-  const handleSort = (key: string) => {
-    setSort((prev) => ({ key, dir: prev.key === key && prev.dir === "desc" ? "asc" : "desc" }))
-  }
-
-  const sortedClients = useMemo(() => {
-    return [...clients].sort((a, b) => {
-      let aVal: unknown = a[sort.key as keyof ClientWithLead]
-      let bVal: unknown = b[sort.key as keyof ClientWithLead]
-      if (sort.key === "value") {
-        aVal = a.totalSpent ?? 0
-        bVal = b.totalSpent ?? 0
-      } else if (sort.key === "lastActivity") {
-        aVal = new Date(a.updatedAt || a.createdAt).getTime()
-        bVal = new Date(b.updatedAt || b.createdAt).getTime()
-      } else if (sort.key === "status") {
-        aVal = normalizeStatus(a.status)
-        bVal = normalizeStatus(b.status)
-      } else if (sort.key === "score") {
-        aVal = calculateClientScore(mapClientToScoreInput(a))
-        bVal = calculateClientScore(mapClientToScoreInput(b))
-      }
-      const cmp = (aVal as number) > (bVal as number) ? 1 : (aVal as number) < (bVal as number) ? -1 : 0
-      return sort.dir === "asc" ? cmp : -cmp
-    })
-  }, [clients, sort])
-
-  const SortableTh = ({ label, columnKey, className = "" }: { label: string; columnKey: string; className?: string }) => (
-    <th
-      className={`px-4 py-3 text-left text-sm font-medium text-neutral-600 cursor-pointer select-none group hover:text-neutral-900 ${className}`}
-      onClick={() => handleSort(columnKey)}
-    >
-      <div className="flex items-center gap-1">
-        {label}
-        <ArrowUp
-          className={`ml-1 h-3 w-3 transition-all duration-200 ${
-            sort.key === columnKey ? "opacity-100 text-neutral-900" : "opacity-0 group-hover:opacity-50"
-          } ${sort.key === columnKey && sort.dir === "asc" ? "rotate-180" : ""}`}
-        />
-      </div>
-    </th>
-  )
 
   if (clients.length === 0) {
     return (
@@ -141,16 +98,16 @@ function ClientsTableComponent({ clients }: ClientsTableProps) {
                   className="border-neutral-300"
                 />
               </th>
-              <SortableTh label="Cliente" columnKey="name" className="min-w-[220px]" />
-              <SortableTh label="Ingresos" columnKey="value" />
-              <SortableTh label="Estado" columnKey="status" />
-              <SortableTh label="Última actividad" columnKey="lastActivity" />
-              <SortableTh label="Puntuación" columnKey="score" />
+              <th className="px-4 py-3 text-left text-sm font-medium text-neutral-600 min-w-[220px]">Cliente</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-neutral-600">Ingresos</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-neutral-600">Estado</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-neutral-600">Última actividad</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-neutral-600">Puntuación</th>
               <th className="px-4 py-3 text-right text-sm font-medium text-neutral-600">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {sortedClients.map((client) => {
+            {clients.map((client) => {
               const lastActivity = new Date(client.updatedAt || client.createdAt)
               const isForgotten = client.isForgotten
               const daysSince = client.daysSinceActivity ?? Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24))

@@ -3,6 +3,7 @@
  */
 
 import { prisma } from "@/lib/prisma"
+import { recalculateClientTotalSpent } from "@/modules/sales/actions/sales.actions"
 import type { InvoiceStatus, InvoiceEnrichment, BillingPaymentShape } from "../types"
 import type { Decimal } from "@prisma/client/runtime/library"
 import {
@@ -229,6 +230,9 @@ export async function registerPayment(
       where: { id: invoiceId, userId },
       data: { paidAt, status: "PAID", updatedAt: new Date() },
     })
+    if (invoice.clientId) {
+      await recalculateClientTotalSpent(invoice.clientId)
+    }
   }
   return getInvoiceById(invoiceId, userId)
 }

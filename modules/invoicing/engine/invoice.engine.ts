@@ -3,6 +3,7 @@
  */
 
 import * as repo from "../repositories/invoice.repository"
+import { recalculateClientTotalSpent } from "@/modules/sales/actions/sales.actions"
 import type { InvoiceLineInput, InvoiceLineComputed, InvoiceWithRelations, AddPaymentInput, InvoiceStatus, PriceMode } from "../types"
 import { INVOICE_STATUS } from "../types"
 
@@ -158,6 +159,9 @@ export async function registerPayment(
       method: payment.method,
       paidAt: paidAt.toISOString(),
     })
+    if (invoice.clientId) {
+      await recalculateClientTotalSpent(invoice.clientId)
+    }
   }
 
   return { ok: true, newStatus: status }

@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
 import { ensureUserExists } from "@/lib/ensure-user"
+import { recalculateClientTotalSpent } from "@/modules/sales/actions/sales.actions"
 
 /* ==================== CLIENT ACTIONS ==================== */
 
@@ -240,14 +241,8 @@ export async function addClientPurchase(
         },
     })
 
-    // Update client totalSpent
-    await prisma.client.update({
-        where: { id: clientId },
-        data: {
-            totalSpent: { increment: data.amount },
-            updatedAt: new Date(),
-        },
-    })
+    // Recalculate totalSpent from aggregate (safe against concurrent calls)
+    await recalculateClientTotalSpent(clientId)
 
     revalidatePath("/dashboard/clients")
     revalidatePath("/dashboard/other")
@@ -619,34 +614,6 @@ export async function getClientSales(clientId: string) {
     })
 
     return sales
-}
-
-// Helper to recalculate total spent
-async function recalculateClientTotalSpent(clientId: string) {
-    const aggregations = await prisma.sale.aggregate({
-        where: {
-            clientId,
-            OR: [
-                { status: "PAID" },
-                { status: "PAGADO" } // Legacy support
-            ]
-        },
-        _sum: {
-            total: true
-        }
-    })
-
-    const totalSpent = Number(aggregations._sum.total || 0)
-
-    await prisma.client.update({
-        where: { id: clientId },
-        data: {
-            totalSpent,
-            updatedAt: new Date()
-        }
-    })
-
-    return totalSpent
 }
 
 // Create client sale/payment

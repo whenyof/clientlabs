@@ -207,7 +207,7 @@ export async function updateSale(id: string, data: SaleUpdateInput) {
   return { success: true }
 }
 
-async function recalculateClientTotalSpent(clientId: string) {
+export async function recalculateClientTotalSpent(clientId: string) {
   const agg = await prisma.sale.aggregate({
     where: {
       clientId,

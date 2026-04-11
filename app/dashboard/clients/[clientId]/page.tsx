@@ -58,7 +58,7 @@ export default async function Client360Page({ params: paramsPromise }: { params:
       </a>
 
       {/* ── Header: identidad del cliente ──────────────────────────────── */}
-      <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-subtle)] px-6 py-5 mb-4">
+      <div className="mb-4">
         <ClientHeader
           client={client}
           kpis={kpis}

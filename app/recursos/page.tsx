@@ -1,13 +1,13 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import { ImageIcon, FileSpreadsheet, Mail, CheckSquare, Calculator, Calendar, Hash, ArrowRight } from "lucide-react"
+import { Navbar } from "../ui/chrome"
 
 export const metadata: Metadata = {
   title: "Recursos para autónomos | ClientLabs",
   description: "Guías gratuitas, plantillas y herramientas para autónomos españoles. Todo lo que necesitas para gestionar mejor tu negocio.",
   alternates: { canonical: "https://clientlabs.io/recursos" },
 }
-import { ImageIcon, FileSpreadsheet, Mail, CheckSquare, Calculator, Calendar, Hash } from "lucide-react"
-import { Navbar } from "../ui/chrome"
 
 const guides = [
   { title: "Cómo gestionar tus leads sin perder ninguno", tag: "Guía gratuita" },
@@ -26,6 +26,21 @@ const tools = [
   { title: "Calculadora de IRPF", href: "https://www.agenciatributaria.gob.es", Icon: Calculator, external: true },
   { title: "Calendario fiscal 2026", href: "https://www.agenciatributaria.gob.es", Icon: Calendar, external: true },
   { title: "Generador de número de factura", href: "/whitelist", Icon: Hash, external: false },
+]
+
+const blogLinks = [
+  {
+    label: "Cómo gestionar tus leads sin perder ninguno",
+    href: "/blog/como-no-perder-clientes-seguimiento",
+  },
+  {
+    label: "Facturación para autónomos en España: guía completa 2026",
+    href: "/blog/facturacion-autonomos-espana-2026",
+  },
+  {
+    label: "Cómo retener a tus clientes como autónomo",
+    href: "/blog/como-retener-clientes-autonomo",
+  },
 ]
 
 export default function RecursosPage() {
@@ -101,6 +116,25 @@ export default function RecursosPage() {
                 <t.Icon className="w-5 h-5 text-[#1FA97A] shrink-0" />
                 <span className="text-[14px] font-medium">{t.title}</span>
               </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Del blog */}
+      <section className="py-16">
+        <div className="mx-auto max-w-5xl px-6">
+          <h2 className="text-[20px] font-bold mb-6">Del blog</h2>
+          <div className="space-y-3">
+            {blogLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="flex items-center gap-2 text-[14px] text-[#1FA97A] hover:underline"
+              >
+                <ArrowRight className="h-3.5 w-3.5 shrink-0" />
+                {link.label}
+              </Link>
             ))}
           </div>
         </div>

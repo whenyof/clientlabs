@@ -2,12 +2,12 @@
 
 import { useSectorConfig } from "@/hooks/useSectorConfig"
 
-import { useState, useMemo, useEffect, useCallback, memo } from "react"
+import { useState, useEffect, useCallback, memo } from "react"
 import type { Client } from "@prisma/client"
 import { ClientRowActions } from "./ClientRowActions"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
-import { Mail, Phone, AlertTriangle, ArrowUp, ArrowDown } from "lucide-react"
+import { Mail, Phone, AlertTriangle } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"
 import { toast } from "sonner"
@@ -42,12 +42,6 @@ function ClientsTableComponent({ clients, onClientUpdate, onClientClick }: Clien
     setIsMounted(true)
   }, [])
 
-
-  // Sorting State
-  const [sort, setSort] = useState<{ key: string; dir: "asc" | "desc" }>({
-    key: "updatedAt", // Default sort
-    dir: "desc",
-  })
 
   // Normalize status to prevent crashes with legacy/invalid data
   const normalizeStatus = (status: any): "ACTIVE" | "FOLLOW_UP" | "INACTIVE" | "VIP" => {
@@ -94,70 +88,6 @@ function ClientsTableComponent({ clients, onClientUpdate, onClientClick }: Clien
     }
   }
 
-  const handleSort = (key: string) => {
-    setSort((prev) => ({
-      key,
-      dir: prev.key === key && prev.dir === "desc" ? "asc" : "desc",
-    }))
-  }
-
-  // Sorted Clients
-  const sortedClients = useMemo(() => {
-    return [...clients].sort((a, b) => {
-      let aValue: any = a[sort.key as keyof ClientWithLead]
-      let bValue: any = b[sort.key as keyof ClientWithLead]
-
-      // Handle specific keys
-      if (sort.key === "value") {
-        aValue = a.totalSpent || 0
-        bValue = b.totalSpent || 0
-      } else if (sort.key === "lastActivity") {
-        aValue = new Date(a.updatedAt || a.createdAt).getTime()
-        bValue = new Date(b.updatedAt || b.createdAt).getTime()
-      } else if (sort.key === "status") {
-        aValue = normalizeStatus(a.status)
-        bValue = normalizeStatus(b.status)
-      } else if (sort.key === "tags") {
-        // rudimentary sort by tag count or first tag? let's do vip check
-        aValue = (a.totalSpent || 0) > 10000 ? 1 : 0
-        bValue = (b.totalSpent || 0) > 10000 ? 1 : 0
-      }
-
-      if (aValue === bValue) return 0
-
-      const comparison = aValue > bValue ? 1 : -1
-      return sort.dir === "asc" ? comparison : -comparison
-    })
-  }, [clients, sort])
-
-  // Render Sort Icon
-  const SortIcon = ({ columnKey }: { columnKey: string }) => {
-    const isActive = sort.key === columnKey
-    const isAsc = sort.dir === "asc"
-
-    return (
-      <ArrowUp
-        className={`h-3 w-3 inline ml-1 transition-all duration-200 ${isActive
-          ? "opacity-100 text-emerald-400 transform-none"
-          : "opacity-0 group-hover:opacity-30 -translate-y-1 group-hover:-translate-y-0"
-          } ${isActive && !isAsc ? "rotate-180" : "rotate-0"
-          }`}
-      />
-    )
-  }
-
-  // Header Component
-  const SortableHeader = ({ label, columnKey, className = "" }: { label: string, columnKey: string, className?: string }) => (
-    <th
-      className={`text-left p-4 text-sm font-medium text-white/80 cursor-pointer hover:text-white transition-colors select-none group ${className}`}
-      onClick={() => handleSort(columnKey)}
-    >
-      <div className="flex items-center gap-1">
-        {label}
-        <SortIcon columnKey={columnKey} />
-      </div>
-    </th>
-  )
 
   const handleToggleSelection = useCallback((clientId: string, checked: boolean) => {
     setSelectedClients(prev =>
@@ -195,15 +125,15 @@ function ClientsTableComponent({ clients, onClientUpdate, onClientClick }: Clien
                     className="border-white/20"
                   />
                 </th>
-                <SortableHeader label={labels.clients.singular} columnKey="name" />
-                <SortableHeader label="Estado" columnKey="status" />
-                <SortableHeader label="Última Actividad" columnKey="lastActivity" />
-                <SortableHeader label="Valor" columnKey="value" />
+                <th className="text-left p-4 text-sm font-medium text-white/80">{labels.clients.singular}</th>
+                <th className="text-left p-4 text-sm font-medium text-white/80">Estado</th>
+                <th className="text-left p-4 text-sm font-medium text-white/80">Última Actividad</th>
+                <th className="text-left p-4 text-sm font-medium text-white/80">Valor</th>
                 <th className="text-right p-4 text-sm font-medium text-white/80">{labels.common.actions}</th>
               </tr>
             </thead>
             <tbody>
-              {sortedClients.map((client) => (
+              {clients.map((client) => (
                 <ClientRow
                   key={client.id}
                   client={client}

@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useMemo, useCallback, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
 import { ClientsHeader } from "@domains/clients/components/ClientsHeader"
 import { ClientsKPIs } from "@domains/clients/components/ClientsKPIs"
 import { ClientsTable } from "@domains/clients/components/ClientsTable"
@@ -37,8 +36,6 @@ type ClientsViewProps = {
 }
 
 export function ClientsView({ initialClients, allClientsBase, currentFilters, serverNow }: ClientsViewProps & { serverNow?: string }) {
-    const router = useRouter()
-    const searchParams = useSearchParams()
     // 1. Unified Reference Date for Hydration Consistency
     const [referenceDate] = useState(() => serverNow ? new Date(serverNow) : new Date());
     const [searchTerm, setSearchTerm] = useState(currentFilters.search)
@@ -63,15 +60,6 @@ export function ClientsView({ initialClients, allClientsBase, currentFilters, se
         setSearchTerm(currentFilters.search)
     }, [currentFilters.search])
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            const params = new URLSearchParams(searchParams.toString())
-            if (searchTerm) params.set("search", searchTerm)
-            else params.delete("search")
-            router.push(`?${params.toString()}`)
-        }, 300)
-        return () => clearTimeout(timer)
-    }, [searchTerm])
 
     const handleClientUpdate = useCallback((clientId: string, data: Partial<ClientWithLead>) => {
         const updateFn = (c: any) => {
@@ -100,6 +88,17 @@ export function ClientsView({ initialClients, allClientsBase, currentFilters, se
     const clientsWithDerivedStatus = useMemo(() => {
         return clients.map(derivedLogic);
     }, [clients, derivedLogic]);
+
+    const clientsFiltrados = useMemo(() => {
+        if (!searchTerm.trim()) return clientsWithDerivedStatus
+        const term = searchTerm.toLowerCase().trim()
+        return clientsWithDerivedStatus.filter(c =>
+            c.name?.toLowerCase().includes(term) ||
+            c.email?.toLowerCase().includes(term) ||
+            c.phone?.toLowerCase().includes(term) ||
+            c.companyName?.toLowerCase().includes(term)
+        )
+    }, [clientsWithDerivedStatus, searchTerm])
 
     // KPI Calculation
     const kpis = useMemo(() => {
@@ -131,7 +130,7 @@ export function ClientsView({ initialClients, allClientsBase, currentFilters, se
             </div>
 
             <ClientsTable
-                clients={clientsWithDerivedStatus}
+                clients={clientsFiltrados}
                 onClientUpdate={handleClientUpdate}
             />
         </div>

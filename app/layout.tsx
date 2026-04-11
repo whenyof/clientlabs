@@ -73,6 +73,25 @@ const themeScript = `
 `
 
 /* ================================
+   Structured Data
+================================ */
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "ClientLabs",
+  "applicationCategory": "BusinessApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "9.99",
+    "priceCurrency": "EUR"
+  },
+  "operatingSystem": "Web",
+  "description": "CRM para autónomos españoles",
+  "url": "https://clientlabs.io",
+}
+
+/* ================================
    Root Layout
 ================================ */
 
@@ -101,6 +120,10 @@ export default function RootLayout({
           transition-colors duration-300
         `}
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <QueryProvider>
           <ThemeProvider>
             <Providers>

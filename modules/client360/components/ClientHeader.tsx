@@ -59,9 +59,6 @@ export function ClientHeader({ client, kpis, lastActivityAt }: ClientHeaderProps
   return (
     <>
       <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-        {/* Banda de color */}
-        <div className="h-1 w-full bg-gradient-to-r from-[#1FA97A] to-[#0B1F2A]" />
-
         <div className="px-6 pt-5 pb-4">
           {/* Fila 1 — avatar + nombre + score */}
           <div className="flex items-start justify-between mb-4">
@@ -114,9 +111,6 @@ export function ClientHeader({ client, kpis, lastActivityAt }: ClientHeaderProps
               </div>
             </div>
           </div>
-
-          {/* Separador */}
-          <div className="h-px bg-slate-100 mb-4" />
 
           {/* Fila 2 — acciones */}
           <div className="flex items-center gap-2 flex-wrap">

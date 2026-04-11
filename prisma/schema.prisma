@@ -376,6 +376,7 @@ model Client {
   companyName         String?
   legalName           String?
   additionalInfo      String?
+  isVip               Boolean               @default(false)
   isFiscalComplete    Boolean?
   BillingInvoice      BillingInvoice[]
   CalendarEvent       CalendarEvent[]

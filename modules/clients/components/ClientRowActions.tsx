@@ -20,7 +20,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { MoreVertical, Edit, MessageSquare, Phone, Mail, Users } from "lucide-react"
+import { MoreVertical, Edit, MessageSquare, Phone, Mail, Users, Star } from "lucide-react"
 import { updateClientInfo, addClientNote, registerClientInteraction } from "../actions"
 import { useSectorConfig } from "@/hooks/useSectorConfig"
 import { toast } from "sonner"
@@ -79,6 +79,25 @@ export function ClientRowActions({ client }: { client: Client }) {
  } finally {
  setLoading(false)
  }
+ }
+
+ const handleToggleVip = async () => {
+   const isCurrentlyVip = client.status === "VIP"
+   try {
+     const res = await fetch(`/api/clients/${client.id}`, {
+       method: "PATCH",
+       headers: { "Content-Type": "application/json" },
+       body: JSON.stringify({
+         isVip: !isCurrentlyVip,
+         status: isCurrentlyVip ? "ACTIVE" : "VIP",
+       }),
+     })
+     if (!res.ok) throw new Error()
+     toast.success(isCurrentlyVip ? "Cliente ya no es VIP" : "Cliente marcado como VIP")
+     router.refresh()
+   } catch {
+     toast.error("Error al actualizar")
+   }
  }
 
  const handleRegisterInteraction = async () => {
@@ -159,12 +178,18 @@ export function ClientRowActions({ client }: { client: Client }) {
  <MoreVertical className="h-4 w-4" />
  </Button>
  </DropdownMenuTrigger>
- <DropdownMenuContent align="end" className="bg-zinc-900 border-[var(--border-subtle)]">
- <DropdownMenuItem onClick={() => setEditDialog(true)} className="text-[var(--text-primary)] hover:bg-[var(--bg-card)] cursor-pointer">
- <Edit className="mr-2 h-4 w-4" />
+ <DropdownMenuContent align="end" className="bg-white border-slate-200 shadow-lg shadow-slate-200/50 rounded-xl py-1 min-w-[170px]">
+ <DropdownMenuItem onClick={() => setEditDialog(true)} className="text-slate-700 hover:bg-slate-50 cursor-pointer text-[12px] font-medium">
+ <Edit className="mr-2 h-3.5 w-3.5" />
  {labels.common.edit} {labels.clients.singular.toLowerCase()}
  </DropdownMenuItem>
- {/* Secondary items can go here if needed */}
+ <DropdownMenuItem
+   onClick={handleToggleVip}
+   className="cursor-pointer text-[12px] font-medium text-amber-600 hover:bg-amber-50 focus:bg-amber-50 focus:text-amber-600"
+ >
+   <Star className={`mr-2 h-3.5 w-3.5 ${client.status === "VIP" ? "fill-amber-400 text-amber-400" : "text-amber-400"}`} />
+   {client.status === "VIP" ? "Quitar VIP" : "Marcar como VIP"}
+ </DropdownMenuItem>
  </DropdownMenuContent>
  </DropdownMenu>
  </div>

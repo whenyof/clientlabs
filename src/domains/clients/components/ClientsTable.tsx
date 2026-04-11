@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import type { Client } from "@prisma/client"
 import { useSectorConfig } from "@/hooks/useSectorConfig"
 import { Checkbox } from "@/components/ui/checkbox"
-import { AlertTriangle } from "lucide-react"
+import { AlertTriangle, Star } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"
 import { ClientRowActions } from "@/modules/clients/components/ClientRowActions"
@@ -138,9 +138,12 @@ function ClientsTableComponent({ clients }: ClientsTableProps) {
                           onClick={(e) => e.stopPropagation()}
                           className="font-medium text-neutral-900 hover:underline cursor-pointer truncate"
                         >
-                          {client.name || labels.common.noResults}
-                          {client.riskLevel === "MEDIUM" && <span className="ml-1 text-sm" title="Riesgo medio">🟠</span>}
-                          {client.riskLevel === "HIGH" && <span className="ml-1 text-sm" title="Riesgo alto">🔴</span>}
+                          <span className="flex items-center gap-1.5">
+                            {client.name || labels.common.noResults}
+                            {client.status === "VIP" && (
+                              <Star className="h-3 w-3 fill-amber-400 text-amber-400 shrink-0" aria-label="VIP" />
+                            )}
+                          </span>
                         </Link>
                         <span className="text-sm text-neutral-500 truncate">{client.email || "—"}</span>
                         {client.companyName && (

@@ -68,8 +68,13 @@ export default async function Client360Page({ params: paramsPromise }: { params:
       </div>
 
       {/* ── 4 KPIs separados ───────────────────────────────────────────── */}
-      <div className="mb-6">
+      <div className="mb-4">
         <ClientKpiOverview kpis={kpis} salesKpis={salesData.kpis} />
+      </div>
+
+      {/* ── Acciones rápidas (ancho completo, siempre visible) ─────────── */}
+      <div className="mb-4">
+        <Client360ActionsBar clientId={client.id} defaultEmail={client.email} />
       </div>
 
       {/* ── Layout 70 / 30 ─────────────────────────────────────────────── */}
@@ -77,9 +82,6 @@ export default async function Client360Page({ params: paramsPromise }: { params:
 
         {/* ── Columna izquierda (70%) ─────────────────────────────────── */}
         <div style={{ flex: 1, minWidth: 0 }} className="space-y-4">
-
-          {/* Acciones rápidas */}
-          <Client360ActionsBar clientId={client.id} defaultEmail={client.email} />
 
           {/* Riesgo + Rentabilidad en dos tarjetas lado a lado */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -2,7 +2,10 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { UserPlus, Building2, Globe, Code, ChevronDown, ChevronUp } from "lucide-react"
+import {
+  UserPlus, Building2, Globe, Code, ChevronDown, ChevronUp,
+  Mail, Bell, AlertCircle, RefreshCw,
+} from "lucide-react"
 import { Navbar } from "../ui/chrome"
 
 const faqs = [
@@ -39,11 +42,106 @@ const startCards = [
   { Icon: Code, title: "Añadir el SDK en tu web", desc: "Una línea de código en el head. Verifica que los leads llegan correctamente desde el panel." },
 ]
 
+const integrationCards = [
+  {
+    title: "5.1 HTML puro",
+    desc: "Añade este script en el head de tu web. Compatible con cualquier tecnología.",
+    code: `<script\n  src="https://clientlabs.io/sdk.js"\n  data-api-key="TU_API_KEY"\n  data-form-id="contact">\n</script>`,
+  },
+  {
+    title: "5.2 WordPress",
+    desc: "Plugin oficial disponible en el directorio de WordPress.org.",
+    steps: [
+      "Instalar plugin «Lead Capture for ClientLabs»",
+      "Ir a Ajustes → ClientLabs",
+      "Pegar la API key",
+      "Añadir shortcode [clientlabs_form]",
+    ],
+  },
+  {
+    title: "5.3 Webflow",
+    desc: "Añade el script desde Project Settings → Custom Code → Head Code. No se requiere ninguna instalación adicional.",
+  },
+  {
+    title: "5.4 Wix",
+    desc: "Añade el código desde Wix Settings → Custom Code → Add Code to Pages. Selecciona «All Pages» para que aplique en toda la web.",
+  },
+]
+
+const automationCards = [
+  {
+    Icon: Mail,
+    title: "Email de bienvenida al nuevo lead",
+    desc: "Se envía automáticamente cuando llega un lead nuevo. Personalizable desde Ajustes → Automatizaciones.",
+  },
+  {
+    Icon: Bell,
+    title: "Recordatorio si lead sin respuesta",
+    desc: "Si un lead lleva X días sin respuesta, ClientLabs te avisa por email para que hagas seguimiento.",
+  },
+  {
+    Icon: AlertCircle,
+    title: "Notificación de factura vencida",
+    desc: "Recibe un aviso cuando una factura lleva más de 30 días sin pagar.",
+  },
+  {
+    Icon: RefreshCw,
+    title: "Email de seguimiento a cliente inactivo",
+    desc: "Si un cliente lleva 60 días sin actividad, se activa un recordatorio automático.",
+  },
+]
+
+const billingItems = [
+  {
+    title: "7.1 Configurar datos fiscales",
+    desc: "Ve a Ajustes → Perfil fiscal. Campos: NIF/CIF, Razón social, Dirección fiscal, Código postal, Ciudad, País. Estos datos aparecen automáticamente en todas tus facturas.",
+  },
+  {
+    title: "7.2 Series de facturación",
+    desc: "Por defecto: FAC-2026-0001. Puedes personalizar el prefijo desde Ajustes → Facturación. El número se incrementa automáticamente.",
+  },
+  {
+    title: "7.3 Tipos de IVA",
+    desc: "21% (servicios generales), 10% (hostelería, transporte), 4% (libros, medicamentos), 0% (operaciones exentas). Selecciona el tipo al crear cada línea de factura.",
+  },
+  {
+    title: "7.4 Generar y enviar PDF",
+    desc: "Desde la factura, haz clic en «Descargar PDF». El PDF incluye todos los datos fiscales y cumple con los requisitos de la AEAT. También puedes enviar por email directamente desde la plataforma.",
+  },
+  {
+    title: "7.5 Registrar pagos",
+    desc: "Abre la factura → «Registrar pago» → introduce importe, fecha y método. Puedes registrar pagos parciales para facturas en varios plazos.",
+  },
+]
+
+const accountCards = [
+  {
+    title: "8.1 Cambiar de plan",
+    desc: "Ajustes → Suscripción → «Cambiar plan». El cambio es inmediato. Si subes de plan, se hace un prorrateo del periodo restante.",
+  },
+  {
+    title: "8.2 Cancelar suscripción",
+    desc: "Ajustes → Suscripción → «Cancelar». El acceso se mantiene hasta el fin del periodo pagado. Tus datos se conservan 30 días adicionales.",
+  },
+  {
+    title: "8.3 Exportar datos",
+    desc: "Ajustes → Privacidad → «Exportar mis datos». Recibirás un ZIP con tus clientes, leads y facturas en formato CSV y PDF.",
+  },
+  {
+    title: "8.4 Añadir colaborador",
+    desc: "Disponible en planes Profesional y Agencia. Ajustes → Equipo → «Invitar colaborador». Introduce el email y asigna el rol.",
+  },
+]
+
 const sidebarLinks = [
   { id: "primeros-pasos", label: "Primeros pasos" },
   { id: "modulos", label: "Módulos" },
   { id: "faq", label: "Preguntas frecuentes" },
   { id: "soporte", label: "Soporte" },
+  { id: "integracion", label: "Integración con tu web" },
+  { id: "automatizaciones", label: "Automatizaciones" },
+  { id: "facturacion-avanzada", label: "Facturación avanzada" },
+  { id: "cuenta", label: "Cuenta y suscripción" },
 ]
 
 export default function DocsPage() {
@@ -100,7 +198,10 @@ export default function DocsPage() {
                 <div className="border border-slate-200 rounded-xl p-5">
                   <h3 className="text-[15px] font-semibold mb-2">2.1 Gestión de leads</h3>
                   <p className="text-[13px] text-slate-600 leading-relaxed mb-2">Los leads pasan por 5 estados: <strong>Nuevo → Contactado → Cualificado → Convertido → Perdido</strong>. Cada cambio de estado actualiza el scoring automáticamente. Puedes añadir notas, registrar interacciones (llamadas, emails, reuniones) y convertir un lead en cliente con un clic.</p>
-                  <p className="text-[13px] text-slate-500">Los leads sin actividad durante 7 días pasan automáticamente a estado "Estancado".</p>
+                  <p className="text-[13px] text-slate-500 mb-2">Los leads sin actividad durante 7 días pasan automáticamente a estado "Estancado".</p>
+                  <Link href="/blog/como-no-perder-clientes-seguimiento" className="text-[#1FA97A] hover:underline text-[13px]">
+                    Leer: Cómo no perder clientes por no hacer seguimiento →
+                  </Link>
                 </div>
                 <div className="border border-slate-200 rounded-xl p-5">
                   <h3 className="text-[15px] font-semibold mb-2">2.2 Gestión de clientes</h3>
@@ -108,7 +209,10 @@ export default function DocsPage() {
                 </div>
                 <div className="border border-slate-200 rounded-xl p-5">
                   <h3 className="text-[15px] font-semibold mb-2">2.3 Facturación</h3>
-                  <p className="text-[13px] text-slate-600 leading-relaxed">Genera facturas legales en segundos. Configura tus datos fiscales una sola vez y selecciona el cliente al crear cada factura. Envíala por email directamente desde la plataforma. Registra pagos y gestiona facturas vencidas desde el panel.</p>
+                  <p className="text-[13px] text-slate-600 leading-relaxed mb-2">Genera facturas legales en segundos. Configura tus datos fiscales una sola vez y selecciona el cliente al crear cada factura. Envíala por email directamente desde la plataforma. Registra pagos y gestiona facturas vencidas desde el panel.</p>
+                  <Link href="/blog/facturacion-autonomos-espana-2026" className="text-[#1FA97A] hover:underline text-[13px]">
+                    Leer: Facturación para autónomos en España en 2026 →
+                  </Link>
                 </div>
                 <div className="border border-slate-200 rounded-xl p-5">
                   <h3 className="text-[15px] font-semibold mb-2">2.4 Proveedores</h3>
@@ -154,6 +258,71 @@ export default function DocsPage() {
                   </a>{" "}
                   y respondemos en menos de 24h.
                 </p>
+              </div>
+            </section>
+
+            {/* Section 5 — Integración */}
+            <section id="integracion">
+              <h2 className="text-[20px] font-bold mb-6">Integración con tu web</h2>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {integrationCards.map((card) => (
+                  <div key={card.title} className="border border-slate-200 rounded-xl p-5">
+                    <h3 className="text-[14px] font-semibold mb-2">{card.title}</h3>
+                    <p className="text-[13px] text-slate-500 leading-relaxed mb-3">{card.desc}</p>
+                    {card.code && (
+                      <pre className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-[11px] text-slate-700 overflow-x-auto whitespace-pre-wrap">
+                        {card.code}
+                      </pre>
+                    )}
+                    {card.steps && (
+                      <ol className="space-y-1.5 list-decimal list-inside">
+                        {card.steps.map((step, i) => (
+                          <li key={i} className="text-[13px] text-slate-600">{step}</li>
+                        ))}
+                      </ol>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Section 6 — Automatizaciones */}
+            <section id="automatizaciones">
+              <h2 className="text-[20px] font-bold mb-6">Automatizaciones</h2>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {automationCards.map((card) => (
+                  <div key={card.title} className="border border-slate-200 rounded-xl p-5">
+                    <card.Icon className="w-5 h-5 text-[#1FA97A] mb-3" />
+                    <h3 className="text-[14px] font-semibold mb-1">{card.title}</h3>
+                    <p className="text-[13px] text-slate-500 leading-relaxed">{card.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Section 7 — Facturación avanzada */}
+            <section id="facturacion-avanzada">
+              <h2 className="text-[20px] font-bold mb-6">Facturación avanzada</h2>
+              <div className="space-y-3">
+                {billingItems.map((item) => (
+                  <div key={item.title} className="border border-slate-200 rounded-xl p-5">
+                    <h3 className="text-[14px] font-semibold mb-1">{item.title}</h3>
+                    <p className="text-[13px] text-slate-600 leading-relaxed">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Section 8 — Cuenta y suscripción */}
+            <section id="cuenta">
+              <h2 className="text-[20px] font-bold mb-6">Cuenta y suscripción</h2>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {accountCards.map((card) => (
+                  <div key={card.title} className="border border-slate-200 rounded-xl p-5">
+                    <h3 className="text-[14px] font-semibold mb-1">{card.title}</h3>
+                    <p className="text-[13px] text-slate-600 leading-relaxed">{card.desc}</p>
+                  </div>
+                ))}
               </div>
             </section>
 

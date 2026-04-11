@@ -1,4 +1,11 @@
+import type { Metadata } from "next"
 import { Navbar } from "../ui/chrome"
+
+export const metadata: Metadata = {
+  title: "Changelog | ClientLabs",
+  description: "Historial de cambios y mejoras de ClientLabs. Nuevas funciones, mejoras y correcciones.",
+  alternates: { canonical: "https://clientlabs.io/changelog" },
+}
 
 type ChangeItem = { type: "nuevo" | "mejorado" | "arreglado"; text: string }
 type Version = {

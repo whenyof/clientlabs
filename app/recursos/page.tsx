@@ -1,4 +1,11 @@
+import type { Metadata } from "next"
 import Link from "next/link"
+
+export const metadata: Metadata = {
+  title: "Recursos para autónomos | ClientLabs",
+  description: "Guías gratuitas, plantillas y herramientas para autónomos españoles. Todo lo que necesitas para gestionar mejor tu negocio.",
+  alternates: { canonical: "https://clientlabs.io/recursos" },
+}
 import { ImageIcon, FileSpreadsheet, Mail, CheckSquare, Calculator, Calendar, Hash } from "lucide-react"
 import { Navbar } from "../ui/chrome"
 

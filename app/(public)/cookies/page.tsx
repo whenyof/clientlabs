@@ -9,7 +9,7 @@ export default function CookiesPage() {
       <div className="max-w-2xl mx-auto">
         {/* Logo */}
         <div className="mb-12">
-          <Link href="/whitelist" className="text-[18px] font-bold" style={{ color: "#1FA97A" }}>
+          <Link href="/" className="text-[18px] font-bold" style={{ color: "#1FA97A" }}>
             ClientLabs
           </Link>
         </div>

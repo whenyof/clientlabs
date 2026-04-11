@@ -17,10 +17,10 @@ export default function NotFound() {
             Volver al inicio
           </Link>
           <Link
-            href="/whitelist"
+            href="/register"
             className="px-6 py-2.5 border border-slate-200 text-slate-600 text-[13px] font-medium rounded-lg hover:border-[#1FA97A] transition-colors"
           >
-            Unirse a la whitelist
+            Empezar gratis
           </Link>
         </div>
       </div>

@@ -115,9 +115,6 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
     {
       title: "INTELIGENCIA",
       items: [
-        { label: labels.automations.title, href: "/dashboard/automations", icon: Zap },
-        { label: labels.aiAssistant.title, href: "/dashboard/ai-assistant", icon: Sparkles },
-        { label: "Marketing", href: "/dashboard/marketing", icon: Megaphone },
         { label: "Conectar", href: "/dashboard/connect", icon: Link2 },
       ],
     },
@@ -242,37 +239,45 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
               </div>
             </div>
 
-            {/* PRÓXIMAMENTE — inserted after CORE (index 0) */}
-            {groupIdx === 0 && (
+            {/* PRÓXIMAMENTE — inserted after SISTEMA (last non-admin group) */}
+            {groupIdx === menu.length - (isAdmin ? 2 : 1) && (
               <div key="proximamente">
                 {!isCollapsed && (
                   <p className="text-xs uppercase tracking-widest text-[var(--text-secondary)] mb-2 px-2 opacity-60">
                     Próximamente
                   </p>
                 )}
-                <div
-                  title={isCollapsed ? "Verifactu — Próximamente" : undefined}
-                  className="w-full flex items-center gap-3 px-3 py-2 text-sm rounded-r-md border-l-[4px] border-transparent opacity-45 cursor-not-allowed select-none"
-                  style={{ color: "var(--text-secondary)" }}
-                >
-                  <Receipt size={18} />
-                  {!isCollapsed && (
-                    <div className="flex justify-between w-full items-center">
-                      <span>Verifactu</span>
-                      <span style={{
-                        display: "flex", alignItems: "center", gap: 3,
-                        fontSize: 10, fontWeight: 600, letterSpacing: "0.04em",
-                        padding: "2px 6px", borderRadius: 4,
-                        background: "var(--bg-surface)",
-                        border: "0.5px solid var(--border-subtle)",
-                        color: "var(--text-secondary)",
-                      }}>
-                        <Lock size={9} />
-                        Pronto
-                      </span>
-                    </div>
-                  )}
-                </div>
+                {[
+                  { icon: Zap,      label: labels.automations.title },
+                  { icon: Sparkles, label: labels.aiAssistant.title },
+                  { icon: Megaphone,label: "Marketing" },
+                  { icon: Receipt,  label: "Verifactu" },
+                ].map(({ icon: Icon, label }) => (
+                  <div
+                    key={label}
+                    title={isCollapsed ? `${label} — Próximamente` : undefined}
+                    className="w-full flex items-center gap-3 px-3 py-2 text-sm rounded-r-md border-l-[4px] border-transparent opacity-45 cursor-not-allowed select-none"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    <Icon size={18} />
+                    {!isCollapsed && (
+                      <div className="flex justify-between w-full items-center">
+                        <span>{label}</span>
+                        <span style={{
+                          display: "flex", alignItems: "center", gap: 3,
+                          fontSize: 10, fontWeight: 600, letterSpacing: "0.04em",
+                          padding: "2px 6px", borderRadius: 4,
+                          background: "var(--bg-surface)",
+                          border: "0.5px solid var(--border-subtle)",
+                          color: "var(--text-secondary)",
+                        }}>
+                          <Lock size={9} />
+                          Pronto
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             )}
           </>

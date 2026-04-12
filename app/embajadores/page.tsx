@@ -10,7 +10,6 @@ import {
   Send,
   Search,
   FileCheck,
-  Link2,
   DollarSign,
 } from "lucide-react"
 import { toast } from "sonner"
@@ -39,12 +38,6 @@ const STEPS = [
   },
   {
     num: "04",
-    title: "Tu enlace + materiales",
-    desc: "Recibes tu enlace único de tracking, acceso a todos los materiales de marketing y soporte directo.",
-    icon: Link2,
-  },
-  {
-    num: "05",
     title: "Comparte y cobra",
     desc: "Cada cliente que se registre desde tu enlace queda atribuido automáticamente. Cobras el día 5 de cada mes.",
     icon: DollarSign,
@@ -124,10 +117,20 @@ export default function EmbajadoresPage() {
       return
     }
     setSending(true)
-    await new Promise((r) => setTimeout(r, 800))
-    toast.success("Solicitud recibida. Te respondemos en menos de 48h.")
-    setForm({ nombre: "", email: "", telefono: "", web: "", dedicacion: "", porQue: "", aQuien: "", acepto: false })
-    setSending(false)
+    try {
+      const res = await fetch("/api/embajadores", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      })
+      if (!res.ok) throw new Error()
+      toast.success("Solicitud recibida. Te enviamos un email de confirmación.")
+      setForm({ nombre: "", email: "", telefono: "", web: "", dedicacion: "", porQue: "", aQuien: "", acepto: false })
+    } catch {
+      toast.error("Error al enviar. Inténtalo de nuevo.")
+    } finally {
+      setSending(false)
+    }
   }
 
   const inputCls =

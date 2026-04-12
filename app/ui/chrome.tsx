@@ -41,6 +41,7 @@ export function Navbar() {
         { label: "Precios", href: "/precios" },
         { label: "Soluciones", href: "/soluciones" },
         { label: "Recursos", href: "/recursos" },
+        { label: "Embajadores", href: "/embajadores" },
         { label: "Novedades", href: "/changelog" },
         { label: "Contacto", href: "/contacto" },
     ]

@@ -5,6 +5,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { Plus, Download } from "lucide-react"
 import { FinanceDataProvider } from "./context/FinanceDataContext"
 import { FinanceKPIs } from "./components/FinanceKPIs"
+import { OverdueAlert } from "./components/OverdueAlert"
 import { MainChart } from "./components/MainChart"
 import { CFOInsights } from "./components/CFOInsights"
 import { CashflowBlock } from "./components/CashflowBlock"
@@ -204,6 +205,11 @@ export function FinanceView({ initialData, period, view, billingNode, purchasesN
         {/* KPIs — always visible */}
         <div className="mb-5">
           <FinanceKPIs />
+        </div>
+
+        {/* Overdue alert — shown when there are unpaid overdue invoices */}
+        <div className="mb-5">
+          <OverdueAlert />
         </div>
 
         {/* Tab content */}

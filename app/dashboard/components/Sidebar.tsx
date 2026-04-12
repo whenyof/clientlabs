@@ -16,7 +16,6 @@ import {
   BarChart3,
   Zap,
   Settings,
-  Plug,
   ShieldCheck,
   Bell,
   ChevronLeft,
@@ -121,7 +120,6 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
     {
       title: "SISTEMA",
       items: [
-        { label: nav.integrations, href: "/dashboard/integrations", icon: Plug },
         ...(session?.user?.plan === "PRO" || session?.user?.plan === "ENTERPRISE" || isAdmin
           ? [{ label: "Sistema de Backups", href: "/dashboard/system/backups", icon: ShieldCheck }]
           : []

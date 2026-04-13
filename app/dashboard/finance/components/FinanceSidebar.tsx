@@ -11,6 +11,8 @@ import {
   TrendingUp,
   TrendingDown,
   BarChart3,
+  Building2,
+  Calendar,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -23,6 +25,8 @@ const FINANCE_NAV = [
   { href: "/dashboard/finance/gastos", label: "Gastos", icon: Receipt },
   { href: "/dashboard/finance/cobros", label: "Cobros", icon: TrendingUp },
   { href: "/dashboard/finance/pagos", label: "Pagos", icon: TrendingDown },
+  { href: "/dashboard/finance/banco", label: "Mi banco", icon: Building2 },
+  { href: "/dashboard/finance/trimestral", label: "Trimestres", icon: Calendar },
 ]
 
 export function FinanceSidebar() {

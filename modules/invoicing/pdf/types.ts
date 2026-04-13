@@ -31,6 +31,8 @@ export type InvoicePdfData = {
   paymentReference: string | null
   subtotal: number
   taxAmount: number
+  irpfRate?: number | null
+  irpfAmount?: number | null
   total: number
   lines: InvoiceLinePdf[]
   payments: { amount: number; method: string }[]

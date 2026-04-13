@@ -50,6 +50,8 @@ export type InvoiceDocumentModel = {
   totals: {
     subtotal: string
     taxAmount: string
+    irpfRate?: number | null
+    irpfAmount?: string | null
     total: string
     currency: string
   }
@@ -140,6 +142,8 @@ export function buildInvoiceDocument(data: InvoicePdfData): InvoiceDocumentModel
     totals: {
       subtotal: formatMoney(data.subtotal, currency),
       taxAmount: formatMoney(data.taxAmount, currency),
+      irpfRate: data.irpfRate ?? null,
+      irpfAmount: data.irpfAmount && data.irpfAmount > 0 ? formatMoney(data.irpfAmount, currency) : null,
       total: formatMoney(data.total, currency),
       currency,
     },

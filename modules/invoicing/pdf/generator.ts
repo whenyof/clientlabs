@@ -1,8 +1,8 @@
 /**
- * Invoice PDF generator — load invoice, render, save to storage, update DB, return URL.
+ * Invoice PDF generator — load invoice, render, upload to Cloudinary, update DB, return URL.
  * Only import from API routes (server-only by usage).
  */
-import { mkdir, writeFile, access, readFile } from "fs/promises"
+import { readFile } from "fs/promises"
 import path from "path"
 import { getBrandingForUser } from "./branding"
 import { buildInvoiceDocument } from "./invoice-template"
@@ -10,7 +10,6 @@ import { renderInvoiceToBuffer } from "./invoice-renderer"
 import type { InvoicePdfData } from "./types"
 import * as invoiceRepo from "../repositories/invoice.repository"
 
-const INVOICES_DIR = "public/uploads/invoices"
 
 type InvoiceForPdf = Awaited<ReturnType<typeof invoiceRepo.findById>>
 
@@ -60,6 +59,8 @@ function toPdfData(invoice: NonNullable<InvoiceForPdf>): InvoicePdfData {
     paymentReference: inv.paymentReference ?? null,
     subtotal: invoice.subtotal,
     taxAmount: invoice.taxAmount,
+    irpfRate: (invoice as { irpfRate?: number | null }).irpfRate ?? null,
+    irpfAmount: (invoice as { irpfAmount?: number | null }).irpfAmount ?? null,
     total: invoice.total,
     lines: (invoice.lines as Array<{
       description: string
@@ -131,6 +132,8 @@ function toPdfDataFromSnapshots(
     paymentReference: inv.paymentReference ?? null,
     subtotal: totals.subtotal,
     taxAmount: totals.taxAmount,
+    irpfRate: (totals as { irpfRate?: number | null }).irpfRate ?? null,
+    irpfAmount: (totals as { irpfAmount?: number | null }).irpfAmount ?? null,
     total: totals.total,
     lines: items,
     payments: (invoice.payments as Array<{ amount: number; method: string | null }>).map((p) => ({
@@ -170,13 +173,11 @@ export async function generateInvoicePDF(
 
   const pdfUrl = invoice.pdfUrl as string | null | undefined
   if (!options.forceRegenerate && pdfUrl) {
-    const filePath = path.join(process.cwd(), pdfUrl.startsWith("/") ? pdfUrl.slice(1) : pdfUrl)
-    try {
-      await access(filePath)
-      return { url: pdfUrl.startsWith("/") ? pdfUrl : `/${pdfUrl}`, regenerated: false }
-    } catch {
-      // file missing, regenerate
+    // If already in Cloudinary (https URL), return directly
+    if (pdfUrl.startsWith("https://")) {
+      return { url: pdfUrl, regenerated: false }
     }
+    // Legacy local path — fall through to regenerate and upload to Cloudinary
   }
 
   const snap = invoice as NonNullable<InvoiceForPdf> & IssuedSnapshots
@@ -226,14 +227,26 @@ export async function generateInvoicePDF(
     logoDataUrl,
   })
 
-  const dir = path.join(process.cwd(), INVOICES_DIR, userId)
-  await mkdir(dir, { recursive: true })
-  const filename = `${invoiceId}.pdf`
-  const relativePath = path.join(INVOICES_DIR, userId, filename)
-  const absolutePath = path.join(process.cwd(), relativePath)
-  await writeFile(absolutePath, buffer)
+  // Upload to Cloudinary instead of filesystem
+  const { default: cloudinary } = await import("@/lib/cloudinary")
+  const uploadResult = await new Promise<{ secure_url: string }>((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        resource_type: "raw",
+        folder: "invoices",
+        public_id: `factura-${invoiceId}`,
+        format: "pdf",
+        overwrite: true,
+      },
+      (error, result) => {
+        if (error || !result) reject(error ?? new Error("Cloudinary upload failed"))
+        else resolve(result as { secure_url: string })
+      }
+    )
+    stream.end(buffer)
+  })
 
-  const url = "/" + relativePath.split(path.sep).join("/")
+  const url = uploadResult.secure_url
   const now = new Date()
   await invoiceRepo.updateInvoicePdf(invoiceId, userId, url, now)
 

@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import * as invoiceService from "@domains/invoicing"
 import type { InvoiceLineInput } from "@domains/invoicing"
+import { prisma } from "@/lib/prisma"
 
 export async function GET(
   _request: NextRequest,
@@ -89,6 +90,8 @@ export async function PATCH(
   if (!issueDate || !dueDate || !lines?.length) {
     return NextResponse.json({ error: "issueDate, dueDate and lines required for draft update" }, { status: 400 })
   }
+  const irpfRate = typeof b.irpfRate === "number" ? b.irpfRate : undefined
+  const irpfAmount = typeof b.irpfAmount === "number" ? b.irpfAmount : undefined
   try {
     const ok = await invoiceService.updateDraftInvoice(id, session.user.id, {
       issueDate,
@@ -106,6 +109,15 @@ export async function PATCH(
       lines,
     })
     if (!ok) return NextResponse.json({ error: "Invoice not found or not a draft" }, { status: 400 })
+    if (irpfRate !== undefined || irpfAmount !== undefined) {
+      await prisma.invoice.update({
+        where: { id },
+        data: {
+          ...(irpfRate !== undefined && { irpfRate }),
+          ...(irpfAmount !== undefined && { irpfAmount }),
+        },
+      })
+    }
     return NextResponse.json({ success: true })
   } catch (e) {
     console.error("Invoicing update draft error:", e)

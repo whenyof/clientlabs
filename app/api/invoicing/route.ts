@@ -226,9 +226,17 @@ export async function POST(request: NextRequest) {
     clientSnapshot: clientSnapshot ?? undefined,
     lines,
   }
+  const irpfRate = typeof b.irpfRate === "number" ? b.irpfRate : 0
+  const irpfAmount = typeof b.irpfAmount === "number" ? b.irpfAmount : 0
   try {
     const result = await invoiceService.createInvoice(input)
     if (!result) return NextResponse.json({ error: "Failed to create invoice" }, { status: 500 })
+    if (irpfRate > 0 || irpfAmount > 0) {
+      await prisma.invoice.update({
+        where: { id: result.id },
+        data: { irpfRate, irpfAmount },
+      })
+    }
     return NextResponse.json({ success: true, id: result.id, number: result.number })
   } catch (e) {
     console.error("Invoicing create error:", e)

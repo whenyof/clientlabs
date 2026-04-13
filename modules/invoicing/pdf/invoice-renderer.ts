@@ -180,6 +180,13 @@ export async function renderInvoiceToBuffer(
   pdf.text("IVA", totalsX, y)
   pdf.text(doc.totals.taxAmount, M + W - 25, y)
   y += totals.lineHeight
+  if (doc.totals.irpfAmount && doc.totals.irpfRate) {
+    pdf.setTextColor(220, 38, 38)
+    pdf.text(`Retención IRPF (${doc.totals.irpfRate}%)`, totalsX, y)
+    pdf.text(`-${doc.totals.irpfAmount}`, M + W - 25, y)
+    pdf.setTextColor(...hexToRgb(colors.textMuted))
+    y += totals.lineHeight
+  }
   pdf.setFont("helvetica", "bold")
   pdf.setFontSize(totals.finalSize)
   pdf.setTextColor(...hexToRgb(colors.primary))

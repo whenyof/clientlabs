@@ -116,6 +116,7 @@ export function CreateInvoiceDialog({
   const [invoiceLanguage, setInvoiceLanguage] = useState<string | null>(null)
   const [currency, setCurrency] = useState("EUR")
   const [lines, setLines] = useState<LineRow[]>([])
+  const [irpfRate, setIrpfRate] = useState(0)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const hasAppliedDefaultTexts = useRef(false)
@@ -344,7 +345,8 @@ export function CreateInvoiceDialog({
       return sum + st * ((l.taxPercent ?? 0) / 100)
     }, 0) * 100
   ) / 100
-  const total = Math.round((subtotal + taxAmount) * 100) / 100
+  const irpfAmount = Math.round(subtotal * (irpfRate / 100) * 100) / 100
+  const total = Math.round((subtotal + taxAmount - irpfAmount) * 100) / 100
 
   const addLine = () => {
     setLines((prev) => [...prev, { id: nextLineId(), description: "", quantity: 1, unitPrice: 0, taxPercent: 0, lastEditedField: "unit" as const }])
@@ -420,6 +422,8 @@ export function CreateInvoiceDialog({
         country: billingData.country?.trim() || null,
         email: billingData.email?.trim() || null,
       },
+      irpfRate,
+      irpfAmount,
       lines: lines.map(({ id: _id, lastEditedField: _le, ...l }) => ({
         description: l.description,
         quantity: l.quantity,
@@ -760,13 +764,29 @@ export function CreateInvoiceDialog({
               </div>
             </div>
 
-            <div className="text-sm text-white/80">
-              <span className="text-white/50">Subtotal </span>
-              <span className="tabular-nums">{formatCurrency(subtotal, currency)}</span>
-              <span className="text-white/50 ml-4">IVA </span>
-              <span className="tabular-nums">{formatCurrency(taxAmount, currency)}</span>
-              <span className="text-white/50 ml-4 font-medium text-white">Total </span>
-              <span className="tabular-nums font-medium">{formatCurrency(total, currency)}</span>
+            <div className="text-sm text-white/80 flex flex-wrap gap-x-4 gap-y-1">
+              <span><span className="text-white/50">Subtotal </span><span className="tabular-nums">{formatCurrency(subtotal, currency)}</span></span>
+              <span><span className="text-white/50">IVA </span><span className="tabular-nums">{formatCurrency(taxAmount, currency)}</span></span>
+              {irpfAmount > 0 && (
+                <span><span className="text-red-400/80">IRPF -{irpfRate}% </span><span className="tabular-nums text-red-400">-{formatCurrency(irpfAmount, currency)}</span></span>
+              )}
+              <span><span className="text-white/50 font-medium text-white">Total </span><span className="tabular-nums font-medium">{formatCurrency(total, currency)}</span></span>
+            </div>
+
+            <div className="space-y-3 rounded-xl border border-white/10 bg-white/[0.02] p-4">
+              <h3 className="text-xs font-medium text-white/50 uppercase tracking-wider">Retención IRPF</h3>
+              <select
+                value={irpfRate}
+                onChange={(e) => setIrpfRate(parseFloat(e.target.value))}
+                disabled={!editableInEditMode}
+                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white disabled:opacity-60"
+              >
+                <option value={0}>Sin retención</option>
+                <option value={7}>7% — Primer año de actividad</option>
+                <option value={15}>15% — General (autónomos)</option>
+                <option value={19}>19% — Capital mobiliario</option>
+                <option value={2}>2% — Arrendamiento de inmuebles</option>
+              </select>
             </div>
 
             <div className="space-y-3 rounded-xl border border-white/10 bg-white/[0.02] p-4">

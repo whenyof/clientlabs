@@ -1,34 +1,19 @@
 "use client"
 
-import { useState, Suspense } from "react"
+import { useState } from "react"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
-import { Plus, Download } from "lucide-react"
+import { Plus } from "lucide-react"
 import { FinanceDataProvider } from "./context/FinanceDataContext"
 import { FinanceKPIs } from "./components/FinanceKPIs"
 import { OverdueAlert } from "./components/OverdueAlert"
+import { TrimestralAlert } from "./components/TrimestralAlert"
 import { MainChart } from "./components/MainChart"
 import { CFOInsights } from "./components/CFOInsights"
 import { CashflowBlock } from "./components/CashflowBlock"
 import { BusinessHealth } from "./components/BusinessHealth"
 import { Forecast } from "./components/Forecast"
-import { FinanceMovementsView } from "./components/movements"
-import { Alerts } from "./components/Alerts"
-import { AutomationFinance } from "./components/AutomationFinance"
-import { Budgets } from "./components/Budgets"
-import { Goals } from "./components/Goals"
 import { CreateTransactionModal } from "./components/CreateTransactionModal"
-import { DocumentsView } from "./components/DocumentsView"
 import type { FinancePageData } from "./lib/server-data"
-
-type FinanceTab = "resumen" | "tesoreria" | "documentos" | "ventas" | "compras"
-
-const TABS: { id: FinanceTab; label: string }[] = [
-  { id: "resumen", label: "Resumen" },
-  { id: "tesoreria", label: "Tesorería" },
-  { id: "documentos", label: "Documentos" },
-  { id: "ventas", label: "Ventas" },
-  { id: "compras", label: "Compras" },
-]
 
 type Props = {
   initialData: FinancePageData
@@ -97,40 +82,12 @@ function FiscalSummary({ initialData }: { initialData: FinancePageData }) {
 export function FinanceView({ initialData, period, view, billingNode, purchasesNode }: Props) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const router = useRouter()
-  const pathname = usePathname()
   const searchParams = useSearchParams()
-
-  const VIEW_TO_TAB: Record<string, FinanceTab> = {
-    resumen: "resumen",
-    overview: "resumen",
-    tesoreria: "tesoreria",
-    transactions: "tesoreria",
-    documentos: "documentos",
-    documents: "documentos",
-    presupuestos: "documentos",
-    quotes: "documentos",
-    albaranes: "documentos",
-    facturas: "ventas",
-    billing: "ventas",
-    ventas: "ventas",
-    sales: "ventas",
-    compras: "compras",
-    purchases: "compras",
-  }
-
-  const urlView = searchParams.get("view") ?? view ?? "resumen"
-  const activeTab: FinanceTab = VIEW_TO_TAB[urlView] ?? "resumen"
-
-  const handleTabChange = (next: FinanceTab) => {
-    const params = new URLSearchParams(searchParams.toString())
-    params.set("view", next)
-    router.push(`${pathname}?${params.toString()}`)
-  }
 
   const handleSetPeriod = (nextPeriod: string) => {
     const params = new URLSearchParams(searchParams.toString())
     params.set("period", nextPeriod)
-    router.push(`${pathname}?${params.toString()}`)
+    router.push(`/dashboard/finance?${params.toString()}`)
   }
 
   const handleRefetch = () => {
@@ -142,11 +99,6 @@ export function FinanceView({ initialData, period, view, billingNode, purchasesN
     router.refresh()
   }
 
-  const handleExportCSV = () => {
-    const params = new URLSearchParams({ period })
-    window.open(`/api/finance/export?${params.toString()}`, "_blank")
-  }
-
   return (
     <div className="flex flex-col w-full min-h-0 pb-10">
       <FinanceDataProvider
@@ -156,97 +108,34 @@ export function FinanceView({ initialData, period, view, billingNode, purchasesN
         onSetPeriod={handleSetPeriod}
         onRefetch={handleRefetch}
       >
-        {/* Header bar: tabs + actions */}
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-5 px-0.5">
-          <nav className="flex items-center gap-1 flex-wrap" aria-label="Navegación de finanzas">
-            {TABS.map((tab) => {
-              const active = activeTab === tab.id
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => handleTabChange(tab.id)}
-                  className={`
-                    h-8 px-3 rounded-lg text-sm font-medium shrink-0
-                    transition-colors duration-150
-                    ${active
-                      ? "bg-[var(--accent)] text-white"
-                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"}
-                  `}
-                  aria-current={active ? "page" : undefined}
-                >
-                  <span className="whitespace-nowrap">{tab.label}</span>
-                </button>
-              )
-            })}
-          </nav>
-
-          <div className="flex items-center gap-2 shrink-0">
-            {activeTab === "tesoreria" && (
-              <button
-                type="button"
-                onClick={handleExportCSV}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-card)] hover:bg-[var(--bg-surface)] px-3 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors"
-              >
-                <Download className="w-3.5 h-3.5" />
-                Exportar CSV
-              </button>
-            )}
-            <button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#1FA97A] hover:bg-[#178a64] px-4 py-2 text-sm font-semibold text-white transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              Nuevo movimiento
-            </button>
-          </div>
+        {/* Action bar */}
+        <div className="flex items-center justify-end mb-5">
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="inline-flex items-center gap-2 rounded-lg bg-[#1FA97A] hover:bg-[#178a64] px-4 py-2 text-sm font-semibold text-white transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Nuevo movimiento
+          </button>
         </div>
 
-        {/* KPIs — always visible */}
+        {/* Trimestral alert */}
+        <div className="mb-5">
+          <TrimestralAlert />
+        </div>
+
+        {/* KPIs */}
         <div className="mb-5">
           <FinanceKPIs />
         </div>
 
-        {/* Overdue alert — shown when there are unpaid overdue invoices */}
+        {/* Overdue alert */}
         <div className="mb-5">
           <OverdueAlert />
         </div>
 
-        {/* Tab content */}
-        <div key={activeTab} className="w-full">
-          {activeTab === "resumen" && (
-            <FinancialSummaryTab initialData={initialData} />
-          )}
-
-          {activeTab === "tesoreria" && (
-            <div className="space-y-5">
-              <FinanceMovementsView initialMovements={initialData.ledgerMovements} />
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                <Alerts />
-                <AutomationFinance />
-              </div>
-            </div>
-          )}
-
-          {activeTab === "documentos" && (
-            <DocumentsView
-              billingNode={billingNode}
-              onNavigateToInvoices={() => handleTabChange("ventas")}
-            />
-          )}
-
-          {activeTab === "ventas" && (
-            <Suspense fallback={<div className="h-48 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] animate-pulse" />}>
-              {billingNode}
-            </Suspense>
-          )}
-
-          {activeTab === "compras" && (
-            <Suspense fallback={<div className="h-48 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] animate-pulse" />}>
-              {purchasesNode}
-            </Suspense>
-          )}
-        </div>
+        {/* Main content */}
+        <FinancialSummaryTab initialData={initialData} />
 
         <CreateTransactionModal
           isOpen={isCreateModalOpen}

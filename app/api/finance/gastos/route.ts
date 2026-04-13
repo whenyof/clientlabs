@@ -101,3 +101,61 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Error interno" }, { status: 500 })
   }
 }
+
+/**
+ * POST /api/finance/gastos
+ * Creates a new vendor invoice (expense).
+ */
+export async function POST(request: NextRequest) {
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 })
+  }
+
+  try {
+    const body = await request.json()
+    const { proveedor, concepto, fecha, base, ivaRate, categoria, documentUrl } = body
+
+    if (!proveedor || !fecha || base === undefined) {
+      return NextResponse.json({ error: "Faltan campos requeridos" }, { status: 400 })
+    }
+
+    const baseNum = parseFloat(base)
+    const rate = parseFloat(ivaRate ?? "21")
+    const taxAmount = +(baseNum * (rate / 100)).toFixed(2)
+    const total = +(baseNum + taxAmount).toFixed(2)
+
+    // Auto-generate number: G-YYYY-NNN
+    const year = new Date(fecha).getFullYear()
+    const count = await prisma.invoice.count({
+      where: { userId: session.user.id, type: "VENDOR", number: { startsWith: `G-${year}-` } },
+    })
+    const number = `G-${year}-${String(count + 1).padStart(3, "0")}`
+
+    const issueDate = new Date(fecha)
+    const dueDate = new Date(fecha)
+
+    const invoice = await prisma.invoice.create({
+      data: {
+        userId: session.user.id,
+        number,
+        series: "G",
+        type: "VENDOR",
+        status: "SENT",
+        issueDate,
+        dueDate,
+        subtotal: baseNum,
+        taxAmount,
+        taxTotal: taxAmount,
+        total,
+        notes: [concepto, categoria ? `Categoría: ${categoria}` : null].filter(Boolean).join(" | "),
+        pdfUrl: documentUrl ?? null,
+      },
+    })
+
+    return NextResponse.json({ success: true, id: invoice.id, number: invoice.number })
+  } catch (error) {
+    console.error("Error creando gasto:", error)
+    return NextResponse.json({ error: "Error interno" }, { status: 500 })
+  }
+}

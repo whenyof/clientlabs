@@ -1857,6 +1857,12 @@ model Invoice {
   discount               Decimal              @default(0) @db.Decimal(14, 2)
   /// Optional explicit tax total (mirrors taxAmount) for reporting
   taxTotal               Decimal              @default(0) @db.Decimal(14, 2)
+  /// IRPF retention percentage (15 general, 7 first year, 0 none)
+  irpfRate               Float?               @default(0)
+  /// IRPF retention amount (subtotal * irpfRate / 100)
+  irpfAmount             Float?               @default(0)
+  /// Date when the invoice was sent by email to the client
+  sentAt                 DateTime?
   Client                 Client?              @relation(fields: [clientId], references: [id], onDelete: Restrict)
   LinkedInvoicePayment   InvoicePayment?      @relation("LinkedFromPayment", fields: [linkedInvoicePaymentId], references: [id])
   Provider               Provider?            @relation(fields: [providerId], references: [id], onDelete: Restrict)

@@ -110,6 +110,10 @@ export function InvoiceDrawer({
   const [issueDialogOpen, setIssueDialogOpen] = useState(false)
   const [rectificativaModalOpen, setRectificativaModalOpen] = useState(false)
   const showRectificativaModal = rectificativaModalOpen || openRectificativaModal
+  const [sendModalOpen, setSendModalOpen] = useState(false)
+  const [emailTo, setEmailTo] = useState("")
+  const [sendMessage, setSendMessage] = useState("")
+  const [sending, setSending] = useState(false)
 
   useEffect(() => {
     if (openRectificativaModal) setRectificativaModalOpen(true)
@@ -175,6 +179,35 @@ export function InvoiceDrawer({
     if (!invoice) return
     window.open(`/api/billing/${invoice.id}/pdf`, "_blank", "noopener,noreferrer")
   }, [invoice])
+
+  const handleOpenSendModal = useCallback(() => {
+    if (!invoice) return
+    setEmailTo(invoice.Client?.email ?? "")
+    setSendMessage("")
+    setSendModalOpen(true)
+  }, [invoice])
+
+  const handleSendEmail = useCallback(async () => {
+    if (!invoice || !emailTo.trim()) return
+    setSending(true)
+    try {
+      const res = await fetch(`${getBaseUrl()}/api/billing/${invoice.id}/send`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ emailTo: emailTo.trim(), message: sendMessage.trim() || undefined }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? "Error al enviar")
+      setSendModalOpen(false)
+      onRefresh()
+    } catch (err: unknown) {
+      // error visible vía alert nativo para no añadir dependencia
+      alert(err instanceof Error ? err.message : "Error al enviar la factura")
+    } finally {
+      setSending(false)
+    }
+  }, [invoice, emailTo, sendMessage, onRefresh])
 
   const handleRegeneratePdf = useCallback(() => {
     if (!invoice) return
@@ -410,9 +443,10 @@ export function InvoiceDrawer({
           </button>
           <button
             type="button"
-            disabled
-            className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white/50 cursor-not-allowed"
-            title="Enviar por email (próximamente)"
+            onClick={handleOpenSendModal}
+            disabled={actionLoading}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-blue-500/30 bg-blue-500/10 px-3 py-1.5 text-sm text-blue-400 hover:bg-blue-500/20 disabled:opacity-50 transition-colors"
+            title="Enviar factura por email al cliente"
           >
             <EnvelopeIcon className="w-4 h-4" /> Enviar por email
           </button>
@@ -607,6 +641,68 @@ export function InvoiceDrawer({
           onRectificationCreated?.(newId)
         }}
       />
+
+      {/* Send email modal */}
+      {sendModalOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setSendModalOpen(false)}
+            aria-hidden
+          />
+          <div className="relative bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl">
+            <h2 className="text-[16px] font-bold text-slate-900 mb-1">Enviar factura por email</h2>
+            <p className="text-[13px] text-slate-500 mb-6">{invoice.number}</p>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
+                  Email del cliente *
+                </label>
+                <input
+                  type="email"
+                  value={emailTo}
+                  onChange={(e) => setEmailTo(e.target.value)}
+                  placeholder="cliente@email.com"
+                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-[#1FA97A] focus:ring-1 focus:ring-[#1FA97A]/20"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
+                  Mensaje personal (opcional)
+                </label>
+                <textarea
+                  value={sendMessage}
+                  onChange={(e) => setSendMessage(e.target.value)}
+                  placeholder="Adjunto te envío la factura correspondiente..."
+                  rows={3}
+                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-[13px] outline-none resize-none focus:border-[#1FA97A] focus:ring-1 focus:ring-[#1FA97A]/20"
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 justify-end mt-6">
+              <button
+                type="button"
+                onClick={() => setSendModalOpen(false)}
+                className="px-4 py-2.5 text-[13px] text-slate-500 hover:text-slate-700"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleSendEmail}
+                disabled={!emailTo.trim() || sending}
+                className="flex items-center gap-2 px-6 py-2.5 bg-[#1FA97A] text-white text-[13px] font-medium rounded-xl hover:bg-[#178a64] disabled:opacity-50 transition-colors"
+              >
+                {sending ? (
+                  <><ArrowPathIcon className="h-4 w-4 animate-spin" /> Enviando...</>
+                ) : (
+                  <><EnvelopeIcon className="h-4 w-4" /> Enviar factura</>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

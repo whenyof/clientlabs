@@ -1,3 +1,4 @@
+import "server-only"
 /**
  * Billing module — KPI feed: outstanding, overdue, collected this month.
  */

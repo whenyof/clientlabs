@@ -6,7 +6,8 @@ import { prisma } from "@/lib/prisma"
 import { authOptions } from "@/lib/auth"
 import { ensureUserExists } from "@/lib/ensure-user"
 
-import { generateInvoiceFromSale, createInvoiceFromSale } from "@domains/billing"
+import { generateInvoiceFromSale } from "@/modules/billing/services/invoice-generator.service"
+import { createInvoiceFromSale } from "@/modules/invoicing/services/invoice.service"
 import type { SaleCreateInput, SaleUpdateInput } from "../types"
 
 async function checkAuth() {

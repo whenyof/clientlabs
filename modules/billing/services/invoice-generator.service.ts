@@ -1,3 +1,4 @@
+import "server-only"
 /**
  * Billing module — generate BillingInvoice from Sale.
  * Non-blocking; do not throw into sales flow.

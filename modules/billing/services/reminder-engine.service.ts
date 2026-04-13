@@ -1,3 +1,4 @@
+import "server-only"
 /**
  * Billing module — automated payment reminders. No spam, no duplicates.
  */

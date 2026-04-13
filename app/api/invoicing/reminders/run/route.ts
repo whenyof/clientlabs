@@ -2,7 +2,7 @@ export const maxDuration = 10
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { processInvoiceReminders } from "@domains/invoicing"
+import { processInvoiceReminders } from "@/modules/invoicing/reminders/reminder.service"
 
 /**
  * POST /api/invoicing/reminders/run

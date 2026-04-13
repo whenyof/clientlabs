@@ -1,3 +1,4 @@
+import "server-only"
 /**
  * Invoicing — high-level service. Orchestrates engine + repository.
  *

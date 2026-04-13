@@ -13,7 +13,7 @@ export const maxDuration = 10
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { getExecutiveKPIs, type KPIPeriod, type KPITimeFilter } from "@domains/invoicing"
+import { getExecutiveKPIs, type KPIPeriod, type KPITimeFilter } from "@/modules/invoicing/services/kpi.service"
 
 const VALID_PERIODS = new Set<KPIPeriod>(["month", "quarter", "year", "custom"])
 

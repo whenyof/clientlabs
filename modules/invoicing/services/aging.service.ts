@@ -1,3 +1,4 @@
+import "server-only"
 /**
  * Accounts Receivable Aging Report — server-side aggregation service.
  *

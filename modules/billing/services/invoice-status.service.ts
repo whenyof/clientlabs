@@ -1,3 +1,4 @@
+import "server-only"
 /**
  * Billing module — computed status and aging. Read-only intelligence.
  */

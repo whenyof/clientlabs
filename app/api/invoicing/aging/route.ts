@@ -14,7 +14,7 @@ import { authOptions } from "@/lib/auth"
 import {
  getAgingReport,
  getAgingReportWithDrillDown,
-} from "@domains/invoicing"
+} from "@/modules/invoicing/services/aging.service"
 
 export async function GET(request: NextRequest) {
  const session = await getServerSession(authOptions)

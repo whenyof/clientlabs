@@ -1,3 +1,4 @@
+import "server-only"
 /**
  * Reminder service. Loads unpaid invoices, evaluates rules, checks logs, sends (simulated), stores log.
  * Only processes invoices belonging to the given userId.

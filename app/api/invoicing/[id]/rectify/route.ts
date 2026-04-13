@@ -2,7 +2,7 @@ export const maxDuration = 10
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import * as invoiceService from "@domains/invoicing"
+import * as invoiceService from "@/modules/invoicing/services/invoice.service"
 
 /**
  * POST /api/invoicing/[id]/rectify

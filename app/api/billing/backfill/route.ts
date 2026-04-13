@@ -2,7 +2,7 @@ export const maxDuration = 30
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { backfillInvoicesForUser } from "@domains/billing"
+import { backfillInvoicesForUser } from "@/modules/billing/services/invoice-generator.service"
 
 /**
  * POST /api/billing/backfill

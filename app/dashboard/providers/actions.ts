@@ -5,7 +5,7 @@ import { authOptions } from "@/lib/auth"
 import { prisma, safeDbCheck, safePrismaQuery } from "@/lib/prisma"
 import { revalidatePath, unstable_noStore } from "next/cache"
 import { ensureUserExists } from "@/lib/ensure-user"
-import { createInvoiceForProviderOrder } from "@domains/invoicing"
+import { createInvoiceForProviderOrder } from "@/modules/invoicing/services/invoice.service"
 import {
     ProviderOrderType,
     ProviderOrderStatus,

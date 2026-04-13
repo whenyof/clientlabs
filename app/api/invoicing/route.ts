@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import * as invoiceService from "@domains/invoicing"
+import * as invoiceService from "@/modules/invoicing/services/invoice.service"
 import { computeDueState } from "@domains/invoicing"
 import type { CreateInvoiceInput } from "@domains/invoicing"
 

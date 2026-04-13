@@ -1,13 +1,9 @@
 export * from "@/modules/invoicing/components"
-export * from "@/modules/invoicing/services/invoice.service"
-export * from "@/modules/invoicing/services/kpi.service"
-export * from "@/modules/invoicing/services/aging.service"
 export * from "@/modules/invoicing/utils/due-engine"
 export * from "@/modules/invoicing/utils/isInvoiceEditable"
 export * from "@/modules/invoicing/utils/invoiceStatusLabel"
 export * from "@/modules/invoicing/utils/replaceInvoiceVariables"
 export * from "@/modules/invoicing/config/defaultInvoiceTexts"
-export * from "@/modules/invoicing/reminders/reminder.service"
 export * from "@/modules/invoicing/paymentBehaviour"
 export * from "@/modules/invoicing/types"
 

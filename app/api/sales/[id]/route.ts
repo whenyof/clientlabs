@@ -3,7 +3,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
-import { generateInvoiceFromSale, createInvoiceFromSale } from '@domains/billing'
+import { generateInvoiceFromSale } from "@/modules/billing/services/invoice-generator.service"
+import { createInvoiceFromSale } from "@/modules/invoicing/services/invoice.service"
 import { recalculateClientTotalSpent } from '@/modules/sales/actions/sales.actions'
 
 /**

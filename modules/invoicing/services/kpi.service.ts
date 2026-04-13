@@ -1,3 +1,4 @@
+import "server-only"
 /**
  * Invoicing KPI Service — executive financial metrics.
  *

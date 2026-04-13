@@ -1,3 +1,4 @@
+import "server-only"
 /**
  * Billing module — invoice service. CRUD + payment lifecycle enrichment.
  */

@@ -111,7 +111,7 @@ export function InvoicePreviewModal({ invoiceId, onClose, onPaid }: InvoicePrevi
 
   if (!invoiceId) return null
 
-  const isPaid = invoice?.status === "PAID" || invoice?.status === "CANCELLED"
+  const isPaid = invoice?.status === "PAID" || invoice?.status === "CANCELED"
   const canPay = invoice && !isPaid
 
   return (

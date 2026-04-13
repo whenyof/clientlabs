@@ -2018,6 +2018,31 @@ model BillingInvoice {
   notes        String?
   createdAt    DateTime             @default(now())
   updatedAt    DateTime             @updatedAt
+
+  // ═══ RECTIFICATIVAS ═══
+  isRectificativa     Boolean  @default(false)
+  rectificadaId       String?
+  motivoRectificacion String?
+
+  // ═══ VERIFACTU (preparado, inactivo hasta 2027) ═══
+  // Estos campos se activarán cuando Verifactu sea obligatorio.
+  // NO modificar la lógica de emisión hasta entonces.
+  verifactuHash       String?   // Hash SHA-256 de este registro
+  verifactuHashPrev   String?   // Hash del registro anterior (encadenado)
+  verifactuQR         String?   // QR en base64 para el PDF
+  verifactuXML        String?   // XML completo para la AEAT
+  verifactuEnviado    Boolean   @default(false)
+  verifactuFechaEnvio DateTime?
+  verifactuEstado     String?   // PENDIENTE / ACEPTADA / RECHAZADA / ERROR
+  verifactuCSV        String?   // Código Seguro de Verificación de la AEAT
+  verifactuError      String?   // Mensaje de error si fue rechazada
+
+  // ═══ INALTERABILIDAD (snapshot en momento de emisión) ═══
+  snapshotFecha    DateTime? // Fecha exacta de emisión inmutable
+  snapshotEmisor   Json?     // Datos fiscales del emisor en el momento de emisión
+  snapshotReceptor Json?     // Datos del cliente en el momento de emisión
+  registroEventos  Json?     // Array: {tipo, fecha, usuario, notas}
+
   Client       Client               @relation(fields: [clientId], references: [id])
   Sale         Sale?                @relation(fields: [saleId], references: [id])
   User         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -2030,6 +2055,7 @@ model BillingInvoice {
   @@index([status])
   @@index([issuedAt])
   @@index([dueAt])
+  @@index([isRectificativa])
 }
 
 model BillingReminderLog {

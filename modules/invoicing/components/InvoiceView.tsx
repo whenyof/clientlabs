@@ -3,7 +3,6 @@ import { getBaseUrl } from "@/lib/api/baseUrl"
 
 
 import { useState, useCallback, useEffect, useRef } from "react"
-import { useRouter } from "next/navigation"
 import { PlusIcon } from "@heroicons/react/24/outline"
 import { Download } from "lucide-react"
 import { InvoiceKPIs } from "./InvoiceKPIs"
@@ -15,6 +14,7 @@ import { CreateInvoiceSelectorDialog } from "./CreateInvoiceSelectorDialog"
 import { SelectSaleForInvoiceDialog } from "./SelectSaleForInvoiceDialog"
 import { IssuedInvoiceEditBlockedModal } from "./IssuedInvoiceEditBlockedModal"
 import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog"
+import { InvoicePreviewModal } from "@/components/billing/InvoicePreview"
 import type { InvoiceListItem, InvoiceDetail, InvoiceKPIsResponse, ClientOption } from "./types"
 import type { InvoiceLineInput } from "@domains/invoicing"
 import { INVOICE_STATUS, isInvoiceEditable } from "@domains/invoicing"
@@ -81,7 +81,6 @@ function computeHeaderTotals(invoices: InvoiceListItem[]) {
 }
 
 export function InvoiceView() {
-  const router = useRouter()
   const [invoices, setInvoices] = useState<InvoiceListItem[]>([])
   const [clients, setClients] = useState<ClientOption[]>([])
   const [filters, setFilters] = useState<InvoiceFiltersState>(defaultFilters)
@@ -123,6 +122,7 @@ export function InvoiceView() {
   } | null>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [previewId, setPreviewId] = useState<string | null>(null)
   const [selectorOpen, setSelectorOpen] = useState(false)
   const [salePickerOpen, setSalePickerOpen] = useState(false)
   const [creatingFromSale, setCreatingFromSale] = useState(false)
@@ -308,9 +308,9 @@ export function InvoiceView() {
 
   const handlePreviewInvoice = useCallback(
     (invoiceId: string) => {
-      router.push(`/dashboard/finance/invoicing/${invoiceId}/preview`)
+      setPreviewId(invoiceId)
     },
-    [router]
+    []
   )
 
   const handleDeleteConfirm = useCallback(async () => {
@@ -523,6 +523,12 @@ export function InvoiceView() {
         editInvoiceStatus={editInvoiceStatus}
         editInvoice={editInvoice}
         onClientUpdated={refresh}
+      />
+
+      <InvoicePreviewModal
+        invoiceId={previewId}
+        onClose={() => setPreviewId(null)}
+        onPaid={() => { setPreviewId(null); refresh() }}
       />
     </div>
   )

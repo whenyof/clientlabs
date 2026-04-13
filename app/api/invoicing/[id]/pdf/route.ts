@@ -2,15 +2,13 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { generateInvoicePDF } from "@/modules/invoicing/pdf/generator"
-import { readFile } from "fs/promises"
-import path from "path"
 
 export const runtime = "nodejs"
 export const maxDuration = 30
 
 /**
  * GET /api/invoicing/[id]/pdf
- * Returns the invoice PDF. Uses stored file if valid; otherwise generates, saves, and streams.
+ * Returns the invoice PDF from Cloudinary. If not yet generated, generates and uploads first.
  * ?regenerate=1 forces regeneration.
  */
 export async function GET(
@@ -27,15 +25,21 @@ export async function GET(
     const result = await generateInvoicePDF(id, session.user.id, { forceRegenerate: regenerate })
     if (!result) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
+    // Cloudinary URL — redirect directly so browser downloads from CDN
+    if (result.url.startsWith("https://")) {
+      return NextResponse.redirect(result.url)
+    }
+
+    // Legacy local path fallback
+    const { readFile } = await import("fs/promises")
+    const path = await import("path")
     const filePath = path.join(process.cwd(), result.url.replace(/^\//, "").split("/").join(path.sep))
     const buf = await readFile(filePath)
-    const filename = `factura-${id}.pdf`
-
     return new NextResponse(buf, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Content-Disposition": `attachment; filename="factura-${id}.pdf"`,
       },
     })
   } catch (e) {

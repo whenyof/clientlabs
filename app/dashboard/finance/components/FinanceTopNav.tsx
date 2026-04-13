@@ -77,7 +77,12 @@ const NAV: NavItem[] = [
 
 function isItemActive(item: NavItem, pathname: string): boolean {
   if (item.exact) return pathname === item.href
-  return pathname === item.href || pathname.startsWith(item.href + "/") || pathname.startsWith(item.href)
+  // Check direct href match
+  if (pathname === item.href || pathname.startsWith(item.href + "/")) return true
+  // Check if any child href matches (for items like Presupuestos / Albaranes
+  // that live under Facturación but have their own top-level path)
+  if (item.children?.some((child) => pathname === child.href || pathname.startsWith(child.href + "/"))) return true
+  return false
 }
 
 export function FinanceTopNav() {

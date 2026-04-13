@@ -8,7 +8,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   Download,
-  ChevronRight,
+  ExternalLink,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { QuarterModelo303 } from "./QuarterModelo303"
@@ -244,6 +244,72 @@ export function QuarterDetail({ quarter }: Props) {
 
       {activeTab === "facturas" && (
         <QuarterInvoicesTable data={data} loading={loading} />
+      )}
+
+      {/* Descarga ficheros AEAT */}
+      {(status === "active" || status === "deadline-soon" || status === "closed") && (
+        <div className="rounded-xl border border-slate-200 bg-white p-5 space-y-4">
+          <div>
+            <p className="text-[12px] font-semibold text-slate-700 mb-0.5">Descargar para importar en la AEAT</p>
+            <p className="text-[11px] text-slate-400">
+              Ficheros en formato oficial BOE. Importa directamente en la Sede Electrónica, todas las casillas se rellenan solas.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            {/* Modelo 303 */}
+            <a
+              href={`/api/finance/trimestral/${quarter}/export-303`}
+              download
+              className="inline-flex items-center gap-2.5 px-4 py-2.5 bg-[#0B1F2A] text-white text-[12px] font-medium rounded-xl hover:bg-[#1a3040] transition-colors"
+            >
+              <Download className="h-4 w-4 shrink-0" />
+              <div className="text-left">
+                <div className="leading-none">Modelo 303</div>
+                <div className="text-[10px] text-slate-400 mt-0.5">IVA trimestral</div>
+              </div>
+            </a>
+
+            {/* Modelo 130 */}
+            <a
+              href={`/api/finance/trimestral/${quarter}/export-130`}
+              download
+              className="inline-flex items-center gap-2.5 px-4 py-2.5 border border-slate-200 bg-white text-slate-700 text-[12px] font-medium rounded-xl hover:border-[#1FA97A] hover:text-[#1FA97A] transition-colors"
+            >
+              <Download className="h-4 w-4 shrink-0" />
+              <div className="text-left">
+                <div className="leading-none">Modelo 130</div>
+                <div className="text-[10px] text-slate-400 mt-0.5">IRPF pago fraccionado</div>
+              </div>
+            </a>
+          </div>
+
+          {/* Instrucciones */}
+          <div className="rounded-xl bg-blue-50 border border-blue-100 p-3.5">
+            <p className="text-[11px] text-blue-700 leading-relaxed">
+              <span className="font-semibold">Cómo presentarlo:</span>{" "}
+              Descarga el fichero → Ve a{" "}
+              <a
+                href="https://sede.agenciatributaria.gob.es"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline inline-flex items-center gap-0.5"
+              >
+                sede.agenciatributaria.gob.es
+                <ExternalLink className="h-2.5 w-2.5" />
+              </a>
+              {" "}→ Entra con Cl@ve o certificado → Busca el modelo → Pulsa{" "}
+              <span className="font-semibold">«Importar fichero»</span> → Revisa las casillas y firma.
+            </p>
+            <p className="text-[11px] text-blue-600 mt-1.5">
+              Si no tienes NIF configurado, ve a{" "}
+              <a href="/dashboard/finance/configuracion" className="underline font-medium">
+                Finanzas → Configuración fiscal
+              </a>
+              {" "}antes de descargar.
+            </p>
+          </div>
+        </div>
       )}
     </div>
   )

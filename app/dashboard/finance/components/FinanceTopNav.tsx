@@ -66,6 +66,7 @@ const NAV: NavItem[] = [
       { label: "Presupuestos", href: "/dashboard/finance/presupuestos" },
       { label: "Facturas", href: "/dashboard/finance/facturas" },
       { label: "Albaranes", href: "/dashboard/finance/albaranes" },
+      { label: "Hojas de pedido", href: "/dashboard/finance/pedidos" },
       { label: "Rectificativas", href: "/dashboard/finance/rectificativas" },
     ],
   },

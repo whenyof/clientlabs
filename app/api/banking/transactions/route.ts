@@ -5,7 +5,8 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
-const TINK_API = "https://api.tink.com"
+const TINK_CLIENT_ID = process.env.TINK_CLIENT_ID!
+const TINK_CLIENT_SECRET = process.env.TINK_CLIENT_SECRET!
 
 type TinkAccount = {
   id: string
@@ -39,35 +40,86 @@ export async function GET() {
   try {
     const connection = await prisma.bankConnection.findFirst({
       where: { userId: session.user.id, status: "CONNECTED" },
-      select: { accessToken: true, tokenExpiresAt: true },
+      select: { authCode: true, accessToken: true, tokenExpiresAt: true },
     })
 
-    if (!connection?.accessToken) {
+    if (!connection) {
       return NextResponse.json({ error: "No hay banco conectado" }, { status: 404 })
     }
 
-    // Comprueba expiración (margen de 5 min)
-    if (connection.tokenExpiresAt && connection.tokenExpiresAt < new Date(Date.now() + 300_000)) {
-      return NextResponse.json({ error: "Token expirado — reconecta el banco" }, { status: 401 })
+    // Si ya tenemos accessToken vigente, úsalo directamente
+    let userToken: string | null = null
+
+    if (
+      connection.accessToken &&
+      connection.tokenExpiresAt &&
+      connection.tokenExpiresAt > new Date(Date.now() + 300_000)
+    ) {
+      userToken = connection.accessToken
+    } else if (connection.authCode) {
+      // Intercambia el code por access_token
+      const tokenRes = await fetch("https://api.tink.com/api/v1/oauth/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          code: connection.authCode,
+          client_id: TINK_CLIENT_ID,
+          client_secret: TINK_CLIENT_SECRET,
+          grant_type: "authorization_code",
+        }),
+      })
+
+      const tokenData = await tokenRes.json()
+
+      if (!tokenData.access_token) {
+        // El code expiró — hay que reconectar
+        await prisma.bankConnection.update({
+          where: { userId: session.user.id },
+          data: { status: "EXPIRED" },
+        }).catch(() => {})
+
+        return NextResponse.json(
+          { error: "La conexión bancaria ha expirado. Reconecta tu banco.", expired: true },
+          { status: 401 }
+        )
+      }
+
+      userToken = tokenData.access_token as string
+      const expiresIn: number = tokenData.expires_in ?? 3600
+
+      // Guarda el access_token para reutilizarlo
+      await prisma.bankConnection.update({
+        where: { userId: session.user.id },
+        data: {
+          accessToken: userToken,
+          tokenExpiresAt: new Date(Date.now() + expiresIn * 1000),
+          authCode: null,
+        },
+      }).catch(() => {})
+    } else {
+      return NextResponse.json({ error: "No hay banco conectado" }, { status: 404 })
     }
 
-    const token = connection.accessToken
+    if (!userToken) {
+      return NextResponse.json({ error: "No hay banco conectado" }, { status: 404 })
+    }
 
-    // Cuentas y saldos
-    const accountsRes = await fetch(`${TINK_API}/data/v2/accounts`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    // Cuentas y transacciones en paralelo
+    const [accountsRes, txRes] = await Promise.all([
+      fetch("https://api.tink.com/data/v2/accounts", {
+        headers: { Authorization: `Bearer ${userToken}` },
+      }),
+      fetch("https://api.tink.com/data/v2/transactions?pageSize=100", {
+        headers: { Authorization: `Bearer ${userToken}` },
+      }),
+    ])
+
     const accountsData = await accountsRes.json()
-    const accounts: TinkAccount[] = accountsData.accounts ?? []
-
-    // Transacciones (últimas 100)
-    const txRes = await fetch(`${TINK_API}/data/v2/transactions?pageSize=100`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
     const txData = await txRes.json()
+
+    const accounts: TinkAccount[] = accountsData.accounts ?? []
     const transactions: TinkTransaction[] = txData.transactions ?? []
 
-    // Mapear saldos
     const balances = accounts.map((a) => {
       const av = a.balances?.available?.amount
       const bk = a.balances?.booked?.amount
@@ -85,7 +137,6 @@ export async function GET() {
       }
     })
 
-    // Mapear transacciones
     const txMapped = transactions.map((tx) => ({
       id: tx.id,
       label: tx.descriptions?.display ?? tx.descriptions?.original ?? "Movimiento",

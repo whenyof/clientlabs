@@ -6,12 +6,12 @@ import { cn } from "@/lib/utils"
 import {
   LayoutDashboard,
   FileText,
-  ShoppingCart,
-  Landmark,
-  CalendarClock,
+  Receipt,
+  TrendingUp,
   Building2,
-  ChevronRight,
+  Calendar,
   AlertCircle,
+  ChevronRight,
 } from "lucide-react"
 
 type SubItem = { label: string; href: string }
@@ -73,12 +73,12 @@ const NAV: NavItem[] = [
   {
     label: "Gastos",
     href: "/dashboard/finance/gastos",
-    icon: ShoppingCart,
+    icon: Receipt,
   },
   {
     label: "Tesorería",
     href: "/dashboard/finance/cobros",
-    icon: Landmark,
+    icon: TrendingUp,
     children: [
       { label: "Cobros", href: "/dashboard/finance/cobros" },
       { label: "Pagos", href: "/dashboard/finance/pagos" },
@@ -93,7 +93,7 @@ const NAV: NavItem[] = [
   {
     label: "Trimestral",
     href: "/dashboard/finance/trimestral",
-    icon: CalendarClock,
+    icon: Calendar,
     badge: true,
     children: [
       { label: "1T · Ene–Mar", href: "/dashboard/finance/trimestral/q1" },
@@ -117,10 +117,10 @@ export function FinanceTopNav() {
   const activeItem = NAV.find((item) => isItemActive(item, pathname)) ?? NAV[0]
 
   return (
-    <div className="w-full shrink-0 bg-white border-b border-slate-200">
-      {/* ── Level 1 ──────────────────────────────────────── */}
+    <div className="w-full shrink-0 bg-white">
+      {/* ── Level 1 — tabs con underline ────────────────── */}
       <nav
-        className="flex items-center gap-1 px-4 overflow-x-auto"
+        className="flex items-end gap-0 px-4 border-b border-slate-200 overflow-x-auto"
         aria-label="Navegación finanzas"
       >
         {NAV.map((item) => {
@@ -133,10 +133,11 @@ export function FinanceTopNav() {
               key={item.href}
               href={item.href}
               className={cn(
-                "relative flex items-center gap-1.5 shrink-0 h-11 px-3.5 text-[13px] font-medium rounded-lg my-1 transition-all duration-150",
+                "relative flex items-center gap-2 shrink-0 h-11 px-4 text-[13px] font-medium",
+                "transition-all duration-150 -mb-px border-b-2",
                 active
-                  ? "bg-[#1FA97A]/10 text-[#1FA97A]"
-                  : "text-slate-500 hover:text-slate-800 hover:bg-slate-100"
+                  ? "text-[#1FA97A] border-[#1FA97A]"
+                  : "text-slate-500 border-transparent hover:text-slate-800 hover:border-slate-300"
               )}
               aria-current={active ? "page" : undefined}
             >
@@ -151,69 +152,71 @@ export function FinanceTopNav() {
               {showBadge && (
                 <span
                   className={cn(
-                    "h-1.5 w-1.5 rounded-full shrink-0",
+                    "flex items-center justify-center h-4 min-w-4 px-1 rounded-full text-[10px] font-bold leading-none",
                     urgentQuarter && urgentQuarter.daysLeft <= 7
-                      ? "bg-red-500 animate-pulse"
-                      : "bg-amber-400 animate-pulse"
+                      ? "bg-red-100 text-red-600"
+                      : "bg-amber-100 text-amber-600"
                   )}
                   aria-label="Plazo próximo"
-                />
+                >
+                  !
+                </span>
               )}
             </Link>
           )
         })}
       </nav>
 
-      {/* ── Level 2 ──────────────────────────────────────── */}
+      {/* ── Level 2 — subtabs discretos ─────────────────── */}
       {activeItem.children && activeItem.children.length > 0 && (
-        <div className="border-t border-slate-100 bg-slate-50/70">
-          <nav
-            className="flex items-center gap-1 px-5 py-1.5 overflow-x-auto"
-            aria-label={`Secciones de ${activeItem.label}`}
-          >
-            {/* Breadcrumb context */}
-            <span className="flex items-center gap-1 text-[11px] text-slate-400 shrink-0 mr-1 select-none">
-              <activeItem.icon className="h-3 w-3" aria-hidden />
-              {activeItem.label}
-              <ChevronRight className="h-3 w-3" aria-hidden />
-            </span>
+        <nav
+          className="flex items-center gap-1 px-5 py-2 border-b border-slate-100 overflow-x-auto"
+          aria-label={`Secciones de ${activeItem.label}`}
+        >
+          {/* Breadcrumb */}
+          <span className="flex items-center gap-1 text-[11px] text-slate-400 shrink-0 mr-1 select-none">
+            <activeItem.icon className="h-3 w-3" aria-hidden />
+            {activeItem.label}
+            <ChevronRight className="h-3 w-3" aria-hidden />
+          </span>
 
-            {activeItem.children.map((child) => {
-              const childActive =
-                pathname === child.href ||
-                (child.href !== activeItem.href && pathname.startsWith(child.href + "/"))
+          {activeItem.children.map((child) => {
+            const childActive =
+              pathname === child.href ||
+              (child.href !== activeItem.href && pathname.startsWith(child.href + "/"))
 
-              return (
-                <Link
-                  key={child.href}
-                  href={child.href}
-                  className={cn(
-                    "shrink-0 h-6 px-3 rounded-md text-[11px] font-medium transition-all duration-150",
-                    childActive
-                      ? "bg-white border border-slate-200 text-slate-800 shadow-sm"
-                      : "text-slate-500 hover:text-slate-700 hover:bg-white/80"
-                  )}
-                  aria-current={childActive ? "page" : undefined}
-                >
-                  {child.label}
-                </Link>
-              )
-            })}
+            return (
+              <Link
+                key={child.href}
+                href={child.href}
+                className={cn(
+                  "shrink-0 h-6 px-3 rounded-md text-[11px] font-medium transition-all duration-150",
+                  childActive
+                    ? "bg-white text-[#1FA97A] border border-slate-200 shadow-sm"
+                    : "text-slate-500 hover:text-slate-700 hover:bg-white/60"
+                )}
+                aria-current={childActive ? "page" : undefined}
+              >
+                {child.label}
+              </Link>
+            )
+          })}
 
-            {/* Urgency warning for Trimestral */}
-            {activeItem.badge && urgentQuarter && (
-              <span className={cn(
+          {/* Urgency warning for Trimestral */}
+          {activeItem.badge && urgentQuarter && (
+            <span
+              className={cn(
                 "ml-auto shrink-0 flex items-center gap-1 text-[11px] font-medium px-2.5 py-0.5 rounded-full",
                 urgentQuarter.daysLeft <= 7
                   ? "bg-red-50 text-red-600 border border-red-200"
                   : "bg-amber-50 text-amber-600 border border-amber-200"
-              )}>
-                <AlertCircle className="h-3 w-3" aria-hidden />
-                {urgentQuarter.daysLeft} días para el plazo
-              </span>
-            )}
-          </nav>
-        </div>
+              )}
+            >
+              <AlertCircle className="h-3 w-3" aria-hidden />
+              {urgentQuarter.daysLeft} días para el plazo
+            </span>
+          )}
+        </nav>
       )}
     </div>
   )

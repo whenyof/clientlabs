@@ -63,8 +63,8 @@ const NAV: NavItem[] = [
     href: "/dashboard/finance/facturas",
     icon: FileText,
     children: [
-      { label: "Facturas", href: "/dashboard/finance/facturas" },
       { label: "Presupuestos", href: "/dashboard/finance/presupuestos" },
+      { label: "Facturas", href: "/dashboard/finance/facturas" },
       { label: "Albaranes", href: "/dashboard/finance/albaranes" },
       { label: "Rectificativas", href: "/dashboard/finance/rectificativas" },
     ],

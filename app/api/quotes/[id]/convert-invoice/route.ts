@@ -5,15 +5,15 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
 async function nextInvoiceNumber(userId: string): Promise<{ number: string; series: string }> {
-  const series = "F"
+  const series = "FAC"
   const year = new Date().getFullYear()
   const last = await prisma.invoice.findFirst({
-    where: { userId, series, number: { startsWith: `F-${year}-` } },
+    where: { userId, series, number: { startsWith: `FAC-${year}-` } },
     orderBy: { createdAt: "desc" },
     select: { number: true },
   })
   const seq = last ? parseInt(last.number.split("-")[2] ?? "0") + 1 : 1
-  return { number: `F-${year}-${String(seq).padStart(3, "0")}`, series }
+  return { number: `FAC-${year}-${String(seq).padStart(3, "0")}`, series }
 }
 
 export async function POST(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {

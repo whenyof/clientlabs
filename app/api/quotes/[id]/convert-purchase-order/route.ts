@@ -7,12 +7,12 @@ import { prisma } from "@/lib/prisma"
 async function nextPONumber(userId: string): Promise<string> {
   const year = new Date().getFullYear()
   const last = await prisma.purchaseOrder.findFirst({
-    where: { userId, number: { startsWith: `HP-${year}-` } },
+    where: { userId, number: { startsWith: `PED-${year}-` } },
     orderBy: { createdAt: "desc" },
     select: { number: true },
   })
   const seq = last ? parseInt(last.number.split("-")[2] ?? "0") + 1 : 1
-  return `HP-${year}-${String(seq).padStart(3, "0")}`
+  return `PED-${year}-${String(seq).padStart(3, "0")}`
 }
 
 export async function POST(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {

@@ -7,12 +7,12 @@ import { prisma } from "@/lib/prisma"
 async function nextDeliveryNoteNumber(userId: string): Promise<string> {
   const year = new Date().getFullYear()
   const last = await prisma.deliveryNote.findFirst({
-    where: { userId, number: { startsWith: `A-${year}-` } },
+    where: { userId, number: { startsWith: `ALB-${year}-` } },
     orderBy: { createdAt: "desc" },
     select: { number: true },
   })
   const seq = last ? parseInt(last.number.split("-")[2] ?? "0") + 1 : 1
-  return `A-${year}-${String(seq).padStart(3, "0")}`
+  return `ALB-${year}-${String(seq).padStart(3, "0")}`
 }
 
 export async function POST(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {

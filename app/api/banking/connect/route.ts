@@ -16,11 +16,10 @@ export async function POST() {
   }
 
   const userId = session.user.id
+  const redirectUri = `${process.env.NEXTAUTH_URL}/api/banking/callback`
 
   try {
-    const redirectUri = `${process.env.NEXTAUTH_URL}/api/banking/callback`
-
-    // ── STEP 1: Token de cliente con scopes correctos ──────────────────────
+    // ── STEP 1: Token de cliente ───────────────────────────────────────────
     const tokenRes = await fetch(`${TINK_API}/api/v1/oauth/token`, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -44,7 +43,7 @@ export async function POST() {
 
     const clientToken: string = tokenData.access_token
 
-    // ── STEP 2: Crear o recuperar usuario Tink ─────────────────────────────
+    // ── STEP 2: Crear usuario — obtener user_id INTERNO de Tink ───────────
     const userRes = await fetch(`${TINK_API}/api/v1/user/create`, {
       method: "POST",
       headers: {
@@ -58,41 +57,40 @@ export async function POST() {
       }),
     })
 
-    const userText = await userRes.text()
-    let userData: Record<string, unknown>
-    try {
-      userData = JSON.parse(userText)
-    } catch {
-      userData = { raw: userText }
-    }
+    const userData = await userRes.json()
 
-    // Tink devuelve user_id en creación nueva o en el objeto de error para ya-existente
-    let tinkUserId: string =
-      (userData.user_id as string) ??
-      (userData.id as string) ??
-      ""
+    // user_id es el ID INTERNO de Tink (distinto del external_user_id)
+    let tinkUserId: string = userData.user_id ?? userData.id ?? ""
 
-    if (!tinkUserId) {
-      // Usuario ya existente: Tink devuelve error pero permite continuar
-      const msg = String((userData.error as Record<string, unknown>)?.message ?? userData.message ?? "")
-      const isAlreadyExists =
-        msg.toLowerCase().includes("already exists") ||
-        (userData.errorCode as string) === "USER_ALREADY_EXISTS" ||
-        userRes.status === 409
+    if (!tinkUserId && userData.errorCode) {
+      // Usuario ya existe — buscarlo por external_user_id
+      const existingRes = await fetch(
+        `${TINK_API}/api/v1/user?external_user_id=${encodeURIComponent(userId)}`,
+        { headers: { Authorization: `Bearer ${clientToken}` } }
+      )
+      const existingData = await existingRes.json()
+      tinkUserId = existingData.id ?? existingData.user_id ?? ""
 
-      if (isAlreadyExists) {
-        // Tink acepta external_user_id como id_hint en el auth grant
-        tinkUserId = userId
-      } else {
-        console.error("Tink user/create error:", userRes.status, userText)
+      if (!tinkUserId) {
+        console.error("Tink user lookup failed:", existingData, "create error:", userData)
         return NextResponse.json(
-          { error: `Error creando usuario Tink (${userRes.status}): ${userText.slice(0, 200)}` },
+          { error: `No se pudo crear ni encontrar el usuario Tink: ${JSON.stringify(userData)}` },
           { status: 500 }
         )
       }
     }
 
-    // ── STEP 3: Authorization grant ────────────────────────────────────────
+    if (!tinkUserId) {
+      console.error("Tink user/create error:", userRes.status, userData)
+      return NextResponse.json(
+        { error: `Error creando usuario Tink: ${JSON.stringify(userData)}` },
+        { status: 500 }
+      )
+    }
+
+    // ── STEP 3: Authorization grant — SOLO user_id interno ────────────────
+    // No pasar id_hint ni external_user_id — Tink rechaza con
+    // oauth.multiple_user_ids_specified si se envían varios identificadores
     const authRes = await fetch(`${TINK_API}/api/v1/oauth/authorization-grant`, {
       method: "POST",
       headers: {
@@ -100,10 +98,7 @@ export async function POST() {
         "Content-Type": "application/x-www-form-urlencoded",
       },
       body: new URLSearchParams({
-        grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
-        actor_client_id: TINK_CLIENT_ID,
-        id_hint: tinkUserId,
-        response_type: "code",
+        user_id: tinkUserId,
         scope: "accounts:read,transactions:read,balances:read,credentials:read",
       }),
     })
@@ -113,18 +108,20 @@ export async function POST() {
     if (!authData.code) {
       console.error("Tink auth-grant error:", authData)
       return NextResponse.json(
-        { error: `Error generando código de autorización: ${JSON.stringify(authData)}` },
+        { error: `Auth grant error: ${JSON.stringify(authData)}` },
         { status: 500 }
       )
     }
 
     // ── STEP 4: Construir URL de Tink Link ─────────────────────────────────
-    const tinkUrl = new URL("https://link.tink.com/1.0/transactions/connect-accounts")
-    tinkUrl.searchParams.set("client_id", TINK_CLIENT_ID)
-    tinkUrl.searchParams.set("redirect_uri", redirectUri)
-    tinkUrl.searchParams.set("authorization_code", authData.code)
-    tinkUrl.searchParams.set("market", "ES")
-    tinkUrl.searchParams.set("locale", "es_ES")
+    const params = new URLSearchParams({
+      client_id: TINK_CLIENT_ID,
+      redirect_uri: redirectUri,
+      authorization_code: authData.code,
+      market: "ES",
+      locale: "es_ES",
+    })
+    const tinkUrl = `https://link.tink.com/1.0/transactions/connect-accounts?${params}`
 
     // ── STEP 5: Guardar conexión pendiente ─────────────────────────────────
     await prisma.bankConnection.upsert({
@@ -143,9 +140,9 @@ export async function POST() {
         accessToken: null,
         tokenExpiresAt: null,
       },
-    })
+    }).catch((err) => console.error("DB save error:", err))
 
-    return NextResponse.json({ url: tinkUrl.toString(), tinkUserId })
+    return NextResponse.json({ url: tinkUrl, tinkUserId })
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Error desconocido"
     console.error("Banking connect error:", err)

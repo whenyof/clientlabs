@@ -13,6 +13,7 @@ import { CashflowBlock } from "./components/CashflowBlock"
 import { BusinessHealth } from "./components/BusinessHealth"
 import { Forecast } from "./components/Forecast"
 import { CreateTransactionModal } from "./components/CreateTransactionModal"
+import { BankConnectionBanner } from "./components/BankConnectionBanner"
 import type { FinancePageData } from "./lib/server-data"
 
 type Props = {
@@ -118,6 +119,9 @@ export function FinanceView({ initialData, period, view, billingNode, purchasesN
             Nuevo movimiento
           </button>
         </div>
+
+        {/* Bank connection banner */}
+        <BankConnectionBanner />
 
         {/* Trimestral alert */}
         <div className="mb-5">

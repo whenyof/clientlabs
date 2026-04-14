@@ -9,6 +9,7 @@ import {
   ShoppingCart,
   Landmark,
   CalendarClock,
+  Building2,
   ChevronRight,
   AlertCircle,
 } from "lucide-react"
@@ -81,6 +82,12 @@ const NAV: NavItem[] = [
       { label: "Cobros", href: "/dashboard/finance/cobros" },
       { label: "Pagos", href: "/dashboard/finance/pagos" },
     ],
+  },
+  {
+    label: "Banco",
+    href: "/dashboard/finance/banco",
+    icon: Building2,
+    exact: true,
   },
   {
     label: "Trimestral",

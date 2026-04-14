@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react"
 import {
-  FileText, Send, CheckCircle, Receipt, Truck,
-  Trash2, Plus, Search, ClipboardList
+  FileText, Send, CheckCircle, XCircle, Clock,
+  Receipt, Truck, Trash2, Plus, Search, ClipboardList
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { NewQuoteModal } from "./NewQuoteModal"
@@ -234,24 +234,67 @@ export function QuotesView({ clientId, onNavigateToInvoices, onNavigateToPurchas
                             <FileText className="h-3.5 w-3.5" />
                           </button>
                           {q.status === "DRAFT" && (
-                            <button
-                              onClick={() => action(q.id, "send")}
-                              disabled={actionLoading === q.id + "send"}
-                              className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors disabled:opacity-50"
-                              title="Enviar"
-                            >
-                              <Send className="h-3.5 w-3.5" />
-                            </button>
+                            <>
+                              <button
+                                onClick={() => action(q.id, "send")}
+                                disabled={actionLoading === q.id + "send"}
+                                className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors disabled:opacity-50"
+                                title="Enviar al cliente"
+                              >
+                                <Send className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                onClick={() => action(q.id, "accept")}
+                                disabled={actionLoading === q.id + "accept"}
+                                className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-[#1FA97A] transition-colors disabled:opacity-50"
+                                title="Marcar como aceptado"
+                              >
+                                <CheckCircle className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                onClick={() => action(q.id, "reject")}
+                                disabled={actionLoading === q.id + "reject"}
+                                className="p-1.5 rounded-md hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors disabled:opacity-50"
+                                title="Marcar como rechazado"
+                              >
+                                <XCircle className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                onClick={() => deleteQuote(q.id)}
+                                className="p-1.5 rounded-md hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors"
+                                title="Eliminar"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </>
                           )}
                           {q.status === "SENT" && (
-                            <button
-                              onClick={() => action(q.id, "accept")}
-                              disabled={actionLoading === q.id + "accept"}
-                              className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-[#1FA97A] transition-colors disabled:opacity-50"
-                              title="Marcar aceptado"
-                            >
-                              <CheckCircle className="h-3.5 w-3.5" />
-                            </button>
+                            <>
+                              <button
+                                onClick={() => action(q.id, "accept")}
+                                disabled={actionLoading === q.id + "accept"}
+                                className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-[#1FA97A] transition-colors disabled:opacity-50"
+                                title="Marcar como aceptado"
+                              >
+                                <CheckCircle className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                onClick={() => action(q.id, "reject")}
+                                disabled={actionLoading === q.id + "reject"}
+                                className="p-1.5 rounded-md hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors disabled:opacity-50"
+                                title="Marcar como rechazado"
+                              >
+                                <XCircle className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                onClick={() => action(q.id, "expire")}
+                                disabled={actionLoading === q.id + "expire"}
+                                className="p-1.5 rounded-md hover:bg-amber-50 text-slate-400 hover:text-amber-500 transition-colors disabled:opacity-50"
+                                title="Marcar como expirado"
+                              >
+                                <Clock className="h-3.5 w-3.5" />
+                              </button>
+                            </>
                           )}
                           {q.status === "ACCEPTED" && (
                             <button
@@ -264,15 +307,6 @@ export function QuotesView({ clientId, onNavigateToInvoices, onNavigateToPurchas
                               )}
                             >
                               Generar documento
-                            </button>
-                          )}
-                          {q.status === "DRAFT" && (
-                            <button
-                              onClick={() => deleteQuote(q.id)}
-                              className="p-1.5 rounded-md hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors"
-                              title="Eliminar"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
                             </button>
                           )}
                         </div>

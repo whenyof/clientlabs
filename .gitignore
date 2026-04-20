@@ -42,3 +42,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Landing reference material (local only, no deploy)
+/docs/landing-ref

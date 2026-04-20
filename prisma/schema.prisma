@@ -763,9 +763,10 @@ model Sale {
   taxTotal         Decimal          @db.Decimal(10, 2)
   BillingInvoice   BillingInvoice[]
   Invoice          Invoice[]
-  Client           Client?          @relation(fields: [clientId], references: [id])
-  User             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Client           Client?            @relation(fields: [clientId], references: [id])
+  User             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   items            SaleItem[]
+  documentos       DocumentoImportado[]
 
   @@index([paymentMethod])
   @@index([saleDate])
@@ -859,6 +860,7 @@ model User {
   ApiKey                 ApiKey[]
   automations            Automation[]
   automationLogs         AutomationLog[]
+  automatizaciones       Automatizacion[]
   BillingInvoice         BillingInvoice[]
   bankConnections        BankConnection[]
   budgets                Budget[]
@@ -930,6 +932,9 @@ model User {
   quotes                 Quote[]
   deliveryNotes          DeliveryNote[]
   purchaseOrders         PurchaseOrder[]
+  newsletterSubscribers  NewsletterSubscriber[]
+  newsletterEdiciones    NewsletterEdicion[]
+  documentosImportados   DocumentoImportado[]
 }
 
 model CalendarIntegration {
@@ -1632,6 +1637,7 @@ model ProviderOrder {
   items                ProviderOrderItem[]
   payment              ProviderPayment?
   timelineEvents       ProviderTimelineEvent[]
+  documentos           DocumentoImportado[]
 
   @@index([providerId])
   @@index([userId])
@@ -2677,4 +2683,132 @@ model WaitlistEntry {
   createdAt DateTime @default(now())
 
   @@map("waitlist_entries")
+}
+
+// ─── Automatizaciones simples ────────────────────────────────────────────────
+
+enum TipoAutomatizacion {
+  // Para ti — notificaciones internas
+  LEAD_NUEVO
+  LEAD_SIN_CONTACTAR
+  LEAD_STALLED
+  FACTURA_VENCIDA_AVISO
+  PRESUPUESTO_EXPIRA_AVISO
+  TRIMESTRE_PROXIMO
+  TAREA_VENCIDA
+  TAREAS_HOY
+  PROVEEDOR_FACTURA_VENCER
+  MES_BENEFICIO_NEGATIVO
+  // Para tus contactos — emails salientes
+  CONFIRMACION_LEAD
+  SEGUIMIENTO_DIA_3
+  SEGUIMIENTO_DIA_7
+  BIENVENIDA_CLIENTE
+  FACTURA_VENCIDA
+  PRESUPUESTO_EXPIRA
+  CUMPLEANOS_CLIENTE
+  CONFIRMACION_PEDIDO
+  AVISO_ENTREGA
+  SOLICITUD_VALORACION
+  // Legado (backward compat con cron existente)
+  PRESUPUESTO_EXPIRADO
+}
+
+model Automatizacion {
+  id              String             @id @default(cuid())
+  userId          String
+  nombre          String
+  descripcion     String?
+  tipo            TipoAutomatizacion
+  categoria       String             @default("para_ti")
+  activa          Boolean            @default(false)
+  config          Json?
+  vecesEjecutada  Int                @default(0)
+  ultimaEjecucion DateTime?
+  ultimoError     String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logs            AutomatizacionLog[]
+
+  @@unique([userId, tipo])
+  @@index([userId])
+  @@map("automatizaciones")
+}
+
+model AutomatizacionLog {
+  id               String         @id @default(cuid())
+  automatizacionId String
+  ejecutadaEn      DateTime       @default(now())
+  resultado        String
+  detalle          String?
+  entidadId        String?
+  entidadTipo      String?
+  automatizacion   Automatizacion @relation(fields: [automatizacionId], references: [id], onDelete: Cascade)
+
+  @@index([automatizacionId])
+  @@index([ejecutadaEn])
+  @@map("automatizacion_logs")
+}
+
+model NewsletterSubscriber {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  email      String
+  nombre     String?
+  confirmado Boolean   @default(true)
+  activo     Boolean   @default(true)
+  fuente     String    @default("manual")
+  creadoEn   DateTime  @default(now())
+  bajaEn     DateTime?
+
+  @@unique([userId, email])
+}
+
+model NewsletterEdicion {
+  id             String    @id @default(cuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  titulo         String
+  asunto         String
+  contenido      String    @db.Text
+  estado         String    @default("borrador")
+  programadaPara DateTime?
+  enviadaEn      DateTime?
+  totalEnviados  Int       @default(0)
+  totalAbiertos  Int       @default(0)
+  totalClicks    Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model DocumentoImportado {
+  id               String         @id @default(cuid())
+  userId           String
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Relaciones con entidades reales
+  saleId           String?
+  sale             Sale?          @relation(fields: [saleId], references: [id], onDelete: SetNull)
+  providerOrderId  String?
+  providerOrder    ProviderOrder? @relation(fields: [providerOrderId], references: [id], onDelete: SetNull)
+  clientId         String?
+  providerId       String?
+
+  // Metadatos del documento
+  tipo             String
+  numero           String?
+  concepto         String?
+  importe          Float?
+  fecha            DateTime @default(now())
+  clienteProveedor String?
+  estadoPago       String   @default("pendiente")
+  nombreArchivo    String?
+  tamanoArchivo    Int?
+  fileUrl          String?
+  mimeType         String?
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }

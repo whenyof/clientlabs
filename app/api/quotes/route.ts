@@ -43,7 +43,14 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ success: true, quotes })
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(_req: NextRequest) {
+  return NextResponse.json(
+    { error: "Creación deshabilitada hasta implementación Verifactu", code: "VERIFACTU_PENDING" },
+    { status: 503 }
+  )
+}
+
+async function _POST_disabled(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 

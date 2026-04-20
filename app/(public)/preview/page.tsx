@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation"
-import { FullLandingPage } from "../components/FullLanding"
+import { FullLandingPage } from "../components/FullLanding.old"
 
 interface Props {
   searchParams: Promise<{ key?: string }>

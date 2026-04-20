@@ -114,6 +114,8 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
     {
       title: "INTELIGENCIA",
       items: [
+        { label: "Automatizaciones", href: "/dashboard/automatizaciones", icon: Zap },
+        { label: "Marketing", href: "/dashboard/marketing", icon: Megaphone },
         { label: "Conectar", href: "/dashboard/connect", icon: Link2 },
       ],
     },
@@ -248,7 +250,6 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
                 {[
                   { icon: Zap,      label: labels.automations.title },
                   { icon: Sparkles, label: labels.aiAssistant.title },
-                  { icon: Megaphone,label: "Marketing" },
                   { icon: Receipt,  label: "Verifactu" },
                 ].map(({ icon: Icon, label }) => (
                   <div

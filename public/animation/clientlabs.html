@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>ClientLabs Animation</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:transparent;}
+body{display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,sans-serif;}
+.scene{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
+.iphone{position:absolute;width:260px;height:520px;z-index:10;opacity:0;transform:translateY(50px) scale(.85);}
+.i-shell{position:absolute;inset:0;border-radius:50px;background:linear-gradient(160deg,#232323 0%,#141414 40%,#0e0e0e 60%,#1c1c1c 100%);box-shadow:inset 0 0 0 .5px rgba(255,255,255,.07),inset 0 1px 0 rgba(255,255,255,.1),0 0 0 .5px #000,0 20px 60px rgba(0,0,0,.7),0 4px 20px rgba(0,0,0,.5);}
+.i-btn-r{position:absolute;right:-2.5px;top:120px;width:2.5px;height:65px;background:linear-gradient(to right,#141414,#252525);border-radius:0 2px 2px 0;}
+.i-btn-l1{position:absolute;left:-2.5px;top:95px;width:2.5px;height:32px;background:linear-gradient(to left,#141414,#252525);border-radius:2px 0 0 2px;}
+.i-btn-l2{position:absolute;left:-2.5px;top:138px;width:2.5px;height:55px;background:linear-gradient(to left,#141414,#252525);border-radius:2px 0 0 2px;}
+.i-btn-l3{position:absolute;left:-2.5px;top:202px;width:2.5px;height:55px;background:linear-gradient(to left,#141414,#252525);border-radius:2px 0 0 2px;}
+.i-inner{position:absolute;inset:5px;border-radius:45px;background:#000;overflow:hidden;}
+.i-screen{position:absolute;inset:0;border-radius:45px;background:#000;overflow:hidden;}
+.di{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:85px;height:28px;background:#000;border-radius:20px;z-index:20;transition:width .45s cubic-bezier(.34,1.56,.64,1),height .45s cubic-bezier(.34,1.56,.64,1);display:flex;align-items:center;justify-content:space-between;padding:0 10px;overflow:hidden;}
+.di.on{width:190px;height:36px;}
+.di-dot{width:9px;height:9px;border-radius:50%;background:#1FA97A;opacity:0;transition:opacity .3s;box-shadow:0 0 8px #1FA97A;}
+.di-txt{font-size:10px;color:rgba(255,255,255,.92);font-weight:600;opacity:0;transition:opacity .3s;white-space:nowrap;flex:1;padding:0 7px;}
+.di.on .di-dot,.di.on .di-txt{opacity:1;}
+.s-off{position:absolute;inset:0;border-radius:45px;background:#000;z-index:5;opacity:1;transition:opacity .9s ease;}
+.s-flash{position:absolute;inset:0;border-radius:45px;background:rgba(255,255,255,.12);z-index:6;opacity:0;pointer-events:none;}
+.ls{position:absolute;inset:0;border-radius:45px;z-index:4;opacity:0;background:linear-gradient(180deg,#071422 0%,#0c1d32 45%,#081422 100%);display:flex;flex-direction:column;align-items:center;padding-top:48px;}
+.ls-time{font-size:62px;font-weight:100;color:#fff;letter-spacing:-3px;line-height:1;margin-bottom:5px;}
+.ls-date{font-size:13px;color:rgba(255,255,255,.45);font-weight:300;margin-bottom:22px;letter-spacing:.4px;}
+.notifs{width:100%;padding:0 12px;display:flex;flex-direction:column;gap:8px;}
+.nc{background:rgba(255,255,255,.07);border:.5px solid rgba(255,255,255,.09);border-radius:16px;padding:10px 12px;display:flex;align-items:center;gap:9px;transform:translateY(-25px) scale(.92);opacity:0;transition:all .5s cubic-bezier(.34,1.56,.64,1);}
+.nc.in{transform:translateY(0) scale(1);opacity:1;}
+.nc-ico{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.nc-b{flex:1;min-width:0;}
+.nc-app{font-size:8px;color:rgba(255,255,255,.35);margin-bottom:1px;text-transform:uppercase;letter-spacing:.5px;}
+.nc-t{font-size:11px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.nc-s{font-size:9.5px;color:rgba(255,255,255,.42);margin-top:1px;}
+.nc-tm{font-size:8.5px;color:rgba(255,255,255,.28);flex-shrink:0;}
+.ripple{position:absolute;width:260px;height:520px;border-radius:50px;border:1.5px solid rgba(31,169,122,.6);opacity:0;z-index:9;pointer-events:none;}
+.dash{position:absolute;width:1060px;height:640px;border-radius:14px;overflow:hidden;opacity:0;z-index:8;transform:scale(.3);background:#f0f2f5;box-shadow:0 40px 120px rgba(0,0,0,.5),0 0 80px rgba(31,169,122,.08);display:flex;}
+.d-sb{width:188px;flex-shrink:0;background:#fff;border-right:.5px solid #e8eaed;display:flex;flex-direction:column;padding:16px 0;}
+.d-logo{display:flex;align-items:center;gap:8px;padding:0 16px 16px;}
+.d-logo-dot{width:22px;height:22px;background:#1FA97A;border-radius:7px;}
+.d-logo-name{font-size:14px;font-weight:700;color:#0B1F2A;letter-spacing:-.3px;}
+.d-logo-name span{color:#1FA97A;}
+.d-sec{font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px;padding:10px 16px 5px;}
+.d-it{display:flex;align-items:center;gap:9px;padding:6px 14px;margin:0 6px;border-radius:9px;}
+.d-it.on{background:#E1F5EE;}
+.d-it svg{width:13px;height:13px;flex-shrink:0;color:#94a3b8;}
+.d-it.on svg{color:#1FA97A;}
+.d-it-l{font-size:11.5px;font-weight:500;color:#64748b;}
+.d-it.on .d-it-l{color:#1FA97A;font-weight:600;}
+.d-badge{margin-left:auto;font-size:9px;font-weight:700;padding:1px 5px;border-radius:10px;}
+.d-bgg{background:#E1F5EE;color:#1FA97A;}
+.d-bgr{background:#fee2e2;color:#ef4444;}
+.d-sep{height:.5px;background:#e8eaed;margin:8px 12px;}
+.d-user{padding:10px 14px;display:flex;align-items:center;gap:8px;}
+.d-av{width:26px;height:26px;border-radius:50%;background:#1FA97A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;}
+.d-un{font-size:10.5px;font-weight:600;color:#1e293b;}
+.d-up{font-size:9px;color:#94a3b8;}
+.d-main{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+.d-tb{height:52px;flex-shrink:0;background:#fff;border-bottom:.5px solid #e8eaed;display:flex;align-items:center;padding:0 20px;gap:12px;}
+.d-gr{flex:1;}
+.d-gr-t{font-size:16px;font-weight:700;color:#0B1F2A;letter-spacing:-.3px;}
+.d-gr-s{font-size:11px;color:#94a3b8;margin-top:1px;}
+.d-acts{display:flex;align-items:center;gap:8px;}
+.d-btn{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:9px;font-size:11px;font-weight:600;border:none;cursor:pointer;}
+.d-bto{background:#fff;border:.5px solid #e2e8f0;color:#64748b;}
+.d-btg{background:#1FA97A;color:#fff;box-shadow:0 2px 8px rgba(31,169,122,.25);}
+.d-ct{flex:1;overflow:hidden;padding:14px 18px;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:auto auto 1fr;gap:11px;}
+.kpi{background:#fff;border-radius:11px;border:.5px solid #e8eaed;padding:13px 15px;}
+.kpi-l{font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;}
+.kpi-v{font-size:25px;font-weight:800;color:#0B1F2A;letter-spacing:-.5px;line-height:1;}
+.kpi-s{font-size:10px;margin-top:3px;display:flex;align-items:center;gap:3px;}
+.ku{color:#1FA97A;font-weight:600;}
+.kn{color:#94a3b8;}
+.kpi-b{height:3px;background:#f1f5f9;border-radius:2px;margin-top:7px;overflow:hidden;}
+.kpi-bf{height:100%;border-radius:2px;}
+.pipe{background:#fff;border-radius:11px;border:.5px solid #e8eaed;padding:13px 15px;grid-column:1/4;}
+.ct{font-size:12px;font-weight:700;color:#0B1F2A;margin-bottom:9px;display:flex;align-items:center;justify-content:space-between;}
+.ct span{font-size:10px;font-weight:500;color:#94a3b8;}
+.pcols{display:flex;gap:7px;}
+.pcol{flex:1;background:#f8fafc;border-radius:8px;padding:9px;border:.5px solid #e8eaed;}
+.ph2{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;display:flex;align-items:center;justify-content:space-between;}
+.pn{font-size:18px;font-weight:800;color:#0B1F2A;margin-bottom:1px;}
+.pl{font-size:9px;color:#94a3b8;}
+.pbar{height:3px;border-radius:2px;margin-top:5px;}
+.lc{background:#fff;border-radius:11px;border:.5px solid #e8eaed;padding:13px 15px;grid-column:1/3;}
+.lr{display:flex;align-items:center;gap:9px;padding:6px 0;border-bottom:.5px solid #f1f5f9;}
+.lr:last-child{border-bottom:none;}
+.lav{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0;}
+.li{flex:1;min-width:0;}
+.ln{font-size:10.5px;font-weight:600;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lm{font-size:9px;color:#94a3b8;margin-top:1px;}
+.lbg{padding:2px 7px;border-radius:5px;font-size:9px;font-weight:700;flex-shrink:0;}
+.ac{background:#fff;border-radius:11px;border:.5px solid #e8eaed;padding:13px 15px;}
+.ai{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:.5px solid #f1f5f9;}
+.ai:last-child{border-bottom:none;}
+.ad{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:3px;}
+.at{flex:1;}
+.atn{font-size:10px;font-weight:600;color:#334155;}
+.atm{font-size:9px;color:#94a3b8;margin-top:1px;}
+.fb{position:absolute;bottom:36px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;opacity:0;z-index:20;pointer-events:none;}
+.fb-logo{display:flex;align-items:center;gap:11px;}
+.fb-dot{width:28px;height:28px;background:#1FA97A;border-radius:8px;box-shadow:0 0 25px rgba(31,169,122,.5);}
+.fb-name{font-size:24px;font-weight:800;color:#fff;letter-spacing:-.5px;}
+.fb-name span{color:#1FA97A;}
+.fb-tag{font-size:12px;color:rgba(255,255,255,.38);letter-spacing:1.5px;text-transform:uppercase;}
+.rep{position:absolute;top:18px;right:18px;padding:7px 16px;background:rgba(31,169,122,.15);border:.5px solid rgba(31,169,122,.35);border-radius:20px;color:#1FA97A;font-size:11px;font-weight:600;cursor:pointer;z-index:100;opacity:0;transition:opacity .3s,background .2s;letter-spacing:.3px;}
+.rep:hover{background:rgba(31,169,122,.28);}
+.rep.show{opacity:1;}
+</style>
+</head>
+<body>
+<div class="scene">
+<div class="ripple" id="rip"></div>
+<div class="iphone" id="ph">
+  <div class="i-shell"></div>
+  <div class="i-btn-r"></div><div class="i-btn-l1"></div><div class="i-btn-l2"></div><div class="i-btn-l3"></div>
+  <div class="i-inner">
+    <div class="i-screen" id="scr">
+      <div class="di" id="di"><div class="di-dot"></div><div class="di-txt" id="diT">Nuevo lead</div></div>
+      <div class="s-off" id="soff"></div>
+      <div class="s-flash" id="sfla"></div>
+      <div class="ls" id="ls">
+        <div class="ls-time">09:41</div>
+        <div class="ls-date">Sábado, 19 de abril</div>
+        <div class="notifs">
+          <div class="nc" id="n1"><div class="nc-ico" style="background:rgba(31,169,122,.18);">🔥</div><div class="nc-b"><div class="nc-app">ClientLabs</div><div class="nc-t">Lead nuevo — María García</div><div class="nc-s">Formulario web · Diseño web</div></div><div class="nc-tm">ahora</div></div>
+          <div class="nc" id="n2"><div class="nc-ico" style="background:rgba(59,130,246,.18);">💶</div><div class="nc-b"><div class="nc-app">ClientLabs</div><div class="nc-t">Factura cobrada — 2.400€</div><div class="nc-s">Restaurante Mirador · Transf.</div></div><div class="nc-tm">3m</div></div>
+          <div class="nc" id="n3"><div class="nc-ico" style="background:rgba(139,92,246,.18);">⚡</div><div class="nc-b"><div class="nc-app">ClientLabs</div><div class="nc-t">Automatización enviada</div><div class="nc-s">Seguimiento a 12 leads</div></div><div class="nc-tm">8m</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="dash" id="dash">
+  <div class="d-sb">
+    <div class="d-logo"><div class="d-logo-dot"></div><div class="d-logo-name">Client<span>Labs</span></div></div>
+    <div class="d-sec">Core</div>
+    <div class="d-it on"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="5" height="5" rx="1"/><rect x="8" y="1" width="5" height="5" rx="1"/><rect x="1" y="8" width="5" height="5" rx="1"/><rect x="8" y="8" width="5" height="5" rx="1"/></svg><span class="d-it-l">Dashboard</span></div>
+    <div class="d-it"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="5" r="2.5"/><path d="M1.5 13c0-2.8 2.4-4.5 5.5-4.5s5.5 1.7 5.5 4.5"/></svg><span class="d-it-l">Leads</span><span class="d-badge d-bgg">47</span></div>
+    <div class="d-it"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h10v9a1 1 0 01-1 1H3a1 1 0 01-1-1V3z"/><path d="M4 6h6M4 9h4"/></svg><span class="d-it-l">Clientes</span></div>
+    <div class="d-it"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1.5 3.5h11v8a1 1 0 01-1 1h-9a1 1 0 01-1-1v-8z"/><path d="M4.5 3.5v-1a.5.5 0 011 0v1M8.5 3.5v-1a.5.5 0 011 0v1"/></svg><span class="d-it-l">Proveedores</span></div>
+    <div class="d-it"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="12" height="10" rx="1"/><path d="M4 2V1M10 2V1M1 6h12"/></svg><span class="d-it-l">Tareas</span><span class="d-badge d-bgr">3</span></div>
+    <div class="d-it"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11V5l5-3 5 3v6a1 1 0 01-1 1H3a1 1 0 01-1-1z"/></svg><span class="d-it-l">Finanzas</span></div>
+    <div class="d-sec">Inteligencia</div>
+    <div class="d-it"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 1l1.8 3.6L13 5.3l-3 2.9.7 4.1L7 10.2l-3.7 2.1.7-4.1L1 5.3l4.2-.7z"/></svg><span class="d-it-l">Marketing</span></div>
+    <div class="d-it"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 7h2l2-4.5 2 9 2-4.5h2"/></svg><span class="d-it-l">Automatizaciones</span></div>
+    <div class="d-sep"></div>
+    <div class="d-it"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="2"/><path d="M7 1v1M7 12v1M1 7h1M12 7h1M2.6 2.6l.7.7M10.7 10.7l.7.7M2.6 11.4l.7-.7M10.7 3.3l.7-.7"/></svg><span class="d-it-l">Ajustes</span></div>
+    <div style="flex:1;"></div>
+    <div class="d-user"><div class="d-av">CL</div><div><div class="d-un">ClientLabs</div><div class="d-up">Plan Pro</div></div></div>
+  </div>
+  <div class="d-main">
+    <div class="d-tb">
+      <div class="d-gr"><div class="d-gr-t">Buenas tardes ☀️</div><div class="d-gr-s">Sábado, 19 de abril de 2026 — 12 días para mayo</div></div>
+      <div class="d-acts"><button class="d-btn d-bto">+ Nuevo lead</button><button class="d-btn d-btg">+ Nueva tarea</button></div>
+    </div>
+    <div class="d-ct">
+      <div class="kpi"><div class="kpi-l">Facturado este mes</div><div class="kpi-v">14.280€</div><div class="kpi-s"><span class="ku">↑ +23%</span><span class="kn"> vs mes anterior</span></div><div class="kpi-b"><div class="kpi-bf" style="width:74%;background:#1FA97A;"></div></div></div>
+      <div class="kpi"><div class="kpi-l">Pendiente de cobro</div><div class="kpi-v">3.900€</div><div class="kpi-s"><span class="kn">2 facturas · vence en 8d</span></div><div class="kpi-b"><div class="kpi-bf" style="width:38%;background:#f59e0b;"></div></div></div>
+      <div class="kpi"><div class="kpi-l">Leads activos</div><div class="kpi-v">47</div><div class="kpi-s"><span class="ku">↑ +12</span><span class="kn"> esta semana</span></div><div class="kpi-b"><div class="kpi-bf" style="width:82%;background:#1FA97A;"></div></div></div>
+      <div class="pipe">
+        <div class="ct">Pipeline de leads <span>47 leads en total</span></div>
+        <div class="pcols">
+          <div class="pcol"><div class="ph2" style="color:#1FA97A;">Nuevo <span style="background:#E1F5EE;color:#1FA97A;padding:1px 5px;border-radius:4px;font-size:8px;">18</span></div><div class="pn">18</div><div class="pl">leads nuevos</div><div class="pbar" style="background:#E1F5EE;"><div style="height:100%;width:100%;background:#1FA97A;border-radius:2px;"></div></div></div>
+          <div class="pcol"><div class="ph2" style="color:#3b82f6;">Contactado <span style="background:#dbeafe;color:#3b82f6;padding:1px 5px;border-radius:4px;font-size:8px;">12</span></div><div class="pn">12</div><div class="pl">en conversación</div><div class="pbar" style="background:#dbeafe;"><div style="height:100%;width:66%;background:#3b82f6;border-radius:2px;"></div></div></div>
+          <div class="pcol"><div class="ph2" style="color:#f59e0b;">Cualificado <span style="background:#fef3c7;color:#d97706;padding:1px 5px;border-radius:4px;font-size:8px;">9</span></div><div class="pn">9</div><div class="pl">con propuesta</div><div class="pbar" style="background:#fef3c7;"><div style="height:100%;width:50%;background:#f59e0b;border-radius:2px;"></div></div></div>
+          <div class="pcol"><div class="ph2" style="color:#8b5cf6;">Convertido <span style="background:#ede9fe;color:#7c3aed;padding:1px 5px;border-radius:4px;font-size:8px;">6</span></div><div class="pn">6</div><div class="pl">nuevos clientes</div><div class="pbar" style="background:#ede9fe;"><div style="height:100%;width:33%;background:#8b5cf6;border-radius:2px;"></div></div></div>
+          <div class="pcol"><div class="ph2" style="color:#ef4444;">Perdido <span style="background:#fee2e2;color:#dc2626;padding:1px 5px;border-radius:4px;font-size:8px;">2</span></div><div class="pn">2</div><div class="pl">no convertidos</div><div class="pbar" style="background:#fee2e2;"><div style="height:100%;width:11%;background:#ef4444;border-radius:2px;"></div></div></div>
+        </div>
+      </div>
+      <div class="lc">
+        <div class="ct">Leads recientes <span>Ver todos →</span></div>
+        <div class="lr"><div class="lav" style="background:#1FA97A;">MG</div><div class="li"><div class="ln">María García Ruiz</div><div class="lm">Diseño web · Formulario web</div></div><div class="lbg" style="background:#E1F5EE;color:#1FA97A;">Nuevo</div></div>
+        <div class="lr"><div class="lav" style="background:#3b82f6;">RM</div><div class="li"><div class="ln">Restaurante Mirador</div><div class="lm">Branding · LinkedIn</div></div><div class="lbg" style="background:#dbeafe;color:#3b82f6;">Contactado</div></div>
+        <div class="lr"><div class="lav" style="background:#f59e0b;">EV</div><div class="li"><div class="ln">Estudio Vega Arquitectos</div><div class="lm">Web + SEO · Referido</div></div><div class="lbg" style="background:#fef3c7;color:#d97706;">Cualificado</div></div>
+        <div class="lr"><div class="lav" style="background:#8b5cf6;">HM</div><div class="li"><div class="ln">Hotel Miramar BCN</div><div class="lm">Diseño web · Directo</div></div><div class="lbg" style="background:#ede9fe;color:#7c3aed;">Propuesta</div></div>
+      </div>
+      <div class="ac">
+        <div class="ct">Actividad reciente</div>
+        <div class="ai"><div class="ad" style="background:#1FA97A;"></div><div class="at"><div class="atn">Nuevo lead — María García</div><div class="atm">Hace 2 minutos</div></div></div>
+        <div class="ai"><div class="ad" style="background:#3b82f6;"></div><div class="at"><div class="atn">Factura cobrada 2.400€</div><div class="atm">Hace 8 minutos</div></div></div>
+        <div class="ai"><div class="ad" style="background:#8b5cf6;"></div><div class="at"><div class="atn">Email automático enviado</div><div class="atm">Hace 15 minutos</div></div></div>
+        <div class="ai"><div class="ad" style="background:#f59e0b;"></div><div class="at"><div class="atn">Tarea — Propuesta Vega</div><div class="atm">Hace 1 hora</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="fb" id="fb">
+  <div class="fb-logo"><div class="fb-dot"></div><div class="fb-name">Client<span>Labs</span></div></div>
+  <div class="fb-tag">Tu negocio. Bajo control.</div>
+</div>
+<button class="rep" id="rep" onclick="go()">↺ Repetir</button>
+</div>
+<script>
+const ph=document.getElementById('ph'),soff=document.getElementById('soff'),sfla=document.getElementById('sfla'),ls=document.getElementById('ls'),di=document.getElementById('di'),diT=document.getElementById('diT'),n1=document.getElementById('n1'),n2=document.getElementById('n2'),n3=document.getElementById('n3'),dash=document.getElementById('dash'),fb=document.getElementById('fb'),rep=document.getElementById('rep'),rip=document.getElementById('rip'),scr=document.getElementById('scr'),shell=ph.querySelector('.i-shell'),inner=ph.querySelector('.i-inner');
+function lerp(a,b,t){return a+(b-a)*Math.min(1,Math.max(0,t));}
+function inv(t,a,b){return Math.min(1,Math.max(0,(t-a)/(b-a)));}
+function eOut(t){return 1-Math.pow(1-Math.min(1,Math.max(0,t)),3);}
+function eIO(t){t=Math.min(1,Math.max(0,t));return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;}
+function eSpr(t){t=Math.min(1,Math.max(0,t));const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2);}
+let af,st;
+function reset(){
+  cancelAnimationFrame(af);
+  ph.style.cssText='position:absolute;width:260px;height:520px;z-index:10;opacity:0;transform:translateY(50px) scale(.85);';
+  shell.style.borderRadius='50px';inner.style.borderRadius='45px';scr.style.borderRadius='45px';
+  soff.style.opacity='1';sfla.style.opacity='0';ls.style.opacity='0';
+  di.classList.remove('on');n1.classList.remove('in');n2.classList.remove('in');n3.classList.remove('in');
+  dash.style.cssText='position:absolute;width:1060px;height:640px;border-radius:14px;overflow:hidden;opacity:0;z-index:8;transform:scale(.3);background:#f0f2f5;box-shadow:0 40px 120px rgba(0,0,0,.5),0 0 80px rgba(31,169,122,.08);display:flex;';
+  fb.style.opacity='0';rep.classList.remove('show');
+  rip.style.cssText='position:absolute;width:260px;height:520px;border-radius:50px;border:1.5px solid rgba(31,169,122,.6);opacity:0;z-index:9;pointer-events:none;transform:scale(1);';
+}
+function tick(now){
+  const t=(now-st)/1000;
+  if(t<=.9){const p=eSpr(inv(t,0,.9));ph.style.opacity=lerp(0,1,eOut(inv(t,0,.5)));ph.style.transform=`translateY(${lerp(50,0,p)}px) scale(${lerp(.85,1,p)})`;}
+  if(t>=.9&&t<=1.05)sfla.style.opacity=lerp(0,.35,inv(t,.9,1.05));
+  else if(t>=1.05&&t<=1.25)sfla.style.opacity=lerp(.35,0,inv(t,1.05,1.25));
+  else sfla.style.opacity='0';
+  if(t>=.9)soff.style.opacity=lerp(1,0,eIO(inv(t,.9,1.7)));
+  if(t>=1.3)ls.style.opacity=lerp(0,1,eOut(inv(t,1.3,1.9)));
+  if(t>=1.8)di.classList.add('on');
+  if(t>=2.3){n1.classList.add('in');diT.textContent='Nuevo lead';}
+  if(t>=3.0){n2.classList.add('in');diT.textContent='Factura cobrada';}
+  if(t>=3.7){n3.classList.add('in');diT.textContent='Automatización';}
+  if(t>=4.5&&t<=7.8){
+    const mp=eIO(inv(t,4.5,7.4));
+    if(t>=4.5&&t<=5.6){const rp=eOut(inv(t,4.5,5.6));rip.style.opacity=lerp(.7,0,rp);rip.style.transform=`scale(${lerp(1,4.5,rp)})`;}
+    const iW=lerp(260,1060,mp),iH=lerp(520,640,mp),iBR=lerp(50,14,mp),iOp=t>6.5?lerp(1,0,eIO(inv(t,6.5,7.5))):1;
+    ph.style.width=iW+'px';ph.style.height=iH+'px';ph.style.opacity=iOp;
+    shell.style.borderRadius=iBR+'px';inner.style.borderRadius=(iBR-5)+'px';scr.style.borderRadius=(iBR-9)+'px';
+    ls.style.opacity=lerp(1,0,eIO(inv(t,4.7,6.0)));
+    dash.style.opacity=eOut(inv(t,5.8,7.2));
+    dash.style.transform=`scale(${lerp(.32,1,eIO(inv(t,4.8,7.3)))})`;
+  }
+  if(t>=7.5){ph.style.opacity='0';dash.style.opacity='1';dash.style.transform='scale(1)';}
+  if(t>=8.2)fb.style.opacity=eOut(inv(t,8.2,9.2));
+  if(t>=9.5)rep.classList.add('show');
+  if(t<10.5)af=requestAnimationFrame(tick);
+}
+function go(){reset();setTimeout(()=>{st=performance.now();af=requestAnimationFrame(tick);},80);}
+window.addEventListener('message',e=>{if(e.data==='start')go();});
+window.addEventListener('load',()=>setTimeout(go,300));
+</script>
+</body>
+</html>

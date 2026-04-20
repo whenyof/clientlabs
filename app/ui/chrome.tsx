@@ -33,6 +33,7 @@ export function LogoMark({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
 export function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+    const [scrolled, setScrolled] = useState(false)
     const userMenuRef = useRef<HTMLDivElement | null>(null)
     const { data: session } = useSession()
 
@@ -45,6 +46,19 @@ export function Navbar() {
         { label: "Novedades", href: "/changelog" },
         { label: "Contacto", href: "/contacto" },
     ]
+
+    /* shrink on scroll — escucha body (scroll container) y window */
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(document.body.scrollTop > 20 || window.scrollY > 20)
+        }
+        document.body.addEventListener("scroll", handleScroll, { passive: true })
+        window.addEventListener("scroll", handleScroll, { passive: true })
+        return () => {
+            document.body.removeEventListener("scroll", handleScroll)
+            window.removeEventListener("scroll", handleScroll)
+        }
+    }, [])
 
     /* cerrar mobile al scroll */
     useEffect(() => {
@@ -67,14 +81,16 @@ export function Navbar() {
     }, [isUserMenuOpen])
 
     return (
-        <nav className="
- fixed top-0 inset-x-0 z-50
- bg-[#FFFFFF]
- backdrop-blur-md
- border-b border-[#E2E8ED]
- shadow-sm
- ">
-            <div className="w-full px-6 py-4">
+        <nav className={[
+            "fixed z-50 transition-all duration-300 ease-in-out",
+            scrolled
+                ? "top-3 inset-x-4 rounded-2xl bg-white/95 backdrop-blur-md border border-[#E2E8ED]/60 shadow-xl shadow-black/5"
+                : "top-0 inset-x-0 rounded-none bg-[#FFFFFF] border-b border-[#E2E8ED] shadow-sm",
+        ].join(" ")}>
+            <div className={[
+                "w-full transition-all duration-300",
+                scrolled ? "px-5 py-2.5" : "px-6 py-4",
+            ].join(" ")}>
 
                 {/* GRID REAL */}
                 <div className="grid grid-cols-[1fr_auto_1fr] items-center">
@@ -82,7 +98,10 @@ export function Navbar() {
                     {/* IZQUIERDA */}
                     <Link
                         href="/"
-                        className="flex items-center gap-2.5 justify-self-start"
+                        className={[
+                            "flex items-center gap-2.5 justify-self-start transition-all duration-300",
+                            scrolled ? "scale-95" : "scale-100",
+                        ].join(" ")}
                     >
                         <LogoMark />
                         <span className="text-[17px] font-semibold leading-none flex items-center text-[#0F1F2A]">
@@ -104,7 +123,10 @@ export function Navbar() {
                     </div>
 
                     {/* DERECHA */}
-                    <div className="hidden md:flex justify-end items-center gap-4 justify-self-end">
+                    <div className={[
+                        "hidden md:flex justify-end items-center gap-4 justify-self-end transition-all duration-300",
+                        scrolled ? "scale-95" : "scale-100",
+                    ].join(" ")}>
                         {!session && (
                             <>
                                 <Link

@@ -5,12 +5,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
+import { X } from "lucide-react"
 import { toast } from "sonner"
 import { createProviderOrder } from "../actions"
 import { useRouter } from "next/navigation"
+import { ModalDocumentosTransaccion } from "@/components/finance/ModalDocumentosTransaccion"
 
 type RegisterOrderDialogProps = {
     providerId: string
@@ -22,6 +23,8 @@ type RegisterOrderDialogProps = {
 
 export function RegisterOrderDialog({ providerId, providerName, open, onOpenChange, onSuccess }: RegisterOrderDialogProps) {
     const [loading, setLoading] = useState(false)
+    const [ordenCreada, setOrdenCreada] = useState<{ id: string; amount: number } | null>(null)
+    const [mostrarDocumentos, setMostrarDocumentos] = useState(false)
     const router = useRouter()
 
     const [formData, setFormData] = useState({
@@ -55,8 +58,6 @@ export function RegisterOrderDialog({ providerId, providerName, open, onOpenChan
 
             if (result.success) {
                 toast.success("Pedido registrado correctamente")
-                onOpenChange(false)
-                if (onSuccess) onSuccess()
                 router.refresh()
 
                 // Reset form
@@ -68,6 +69,15 @@ export function RegisterOrderDialog({ providerId, providerName, open, onOpenChan
                     status: "PENDING",
                     createPayment: true
                 })
+
+                // Mostrar modal de documentos
+                if (result.order?.id) {
+                    setOrdenCreada({ id: result.order.id, amount: parseFloat(formData.amount) || 0 })
+                    setMostrarDocumentos(true)
+                } else {
+                    onOpenChange(false)
+                    if (onSuccess) onSuccess()
+                }
             } else {
                 toast.error(result.error || "Error al registrar pedido")
             }
@@ -76,6 +86,42 @@ export function RegisterOrderDialog({ providerId, providerName, open, onOpenChan
         } finally {
             setLoading(false)
         }
+    }
+
+    const cerrarDocumentos = () => {
+        setMostrarDocumentos(false)
+        setOrdenCreada(null)
+        onOpenChange(false)
+        if (onSuccess) onSuccess()
+    }
+
+    if (mostrarDocumentos && ordenCreada) {
+        return (
+            <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+                <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+                <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[85vh]">
+                    <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 flex-shrink-0">
+                        <div>
+                            <h2 className="text-[16px] font-bold text-slate-900">Documentos de la compra</h2>
+                            <p className="text-[12px] text-slate-400 mt-0.5">
+                                Importa la factura y documentos del proveedor
+                            </p>
+                        </div>
+                        <button onClick={cerrarDocumentos} className="p-2 rounded-xl hover:bg-slate-100">
+                            <X className="h-5 w-5 text-slate-400" />
+                        </button>
+                    </div>
+                    <ModalDocumentosTransaccion
+                        tipo="compra"
+                        transaccionId={ordenCreada.id}
+                        proveedorNombre={providerName}
+                        importeTotal={ordenCreada.amount}
+                        onCompletado={cerrarDocumentos}
+                        onOmitir={cerrarDocumentos}
+                    />
+                </div>
+            </div>
+        )
     }
 
     return (

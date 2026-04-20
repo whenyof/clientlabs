@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 import { invalidateCachedData } from '@/lib/redis-cache'
 import { updateLeadScore } from '@/lib/scoring/updateLeadScore'
+import { runAutomation } from '@/lib/automations/engine'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 30
@@ -278,6 +279,26 @@ export async function POST(request: NextRequest) {
     })
 
     await invalidateCachedData(`leads-kpis-${session.user.id}`)
+
+    // Dispara automatización LEAD_NUEVO sin bloquear la respuesta
+    runAutomation(session.user.id, "LEAD_NUEVO", {
+      "lead.nombre": lead.name ?? "Sin nombre",
+      "lead.email": lead.email ?? "—",
+      "lead.telefono": lead.phone ?? "—",
+      "lead.fuente": lead.source ?? "Web",
+      "lead.fecha": new Date().toLocaleDateString("es-ES"),
+      leadId: lead.id,
+    }).catch(() => {})
+
+    // Confirmación automática al lead si tiene email
+    if (lead.email) {
+      runAutomation(session.user.id, "CONFIRMACION_LEAD", {
+        "lead.nombre": lead.name ?? "Sin nombre",
+        "lead.email": lead.email,
+        leadId: lead.id,
+      }).catch(() => {})
+    }
+
     return withCors(NextResponse.json(updatedLead, { status: 201 }), origin)
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {

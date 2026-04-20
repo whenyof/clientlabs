@@ -8,6 +8,7 @@ import { ScrollToPlugin } from "gsap/ScrollToPlugin"
 import Link from "next/link"
 import { Navbar } from "@/app/ui/chrome"
 import { Calendar, Link2, Zap, Bot, Sparkles, TrendingUp, Clock, BarChart2, CheckCircle2, Users, CreditCard, Brain, FileText, FileSpreadsheet, Calculator, CheckSquare, Receipt, Puzzle, ArrowRight } from "lucide-react"
+import { ChaosAnimation } from "@/components/landing/ChaosAnimation"
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin, useGSAP)
 
@@ -107,195 +108,72 @@ function SectionDots() {
 ══════════════════════════════════════════ */
 
 function HeroSection() {
-  const heroRef = useRef<HTMLElement>(null)
-  const leadsRef = useRef<HTMLSpanElement>(null)
-  const tasksRef = useRef<HTMLSpanElement>(null)
-  const autoRef = useRef<HTMLSpanElement>(null)
-  const aiRef = useRef<HTMLSpanElement>(null)
-
-  useGSAP(() => {
-    const tl = gsap.timeline({ defaults: { ease: "power3.out" } })
-
-    tl.fromTo(".hero-scanline", { y: 0, opacity: 1 }, {
-      y: "100%", duration: 1.0, ease: "power2.inOut",
-      onComplete: () => { gsap.set(".hero-scanline", { display: "none" }) },
-    }, 0)
-
-    tl.from(".hero-badge", { y: -30, opacity: 0, scale: 0.7, duration: 0.6, ease: "back.out(2.5)" }, 0.15)
-
-    tl.from(".hero-word", {
-      y: -80, opacity: 0, rotation: -3, duration: 0.7,
-      stagger: 0.08, ease: "back.out(1.5)",
-    }, 0.3)
-
-    tl.from(".hero-sub", { y: 25, opacity: 0, duration: 0.55 }, "-=0.25")
-    tl.from(".hero-btn", { x: -40, opacity: 0, duration: 0.45, stagger: 0.1 }, "-=0.3")
-    tl.from(".hero-micro", { opacity: 0, duration: 0.4 }, "-=0.2")
-
-    tl.from(".hero-panel", {
-      y: 60, opacity: 0, rotateX: 12, scale: 0.94,
-      duration: 1.0, ease: "power2.out", transformPerspective: 1200,
-    }, "-=0.9")
-
-    tl.from(".panel-kpi", { y: 18, opacity: 0, duration: 0.4, stagger: 0.07 }, "-=0.5")
-
-    const counts = { leads: 0, tasks: 0, auto: 0, ai: 0 }
-    tl.to(counts, {
-      leads: 247, tasks: 89, auto: 380, ai: 1240,
-      duration: 2.0, ease: "power4.out",
-      onUpdate: () => {
-        if (leadsRef.current) leadsRef.current.textContent = Math.round(counts.leads).toString()
-        if (tasksRef.current) tasksRef.current.textContent = Math.round(counts.tasks).toString()
-        if (autoRef.current) autoRef.current.textContent = Math.round(counts.auto).toString()
-        if (aiRef.current) aiRef.current.textContent = Math.round(counts.ai).toString()
-      },
-    }, "-=0.7")
-
-    tl.from(".panel-row", { x: -25, opacity: 0, duration: 0.35, stagger: 0.1 }, "-=1.4")
-    tl.from(".hero-pill", { opacity: 0, y: 12, duration: 0.3, stagger: 0.05 }, "-=1.0")
-
-    gsap.to(".hero-accent", {
-      skewX: 5, duration: 0.04, repeat: 5, yoyo: true, ease: "none", delay: 1.6,
-      onComplete: () => { gsap.set(".hero-accent", { skewX: 0 }) },
-    })
-    gsap.to(".hero-accent", {
-      textShadow: "0 0 40px rgba(31,169,122,0.6), 0 0 80px rgba(31,169,122,0.2)",
-      duration: 1.8, repeat: -1, yoyo: true, ease: "sine.inOut", delay: 2.2,
-    })
-    gsap.to(".hero-orb-1", { y: -20, duration: 3.5, repeat: -1, yoyo: true, ease: "sine.inOut" })
-    gsap.to(".hero-orb-2", { y: 15, duration: 4.2, repeat: -1, yoyo: true, ease: "sine.inOut", delay: 1 })
-
-  }, { scope: heroRef })
-
   return (
-    <section id="hero" ref={heroRef} className="bg-[#0B1F2A] min-h-screen flex items-center relative overflow-hidden"
+    <section
+      id="hero"
       style={{
+        minHeight:       "100vh",
+        background:      "#0B1F2A",
         backgroundImage: `linear-gradient(rgba(31,169,122,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(31,169,122,0.04) 1px, transparent 1px)`,
-        backgroundSize: "60px 60px",
-      }}>
+        backgroundSize:  "60px 60px",
+        display:         "flex",
+        alignItems:      "center",
+        position:        "relative",
+        zIndex:          1,
+      }}
+    >
+      <div className="max-w-[1180px] mx-auto px-8 w-full grid grid-cols-2 gap-12 items-center py-24">
 
-      <div className="hero-scanline absolute inset-x-0 top-0 h-[2px] z-20 pointer-events-none"
-        style={{ background: "linear-gradient(90deg, transparent 0%, #1FA97A 30%, #1FA97A 70%, transparent 100%)", filter: "blur(1px)" }} />
+        {/* Left — copy */}
+        <div>
+          <div className="inline-flex items-center gap-2 bg-[#1FA97A]/10 border border-[#1FA97A]/20 text-[#1FA97A] text-[11px] px-3 py-1.5 rounded-full mb-5">
+            <PulseDot />
+            Sistema operativo para negocios
+          </div>
 
-      <div className="hero-orb-1 absolute top-1/4 -left-20 w-[500px] h-[500px] rounded-full pointer-events-none"
-        style={{ background: "radial-gradient(circle, rgba(31,169,122,0.07) 0%, transparent 65%)" }} />
-      <div className="hero-orb-2 absolute bottom-1/4 -right-20 w-[400px] h-[400px] rounded-full pointer-events-none"
-        style={{ background: "radial-gradient(circle, rgba(59,130,246,0.05) 0%, transparent 65%)" }} />
+          <h1 className="text-[52px] md:text-[60px] font-bold text-[#E6F1F5] leading-[1.06] tracking-[-0.03em] mb-5">
+            Todo tu negocio.<br />
+            Un solo{" "}
+            <span className="text-[#1FA97A]">sistema.</span>
+          </h1>
 
-      <div className="w-full max-w-[1180px] mx-auto px-8 pt-20 pb-12 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-[55fr_45fr] gap-12 items-center">
+          <p className="text-[16px] font-light text-[#8FA6B2] max-w-[440px] leading-[1.65] mb-6">
+            CRM, tareas, facturación, automatizaciones, IA y recomendaciones inteligentes — conectados, en tiempo real.
+          </p>
 
-          {/* Left */}
-          <div>
-            <div className="hero-badge inline-flex items-center gap-2 bg-[#1FA97A]/10 border border-[#1FA97A]/20 text-[#1FA97A] text-[11px] px-3 py-1.5 rounded-full mb-5">
-              <PulseDot />
-              Sistema operativo para negocios
-            </div>
+          <div className="flex flex-wrap gap-3 mb-4">
+            <Link href="/auth" className="inline-flex items-center justify-center bg-[#1FA97A] hover:bg-[#178f68] text-white px-7 py-3 rounded-md text-[14px] font-medium transition-colors shadow-lg shadow-[#1FA97A]/20">
+              Empezar gratis
+            </Link>
+            <Link href="/demo" className="inline-flex items-center justify-center border border-white/15 hover:border-white/30 text-[#8FA6B2] hover:text-white px-7 py-3 rounded-md text-[14px] transition-colors">
+              Ver demo →
+            </Link>
+          </div>
 
-            <h1 className="text-[52px] md:text-[60px] font-bold text-[#E6F1F5] leading-[1.06] tracking-[-0.03em]">
-              <span className="hero-word inline-block">Todo</span>{" "}
-              <span className="hero-word inline-block">tu</span>{" "}
-              <span className="hero-word inline-block">negocio.</span>
-              <br />
-              <span className="hero-word inline-block">Un</span>{" "}
-              <span className="hero-word inline-block">solo</span>{" "}
-              <span className="hero-word hero-accent inline-block text-[#1FA97A]">sistema.</span>
-            </h1>
+          <p className="text-[11px] text-[#8FA6B2]/50 mb-6">14 días gratis · Sin tarjeta · Sin permanencia</p>
 
-            <p className="hero-sub text-[16px] font-light text-[#8FA6B2] max-w-[440px] mt-4 leading-[1.65]">
-              CRM, tareas, facturación, automatizaciones, IA y recomendaciones inteligentes — conectados, en tiempo real.
-            </p>
-
-            <div className="flex flex-wrap gap-3 mt-6">
-              <Link href="/auth" className="hero-btn inline-flex items-center justify-center bg-[#1FA97A] hover:bg-[#178f68] text-white px-7 py-3 rounded-md text-[14px] font-medium transition-colors">
-                Empezar gratis
-              </Link>
-              <Link href="/demo" className="hero-btn inline-flex items-center justify-center border border-white/15 hover:border-white/30 text-[#8FA6B2] hover:text-white px-7 py-3 rounded-md text-[14px] transition-colors">
-                Ver demo →
-              </Link>
-            </div>
-
-            <p className="hero-micro text-[11px] text-[#8FA6B2]/50 mt-3">14 días gratis · Sin tarjeta · Sin permanencia</p>
-
-            {/* Module pills */}
-            <div className="flex flex-wrap gap-2 mt-6">
-              {ALL_MODULES.map((m) => (
-                <span key={m.id} className="hero-pill inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-[#8FA6B2]">
-                  <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: m.color }} />
-                  {m.name}
-                </span>
+          {/* Social proof */}
+          <div className="flex items-center gap-3">
+            <div className="flex -space-x-2">
+              {["MG", "RM", "EV", "HM", "CP"].map((av, i) => (
+                <div key={i} className="w-8 h-8 rounded-full border-2 border-[#0B1F2A] flex items-center justify-center text-[9px] font-bold text-white"
+                  style={{ background: ["#1FA97A", "#3b82f6", "#f59e0b", "#8b5cf6", "#ef4444"][i] }}>
+                  {av}
+                </div>
               ))}
             </div>
-          </div>
-
-          {/* Right — Dashboard */}
-          <div className="hero-panel w-full bg-[#061A22] rounded-xl overflow-hidden border border-white/[0.07]"
-            style={{ boxShadow: "0 0 0 1px rgba(255,255,255,0.04), 0 24px 60px rgba(0,0,0,0.6), 0 0 100px rgba(31,169,122,0.06)", transformStyle: "preserve-3d" }}>
-
-            <div className="h-9 bg-[#040E14] border-b border-white/[0.06] flex items-center px-3 justify-between">
-              <div className="flex items-center gap-1.5">
-                <span className="w-[7px] h-[7px] rounded-full bg-[#FF5F57]" />
-                <span className="w-[7px] h-[7px] rounded-full bg-[#FEBC2E]" />
-                <span className="w-[7px] h-[7px] rounded-full bg-[#28C840]" />
-              </div>
-              <span className="text-[11px] text-[#8FA6B2]/50">ClientLabs — Dashboard</span>
-              <div className="flex items-center gap-1 text-[10px] text-[#1FA97A]">
-                <PulseDot /><span>En vivo</span>
-              </div>
-            </div>
-
-            <div className="p-4">
-              <div className="grid grid-cols-4 gap-2 mb-4">
-                {[
-                  { label: "LEADS", ref: leadsRef, init: "0", color: "#1FA97A" },
-                  { label: "TAREAS", ref: tasksRef, init: "0", color: "#3B82F6" },
-                  { label: "AUTO/MES", ref: autoRef, init: "0", color: "#8B5CF6" },
-                  { label: "IA CONSULT.", ref: aiRef, init: "0", color: "#EC4899" },
-                ].map((stat) => (
-                  <div key={stat.label} className="panel-kpi bg-[#0B1C24] rounded-lg p-3 border border-white/[0.05]">
-                    <p className="text-[9px] uppercase tracking-[0.1em] mb-1" style={{ color: stat.color + "99" }}>{stat.label}</p>
-                    <p className="text-[18px] font-semibold text-white" style={{ fontVariantNumeric: "tabular-nums" }}>
-                      <span ref={stat.ref}>{stat.init}</span>
-                    </p>
-                  </div>
-                ))}
-              </div>
-
-              {/* Mini task board */}
-              <div className="border border-white/[0.05] rounded-lg overflow-hidden mb-3">
-                <div className="h-7 bg-[#040E14] flex items-center px-3 gap-4 border-b border-white/[0.04]">
-                  <span className="text-[9px] uppercase tracking-[0.1em] text-[#8FA6B2]/40 flex-1">Tarea</span>
-                  <span className="text-[9px] uppercase tracking-[0.1em] text-[#8FA6B2]/40 w-16 text-center">Módulo</span>
-                  <span className="text-[9px] uppercase tracking-[0.1em] text-[#8FA6B2]/40 w-14 text-right">Estado</span>
-                </div>
-                {[
-                  { task: "Propuesta NextSite", mod: "CRM", status: "En proceso", sc: "#3B82F6" },
-                  { task: "Automatizar emails", mod: "Auto", status: "Activo", sc: "#8B5CF6" },
-                  { task: "Revisar alertas IA", mod: "IA", status: "Pendiente", sc: "#EC4899" },
-                ].map((row) => (
-                  <div key={row.task} className="panel-row h-10 flex items-center px-3 gap-2 border-t border-white/[0.04] hover:bg-white/[0.02]">
-                    <span className="text-[12px] text-white/70 flex-1 truncate">{row.task}</span>
-                    <span className="text-[9px] px-2 py-0.5 rounded w-16 text-center font-medium" style={{ background: sc(row.sc), color: row.sc }}>{row.mod}</span>
-                    <span className="text-[10px] text-[#8FA6B2] w-14 text-right">{row.status}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* AI insight bar */}
-              <div className="rounded-lg border border-[#EC4899]/20 bg-[#EC4899]/5 px-3 py-2 flex items-center gap-2">
-                <span className="text-[10px] text-[#EC4899] font-medium uppercase tracking-wider">IA</span>
-                <p className="text-[11px] text-[#8FA6B2] flex-1 truncate">NextSite: riesgo de churn en 7 días — recomendado contacto hoy</p>
-                <span className="text-[9px] text-[#EC4899] bg-[#EC4899]/10 px-2 py-0.5 rounded-full">Crítica</span>
-              </div>
-            </div>
+            <p className="text-[13px] text-[#8FA6B2]/60">
+              <span className="text-white font-semibold">+200 negocios</span>{" "}en lista de espera
+            </p>
           </div>
         </div>
+
+        {/* Right — empty; ChaosAnimation flota aquí */}
+        <div style={{ height: "520px" }} />
       </div>
     </section>
   )
 }
-
-function sc(color: string) { return color + "20" }
 
 /* ══════════════════════════════════════════
    PROBLEMA
@@ -320,38 +198,45 @@ function ProblemaSection() {
   }, { scope: ref })
 
   return (
-    <section id="problema" ref={ref} className="bg-white min-h-screen flex items-center relative overflow-x-hidden">
+    <section id="problema" ref={ref} className="bg-white min-h-screen flex items-center relative overflow-x-hidden" style={{ zIndex: 1 }}>
       <span className="prob-deco pointer-events-none absolute select-none hidden lg:block text-[220px] font-black leading-none"
         style={{ color: "#F3F4F6", right: 0, top: "50%", transform: "translateY(-50%) translateX(30%)" }}>01</span>
 
-      <div className="max-w-[1100px] mx-auto px-8 w-full py-24 relative z-10">
-        <p className="prob-header text-[11px] uppercase tracking-[0.15em] text-[#1FA97A] mb-4">El problema</p>
-        <h2 className="prob-header text-[46px] md:text-[52px] font-bold text-[#0B1F2A] leading-[1.1] tracking-[-0.025em] mb-3">
-          Demasiadas herramientas.<br />Ningún sistema.
-        </h2>
-        <p className="prob-header text-[15px] text-[#8FA6B2] max-w-md leading-relaxed mb-14">
-          El negocio promedio usa 6+ herramientas que no se comunican. Caos, tiempo perdido y dinero invisible.
-        </p>
+      <div className="max-w-[1180px] mx-auto px-8 w-full py-24 relative z-10 grid grid-cols-2 gap-16 items-center">
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {PAIN_POINTS.map((item) => (
-            <div key={item.num} className="pain-item rounded-xl border border-[#F3F4F6] bg-[#FAFAFA] p-6 hover:border-[#E5E7EB] hover:bg-white transition-colors">
-              <span className="font-mono text-[11px] text-[#1FA97A]/50 block mb-3">{item.num}</span>
-              <h3 className="text-[16px] font-semibold text-[#0B1F2A] mb-2">{item.title}</h3>
-              <p className="text-[13px] text-[#9CA3AF] leading-relaxed">{item.desc}</p>
-            </div>
-          ))}
-        </div>
+        {/* Left — vacío; el iPhone llega aquí desde la derecha */}
+        <div style={{ height: "520px" }} />
 
-        <div className="mt-12 rounded-2xl border border-[#1FA97A]/20 bg-[#F0FDF8] p-6 flex flex-col md:flex-row items-start md:items-center gap-4">
-          <CheckCircle2 className="w-7 h-7 text-[#1FA97A] flex-shrink-0" />
-          <div>
-            <p className="text-[15px] font-semibold text-[#0B1F2A]">ClientLabs resuelve los 6 a la vez</p>
-            <p className="text-[13px] text-[#5F7280] mt-0.5">Un solo sistema que conecta todo tu flujo operativo sin código, sin integraciones manuales.</p>
+        {/* Right — contenido del problema */}
+        <div>
+          <p className="prob-header text-[11px] uppercase tracking-[0.15em] text-[#1FA97A] mb-4">El problema</p>
+          <h2 className="prob-header text-[46px] md:text-[52px] font-bold text-[#0B1F2A] leading-[1.1] tracking-[-0.025em] mb-3">
+            Demasiadas herramientas.<br />Ningún sistema.
+          </h2>
+          <p className="prob-header text-[15px] text-[#8FA6B2] max-w-md leading-relaxed mb-10">
+            El negocio promedio usa 6+ herramientas que no se comunican. Caos, tiempo perdido y dinero invisible.
+          </p>
+
+          <div className="grid grid-cols-1 gap-4 mb-8">
+            {PAIN_POINTS.map((item) => (
+              <div key={item.num} className="pain-item rounded-xl border border-[#F3F4F6] bg-[#FAFAFA] p-5 hover:border-[#E5E7EB] hover:bg-white transition-colors">
+                <span className="font-mono text-[11px] text-[#1FA97A]/50 block mb-2">{item.num}</span>
+                <h3 className="text-[15px] font-semibold text-[#0B1F2A] mb-1">{item.title}</h3>
+                <p className="text-[13px] text-[#9CA3AF] leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
           </div>
-          <Link href="/auth" className="ml-auto flex-shrink-0 bg-[#1FA97A] hover:bg-[#178f68] text-white px-5 py-2.5 rounded-md text-[13px] font-medium transition-colors">
-            Probar gratis →
-          </Link>
+
+          <div className="rounded-2xl border border-[#1FA97A]/20 bg-[#F0FDF8] p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <CheckCircle2 className="w-6 h-6 text-[#1FA97A] flex-shrink-0" />
+            <div>
+              <p className="text-[14px] font-semibold text-[#0B1F2A]">ClientLabs resuelve los 6 a la vez</p>
+              <p className="text-[12px] text-[#5F7280] mt-0.5">Un solo sistema que conecta todo tu flujo operativo sin código, sin integraciones manuales.</p>
+            </div>
+            <Link href="/auth" className="flex-shrink-0 bg-[#1FA97A] hover:bg-[#178f68] text-white px-4 py-2 rounded-md text-[13px] font-medium transition-colors">
+              Probar gratis →
+            </Link>
+          </div>
         </div>
       </div>
     </section>
@@ -488,21 +373,27 @@ function PlataformaSection() {
   const detail = DETAIL[mod.id]
 
   return (
-    <section id="plataforma" ref={ref} className="bg-[#F8FAFB] min-h-screen flex items-center relative overflow-x-hidden">
+    <section id="plataforma" ref={ref} className="bg-[#F8FAFB] min-h-screen flex items-center relative overflow-x-hidden" style={{ zIndex: 1 }}>
       <span className="plat-deco pointer-events-none absolute select-none hidden lg:block text-[220px] font-black leading-none"
         style={{ color: "#ECEDEF", left: 0, top: "50%", transform: "translateY(-50%) translateX(-30%)" }}>02</span>
 
       <div className="max-w-[1180px] mx-auto px-8 w-full py-24 relative z-10">
-        <p className="plat-header text-[11px] uppercase tracking-[0.15em] text-[#1FA97A] mb-4">La plataforma</p>
-        <h2 className="plat-header text-[46px] md:text-[52px] font-bold text-[#0B1F2A] leading-[1.1] tracking-[-0.025em] mb-3">
-          Seis módulos.<br />Un solo sistema.
-        </h2>
-        <p className="plat-header text-[15px] text-[#8FA6B2] max-w-md leading-relaxed mb-12">
-          Cada módulo se conecta con los demás. Sin datos duplicados. Sin fricciones. Sin silos.
-        </p>
+        {/* Header centrado */}
+        <div className="text-center mb-12">
+          <p className="plat-header text-[11px] uppercase tracking-[0.15em] text-[#1FA97A] mb-4">La plataforma</p>
+          <h2 className="plat-header text-[46px] md:text-[52px] font-bold text-[#0B1F2A] leading-[1.1] tracking-[-0.025em] mb-3">
+            Seis módulos.<br />Un solo sistema.
+          </h2>
+          <p className="plat-header text-[15px] text-[#8FA6B2] max-w-lg mx-auto leading-relaxed">
+            Cada módulo se conecta con los demás. Sin datos duplicados. Sin fricciones. Sin silos.
+          </p>
+        </div>
+
+        {/* El dashboard morpheado aparece aquí desde AnimacionFlotante */}
+        <div style={{ height: "100vh" }} />
 
         {/* Module pills */}
-        <div className="mod-pills-row flex flex-wrap gap-2 mb-10">
+        <div className="mod-pills-row flex flex-wrap justify-center gap-2 mt-12 mb-10">
           {ALL_MODULES.map((m, i) => (
             <button
               key={m.id}
@@ -1373,11 +1264,20 @@ function CtaSection() {
 
 export function FullLandingPage() {
   return (
-    <main className="overflow-x-hidden">
+    <main>
       <Navbar />
-      <HeroSection />
-      <ProblemaSection />
-      <PlataformaSection />
+
+      {/* Wrapper de animación — engloba las 3 primeras secciones */}
+      <div id="landing-anim-wrapper" style={{ position: "relative" }}>
+        {/* ChaosAnimation: sticky PRIMER hijo con marginBottom:-100vh
+            Las secciones se solapan desde scroll=0.
+            ScrollTrigger trigger=wrapper cubre las 3 secciones. */}
+        <ChaosAnimation />
+        <HeroSection />
+        <ProblemaSection />
+        <PlataformaSection />
+      </div>
+
       <TareasSection />
       <IASection />
       <AutomatizacionesSection />

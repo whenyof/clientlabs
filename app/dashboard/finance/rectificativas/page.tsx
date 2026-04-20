@@ -1,8 +1,10 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { FileMinus, FileText, Search } from "lucide-react"
+import { FileMinus, FileText, Search, Upload, X } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { BannerLegal } from "@/components/finance/BannerLegal"
+import { ImportarDocumento } from "@/components/finance/ImportarDocumento"
 
 type RectStatus = "DRAFT" | "SENT" | "VIEWED" | "PARTIAL" | "PAID" | "OVERDUE" | "CANCELED"
 
@@ -59,6 +61,7 @@ export default function RectificativasPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
   const [activeFilter, setActiveFilter] = useState("")
+  const [modalImportar, setModalImportar] = useState(false)
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -84,6 +87,8 @@ export default function RectificativasPage() {
 
   return (
     <div className="w-full space-y-5">
+      <BannerLegal />
+
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
@@ -94,9 +99,18 @@ export default function RectificativasPage() {
             </span>
           )}
         </div>
-        <p className="text-[12px] text-slate-500">
-          Facturas correctoras emitidas para anular o modificar facturas anteriores
-        </p>
+        <div className="flex items-center gap-3">
+          <p className="text-[12px] text-slate-500">
+            Facturas correctoras emitidas para anular o modificar facturas anteriores
+          </p>
+          <button
+            onClick={() => setModalImportar(true)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#1FA97A] text-white rounded-xl text-[13px] font-semibold hover:bg-[#1a9068] transition-colors shrink-0"
+          >
+            <Upload className="h-4 w-4" />
+            Importar documento
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -199,6 +213,31 @@ export default function RectificativasPage() {
           </p>
         </div>
       </div>
+
+      {modalImportar && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+            onClick={() => setModalImportar(false)}
+          />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+              <div>
+                <h2 className="text-[16px] font-bold text-slate-900">Importar documento</h2>
+                <p className="text-[12px] text-slate-400 mt-0.5">
+                  Sube el PDF de tu rectificativa u otro documento
+                </p>
+              </div>
+              <button onClick={() => setModalImportar(false)} className="p-2 rounded-xl hover:bg-slate-100">
+                <X className="h-5 w-5 text-slate-400" />
+              </button>
+            </div>
+            <div className="p-6">
+              <ImportarDocumento tipo="rectificativa" onImportado={() => setModalImportar(false)} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

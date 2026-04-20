@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef } from "react"
+import { useRouter } from "next/navigation"
 import { Pencil, Loader2, Mail, Phone, Building2, Globe, Compass, Calendar } from "lucide-react"
 import { toast } from "sonner"
 import type { Client360Base } from "../types"
@@ -23,6 +24,7 @@ interface ClientProfileCardProps {
 }
 
 export function ClientProfileCard({ client }: ClientProfileCardProps) {
+  const router = useRouter()
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving,  setIsSaving]  = useState(false)
   const isSubmitting = useRef(false)
@@ -56,7 +58,7 @@ export function ClientProfileCard({ client }: ClientProfileCardProps) {
         }),
       })
       const data = await res.json()
-      if (res.ok) { toast.success("Guardado"); setIsEditing(false) }
+      if (res.ok) { toast.success("Guardado"); setIsEditing(false); router.refresh() }
       else toast.error(data.error || "Error al guardar")
     } catch {
       toast.error("Error de conexión")
@@ -139,8 +141,8 @@ export function ClientProfileCard({ client }: ClientProfileCardProps) {
             />
           ) : (
             <p className="text-[13px] leading-relaxed whitespace-pre-wrap">
-              {client.additionalInfo
-                ? <span className="text-[var(--text-primary)]">{client.additionalInfo}</span>
+              {form.additionalInfo
+                ? <span className="text-[var(--text-primary)]">{form.additionalInfo}</span>
                 : <span className="text-[var(--text-secondary)]">—</span>
               }
             </p>

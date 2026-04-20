@@ -3,8 +3,10 @@ import { getBaseUrl } from "@/lib/api/baseUrl"
 
 
 import { useState, useCallback, useEffect, useRef } from "react"
-import { PlusIcon } from "@heroicons/react/24/outline"
+import { Upload, X } from "lucide-react"
 import { Download } from "lucide-react"
+import { BannerLegal } from "@/components/finance/BannerLegal"
+import { ImportarDocumento } from "@/components/finance/ImportarDocumento"
 import { InvoiceKPIs } from "./InvoiceKPIs"
 import { InvoiceFilters, type InvoiceFiltersState } from "./InvoiceFilters"
 import { InvoiceTable } from "./InvoiceTable"
@@ -128,6 +130,7 @@ export function InvoiceView() {
   const [creatingFromSale, setCreatingFromSale] = useState(false)
   const [editBlockedModalOpen, setEditBlockedModalOpen] = useState(false)
   const [forceOpenRectificativaModal, setForceOpenRectificativaModal] = useState(false)
+  const [modalImportar, setModalImportar] = useState(false)
   const skipInitialFetch = useRef(false)
 
   const fetchList = useCallback(async () => {
@@ -414,6 +417,8 @@ export function InvoiceView() {
 
   return (
     <div className="w-full space-y-5">
+      <BannerLegal />
+
       {/* Header bar */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
@@ -426,10 +431,10 @@ export function InvoiceView() {
         </div>
         <button
           type="button"
-          onClick={handleOpenNewInvoice}
-          className="flex items-center gap-2 px-4 py-2 bg-[#1FA97A] text-white rounded-lg text-[12px] font-medium hover:bg-[#178f68] transition-colors shrink-0"
+          onClick={() => setModalImportar(true)}
+          className="flex items-center gap-2 px-4 py-2.5 bg-[#1FA97A] text-white rounded-xl text-[13px] font-semibold hover:bg-[#1a9068] transition-colors shrink-0"
         >
-          <PlusIcon className="w-3.5 h-3.5" /> Nueva factura
+          <Upload className="h-4 w-4" /> Importar documento
         </button>
       </div>
 
@@ -530,6 +535,34 @@ export function InvoiceView() {
         onClose={() => setPreviewId(null)}
         onPaid={() => { setPreviewId(null); refresh() }}
       />
+
+      {modalImportar && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+            onClick={() => setModalImportar(false)}
+          />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+              <div>
+                <h2 className="text-[16px] font-bold text-slate-900">Importar documento</h2>
+                <p className="text-[12px] text-slate-400 mt-0.5">
+                  Sube el PDF de tu factura, presupuesto u otro documento
+                </p>
+              </div>
+              <button
+                onClick={() => setModalImportar(false)}
+                className="p-2 rounded-xl hover:bg-slate-100"
+              >
+                <X className="h-5 w-5 text-slate-400" />
+              </button>
+            </div>
+            <div className="p-6">
+              <ImportarDocumento tipo="factura" onImportado={() => setModalImportar(false)} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

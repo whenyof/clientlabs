@@ -1,8 +1,10 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { FileText, ClipboardList, Truck, Receipt, Trash2, Plus, Search, ChevronRight } from "lucide-react"
+import { FileText, ClipboardList, Truck, Receipt, Trash2, Search, ChevronRight, Upload, X } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { BannerLegal } from "@/components/finance/BannerLegal"
+import { ImportarDocumento } from "@/components/finance/ImportarDocumento"
 
 type POStatus = "DRAFT" | "CONFIRMED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED"
 
@@ -62,6 +64,7 @@ export function PurchaseOrdersView({ clientId, onNavigateToInvoices, onNavigateT
   const [loading, setLoading] = useState(true)
   const [activeFilter, setActiveFilter] = useState("")
   const [search, setSearch] = useState("")
+  const [modalImportar, setModalImportar] = useState(false)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
 
   const fetchOrders = useCallback(async () => {
@@ -119,6 +122,8 @@ export function PurchaseOrdersView({ clientId, onNavigateToInvoices, onNavigateT
 
   return (
     <div className="space-y-4">
+      <BannerLegal />
+
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <h3 className="text-[14px] font-semibold text-slate-900">Hojas de pedido</h3>
@@ -152,6 +157,13 @@ export function PurchaseOrdersView({ clientId, onNavigateToInvoices, onNavigateT
               className="text-[12px] outline-none flex-1 text-slate-700 placeholder-slate-400"
             />
           </div>
+          <button
+            onClick={() => setModalImportar(true)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#1FA97A] text-white rounded-xl text-[13px] font-semibold hover:bg-[#1a9068] transition-colors"
+          >
+            <Upload className="h-4 w-4" />
+            Importar documento
+          </button>
         </div>
       </div>
 
@@ -248,6 +260,31 @@ export function PurchaseOrdersView({ clientId, onNavigateToInvoices, onNavigateT
           </div>
         )}
       </div>
+
+      {modalImportar && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+            onClick={() => setModalImportar(false)}
+          />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+              <div>
+                <h2 className="text-[16px] font-bold text-slate-900">Importar documento</h2>
+                <p className="text-[12px] text-slate-400 mt-0.5">
+                  Sube el PDF de tu hoja de pedido u otro documento
+                </p>
+              </div>
+              <button onClick={() => setModalImportar(false)} className="p-2 rounded-xl hover:bg-slate-100">
+                <X className="h-5 w-5 text-slate-400" />
+              </button>
+            </div>
+            <div className="p-6">
+              <ImportarDocumento tipo="pedido" onImportado={() => setModalImportar(false)} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Script from "next/script"
-import { Geist, Geist_Mono } from "next/font/google"
+import { Geist, Geist_Mono, Inter, Inter_Tight, JetBrains_Mono } from "next/font/google"
 
 import "./globals.css"
 
@@ -10,7 +10,7 @@ import QueryProvider from "@/providers/QueryProvider"
 
 import { ToastProvider } from "@/components/ui/toast"
 import { ThemeProvider } from "@/components/ThemeProvider"
-import { AiFloatingAssistant } from "@/components/AiFloatingAssistant"
+import { ConditionalAiAssistant } from "@/components/ConditionalAiAssistant"
 import { Toaster } from "sonner"
 
 /* ================================
@@ -25,6 +25,25 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+})
+
+// Landing design system fonts
+const interTight = Inter_Tight({
+  variable: "--font-display",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+})
+
+const inter = Inter({
+  variable: "--font-body",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+})
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-mono",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
 })
 
 /* ================================
@@ -113,6 +132,9 @@ export default function RootLayout({
         className={`
           ${geistSans.variable}
           ${geistMono.variable}
+          ${interTight.variable}
+          ${inter.variable}
+          ${jetbrainsMono.variable}
           antialiased
           min-h-screen
           bg-[var(--bg-main)]
@@ -132,7 +154,7 @@ export default function RootLayout({
 
                 {children}
 
-                <AiFloatingAssistant />
+                <ConditionalAiAssistant />
 
                 <Toaster
                   richColors

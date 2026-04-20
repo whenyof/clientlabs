@@ -2,6 +2,8 @@
  * Single source of truth for all landing page copy.
  * All user-visible text is in Spanish.
  * Use `as const` so TypeScript infers literal types for safe access.
+ *
+ * Copy taken verbatim from docs/landing-ref/extracted/components/*.jsx
  */
 
 /* ─── Navbar ─────────────────────────────────────────────────────── */
@@ -9,17 +11,17 @@
 export const navbarContent = {
   brand: "ClientLabs",
   links: [
-    { label: "Producto",     href: "/producto" },
-    { label: "Precios",      href: "/precios" },
-    { label: "Soluciones",   href: "/soluciones" },
-    { label: "Recursos",     href: "/recursos" },
-    { label: "Embajadores",  href: "/embajadores" },
-    { label: "Novedades",    href: "/changelog" },
-    { label: "Contacto",     href: "/contacto" },
+    { label: "Producto",    href: "#Producto" },
+    { label: "Precios",     href: "#Precios" },
+    { label: "Soluciones",  href: "#Soluciones" },
+    { label: "Recursos",    href: "#Recursos" },
+    { label: "Embajadores", href: "#Embajadores" },
+    { label: "Novedades",   href: "#Novedades" },
+    { label: "Contacto",    href: "#Contacto" },
   ],
   ctas: {
-    login:   { label: "Entrar",       href: "/login" },
-    primary: { label: "Empezar ahora", href: "/register" },
+    login:   { label: "Entrar",        href: "/login" },
+    primary: { label: "Empezar gratis", href: "/register" },
   },
 } as const
 
@@ -31,27 +33,41 @@ export const heroContent = {
   headlineAccent: "Un solo sistema.",
   sub: "CRM, tareas, facturación, automatizaciones, IA y recomendaciones inteligentes — conectados, en tiempo real.",
   ctas: {
-    primary:   { label: "Empezar gratis",  href: "/register" },
-    secondary: { label: "Ver demo →",      href: "/demo" },
+    primary:   { label: "Empezar gratis", href: "/register" },
+    secondary: { label: "Ver demo",       href: "/demo" },
   },
-  trust: "14 días gratis · Sin tarjeta · Sin permanencia",
   proof: {
     count: "+200 negocios",
     label: "en lista de espera",
     avatars: [
-      { initials: "MG", color: "#1FA97A" },
-      { initials: "RM", color: "#3b82f6" },
-      { initials: "EV", color: "#f59e0b" },
-      { initials: "HM", color: "#8b5cf6" },
-      { initials: "CP", color: "#ef4444" },
+      { initials: "MG", color: "#c44444" },
+      { initials: "RV", color: "#c99300" },
+      { initials: "JC", color: "#449944" },
+      { initials: "LM", color: "#336699" },
+      { initials: "AS", color: "#773355" },
     ],
   },
+  trust: [
+    "14 días gratis",
+    "Sin tarjeta",
+    "Sin permanencia",
+  ],
+  tools: [
+    { name: "Excel",      color: "#1f7145", style: { top: "8%",  left:  "6%",  "--rot": "-6deg", "--tx": "4px",  "--ty": "-8px", animationDelay: "0s"   } },
+    { name: "WhatsApp",   color: "#25d366", style: { top: "4%",  right: "10%", "--rot": "4deg",  "--tx": "-8px", "--ty": "6px",  animationDelay: ".8s"  } },
+    { name: "Gmail",      color: "#d93025", style: { top: "32%", left:  "2%",  "--rot": "-2deg", "--tx": "6px",  "--ty": "4px",  animationDelay: "1.4s" } },
+    { name: "Drive",      color: "#4285f4", style: { top: "70%", left:  "4%",  "--rot": "5deg",  "--tx": "5px",  "--ty": "-6px", animationDelay: "2.1s" } },
+    { name: "Post-its",   color: "#e0a800", style: { top: "86%", left:  "32%", "--rot": "-8deg", "--tx": "-4px", "--ty": "-7px", animationDelay: "1s"   } },
+    { name: "Facturas",   color: "#6b4ce0", style: { top: "78%", right: "6%",  "--rot": "6deg",  "--tx": "-6px", "--ty": "5px",  animationDelay: "2.6s" } },
+    { name: "Notion",     color: "#1a1a1a", style: { top: "44%", right: "2%",  "--rot": "-3deg", "--tx": "8px",  "--ty": "-4px", animationDelay: ".3s"  } },
+    { name: "Calendario", color: "#ea4335", style: { top: "18%", right: "36%", "--rot": "3deg",  "--tx": "-4px", "--ty": "8px",  animationDelay: "1.8s" } },
+  ],
 } as const
 
 /* ─── Problem ────────────────────────────────────────────────────── */
 
 export const problemContent = {
-  eyebrow: "El problema",
+  eyebrow: "Diagnóstico",
   headline: "Demasiadas herramientas.",
   headlineAccent: "Ningún sistema.",
   sub: "El negocio promedio usa 6+ herramientas que no se comunican. Caos, tiempo perdido y dinero invisible.",
@@ -78,7 +94,7 @@ export const problemContent = {
     },
     {
       num: "05",
-      title: "Procesos manuales infinitos",
+      title: "Procesos infinitos",
       desc: "Repetir las mismas acciones cada día: emails, asignaciones, recordatorios. Tiempo destruido.",
     },
     {
@@ -87,10 +103,23 @@ export const problemContent = {
       desc: "Sin métricas, sin alertas, sin predicciones. Decisiones a ciegas hasta que ya es tarde.",
     },
   ],
+  nodes: [
+    { x: "8%",  y: "6%",  label: "Excel",    color: "#1f7145" },
+    { x: "62%", y: "2%",  label: "WhatsApp", color: "#25d366" },
+    { x: "3%",  y: "44%", label: "Gmail",    color: "#d93025" },
+    { x: "48%", y: "32%", label: "Post-its", color: "#e0a800" },
+    { x: "72%", y: "48%", label: "Drive",    color: "#4285f4" },
+    { x: "20%", y: "70%", label: "Notion",   color: "#1a1a1a" },
+    { x: "62%", y: "78%", label: "Facturas", color: "#6b4ce0" },
+    { x: "30%", y: "22%", label: "Calendar", color: "#ea4335" },
+  ],
+  // pairs of node indices for tangle lines
+  pairs: [[0,2],[1,3],[2,5],[3,6],[4,6],[0,3],[1,4],[5,6],[7,1],[7,3]] as [number, number][],
+  visualCaption: "stack.actual/ · 8 herramientas · 0 conexiones",
   resolve: {
-    title: "ClientLabs resuelve los 6 a la vez",
-    sub: "Un solo sistema que conecta todo tu flujo operativo sin código, sin integraciones manuales.",
-    cta: { label: "Probar gratis →", href: "/register" },
+    title: "ClientLabs resuelve los 6 a la vez.",
+    sub: "Un solo sistema que conecta todo tu flujo operativo. Sin código, sin integraciones manuales.",
+    cta: { label: "Probar gratis", href: "/register" },
   },
 } as const
 
@@ -105,109 +134,177 @@ export const platformContent = {
     {
       id: "crm",
       num: "01",
-      name: "CRM & Leads",
-      tagline: "Pipeline visual con scoring IA",
-      color: "#1FA97A",
-      desc: "Centraliza cada contacto con historial completo. Pipeline visual, scoring automático y conversión a cliente en un clic.",
-      features: [
-        "Pipeline visual con estados personalizados",
-        "Scoring de leads con IA",
-        "Historial 360° de cada cliente",
-        "Captura desde web y formularios",
-      ],
-      ctaLabel: "Ver módulo completo →",
-      ctaHref: "/producto",
+      tab: "CRM & Leads",
+      title: "Captura cada lead. Gana cada cliente.",
+      desc: "Pipeline visual con 5 estados, ficha completa del cliente, historial de interacciones y formulario embebible en tu web.",
+      feats: [
+        ["Formulario embebible", "Convierte cualquier página en captador de leads."],
+        ["Pipeline visual",      "Nuevo → Contactado → Cualificado → Convertido."],
+        ["Ficha 360º",           "Historial, compras y notas en un solo lugar."],
+      ] as [string, string][],
+      metric: ["+34%", "conversión de leads"] as [string, string],
     },
     {
-      id: "tareas",
+      id: "tasks",
       num: "02",
-      name: "Gestión de Tareas",
-      tagline: "Kanban, calendario y prioridades",
-      color: "#3B82F6",
-      desc: "Tablero Kanban, vista calendario y prioridades automáticas. Cada tarea vinculada a un cliente, con deadlines y asignaciones.",
-      features: [
-        "Tablero Kanban personalizable",
-        "Vista calendario integrada",
-        "Prioridad automática con IA",
-        "Vinculación a clientes y proyectos",
-      ],
-      ctaLabel: "Ver módulo completo →",
-      ctaHref: "/producto",
+      tab: "Gestión de Tareas",
+      title: "Proyectos y equipos bajo control.",
+      desc: "Tablero Kanban, vista calendario y prioridades automáticas con IA. Cada tarea vinculada al cliente correspondiente.",
+      feats: [
+        ["Kanban + calendario",  "Cambia de vista sin perder contexto."],
+        ["Vinculada a clientes", "Cada tarea con su historial al lado."],
+        ["Prioridad con IA",     "Sabe qué hacer primero según valor e impacto."],
+      ] as [string, string][],
+      metric: ["-62%", "tiempo en tareas manuales"] as [string, string],
     },
     {
-      id: "billing",
+      id: "invoice",
       num: "03",
-      name: "Facturación",
-      tagline: "MRR, Stripe y Verifactu",
-      color: "#F59E0B",
-      desc: "Facturación profesional en PDF, integración Stripe y seguimiento de MRR. Cobros automáticos y alertas de impago.",
-      features: [
-        "Facturas PDF profesionales en 30s",
-        "Integración Stripe nativa",
-        "MRR y ARR en tiempo real",
-        "Recuperación de cobros fallidos",
-      ],
-      ctaLabel: "Ver módulo completo →",
-      ctaHref: "/producto",
+      tab: "Facturación",
+      title: "Facturas que se pagan solas.",
+      desc: "Series personalizadas, PDFs al instante, control de pagadas, pendientes y vencidas. Recordatorios automáticos.",
+      feats: [
+        ["Series personalizadas", "Tu numeración, tus plantillas, tu marca."],
+        ["PDF instantáneo",       "30 segundos y lista para enviar."],
+        ["Cobros al día",         "Alertas de vencimiento sin drama."],
+      ] as [string, string][],
+      metric: ["-95%", "tiempo en facturación"] as [string, string],
     },
     {
       id: "auto",
       num: "04",
-      name: "Automatizaciones",
-      tagline: "Flujos sin código",
-      color: "#8B5CF6",
-      desc: "Diseña flujos visuales sin código: trigger → condición → acción. Emails, asignaciones y notificaciones en piloto automático.",
-      features: [
-        "Editor visual drag & drop",
-        "200+ integraciones disponibles",
-        "Logs en tiempo real",
-        "Reintentos automáticos en fallos",
-      ],
-      ctaLabel: "Ver módulo completo →",
-      ctaHref: "/producto",
+      tab: "Automatizaciones",
+      title: "Deja que el sistema trabaje por ti.",
+      desc: "Reglas visuales sin código: seguimiento automático, asignaciones, recordatorios y flujos condicionales.",
+      feats: [
+        ["Sin código",         "Arrastra triggers y acciones. Listo."],
+        ["Condicionales reales","Si pasa X, entonces Y. Tan simple."],
+        ["24/7",               "Trabajan mientras duermes."],
+      ] as [string, string][],
+      metric: ["2.4h", "ahorradas al día"] as [string, string],
     },
     {
-      id: "ia",
+      id: "ai",
       num: "05",
-      name: "Asistente IA",
-      tagline: "GPT-4o sobre tus datos reales",
-      color: "#EC4899",
-      desc: "Pregunta en lenguaje natural y obtén análisis de tus datos reales. GPT-4o integrado directamente en tu operación.",
-      features: [
-        "Consultas en lenguaje natural",
-        "Análisis sobre datos reales",
-        "Resúmenes automáticos",
-        "Sugerencias de acciones concretas",
-      ],
-      ctaLabel: "Ver módulo completo →",
-      ctaHref: "/producto",
+      tab: "Asistente IA",
+      title: "Pregunta. Responde. Actúa.",
+      desc: "Un asistente que conoce tus leads, clientes y finanzas. Respuestas al instante, acciones con confirmación.",
+      feats: [
+        ["Lenguaje natural", "\"¿Cuánto facturé este mes?\" y listo."],
+        ["Conoce tu negocio", "Entrena sobre tus datos, siempre privados."],
+        ["Acciones reales",   "No solo responde: ejecuta con permiso."],
+      ] as [string, string][],
+      metric: ["+18/día", "acciones completadas"] as [string, string],
     },
     {
       id: "reco",
       num: "06",
-      name: "Recomendaciones",
-      tagline: "Churn, upsell y anomalías",
-      color: "#06B6D4",
-      desc: "El sistema detecta patrones, anticipa churn, sugiere upsells y alerta sobre anomalías antes de que afecten tus resultados.",
-      features: [
-        "Detección de churn temprana",
-        "Sugerencias de upsell automáticas",
-        "Alertas de anomalías en datos",
-        "Insights semanales automáticos",
-      ],
-      ctaLabel: "Ver módulo completo →",
-      ctaHref: "/producto",
+      tab: "Recomendaciones",
+      title: "Sabe qué hacer antes que tú.",
+      desc: "Qué lead priorizar, qué cliente está en riesgo, qué cobrar primero. Recomendaciones en contexto, siempre.",
+      feats: [
+        ["Prioridad diaria",  "Tu lista de hoy, ordenada por impacto."],
+        ["Alertas de riesgo", "Detecta clientes que se enfrían."],
+        ["Oportunidades",     "Upsells y cobros que habrías perdido."],
+      ] as [string, string][],
+      metric: ["+40%", "visibilidad financiera"] as [string, string],
     },
   ],
+  // Preview data per module id — used by PlatformPreview component
+  preview: {
+    crm: {
+      topbar: "crm / pipeline.view",
+      cols: [
+        { heading: "Nuevo",       items: [["Clara Ortiz",     "·· 1.200€"], ["Ramón Vela",    "·· 780€"]] },
+        { heading: "Contactado",  items: [["Estudio Vega",    "·· 3.400€"], ["A. Ferrer",     "·· 600€"]] },
+        { heading: "Cualificado", items: [["Hotel Miramar",   "·· 4.900€"]] },
+        { heading: "Convertido",  items: [["Rest. Mirador",   "·· 2.100€"], ["M. García",     "·· 1.800€"]] },
+        { heading: "Perdido",     items: [["Tienda Sol",      "·· –"]] },
+      ] as { heading: string; items: [string, string][] }[],
+      status: "en vivo · 12 leads activos · 3 actualizados hoy",
+    },
+    tasks: {
+      topbar: "tareas / kanban.view",
+      cols: [
+        { heading: "Pendiente",  count: 4, items: [["Enviar propuesta a Hotel Miramar", "Alta"], ["Revisar factura FA-2026-0184", "Media"], ["Llamar a Ramón Vela", "Alta"]] },
+        { heading: "En proceso", count: 3, items: [["Diseño landing · Estudio Vega", "Media"], ["Presupuesto Rest. Mirador", "Baja"]] },
+        { heading: "Revisión",   count: 2, items: [["Contrato A. Ferrer", "Alta"], ["Newsletter Mayo", "Media"]] },
+      ] as { heading: string; count: number; items: [string, string][] }[],
+    },
+    invoice: {
+      topbar: "facturación / 2026-0184.pdf",
+      client: { name: "Estudio Vega S.L.", nif: "B-87234512 · Madrid" },
+      invoiceNum: "Factura FA-2026-0184",
+      dates: "Emisión 18 Abr · Venc. 18 May",
+      lines: [
+        ["Rediseño web · Fase 1",  "1", "1.800€", "1.800€"],
+        ["Identidad corporativa",  "1",  "950€",   "950€"],
+        ["Sesión fotográfica",     "1",  "420€",   "420€"],
+      ] as [string, string, string, string][],
+      total: "3.836,00 €",
+      status: "Pagada",
+    },
+    auto: {
+      topbar: "automatizaciones / flow.builder",
+      nodes: [
+        { type: "trigger", label: "Cuando llega un lead nuevo",                  sub: "TRIGGER · formulario web",          colorBg: "#e7f0ff", colorFg: "#2a5ec6" },
+        { type: "action",  label: "Asignar a vendedor según zona",               sub: "ACTION · reglas.geografía",         colorBg: undefined, colorFg: undefined },
+        { type: "action",  label: "Enviar email de bienvenida",                  sub: "ACTION · plantilla/welcome_es",     colorBg: undefined, colorFg: undefined },
+        { type: "delay",   label: "Seguimiento en 3 días si no responde",        sub: "DELAY · condicional",               colorBg: "#fff3e6", colorFg: "#a66300" },
+      ],
+    },
+    ai: {
+      topbar: "asistente.ia / chat",
+      messages: [
+        { role: "me" as const, text: "¿Cuánto facturé en Abril y qué cliente me debe más?" },
+        { role: "ai" as const, text: "En Abril has facturado <b>14.280 €</b> (+18% vs Marzo).<br/>El cliente con más deuda es <b>Hotel Miramar</b>: <b>2.450 €</b> con 12 días de retraso. ¿Quiero enviar recordatorio?" },
+        { role: "me" as const, text: "Sí, envía recordatorio amable." },
+        { role: "ai" as const, text: "<b>Hecho.</b> Recordatorio enviado a facturación@hotelmiramar.com" },
+      ],
+    },
+    reco: {
+      topbar: "recomendaciones / today",
+      dateLabel: "PRIORIDAD DE HOY · 20 ABR",
+      cards: [
+        { title: "Clara Ortiz lleva 4 días sin respuesta",       sub: "Lead cualificado · 1.200€ potencial",             badge: "Urgente",    tone: "hot" as const },
+        { title: "Hotel Miramar tiene factura vencida",          sub: "2.450€ · 12 días de retraso",                     badge: "Cobrar",     tone: "hot" as const },
+        { title: "Estudio Vega: enviar propuesta ampliación",    sub: "Cliente activo · 40% más probable de cerrar",     badge: "Oportunidad", tone: "warm" as const },
+        { title: "Ramón Vela: 3 visitas web sin contacto",       sub: "Lead cálido · contactar hoy",                     badge: "Seguir",     tone: "warm" as const },
+      ],
+    },
+  },
+} as const
+
+/* ─── Stats ──────────────────────────────────────────────────────── */
+
+export const statsContent = {
+  eyebrow: "Impacto",
+  headline: "Números que hablan solos.",
+  sub: "Datos agregados de los primeros 200 negocios en lista de espera usando la beta.",
+  stats: [
+    { prefix: "−", value: 67, suffix: "%",    decimals: 0, label: "tiempo en gestión operativa" },
+    { prefix: "+", value: 34, suffix: "%",    decimals: 0, label: "leads convertidos a clientes" },
+    { prefix: "",  value: 2.4, suffix: "h/día", decimals: 1, label: "ahorradas por usuario" },
+    { prefix: "",  value: 98, suffix: "%",    decimals: 0, label: "satisfacción de usuarios" },
+  ],
+  chart: {
+    eyebrow: "Facturación media · usuarios beta",
+    headline: "+47% en 6 meses",
+    months: ["Nov", "Dic", "Ene", "Feb", "Mar", "Abr"],
+    before: [62, 58, 64, 66, 63, 68],
+    after:  [62, 70, 82, 95, 108, 124],
+    max: 130,
+    legendBefore: "Antes",
+    legendAfter: "Con ClientLabs",
+  },
 } as const
 
 /* ─── Tasks ──────────────────────────────────────────────────────── */
 
 export const tasksContent = {
   eyebrow: "Gestión de tareas",
-  headline: "Proyectos y equipos",
-  headlineAccent: "siempre bajo control.",
-  accentColor: "#3B82F6",
+  headline: "Proyectos y equipos.",
+  headlineAccent: "Siempre bajo control.",
   sub: "Tablero Kanban, vista calendario y prioridades automáticas con IA. Cada tarea vinculada al cliente o proyecto correspondiente.",
   features: [
     {
@@ -226,196 +323,121 @@ export const tasksContent = {
       desc: "El sistema sugiere qué hacer primero según valor e impacto.",
     },
   ],
-  stats: [
-    { value: "-62%",  label: "Tareas manuales" },
-    { value: "127",   label: "Completadas/mes" },
-    { value: "18/día", label: "Auto-asignadas" },
+  metrics: [
+    { value: "−62%",  label: "tareas manuales" },
+    { value: "127",   label: "completadas / mes" },
+    { value: "18/día", label: "auto-asignadas" },
   ],
+  kanbanTopbar: "tareas · Q2 2026",
   kanbanCols: [
-    { label: "Pendiente",  color: "#9CA3AF", items: ["Propuesta NextSite", "Actualizar precios", "Revisar contrato"] },
-    { label: "En proceso", color: "#3B82F6", items: ["Demo TechMark", "Email bienvenida auto", "Informe Q1"] },
-    { label: "Revisión",   color: "#F59E0B", items: ["Factura MediaCore"] },
-    { label: "Completado", color: "#1FA97A", items: ["Onboarding NextSite", "Integración Stripe"] },
+    {
+      heading: "Pendiente",
+      items: [
+        ["Propuesta Hotel Miramar",    "Alta",  "Hoy"],
+        ["Revisar factura FA-0184",    "Media", "28 Abr"],
+        ["Llamar a Ramón Vela",        "Alta",  "Mañana"],
+        ["Presupuesto Rest. Mirador",  "Baja",  "2 May"],
+      ] as [string, string, string][],
+    },
+    {
+      heading: "En proceso",
+      items: [
+        ["Landing · Estudio Vega",  "Media", "30 Abr"],
+        ["Branding · A. Ferrer",    "Alta",  "29 Abr"],
+        ["Newsletter Mayo",         "Baja",  "5 May"],
+      ] as [string, string, string][],
+    },
+    {
+      heading: "Revisión",
+      items: [
+        ["Contrato Tienda Sol",        "Alta",  "Hoy"],
+        ["Sesión fotos Clara O.",      "Media", "24 Abr"],
+      ] as [string, string, string][],
+    },
   ],
 } as const
 
 /* ─── AI ─────────────────────────────────────────────────────────── */
 
 export const aiContent = {
-  eyebrow: "Inteligencia artificial + Recomendaciones",
-  headline: "Tu co-piloto inteligente.",
-  headlineAccent: "Siempre activo.",
-  accentColor: "#EC4899",
-  sub: "Pregunta en lenguaje natural sobre tus datos reales. El sistema detecta churn, sugiere upsells y alerta antes de que los problemas impacten.",
+  eyebrow: "IA & Automatizaciones",
+  headline: "La inteligencia que tu",
+  headlineAccent: "negocio necesitaba.",
+  sub: "Automatizaciones configurables, sugerencias en contexto y un asistente que conoce tu negocio.",
   features: [
     {
       icon: "bot" as const,
-      title: "Asistente en lenguaje natural",
-      desc: "GPT-4o integrado directamente en tus datos. Sin copiar ni pegar.",
+      title: "Asistente IA",
+      desc: "Pregunta sobre tus leads, clientes o finanzas en lenguaje natural. Respuestas al instante con datos reales.",
     },
     {
-      icon: "sparkles" as const,
-      title: "Churn detectado 3x antes",
-      desc: "Identifica señales de abandono semanas antes de que ocurra.",
+      icon: "bolt" as const,
+      title: "Automatizaciones",
+      desc: "Reglas que actúan solas: seguimiento automático, facturas, recordatorios, asignaciones.",
     },
     {
-      icon: "trending" as const,
-      title: "Upsell automático sugerido",
-      desc: "Detecta cuándo un cliente está listo para subir de plan.",
+      icon: "target" as const,
+      title: "Recomendaciones",
+      desc: "Sabe qué lead priorizar, qué cliente está en riesgo, qué cobrar primero.",
     },
   ],
-  stats: [
-    { value: "97%",       label: "Precisión alertas" },
-    { value: "200+",      label: "Consultas IA/día" },
-    { value: "€3.2k/sem", label: "Revenue protegido" },
-  ],
-  chatMessages: [
-    { role: "user" as const, text: "¿Qué clientes tienen riesgo de churn esta semana?" },
-    { role: "ai" as const,   text: "Detecté 3 clientes en riesgo: NextSite (sin actividad 8 días), MediaCore (factura pendiente €800), TechMark (NPS bajó a 4). Recomiendo contacto directo hoy." },
-    { role: "user" as const, text: "¿Cuánto MRR podría perder si no actúo?" },
-    { role: "ai" as const,   text: "Exposición estimada: €847/mes. Si recuperas los 3 clientes con seguimiento proactivo, probabilidad de retención: 71%." },
-  ],
-  insights: [
-    { text: "NextSite — churn inminente (74%)",          priority: "Crítica", color: "#EF4444" },
-    { text: "TechMark — oportunidad upgrade a Pro",      priority: "Alta",    color: "#F59E0B" },
-    { text: "Anomalía cobros 14-16h detectada",          priority: "Media",   color: "#8B5CF6" },
-  ],
-} as const
-
-/* ─── Automatizaciones ───────────────────────────────────────────── */
-
-export const automationsContent = {
-  eyebrow: "Automatizaciones",
-  headline: "Procesos que se",
-  headlineAccent: "ejecutan solos.",
-  accentColor: "#8B5CF6",
-  sub: "Diseña flujos visuales sin una sola línea de código. Trigger, condición y acción. Así de simple.",
-  stats: [
-    { value: "18",   label: "Flujos activos" },
-    { value: "380+", label: "Ejecuciones/mes" },
-    { value: "120h", label: "Ahorradas/mes" },
-    { value: "200+", label: "Integraciones" },
-  ],
-  activeFlows: [
-    { title: "Bienvenida automática",         runs: "340/mes" },
-    { title: "Recuperación de pagos fallidos", runs: "12/mes" },
-    { title: "Alerta churn preventiva",        runs: "28/mes" },
-  ],
-  demoFlow: {
-    trigger: "Lead nuevo entra",
-    steps: [
-      "Score calculado > 60",
-      "Email bienvenida enviado",
-      "Comercial asignado",
-      "Tarea follow-up creada",
+  demo: {
+    label: "ClientLabs · Asistente",
+    sublabel: "responde en 0.4s · conoce tu negocio",
+    messages: [
+      { role: "me" as const, text: "¿Qué leads debería llamar hoy?" },
+      { role: "ai" as const, text: "Tres prioritarios: <b>Clara Ortiz</b> (cualificado, 4 días sin seguimiento, 1.200€), <b>Ramón Vela</b> (3 visitas web ayer), <b>A. Ferrer</b> (abrió tu propuesta 2 veces). ¿Preparo recordatorios?" },
+      { role: "me" as const, text: "¿Y cómo voy este mes vs el pasado?" },
+      { role: "ai" as const, text: "Abril va un <b>+18%</b> vs Marzo (14.280€ vs 12.100€). Tasa de cierre del <b>34%</b>. Tu mejor cliente: <b>Estudio Vega</b> (3.836€). Próxima factura vence en 6 días: <b>Hotel Miramar 2.450€</b>." },
     ],
-    badge: "340/mes",
+    chips: ["Sí, los tres", "Solo Clara", "Agendar llamadas"],
   },
 } as const
 
-/* ─── Comparativa (Stats) ────────────────────────────────────────── */
+/* ─── Carousel ───────────────────────────────────────────────────── */
 
-export const comparativaContent = {
-  eyebrow: "Sin mentiras",
-  headline: "Lo que dejarás de",
-  headlineAccent: "hacer a mano.",
-  sub: "No te vamos a poner métricas inventadas. Te mostramos exactamente qué procesos se automatizan y cuánto tiempo recuperas cada semana.",
-  rows: [
-    { task: "Registrar un lead nuevo",         before: "Copiar a mano en Excel o CRM",      after: "Captura automática desde web" },
-    { task: "Hacer seguimiento de un cliente", before: "Buscar entre emails y notas",        after: "Historial 360° en un clic" },
-    { task: "Crear y enviar una factura",      before: "15-30 min en Word o PDF",            after: "30 segundos, PDF automático" },
-    { task: "Asignar tareas al equipo",        before: "WhatsApp, Slack o reunión",          after: "Tablero Kanban + asignación IA" },
-    { task: "Detectar un cliente en riesgo",   before: "Cuando ya ha cancelado",             after: "Alerta 7-14 días antes" },
-    { task: "Enviar email de bienvenida",      before: "Manual, a veces se olvida",          after: "Automático al entrar el lead" },
-    { task: "Ver cuánto ingresaste este mes",  before: "Suma manual en hoja de cálculo",     after: "Dashboard en tiempo real" },
-    { task: "Saber qué priorizar hoy",         before: "Intuición y reuniones",              after: "IA sugiere prioridades" },
-  ],
-  pillars: [
+export const carouselContent = {
+  eyebrow: "Casos reales",
+  headline: "Los autónomos que más facturan",
+  headlineAccent: "tienen algo en común.",
+  progress: "01 — 05",
+  progressHint: "desliza",
+  slides: [
     {
-      icon: "clock" as const,
-      title: "Tiempo recuperado",
-      desc: "Cada uno de estos procesos sucede múltiples veces por semana. Con ClientLabs, se hacen solos o en segundos.",
+      tone: "tone-navy" as const,
+      num: "01",
+      quote: "Antes perdía 3 leads por semana por no hacer seguimiento a tiempo.",
+      who: "María G. · Diseñadora web · Madrid",
+      impact: ["−100%", "leads perdidos"] as [string, string],
     },
     {
-      icon: "brain" as const,
-      title: "Sin carga mental",
-      desc: "No tienes que recordar qué hacer ni cuándo. El sistema actúa, te avisa y prioriza por ti.",
+      tone: "tone-emerald" as const,
+      num: "02",
+      quote: "Tardaba 2 horas en hacer una factura. Ahora son 30 segundos.",
+      who: "Restaurante Mirador · Barcelona",
+      impact: ["−95%", "tiempo en facturación"] as [string, string],
     },
     {
-      icon: "chart" as const,
-      title: "Visibilidad total",
-      desc: "Sabes exactamente qué pasa en tu negocio, qué entra, qué falla y qué hay que hacer hoy.",
-    },
-  ],
-} as const
-
-/* ─── Recursos ───────────────────────────────────────────────────── */
-
-export const resourcesContent = {
-  eyebrow: "Recursos gratuitos",
-  headline: "Todo lo que necesitas para",
-  headlineAccent: "gestionar tu negocio",
-  sub: "Guías, plantillas y herramientas gratuitas para autónomos y pequeños negocios en España.",
-  items: [
-    {
-      icon: "fileText" as const,
-      tag: "Guía gratuita",
-      title: "Cómo captar tus primeros 10 clientes como autónomo",
-      desc: "Estrategias probadas para conseguir clientes sin presupuesto de marketing.",
-      cta: "Descargar gratis",
-      href: "/register",
-      featured: false,
+      tone: "tone-neutral" as const,
+      num: "03",
+      quote: "No sabía cuánto estaba facturando en tiempo real. Ahora lo veo todo.",
+      who: "Estudio Vega · Arquitectos · Valencia",
+      impact: ["+40%", "visibilidad financiera"] as [string, string],
     },
     {
-      icon: "fileSpreadsheet" as const,
-      tag: "Plantilla Excel",
-      title: "Plantilla de seguimiento de clientes y ventas",
-      desc: "La plantilla que usaban nuestros usuarios antes de descubrir ClientLabs.",
-      cta: "Descargar gratis",
-      href: "/register",
-      featured: false,
-    },
-    {
-      icon: "calculator" as const,
-      tag: "Herramienta gratuita",
-      title: "Calculadora de tarifa hora para autónomos",
-      desc: "Calcula cuánto deberías cobrar por hora según tus gastos y objetivos de ingresos.",
-      cta: "Usar gratis",
-      href: "/register",
-      featured: false,
-    },
-    {
-      icon: "checkSquare" as const,
-      tag: "Checklist",
-      title: "Checklist cierre de mes para autónomos",
-      desc: "24 tareas que todo autónomo debería hacer antes de cerrar el mes. Nunca más te olvides nada.",
-      cta: "Descargar gratis",
-      href: "/register",
-      featured: false,
-    },
-    {
-      icon: "receipt" as const,
-      tag: "Guía práctica",
-      title: "IVA trimestral para autónomos: guía paso a paso",
-      desc: "Todo lo que necesitas saber sobre el modelo 303 sin morir en el intento.",
-      cta: "Leer guía",
-      href: "/register",
-      featured: false,
-    },
-    {
-      icon: "puzzle" as const,
-      tag: "Plugin gratuito",
-      title: "Plugin WordPress para captar leads automáticamente",
-      desc: "Instala en 2 minutos y todos los formularios de tu web llegarán directamente a ClientLabs.",
-      cta: "Descargar plugin",
-      href: "/api/downloads/wordpress-plugin",
-      featured: true,
+      tone: "tone-emerald" as const,
+      num: "04",
+      quote: "Las automatizaciones me ahorran 2 horas al día de tareas repetitivas.",
+      who: "Hotel Miramar · Barcelona",
+      impact: ["+2h/día", "recuperadas"] as [string, string],
     },
   ],
-  ctaBanner: {
-    title: "¿Quieres usar ClientLabs gratis?",
-    sub: "Crea tu cuenta y accede a todos los recursos de forma gratuita.",
-    cta: { label: "Empezar gratis 14 días →", href: "/register" },
+  ctaCard: {
+    num: "05",
+    eyebrow: "Tu turno",
+    headline: "¿Listo\npara unirte?",
+    cta: { label: "Empezar gratis", href: "/register" },
+    hint: "+200 negocios ya en lista de espera",
   },
 } as const
 
@@ -424,109 +446,145 @@ export const resourcesContent = {
 export const pricingContent = {
   eyebrow: "Precios",
   headline: "Simple. Sin sorpresas.",
-  sub: "14 días gratis en cualquier plan. Sin tarjeta.",
-  compareHref: "/precios",
+  sub: "Empieza gratis 14 días. Elige plan cuando lo necesites. Cambia o cancela cuando quieras.",
+  annualDiscount: "−20%",
+  toggleLabels: { monthly: "Mensual", annual: "Anual" },
   plans: [
     {
-      id: "starter",
       name: "Starter",
-      price: "9,99€",
-      period: "/mes",
-      tagline: "Para empezar con control.",
+      tag: "Para empezar",
+      price: 29,
       featured: false,
       featuredLabel: null,
+      cta: "Empezar gratis",
       features: [
-        "CRM + Leads (50/mes)",
-        "Tareas y proyectos",
-        "Facturación (30/mes)",
-        "Automatizaciones básicas",
+        "Hasta 100 leads",
+        "CRM básico",
+        "Facturación PDF",
+        "1 usuario",
+        "Soporte por email",
       ],
-      note: "Sin asistente IA",
-      cta: { label: "Empezar gratis", href: "/register" },
     },
     {
-      id: "pro",
       name: "Pro",
-      price: "19,99€",
-      period: "/mes",
-      tagline: "Para crecer con IA.",
+      tag: "Para crecer",
+      price: 59,
       featured: true,
-      featuredLabel: "Más elegido",
+      featuredLabel: "★ Más popular",
+      cta: "Empezar gratis",
       features: [
-        "CRM + Leads (300/mes)",
-        "Tareas y proyectos",
-        "Facturación (150/mes)",
-        "Automatizaciones avanzadas",
-        "Asistente IA completo",
-        "Recomendaciones inteligentes",
+        "Leads ilimitados",
+        "CRM completo + automatizaciones",
+        "Facturación + serie personalizada",
+        "Hasta 3 usuarios",
+        "IA básica incluida",
+        "Soporte prioritario",
       ],
-      note: "Todo incluido · IA completa",
-      cta: { label: "Empezar gratis 14 días", href: "/register" },
     },
     {
-      id: "max",
       name: "Max",
-      price: "39,99€",
-      period: "/mes",
-      tagline: "Para escalar sin límites.",
+      tag: "Para equipos",
+      price: 99,
       featured: false,
       featuredLabel: null,
+      cta: "Contactar",
       features: [
-        "CRM + Leads ilimitados",
-        "Tareas y proyectos",
-        "Facturas ilimitadas + Verifactu",
-        "Automatizaciones ilimitadas",
-        "IA completa + Recomendaciones",
-        "API completa + webhooks",
+        "Todo de Pro",
+        "Usuarios ilimitados",
+        "IA avanzada + recomendaciones",
+        "Marketing + newsletter",
+        "Acceso a API",
+        "Onboarding dedicado",
       ],
-      note: "Todo incluido · Sin límites",
-      cta: { label: "Empezar gratis", href: "/register" },
     },
   ],
+  faqsHeading: "Preguntas frecuentes",
+  faqs: [
+    [
+      "¿Necesito tarjeta para la prueba gratuita?",
+      "No. Los 14 días son totalmente gratuitos, sin tarjeta ni compromiso. Al acabar decides si sigues.",
+    ],
+    [
+      "¿Puedo cancelar cuando quiera?",
+      "Sí. Sin permanencia ni penalización. Cancelas desde tu panel en un clic.",
+    ],
+    [
+      "¿Mis datos son privados?",
+      "Totalmente. Servidores en UE, cumplimiento RGPD, cifrado en tránsito y en reposo. Tú eres dueño de tus datos siempre.",
+    ],
+    [
+      "¿Puedo migrar desde mi Excel / CRM actual?",
+      "Sí. Importamos tus clientes, leads y facturas desde CSV, Excel o los CRM más comunes. Te ayudamos gratis.",
+    ],
+    [
+      "¿Hay soporte en español?",
+      "Claro. Todo el equipo es hispanohablante. Soporte por email en Starter, chat prioritario en Pro, videollamada en Max.",
+    ],
+  ] as [string, string][],
 } as const
 
 /* ─── Final CTA ──────────────────────────────────────────────────── */
 
 export const finalCtaContent = {
-  headline: ["Un", "sistema.", "Todo", "resuelto."],
-  accentWords: ["Todo", "resuelto."],
-  sub: "CRM, tareas, facturación, automatizaciones, IA y recomendaciones — en un solo sistema operativo para tu negocio.",
+  pill: "Tu negocio merece más",
+  headline: "Tu negocio merece",
+  headlineAccent: "un sistema.",
+  sub: "Empieza gratis hoy. Sin tarjeta. Sin permanencia. Sin excusas.",
   ctas: {
-    primary:   { label: "Empezar gratis hoy", href: "/register" },
-    secondary: { label: "Ver planes →",       href: "/precios" },
+    primary:   { label: "Empezar gratis",    href: "/register" },
+    secondary: { label: "Ver demo en vivo",  href: "/demo" },
   },
-  trust: "14 días gratis · Sin tarjeta · Sin permanencia",
+  trust: [
+    "14 días gratis",
+    "Sin tarjeta",
+    "Cancela cuando quieras",
+    "Soporte en español",
+  ],
 } as const
 
 /* ─── Footer ─────────────────────────────────────────────────────── */
 
 export const footerContent = {
-  brand: "ClientLabs",
-  links: [
-    { label: "Producto",              href: "/producto" },
-    { label: "Precios",              href: "/precios" },
-    { label: "Contacto",             href: "/contacto" },
-    { label: "Términos y Condiciones", href: "/terms" },
-    { label: "Política de Privacidad", href: "/privacy" },
-    { label: "Política de Cookies",    href: "/cookies" },
+  brand: { name: "ClientLabs", tagline: "Tu negocio. Bajo control." },
+  newsletter: { eyebrow: "Newsletter", placeholder: "tu@email.com", cta: "Suscribirme" },
+  columns: [
+    {
+      heading: "Producto",
+      links: ["CRM & Leads", "Tareas", "Facturación", "Automatizaciones", "Asistente IA", "Precios"],
+    },
+    {
+      heading: "Empresa",
+      links: ["Sobre nosotros", "Embajadores", "Empleo", "Prensa", "Contacto"],
+    },
+    {
+      heading: "Recursos",
+      links: ["Blog", "Guías", "Plantillas", "Novedades", "Estado del sistema"],
+    },
+    {
+      heading: "Legal",
+      links: ["Términos", "Privacidad", "Cookies", "RGPD", "Seguridad"],
+    },
   ],
+  bottom: {
+    copy: "© 2026 ClientLabs. Hecho en España 🇪🇸",
+    version: "v1.0 · Lanzamiento Junio 2026",
+  },
 } as const
 
 /* ─── Barrel export ──────────────────────────────────────────────── */
 
 export const landingContent = {
-  navbar:       navbarContent,
-  hero:         heroContent,
-  problem:      problemContent,
-  platform:     platformContent,
-  tasks:        tasksContent,
-  ai:           aiContent,
-  automations:  automationsContent,
-  comparativa:  comparativaContent,
-  resources:    resourcesContent,
-  pricing:      pricingContent,
-  finalCta:     finalCtaContent,
-  footer:       footerContent,
+  navbar:    navbarContent,
+  hero:      heroContent,
+  problem:   problemContent,
+  platform:  platformContent,
+  stats:     statsContent,
+  tasks:     tasksContent,
+  ai:        aiContent,
+  carousel:  carouselContent,
+  pricing:   pricingContent,
+  finalCta:  finalCtaContent,
+  footer:    footerContent,
 } as const
 
 export type LandingContent = typeof landingContent

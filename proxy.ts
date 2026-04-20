@@ -11,9 +11,9 @@ import { getToken } from "next-auth/jwt"
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl
 
-  // Redirect root to whitelist landing
+  // Root → new landing page (Fase B+). Pass through, no auth required.
   if (pathname === "/") {
-    return NextResponse.redirect(new URL("/whitelist", req.url))
+    return NextResponse.next()
   }
 
   if (

@@ -1,5 +1,25 @@
 import { redirect } from "next/navigation"
-import { FullLandingPage } from "../components/FullLanding.old"
+import type { Metadata } from "next"
+
+import { Navbar }    from "@/components/landing/navbar"
+import { Hero }      from "@/components/landing/hero"
+import { Problem }   from "@/components/landing/problem"
+import { Platform }  from "@/components/landing/platform"
+import { Tasks }     from "@/components/landing/tasks"
+import { AI }        from "@/components/landing/ai"
+import { FinalCTA }  from "@/components/landing/final-cta"
+import { Footer }    from "@/components/landing/footer"
+
+export const metadata: Metadata = {
+  title: "ClientLabs · Todo tu negocio. Un solo sistema.",
+  description:
+    "CRM, tareas, facturación, automatizaciones e IA. El sistema operativo para autónomos y pequeños negocios hispanohablantes.",
+  openGraph: {
+    title: "ClientLabs",
+    description: "Todo tu negocio. Un solo sistema.",
+    type: "website",
+  },
+}
 
 interface Props {
   searchParams: Promise<{ key?: string }>
@@ -13,5 +33,19 @@ export default async function PreviewPage({ searchParams }: Props) {
     redirect("/whitelist")
   }
 
-  return <FullLandingPage />
+  return (
+    <>
+      <Navbar />
+      <main>
+        <Hero />
+        <Problem />
+        <Platform />
+        <Tasks />
+        <AI />
+        {/* Fase D: Carousel, Stats, Pricing */}
+        <FinalCTA />
+      </main>
+      <Footer />
+    </>
+  )
 }

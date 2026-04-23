@@ -1,12 +1,11 @@
 "use client"
 
-import { Bell, Sun, Moon, Search } from "lucide-react"
+import { Sun, Moon, Search } from "lucide-react"
 import { useTheme } from "@/components/ThemeProvider"
-import { useRouter } from "next/navigation"
+import { NotificationBell } from "@/components/dashboard/notification-bell"
 
 export function DashboardHeader() {
     const { theme, toggleTheme } = useTheme()
-    const router = useRouter()
 
     return (
         <header
@@ -41,14 +40,7 @@ export function DashboardHeader() {
 
                 <div className="w-px h-4 bg-[var(--border-subtle)]"></div>
 
-                <button
-                    onClick={() => router.push("/dashboard/notifications")}
-                    className="p-2 rounded-md hover:bg-[var(--bg-card)] border border-transparent hover:border-[var(--border-subtle)] transition-colors text-[var(--text-secondary)] hover:text-[var(--text-primary)] relative group"
-                    aria-label="Centro de notificaciones"
-                >
-                    <Bell size={15} className="group-hover:text-[var(--accent)] transition-colors" />
-                    <span className="absolute top-[6px] right-[6px] w-1.5 h-1.5 rounded-full bg-[var(--accent)]"></span>
-                </button>
+                <NotificationBell />
             </div>
         </header>
     )

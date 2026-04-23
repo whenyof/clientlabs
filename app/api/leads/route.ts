@@ -8,6 +8,9 @@ import { invalidateCachedData } from '@/lib/redis-cache'
 import { updateLeadScore } from '@/lib/scoring/updateLeadScore'
 import { runAutomation } from '@/lib/automations/engine'
 import { gateLimit } from '@/lib/api-gate'
+import { notifyNewLead, notifyPlanLimit } from '@/lib/notification-service'
+import { getLimit } from '@/lib/plan-gates'
+import type { PlanType } from '@prisma/client'
 
 const createLeadSchema = z.object({
   name: z.string().min(1, "Nombre requerido").max(200).trim(),
@@ -299,6 +302,16 @@ export async function POST(request: NextRequest) {
     })
 
     await invalidateCachedData(`leads-kpis-${session.user.id}`)
+
+    // Notificación + alerta de límite (non-blocking)
+    notifyNewLead(session.user.id, lead.name ?? "Sin nombre", lead.id).catch(() => {})
+    // Warn at 80% of plan limit
+    const currentCount = await prisma.lead.count({ where: { userId: session.user.id } }).catch(() => 0)
+    const planType = (session.user.plan ?? "FREE") as PlanType
+    const maxLeads = getLimit(planType, "maxLeadsTotal")
+    if (maxLeads !== Infinity && currentCount >= Math.floor(maxLeads * 0.8)) {
+      notifyPlanLimit(session.user.id, "leads", currentCount, maxLeads).catch(() => {})
+    }
 
     // Dispara automatización LEAD_NUEVO sin bloquear la respuesta
     runAutomation(session.user.id, "LEAD_NUEVO", {

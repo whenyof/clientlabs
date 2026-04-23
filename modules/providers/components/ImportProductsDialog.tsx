@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import Papa from "papaparse"
-import * as XLSX from "xlsx"
+// ExcelJS loaded dynamically to avoid heavy static import
 import { importProviderProductsFromCsv } from "@/app/dashboard/providers/actions"
 import { useRouter } from "next/navigation"
 import { Upload, Download, FileSpreadsheet, FileText, FileType } from "lucide-react"
@@ -101,13 +101,18 @@ function parseCsvFile(file: File): Promise<CsvRow[]> {
 }
 
 async function parseExcelFile(file: File): Promise<CsvRow[]> {
-    const data = await file.arrayBuffer()
-    const workbook = XLSX.read(data)
-    const sheetName = workbook.SheetNames[0]
-    if (!sheetName) return []
-    const worksheet = workbook.Sheets[sheetName]
-    const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet)
-    return json.map(normalizeRowKeys)
+    const ExcelJS = await import("exceljs")
+    const wb = new ExcelJS.Workbook()
+    await wb.xlsx.load(await file.arrayBuffer())
+    const ws = wb.worksheets[0]
+    if (!ws) return []
+    const headers: string[] = []
+    const rows: Record<string, unknown>[] = []
+    ws.eachRow({ includeEmpty: false }, (row, rowNum) => {
+        if (rowNum === 1) { row.eachCell((cell) => headers.push(String(cell.value ?? ""))) }
+        else { const obj: Record<string, unknown> = {}; row.eachCell((cell, col) => { obj[headers[col - 1]] = cell.value }); rows.push(obj) }
+    })
+    return rows.map(normalizeRowKeys)
 }
 
 function rowToImportRow(row: CsvRow): { code: string; name: string; category?: string; unit?: string; price: number; description?: string } | null {

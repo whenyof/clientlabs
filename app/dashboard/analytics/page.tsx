@@ -7,8 +7,9 @@ import { UpgradeWall } from "@/components/ui/upgrade-wall"
 import { DashboardContainer } from "@/components/layout/DashboardContainer"
 import { AnalyticsKPIs } from "./components/AnalyticsKPIs"
 import { DateRangePicker } from "./components/DateRangePicker"
-import { MainChart } from "./components/MainChart"
-import { FunnelChart } from "./components/FunnelChart"
+import dynamic from "next/dynamic"
+const MainChart = dynamic(() => import("./components/MainChart").then(m => ({ default: m.MainChart })), { ssr: false })
+const FunnelChart = dynamic(() => import("./components/FunnelChart").then(m => ({ default: m.FunnelChart })), { ssr: false })
 import { SectionTabs } from "./components/SectionTabs"
 import { ActivityTable } from "./components/ActivityTable"
 import { AiInsights } from "./components/AiInsights"

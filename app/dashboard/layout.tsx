@@ -28,7 +28,7 @@ export default async function DashboardLayout({
   }
 
   if (!dbUser.onboardingCompleted) {
-    redirect("/onboarding/sector")
+    redirect("/onboarding")
   }
 
   return <DashboardShell>{children}</DashboardShell>

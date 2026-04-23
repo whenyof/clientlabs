@@ -706,18 +706,19 @@ model LeadEvent {
 }
 
 model Notification {
-  id        String   @id
+  id        String   @id @default(cuid())
   userId    String
   title     String
   message   String
   type      String
   read      Boolean  @default(false)
+  actionUrl String?
   createdAt DateTime @default(now())
   User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([createdAt])
-  @@index([read])
-  @@index([userId])
+  @@index([userId, read])
+  @@index([userId, createdAt])
+  @@map("notifications")
 }
 
 model Post {

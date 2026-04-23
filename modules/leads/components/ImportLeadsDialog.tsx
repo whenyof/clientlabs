@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog"
 import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, XCircle, Loader2, X, Undo2, Flame, CloudSun, CloudSnow } from "lucide-react"
 import Papa from "papaparse"
-import * as XLSX from "xlsx"
+// ExcelJS loaded dynamically to avoid heavy static import
 import { importLeads } from "../actions"
 import type { LeadTemp } from "@prisma/client"
 import { toast } from "sonner"
@@ -71,11 +71,17 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
  }
  })
  } else {
- const data = await file.arrayBuffer()
- const workbook = XLSX.read(data)
- const sheetName = workbook.SheetNames[0]
- const worksheet = workbook.Sheets[sheetName]
- parsedData = XLSX.utils.sheet_to_json(worksheet)
+ const ExcelJS = await import("exceljs")
+ const wb = new ExcelJS.Workbook()
+ await wb.xlsx.load(await file.arrayBuffer())
+ const ws = wb.worksheets[0]
+ const headers: string[] = []
+ const jsonRows: Record<string, string>[] = []
+ ws.eachRow({ includeEmpty: false }, (row, rowNum) => {
+   if (rowNum === 1) { row.eachCell((cell) => headers.push(String(cell.value ?? ""))) }
+   else { const obj: Record<string, string> = {}; row.eachCell((cell, col) => { obj[headers[col - 1]] = String(cell.value ?? "") }); jsonRows.push(obj) }
+ })
+ parsedData = jsonRows
  processLeads(parsedData, fileType)
  }
  } catch (error) {

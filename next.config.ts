@@ -51,24 +51,27 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-      {
-        source: "/logo.PNG",
-        headers: [
-          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
-        ],
-      },
-      {
-        source: "/:all*(svg|jpg|jpeg|png|webp|gif|ico|woff|woff2)",
-        headers: [
-          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
-        ],
-      },
-      {
-        source: "/_next/static/:path*",
-        headers: [
-          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
-        ],
-      },
+      // Static asset caching — production only (dev hot-reload needs no-cache)
+      ...(process.env.NODE_ENV === "production" ? [
+        {
+          source: "/logo.PNG",
+          headers: [
+            { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+          ],
+        },
+        {
+          source: "/:all*(svg|jpg|jpeg|png|webp|gif|ico|woff|woff2)",
+          headers: [
+            { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+          ],
+        },
+        {
+          source: "/_next/static/:path*",
+          headers: [
+            { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+          ],
+        },
+      ] : []),
     ];
   },
 };

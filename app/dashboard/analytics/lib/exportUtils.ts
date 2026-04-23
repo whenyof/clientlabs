@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf'
-import * as XLSX from 'xlsx'
+import ExcelJS from 'exceljs'
 
 export interface ExportData {
   title: string
@@ -155,11 +155,12 @@ export async function exportToPDF(data: ExportData): Promise<void> {
 }
 
 // Exportar a Excel
-export function exportToExcel(data: ExportData): void {
-  const workbook = XLSX.utils.book_new()
+export async function exportToExcel(data: ExportData): Promise<void> {
+  const workbook = new ExcelJS.Workbook()
 
   // Hoja de resumen
-  const summaryData = [
+  const summarySheet = workbook.addWorksheet('Resumen')
+  const summaryRows: (string | number)[][] = [
     ['ClientLabs - Analytics'],
     [data.title],
     [''],
@@ -167,57 +168,44 @@ export function exportToExcel(data: ExportData): void {
     ['Rango:', data.dateRange],
     ['Generado:', new Date().toLocaleDateString('es-ES')],
     [''],
-    ['Métricas Principales']
+    ['Métricas Principales'],
   ]
-
-  // Añadir KPIs
   data.kpis.forEach(kpi => {
-    summaryData.push([kpi.label, kpi.value])
-    if (kpi.change) {
-      summaryData.push(['Cambio', kpi.change])
-    }
-    summaryData.push([''])
+    summaryRows.push([kpi.label, kpi.value])
+    if (kpi.change) summaryRows.push(['Cambio', kpi.change])
+    summaryRows.push([''])
   })
-
-  // Summary
   if (data.summary) {
-    summaryData.push(['Resumen Ejecutivo'])
-    summaryData.push(['Total de registros', data.summary.totalRecords.toString()])
-    summaryData.push(['Valor total', data.summary.totalValue.toString()])
-    summaryData.push(['Valor promedio', data.summary.averageValue.toString()])
+    summaryRows.push(['Resumen Ejecutivo'])
+    summaryRows.push(['Total de registros', data.summary.totalRecords])
+    summaryRows.push(['Valor total', data.summary.totalValue])
+    summaryRows.push(['Valor promedio', data.summary.averageValue])
     if (data.summary.conversionRate) {
-      summaryData.push(['Tasa de conversión', `${data.summary.conversionRate}%`])
+      summaryRows.push(['Tasa de conversión', `${data.summary.conversionRate}%`])
     }
   }
-
-  const summarySheet = XLSX.utils.aoa_to_sheet(summaryData)
-  XLSX.utils.book_append_sheet(workbook, summarySheet, 'Resumen')
+  summaryRows.forEach(row => summarySheet.addRow(row))
 
   // Hoja de datos
   const tableHeaders = Object.keys(data.tableData[0] || {})
-  const tableRows = data.tableData.map(row =>
-    tableHeaders.map(header => row[header] || '')
-  )
-
-  const fullTableData = [tableHeaders, ...tableRows]
-  const tableSheet = XLSX.utils.aoa_to_sheet(fullTableData)
-  XLSX.utils.book_append_sheet(workbook, tableSheet, 'Datos')
+  const dataSheet = workbook.addWorksheet('Datos')
+  dataSheet.addRow(tableHeaders)
+  data.tableData.forEach(row => dataSheet.addRow(tableHeaders.map(h => row[h] ?? '')))
 
   // Hoja de gráfico
-  const chartHeaders = ['Etiqueta', 'Valor', 'Valor Secundario']
-  const chartRows = data.chartData.map(point => [
-    point.label,
-    point.value,
-    point.secondaryValue || ''
-  ])
+  const chartSheet = workbook.addWorksheet('Gráfico')
+  chartSheet.addRow(['Etiqueta', 'Valor', 'Valor Secundario'])
+  data.chartData.forEach(point => chartSheet.addRow([point.label, point.value, point.secondaryValue ?? '']))
 
-  const fullChartData = [chartHeaders, ...chartRows]
-  const chartSheet = XLSX.utils.aoa_to_sheet(fullChartData)
-  XLSX.utils.book_append_sheet(workbook, chartSheet, 'Gráfico')
-
-  // Descargar
-  const fileName = `analytics-${new Date().toISOString().split('T')[0]}.xlsx`
-  XLSX.writeFile(workbook, fileName)
+  // Descargar como blob en el navegador
+  const buffer = await workbook.xlsx.writeBuffer()
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `analytics-${new Date().toISOString().split('T')[0]}.xlsx`
+  a.click()
+  URL.revokeObjectURL(url)
 }
 
 // Exportar a CSV

@@ -1,6 +1,7 @@
 import { aiContent } from "@/components/landing/content"
 import { LandingIcons } from "@/components/landing/icons"
 import { GridBackground, NoiseOverlay } from "@/components/landing/utils"
+import { sanitizeAllowInline } from "@/lib/sanitize"
 
 export function AI() {
   const { eyebrow, headline, headlineAccent, sub, features, demo } = aiContent
@@ -49,9 +50,7 @@ export function AI() {
         <div className="rounded-card-lg border border-line-dark bg-navy-2 p-7">
           {/* Demo header */}
           <div className="mb-[18px] flex items-center gap-2.5 border-b border-line-dark pb-4">
-            <div className="grid h-8 w-8 place-items-center rounded-[8px] bg-emerald font-display text-[13px] font-extrabold text-white">
-              CL
-            </div>
+            <img src="/logo-trimmed.png" alt="ClientLabs" className="h-10 w-10 object-contain" />
             <div>
               <h4 className="m-0 font-display text-[16px] font-bold tracking-[-0.015em]">
                 {demo.label}
@@ -64,12 +63,16 @@ export function AI() {
           <div className="grid gap-3.5">
             {demo.messages.map((msg, i) => (
               <div key={i} className="flex items-start gap-3">
-                <div
-                  className="grid h-8 w-8 shrink-0 place-items-center rounded-[8px] font-display text-[12px] font-extrabold text-white"
-                  style={{ background: msg.role === "me" ? "#3c5664" : "#1FA97A" }}
-                >
-                  {msg.role === "me" ? "YO" : "CL"}
-                </div>
+                {msg.role === "me" ? (
+                  <div
+                    className="grid h-8 w-8 shrink-0 place-items-center rounded-[8px] font-display text-[12px] font-extrabold text-white"
+                    style={{ background: "#3c5664" }}
+                  >
+                    YO
+                  </div>
+                ) : (
+                  <img src="/logo-trimmed.png" alt="CL" className="h-10 w-10 shrink-0 object-contain" />
+                )}
                 <div
                   className={[
                     "max-w-[700px] rounded-[12px] border px-3.5 py-3 text-[14.5px] leading-[1.5] text-[#e7edf0]",
@@ -78,7 +81,7 @@ export function AI() {
                       ? "border-line-dark bg-white/[0.04]"
                       : "border-emerald/[0.22] bg-emerald/[0.08]",
                   ].join(" ")}
-                  dangerouslySetInnerHTML={{ __html: msg.text }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeAllowInline(msg.text) }}
                 />
               </div>
             ))}

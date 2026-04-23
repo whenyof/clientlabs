@@ -78,13 +78,13 @@ export async function POST(request: NextRequest) {
         // ── Known business errors ────────────────────────
         if (error instanceof LeadEventError) {
             return NextResponse.json(
-                { error: error.message, code: error.code },
+                { error: 'Error procesando evento', code: error.code },
                 { status: error.statusCode }
             )
         }
 
         // ── Unexpected errors ────────────────────────────
-        console.error('[POST /api/events] Unhandled error:', error)
+        console.error('[POST /api/events] Unhandled error:', error instanceof Error ? error.message : String(error))
         return NextResponse.json(
             { error: 'Internal server error', code: 'INTERNAL_ERROR' },
             { status: 500 }
@@ -138,13 +138,13 @@ export async function GET(request: NextRequest) {
         // ── Known business errors ────────────────────────
         if (error instanceof LeadEventError) {
             return NextResponse.json(
-                { error: error.message, code: error.code },
+                { error: 'Error procesando evento', code: error.code },
                 { status: error.statusCode }
             )
         }
 
         // ── Unexpected errors ────────────────────────────
-        console.error('[GET /api/events] Unhandled error:', error)
+        console.error('[GET /api/events] Unhandled error:', error instanceof Error ? error.message : String(error))
         return NextResponse.json(
             { error: 'Internal server error', code: 'INTERNAL_ERROR' },
             { status: 500 }

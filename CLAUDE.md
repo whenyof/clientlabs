@@ -265,3 +265,66 @@ Si aparece cualquiera de esto, detener y notificar al usuario antes de continuar
 - `refetchInterval` < 30_000
 
 **Contexto:** En 6 dias se consumieron 1.091 GB-Hrs de Vercel (limite: 360 GB-Hrs/mes) causando la pausa del proyecto. La causa principal fue 163 rutas API sin `maxDuration` explícito — el `vercel.json` functions config NO aplica a App Router route handlers.
+
+---
+
+## 🔒 REGLAS DE SEGURIDAD (OBLIGATORIAS)
+
+Estas reglas son OBLIGATORIAS para cualquier modificación o implementación nueva.
+
+### Rate Limiting
+- Todas las API routes tienen rate limiting de 60 req/min por IP via `middleware.ts`
+- Implementado con `@upstash/ratelimit` + Redis — ya configurado y activo
+- NUNCA crear un endpoint sin rate limiting (el middleware lo aplica automáticamente)
+
+### API Keys y Secretos
+- NUNCA usar `NEXT_PUBLIC_` para secretos, tokens o API keys
+- `.env*` siempre en `.gitignore` (ya configurado)
+- NUNCA hardcodear credenciales en el código
+
+### Protección contra Inyecciones
+- SIEMPRE usar Prisma con template literals para queries (`` prisma.$queryRaw`SELECT * FROM t WHERE id = ${id}` ``)
+- NUNCA usar `$queryRawUnsafe` con string concatenation
+- SIEMPRE sanitizar inputs con `lib/sanitize.ts` antes de renderizar HTML dinámico
+- Security headers configurados en `next.config.ts` (CSP, HSTS, XSS Protection, etc.)
+
+### Validación de Inputs
+- TODOS los inputs de usuario se validan con Zod (`lib/validations.ts` tiene schemas reutilizables)
+- NUNCA procesar `request.json()` sin validar con Zod primero
+- Mensajes de error en español para el usuario final
+- Límites de longitud en TODOS los campos de texto
+
+### Checklist para cada nuevo endpoint/formulario
+- [ ] Rate limiting aplicado (automático via middleware — verificar que la ruta empieza por `/api/`)
+- [ ] Input validado con Zod schema antes de cualquier lógica
+- [ ] No hay API keys expuestas en el frontend (sin `NEXT_PUBLIC_SECRET_*`)
+- [ ] Queries usan Prisma con template literals (no SQL raw con concatenación)
+- [ ] Output sanitizado si se renderiza como HTML (`lib/sanitize.ts`)
+- [ ] Errores manejados con try/catch
+- [ ] Respuestas de error no exponen stack traces ni detalles internos
+- [ ] Endpoints que acceden a recursos por ID incluyen `userId` en el WHERE de Prisma
+
+### Historial de Auditorías de Seguridad
+
+| Fecha | Herramientas | Vulns encontradas | Vulns corregidas | Estado |
+|-------|-------------|-------------------|-----------------|--------|
+| 22 Abril 2026 | Semgrep 1.157.0 + Gitleaks 8.30.1 + análisis manual | 25 (3 críticas, 7 altas, 8 medias, 4 bajas, 3 info) | 25/25 | ✅ Completado |
+
+**Próxima auditoría recomendada:** antes del launch público (antes de 23 Junio 2026)
+
+Ejecutar:
+```bash
+semgrep --config p/owasp-top-ten --config p/nextjs .
+gitleaks detect --source . --log-level warn
+npm audit
+```
+
+## Sistema de Permisos por Plan
+
+- **Fuente de verdad:** `lib/plan-gates.ts` — NUNCA hardcodear límites en otro sitio
+- **Backend:** Usar `gateFeature()` o `gateLimit()` de `lib/api-gate.ts` en CADA API route que mutate datos
+- **Frontend:** Usar `usePlan()` hook + `<UpgradeWall>` component
+- **Planes:** FREE (0EUR) -> PRO (14,99EUR) -> BUSINESS (29,99EUR)
+- **Regla:** Cualquier nueva feature DEBE añadirse a `PLAN_FEATURES` en `plan-gates.ts` y protegerse con el gate correspondiente
+- **Regla:** El gate de backend es OBLIGATORIO aunque haya gate de frontend
+- **Regla:** Los errores de gate siempre incluyen `upgradeUrl: "/precios"`

@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma"
 import * as invoiceService from "@/modules/invoicing/services/invoice.service"
 import { computeDueState } from "@domains/invoicing"
 import type { CreateInvoiceInput } from "@domains/invoicing"
+import { gateLimit } from "@/lib/api-gate"
 
 export const dynamic = "force-dynamic"
 
@@ -160,6 +161,14 @@ export async function POST(_request: NextRequest) {
 }
 
 async function _POST_disabled(request: NextRequest) {
+  const gate = await gateLimit("maxInvoicesPerMonth", (userId) => {
+    const start = new Date()
+    start.setDate(1)
+    start.setHours(0, 0, 0, 0)
+    return prisma.invoice.count({ where: { userId, createdAt: { gte: start } } })
+  })
+  if (!gate.allowed) return gate.error!
+
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })

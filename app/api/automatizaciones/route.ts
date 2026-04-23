@@ -4,10 +4,14 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { seedAutomations } from "@/lib/automations/seedAutomations"
+import { gateFeature } from "@/lib/api-gate"
 
 const EXPECTED = 20
 
 export async function GET() {
+  const featureGate = await gateFeature("automations")
+  if (!featureGate.allowed) return featureGate.error!
+
   const session = await getServerSession(authOptions)
   console.log("=== GET /api/automatizaciones ===")
   console.log("Session userId:", session?.user?.id)

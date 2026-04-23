@@ -2185,7 +2185,7 @@ enum LeadTemp {
 enum PlanType {
   FREE
   PRO
-  ENTERPRISE
+  BUSINESS
 }
 
 enum UserRole {

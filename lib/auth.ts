@@ -10,6 +10,10 @@ export const authOptions: NextAuthOptions = {
 
  session: {
  strategy: "jwt",
+ maxAge: 7 * 24 * 60 * 60, // 7 días (el default de NextAuth son 30 días)
+ },
+ jwt: {
+ maxAge: 7 * 24 * 60 * 60, // 7 días
  },
 
  providers: [
@@ -88,7 +92,7 @@ export const authOptions: NextAuthOptions = {
  const fromDb = user as { role?: string; plan?: string; onboardingCompleted?: boolean; selectedSector?: string | null }
  if (fromDb.role != null && fromDb.plan != null && typeof fromDb.onboardingCompleted === "boolean") {
  token.role = fromDb.role as "USER" | "ADMIN"
- token.plan = fromDb.plan as "FREE" | "PRO" | "ENTERPRISE"
+ token.plan = fromDb.plan as "FREE" | "PRO" | "BUSINESS"
  token.onboardingCompleted = fromDb.onboardingCompleted
  token.selectedSector = fromDb.selectedSector ?? null
  } else {
@@ -98,7 +102,7 @@ export const authOptions: NextAuthOptions = {
  })
  if (dbUser) {
  token.role = dbUser.role as "USER" | "ADMIN"
- token.plan = dbUser.plan as "FREE" | "PRO" | "ENTERPRISE"
+ token.plan = dbUser.plan as "FREE" | "PRO" | "BUSINESS"
  token.onboardingCompleted = dbUser.onboardingCompleted
  token.selectedSector = dbUser.selectedSector ?? null
  }
@@ -114,7 +118,7 @@ export const authOptions: NextAuthOptions = {
  if (session.user) {
  session.user.id = token.userId as string
  session.user.role = token.role as "USER" | "ADMIN"
- session.user.plan = token.plan as "FREE" | "PRO" | "ENTERPRISE"
+ session.user.plan = token.plan as "FREE" | "PRO" | "BUSINESS"
  session.user.onboardingCompleted =
  token.onboardingCompleted as boolean
  session.user.selectedSector = token.selectedSector as string | null
@@ -136,5 +140,5 @@ export const authOptions: NextAuthOptions = {
  signIn: "/auth",
  },
 
- secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
+ secret: process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET,
 }

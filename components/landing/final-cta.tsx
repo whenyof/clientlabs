@@ -66,7 +66,7 @@ export function FinalCTA() {
         </div>
 
         {/* Trust row */}
-        <div className="mt-9 flex flex-wrap justify-center gap-5 text-[13.5px] text-[#8fa0aa]">
+        <div className="mt-9 flex flex-wrap justify-center gap-[22px] text-[13.5px] text-[#8fa0aa]">
           {finalCtaContent.trust.map((item) => (
             <span key={item} className="flex items-center gap-1.5">
               <LandingIcons.check className="h-3.5 w-3.5 text-emerald" />

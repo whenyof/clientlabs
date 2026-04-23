@@ -36,10 +36,10 @@ export default function BackupManagementPage() {
   const [runningBackup, setRunningBackup] = useState(false)
   const [runningRollback, setRunningRollback] = useState(false)
 
-  // ✅ AUTHORIZATION CHECK: Only PRO/ENTERPRISE users or admins can access backups
+  // ✅ AUTHORIZATION CHECK: Only PRO/BUSINESS users or admins can access backups
   const isAuthorized = session?.user?.role === "ADMIN" ||
                       session?.user?.plan === "PRO" ||
-                      session?.user?.plan === "ENTERPRISE"
+                      session?.user?.plan === "BUSINESS"
 
   useEffect(() => {
     if (sessionStatus === "loading") return
@@ -73,7 +73,7 @@ export default function BackupManagementPage() {
             Acceso Restringido
           </h2>
           <p className="text-[var(--text-primary)] mb-6">
-            La funcionalidad de backups está disponible solo para planes PRO y ENTERPRISE.
+            La funcionalidad de backups está disponible solo para planes PRO y BUSINESS.
           </p>
           <button
             onClick={() => router.push("/dashboard/finance/billing")}

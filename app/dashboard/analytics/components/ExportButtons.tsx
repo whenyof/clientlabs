@@ -28,7 +28,7 @@ export function ExportButtons({ data, onExportStart, onExportEnd }: ExportButton
           await exportToPDF(data)
           break
         case 'excel':
-          exportToExcel(data)
+          await exportToExcel(data)
           break
         case 'csv':
           exportToCSV(data)

@@ -28,6 +28,7 @@
       "@/components/*": ["./components/*"],
       "@/app/*": ["./app/*"],
       "@/lib/*": ["./lib/*"],
+      "@/hooks/*": ["./hooks/*"],
       "@/config/*": ["./config/*"],
       "@/core/*": ["./core/*"],
       "@/context/*": ["./context/*"],

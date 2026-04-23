@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
  return NextResponse.json(
  {
  success: false,
- error: error.message || 'Backup execution failed',
+ error: 'Error interno del servidor',
  timestamp: new Date().toISOString()
  },
  { status: 500 }

@@ -5,7 +5,7 @@ import { footerContent } from "@/components/landing/content"
 export function NewsletterForm() {
   return (
     <form
-      className="flex max-w-[320px] items-center rounded-full border border-line-dark-2 bg-white/[0.04] px-4 py-1"
+      className="flex max-w-[320px] items-center rounded-full border border-line-dark-2 bg-white/[0.04] py-1 pl-4 pr-1"
       onSubmit={(e) => e.preventDefault()} // TODO: wire up in later phase
     >
       <input

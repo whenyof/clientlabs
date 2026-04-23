@@ -37,7 +37,7 @@ async function getSystemStats() {
       prisma.user.count({ where: { role: "ADMIN" } }),
       prisma.user.count({ where: { plan: "FREE" } }),
       prisma.user.count({ where: { plan: "PRO" } }),
-      prisma.user.count({ where: { plan: "ENTERPRISE" } }),
+      prisma.user.count({ where: { plan: "BUSINESS" } }),
       prisma.user.count({ where: { isBlocked: true } }),
       prisma.impersonationSession.count({ where: { endedAt: null } }),
       prisma.user.findMany({
@@ -173,7 +173,7 @@ export default async function AdminDashboard() {
               <span className="text-white font-medium">{stats.plans.pro}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-white/60">ENTERPRISE</span>
+              <span className="text-white/60">BUSINESS</span>
               <span className="text-white font-medium">{stats.plans.enterprise}</span>
             </div>
           </CardContent>

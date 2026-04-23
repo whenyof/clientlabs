@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
+import { usePlan } from "@/hooks/use-plan"
+import { UpgradeWall } from "@/components/ui/upgrade-wall"
 import { getBaseUrl } from "@/lib/api/baseUrl"
 import { toast } from "sonner"
 import {
@@ -363,6 +365,7 @@ function ActivityEmptyState() {
 type ActiveTab = "conexiones" | "actividad"
 
 export default function ConnectPage() {
+  const { can } = usePlan()
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<ActiveTab>("conexiones")
   const [activeCategory, setActiveCategory] = useState<CategoryId | "all">("all")
@@ -372,6 +375,7 @@ export default function ConnectPage() {
   const [loadingStatus, setLoadingStatus] = useState(true)
 
   useEffect(() => {
+    if (!can("calendarSync")) return
     const controller = new AbortController()
     fetch(getBaseUrl() + "/api/integrations", { signal: controller.signal })
       .then((r) => r.json())
@@ -393,7 +397,9 @@ export default function ConnectPage() {
       .catch(() => {})
       .finally(() => setLoadingStatus(false))
     return () => controller.abort()
-  }, [])
+  }, [can])
+
+  if (!can("calendarSync")) return <UpgradeWall feature="Conectar integraciones" requiredPlan="Pro" />
 
   const handleAction = (integration: IntegrationDef) => {
     if (integration.id === "web") {

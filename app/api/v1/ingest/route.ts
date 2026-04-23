@@ -309,12 +309,7 @@ export async function POST(request: NextRequest) {
       corsHeaders
     )
   } catch (error) {
-    console.error("[ingest] Unhandled error:", {
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-      url: request.url,
-      origin: request.headers.get("origin"),
-    })
+    console.error("[ingest] Unhandled error:", error instanceof Error ? error.message : String(error))
 
     return withCors(
       NextResponse.json({ error: "Internal server error" }, { status: 500 }),

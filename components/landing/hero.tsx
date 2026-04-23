@@ -7,7 +7,7 @@ import { HeroVisual } from "@/components/landing/hero-visual"
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden bg-navy text-white">
+    <section className="relative min-h-screen overflow-hidden bg-navy text-white">
       {/* Background layers */}
       <GridBackground variant="dark" />
       {/* Glow top-left */}
@@ -31,8 +31,8 @@ export function Hero() {
       <NoiseOverlay opacity={0.04} className="mix-blend-overlay" />
 
       {/* Content */}
-      <div className="relative z-10 mx-auto max-w-[1240px] px-7 pb-32 pt-44">
-        <div className="grid items-center gap-16 lg:grid-cols-[1.05fr_1fr]">
+      <div className="relative z-10 mx-auto max-w-[1240px] px-7 pb-[120px] pt-[168px]">
+        <div className="grid items-center gap-[60px] lg:grid-cols-[1.05fr_1fr]">
           {/* ── Left column ── */}
           <div>
             {/* Pill */}
@@ -79,26 +79,6 @@ export function Hero() {
               </Link>
             </div>
 
-            {/* Social proof */}
-            <div className="flex items-center gap-3.5">
-              <div className="flex">
-                {heroContent.proof.avatars.map((av) => (
-                  <span
-                    key={av.initials}
-                    className="grid h-8 w-8 place-items-center rounded-full border-2 border-navy font-display text-[12px] font-bold text-white first:ml-0 -ml-2"
-                    style={{ background: av.color }}
-                  >
-                    {av.initials}
-                  </span>
-                ))}
-              </div>
-              <p className="text-sm text-[#c6d0d6]">
-                <strong className="font-semibold text-white">
-                  {heroContent.proof.count}
-                </strong>{" "}
-                {heroContent.proof.label}
-              </p>
-            </div>
 
             {/* Trust row */}
             <div className="mt-3.5 flex flex-wrap items-center gap-3.5 text-[13px] text-[#8fa0aa]">

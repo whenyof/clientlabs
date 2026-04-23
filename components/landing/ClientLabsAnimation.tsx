@@ -15,7 +15,7 @@ export function ClientLabsAnimation() {
         if (entry.isIntersecting && !fired) {
           setFired(true)
           setTimeout(() => {
-            iframeRef.current?.contentWindow?.postMessage("start", "*")
+            iframeRef.current?.contentWindow?.postMessage("start", window.location.origin)
           }, 200)
         }
       },

@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { useSectorConfig } from "@shared/hooks/useSectorConfig"
+import { usePlan } from "@/hooks/use-plan"
+import { UpgradeWall } from "@/components/ui/upgrade-wall"
 import { DashboardContainer } from "@/components/layout/DashboardContainer"
 import { AnalyticsKPIs } from "./components/AnalyticsKPIs"
 import { DateRangePicker } from "./components/DateRangePicker"
@@ -22,11 +24,14 @@ import { ExportData } from "./lib/exportUtils"
 
 /** Analytics/reports has no dedicated backend — no mock data. */
 export default function AnalyticsPage() {
+  const { can } = usePlan()
   const { labels } = useSectorConfig()
   const a = labels.analytics
   const [selectedRange, setSelectedRange] = useState("7d")
   const [isLoading, setIsLoading] = useState(false)
   const [analyticsData] = useState<ExportData | null>(null)
+
+  if (!can("advancedReports")) return <UpgradeWall feature="Informes avanzados" requiredPlan="Business" />
 
   const handleRangeChange = async (range: string) => {
     setIsLoading(true)

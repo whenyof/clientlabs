@@ -19,7 +19,7 @@ type UserData = {
  email: string
  name: string | null
  role: "USER" | "ADMIN"
- plan: "FREE" | "PRO" | "ENTERPRISE"
+ plan: "FREE" | "PRO" | "BUSINESS"
  onboardingCompleted: boolean
  createdAt: string
  image: string | null
@@ -51,7 +51,7 @@ function PlanBadge({ plan }: { plan: string }) {
  const colors = {
  FREE: "bg-gray-500/20 text-[var(--text-secondary)] border-gray-500/30",
  PRO: "bg-[var(--accent-soft)]-primary/15 text-[var(--accent)]-bg-emerald-600 border-[var(--accent)]-primary/30",
- ENTERPRISE: "bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border-subtle)]"
+ BUSINESS: "bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border-subtle)]"
  }
 
  return (
@@ -107,7 +107,7 @@ export function UserManagementTable({ initialUsers }: { initialUsers: UserData[]
  }
  }
 
- const handlePlanChange = async (userId: string, newPlan: "FREE" | "PRO" | "ENTERPRISE") => {
+ const handlePlanChange = async (userId: string, newPlan: "FREE" | "PRO" | "BUSINESS") => {
  try {
  const response = await fetch(`${getBaseUrl()}/api/admin/users/${userId}`, {
  method: "PATCH",

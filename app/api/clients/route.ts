@@ -1,7 +1,16 @@
 import { NextRequest, NextResponse } from "next/server"
+import { z } from "zod"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { gateLimit } from "@/lib/api-gate"
+
+const createClientSchema = z.object({
+  name: z.string().min(1, "Nombre requerido").max(200).trim(),
+  email: z.string().email("Email no válido").max(255).optional().or(z.literal("")),
+  phone: z.string().max(50).trim().optional(),
+  totalSpent: z.union([z.string().max(20), z.number()]).optional(),
+})
 
 export const dynamic = "force-dynamic"
 export const maxDuration = 15
@@ -39,35 +48,44 @@ export async function GET(request: NextRequest) {
 /** POST /api/clients — creates a client manually */
 export async function POST(req: Request) {
   try {
+    const gate = await gateLimit("maxClients", (userId) =>
+      prisma.client.count({ where: { userId } })
+    )
+    if (!gate.allowed) return gate.error!
+
     const session = await getServerSession(authOptions)
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 })
     }
 
-    const body = await req.json()
-
-    if (!body.name?.trim()) {
-      return NextResponse.json({ error: "Nombre requerido" }, { status: 400 })
+    const raw = await req.json()
+    const parsed = createClientSchema.safeParse(raw)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message ?? "Datos no válidos" },
+        { status: 400 }
+      )
     }
+    const { name, email, phone, totalSpent } = parsed.data
 
     const client = await withTimeout(
       prisma.client.create({
         data: {
           userId: session.user.id,
-          name: body.name.trim(),
-          email: body.email?.trim() || null,
-          phone: body.phone?.trim() || null,
+          name,
+          email: email || null,
+          phone: phone || null,
           status: "ACTIVE",
-          totalSpent: body.totalSpent ? parseFloat(body.totalSpent) : 0,
+          totalSpent: totalSpent !== undefined ? parseFloat(String(totalSpent)) : 0,
         },
       }),
       12000
     )
 
     return NextResponse.json(client)
-  } catch (err: any) {
+  } catch (err) {
     console.error("POST /api/clients error:", err)
-    return NextResponse.json({ error: err.message || "Error interno" }, { status: 500 })
+    return NextResponse.json({ error: "Error interno" }, { status: 500 })
   }
 }

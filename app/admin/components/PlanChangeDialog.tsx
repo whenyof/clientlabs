@@ -19,14 +19,14 @@ type UserData = {
  email: string
  name: string | null
  role: "USER" | "ADMIN"
- plan: "FREE" | "PRO" | "ENTERPRISE"
+ plan: "FREE" | "PRO" | "BUSINESS"
 }
 
 type PlanChangeDialogProps = {
  open: boolean
  onOpenChange: (open: boolean) => void
  user: UserData
- onConfirm: (userId: string, newPlan: "FREE" | "PRO" | "ENTERPRISE") => Promise<void>
+ onConfirm: (userId: string, newPlan: "FREE" | "PRO" | "BUSINESS") => Promise<void>
 }
 
 const PLANS = [
@@ -43,7 +43,7 @@ const PLANS = [
  color: "bg-[var(--accent-soft)]-primary/15 text-[var(--accent)]-bg-emerald-600 border-[var(--accent)]-primary/30"
  },
  {
- value: "ENTERPRISE",
+ value: "BUSINESS",
  label: "Enterprise",
  description: "Full features with priority support",
  color: "bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border-subtle)]"
@@ -52,7 +52,7 @@ const PLANS = [
 
 export function PlanChangeDialog({ open, onOpenChange, user, onConfirm }: PlanChangeDialogProps) {
  const [loading, setLoading] = useState(false)
- const [selectedPlan, setSelectedPlan] = useState<"FREE" | "PRO" | "ENTERPRISE">(user.plan)
+ const [selectedPlan, setSelectedPlan] = useState<"FREE" | "PRO" | "BUSINESS">(user.plan)
 
  const handleConfirm = async () => {
  if (selectedPlan === user.plan) {
@@ -87,7 +87,7 @@ export function PlanChangeDialog({ open, onOpenChange, user, onConfirm }: PlanCh
 
  <div className="space-y-3">
  <Label className="text-[var(--text-primary)]">Select Plan</Label>
- <RadioGroup value={selectedPlan} onValueChange={(value: string) => setSelectedPlan(value as "FREE" | "PRO" | "ENTERPRISE")}>
+ <RadioGroup value={selectedPlan} onValueChange={(value: string) => setSelectedPlan(value as "FREE" | "PRO" | "BUSINESS")}>
  {PLANS.map((plan) => (
  <div
  key={plan.value}

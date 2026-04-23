@@ -1,4 +1,5 @@
 import { problemContent } from "@/components/landing/content"
+import { BrandIcons } from "@/components/landing/brand-icons"
 
 export function TangleVisual() {
   const { nodes, pairs, visualCaption } = problemContent
@@ -9,7 +10,11 @@ export function TangleVisual() {
   const captionRight = parts.slice(1).join(" · ")
 
   return (
-    <div className="relative aspect-[4/5] w-full overflow-hidden rounded-card-lg border border-line bg-[#F8FAFB] p-6 lg:sticky lg:top-[120px]">
+    <div
+      className="relative w-full overflow-hidden rounded-card-lg border border-line bg-[#F8FAFB] p-6 lg:sticky lg:top-[120px]"
+      style={{ aspectRatio: "4/5" }}
+    >
+      {/* Inner tangle — fills padded content area, matches ref: .tangle { position: relative; width: 100%; height: 100% } */}
       <div className="relative h-full w-full">
         {/* Connecting lines */}
         <svg
@@ -41,21 +46,32 @@ export function TangleVisual() {
         </svg>
 
         {/* Nodes */}
-        {nodes.map((node, i) => (
-          <div
-            key={i}
-            className="absolute flex items-center gap-1.5 rounded-[10px] border border-line bg-white px-2.5 py-2 font-display text-[12.5px] font-semibold shadow-soft"
-            style={{ left: node.x, top: node.y }}
-          >
-            <span
-              className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-[5px] font-display text-[10px] font-extrabold text-white"
-              style={{ background: node.color }}
+        {nodes.map((node, i) => {
+          const brand = BrandIcons[node.label]
+          return (
+            <div
+              key={i}
+              className="absolute flex items-center gap-1.5 rounded-[10px] border border-line bg-white px-2.5 py-2 font-display text-[12.5px] font-semibold shadow-soft"
+              style={{ left: node.x, top: node.y }}
             >
-              {node.label[0]}
-            </span>
-            {node.label}
-          </div>
-        ))}
+              {brand ? (
+                /* Brand SVG — no background, icon carries its own colors */
+                <span
+                  className="grid h-[18px] w-[18px] shrink-0 place-items-center [&_svg]:h-full [&_svg]:w-full"
+                  dangerouslySetInnerHTML={{ __html: brand.svg }}
+                />
+              ) : (
+                <span
+                  className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-[5px] font-display text-[10px] font-extrabold text-white"
+                  style={{ background: node.color }}
+                >
+                  {node.label[0]}
+                </span>
+              )}
+              {node.label}
+            </div>
+          )
+        })}
       </div>
 
       {/* Caption */}

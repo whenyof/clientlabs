@@ -1,11 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { z } from 'zod'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 import { invalidateCachedData } from '@/lib/redis-cache'
 import { updateLeadScore } from '@/lib/scoring/updateLeadScore'
 import { runAutomation } from '@/lib/automations/engine'
+import { gateLimit } from '@/lib/api-gate'
+
+const createLeadSchema = z.object({
+  name: z.string().min(1, "Nombre requerido").max(200).trim(),
+  email: z.string().email("Email no válido").max(255).optional().or(z.literal("")),
+  phone: z.string().max(50).optional(),
+  company: z.string().max(200).trim().optional(),
+  source: z.string().max(100).optional(),
+  budget: z.union([z.string().max(50), z.number()]).optional(),
+  notes: z.string().max(5000).trim().optional(),
+})
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 30
@@ -222,23 +234,31 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const origin = request.headers.get('origin')
   try {
+    const gate = await gateLimit("maxLeadsTotal", (userId) =>
+      prisma.lead.count({ where: { userId } })
+    )
+    if (!gate.allowed) return withCors(gate.error!, origin)
+
     const session = await getServerSession(authOptions)
 
     if (!session?.user?.id) {
       return withCors(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }), origin)
     }
 
-    const body = await request.json()
+    const raw = await request.json()
+    const parsed = createLeadSchema.safeParse(raw)
 
-    const {
-      name,
-      email,
-      phone,
-      company,
-      source,
-      budget,
-      notes
-    } = body
+    if (!parsed.success) {
+      return withCors(
+        NextResponse.json(
+          { error: parsed.error.issues[0]?.message ?? "Datos no válidos" },
+          { status: 400 }
+        ),
+        origin
+      )
+    }
+
+    const { name, email, phone, company, source, budget, notes } = parsed.data
 
     const lead = await prisma.lead.create({
       data: {
@@ -252,7 +272,7 @@ export async function POST(request: NextRequest) {
         notes,
         metadata: {
           ...(company ? { company } : {}),
-          ...(budget ? { budget: parseFloat(budget) } : {}),
+          ...(budget !== undefined && budget !== "" ? { budget: parseFloat(String(budget)) } : {}),
         },
       },
       include: {

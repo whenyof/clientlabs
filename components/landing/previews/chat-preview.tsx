@@ -1,4 +1,5 @@
 import { platformContent } from "@/components/landing/content"
+import { sanitizeAllowInline } from "@/lib/sanitize"
 
 export function ChatPreview() {
   const { topbar, messages } = platformContent.preview.ai
@@ -29,8 +30,7 @@ export function ChatPreview() {
                 </div>
                 <div
                   className="max-w-full rounded-[10px] border border-line bg-[#F8FAFB] px-[11px] py-2 text-[12.5px] leading-[1.45] [&_b]:font-bold [&_b]:text-emerald-ink"
-                  /* Messages contain <b> tags from content.ts — safe static data */
-                  dangerouslySetInnerHTML={{ __html: msg.text }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeAllowInline(msg.text) }}
                 />
               </div>
             ))}

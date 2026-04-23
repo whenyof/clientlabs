@@ -9,7 +9,7 @@ async function getPlanStats() {
     const [freeCount, proCount, enterpriseCount, totalUsers] = await Promise.all([
       prisma.user.count({ where: { plan: "FREE" } }),
       prisma.user.count({ where: { plan: "PRO" } }),
-      prisma.user.count({ where: { plan: "ENTERPRISE" } }),
+      prisma.user.count({ where: { plan: "BUSINESS" } }),
       prisma.user.count(),
     ])
 
@@ -43,7 +43,7 @@ async function getPlanStats() {
           ]
         },
         {
-          name: "ENTERPRISE",
+          name: "BUSINESS",
           label: "Enterprise",
           description: "Full features with priority support",
           userCount: enterpriseCount,

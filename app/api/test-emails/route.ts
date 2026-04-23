@@ -26,7 +26,7 @@ async function sendEmail(from: string, subject: string, label: string) {
     return { from, success: res.ok, data }
   } catch (error) {
     clearTimeout(timeout)
-    return { from, success: false, data: { error: String(error) } }
+    return { from, success: false, data: { error: "Error interno del servidor" } }
   }
 }
 

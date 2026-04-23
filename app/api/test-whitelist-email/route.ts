@@ -32,6 +32,6 @@ export async function GET() {
     return NextResponse.json({ success: res.ok, data })
   } catch (error) {
     clearTimeout(timeout)
-    return NextResponse.json({ error: String(error) }, { status: 500 })
+    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 })
   }
 }

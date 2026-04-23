@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import Anthropic from "@anthropic-ai/sdk"
+import { gateFeature } from "@/lib/api-gate"
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -16,6 +17,9 @@ const SYSTEM_PROMPTS: Record<string, string> = {
 }
 
 export async function POST(request: NextRequest) {
+  const gate = await gateFeature("ai")
+  if (!gate.allowed) return gate.error!
+
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })

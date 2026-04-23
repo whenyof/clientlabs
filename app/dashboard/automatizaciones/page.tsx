@@ -8,6 +8,8 @@ import {
   CheckCircle, Send, Users, Gift, AlertTriangle,
   Zap, Mail, X, Sparkles, CheckSquare, Building2, Package, Star,
 } from "lucide-react"
+import { usePlan } from "@/hooks/use-plan"
+import { UpgradeWall } from "@/components/ui/upgrade-wall"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -114,6 +116,7 @@ const VARS_CONTACTOS = [
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function AutomatizacionesPage() {
+  const { can } = usePlan()
   const [automatizaciones, setAutomatizaciones] = useState<DbAuto[]>([])
   const [actividad, setActividad] = useState<LogEntry[]>([])
   const [loading, setLoading] = useState(true)
@@ -123,6 +126,8 @@ export default function AutomatizacionesPage() {
   const [drawerAsunto, setDrawerAsunto] = useState("")
   const [drawerMensaje, setDrawerMensaje] = useState("")
   const [drawerDias, setDrawerDias] = useState(1)
+
+  if (!can("automations")) return <UpgradeWall feature="Automatizaciones" requiredPlan="Pro" />
 
   useEffect(() => {
     fetch("/api/automatizaciones")

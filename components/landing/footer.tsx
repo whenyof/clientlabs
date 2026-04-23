@@ -9,13 +9,11 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1fr_1fr]">
           {/* Brand column */}
           <div>
-            <div className="flex items-center gap-2.5 font-display text-lg font-extrabold tracking-[-0.02em] text-white">
-              <span className="grid h-7 w-7 place-items-center rounded-lg bg-emerald font-display text-[15px] font-black text-white shadow-[0_6px_14px_rgba(31,169,122,.3)]">
-                C
-              </span>
-              <span>{footerContent.brand.name}</span>
+            <div className="flex items-center gap-1 font-display text-lg font-extrabold tracking-[-0.02em] text-white">
+              <img src="/logo-trimmed.png" alt="ClientLabs" className="h-7 w-7 object-contain" />
+              <span className="leading-none">{footerContent.brand.name}</span>
             </div>
-            <p className="mb-6 mt-3 max-w-[280px] text-sm leading-relaxed text-[#8fa0aa]">
+            <p className="mb-[22px] mt-3 max-w-[280px] text-[14.5px] leading-[1.5] text-[#8fa0aa]">
               {footerContent.brand.tagline}
             </p>
             <p className="mb-2.5 font-mono text-[11px] uppercase tracking-[0.14em] text-white/55">
@@ -27,7 +25,7 @@ export function Footer() {
           {/* Link columns */}
           {footerContent.columns.map((col) => (
             <div key={col.heading}>
-              <h5 className="mb-4 mt-0 font-display text-[13px] font-bold uppercase tracking-[.05em] text-white">
+              <h5 className="mb-[18px] mt-0 font-display text-[13px] font-bold uppercase tracking-[.05em] text-white">
                 {col.heading}
               </h5>
               <ul className="m-0 grid list-none gap-2.5 p-0">

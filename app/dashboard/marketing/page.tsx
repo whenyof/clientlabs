@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
+import { usePlan } from "@/hooks/use-plan"
+import { UpgradeWall } from "@/components/ui/upgrade-wall"
 import {
   Megaphone, Filter, Plus,
   LayoutDashboard, Send, Newspaper,
@@ -176,7 +178,7 @@ const SEGMENTOS_DATA = [
   { nombre: "Clientes activos",       desc: "Con factura en últimos 90d",    count: 87, color: "text-[#1FA97A]",   bg: "bg-[#E1F5EE]"     },
   { nombre: "Sin contactar +14d",     desc: "Leads sin acción reciente",     count: 21, color: "text-amber-600",   bg: "bg-amber-50"      },
   { nombre: "Inactivos >6 meses",     desc: "Para reactivación",             count: 56, color: "text-indigo-600",  bg: "bg-indigo-50"     },
-  { nombre: "Clientes PRO",           desc: "Plan PRO o ENTERPRISE",         count: 12, color: "text-sky-600",     bg: "bg-sky-50"        },
+  { nombre: "Clientes PRO / Business", desc: "Plan PRO o Business",           count: 12, color: "text-sky-600",     bg: "bg-sky-50"        },
 ]
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -2139,6 +2141,7 @@ const SECUENCIAS: Record<string, Array<{ dia: number; asunto: string; mensaje: s
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 export default function MarketingPage() {
+  const { can } = usePlan()
   const [activeTab, setActiveTab] = useState("resumen")
   const [modalCampana, setModalCampana] = useState(false)
   const [pasoModal, setPasoModal] = useState<1|2|3|4|5>(1)
@@ -2167,6 +2170,8 @@ export default function MarketingPage() {
     tipo: string
     creadaEn: string
   }>>([])
+
+  if (!can("emailMarketing")) return <UpgradeWall feature="Email Marketing" requiredPlan="Business" />
 
   function handleNuevaCampana() {
     setActiveTab("campanas")

@@ -196,8 +196,8 @@ export async function POST(req: NextRequest) {
                         results.push(createResult)
                     }
                 } catch (e) {
-                    console.error(`[INGEST][ITEM ERROR] #${idx} failed for user ${userId}:`, e)
-                    results.push({ status: "error", message: e instanceof Error ? e.message : String(e) })
+                    console.error(`[INGEST][ITEM ERROR] #${idx} failed for user ${userId}:`, e instanceof Error ? e.message : "Unknown error")
+                    results.push({ status: "error", message: "Error interno" })
                 }
             }
 
@@ -209,14 +209,12 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: true, status: "Verified" })
 
     } catch (err) {
-        console.error("[INGEST][CRITICAL FAIL]:", err)
+        console.error("[INGEST][CRITICAL FAIL]:", err instanceof Error ? err.message : "Unknown error")
         logger.error("ingest_500", "Critical fail", undefined, {
             error: err instanceof Error ? err.message : "unknown",
-            stack: err instanceof Error ? err.stack : undefined
         })
-        return NextResponse.json({ 
+        return NextResponse.json({
             error: "INGEST_FAILED",
-            message: err instanceof Error ? err.message : "Critical ingestion failure"
         }, { status: 500 })
     }
 }

@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
  .sort((a, b) => b.name.localeCompare(a.name))
  .slice(0, 10) // Last 10
  } catch (error: any) {
- cloudError = error.message
+ cloudError = 'Error al leer backups en la nube'
  console.error('Error reading cloud backups:', error)
  }
 

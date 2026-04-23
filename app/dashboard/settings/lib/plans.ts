@@ -21,45 +21,48 @@ export interface Plan {
 
 export const PLANS: Plan[] = [
   {
-    id: 'starter',
-    name: 'Starter',
-    price: 1500, // 15€
+    id: 'free',
+    name: 'Free',
+    price: 0,
     currency: 'EUR',
     interval: 'month',
-    stripePriceId: process.env.STRIPE_STARTER_PRICE_ID || '',
+    stripePriceId: '',
     features: [
-      'Hasta 200 clientes',
-      '5 automatizaciones',
-      'Soporte por email',
-      'Dashboard básico',
-      '1 usuario'
+      '50 leads totales',
+      '20 clientes activos',
+      '10 facturas / mes',
+      'Pipeline visual básico',
+      '1 formulario embebible',
+      '1 usuario',
+      'Soporte por email (48h)',
     ],
     limits: {
-      clients: 200,
-      automations: 5,
-      integrations: 2,
-      aiRequests: 100
+      clients: 20,
+      automations: 0,
+      integrations: 0,
+      aiRequests: 0
     },
-    badge: 'Básico'
+    badge: 'Gratis'
   },
   {
     id: 'pro',
     name: 'Pro',
-    price: 2900, // 29€
+    price: 1499, // 14,99€
     currency: 'EUR',
     interval: 'month',
     stripePriceId: process.env.STRIPE_PRO_PRICE_ID || '',
     features: [
-      'Clientes ilimitados',
-      'Automatizaciones ilimitadas',
-      'IA básica incluida',
-      'Todas las integraciones',
-      'Soporte prioritario',
-      'Hasta 5 usuarios'
+      'Leads, clientes y facturas ilimitados',
+      'Hasta 3 usuarios',
+      'Sin marca de agua en facturas',
+      'IA para calificar leads',
+      'Automatizaciones básicas (5 activas)',
+      'Google Calendar sync',
+      'Soporte prioritario por chat (24h)',
     ],
     limits: {
-      clients: -1, // unlimited
-      automations: -1,
+      clients: -1,
+      automations: 5,
       integrations: -1,
       aiRequests: 1000
     },
@@ -69,18 +72,18 @@ export const PLANS: Plan[] = [
   {
     id: 'business',
     name: 'Business',
-    price: 5900, // 59€
+    price: 2999, // 29,99€
     currency: 'EUR',
     interval: 'month',
     stripePriceId: process.env.STRIPE_BUSINESS_PRICE_ID || '',
     features: [
-      'IA avanzada',
-      'Reportes PDF profesionales',
-      'Multi-empresa',
-      'API completa',
-      'Soporte VIP 24/7',
-      'Usuarios ilimitados',
-      'White-label'
+      'Todo ilimitado · Hasta 10 usuarios',
+      'IA avanzada con predicciones de cierre',
+      'Automatizaciones ilimitadas',
+      'Webhooks y API completa',
+      'Roles y permisos de equipo',
+      'Verifactu incluido',
+      'Soporte dedicado (videollamada mensual)',
     ],
     limits: {
       clients: -1,
@@ -88,24 +91,22 @@ export const PLANS: Plan[] = [
       integrations: -1,
       aiRequests: -1
     },
-    badge: 'Enterprise'
+    badge: 'Business'
   }
 ]
 
 export const PLAN_NAMES = {
-  starter: 'Starter',
+  free: 'Free',
   pro: 'Pro',
   business: 'Business',
   trial: 'Prueba gratuita',
-  free: 'Gratuito'
 }
 
 export const PLAN_COLORS = {
-  starter: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+  free: 'bg-gray-500/20 text-[var(--text-secondary)] border-gray-500/30',
   pro: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-  business: 'bg-green-500/20 text-green-400 border-green-500/30',
+  business: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
   trial: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-  free: 'bg-[var(--bg-main)]0/20 text-[var(--text-secondary)] border-[var(--border-subtle)]'
 }
 
 export function getPlanById(planId: string): Plan | undefined {
@@ -131,8 +132,8 @@ export function getPlanLimits(planId: string) {
 }
 
 export function canUpgrade(currentPlan: string, targetPlan: string): boolean {
-  const order = ['trial', 'free', 'starter', 'pro', 'business']
-  const currentIndex = order.indexOf(currentPlan)
-  const targetIndex = order.indexOf(targetPlan)
+  const order = ['trial', 'free', 'pro', 'business']
+  const currentIndex = order.indexOf(currentPlan.toLowerCase())
+  const targetIndex = order.indexOf(targetPlan.toLowerCase())
   return targetIndex > currentIndex
 }

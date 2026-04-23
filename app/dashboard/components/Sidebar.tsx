@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react"
 import { motion } from "framer-motion"
 import { useEffect, useState } from "react"
 import { useSectorConfig } from "@/hooks/useSectorConfig"
+import { usePlan } from "@/hooks/use-plan"
 import {
   LayoutDashboard,
   Users,
@@ -78,6 +79,7 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
   const pathname = usePathname()
   const { data: session, status } = useSession()
   const { labels } = useSectorConfig()
+  const { can } = usePlan()
   const nav = labels.nav
   const isAdmin = session?.user?.role === "ADMIN"
 
@@ -122,7 +124,7 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
     {
       title: "SISTEMA",
       items: [
-        ...(session?.user?.plan === "PRO" || session?.user?.plan === "ENTERPRISE" || isAdmin
+        ...(session?.user?.plan === "PRO" || session?.user?.plan === "BUSINESS" || isAdmin
           ? [{ label: "Sistema de Backups", href: "/dashboard/system/backups", icon: ShieldCheck }]
           : []
         ),
@@ -217,20 +219,31 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
                       <Icon size={18} />
 
                       {!isCollapsed && (
-                        <div className="flex justify-between w-full">
+                        <div className="flex justify-between w-full items-center">
                           <span>{item.label}</span>
 
-                          {item.count && (
-                            <span
-                              className="text-xs px-2 rounded-full font-semibold"
-                              style={{
-                                background: item.href === "/dashboard/tasks" ? "#FEF2F2" : "var(--accent-soft)",
-                                color: item.href === "/dashboard/tasks" ? "#EF4444" : "var(--accent)",
-                              }}
-                            >
-                              {item.count}
-                            </span>
-                          )}
+                          <div className="flex items-center gap-1">
+                            {item.href === "/dashboard/automatizaciones" && !can("automations") && (
+                              <span className="rounded bg-[#1FA97A]/10 px-1.5 py-0.5 text-[10px] font-bold text-[#1FA97A]">PRO</span>
+                            )}
+                            {item.href === "/dashboard/marketing" && !can("emailMarketing") && (
+                              <span className="rounded bg-[#1FA97A]/10 px-1.5 py-0.5 text-[10px] font-bold text-[#1FA97A]">BIZ</span>
+                            )}
+                            {item.href === "/dashboard/connect" && !can("calendarSync") && (
+                              <span className="rounded bg-[#1FA97A]/10 px-1.5 py-0.5 text-[10px] font-bold text-[#1FA97A]">PRO</span>
+                            )}
+                            {item.count && (
+                              <span
+                                className="text-xs px-2 rounded-full font-semibold"
+                                style={{
+                                  background: item.href === "/dashboard/tasks" ? "#FEF2F2" : "var(--accent-soft)",
+                                  color: item.href === "/dashboard/tasks" ? "#EF4444" : "var(--accent)",
+                                }}
+                              >
+                                {item.count}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       )}
                     </button>

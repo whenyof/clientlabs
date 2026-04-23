@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
  return NextResponse.json(
  {
  success: false,
- error: error.message || 'Rollback execution failed',
+ error: 'Error interno del servidor',
  timestamp: new Date().toISOString()
  },
  { status: 500 }

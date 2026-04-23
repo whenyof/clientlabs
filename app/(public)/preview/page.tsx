@@ -7,6 +7,9 @@ import { Problem }   from "@/components/landing/problem"
 import { Platform }  from "@/components/landing/platform"
 import { Tasks }     from "@/components/landing/tasks"
 import { AI }        from "@/components/landing/ai"
+import { Carousel }  from "@/components/landing/carousel"
+import { Stats }     from "@/components/landing/stats"
+import { Pricing }   from "@/components/landing/pricing"
 import { FinalCTA }  from "@/components/landing/final-cta"
 import { Footer }    from "@/components/landing/footer"
 
@@ -40,9 +43,11 @@ export default async function PreviewPage({ searchParams }: Props) {
         <Hero />
         <Problem />
         <Platform />
+        <Carousel />
         <Tasks />
         <AI />
-        {/* Fase D: Carousel, Stats, Pricing */}
+        <Stats />
+        <Pricing />
         <FinalCTA />
       </main>
       <Footer />

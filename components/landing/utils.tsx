@@ -115,10 +115,9 @@ export function GridBackground({
   variant = "light",
   className,
 }: GridBackgroundProps) {
-  const color =
-    variant === "dark"
-      ? "rgba(31,169,122,0.04)"
-      : "rgba(31,169,122,0.05)"
+  const isDark = variant === "dark"
+  const color = isDark ? "rgba(255,255,255,.04)" : "rgba(11,31,42,.035)"
+  const size  = isDark ? "56px 56px" : "48px 48px"
 
   return (
     <div
@@ -126,7 +125,7 @@ export function GridBackground({
       className={cn("absolute inset-0 pointer-events-none", className)}
       style={{
         backgroundImage: `linear-gradient(${color} 1px, transparent 1px), linear-gradient(90deg, ${color} 1px, transparent 1px)`,
-        backgroundSize: "60px 60px",
+        backgroundSize: size,
       }}
     />
   )

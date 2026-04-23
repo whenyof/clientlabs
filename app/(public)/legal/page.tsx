@@ -3,8 +3,10 @@ import Link from "next/link"
 import { FileText, Shield, Cookie } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "Legal — ClientLabs",
-  description: "Información legal de ClientLabs",
+  title: "Información Legal — ClientLabs",
+  description: "Aviso legal, términos, privacidad y cookies de ClientLabs. Cumplimiento RGPD y normativa española.",
+  robots: { index: false, follow: false },
+  alternates: { canonical: "https://clientlabs.io/legal" },
 }
 
 export default function LegalPage() {

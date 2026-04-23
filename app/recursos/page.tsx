@@ -4,8 +4,17 @@ import { ImageIcon, FileSpreadsheet, Mail, CheckSquare, Calculator, Calendar, Ex
 import { Navbar } from "../ui/chrome"
 
 export const metadata: Metadata = {
-  title: "Recursos para autónomos | ClientLabs",
-  description: "Todo lo que necesitas para gestionar mejor tu negocio. Gratis.",
+  title: "Recursos — ClientLabs | Aprende a Sacar el Máximo Partido",
+  description: "Guías, tutoriales, documentación y recursos para sacar el máximo partido a ClientLabs. Todo en español, pensado para autónomos y pequeños negocios.",
+  keywords: ["recursos autónomos", "plantillas facturación", "guías crm", "tutoriales gestión clientes"],
+  openGraph: {
+    title: "Recursos — ClientLabs | Aprende a Sacar el Máximo Partido",
+    description: "Guías, tutoriales y recursos para autónomos y pequeños negocios. Todo en español.",
+    type: "website",
+    url: "https://clientlabs.io/recursos",
+    siteName: "ClientLabs",
+    locale: "es_ES",
+  },
   alternates: { canonical: "https://clientlabs.io/recursos" },
 }
 

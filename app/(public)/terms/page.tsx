@@ -3,7 +3,9 @@ import Link from "next/link"
 
 export const metadata: Metadata = {
   title: "Términos y Condiciones — ClientLabs",
-  description: "Términos y condiciones de uso de ClientLabs",
+  description: "Consulta los términos y condiciones de uso de ClientLabs. Sin letra pequeña, todo en español.",
+  robots: { index: false, follow: false },
+  alternates: { canonical: "https://clientlabs.io/terms" },
 }
 
 export default function TermsPage() {

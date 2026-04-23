@@ -14,14 +14,24 @@ import { FinalCTA }  from "@/components/landing/final-cta"
 import { Footer }    from "@/components/landing/footer"
 
 export const metadata: Metadata = {
-  title: "ClientLabs · Todo tu negocio. Un solo sistema.",
+  title: "ClientLabs — CRM y Facturación para Autónomos y Pequeños Negocios",
   description:
-    "CRM, tareas, facturación, automatizaciones e IA. El sistema operativo para autónomos y pequeños negocios hispanohablantes.",
+    "Gestiona leads, clientes, proveedores y facturas en un solo sistema. CRM con IA, automatizaciones y facturación electrónica para autónomos en España. Empieza gratis.",
+  keywords: ["crm autónomos", "facturación autónomos", "gestión clientes", "software pymes españa", "crm español", "facturación electrónica", "crm gratis"],
   openGraph: {
-    title: "ClientLabs",
-    description: "Todo tu negocio. Un solo sistema.",
+    title: "ClientLabs — CRM y Facturación para Autónomos",
+    description: "Gestiona leads, clientes, proveedores y facturas en un solo sistema. Empieza gratis.",
     type: "website",
+    url: "https://clientlabs.io",
+    siteName: "ClientLabs",
+    locale: "es_ES",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "ClientLabs — CRM y Facturación para Autónomos",
+    description: "Gestiona leads, clientes, proveedores y facturas en un solo sistema. Empieza gratis.",
+  },
+  alternates: { canonical: "https://clientlabs.io" },
 }
 
 interface Props {

@@ -76,6 +76,10 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://clientlabs.io",
   },
+  icons: {
+    icon: '/icon.png',
+    apple: '/apple-icon.png',
+  },
 }
 
 /* ================================
@@ -98,16 +102,21 @@ const themeScript = `
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  "name": "ClientLabs",
-  "applicationCategory": "BusinessApplication",
-  "offers": {
-    "@type": "Offer",
-    "price": "9.99",
-    "priceCurrency": "EUR"
+  name: "ClientLabs",
+  applicationCategory: "BusinessApplication",
+  operatingSystem: "Web",
+  description: "CRM y facturación para autónomos y pequeños negocios en España",
+  url: "https://clientlabs.io",
+  offers: [
+    { "@type": "Offer", price: "0",     priceCurrency: "EUR", name: "Free"     },
+    { "@type": "Offer", price: "14.99", priceCurrency: "EUR", name: "Pro"      },
+    { "@type": "Offer", price: "29.99", priceCurrency: "EUR", name: "Business" },
+  ],
+  aggregateRating: {
+    "@type": "AggregateRating",
+    ratingValue: "4.8",
+    ratingCount: "200",
   },
-  "operatingSystem": "Web",
-  "description": "CRM para autónomos españoles",
-  "url": "https://clientlabs.io",
 }
 
 /* ================================

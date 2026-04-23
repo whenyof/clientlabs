@@ -7,8 +7,17 @@ import { ARTICLES } from "./data"
 export const revalidate = 3600
 
 export const metadata: Metadata = {
-  title: "Blog para autónomos | ClientLabs",
-  description: "Consejos, guías y recursos prácticos para autónomos y freelancers españoles. Gestión, fiscalidad, clientes y productividad.",
+  title: "Blog — ClientLabs | Guías y Consejos para Autónomos",
+  description: "Artículos, guías y recursos para autónomos y pequeños negocios. Aprende a gestionar tu negocio mejor con consejos prácticos sobre fiscalidad, clientes y productividad.",
+  keywords: ["blog autónomos", "consejos facturación", "guías crm pymes", "fiscalidad autónomos españa", "gestión freelance"],
+  openGraph: {
+    title: "Blog — ClientLabs | Guías y Consejos para Autónomos",
+    description: "Artículos, guías y recursos para autónomos y pequeños negocios.",
+    type: "website",
+    url: "https://clientlabs.io/blog",
+    siteName: "ClientLabs",
+    locale: "es_ES",
+  },
   alternates: { canonical: "https://clientlabs.io/blog" },
 }
 

@@ -4,8 +4,16 @@ import { Plus, Wrench, Bug } from "lucide-react"
 import { Navbar } from "../ui/chrome"
 
 export const metadata: Metadata = {
-  title: "Novedades | ClientLabs",
-  description: "Todas las mejoras y nuevas funciones de ClientLabs.",
+  title: "Novedades — ClientLabs | Últimas Actualizaciones",
+  description: "Descubre las últimas funciones, mejoras y actualizaciones de ClientLabs. Estamos en constante evolución para tu negocio.",
+  openGraph: {
+    title: "Novedades — ClientLabs | Últimas Actualizaciones",
+    description: "Descubre las últimas funciones, mejoras y actualizaciones de ClientLabs.",
+    type: "website",
+    url: "https://clientlabs.io/changelog",
+    siteName: "ClientLabs",
+    locale: "es_ES",
+  },
   alternates: { canonical: "https://clientlabs.io/changelog" },
 }
 

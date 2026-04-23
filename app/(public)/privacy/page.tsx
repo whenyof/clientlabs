@@ -3,7 +3,9 @@ import Link from "next/link"
 
 export const metadata: Metadata = {
   title: "Política de Privacidad — ClientLabs",
-  description: "Política de privacidad de ClientLabs",
+  description: "Consulta nuestra política de privacidad. Cumplimiento RGPD, datos en la UE, cifrado completo. Tus datos son tuyos.",
+  robots: { index: false, follow: false },
+  alternates: { canonical: "https://clientlabs.io/privacy" },
 }
 
 export default function PrivacyPage() {

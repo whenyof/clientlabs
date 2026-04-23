@@ -1,4 +1,12 @@
+import type { Metadata } from "next"
 import Link from "next/link"
+
+export const metadata: Metadata = {
+  title: "Política de Cookies — ClientLabs",
+  description: "Consulta nuestra política de cookies. Solo las estrictamente necesarias para el funcionamiento de la plataforma.",
+  robots: { index: false, follow: false },
+  alternates: { canonical: "https://clientlabs.io/cookies" },
+}
 
 export default function CookiesPage() {
   return (

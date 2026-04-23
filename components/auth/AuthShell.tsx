@@ -8,8 +8,8 @@ import Register from "./Register"
 
 gsap.registerPlugin(useGSAP)
 
-export default function AuthShell() {
-  const [isRegister, setIsRegister] = useState(false)
+export default function AuthShell({ defaultRegister = false }: { defaultRegister?: boolean }) {
+  const [isRegister, setIsRegister] = useState(defaultRegister)
   const containerRef = useRef<HTMLDivElement>(null)
 
   useGSAP(() => {

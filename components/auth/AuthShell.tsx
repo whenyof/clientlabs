@@ -66,8 +66,8 @@ export default function AuthShell({ defaultRegister = false }: { defaultRegister
 
         {/* Logo */}
         <Link href="/" className="relative z-10 flex items-center gap-2.5" style={{ animation: "fadeSlideUp .6s ease both" }}>
-          <img src="/logo-trimmed.png" width={34} height={34} alt="ClientLabs" className="rounded-xl object-contain" />
-          <span className="font-bold text-[17px] tracking-tight text-white">
+          <img src="/logo-trimmed.png" width={26} height={26} alt="ClientLabs" className="rounded-lg object-contain" />
+          <span className="font-bold text-[22px] tracking-tight leading-none text-white">
             Client<span style={{ color: "#1FA97A" }}>Labs</span>
           </span>
         </Link>

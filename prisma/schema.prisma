@@ -2497,7 +2497,7 @@ model Product {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   deletedAt   DateTime?
-  user        User     @relation(fields: [userId], references: [id])
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   quoteItems        QuoteItem[]
   deliveryNoteItems DeliveryNoteItem[]
   purchaseOrderItems PurchaseOrderItem[]
@@ -2527,7 +2527,7 @@ model Quote {
   createdAt                 DateTime    @default(now())
   updatedAt                 DateTime    @updatedAt
   deletedAt                 DateTime?
-  user                      User        @relation(fields: [userId], references: [id])
+  user                      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   client                    Client      @relation(fields: [clientId], references: [id])
   items                     QuoteItem[]
   deliveryNote              DeliveryNote?
@@ -2571,7 +2571,7 @@ model DeliveryNote {
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
   deletedAt            DateTime?
-  user                 User               @relation(fields: [userId], references: [id])
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   client               Client             @relation(fields: [clientId], references: [id])
   quote                Quote?             @relation(fields: [quoteId], references: [id])
   items                DeliveryNoteItem[]
@@ -2626,7 +2626,7 @@ model PurchaseOrder {
   createdAt                 DateTime            @default(now())
   updatedAt                 DateTime            @updatedAt
   deletedAt                 DateTime?
-  user                      User                @relation(fields: [userId], references: [id])
+  user                      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   client                    Client              @relation(fields: [clientId], references: [id])
   quote                     Quote?              @relation(fields: [quoteId], references: [id])
   items                     PurchaseOrderItem[]

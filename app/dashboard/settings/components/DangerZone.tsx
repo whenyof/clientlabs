@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { signOut } from "next-auth/react"
 import { ExclamationTriangleIcon, TrashIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline"
 
 export function DangerZone() {
@@ -11,10 +12,18 @@ export function DangerZone() {
     console.log('Exporting user data...')
   }
 
-  const handleDeleteAccount = () => {
-    if (deleteConfirmation === 'ELIMINAR CUENTA') {
-      console.log('Deleting account...')
-      setShowDeleteModal(false)
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmation !== 'ELIMINAR CUENTA') return
+    try {
+      const res = await fetch('/api/user/delete-account', { method: 'DELETE' })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        alert(data.error ?? 'Error al eliminar la cuenta. Inténtalo de nuevo.')
+        return
+      }
+      await signOut({ callbackUrl: '/' })
+    } catch {
+      alert('Error de conexión. Comprueba tu internet e inténtalo de nuevo.')
     }
   }
 

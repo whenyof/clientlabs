@@ -57,7 +57,7 @@ export default function Register({ onSwitch }: Props) {
         setLoading(false)
         return
       }
-      await signIn("credentials", { email, password, callbackUrl: "/dashboard" })
+      await signIn("credentials", { email, password, callbackUrl: "/plan" })
     } catch {
       setError("Error de conexión. Comprueba tu internet e inténtalo de nuevo.")
       setLoading(false)
@@ -77,7 +77,7 @@ export default function Register({ onSwitch }: Props) {
       {/* Google */}
       <button
         type="button"
-        onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+        onClick={() => signIn("google", { callbackUrl: "/plan" })}
         className="w-full flex items-center justify-center gap-3 rounded-xl py-3 text-[13.5px] font-medium text-slate-700 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all duration-150 shadow-sm"
       >
         <GoogleIcon />

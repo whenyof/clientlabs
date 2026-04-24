@@ -66,7 +66,7 @@ export default function AuthShell({ defaultRegister = false }: { defaultRegister
 
         {/* Logo */}
         <Link href="/" className="relative z-10 flex items-center gap-2.5" style={{ animation: "fadeSlideUp .6s ease both" }}>
-          <img src="/logo.PNG" width={34} height={34} alt="ClientLabs" className="rounded-xl object-contain" />
+          <img src="/logo-trimmed.png" width={34} height={34} alt="ClientLabs" className="rounded-xl object-contain" />
           <span className="font-bold text-[17px] tracking-tight text-white">
             Client<span style={{ color: "#1FA97A" }}>Labs</span>
           </span>
@@ -118,7 +118,7 @@ export default function AuthShell({ defaultRegister = false }: { defaultRegister
 
         {/* Mobile logo */}
         <Link href="/" className="lg:hidden flex items-center gap-2 mb-8">
-          <img src="/logo.PNG" width={28} height={28} alt="ClientLabs" className="rounded-lg" />
+          <img src="/logo-trimmed.png" width={28} height={28} alt="ClientLabs" className="rounded-lg" />
           <span className="font-bold text-[16px] tracking-tight text-slate-900">
             Client<span style={{ color: "#1FA97A" }}>Labs</span>
           </span>

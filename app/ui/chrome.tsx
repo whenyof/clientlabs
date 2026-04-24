@@ -18,7 +18,7 @@ export function LogoMark({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
             style={{ width: dimension, height: dimension }}
         >
             <Image
-                src="/logo.PNG"
+                src="/logo-trimmed.png"
                 alt="ClientLabs"
                 width={dimension}
                 height={dimension}

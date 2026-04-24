@@ -58,7 +58,17 @@ export default function Register({ onSwitch }: Props) {
         setLoading(false)
         return
       }
-      await signIn("credentials", { email, password, callbackUrl: "/plan" })
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      })
+      if (result?.error) {
+        setError("Cuenta creada pero no pudimos iniciar sesión. Intenta entrar manualmente.")
+        setLoading(false)
+        return
+      }
+      window.location.href = "/plan"
     } catch {
       setError("Error de conexión. Comprueba tu internet e inténtalo de nuevo.")
       setLoading(false)

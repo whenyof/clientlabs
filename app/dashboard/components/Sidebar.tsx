@@ -6,6 +6,7 @@ import { motion } from "framer-motion"
 import { useEffect, useState } from "react"
 import { useSectorConfig } from "@/hooks/useSectorConfig"
 import { usePlan } from "@/hooks/use-plan"
+import { useTour } from "@/components/tour/TourContext"
 import {
   LayoutDashboard,
   Users,
@@ -80,6 +81,7 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
   const { data: session, status } = useSession()
   const { labels } = useSectorConfig()
   const { can } = usePlan()
+  const { active: tourActive, currentStep: tourStep } = useTour()
   const nav = labels.nav
   const isAdmin = session?.user?.role === "ADMIN"
 
@@ -201,11 +203,24 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
               <div className="space-y-1">
                 {group.items.map((item) => {
                   const active = pathname === item.href
+                  const isTourHighlighted = tourActive && tourStep.href === item.href
                   const Icon = item.icon
 
                   return (
+                    <div key={`${group.title}-${item.href}`} className="relative">
+                      {/* Tour pulse ring */}
+                      {isTourHighlighted && (
+                        <span className="absolute inset-0 rounded-r-md pointer-events-none z-10 animate-[tour-pulse_1.6s_ease-in-out_infinite]"
+                          style={{ boxShadow: "0 0 0 2px #1FA97A, 0 0 12px rgba(31,169,122,0.4)" }} />
+                      )}
+                      {/* Tour dot badge */}
+                      {isTourHighlighted && !isCollapsed && (
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 z-20 flex items-center gap-1 bg-[#1FA97A] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full pointer-events-none">
+                          <span className="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse" />
+                          AQUÍ
+                        </span>
+                      )}
                     <button
-                      key={`${group.title}-${item.href}`}
                       onClick={() => router.push(item.href)}
                       className={`
                         w-full flex items-center gap-3 px-3 py-2 text-sm rounded-r-md
@@ -214,6 +229,7 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
                           ? "bg-[var(--accent-soft)] text-[var(--accent)] font-medium border-l-[4px] border-[var(--accent)]"
                           : "text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)] border-l-[4px] border-transparent"
                         }
+                        ${isTourHighlighted ? "bg-[#1FA97A]/8 text-[#1FA97A]" : ""}
                       `}
                     >
                       <Icon size={18} />
@@ -247,6 +263,7 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
                         </div>
                       )}
                     </button>
+                    </div>
                   )
                 })}
               </div>

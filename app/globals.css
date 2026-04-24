@@ -93,7 +93,7 @@ body {
   height: 100%;
   min-height: 100%;
   width: 100%;
-  overflow-x: hidden;
+  /* overflow-x: hidden removed — breaks scroll-pinned carousel (body becomes scroll container) */
   background: var(--bg-main);
   color: var(--text-primary);
 }
@@ -145,6 +145,13 @@ body {
     display: none;
   }
 
+  /* Tour sidebar item pulse ring */
+
+  @keyframes tour-pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 2px #1FA97A, 0 0 10px rgba(31,169,122,0.35); }
+    50%       { opacity: 0.7; box-shadow: 0 0 0 2px #1FA97A, 0 0 18px rgba(31,169,122,0.6); }
+  }
+
   /* Live dot pulse */
 
   @keyframes pulse-dot {
@@ -176,6 +183,18 @@ body {
 
   .motion-element {
     will-change: transform, opacity;
+  }
+
+  /* Hero ring orbit animations */
+
+  @keyframes orbit-cw {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  @keyframes orbit-ccw {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(-360deg); }
   }
 
   /* Hero fade-in-up animation */

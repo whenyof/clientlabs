@@ -14,126 +14,127 @@ gsap.registerPlugin(ScrollTrigger, ScrollToPlugin, useGSAP)
 
 const PLANS = [
   {
-    id: "starter",
-    name: "Starter",
-    monthly: 9.99,
-    yearly: 8.32,
-    yearlyBilled: 99.9,
-    tag: "Para empezar",
-    limits: ["50 leads / mes", "75 clientes activos", "30 facturas / mes"],
+    id: "free",
+    name: "Free",
+    monthly: 0,
+    yearly: 0,
+    yearlyBilled: 0,
+    tag: "Para probar sin compromiso",
+    limits: ["50 leads totales", "20 clientes activos", "10 facturas / mes"],
     features: [
       "Panel de leads en tiempo real",
       "Pipeline visual básico",
-      "Formularios embebibles",
+      "1 formulario embebible",
+      "Facturación PDF con marca de agua",
       "Historial de contactos",
-      "Métricas básicas",
       "Exportación CSV",
+      "Soporte por email (48h)",
     ],
-    note: "Sin IA",
+    note: "Sin tarjeta · Sin límite de tiempo",
     highlight: false,
   },
   {
     id: "pro",
     name: "Pro",
-    monthly: 19.99,
-    yearly: 16.66,
-    yearlyBilled: 199.9,
-    tag: "El más elegido",
+    monthly: 14.99,
+    yearly: 11.99,
+    yearlyBilled: 143.88,
+    tag: "Para profesionales que quieren crecer",
     badge: "Popular",
-    limits: ["300 leads / mes", "500 clientes activos", "150 facturas / mes"],
+    limits: ["Leads ilimitados", "Clientes ilimitados", "Facturas ilimitadas", "Hasta 3 usuarios"],
     features: [
-      "Todo lo del Starter",
-      "IA para calificar leads",
+      "Todo lo del Free",
+      "Sin marca de agua en facturas",
+      "IA para calificar y puntuar leads",
       "Scoring automático",
+      "Automatizaciones básicas (5 activas)",
       "Dashboards personalizables",
-      "Automatizaciones básicas",
-      "Notificaciones en tiempo real",
       "Google Calendar sync",
-      "Soporte prioritario",
+      "Soporte prioritario por chat (24h)",
     ],
-    note: "IA incluida",
+    note: "14 días gratis · Sin tarjeta",
     highlight: true,
   },
   {
-    id: "max",
-    name: "Max",
-    monthly: 39.99,
-    yearly: 33.32,
-    yearlyBilled: 399.9,
-    tag: "Sin límites",
-    limits: ["Leads ilimitados", "Clientes ilimitados", "Facturas ilimitadas"],
+    id: "business",
+    name: "Business",
+    monthly: 29.99,
+    yearly: 23.99,
+    yearlyBilled: 287.88,
+    tag: "Para negocios que escalan",
+    limits: ["Todo ilimitado", "Hasta 10 usuarios"],
     features: [
       "Todo lo del Pro",
-      "IA avanzada con predicciones",
+      "IA avanzada con predicciones de cierre",
       "Automatizaciones ilimitadas",
-      "Segmentación avanzada",
-      "Webhooks y API",
-      "Roles de equipo",
+      "Segmentación avanzada de clientes",
+      "Webhooks y API completa",
+      "Roles y permisos de equipo",
       "Verifactu incluido",
-      "Soporte dedicado",
+      "Soporte dedicado (videollamada mensual)",
     ],
-    note: "IA completa + Verifactu",
+    note: "14 días gratis · Sin tarjeta",
     highlight: false,
   },
 ]
 
 const COMPARISON = [
   {
-    group: "Límites mensuales",
+    group: "Límites",
     items: [
-      { label: "Leads capturados", starter: "50", pro: "300", max: "∞" },
-      { label: "Clientes activos", starter: "75", pro: "500", max: "∞" },
-      { label: "Facturas emitidas", starter: "30", pro: "150", max: "∞" },
+      { label: "Leads capturados", free: "50 totales", pro: "∞", business: "∞" },
+      { label: "Clientes activos", free: "20", pro: "∞", business: "∞" },
+      { label: "Facturas emitidas / mes", free: "10", pro: "∞", business: "∞" },
+      { label: "Usuarios", free: "1", pro: "3", business: "10" },
     ],
   },
   {
     group: "CRM & Leads",
     items: [
-      { label: "Panel en tiempo real", starter: true, pro: true, max: true },
-      { label: "Pipeline visual", starter: true, pro: true, max: true },
-      { label: "Formularios embebibles", starter: true, pro: true, max: true },
-      { label: "Scoring de leads con IA", starter: false, pro: true, max: true },
-      { label: "Etiquetas inteligentes", starter: false, pro: true, max: true },
-      { label: "Segmentación avanzada", starter: false, pro: false, max: true },
+      { label: "Panel en tiempo real", free: true, pro: true, business: true },
+      { label: "Pipeline visual", free: true, pro: true, business: true },
+      { label: "Formularios embebibles", free: "1", pro: "∞", business: "∞" },
+      { label: "Scoring de leads con IA", free: false, pro: true, business: true },
+      { label: "Etiquetas inteligentes", free: false, pro: true, business: true },
+      { label: "Segmentación avanzada", free: false, pro: false, business: true },
     ],
   },
   {
     group: "Clientes & Facturación",
     items: [
-      { label: "Ficha 360° del cliente", starter: true, pro: true, max: true },
-      { label: "Historial de pagos", starter: true, pro: true, max: true },
-      { label: "Facturas PDF profesionales", starter: true, pro: true, max: true },
-      { label: "Control de cobros", starter: true, pro: true, max: true },
-      { label: "Series de facturación", starter: true, pro: true, max: true },
-      { label: "Verifactu", starter: false, pro: false, max: true },
+      { label: "Ficha 360° del cliente", free: true, pro: true, business: true },
+      { label: "Historial de pagos", free: true, pro: true, business: true },
+      { label: "Facturas PDF profesionales", free: "Con marca de agua", pro: true, business: true },
+      { label: "Control de cobros", free: true, pro: true, business: true },
+      { label: "Series de facturación propias", free: false, pro: true, business: true },
+      { label: "Verifactu", free: false, pro: false, business: true },
     ],
   },
   {
     group: "Automatización & IA",
     items: [
-      { label: "Automatizaciones básicas", starter: false, pro: true, max: true },
-      { label: "Automatizaciones ilimitadas", starter: false, pro: false, max: true },
-      { label: "IA operativa", starter: false, pro: true, max: true },
-      { label: "IA avanzada (predicciones)", starter: false, pro: false, max: true },
-      { label: "Google Calendar sync", starter: false, pro: true, max: true },
-      { label: "Webhooks y API", starter: false, pro: false, max: true },
+      { label: "Automatizaciones activas", free: false, pro: "5", business: "∞" },
+      { label: "IA operativa", free: false, pro: true, business: true },
+      { label: "IA avanzada (predicciones de cierre)", free: false, pro: false, business: true },
+      { label: "Google Calendar sync", free: false, pro: true, business: true },
+      { label: "Webhooks y API", free: false, pro: false, business: true },
     ],
   },
   {
     group: "Equipo & Soporte",
     items: [
-      { label: "Roles de equipo", starter: false, pro: false, max: true },
-      { label: "Soporte por email", starter: true, pro: true, max: true },
-      { label: "Soporte prioritario", starter: false, pro: true, max: true },
-      { label: "Soporte dedicado", starter: false, pro: false, max: true },
+      { label: "Roles y permisos de equipo", free: false, pro: false, business: true },
+      { label: "Soporte por email", free: "48h", pro: true, business: true },
+      { label: "Soporte por chat prioritario", free: false, pro: "24h", business: true },
+      { label: "Soporte dedicado (videollamada)", free: false, pro: false, business: "Mensual" },
     ],
   },
 ]
 
 const FAQS = [
+  { q: "¿El plan Free es realmente gratis?", a: "Sí. Sin tarjeta, sin trampas, sin límite de tiempo. Úsalo todo lo que quieras. Cuando necesites más leads, clientes o funciones, eliges un plan de pago." },
   { q: "¿Puedo cambiar de plan en cualquier momento?", a: "Sí. Puedes subir o bajar de plan cuando quieras. El cambio se aplica inmediatamente y se prorratea en tu próxima factura." },
-  { q: "¿Qué pasa cuando termina la prueba de 14 días?", a: "Te avisamos 3 días antes. Si no introduces tarjeta, la cuenta se pausa y tus datos se conservan 30 días más." },
-  { q: "¿Verifactu está incluido en todos los planes?", a: "Verifactu solo está incluido en el plan Max. En Starter y Pro puedes añadirlo como complemento por 5€/mes." },
+  { q: "¿Verifactu está incluido en todos los planes?", a: "Verifactu está incluido en el plan Business. En Free y Pro puedes añadirlo como complemento por 5€/mes." },
   { q: "¿Puedo cancelar sin penalización?", a: "Absolutamente. Sin permanencia, sin letras pequeñas. Cancela en un clic desde tu panel." },
 ]
 
@@ -549,7 +550,7 @@ function ComparativaSection() {
           {/* Sticky header */}
           <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-2 mb-3 sticky top-16 z-20 bg-[#F8FAFB] pb-2">
             <div />
-            {["Starter", "Pro", "Max"].map((name, i) => (
+            {["Free", "Pro", "Business"].map((name, i) => (
               <div key={name} className={`cmp-header rounded-lg py-3 text-center ${
                 i === 1 ? "bg-[#0B1F2A] border border-[#1FA97A]/40" : "bg-white border border-[#E5E7EB]"
               }`}>
@@ -567,11 +568,11 @@ function ComparativaSection() {
                 </div>
                 <div className="divide-y divide-[#F9FAFB]">
                   {group.items.map((item) => {
-                    const vals = { starter: item.starter, pro: item.pro, max: item.max }
+                    const vals = { free: item.free, pro: item.pro, business: item.business }
                     return (
                       <div key={item.label} className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-2 px-5 py-3 items-center">
                         <p className="text-[13px] text-[#374151]">{item.label}</p>
-                        {(["starter", "pro", "max"] as const).map((col, ci) => (
+                        {(["free", "pro", "business"] as const).map((col, ci) => (
                           <div key={col} className={`flex justify-center items-center ${ci === 1 ? "font-semibold" : ""}`}>
                             {typeof vals[col] === "string"
                               ? <span className="text-[13px] font-semibold text-[#1FA97A]">{vals[col] as string}</span>

@@ -28,7 +28,7 @@ const MODULES = [
     id: "tareas",
     num: "02",
     name: "Gestión de Tareas",
-    tagline: "Proyectos y equipos bajo control total",
+    tagline: "Proyectos y tareas bajo control total",
     desc: "Tablero Kanban, vista calendario y prioridades automáticas. Cada tarea vinculada a un cliente o proyecto real.",
     stats: [{ label: "Tiempo ahorrado", val: "62%" }, { label: "Tareas auto-asignadas", val: "18/día" }],
     color: "#3B82F6",
@@ -373,7 +373,7 @@ function TareasSection() {
           <div className="tareas-title">
             <p className="text-xs uppercase tracking-[0.3em] text-[#5F7280] mb-3">Gestión de tareas</p>
             <h2 className="text-4xl md:text-5xl font-bold text-[#0F1F2A] leading-tight">
-              Proyectos y equipos<br /><span className="text-[#3B82F6]">bajo control total.</span>
+              Proyectos y tareas<br /><span className="text-[#3B82F6]">bajo control total.</span>
             </h2>
           </div>
           <div className="grid grid-cols-3 gap-4">

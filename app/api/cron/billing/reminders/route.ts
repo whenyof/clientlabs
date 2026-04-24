@@ -11,7 +11,11 @@ export const maxDuration = 60
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization")
   const cronSecret = process.env.CRON_SECRET || process.env.CALENDAR_SYNC_CRON_SECRET
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (!cronSecret) {
+    console.error("[cron/billing/reminders] CRON_SECRET not configured — blocking endpoint")
+    return NextResponse.json({ error: "Not configured" }, { status: 503 })
+  }
+  if (authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 

@@ -3,8 +3,16 @@ export const maxDuration = 15
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
+import crypto from "crypto"
 
 const TINK_CLIENT_ID = process.env.TINK_CLIENT_ID!
+
+function signState(userId: string): string {
+  const secret = process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET ?? ""
+  const hmac = crypto.createHmac("sha256", secret).update(userId).digest("hex")
+  // Format: "userId.hmac" encoded as base64
+  return Buffer.from(`${userId}.${hmac}`).toString("base64url")
+}
 
 export async function POST() {
   const session = await getServerSession(authOptions)
@@ -12,12 +20,8 @@ export async function POST() {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 })
   }
 
-  // Flujo de acceso único — NO necesita crear usuarios ni authorization_code.
-  // Solo client_id + redirect_uri.
   const redirectUri = `${process.env.NEXTAUTH_URL}/api/banking/callback`
-
-  // Usa state para identificar al usuario en el callback
-  const state = Buffer.from(session.user.id).toString("base64")
+  const state = signState(session.user.id)
 
   const params = new URLSearchParams({
     client_id: TINK_CLIENT_ID,

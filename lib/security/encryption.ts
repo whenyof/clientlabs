@@ -52,7 +52,7 @@ export function decrypt(payload: string): string {
         const authTag = data.subarray(16, 32)
         const encrypted = data.subarray(32)
 
-        const decipher = crypto.createDecipheriv(ALGO, KEY, iv)
+        const decipher = crypto.createDecipheriv(ALGO, KEY, iv, { authTagLength: 16 })
         decipher.setAuthTag(authTag)
 
         const decrypted = Buffer.concat([

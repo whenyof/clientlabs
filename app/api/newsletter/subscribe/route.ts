@@ -1,18 +1,29 @@
 export const maxDuration = 15
 
 import { NextResponse } from "next/server"
+import { z } from "zod"
 import { prisma } from "@/lib/prisma"
+
+const subscribeSchema = z.object({
+  slug: z.string().min(1).max(100).trim(),
+  email: z.string().email("Email no válido").max(255),
+  nombre: z.string().max(200).trim().optional(),
+  fuente: z.string().max(100).optional(),
+})
 
 export async function POST(req: Request) {
   try {
-    const { slug, email, nombre, fuente } = await req.json()
+    const raw = await req.json()
+    const parsed = subscribeSchema.safeParse(raw)
 
-    if (!email || !slug) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Email y slug requeridos" },
+        { error: parsed.error.issues[0]?.message ?? "Datos no válidos" },
         { status: 400 }
       )
     }
+
+    const { slug, email, nombre, fuente } = parsed.data
 
     const users = await prisma.user.findMany({
       select: { id: true, name: true, email: true },

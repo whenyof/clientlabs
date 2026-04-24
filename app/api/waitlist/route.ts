@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { z } from "zod"
 import { waitUntil } from "@vercel/functions"
 import { prisma } from "@/lib/prisma"
 import { buildWaitlistEmail } from "@/lib/email/waitlist-template"
@@ -7,6 +8,11 @@ export const maxDuration = 30
 
 const BASE_COUNT = 17
 
+const waitlistSchema = z.object({
+  email: z.string().email("Email no válido").max(255),
+  source: z.string().max(100).optional(),
+})
+
 export async function GET() {
   const real = await prisma.waitlistEntry.count()
   return NextResponse.json({ count: real + BASE_COUNT })
@@ -14,35 +20,39 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json()
-    const { email, source } = body
-
-    if (!email || !email.includes("@")) {
-      return NextResponse.json({ error: "Email inválido" }, { status: 400 })
+    const raw = await req.json()
+    const result = waitlistSchema.safeParse(raw)
+    if (!result.success) {
+      return NextResponse.json(
+        { error: result.error.issues[0]?.message ?? "Datos no válidos" },
+        { status: 400 }
+      )
     }
+    const { email, source } = result.data
+    const normalizedEmail = email.toLowerCase().trim()
 
-    const existing = await prisma.waitlistEntry.findUnique({ where: { email } })
+    const existing = await prisma.waitlistEntry.findUnique({ where: { email: normalizedEmail } })
     if (existing) {
       return NextResponse.json({ error: "Este email ya está registrado" }, { status: 409 })
     }
 
-    const [entry, realCount] = await Promise.all([
+    const [, realCount] = await Promise.all([
       prisma.waitlistEntry.create({
-        data: { email, source: source ?? "whitelist" },
+        data: { email: normalizedEmail, source: source ?? "whitelist" },
       }),
       prisma.waitlistEntry.count(),
     ])
 
     const position = realCount + BASE_COUNT
 
-    waitUntil(sendWaitlistEmail(email, position).catch(err =>
-      console.error("Email error:", JSON.stringify(err), String(err))
+    waitUntil(sendWaitlistEmail(normalizedEmail, position).catch(err =>
+      console.error("Email error:", err)
     ))
 
     return NextResponse.json({ success: true, position })
   } catch (error) {
-    console.error("WAITLIST ERROR:", JSON.stringify(error), String(error))
-    return NextResponse.json({ error: String(error) }, { status: 500 })
+    console.error("WAITLIST ERROR:", error)
+    return NextResponse.json({ error: "Error interno. Inténtalo de nuevo." }, { status: 500 })
   }
 }
 

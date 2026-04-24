@@ -1,0 +1,21 @@
+User-agent: *
+Allow: /
+Allow: /blog/
+Allow: /precios
+Allow: /producto
+Allow: /soluciones
+Allow: /recursos
+Allow: /changelog
+Allow: /contacto
+Allow: /about
+
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /admin/
+Disallow: /uploads/
+Disallow: /auth/
+Disallow: /login
+Disallow: /register
+Disallow: /whitelist
+
+Sitemap: https://clientlabs.io/sitemap.xml

@@ -45,3 +45,5 @@ next-env.d.ts
 
 # Landing reference material (local only, no deploy)
 /docs/landing-ref
+# Protected uploads (served via /api/files/ with auth)
+/uploads/

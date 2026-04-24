@@ -50,6 +50,7 @@ export default function Register({ onSwitch }: Props) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),
+        signal: AbortSignal.timeout(35_000), // 35s — da tiempo a Neon cold start
       })
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))

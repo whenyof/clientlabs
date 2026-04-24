@@ -1,19 +1,20 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef } from "react"
 import Link from "next/link"
+import { LayoutDashboard, Sparkles, ShieldCheck } from "lucide-react"
 import Login from "./Login"
 import Register from "./Register"
 
 const FEATURES = [
-  { icon: "⚡", title: "Panel unificado", desc: "Leads, finanzas, clientes y tareas en un solo lugar." },
-  { icon: "🤖", title: "IA integrada", desc: "Insights automáticos para tomar mejores decisiones." },
-  { icon: "🔒", title: "Seguridad empresarial", desc: "Cifrado de extremo a extremo. Tus datos, solo tuyos." },
+  { Icon: LayoutDashboard, title: "Panel unificado", desc: "Leads, finanzas, clientes y tareas en un solo lugar." },
+  { Icon: Sparkles,        title: "IA integrada",    desc: "Insights automáticos para tomar mejores decisiones." },
+  { Icon: ShieldCheck,     title: "Seguridad empresarial", desc: "Cifrado de extremo a extremo. Tus datos, solo tuyos." },
 ]
 
 const STATS = [
-  { value: "500+", label: "empresas activas" },
-  { value: "4.9★", label: "valoración media" },
+  { value: "+100",  label: "empresas activas" },
+  { value: "5 min", label: "para estar listo" },
   { value: "99.9%", label: "uptime garantizado" },
 ]
 
@@ -64,12 +65,12 @@ export default function AuthShell({ defaultRegister = false }: { defaultRegister
         `}</style>
 
         {/* Logo */}
-        <div className="relative z-10 flex items-center gap-2.5" style={{ animation: "fadeSlideUp .6s ease both" }}>
-          <img src="/logo.PNG" width={32} height={32} alt="ClientLabs" className="rounded-lg" />
+        <Link href="/" className="relative z-10 flex items-center gap-2.5" style={{ animation: "fadeSlideUp .6s ease both" }}>
+          <img src="/logo.PNG" width={34} height={34} alt="ClientLabs" className="rounded-xl object-contain" />
           <span className="font-bold text-[17px] tracking-tight text-white">
             Client<span style={{ color: "#1FA97A" }}>Labs</span>
           </span>
-        </div>
+        </Link>
 
         {/* Center content */}
         <div className="relative z-10 space-y-8" style={{ animation: "fadeSlideUp .7s .1s ease both" }}>
@@ -87,14 +88,14 @@ export default function AuthShell({ defaultRegister = false }: { defaultRegister
           </div>
 
           <div className="space-y-4">
-            {FEATURES.map((f, i) => (
+            {FEATURES.map(({ Icon, title, desc }, i) => (
               <div key={i} className="flex items-start gap-3.5" style={{ animation: `fadeSlideUp .6s ${.2 + i * .08}s ease both` }}>
-                <div className="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center text-base" style={{ background: "rgba(31,169,122,0.12)", border: "1px solid rgba(31,169,122,0.2)" }}>
-                  {f.icon}
+                <div className="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center" style={{ background: "rgba(31,169,122,0.12)", border: "1px solid rgba(31,169,122,0.2)" }}>
+                  <Icon className="w-4 h-4" style={{ color: "#1FA97A" }} />
                 </div>
                 <div>
-                  <p className="text-[13px] font-semibold text-white">{f.title}</p>
-                  <p className="text-[12px] mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>{f.desc}</p>
+                  <p className="text-[13px] font-semibold text-white">{title}</p>
+                  <p className="text-[12px] mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>{desc}</p>
                 </div>
               </div>
             ))}

@@ -19,7 +19,7 @@ export type TaskData = {
     title: string
     description?: string
     dueDate?: Date
-    priority?: "LOW" | "MEDIUM" | "HIGH"
+    priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
     type?: "CALL" | "EMAIL" | "MEETING" | "MANUAL"
     clientId?: string
     leadId?: string
@@ -64,7 +64,7 @@ export async function createTask(data: TaskData) {
     }
 
     revalidatePath("/dashboard/clients")
-    revalidatePath("/dashboard/other")
+    revalidatePath("/dashboard")
     revalidatePath("/dashboard/tasks")
     return { success: true, taskId: task.id }
 }
@@ -90,7 +90,7 @@ export async function updateTask(id: string, data: Partial<TaskData>) {
     }
 
     revalidatePath("/dashboard/clients")
-    revalidatePath("/dashboard/other")
+    revalidatePath("/dashboard")
     revalidatePath("/dashboard/tasks")
     return { success: true }
 }
@@ -107,7 +107,7 @@ export async function toggleTaskCompletion(id: string, completed: boolean) {
     }
 
     revalidatePath("/dashboard/clients")
-    revalidatePath("/dashboard/other")
+    revalidatePath("/dashboard")
     revalidatePath("/dashboard/tasks")
     return { success: true }
 }
@@ -156,7 +156,7 @@ export async function deleteTask(id: string) {
     }
 
     revalidatePath("/dashboard/clients")
-    revalidatePath("/dashboard/other")
+    revalidatePath("/dashboard")
     revalidatePath("/dashboard/tasks")
     return { success: true }
 }

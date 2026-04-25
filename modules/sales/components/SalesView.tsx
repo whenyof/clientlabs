@@ -23,9 +23,13 @@ import { getSalesActions } from "../lib/salesActions"
 import { calculateMonthlyForecast } from "../lib/monthly-forecast"
 import { detectSalesRisks } from "../lib/risk-detection"
 import { detectGrowthOpportunities } from "../lib/growth-opportunities"
+import dynamic from "next/dynamic"
 import { SalesDateRangePicker } from "./SalesDateRangePicker"
 import { SalesKPIs } from "./SalesKPIs"
-import { SalesMegaChart } from "./SalesMegaChart"
+const SalesMegaChart = dynamic(() => import("./SalesMegaChart").then(m => ({ default: m.SalesMegaChart })), {
+  ssr: false,
+  loading: () => <div className="animate-pulse bg-slate-100 rounded-xl h-80" />,
+})
 import { SalesGoalCard } from "./SalesGoalCard"
 import { SalesRiskPanel } from "./SalesRiskPanel"
 import { SalesOpportunitiesPanel } from "./SalesOpportunitiesPanel"

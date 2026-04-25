@@ -19,7 +19,6 @@ import {
   Zap,
   Settings,
   ShieldCheck,
-  Bell,
   ChevronLeft,
   ChevronRight,
   Building2,
@@ -34,6 +33,8 @@ import {
 interface SidebarProps {
   isCollapsed?: boolean
   onToggleCollapsed?: () => void
+  /** Called when a nav item is clicked — used to close mobile drawer */
+  onNavItemClick?: () => void
 }
 
 interface BadgeProps {
@@ -75,7 +76,7 @@ interface MenuGroup {
   items: MenuItem[]
 }
 
-export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: SidebarProps) {
+export default function Sidebar({ isCollapsed = false, onToggleCollapsed, onNavItemClick }: SidebarProps) {
   const router = useRouter()
   const pathname = usePathname()
   const { data: session, status } = useSession()
@@ -163,14 +164,6 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
 
         <div className="flex items-center gap-2">
 
-          {/* NOTIFICATIONS */}
-          <button
-            onClick={() => router.push("/dashboard/notifications")}
-            className="p-2 rounded-lg hover:bg-[var(--border-subtle)]"
-          >
-            <Bell size={18} className="text-[var(--text-secondary)]" />
-          </button>
-
           {/* COLLAPSE */}
           {onToggleCollapsed && (
             <button
@@ -221,7 +214,7 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
                         </span>
                       )}
                     <button
-                      onClick={() => router.push(item.href)}
+                      onClick={() => { router.push(item.href); onNavItemClick?.() }}
                       className={`
                         w-full flex items-center gap-3 px-3 py-2 text-sm rounded-r-md
                         transition-all
@@ -239,15 +232,6 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
                           <span>{item.label}</span>
 
                           <div className="flex items-center gap-1">
-                            {item.href === "/dashboard/automatizaciones" && !can("automations") && (
-                              <span className="rounded bg-[#1FA97A]/10 px-1.5 py-0.5 text-[10px] font-bold text-[#1FA97A]">PRO</span>
-                            )}
-                            {item.href === "/dashboard/marketing" && !can("emailMarketing") && (
-                              <span className="rounded bg-[#1FA97A]/10 px-1.5 py-0.5 text-[10px] font-bold text-[#1FA97A]">BIZ</span>
-                            )}
-                            {item.href === "/dashboard/connect" && !can("calendarSync") && (
-                              <span className="rounded bg-[#1FA97A]/10 px-1.5 py-0.5 text-[10px] font-bold text-[#1FA97A]">PRO</span>
-                            )}
                             {item.count && (
                               <span
                                 className="text-xs px-2 rounded-full font-semibold"
@@ -278,7 +262,6 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed }: Side
                   </p>
                 )}
                 {[
-                  { icon: Zap,      label: labels.automations.title },
                   { icon: Sparkles, label: labels.aiAssistant.title },
                   { icon: Receipt,  label: "Verifactu" },
                 ].map(({ icon: Icon, label }) => (

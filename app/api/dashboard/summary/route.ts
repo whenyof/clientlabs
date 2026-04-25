@@ -4,7 +4,7 @@ export const maxDuration = 30
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
+import { prisma, safePrismaQuery } from "@/lib/prisma"
 import { getCachedData, setCachedData } from "@/lib/redis-cache"
 
 export async function GET() {
@@ -40,7 +40,7 @@ export async function GET() {
       activityLeads,
       activityInvoices,
       activityTasks,
-    ] = await Promise.all([
+    ] = await safePrismaQuery(() => Promise.all([
       // Leads activos (QUALIFIED + CONTACTED)
       prisma.lead.count({
         where: {
@@ -172,7 +172,7 @@ export async function GET() {
         take: 2,
         select: { id: true, title: true, updatedAt: true },
       }),
-    ])
+    ]), 3, 800)
 
     const invoicedThisMonth = Number(invoicesPaid._sum.total ?? 0)
     const invoicedPrevMonth = Number(invoicesPaidPrevMonth._sum.total ?? 0)

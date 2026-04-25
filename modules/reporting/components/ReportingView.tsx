@@ -13,14 +13,28 @@ import {
   monthlyRevenueFromSales,
   computeRevenueForecast,
 } from "../utils"
+import dynamic from "next/dynamic"
 import { ReportingKPIs } from "./ReportingKPIs"
 import { ReportingPeriodPicker } from "./ReportingPeriodPicker"
-import { ReportingChart } from "./ReportingChart"
-import { ReportingBreakdown } from "./ReportingBreakdown"
 import { ReportingInsight } from "./ReportingInsight"
-import { ReportingForecast } from "./ReportingForecast"
-import { ReportingYoY } from "./ReportingYoY"
 import type { ReportingSale, ReportingPeriodPreset } from "../types"
+
+const ReportingChart = dynamic(() => import("./ReportingChart").then(m => ({ default: m.ReportingChart })), {
+  ssr: false,
+  loading: () => <div className="animate-pulse bg-slate-100 rounded-xl h-64" />,
+})
+const ReportingBreakdown = dynamic(() => import("./ReportingBreakdown").then(m => ({ default: m.ReportingBreakdown })), {
+  ssr: false,
+  loading: () => <div className="animate-pulse bg-slate-100 rounded-xl h-48" />,
+})
+const ReportingForecast = dynamic(() => import("./ReportingForecast").then(m => ({ default: m.ReportingForecast })), {
+  ssr: false,
+  loading: () => <div className="animate-pulse bg-slate-100 rounded-xl h-64" />,
+})
+const ReportingYoY = dynamic(() => import("./ReportingYoY").then(m => ({ default: m.ReportingYoY })), {
+  ssr: false,
+  loading: () => <div className="animate-pulse bg-slate-100 rounded-xl h-64" />,
+})
 
 export function ReportingView() {
   const [sales, setSales] = useState<ReportingSale[]>([])

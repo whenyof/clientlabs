@@ -306,8 +306,8 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
           {/* Priority */}
           <div>
             <Label>Prioridad</Label>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
-              {(["HIGH", "MEDIUM", "LOW"] as TaskPriority[]).map((p) => {
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
+              {(["URGENT", "HIGH", "MEDIUM", "LOW"] as TaskPriority[]).map((p) => {
                 const cfg = PRIORITY_CONFIG[p]
                 const active = priority === p
                 return (

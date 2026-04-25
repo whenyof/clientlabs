@@ -49,6 +49,10 @@ export function DocumentsView({ billingNode, onNavigateToInvoices }: Props) {
 
   return (
     <div className="space-y-5">
+      {/* Verifactu disclaimer */}
+      <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+        <strong>Documento orientativo</strong> — No válido como factura legal. Pendiente de certificación Verifactu.
+      </div>
       {/* Client selector + doc tabs */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         {/* Client filter */}

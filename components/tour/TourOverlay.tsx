@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { X, ChevronLeft, ChevronRight, Check, Lightbulb, MousePointerClick } from "lucide-react"
 import { useTour, TOUR_STEPS } from "./TourContext"
@@ -9,17 +9,11 @@ import { motion, AnimatePresence } from "framer-motion"
 export function TourOverlay() {
   const router = useRouter()
   const { active, step, total, currentStep, next, prev, stop } = useTour()
-  const navigated = useRef(false)
 
-  // Navigate to the section when step changes
+  // Navigate to step 0 only when the tour first activates
   useEffect(() => {
-    if (!active) return
-    navigated.current = false
-    router.push(currentStep.href)
-    // Small delay so the navigation registers, then mark done
-    const t = setTimeout(() => { navigated.current = true }, 600)
-    return () => clearTimeout(t)
-  }, [active, step]) // eslint-disable-line
+    if (active) router.push(TOUR_STEPS[0].href)
+  }, [active]) // eslint-disable-line
 
   if (!active) return null
 
@@ -27,10 +21,20 @@ export function TourOverlay() {
   const isFirst  = step === 0
   const isLast   = step === total - 1
   const nextStep = TOUR_STEPS[step + 1]
+  const prevStep = TOUR_STEPS[step - 1]
 
   function handleNext() {
-    if (isLast) stop()
-    else next()
+    if (isLast) {
+      stop()
+    } else {
+      router.push(TOUR_STEPS[step + 1].href) // navigate first — instant
+      next()                                   // then update step state
+    }
+  }
+
+  function handlePrev() {
+    router.push(TOUR_STEPS[step - 1].href)
+    prev()
   }
 
   return (
@@ -42,7 +46,7 @@ export function TourOverlay() {
           animate={{ opacity: 1, x: 0, scale: 1 }}
           exit={{ opacity: 0, x: 16, scale: 0.97 }}
           transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-          className="fixed bottom-5 right-5 z-[200] w-[340px] bg-white rounded-2xl border border-slate-200 shadow-2xl overflow-hidden pointer-events-auto"
+          className="fixed bottom-5 right-5 z-[200] w-[340px] bg-white rounded-2xl border border-slate-200 overflow-hidden pointer-events-auto"
           style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.14), 0 0 0 1px rgba(31,169,122,0.08)" }}
         >
           {/* Top accent bar */}
@@ -111,8 +115,8 @@ export function TourOverlay() {
                 <div
                   key={i}
                   className={`rounded-full transition-all duration-200 ${
-                    i === step       ? "w-5 h-1.5 bg-[#1FA97A]"
-                    : i < step      ? "w-1.5 h-1.5 bg-[#1FA97A]/35"
+                    i === step  ? "w-5 h-1.5 bg-[#1FA97A]"
+                    : i < step  ? "w-1.5 h-1.5 bg-[#1FA97A]/35"
                     : "w-1.5 h-1.5 bg-slate-200"
                   }`}
                 />
@@ -123,7 +127,7 @@ export function TourOverlay() {
             <div className="flex items-center gap-2">
               {!isFirst && (
                 <button
-                  onClick={prev}
+                  onClick={handlePrev}
                   className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-medium text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
                 >
                   <ChevronLeft size={13} />

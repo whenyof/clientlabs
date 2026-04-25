@@ -61,6 +61,7 @@ import { FilePreviewModal } from "./FilePreviewModal"
 import { FileUploadDialog } from "./FileUploadDialog"
 import { EditProviderProductDialog, type ProviderProductRow } from "./EditProviderProductDialog"
 import { ImportProductsDialog } from "./ImportProductsDialog"
+import { ProviderPurchasesTab } from "./ProviderPurchasesTab"
 import { CreateProviderOrderDialog } from "./orders/CreateProviderOrderDialog"
 import { ConfirmSendOrderModal } from "./orders/ConfirmSendOrderModal"
 import {
@@ -181,7 +182,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
         initialTab === 'automations' ? 'summary' :
             initialTab
 
-    const [activeTab, setActiveTab] = useState<"summary" | "orders" | "tasks" | "timeline" | "files" | "productos" | "plantillas">(mappedTab || "summary")
+    const [activeTab, setActiveTab] = useState<"summary" | "orders" | "compras" | "tasks" | "timeline" | "files" | "productos" | "plantillas">(mappedTab || "summary")
     const [timeline, setTimeline] = useState<any[]>([])
     const [orders, setOrders] = useState<Order[]>([])
     const [tasks, setTasks] = useState<Task[]>([])
@@ -880,6 +881,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
                                     {[
                                         { id: "summary", label: "Resumen" },
                                         { id: "orders", label: labels.orders.title + " y Pagos" },
+                                        { id: "compras", label: "Compras" },
                                         { id: "productos", label: "Productos" },
                                         { id: "plantillas", label: "Plantillas" },
                                         { id: "files", label: "Archivos" },
@@ -1000,6 +1002,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
                                         {[
                                             { id: "summary", label: "Resumen" },
                                             { id: "orders", label: labels.orders.title + " y Pagos" },
+                                            { id: "compras", label: "Compras" },
                                             { id: "productos", label: "Productos" },
                                             { id: "plantillas", label: "Plantillas" },
                                             { id: "files", label: "Archivos" },
@@ -1105,6 +1108,10 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
                                     else toast.error(r?.error ?? "Error al eliminar")
                                 }}
                             />
+                        )}
+
+                        {activeTab === "compras" && (
+                            <ProviderPurchasesTab providerId={provider.id} />
                         )}
 
                         {activeTab === "productos" && (

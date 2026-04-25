@@ -40,7 +40,7 @@ export function Breadcrumbs() {
  return (
  <nav className="flex items-center space-x-2 text-sm text-[var(--text-secondary)] mb-6">
  <Link
- href="/dashboard/other"
+ href="/dashboard"
  className="flex items-center gap-1 hover:text-[var(--text-primary)] transition-colors"
  >
  <Home size={16} />
@@ -54,7 +54,7 @@ export function Breadcrumbs() {
  <span className="text-[var(--text-primary)] font-medium">{crumb.label}</span>
  ) : (
  <Link
- href={crumb.href || "/dashboard/other"}
+ href={crumb.href || "/dashboard"}
  className="hover:text-[var(--text-primary)] transition-colors"
  >
  {crumb.label}

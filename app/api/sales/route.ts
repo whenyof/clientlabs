@@ -149,8 +149,8 @@ export async function POST(request: NextRequest) {
     } catch (_) {
       // non-blocking
     }
-    revalidatePath('/dashboard/other')
-    revalidatePath('/dashboard/other/sales')
+    revalidatePath('/dashboard')
+    revalidatePath('/dashboard/sales')
     return NextResponse.json({ sale })
   } catch (error) {
     console.error('Sales create error:', error)

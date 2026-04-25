@@ -8,8 +8,30 @@ export function DangerZone() {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteConfirmation, setDeleteConfirmation] = useState('')
 
-  const handleExportData = () => {
-    console.log('Exporting user data...')
+  const [exporting, setExporting] = useState(false)
+
+  const handleExportData = async () => {
+    setExporting(true)
+    try {
+      const res = await fetch("/api/settings/export", { method: "POST" })
+      if (res.ok) {
+        const blob = await res.blob()
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url
+        a.download = `clientlabs-export-${new Date().toISOString().split("T")[0]}.json`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+      } else {
+        alert("La exportación no está disponible en este momento. Contacta con soporte.")
+      }
+    } catch {
+      alert("Error al solicitar la exportación.")
+    } finally {
+      setExporting(false)
+    }
   }
 
   const handleDeleteAccount = async () => {
@@ -51,9 +73,10 @@ export function DangerZone() {
             </p>
             <button
               onClick={handleExportData}
-              className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+              disabled={exporting}
+              className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-50 transition-colors"
             >
-              Solicitar exportación
+              {exporting ? "Preparando exportación…" : "Solicitar exportación"}
             </button>
           </div>
         </div>

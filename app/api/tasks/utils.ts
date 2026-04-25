@@ -3,8 +3,8 @@ import { authOptions } from "@/lib/auth"
 import type { Prisma } from "@prisma/client"
 
 export type TaskEntityType = "LEAD" | "CLIENT" | "PROVIDER" | "SALE"
-export type TaskPriorityParam = "LOW" | "MEDIUM" | "HIGH"
-export type TaskStatusParam = "PENDING" | "DONE" | "CANCELLED"
+export type TaskPriorityParam = "LOW" | "MEDIUM" | "HIGH" | "URGENT"
+export type TaskStatusParam = "PENDING" | "IN_PROGRESS" | "DONE" | "CANCELLED"
 
 /** Returns current user id or null. Use for 401 when null. */
 export async function getSessionUserId(): Promise<string | null> {

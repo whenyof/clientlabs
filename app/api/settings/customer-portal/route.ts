@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 
  const result = await createCustomerPortalSession({
  customerId,
- returnUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/other/settings`
+ returnUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings`
  })
 
  return NextResponse.json({

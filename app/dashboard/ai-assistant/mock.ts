@@ -94,7 +94,7 @@ export const mockAiInsights: AiInsight[] = [
     confidence: 94,
     createdAt: '2025-01-21T10:30:00Z',
     leadId: 'lead-1',
-    actionUrl: '/dashboard/other/leads/lead-1'
+    actionUrl: '/dashboard/leads/lead-1'
   },
   {
     id: '2',
@@ -105,7 +105,7 @@ export const mockAiInsights: AiInsight[] = [
     confidence: 87,
     createdAt: '2025-01-21T09:15:00Z',
     clientId: 'client-risk-1',
-    actionUrl: '/dashboard/other/clients/client-risk-1'
+    actionUrl: '/dashboard/clients/client-risk-1'
   },
   {
     id: '3',
@@ -116,7 +116,7 @@ export const mockAiInsights: AiInsight[] = [
     confidence: 78,
     createdAt: '2025-01-21T08:45:00Z',
     clientId: 'client-up-1',
-    actionUrl: '/dashboard/other/clients/client-up-1'
+    actionUrl: '/dashboard/clients/client-up-1'
   },
   {
     id: '4',

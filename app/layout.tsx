@@ -10,7 +10,6 @@ import QueryProvider from "@/providers/QueryProvider"
 
 import { ToastProvider } from "@/components/ui/toast"
 import { ThemeProvider } from "@/components/ThemeProvider"
-import { ConditionalAiAssistant } from "@/components/ConditionalAiAssistant"
 import { Toaster } from "sonner"
 
 /* ================================
@@ -162,8 +161,6 @@ export default function RootLayout({
                 <WebVitals />
 
                 {children}
-
-                <ConditionalAiAssistant />
 
                 <Toaster
                   richColors

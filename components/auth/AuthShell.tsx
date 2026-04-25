@@ -1,8 +1,10 @@
 "use client"
 
 import { useState, useRef } from "react"
+import { useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { LayoutDashboard, Sparkles, ShieldCheck } from "lucide-react"
+import Image from "next/image"
+import { LayoutDashboard, Sparkles, ShieldCheck, CheckCircle } from "lucide-react"
 import Login from "./Login"
 import Register from "./Register"
 
@@ -19,6 +21,9 @@ const STATS = [
 ]
 
 export default function AuthShell({ defaultRegister = false }: { defaultRegister?: boolean }) {
+  const searchParams = useSearchParams()
+  const justRegistered = searchParams?.get("registered") === "true"
+
   const [isRegister, setIsRegister] = useState(defaultRegister)
   const [animating, setAnimating] = useState(false)
   const formRef = useRef<HTMLDivElement>(null)
@@ -66,7 +71,7 @@ export default function AuthShell({ defaultRegister = false }: { defaultRegister
 
         {/* Logo */}
         <Link href="/" className="relative z-10 flex items-center gap-2.5" style={{ animation: "fadeSlideUp .6s ease both" }}>
-          <img src="/logo-trimmed.png" width={26} height={26} alt="ClientLabs" className="rounded-lg object-contain" />
+          <Image src="/logo-trimmed.png" width={26} height={26} alt="ClientLabs" className="rounded-lg object-contain" priority />
           <span className="font-bold text-[22px] tracking-tight leading-none text-white">
             Client<span style={{ color: "#1FA97A" }}>Labs</span>
           </span>
@@ -118,7 +123,7 @@ export default function AuthShell({ defaultRegister = false }: { defaultRegister
 
         {/* Mobile logo */}
         <Link href="/" className="lg:hidden flex items-center gap-2 mb-8">
-          <img src="/logo-trimmed.png" width={28} height={28} alt="ClientLabs" className="rounded-lg" />
+          <Image src="/logo-trimmed.png" width={28} height={28} alt="ClientLabs" className="rounded-lg" />
           <span className="font-bold text-[16px] tracking-tight text-slate-900">
             Client<span style={{ color: "#1FA97A" }}>Labs</span>
           </span>
@@ -132,6 +137,14 @@ export default function AuthShell({ defaultRegister = false }: { defaultRegister
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
           Volver al inicio
         </Link>
+
+        {/* Registered success banner */}
+        {justRegistered && !isRegister && (
+          <div className="w-full max-w-[420px] mb-4 flex items-center gap-3 rounded-xl px-4 py-3 text-[13px] font-medium" style={{ background: "rgba(31,169,122,0.08)", border: "1px solid rgba(31,169,122,0.25)", color: "#1FA97A" }}>
+            <CheckCircle size={16} className="shrink-0" />
+            ¡Cuenta creada! Inicia sesión para continuar.
+          </div>
+        )}
 
         {/* Form container */}
         <div

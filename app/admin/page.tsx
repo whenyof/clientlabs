@@ -14,7 +14,7 @@ async function requireAdmin() {
   const session = await getServerSession(authOptions)
 
   if (!session || session.user?.role !== "ADMIN") {
-    redirect("/dashboard/other")
+    redirect("/dashboard")
   }
 
   return session

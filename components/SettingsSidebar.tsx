@@ -17,6 +17,7 @@ import {
     ExclamationTriangleIcon,
     CommandLineIcon,
     ArchiveBoxIcon,
+    ClockIcon,
 } from "@heroicons/react/24/outline"
 
 export function SettingsSidebar() {
@@ -32,6 +33,7 @@ export function SettingsSidebar() {
         { id: 'company', label: s.company, icon: BuildingOfficeIcon, href: '/dashboard/settings?section=company' },
         { id: 'notifications', label: s.notifications, icon: BellIcon, href: '/dashboard/settings?section=notifications' },
         { id: 'team', label: s.team, icon: UsersIcon, href: '/dashboard/settings?section=team' },
+        { id: 'activity', label: 'Actividad', icon: ClockIcon, href: '/dashboard/settings?section=activity' },
         { id: 'permissions', label: s.permissions, icon: KeyIcon, href: '/dashboard/settings?section=permissions', pro: true },
         { id: 'plans', label: s.plans, icon: CreditCardIcon, href: '/dashboard/settings?section=plans' },
         { id: 'billing', label: s.billing, icon: ChartBarIcon, href: '/dashboard/settings?section=billing' },

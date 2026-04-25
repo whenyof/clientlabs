@@ -21,8 +21,8 @@ import { toast } from "sonner"
 export type Task = {
  id: string
  title: string
- status: "PENDING" | "DONE" | "CANCELLED"
- priority: "LOW" | "MEDIUM" | "HIGH"
+ status: "PENDING" | "IN_PROGRESS" | "DONE" | "CANCELLED"
+ priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
  type: "MANUAL" | "CALL" | "EMAIL" | "MEETING"
  dueDate: Date | string | null
  clientId?: string | null

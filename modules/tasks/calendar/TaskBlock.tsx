@@ -13,11 +13,13 @@ type TaskBlockProps = {
 
 const STATUS_STYLES: Record<CalendarTask["status"], string> = {
  PENDING: "bg-emerald-500/90 hover:bg-emerald-500 border-emerald-400/50",
+ IN_PROGRESS: "bg-blue-500/90 hover:bg-blue-500 border-blue-400/50",
  DONE: "bg-[var(--accent-soft)] hover:bg-[var(--accent-soft)] border-[var(--accent)]",
  CANCELLED: "bg-zinc-500/60 hover:bg-zinc-500/70 border-zinc-400/40",
 }
 
 const PRIORITY_BORDER: Record<CalendarTask["priority"], string> = {
+ URGENT: "border-l-4 border-l-red-500",
  HIGH: "border-l-4 border-l-rose-400",
  MEDIUM: "border-l-4 border-l-amber-400",
  LOW: "border-l-4 border-l-slate-400",

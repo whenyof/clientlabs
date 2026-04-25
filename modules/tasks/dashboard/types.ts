@@ -1,5 +1,5 @@
-export type TaskPriority = "LOW" | "MEDIUM" | "HIGH"
-export type TaskStatus = "PENDING" | "DONE" | "CANCELLED"
+export type TaskPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT"
+export type TaskStatus = "PENDING" | "IN_PROGRESS" | "DONE" | "CANCELLED"
 
 export interface DashboardTask {
   id: string
@@ -26,28 +26,35 @@ export interface TasksKPIsData {
   overdue: number
 }
 
-export type ViewMode = "priority" | "week" | "month"
+export type ViewMode = "priority" | "kanban" | "week" | "month"
 
 export const PRIORITY_CONFIG = {
-  HIGH: {
+  URGENT: {
     label: "Urgente",
     color: "#EF4444",
     bg: "#FEF2F2",
     border: "#FECACA",
     soft: "#FEF2F210",
   },
-  MEDIUM: {
+  HIGH: {
     label: "Alta",
-    color: "#D9A441",
-    bg: "#FFFBEB",
+    color: "#F97316",
+    bg: "#FFF7ED",
+    border: "#FDBA74",
+    soft: "#FFF7ED10",
+  },
+  MEDIUM: {
+    label: "Media",
+    color: "#EAB308",
+    bg: "#FEFCE8",
     border: "#FDE68A",
-    soft: "#FFFBEB10",
+    soft: "#FEFCE810",
   },
   LOW: {
-    label: "Normal",
-    color: "#3B82F6",
-    bg: "#EFF6FF",
-    border: "#BFDBFE",
-    soft: "#EFF6FF10",
+    label: "Baja",
+    color: "#94A3B8",
+    bg: "#F8FAFC",
+    border: "#E2E8F0",
+    soft: "#F8FAFC10",
   },
 } as const

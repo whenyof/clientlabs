@@ -8,8 +8,9 @@ import { ClientInvoiceList } from "./ClientInvoiceList"
 import { ClientSalesList } from "./ClientSalesList"
 import { ClientPaymentsList } from "./ClientPaymentsList"
 import { ClientDocumentsList } from "./ClientDocumentsList"
+import { ClientQuickSalesTab } from "./ClientQuickSalesTab"
 
-type TabId = "ventas" | "facturas" | "pagos" | "documentos"
+type TabId = "ventas" | "ventas-rapidas" | "facturas" | "pagos" | "documentos"
 
 interface ClientTransactionsTabsProps {
   clientId: string
@@ -27,10 +28,11 @@ export function ClientTransactionsTabs({
   const [activeTab, setActiveTab] = useState<TabId>("ventas")
 
   const TABS: { id: TabId; label: string; count: number }[] = [
-    { id: "ventas",      label: "Ventas",      count: salesData.sales.length       },
-    { id: "facturas",    label: "Facturas",    count: invoices.length              },
-    { id: "pagos",       label: "Pagos",       count: paymentsData.payments.length },
-    { id: "documentos",  label: "Documentos",  count: 0                            },
+    { id: "ventas",         label: "Ventas",          count: salesData.sales.length       },
+    { id: "ventas-rapidas", label: "Ventas rápidas",  count: 0                            },
+    { id: "facturas",       label: "Facturas",        count: invoices.length              },
+    { id: "pagos",          label: "Pagos",           count: paymentsData.payments.length },
+    { id: "documentos",     label: "Documentos",      count: 0                            },
   ]
 
   return (
@@ -70,18 +72,29 @@ export function ClientTransactionsTabs({
       </div>
 
       {/* Content */}
-      <div className="p-5 min-h-[180px]">
+      <div className="min-h-[180px]">
         {activeTab === "ventas" && (
-          <ClientSalesList sales={salesData.sales} kpis={salesData.kpis} clientId={clientId} />
+          <div className="p-5">
+            <ClientSalesList sales={salesData.sales} kpis={salesData.kpis} clientId={clientId} />
+          </div>
+        )}
+        {activeTab === "ventas-rapidas" && (
+          <ClientQuickSalesTab clientId={clientId} />
         )}
         {activeTab === "facturas" && (
-          <ClientInvoiceList invoices={invoices} clientId={clientId} />
+          <div className="p-5">
+            <ClientInvoiceList invoices={invoices} clientId={clientId} />
+          </div>
         )}
         {activeTab === "pagos" && (
-          <ClientPaymentsList payments={paymentsData.payments} kpis={paymentsData.kpis} />
+          <div className="p-5">
+            <ClientPaymentsList payments={paymentsData.payments} kpis={paymentsData.kpis} />
+          </div>
         )}
         {activeTab === "documentos" && (
-          <ClientDocumentsList clientId={clientId} />
+          <div className="p-5">
+            <ClientDocumentsList clientId={clientId} />
+          </div>
         )}
       </div>
     </div>

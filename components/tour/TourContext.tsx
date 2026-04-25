@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, useCallback } from "react"
 import {
-  LayoutDashboard, Target, Users, CheckSquare,
+  LayoutDashboard, Target, Users, Building2, CheckSquare,
   DollarSign, Zap, Megaphone, Settings,
 } from "lucide-react"
 
@@ -37,6 +37,16 @@ export const TOUR_STEPS = [
     description:
       "Todos tus clientes activos en un lugar. Accede al historial de comunicaciones, documentos, presupuestos y facturas de cada cliente.",
     tips: ["Convierte un lead a cliente con un clic", "Filtra por sector, estado o fecha"],
+  },
+  {
+    id: "providers",
+    href: "/dashboard/providers",
+    icon: Building2,
+    title: "Proveedores",
+    subtitle: "Gestión de proveedores",
+    description:
+      "Centraliza todos tus proveedores: datos de contacto, historial de pedidos y documentos. Ten siempre a mano a quién llamar cuando necesites reaprovisionar.",
+    tips: ["Añade tus proveedores habituales para tenerlos siempre localizados", "Desde aquí puedes crear hojas de pedido directamente"],
   },
   {
     id: "tasks",

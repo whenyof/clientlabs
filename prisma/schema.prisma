@@ -387,6 +387,7 @@ model Client {
   Invoice             Invoice[]
   leads               Lead[]                @relation("ClientLeads")
   Sale                Sale[]
+  clientSales         ClientSale[]
   Task                Task[]
   transactions        Transaction[]
   quotes              Quote[]
@@ -850,6 +851,7 @@ model User {
   lastLoginAt            DateTime?
   lastActiveAt           DateTime?
   monthlyRevenueTarget   Int?
+  notificationPrefs      Json?
   AIInsight              AIInsight[]
   AIPrediction           AIPrediction[]
   accounts               Account[]
@@ -918,6 +920,9 @@ model User {
   Task                   Task[]
   TaskCalendarSync       TaskCalendarSync[]
   teamMembers            TeamMember[]
+  ownedWorkspaces        Workspace[]           @relation("WorkspaceOwner")
+  workspaceMemberships   WorkspaceMember[]     @relation("WorkspaceMembers")
+  activityLogs           ActivityLog[]         @relation("ActivityLogs")
   TrackingEvent          TrackingEvent[]
   transactions           Transaction[]
   planRelation           Plan?                   @relation(fields: [planId], references: [id])
@@ -936,6 +941,8 @@ model User {
   newsletterSubscribers  NewsletterSubscriber[]
   newsletterEdiciones    NewsletterEdicion[]
   documentosImportados   DocumentoImportado[]
+  clientSales            ClientSale[]
+  clientPurchases        ClientPurchase[]
 }
 
 model CalendarIntegration {
@@ -1579,6 +1586,7 @@ model Provider {
   tasks                    ProviderTask[]
   timelineEvents           ProviderTimelineEvent[]
   services                 Service[]                @relation("ProviderToService")
+  clientPurchases          ClientPurchase[]
 
   @@index([userId])
   @@index([status])
@@ -2319,6 +2327,7 @@ enum BackupType {
 
 enum TaskStatus {
   PENDING
+  IN_PROGRESS
   DONE
   CANCELLED
 }
@@ -2332,6 +2341,7 @@ enum TaskPriority {
   LOW
   MEDIUM
   HIGH
+  URGENT
 }
 
 enum TaskType {
@@ -2686,6 +2696,66 @@ model WaitlistEntry {
   @@map("waitlist_entries")
 }
 
+// ─── ClientSale / ClientPurchase — registro simple de ventas y compras ───────
+
+enum ClientSaleStatus {
+  PENDING
+  INVOICED
+  PAID
+  CANCELLED
+}
+
+enum ClientPurchaseStatus {
+  PENDING
+  RECEIVED
+  PAID
+  CANCELLED
+}
+
+model ClientSale {
+  id          String           @id @default(cuid())
+  concept     String
+  amount      Float
+  tax         Float            @default(21)
+  total       Float
+  status      ClientSaleStatus @default(PENDING)
+  date        DateTime         @default(now())
+  notes       String?
+  clientId    String
+  client      Client           @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([clientId])
+  @@index([userId])
+  @@map("client_sales")
+}
+
+model ClientPurchase {
+  id             String               @id @default(cuid())
+  concept        String
+  amount         Float
+  tax            Float                @default(21)
+  total          Float
+  status         ClientPurchaseStatus @default(PENDING)
+  date           DateTime             @default(now())
+  notes          String?
+  providerId     String
+  provider       Provider             @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  invoiceDocUrl  String?
+  deliveryDocUrl String?
+  userId         String
+  user           User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  @@index([providerId])
+  @@index([userId])
+  @@map("client_purchases")
+}
+
 // ─── Automatizaciones simples ────────────────────────────────────────────────
 
 enum TipoAutomatizacion {
@@ -2812,4 +2882,69 @@ model DocumentoImportado {
 
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+}
+
+// ─── Team / Workspace System ──────────────────────────────────────────────────
+
+enum TeamRole {
+  OWNER
+  ADMIN
+  USER
+}
+
+model Workspace {
+  id        String   @id @default(cuid())
+  name      String
+  ownerId   String
+  owner     User     @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members   WorkspaceMember[]
+  invites   WorkspaceInvite[]
+  activityLogs ActivityLog[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation("WorkspaceMembers", fields: [userId], references: [id], onDelete: Cascade)
+  role        TeamRole  @default(USER)
+  joinedAt    DateTime  @default(now())
+
+  @@unique([workspaceId, userId])
+  @@map("workspace_members")
+}
+
+model WorkspaceInvite {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  email       String
+  role        TeamRole  @default(USER)
+  token       String    @unique @default(cuid())
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+
+  @@map("workspace_invites")
+}
+
+model ActivityLog {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation("ActivityLogs", fields: [userId], references: [id], onDelete: Cascade)
+  action      String
+  entity      String
+  entityId    String?
+  entityLabel String?
+  metadata    Json?
+  createdAt   DateTime  @default(now())
+
+  @@index([workspaceId, createdAt(sort: Desc)])
+  @@map("activity_logs")
 }

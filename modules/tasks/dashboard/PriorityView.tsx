@@ -9,7 +9,7 @@ interface PriorityViewProps {
   onAddTask: (priority: TaskPriority) => void
 }
 
-const BANDS: TaskPriority[] = ["HIGH", "MEDIUM", "LOW"]
+const BANDS: TaskPriority[] = ["URGENT", "HIGH", "MEDIUM", "LOW"]
 
 export function PriorityView({ tasks, search, onAddTask }: PriorityViewProps) {
   const filtered = search
@@ -17,7 +17,7 @@ export function PriorityView({ tasks, search, onAddTask }: PriorityViewProps) {
     : tasks
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, alignItems: "flex-start" }}>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, alignItems: "flex-start" }}>
       {BANDS.map((priority) => (
         <PriorityBand
           key={priority}

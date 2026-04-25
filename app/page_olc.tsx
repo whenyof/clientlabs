@@ -599,7 +599,7 @@ export default function Home() {
           <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
             {session?.user ? (
               <>
-                <Button href="/dashboard/other" variant="primary">
+                <Button href="/dashboard" variant="primary">
                   Ir al Dashboard
                 </Button>
                 <p className="text-xs text-white/60">Bienvenido de vuelta, {session.user.name || session.user.email}</p>

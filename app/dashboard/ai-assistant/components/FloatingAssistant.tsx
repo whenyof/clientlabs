@@ -13,7 +13,7 @@ export function AiFloatingAssistant() {
       id: 'leads',
       label: 'Leads Calientes',
       action: () => {
-        router.push('/dashboard/other/ai-assistant?tab=leads')
+        router.push('/dashboard/ai-assistant?tab=leads')
         setIsOpen(false)
       }
     },
@@ -21,7 +21,7 @@ export function AiFloatingAssistant() {
       id: 'insights',
       label: 'Ver Insights',
       action: () => {
-        router.push('/dashboard/other/ai-assistant?tab=insights')
+        router.push('/dashboard/ai-assistant?tab=insights')
         setIsOpen(false)
       }
     },
@@ -29,7 +29,7 @@ export function AiFloatingAssistant() {
       id: 'chat',
       label: 'Chat Completo',
       action: () => {
-        router.push('/dashboard/other/ai-assistant?tab=chat')
+        router.push('/dashboard/ai-assistant?tab=chat')
         setIsOpen(false)
       }
     }
@@ -104,7 +104,7 @@ export function AiFloatingAssistant() {
 
               <div className="p-4 border-t border-[var(--border-subtle)] bg-[var(--bg-main)]">
                 <button
-                  onClick={() => router.push('/dashboard/other/ai-assistant')}
+                  onClick={() => router.push('/dashboard/ai-assistant')}
                   className="w-full text-center text-emerald-400 hover:text-emerald-300 text-sm font-medium transition-colors"
                 >
                   Abrir panel completo →

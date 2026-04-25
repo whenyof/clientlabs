@@ -11,13 +11,13 @@ export default async function ReportingPage() {
     redirect("/auth")
   }
 
-  const config = getSectorConfigByPath("/dashboard/other/reporting")
+  const config = getSectorConfigByPath("/dashboard/reporting")
   const { labels, features } = config
   const reportingLabels = labels.reporting
   const reportingEnabled = features?.modules?.reporting ?? true
 
   if (!reportingEnabled) {
-    redirect("/dashboard/other")
+    redirect("/dashboard")
   }
 
   return (

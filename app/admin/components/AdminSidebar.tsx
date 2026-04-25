@@ -80,7 +80,7 @@ export default function AdminSidebar() {
       {/* Back to Dashboard */}
       <div className="border-t border-white/10 p-4">
         <Link
-          href="/dashboard/other"
+          href="/dashboard"
           className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-white/70 hover:bg-white/10 hover:text-white transition"
         >
           <ArrowLeft size={18} />

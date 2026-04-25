@@ -95,6 +95,10 @@ export default function InvoicePreviewPage() {
         >
           ← Volver a facturación
         </button>
+        {/* Verifactu disclaimer */}
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 mb-4">
+          <strong>Documento orientativo</strong> — No válido como factura legal. Pendiente de certificación Verifactu.
+        </div>
         {showFiscalWarning && invoice.Client && (
           <div className="mb-4">
             <FiscalWarning

@@ -35,7 +35,7 @@ const menu: MenuGroup[] = [
  {
  title: "CORE",
  items: [
- { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard/other" },
+ { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
  { label: "Clientes", icon: Users, href: "/dashboard/clients" },
  { label: "Finanzas", icon: BarChart3, href: "/dashboard/finance" },
  { label: "Tareas", icon: CheckSquare, href: "/dashboard/tasks" },
@@ -44,17 +44,17 @@ const menu: MenuGroup[] = [
  {
  title: "INTELIGENCIA",
  items: [
- { label: "Automatizaciones", icon: Zap, href: "/dashboard/other/automations", badge: "pro" },
- { label: "Analytics", icon: LineChart, href: "/dashboard/other/analytics", badge: "beta" },
- { label: "Reporte Ejecutivo", icon: FileText, href: "/dashboard/other/reporting" },
+ { label: "Automatizaciones", icon: Zap, href: "/dashboard/automatizaciones", badge: "pro" },
+ { label: "Analytics", icon: LineChart, href: "/dashboard/analytics", badge: "beta" },
+ { label: "Reporte Ejecutivo", icon: FileText, href: "/dashboard/reporting" },
  ],
  },
  {
  title: "SISTEMA",
  items: [
- { label: "Integraciones", icon: Plug, href: "/dashboard/other/integrations" },
- { label: "Equipo", icon: Shield, href: "/dashboard/other/team" },
- { label: "Ajustes", icon: Settings, href: "/dashboard/other/settings" },
+ { label: "Integraciones", icon: Plug, href: "/dashboard/integrations" },
+ { label: "Equipo", icon: Shield, href: "/dashboard/settings?section=team" },
+ { label: "Ajustes", icon: Settings, href: "/dashboard/settings" },
  ],
  },
 ]

@@ -43,8 +43,8 @@ export async function POST(request: NextRequest) {
  priceId: plan.stripePriceId,
  userId,
  userEmail,
- successUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/other/settings?success=true`,
- cancelUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/other/settings?canceled=true`
+ successUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?success=true`,
+ cancelUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?canceled=true`
  })
 
  return NextResponse.json({

@@ -58,7 +58,7 @@ export function AiFloatingAssistant() {
  setIsOpen(true)
  break
  case 'insights':
- router.push('/dashboard/other/ai-assistant?tab=insights')
+ router.push('/dashboard/ai-assistant?tab=insights')
  setIsOpen(false)
  break
  default:
@@ -266,7 +266,7 @@ export function AiFloatingAssistant() {
  </div>
  <button
  onClick={() => {
- router.push('/dashboard/other/ai-assistant');
+ router.push('/dashboard/ai-assistant');
  setIsOpen(false);
  }}
  className="text-xs font-bold text-[var(--accent)] hover:text-[var(--accent)]-primary transition-colors"

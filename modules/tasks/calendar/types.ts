@@ -1,8 +1,8 @@
 /**
  * Calendar-specific task type. Not Prisma — optimized for grid and overlap detection.
  */
-export type CalendarTaskStatus = "PENDING" | "DONE" | "CANCELLED"
-export type CalendarTaskPriority = "LOW" | "MEDIUM" | "HIGH"
+export type CalendarTaskStatus = "PENDING" | "IN_PROGRESS" | "DONE" | "CANCELLED"
+export type CalendarTaskPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT"
 
 export type CalendarTask = {
  id: string

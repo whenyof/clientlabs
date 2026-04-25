@@ -37,7 +37,7 @@ export default function Login({ onSwitch }: Props) {
     if (res?.error) {
       setError("Email o contraseña incorrectos. Revísalos e inténtalo de nuevo.")
     } else {
-      window.location.href = "/dashboard"
+      window.location.href = "/plan"
     }
   }
 

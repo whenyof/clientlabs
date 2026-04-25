@@ -22,7 +22,7 @@ function getOriginHref(m: Movement): string | null {
   if (!m.originId) return null
   switch (m.originModule) {
     case "sale":
-      return "/dashboard/other/sales"
+      return "/dashboard/sales"
     case "purchase":
     case "provider_order":
       return "/dashboard/providers"

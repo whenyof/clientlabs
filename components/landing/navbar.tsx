@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { useSession, signOut } from "next-auth/react"
-import { LayoutDashboard, User, Settings, LogOut, ChevronDown } from "lucide-react"
+import { LayoutDashboard, User, Settings, LogOut, ChevronDown, Menu, X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { navbarContent } from "@/components/landing/content"
@@ -87,6 +87,7 @@ function ProfileDropdown({ name, email, image }: { name?: string | null; email?:
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { data: session, status } = useSession()
   const isLoggedIn = status === "authenticated" && !!session
 
@@ -126,7 +127,7 @@ export function Navbar() {
           <span>{navbarContent.brand}</span>
         </Link>
 
-        {/* Nav links — absolutely centred in the pill */}
+        {/* Nav links — absolutely centred in the pill (desktop only) */}
         <nav
           aria-label="Principal"
           className="hidden flex-1 items-center justify-center gap-1 lg:flex"
@@ -145,11 +146,10 @@ export function Navbar() {
           ))}
         </nav>
 
-        {/* CTAs — right */}
-        <div className="ml-auto flex items-center gap-2">
+        {/* CTAs — right (desktop) */}
+        <div className="ml-auto hidden lg:flex items-center gap-2">
           {isLoggedIn ? (
             <>
-              {/* Dashboard button */}
               <Link
                 href="/dashboard"
                 className={cn(
@@ -162,8 +162,6 @@ export function Navbar() {
                 <LayoutDashboard className="h-4 w-4" />
                 Dashboard
               </Link>
-
-              {/* Profile dropdown */}
               <ProfileDropdown
                 name={session.user?.name}
                 email={session.user?.email}
@@ -188,7 +186,95 @@ export function Navbar() {
             </>
           )}
         </div>
+
+        {/* Mobile hamburger */}
+        <button
+          className={cn(
+            "ml-auto lg:hidden h-9 w-9 flex items-center justify-center rounded-full transition-colors",
+            scrolled ? "hover:bg-black/[0.06]" : "hover:bg-white/[0.1]"
+          )}
+          onClick={() => setMobileMenuOpen((v) => !v)}
+          aria-label={mobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
+          aria-expanded={mobileMenuOpen}
+        >
+          {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </button>
       </div>
+
+      {/* Mobile dropdown menu */}
+      {mobileMenuOpen && (
+        <div
+          className={cn(
+            "lg:hidden mx-4 mt-2 rounded-2xl border shadow-lg py-3 overflow-hidden",
+            scrolled
+              ? "bg-white/[0.95] border-[#e5e7eb] text-[#374151] [backdrop-filter:saturate(140%)_blur(14px)]"
+              : "bg-[#0B1F2A]/[0.95] border-white/10 text-white [backdrop-filter:blur(20px)]"
+          )}
+        >
+          {/* Nav links */}
+          <div className="px-2 pb-2 border-b border-current/10">
+            {navbarContent.links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className={cn(
+                  "flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-colors min-h-[44px]",
+                  scrolled ? "hover:bg-black/[0.06]" : "hover:bg-white/[0.08]"
+                )}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* CTAs */}
+          <div className="px-4 pt-3 flex flex-col gap-2">
+            {isLoggedIn ? (
+              <>
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-center gap-2 min-h-[44px] rounded-full bg-[#1FA97A] px-4 py-2.5 text-sm font-semibold text-white"
+                >
+                  <LayoutDashboard className="h-4 w-4" />
+                  Ir al Dashboard
+                </Link>
+                <button
+                  onClick={() => { setMobileMenuOpen(false); signOut({ callbackUrl: "/" }) }}
+                  className={cn(
+                    "flex items-center justify-center gap-2 min-h-[44px] rounded-full px-4 py-2.5 text-sm font-medium border",
+                    scrolled ? "border-[#e5e7eb] text-red-500" : "border-white/20 text-red-300"
+                  )}
+                >
+                  <LogOut className="h-4 w-4" />
+                  Cerrar sesión
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href={navbarContent.ctas.primary.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-center gap-2 min-h-[44px] rounded-full bg-[#1FA97A] px-4 py-2.5 text-sm font-semibold text-white"
+                >
+                  {navbarContent.ctas.primary.label}
+                </Link>
+                <Link
+                  href={navbarContent.ctas.login.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={cn(
+                    "flex items-center justify-center min-h-[44px] rounded-full px-4 py-2.5 text-sm font-medium border",
+                    scrolled ? "border-[#e5e7eb] text-[#374151]" : "border-white/20 text-white/90"
+                  )}
+                >
+                  {navbarContent.ctas.login.label}
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </header>
   )
 }

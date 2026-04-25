@@ -50,7 +50,7 @@ export default function BackupManagementPage() {
     }
 
     if (!isAuthorized) {
-      router.push("/dashboard/other?error=backup_access_denied")
+      router.push("/dashboard?error=backup_access_denied")
       return
     }
   }, [session, sessionStatus, isAuthorized, router])

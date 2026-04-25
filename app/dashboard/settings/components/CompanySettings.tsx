@@ -3,6 +3,7 @@ import { getBaseUrl } from "@/lib/api/baseUrl"
 
 
 import { useState, useEffect, useRef, useCallback } from "react"
+import Image from "next/image"
 import { toast } from "sonner"
 import {
   BuildingOfficeIcon,
@@ -254,7 +255,7 @@ export function CompanySettings() {
             className="w-16 h-16 rounded-xl overflow-hidden bg-slate-50 border border-slate-200 flex items-center justify-center disabled:cursor-default transition-colors"
           >
             {companyData.logoUrl ? (
-              <img src={companyData.logoUrl} alt="Logo" className="w-full h-full object-contain p-1.5" />
+              <Image src={companyData.logoUrl} alt="Logo" width={64} height={64} className="w-full h-full object-contain p-1.5" unoptimized />
             ) : (
               <BuildingOfficeIcon className="w-7 h-7 text-slate-300" />
             )}

@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { prisma, safePrismaQuery } from "@/lib/prisma"
 import bcrypt from "bcrypt"
+import { sendWelcomeEmail } from "@/lib/email-service"
 
 const registerSchema = z.object({
   name: z.string().min(1).max(200).trim().optional(),
@@ -73,7 +74,7 @@ export async function POST(req: NextRequest) {
 
     const hashed = await bcrypt.hash(password, 10)
 
-    await safePrismaQuery(
+    const newUser = await safePrismaQuery(
       () => prisma.user.create({
         data: {
           name: name ?? null,
@@ -88,6 +89,22 @@ export async function POST(req: NextRequest) {
       2,
       500
     )
+
+    // Create workspace for the new user
+    await safePrismaQuery(() =>
+      prisma.workspace.create({
+        data: {
+          name: `Workspace de ${name ?? normalizedEmail}`,
+          ownerId: newUser.id,
+          members: {
+            create: { userId: newUser.id, role: "OWNER" },
+          },
+        },
+      })
+    )
+
+    // Send welcome email non-blocking
+    sendWelcomeEmail(normalizedEmail, name ?? "Usuario").catch(console.error)
 
     return NextResponse.json({ success: true })
   } catch (err: unknown) {

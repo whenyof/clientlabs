@@ -327,13 +327,13 @@ export default function OnboardingWizard() {
 
         {/* Card body */}
         <div className="px-8 py-6">
-          <AnimatePresence mode="wait">
+          <AnimatePresence>
             <motion.div
               key={step}
-              initial={{ opacity: 0, x: 16 }}
+              initial={{ opacity: 0, x: 12 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -16 }}
-              transition={{ duration: 0.18 }}
+              exit={{ opacity: 0, x: -12, position: "absolute" }}
+              transition={{ duration: 0.1, ease: "easeOut" }}
             >
               {stepContent[step]}
             </motion.div>

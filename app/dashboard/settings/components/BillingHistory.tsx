@@ -22,13 +22,7 @@ interface Payment {
 }
 
 export function BillingHistory() {
-  const [payments] = useState<Payment[]>([
-    { id: 'pi_1234567890', amount: 2900, currency: 'EUR', status: 'succeeded', invoiceUrl: '#', createdAt: '2025-01-15', description: 'Plan Pro - Enero 2025' },
-    { id: 'pi_0987654321', amount: 2900, currency: 'EUR', status: 'succeeded', invoiceUrl: '#', createdAt: '2024-12-15', description: 'Plan Pro - Diciembre 2024' },
-    { id: 'pi_1111111111', amount: 2900, currency: 'EUR', status: 'succeeded', invoiceUrl: '#', createdAt: '2024-11-15', description: 'Plan Pro - Noviembre 2024' },
-    { id: 'pi_2222222222', amount: 1500, currency: 'EUR', status: 'succeeded', invoiceUrl: '#', createdAt: '2024-10-15', description: 'Plan Starter - Octubre 2024' },
-    { id: 'pi_3333333333', amount: 1500, currency: 'EUR', status: 'succeeded', invoiceUrl: '#', createdAt: '2024-09-15', description: 'Plan Starter - Septiembre 2024' }
-  ])
+  const [payments] = useState<Payment[]>([])
 
   const getStatusText = (status: string) => {
     if (status === 'succeeded') return 'Pagado'
@@ -69,7 +63,7 @@ export function BillingHistory() {
           <div className="text-xs text-slate-500 mt-0.5">Pagos exitosos</div>
         </div>
         <div className="bg-white rounded-xl border border-slate-200 p-4 text-center">
-          <div className="text-lg font-bold text-[#0B1F2A]">Pro</div>
+          <div className="text-lg font-bold text-[#0B1F2A]">—</div>
           <div className="text-xs text-slate-500 mt-0.5">Plan activo</div>
         </div>
       </div>

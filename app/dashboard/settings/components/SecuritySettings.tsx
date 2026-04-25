@@ -6,12 +6,13 @@ import {
   KeyIcon,
   DevicePhoneMobileIcon,
   EyeIcon,
-  EyeSlashIcon,
 } from "@heroicons/react/24/outline"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 
 export function SecuritySettings() {
   const [showPassword, setShowPassword] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [passwordForm, setPasswordForm] = useState({
     current: '',
     new: '',
@@ -19,9 +20,42 @@ export function SecuritySettings() {
   })
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
 
-  const handlePasswordChange = () => {
-    console.log('Changing password')
-    setPasswordForm({ current: '', new: '', confirm: '' })
+  const handlePasswordChange = async () => {
+    if (!passwordForm.current || !passwordForm.new || !passwordForm.confirm) {
+      toast.error("Por favor completa todos los campos")
+      return
+    }
+    if (passwordForm.new.length < 8) {
+      toast.error("La nueva contraseña debe tener al menos 8 caracteres")
+      return
+    }
+    if (passwordForm.new !== passwordForm.confirm) {
+      toast.error("Las contraseñas nuevas no coinciden")
+      return
+    }
+    setSaving(true)
+    try {
+      const res = await fetch("/api/settings/security/password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          currentPassword: passwordForm.current,
+          newPassword: passwordForm.new,
+          confirmPassword: passwordForm.confirm,
+        }),
+      })
+      const data = await res.json()
+      if (res.ok && data.success) {
+        toast.success("Contraseña actualizada correctamente")
+        setPasswordForm({ current: '', new: '', confirm: '' })
+      } else {
+        toast.error(data.error ?? "Error al actualizar la contraseña")
+      }
+    } catch {
+      toast.error("Error de conexión")
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handleToggle2FA = () => {
@@ -95,9 +129,10 @@ export function SecuritySettings() {
 
           <button
             onClick={handlePasswordChange}
-            className="px-4 py-2 text-sm font-medium text-white bg-[var(--accent)] rounded-lg hover:opacity-90 transition-colors"
+            disabled={saving}
+            className="px-4 py-2 text-sm font-medium text-white bg-[var(--accent)] rounded-lg hover:opacity-90 disabled:opacity-50 transition-colors"
           >
-            Actualizar contraseña
+            {saving ? "Actualizando…" : "Actualizar contraseña"}
           </button>
         </div>
       </div>

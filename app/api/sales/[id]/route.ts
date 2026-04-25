@@ -51,8 +51,8 @@ export async function PATCH(
     } catch (_) {
       // non-blocking
     }
-    revalidatePath('/dashboard/other')
-    revalidatePath('/dashboard/other/sales')
+    revalidatePath('/dashboard')
+    revalidatePath('/dashboard/sales')
     return NextResponse.json({ sale: updated })
   } catch (error) {
     console.error('Sales update error:', error)

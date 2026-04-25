@@ -1,18 +1,58 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ComputerDesktopIcon, MoonIcon, SunIcon } from "@heroicons/react/24/outline"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
+
+const STORAGE_KEY = "cl_appearance"
+
+function loadPrefs() {
+  if (typeof window === "undefined") return null
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
+
+function savePrefs(prefs: object) {
+  if (typeof window === "undefined") return
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs))
+  } catch {
+    // ignore
+  }
+}
 
 export function AppearanceSettings() {
-  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('dark')
+  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('light')
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [animationsEnabled, setAnimationsEnabled] = useState(true)
   const [compactMode, setCompactMode] = useState(false)
+  const [saved, setSaved] = useState(false)
+
+  useEffect(() => {
+    const prefs = loadPrefs()
+    if (prefs) {
+      if (prefs.theme) setTheme(prefs.theme)
+      if (typeof prefs.sidebarCollapsed === "boolean") setSidebarCollapsed(prefs.sidebarCollapsed)
+      if (typeof prefs.animationsEnabled === "boolean") setAnimationsEnabled(prefs.animationsEnabled)
+      if (typeof prefs.compactMode === "boolean") setCompactMode(prefs.compactMode)
+    }
+  }, [])
 
   const handleThemeChange = (newTheme: 'light' | 'dark' | 'system') => {
     setTheme(newTheme)
-    console.log('Theme changed to:', newTheme)
+  }
+
+  const handleSave = () => {
+    const prefs = { theme, sidebarCollapsed, animationsEnabled, compactMode }
+    savePrefs(prefs)
+    setSaved(true)
+    toast.success("Preferencias de apariencia guardadas")
+    setTimeout(() => setSaved(false), 2000)
   }
 
   const themes = [
@@ -107,8 +147,11 @@ export function AppearanceSettings() {
 
       {/* Save */}
       <div className="flex justify-end">
-        <button className="px-5 py-2.5 text-sm font-medium text-white bg-[var(--accent)] rounded-lg hover:opacity-90 transition-colors">
-          Guardar preferencias
+        <button
+          onClick={handleSave}
+          className="px-5 py-2.5 text-sm font-medium text-white bg-[var(--accent)] rounded-lg hover:opacity-90 transition-colors"
+        >
+          {saved ? "¡Guardado!" : "Guardar preferencias"}
         </button>
       </div>
     </div>

@@ -118,7 +118,7 @@ export async function createProvider(data: {
         console.log("Provider created successfully:", provider.id)
 
         revalidatePath("/dashboard/providers")
-        revalidatePath("/dashboard/other/providers")
+        revalidatePath("/dashboard/providers")
         return { success: true, provider }
     } catch (error) {
         console.error("Error creating provider:", error)
@@ -155,7 +155,7 @@ export async function updateProvider(id: string, data: any) {
         }))
 
         revalidatePath("/dashboard/providers")
-        revalidatePath("/dashboard/other/providers")
+        revalidatePath("/dashboard/providers")
         return { success: true, provider }
     } catch (error) {
         console.error("Error updating provider:", error)
@@ -176,7 +176,7 @@ export async function deleteProvider(id: string) {
             where: { id, userId: session.user.id }
         }))
         revalidatePath("/dashboard/providers")
-        revalidatePath("/dashboard/other/providers")
+        revalidatePath("/dashboard/providers")
         return { success: true }
     } catch (error) {
         console.error("Error deleting provider:", error)
@@ -302,7 +302,7 @@ export async function registerProviderPayment(data: {
         }
 
         revalidatePath("/dashboard/providers")
-        revalidatePath("/dashboard/other/finance")
+        revalidatePath("/dashboard/finance")
         return { success: true, payment: result }
 
     } catch (error) {
@@ -420,7 +420,7 @@ export async function updateProviderPaymentStatus(
         }))
 
         revalidatePath("/dashboard/providers")
-        revalidatePath("/dashboard/other/finance")
+        revalidatePath("/dashboard/finance")
         return { success: true, payment: result }
     } catch (error: any) {
         console.error("Error updating payment status:", error)
@@ -485,7 +485,7 @@ export async function createProviderTask(data: {
         }))
 
         revalidatePath("/dashboard/providers")
-        revalidatePath("/dashboard/other/providers")
+        revalidatePath("/dashboard/providers")
         return { success: true, task: result }
     } catch (error) {
         console.error("Error creating task:", error)
@@ -516,7 +516,7 @@ export async function toggleProviderTaskStatus(taskId: string, completed: boolea
         await recalculateProviderStatus(task.providerId)
 
         revalidatePath("/dashboard/providers")
-        revalidatePath("/dashboard/other/providers")
+        revalidatePath("/dashboard/providers")
         return { success: true, task }
     } catch (error) {
         console.error("Error toggling task:", error)
@@ -544,7 +544,7 @@ export async function deleteProviderTask(taskId: string) {
         await recalculateProviderStatus(task.providerId)
 
         revalidatePath("/dashboard/providers")
-        revalidatePath("/dashboard/other/providers")
+        revalidatePath("/dashboard/providers")
         return { success: true }
     } catch (error) {
         console.error("Error deleting task:", error)
@@ -580,7 +580,7 @@ export async function addProviderNote(providerId: string, content: string) {
         }))
 
         revalidatePath("/dashboard/providers")
-        revalidatePath("/dashboard/other/providers")
+        revalidatePath("/dashboard/providers")
         return { success: true, note }
     } catch (error) {
         console.error("Error adding note:", error)
@@ -827,7 +827,7 @@ export async function toggleProviderCritical(providerId: string, isCritical: boo
         })
 
         revalidatePath("/dashboard/providers")
-        revalidatePath("/dashboard/other/providers")
+        revalidatePath("/dashboard/providers")
 
         return { success: true }
     } catch (error) {
@@ -853,7 +853,7 @@ export async function updateProviderBudget(providerId: string, limit: number | n
         })
 
         revalidatePath("/dashboard/providers")
-        revalidatePath("/dashboard/other/providers")
+        revalidatePath("/dashboard/providers")
 
         return { success: true }
     } catch (error) {
@@ -882,7 +882,7 @@ export async function updateProviderReminder(providerId: string, days: number | 
         })
 
         revalidatePath("/dashboard/providers")
-        revalidatePath("/dashboard/other/providers")
+        revalidatePath("/dashboard/providers")
 
         return { success: true }
     } catch (error) {
@@ -908,7 +908,7 @@ export async function acknowledgeProviderReminder(providerId: string) {
         })
 
         revalidatePath("/dashboard/providers")
-        revalidatePath("/dashboard/other/providers")
+        revalidatePath("/dashboard/providers")
 
         return { success: true }
     } catch (error) {
@@ -974,7 +974,7 @@ export async function logProviderContact(
         })
 
         revalidatePath("/dashboard/providers")
-        revalidatePath("/dashboard/other/providers")
+        revalidatePath("/dashboard/providers")
 
         return { success: true }
     } catch (error) {
@@ -1058,7 +1058,7 @@ export async function saveEmailTemplate(
         })
 
         revalidatePath("/dashboard/providers")
-        revalidatePath("/dashboard/other/providers")
+        revalidatePath("/dashboard/providers")
 
         return { success: true }
     } catch (error) {
@@ -1132,7 +1132,7 @@ export async function updateProviderConsumptionRate(providerId: string, rate: nu
         })
 
         revalidatePath("/dashboard/providers")
-        revalidatePath("/dashboard/other/providers")
+        revalidatePath("/dashboard/providers")
 
         return { success: true }
     } catch (error) {
@@ -1174,7 +1174,7 @@ export async function updateProviderOperationalDataAction(providerId: string) {
         await processLightAutomations(providerId)
 
         revalidatePath("/dashboard/providers")
-        revalidatePath("/dashboard/other/providers")
+        revalidatePath("/dashboard/providers")
 
         return { success: true }
     } catch (error) {
@@ -1370,7 +1370,7 @@ export async function updateProviderLightAutomations(
         }) */
 
         revalidatePath("/dashboard/providers")
-        revalidatePath("/dashboard/other/providers")
+        revalidatePath("/dashboard/providers")
 
         return { success: true }
     } catch (error) {
@@ -1449,7 +1449,7 @@ export async function updateProviderAiSettings(
         })
         */
 
-        revalidatePath("/dashboard/other/providers")
+        revalidatePath("/dashboard/providers")
         return { success: true }
     } catch (error) {
         console.error("Error updating AI settings:", error)
@@ -1550,7 +1550,7 @@ export async function createProviderFile(data: {
         })
 
         revalidatePath("/dashboard/providers")
-        revalidatePath("/dashboard/other/providers")
+        revalidatePath("/dashboard/providers")
         return { success: true, file }
     } catch (error) {
         console.error("Error creating file:", error)
@@ -1574,7 +1574,7 @@ export async function deleteProviderFile(fileId: string) {
         })
 
         revalidatePath("/dashboard/providers")
-        revalidatePath("/dashboard/other/providers")
+        revalidatePath("/dashboard/providers")
         return { success: true }
     } catch (error) {
         console.error("Error deleting file:", error)
@@ -1736,7 +1736,7 @@ export async function addServiceToProvider(providerId: string, serviceId: string
         })
 
         revalidatePath("/dashboard/providers")
-        revalidatePath("/dashboard/other/providers")
+        revalidatePath("/dashboard/providers")
         return { success: true }
     } catch (error) {
         console.error("Error linking service:", error)
@@ -1779,7 +1779,7 @@ export async function removeServiceFromProvider(providerId: string, serviceId: s
         }
 
         revalidatePath("/dashboard/providers")
-        revalidatePath("/dashboard/other/providers")
+        revalidatePath("/dashboard/providers")
         return { success: true }
     } catch (error) {
         console.error("Error unlinking service:", error)
@@ -2121,7 +2121,7 @@ export async function updateProviderOperationalDetails(providerId: string, data:
         }
 
         revalidatePath("/dashboard/providers")
-        revalidatePath("/dashboard/other/providers")
+        revalidatePath("/dashboard/providers")
         return { success: true }
     } catch (error) {
         console.error("Error updating operational details:", error)

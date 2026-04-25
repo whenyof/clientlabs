@@ -40,7 +40,7 @@ export function ImpersonateDialog({
  if (result.success) {
  // Close dialog and redirect to user dashboard
  onOpenChange(false)
- router.push("/dashboard/other")
+ router.push("/dashboard")
  router.refresh()
  }
  } catch (error: any) {

@@ -12,7 +12,7 @@ export default async function SalesPage() {
     redirect("/auth")
   }
 
-  const config = getSectorConfigByPath("/dashboard/other/sales")
+  const config = getSectorConfigByPath("/dashboard/sales")
   const { labels } = config
   const sl = labels.sales
 

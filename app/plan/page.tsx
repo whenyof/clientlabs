@@ -10,5 +10,10 @@ export default async function PlanPage() {
     redirect("/auth")
   }
 
+  // Returning users who already completed onboarding go straight to dashboard
+  if (session.user.onboardingCompleted) {
+    redirect("/dashboard")
+  }
+
   return <PlanSelector />
 }

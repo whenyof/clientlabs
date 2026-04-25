@@ -71,11 +71,11 @@ export default async function Client360Page({ params: paramsPromise }: { params:
         <ClientKpiOverview kpis={kpis} salesKpis={salesData.kpis} />
       </div>
 
-      {/* ── Layout 70 / 30 ─────────────────────────────────────────────── */}
-      <div style={{ display: "flex", gap: "20px", alignItems: "flex-start" }}>
+      {/* ── Layout 70 / 30 — stacked on mobile, side-by-side on xl ───── */}
+      <div className="flex flex-col xl:flex-row gap-5 items-start">
 
         {/* ── Columna izquierda (70%) ─────────────────────────────────── */}
-        <div style={{ flex: 1, minWidth: 0 }} className="space-y-4">
+        <div className="flex-1 min-w-0 space-y-4 w-full">
 
           {/* Riesgo + Rentabilidad en dos tarjetas lado a lado */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -95,7 +95,7 @@ export default async function Client360Page({ params: paramsPromise }: { params:
         </div>
 
         {/* ── Columna derecha (30%) ───────────────────────────────────── */}
-        <aside style={{ width: "300px", flexShrink: 0, position: "sticky", top: "24px" }} className="space-y-4">
+        <aside className="w-full xl:w-[300px] xl:shrink-0 xl:sticky xl:top-6 space-y-4">
 
           {/* Información del cliente (editable) */}
           <ClientProfileCard client={client} />

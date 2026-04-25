@@ -14,6 +14,7 @@ import { UsageLimits } from "./components/UsageLimits"
 import { AppearanceSettings } from "./components/AppearanceSettings"
 import { DangerZone } from "./components/DangerZone"
 import { ProductCatalog } from "./components/ProductCatalog"
+import { ActivityLogSection } from "./components/ActivityLogSection"
 
 export default function SettingsPage() {
   const searchParams = useSearchParams()
@@ -25,6 +26,7 @@ export default function SettingsPage() {
     { id: 'company', component: CompanySettings },
     { id: 'notifications', component: NotificationSettings },
     { id: 'team', component: TeamMembers },
+    { id: 'activity', component: ActivityLogSection },
     { id: 'permissions', component: PermissionsPanel },
     { id: 'plans', component: PlansSection },
     { id: 'billing', component: BillingHistory },

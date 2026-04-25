@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma"
+import { sendNewLeadEmail, sendTrialExpiringEmail, sendPlanLimitEmail } from "@/lib/email-service"
 
 interface NotificationInput {
   type: string
@@ -23,13 +24,40 @@ export async function createNotification(userId: string, data: NotificationInput
   }
 }
 
-export async function notifyNewLead(userId: string, leadName: string, leadId?: string) {
+export async function notifyNewLead(
+  userId: string,
+  leadName: string,
+  leadId?: string,
+  leadEmail?: string,
+  source?: string
+) {
   await createNotification(userId, {
     type: "lead_created",
     title: "Nuevo lead",
     message: `${leadName} ha entrado como nuevo lead.`,
     actionUrl: leadId ? `/dashboard/leads/${leadId}` : "/dashboard/leads",
   })
+  // Send email notification non-blocking
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true, name: true, notificationPrefs: true },
+    })
+    if (user?.email) {
+      const prefs = user.notificationPrefs as Record<string, unknown> | null
+      if (!prefs || prefs.newLeadEmail !== false) {
+        sendNewLeadEmail(
+          user.email,
+          user.name ?? "Usuario",
+          leadName,
+          leadEmail ?? "",
+          source ?? "directo"
+        ).catch(console.error)
+      }
+    }
+  } catch {
+    // Never crash — notification is best-effort
+  }
 }
 
 export async function notifyInvoiceDue(userId: string, invoiceNumber: string, invoiceId?: string) {
@@ -62,4 +90,15 @@ export async function notifyTrialExpiring(userId: string, daysLeft: number) {
     message: `Tu prueba gratuita expira en ${daysLeft} ${daysLeft === 1 ? "día" : "días"}.`,
     actionUrl: "/dashboard/finance/billing",
   })
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true, name: true },
+    })
+    if (user?.email) {
+      sendTrialExpiringEmail(user.email, user.name ?? "Usuario", daysLeft).catch(console.error)
+    }
+  } catch {
+    // Never crash
+  }
 }

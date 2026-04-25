@@ -8,7 +8,7 @@ import { cookies } from "next/headers"
 import { getBaseUrl } from "@/lib/api/baseUrl"
 
 export type TaskEntityType = "LEAD" | "CLIENT" | "PROVIDER" | "SALE"
-export type TaskPriority = "LOW" | "MEDIUM" | "HIGH"
+export type TaskPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT"
 
 export type CreateTaskPayload = {
  title: string
@@ -31,7 +31,7 @@ export type UpdateTaskPayload = {
  endAt?: string | Date | null
  priority?: TaskPriority | null
  assignedToId?: string | null
- status?: "PENDING" | "DONE" | "CANCELLED" | null
+ status?: "PENDING" | "IN_PROGRESS" | "DONE" | "CANCELLED" | null
  completedAt?: string | Date | null
  type?: "CALL" | "EMAIL" | "MEETING" | "MANUAL" | null
  estimatedMinutes?: number | null

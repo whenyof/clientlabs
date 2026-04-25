@@ -1,13 +1,30 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { PLANS, formatPrice, canUpgrade } from "../lib/plans"
 import { CheckIcon, CreditCardIcon } from "@heroicons/react/24/outline"
 import { cn } from "@/lib/utils"
 
+// Map Prisma plan enum to plans.ts id
+function mapPlanId(plan: string): string {
+  const map: Record<string, string> = {
+    FREE: "free",
+    PRO: "pro",
+    BUSINESS: "business",
+  }
+  return map[plan] ?? plan.toLowerCase()
+}
+
 export function PlansSection() {
-  const [currentPlan, setCurrentPlan] = useState('pro')
+  const [currentPlan, setCurrentPlan] = useState('free')
   const [billingCycle, setBillingCycle] = useState<'month' | 'year'>('month')
+
+  useEffect(() => {
+    fetch("/api/settings/profile")
+      .then((r) => r.json())
+      .then((d) => { if (d.success && d.user?.plan) setCurrentPlan(mapPlanId(d.user.plan)) })
+      .catch(() => {})
+  }, [])
 
   const handleUpgrade = (planId: string) => {
     console.log('Upgrading to plan:', planId)

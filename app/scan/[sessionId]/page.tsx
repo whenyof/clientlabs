@@ -9,7 +9,6 @@ export default function ScanSessionPage({
 }: {
   params: { sessionId: string }
 }) {
-  console.log("SCAN PAGE PARAMS:", params)
   // Next.js puede entregar `params` como Promise en ciertos modos.
   // Para que `sessionId` nunca quede undefined, desempaquetamos de forma segura sin `await`.
   const sessionId =

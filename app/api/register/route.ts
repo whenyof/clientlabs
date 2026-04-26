@@ -3,7 +3,7 @@ export const maxDuration = 30
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { prisma, safePrismaQuery } from "@/lib/prisma"
-import bcrypt from "bcrypt"
+import bcrypt from "bcryptjs"
 import { sendWelcomeEmail } from "@/lib/email-service"
 
 const registerSchema = z.object({

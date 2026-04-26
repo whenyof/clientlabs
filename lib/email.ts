@@ -19,7 +19,7 @@ export async function sendEmail(
     return { success: true, mock: true }
   }
   try {
-    const fromAddress = process.env.RESEND_FROM_EMAIL || "ClientLabs <onboarding@resend.dev>"
+    const fromAddress = process.env.RESEND_FROM_EMAIL || process.env.EMAIL_FROM || "ClientLabs <onboarding@resend.dev>"
     const { data, error } = await resend.emails.send({
       from: fromAddress,
       to,

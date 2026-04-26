@@ -114,7 +114,15 @@ export async function POST(request: Request) {
   )
 
   const { subject, html } = verificationCodeEmail(code)
-  await sendEmail(normalizedEmail, subject, html)
+  const emailResult = await sendEmail(normalizedEmail, subject, html)
+
+  if (!emailResult.success) {
+    console.error("[send-verification] Email failed:", emailResult.error)
+    return NextResponse.json(
+      { error: "No se pudo enviar el código. Inténtalo de nuevo en unos segundos." },
+      { status: 500 }
+    )
+  }
 
   return NextResponse.json({ success: true })
 }

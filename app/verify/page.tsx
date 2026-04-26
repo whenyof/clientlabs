@@ -6,35 +6,52 @@ import { signIn } from "next-auth/react"
 import Image from "next/image"
 import Link from "next/link"
 
-/* ── Constants ─────────────────────────────────────────────────────── */
-const SESSION_KEY = "cl_verify_pw"
+const SESSION_KEY    = "cl_verify_pw"
+const MAX_RESENDS    = 3
+const COOLDOWN_SECS  = 60
 
-/* ── Inner form (needs useSearchParams → must be inside <Suspense>) ── */
 function VerifyForm() {
   const searchParams = useSearchParams()
-  const router = useRouter()
+  const router       = useRouter()
+  const email        = searchParams?.get("email") ?? ""
 
-  const email    = searchParams?.get("email") ?? ""
-  const [digits, setDigits] = useState(["", "", "", "", "", ""])
-  const [error,  setError]  = useState("")
-  const [loading, setLoading] = useState(false)
-  const [resending, setResending] = useState(false)
-  const [resent, setResent] = useState(false)
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([])
+  const [digits,   setDigits]   = useState(["", "", "", "", "", ""])
+  const [error,    setError]    = useState("")
+  const [loading,  setLoading]  = useState(false)
 
-  // Auto-focus first input on mount
+  // Resend state
+  const [resending,   setResending]   = useState(false)
+  const [resendCount, setResendCount] = useState(0)
+  const [cooldown,    setCooldown]    = useState(0) // seconds remaining
+
+  const inputRefs   = useRef<(HTMLInputElement | null)[]>([])
+  const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
   useEffect(() => {
     inputRefs.current[0]?.focus()
+    return () => { if (cooldownRef.current) clearInterval(cooldownRef.current) }
   }, [])
+
+  function startCooldown() {
+    setCooldown(COOLDOWN_SECS)
+    cooldownRef.current = setInterval(() => {
+      setCooldown(prev => {
+        if (prev <= 1) {
+          clearInterval(cooldownRef.current!)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+  }
 
   /* ── Verify code ──────────────────────────────────────────────────── */
   async function verifyCode(fullCode: string) {
     if (loading) return
     setLoading(true)
     setError("")
-
     try {
-      const res = await fetch("/api/auth/verify-code", {
+      const res  = await fetch("/api/auth/verify-code", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify({ email, code: fullCode }),
@@ -42,23 +59,12 @@ function VerifyForm() {
       const data = await res.json()
 
       if (data.verified) {
-        // Retrieve password from sessionStorage and clean up immediately
         const pw = sessionStorage.getItem(SESSION_KEY)
         sessionStorage.removeItem(SESSION_KEY)
-
         if (pw) {
-          const result = await signIn("credentials", {
-            email,
-            password: pw,
-            redirect: false,
-          })
-          if (result?.ok) {
-            router.push("/plan")
-            return
-          }
+          const result = await signIn("credentials", { email, password: pw, redirect: false })
+          if (result?.ok) { router.push("/plan"); return }
         }
-
-        // Fallback: no password available — send to login with success message
         router.push("/auth?verified=true")
       } else {
         setError(data.error ?? "Código incorrecto")
@@ -76,20 +82,13 @@ function VerifyForm() {
 
   /* ── Input handlers ───────────────────────────────────────────────── */
   function handleChange(index: number, value: string) {
-    if (!/^\d*$/.test(value)) return // números only
-
-    const newDigits = [...digits]
-    newDigits[index] = value.slice(-1)
-    setDigits(newDigits)
+    if (!/^\d*$/.test(value)) return
+    const next = [...digits]
+    next[index] = value.slice(-1)
+    setDigits(next)
     setError("")
-
-    if (value && index < 5) {
-      inputRefs.current[index + 1]?.focus()
-    }
-
-    if (newDigits.every(d => d !== "")) {
-      verifyCode(newDigits.join(""))
-    }
+    if (value && index < 5) inputRefs.current[index + 1]?.focus()
+    if (next.every(d => d !== "")) verifyCode(next.join(""))
   }
 
   function handleKeyDown(index: number, e: React.KeyboardEvent<HTMLInputElement>) {
@@ -102,8 +101,7 @@ function VerifyForm() {
     e.preventDefault()
     const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6)
     if (pasted.length === 6) {
-      const newDigits = pasted.split("")
-      setDigits(newDigits)
+      setDigits(pasted.split(""))
       inputRefs.current[5]?.focus()
       verifyCode(pasted)
     }
@@ -111,11 +109,11 @@ function VerifyForm() {
 
   /* ── Resend code ──────────────────────────────────────────────────── */
   async function resendCode() {
-    if (resending) return
+    if (resending || cooldown > 0 || resendCount >= MAX_RESENDS) return
     setResending(true)
     setError("")
     try {
-      const res = await fetch("/api/auth/send-verification", {
+      const res  = await fetch("/api/auth/send-verification", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify({ email }),
@@ -124,10 +122,10 @@ function VerifyForm() {
       if (!res.ok) {
         setError(data.error ?? "Error al reenviar el código")
       } else {
-        setResent(true)
+        setResendCount(c => c + 1)
         setDigits(["", "", "", "", "", ""])
         inputRefs.current[0]?.focus()
-        setTimeout(() => setResent(false), 5000)
+        startCooldown()
       }
     } catch {
       setError("Error al reenviar. Inténtalo de nuevo.")
@@ -136,15 +134,22 @@ function VerifyForm() {
     }
   }
 
-  /* ── Render ───────────────────────────────────────────────────────── */
-  const filled = digits.filter(Boolean).length
+  /* ── Derived state ────────────────────────────────────────────────── */
+  const filled         = digits.filter(Boolean).length
+  const resendsLeft    = MAX_RESENDS - resendCount
+  const canResend      = !resending && cooldown === 0 && resendsLeft > 0 && !loading
 
+  function resendLabel() {
+    if (resending)        return "Enviando..."
+    if (cooldown > 0)     return `Reenviar en ${cooldown}s`
+    if (resendsLeft <= 0) return "Límite alcanzado"
+    return "Reenviar"
+  }
+
+  /* ── Render ───────────────────────────────────────────────────────── */
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center px-4 py-12"
-      style={{ background: "#f8fafc" }}
-    >
-      {/* Back link */}
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12" style={{ background: "#f8fafc" }}>
+
       <Link
         href="/register"
         className="absolute top-6 left-6 flex items-center gap-1.5 text-[12px] font-medium text-slate-400 hover:text-slate-600 transition-colors"
@@ -171,14 +176,10 @@ function VerifyForm() {
           </p>
         </div>
 
-        {/* Card */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
 
-          {/* 6-digit input */}
-          <div
-            className="flex justify-center gap-2.5 mb-5"
-            onPaste={handlePaste}
-          >
+          {/* 6-digit inputs */}
+          <div className="flex justify-center gap-2.5 mb-5" onPaste={handlePaste}>
             {digits.map((digit, i) => (
               <input
                 key={i}
@@ -192,16 +193,10 @@ function VerifyForm() {
                 disabled={loading}
                 className="w-12 h-14 text-center text-[22px] font-bold rounded-xl border-2 transition-all outline-none disabled:opacity-50"
                 style={{
-                  borderColor: error
-                    ? "#fca5a5"
-                    : digit
-                      ? "#1FA97A"
-                      : i === filled
-                        ? "#1FA97A"
-                        : "#e2e8f0",
-                  color: "#0B1F2A",
-                  background: error ? "#fff5f5" : "#fff",
-                  boxShadow: i === filled && !error ? "0 0 0 3px rgba(31,169,122,0.12)" : "none",
+                  borderColor: error ? "#fca5a5" : digit ? "#1FA97A" : i === filled ? "#1FA97A" : "#e2e8f0",
+                  color:       "#0B1F2A",
+                  background:  error ? "#fff5f5" : "#fff",
+                  boxShadow:   i === filled && !error ? "0 0 0 3px rgba(31,169,122,0.12)" : "none",
                 }}
               />
             ))}
@@ -217,7 +212,7 @@ function VerifyForm() {
             </div>
           )}
 
-          {/* Loading state */}
+          {/* Loading */}
           {loading && (
             <div className="flex items-center justify-center gap-2 text-[13px] text-slate-500 mb-4">
               <svg className="w-4 h-4 animate-spin text-[#1FA97A]" viewBox="0 0 24 24" fill="none">
@@ -227,31 +222,33 @@ function VerifyForm() {
             </div>
           )}
 
-          {/* Resent success */}
-          {resent && !error && (
-            <p className="text-[12.5px] text-center text-[#1FA97A] mb-4">
-              ✓ Código reenviado. Revisa tu bandeja de entrada.
-            </p>
-          )}
-
-          {/* Resend link */}
-          <div className="text-center border-t border-slate-100 pt-4">
+          {/* Resend section */}
+          <div className="text-center border-t border-slate-100 pt-4 space-y-1">
             <p className="text-[13px] text-slate-500">
               ¿No recibiste el código?{" "}
               <button
                 type="button"
                 onClick={resendCode}
-                disabled={resending || resent || loading}
-                className="font-semibold transition-colors disabled:opacity-40"
-                style={{ color: "#1FA97A" }}
+                disabled={!canResend}
+                className="font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{ color: canResend ? "#1FA97A" : "#94a3b8" }}
               >
-                {resending ? "Enviando..." : "Reenviar"}
+                {resendLabel()}
               </button>
             </p>
+            {resendsLeft > 0 && resendsLeft < MAX_RESENDS && (
+              <p className="text-[11px] text-slate-400">
+                {resendsLeft} {resendsLeft === 1 ? "reenvío restante" : "reenvíos restantes"}
+              </p>
+            )}
+            {resendsLeft <= 0 && (
+              <p className="text-[11px] text-red-400">
+                Límite de reenvíos alcanzado. Vuelve a registrarte si no recibes el código.
+              </p>
+            )}
           </div>
         </div>
 
-        {/* Footer note */}
         <p className="text-center text-[11.5px] text-slate-400 mt-4">
           El código expira en 10 minutos · Revisa también tu carpeta de spam
         </p>
@@ -260,7 +257,6 @@ function VerifyForm() {
   )
 }
 
-/* ── Page wrapper with Suspense (required for useSearchParams) ──────── */
 export default function VerifyPage() {
   return (
     <Suspense

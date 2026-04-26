@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
+import { Suspense } from "react"
 import { DashboardView } from "./components/DashboardView"
 
 export interface SummaryData {
@@ -86,7 +88,49 @@ function DashboardSkeleton() {
   )
 }
 
-export default function DashboardPage() {
+function UpgradeToast() {
+  const searchParams = useSearchParams()
+  const upgrade = searchParams?.get("upgrade")
+  const plan = searchParams?.get("plan")
+  const [visible, setVisible] = useState(upgrade === "success")
+
+  // Remove ?upgrade=success from URL without re-render
+  useEffect(() => {
+    if (upgrade === "success" && typeof window !== "undefined") {
+      const url = new URL(window.location.href)
+      url.searchParams.delete("upgrade")
+      url.searchParams.delete("plan")
+      window.history.replaceState({}, "", url.toString())
+      // Clear cached plan info so TrialBanner re-fetches
+      sessionStorage.removeItem("cl_plan_banner")
+    }
+  }, [upgrade])
+
+  if (!visible) return null
+
+  return (
+    <div
+      className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-xl px-5 py-4 shadow-lg text-[13px] font-medium text-white"
+      style={{ background: "#1FA97A", maxWidth: 360 }}
+    >
+      <span className="text-lg">🎉</span>
+      <span>
+        {plan
+          ? `¡Bienvenido al plan ${plan.charAt(0).toUpperCase() + plan.slice(1)}! Tu cuenta está activa.`
+          : "¡Suscripción activada con éxito!"}
+      </span>
+      <button
+        onClick={() => setVisible(false)}
+        className="ml-2 shrink-0 opacity-70 hover:opacity-100 transition-opacity text-white"
+        aria-label="Cerrar"
+      >
+        ✕
+      </button>
+    </div>
+  )
+}
+
+function DashboardPageInner() {
   const [data, setData] = useState<SummaryData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -113,4 +157,17 @@ export default function DashboardPage() {
   }
 
   return <DashboardView data={data} />
+}
+
+export default function DashboardPage() {
+  return (
+    <>
+      <Suspense fallback={null}>
+        <UpgradeToast />
+      </Suspense>
+      <Suspense fallback={<DashboardSkeleton />}>
+        <DashboardPageInner />
+      </Suspense>
+    </>
+  )
 }

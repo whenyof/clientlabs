@@ -7,8 +7,24 @@ import { pricingContent } from "@/components/landing/content"
 import { LandingIcons } from "@/components/landing/icons"
 import { GridBackground } from "@/components/landing/utils"
 
+async function startCheckout(plan: "PRO" | "BUSINESS", period: "monthly" | "yearly") {
+  const res = await fetch("/api/stripe/checkout", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ plan, period }),
+  })
+  if (res.status === 401) {
+    // Not logged in — send to register with hint
+    window.location.href = `/register?plan=${plan.toLowerCase()}&period=${period}`
+    return
+  }
+  const data = await res.json()
+  if (data.url) window.location.href = data.url
+}
+
 export function Pricing() {
   const [annual, setAnnual] = useState(true)
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
   /* FAQ open index — null means all closed.
      Starts with 0 (first FAQ open) to match reference behaviour. */
   const [openIdx, setOpenIdx] = useState<number | null>(0)
@@ -141,18 +157,39 @@ export function Pricing() {
                 )}
 
                 {/* CTA — ref: .plan .btn */}
-                <Link
-                  href="/register"
-                  className={[
-                    "flex w-full items-center justify-center gap-2 rounded-full py-3 font-display text-[15px] font-semibold transition-opacity hover:opacity-90",
-                    plan.featured
-                      ? "bg-emerald text-white"
-                      : "border border-line-dark text-[#c6d0d6] hover:bg-white/[0.06]",
-                  ].join(" ")}
-                >
-                  {plan.cta}
-                  <LandingIcons.arrow className="h-4 w-4" />
-                </Link>
+                {plan.name === "Free" ? (
+                  <Link
+                    href="/register"
+                    className={[
+                      "flex w-full items-center justify-center gap-2 rounded-full py-3 font-display text-[15px] font-semibold transition-opacity hover:opacity-90",
+                      "border border-line-dark text-[#c6d0d6] hover:bg-white/[0.06]",
+                    ].join(" ")}
+                  >
+                    {plan.cta}
+                    <LandingIcons.arrow className="h-4 w-4" />
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={loadingPlan !== null}
+                    onClick={async () => {
+                      const stripePlan = plan.name.toUpperCase() as "PRO" | "BUSINESS"
+                      const period = annual ? "yearly" : "monthly"
+                      setLoadingPlan(plan.name)
+                      try { await startCheckout(stripePlan, period) }
+                      finally { setLoadingPlan(null) }
+                    }}
+                    className={[
+                      "flex w-full items-center justify-center gap-2 rounded-full py-3 font-display text-[15px] font-semibold transition-opacity hover:opacity-90 disabled:opacity-60",
+                      plan.featured
+                        ? "bg-emerald text-white"
+                        : "border border-line-dark text-[#c6d0d6] hover:bg-white/[0.06]",
+                    ].join(" ")}
+                  >
+                    {loadingPlan === plan.name ? "Cargando..." : plan.cta}
+                    {loadingPlan !== plan.name && <LandingIcons.arrow className="h-4 w-4" />}
+                  </button>
+                )}
               </div>
             )
           })}

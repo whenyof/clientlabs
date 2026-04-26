@@ -11,6 +11,11 @@ import { getToken } from "next-auth/jwt"
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl
 
+  // ── Stripe webhook — bypass rate limiting (Stripe sends raw body; must reach route untouched) ──
+  if (pathname === "/api/stripe/webhook") {
+    return NextResponse.next()
+  }
+
   // ── Rate Limiting — solo si Upstash está configurado (no aplica en local sin Redis) ──
   if (
     pathname.startsWith("/api/") &&

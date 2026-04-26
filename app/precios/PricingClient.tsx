@@ -10,6 +10,20 @@ import { Navbar, LogoMark } from "../ui/chrome"
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin, useGSAP)
 
+async function startCheckout(plan: "PRO" | "BUSINESS", period: "monthly" | "yearly") {
+  const res = await fetch("/api/stripe/checkout", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ plan, period }),
+  })
+  if (res.status === 401) {
+    window.location.href = `/register?plan=${plan.toLowerCase()}&period=${period}`
+    return
+  }
+  const data = await res.json()
+  if (data.url) window.location.href = data.url
+}
+
 /* ═══════════════════════════════════════ DATA ═══════════════════════════════════════ */
 
 const PLANS = [
@@ -396,14 +410,26 @@ function PlanesSection({ billing, setBilling }: { billing: "monthly" | "annual";
 
                 <p className={`text-[11px] mb-5 ${plan.highlight ? "text-[#8FA6B2]" : "text-[#9CA3AF]"}`}>{plan.note}</p>
 
-                <Link href="/auth"
-                  className={`w-full inline-flex items-center justify-center py-3 rounded-md text-[14px] font-semibold transition-colors ${
-                    plan.highlight
-                      ? "bg-[#1FA97A] hover:bg-[#178f68] text-white"
-                      : "border border-[#E5E7EB] hover:border-[#1FA97A]/40 hover:text-[#1FA97A] text-[#0B1F2A]"
-                  }`}>
-                  Empezar gratis 14 días
-                </Link>
+                {plan.id === "free" ? (
+                  <Link href="/register"
+                    className={`w-full inline-flex items-center justify-center py-3 rounded-md text-[14px] font-semibold transition-colors border border-[#E5E7EB] hover:border-[#1FA97A]/40 hover:text-[#1FA97A] text-[#0B1F2A]`}>
+                    Empezar gratis
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => startCheckout(
+                      plan.id.toUpperCase() as "PRO" | "BUSINESS",
+                      billing === "annual" ? "yearly" : "monthly"
+                    )}
+                    className={`w-full inline-flex items-center justify-center py-3 rounded-md text-[14px] font-semibold transition-colors ${
+                      plan.highlight
+                        ? "bg-[#1FA97A] hover:bg-[#178f68] text-white"
+                        : "border border-[#E5E7EB] hover:border-[#1FA97A]/40 hover:text-[#1FA97A] text-[#0B1F2A]"
+                    }`}>
+                    Empezar gratis 14 días
+                  </button>
+                )}
                 <p className={`text-[10px] text-center mt-2 ${plan.highlight ? "text-[#8FA6B2]/60" : "text-[#9CA3AF]"}`}>
                   Sin tarjeta · Cancela cuando quieras
                 </p>

@@ -8,6 +8,7 @@ import { DashboardHeader } from "@/components/layout/DashboardHeader"
 import { FinanceNavbar } from "@/components/finance/FinanceNavbar"
 import { TourProvider } from "@/components/tour/TourContext"
 import { TourOverlay } from "@/components/tour/TourOverlay"
+import { TrialBanner } from "@/components/layout/TrialBanner"
 
 /**
  * DashboardShell — persistent sidebar + main content area.
@@ -79,6 +80,9 @@ export default function DashboardShell({
                             Client<span className="text-[var(--accent)]">Labs</span>
                         </span>
                     </div>
+
+                    {/* Trial / free plan banner */}
+                    <TrialBanner />
 
                     {/* Header: normal en resto del panel, reemplazado por FinanceNavbar en finanzas */}
                     <div className="hidden lg:block">

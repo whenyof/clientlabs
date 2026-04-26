@@ -58,7 +58,19 @@ export default function Register({ onSwitch }: Props) {
         setLoading(false)
         return
       }
-      window.location.href = "/auth?registered=true"
+
+      // Send verification code
+      await fetch("/api/auth/send-verification", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ email }),
+      })
+
+      // Store password in sessionStorage for auto-login after verification
+      // (never sent to any server from here — only used locally for signIn())
+      sessionStorage.setItem("cl_verify_pw", password)
+
+      window.location.href = `/verify?email=${encodeURIComponent(email.toLowerCase().trim())}`
     } catch {
       setError("Error de conexión. Comprueba tu internet e inténtalo de nuevo.")
       setLoading(false)

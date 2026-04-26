@@ -73,6 +73,7 @@ export async function proxy(req: NextRequest) {
     pathname.startsWith("/plan") ||
     pathname.startsWith("/login") ||
     pathname.startsWith("/register") ||
+    pathname.startsWith("/verify") ||
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/api/waitlist") ||
     pathname.startsWith("/api/register") ||

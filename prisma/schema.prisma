@@ -2948,3 +2948,15 @@ model ActivityLog {
   @@index([workspaceId, createdAt(sort: Desc)])
   @@map("activity_logs")
 }
+
+model VerificationCode {
+  id        String   @id @default(cuid())
+  email     String
+  code      String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email, code])
+  @@map("verification_codes")
+}

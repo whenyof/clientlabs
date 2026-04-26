@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { LayoutDashboard, Sparkles, ShieldCheck, CheckCircle } from "lucide-react"
+// Note: ?registered=true param is no longer generated — registration redirects to /verify
 import Login from "./Login"
 import Register from "./Register"
 
@@ -22,7 +23,7 @@ const STATS = [
 
 export default function AuthShell({ defaultRegister = false }: { defaultRegister?: boolean }) {
   const searchParams = useSearchParams()
-  const justRegistered = searchParams?.get("registered") === "true"
+  const justVerified = searchParams?.get("verified") === "true"
 
   const [isRegister, setIsRegister] = useState(defaultRegister)
   const [animating, setAnimating] = useState(false)
@@ -138,11 +139,11 @@ export default function AuthShell({ defaultRegister = false }: { defaultRegister
           Volver al inicio
         </Link>
 
-        {/* Registered success banner */}
-        {justRegistered && !isRegister && (
+        {/* Email verified success banner (fallback when auto-login failed after /verify) */}
+        {justVerified && !isRegister && (
           <div className="w-full max-w-[420px] mb-4 flex items-center gap-3 rounded-xl px-4 py-3 text-[13px] font-medium" style={{ background: "rgba(31,169,122,0.08)", border: "1px solid rgba(31,169,122,0.25)", color: "#1FA97A" }}>
             <CheckCircle size={16} className="shrink-0" />
-            ¡Cuenta creada! Inicia sesión para continuar.
+            ¡Email verificado! Inicia sesión para continuar.
           </div>
         )}
 

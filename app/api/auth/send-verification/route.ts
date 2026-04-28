@@ -116,6 +116,15 @@ export async function POST(request: Request) {
   const { subject, html } = verificationCodeEmail(code)
   const emailResult = await sendEmail(normalizedEmail, subject, html)
 
+  // mock:true means RESEND_API_KEY is not configured — treat as failure in production
+  if (emailResult.mock) {
+    console.error("[send-verification] RESEND_API_KEY not configured — email not sent (mock mode)")
+    return NextResponse.json(
+      { error: "El servicio de email no está configurado. Contacta con soporte." },
+      { status: 503 }
+    )
+  }
+
   if (!emailResult.success) {
     console.error("[send-verification] Email failed:", emailResult.error)
     return NextResponse.json(

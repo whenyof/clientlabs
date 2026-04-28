@@ -60,14 +60,21 @@ export default function Register({ onSwitch }: Props) {
       }
 
       // Send verification code
-      await fetch("/api/auth/send-verification", {
+      const verifyRes = await fetch("/api/auth/send-verification", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify({ email }),
       })
 
+      if (!verifyRes.ok) {
+        const verifyData = await verifyRes.json().catch(() => ({}))
+        setError(verifyData.error ?? "No pudimos enviar el código de verificación. Inténtalo de nuevo.")
+        setLoading(false)
+        return
+      }
+
       // Store password in sessionStorage for auto-login after verification
-      // (never sent to any server from here — only used locally for signIn())
+      // (never sent to any server — only used locally for signIn())
       sessionStorage.setItem("cl_verify_pw", password)
 
       window.location.href = `/verify?email=${encodeURIComponent(email.toLowerCase().trim())}`

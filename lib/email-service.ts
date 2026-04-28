@@ -16,6 +16,14 @@ import {
   passwordResetEmail,
   leadConvertedEmail,
   planLimitEmail,
+  verificationCodeEmail,
+  invoicePaidEmail,
+  invoiceOverdueEmail,
+  quoteSentEmail,
+  subscriptionActivatedEmail,
+  paymentFailedEmail,
+  subscriptionCancelledEmail,
+  weeklyBusinessSummaryEmail,
 } from "@/lib/email-templates"
 
 interface TaskItem {
@@ -133,5 +141,115 @@ export async function sendPlanLimitEmail(
     to,
     `Límite alcanzado: ${resource} — ClientLabs`,
     planLimitEmail(name, resource, current, max)
+  )
+}
+
+export async function sendVerificationCodeEmail(to: string, code: string) {
+  return sendEmail(
+    to,
+    `${code} — Tu código de verificación de ClientLabs`,
+    verificationCodeEmail(code)
+  )
+}
+
+export async function sendInvoicePaidEmail(
+  to: string,
+  name: string,
+  invoiceNumber: string,
+  clientName: string,
+  total: number
+) {
+  return sendEmail(
+    to,
+    `✅ Factura cobrada: ${invoiceNumber} — ClientLabs`,
+    invoicePaidEmail(name, invoiceNumber, clientName, total)
+  )
+}
+
+export async function sendInvoiceOverdueEmail(
+  to: string,
+  name: string,
+  invoiceNumber: string,
+  clientName: string,
+  dueDate: string,
+  total: number
+) {
+  return sendEmail(
+    to,
+    `🔴 Factura vencida: ${invoiceNumber} — ClientLabs`,
+    invoiceOverdueEmail(name, invoiceNumber, clientName, dueDate, total)
+  )
+}
+
+export async function sendQuoteSentEmail(
+  to: string,
+  clientName: string,
+  quoteNumber: string,
+  total: number,
+  businessName: string
+) {
+  return sendEmail(
+    to,
+    `Presupuesto ${quoteNumber} de ${businessName}`,
+    quoteSentEmail(clientName, quoteNumber, total, businessName)
+  )
+}
+
+export async function sendSubscriptionActivatedEmail(
+  to: string,
+  name: string,
+  plan: string,
+  nextBillingDate: string
+) {
+  return sendEmail(
+    to,
+    `🎉 Plan ${plan} activado — ClientLabs`,
+    subscriptionActivatedEmail(name, plan, nextBillingDate)
+  )
+}
+
+export async function sendPaymentFailedEmail(
+  to: string,
+  name: string,
+  plan: string,
+  retryDate: string
+) {
+  return sendEmail(
+    to,
+    `⚠️ Pago fallido — ClientLabs`,
+    paymentFailedEmail(name, plan, retryDate)
+  )
+}
+
+export async function sendSubscriptionCancelledEmail(
+  to: string,
+  name: string,
+  plan: string,
+  accessUntil: string
+) {
+  return sendEmail(
+    to,
+    `Suscripción cancelada — ClientLabs`,
+    subscriptionCancelledEmail(name, plan, accessUntil)
+  )
+}
+
+interface WeeklyStats {
+  newLeads: number
+  invoicedAmount: number
+  tasksCompleted: number
+  openInvoices: number
+  weekLabel: string
+}
+
+export async function sendWeeklyBusinessSummaryEmail(
+  to: string,
+  name: string,
+  stats: WeeklyStats
+) {
+  return sendEmail(
+    to,
+    `📊 Tu resumen semanal — ${stats.weekLabel} — ClientLabs`,
+    weeklyBusinessSummaryEmail(name, stats)
   )
 }

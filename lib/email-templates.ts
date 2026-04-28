@@ -1,45 +1,74 @@
 /**
  * Email templates for ClientLabs.
  *
- * NOTE: invoiceSentEmail has NO ClientLabs branding — it's sent to end-clients.
- * All others HAVE ClientLabs branding.
+ * NOTES:
+ * - invoiceSentEmail and quoteSentEmail have NO ClientLabs branding — sent to end-clients.
+ * - All others have ClientLabs branding + noreply notice in footer.
+ * - Logo is CSS-rendered (no external image dependency).
  */
 
 // ─── Shared brand helpers ────────────────────────────────────────────────────
 
 const BRAND_GREEN = "#1FA97A"
-const DARK_BG = "#0B1F2A"
+const DARK_BG     = "#0B1F2A"
+
+function logoHtml(): string {
+  return `
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 auto">
+      <tr>
+        <td style="vertical-align:middle;padding-right:10px">
+          <!--[if !mso]><!-->
+          <img src="https://clientlabs.io/logo-trimmed.png"
+               width="36" height="36" border="0" alt="ClientLabs"
+               style="display:block;border:0;border-radius:8px;width:36px;height:36px">
+          <!--<![endif]-->
+          <!--[if mso]>
+          <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word"
+            href="#" style="width:36pt;height:36pt;" arcsize="22%" stroke="f" fillcolor="${BRAND_GREEN}">
+            <v:textbox inset="0,0,0,0"><center style="color:#fff;font-family:Arial;font-weight:800;font-size:14px">CL</center></v:textbox>
+          </v:roundrect>
+          <![endif]-->
+        </td>
+        <td style="vertical-align:middle">
+          <span style="font-size:18px;font-weight:700;color:#fff;letter-spacing:-0.03em;font-family:Arial,sans-serif">Client<span style="color:${BRAND_GREEN}">Labs</span></span>
+        </td>
+      </tr>
+    </table>
+  `
+}
 
 function brandHeader(): string {
   return `
-    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background:${DARK_BG};border-radius:16px 16px 0 0;padding:32px;text-align:center">
-      <tr><td>
-        <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 auto 20px">
-          <tr>
-            <td style="vertical-align:middle;padding-right:8px">
-              <img src="https://clientlabs.io/logo.PNG" width="28" height="28" alt="CL" style="display:block;border:0;border-radius:6px">
-            </td>
-            <td style="vertical-align:middle">
-              <span style="font-size:17px;font-weight:700;color:#fff;letter-spacing:-0.02em">Client<span style="color:${BRAND_GREEN}">Labs</span></span>
-            </td>
-          </tr>
-        </table>
-      </td></tr>
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
+      style="background:${DARK_BG};border-radius:14px 14px 0 0;padding:28px 32px;text-align:center">
+      <tr><td>${logoHtml()}</td></tr>
     </table>
   `
 }
 
 function brandFooter(): string {
   return `
-    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background:#F8FAFB;border-top:1px solid #E2E8F0;border-radius:0 0 16px 16px;padding:20px 24px;text-align:center">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
+      style="background:#F1F5F9;border-top:1px solid #E2E8F0;border-radius:0 0 14px 14px;padding:20px 28px;text-align:center">
       <tr><td>
-        <p style="font-size:13px;font-weight:600;color:${DARK_BG};margin:0 0 8px">Client<span style="color:${BRAND_GREEN}">Labs</span></p>
-        <p style="margin:0 0 8px">
-          <a href="https://clientlabs.io" style="font-size:10px;color:#94A3B8;text-decoration:none">clientlabs.io</a>&nbsp;·&nbsp;
-          <a href="https://clientlabs.io/privacidad" style="font-size:10px;color:#94A3B8;text-decoration:none">Privacidad</a>
+        <p style="font-size:11px;font-weight:700;color:#475569;margin:0 0 6px;font-family:Arial,sans-serif;letter-spacing:0.02em">
+          Client<span style="color:${BRAND_GREEN}">Labs</span>
         </p>
-        <p style="font-size:10px;color:#CBD5E1;line-height:1.6;margin:0">
-          © 2026 ClientLabs · hola@clientlabs.io
+        <p style="font-size:11px;color:#94A3B8;margin:0 0 10px;font-family:Arial,sans-serif">
+          <a href="https://clientlabs.io" style="color:#94A3B8;text-decoration:none">clientlabs.io</a>
+          &nbsp;·&nbsp;
+          <a href="https://clientlabs.io/privacidad" style="color:#94A3B8;text-decoration:none">Privacidad</a>
+          &nbsp;·&nbsp;
+          <a href="mailto:hola@clientlabs.io" style="color:#94A3B8;text-decoration:none">hola@clientlabs.io</a>
+        </p>
+        <p style="font-size:10px;color:#CBD5E1;margin:0;font-family:Arial,sans-serif;line-height:1.6">
+          Este es un mensaje automático generado por ClientLabs.<br>
+          Por favor, <strong>no respondas a este correo</strong> — no está monitoreado.<br>
+          Si necesitas ayuda escríbenos a
+          <a href="mailto:hola@clientlabs.io" style="color:#94A3B8;text-decoration:none">hola@clientlabs.io</a>.
+        </p>
+        <p style="font-size:10px;color:#CBD5E1;margin:10px 0 0;font-family:Arial,sans-serif">
+          © 2026 ClientLabs. Todos los derechos reservados.
         </p>
       </td></tr>
     </table>
@@ -47,26 +76,38 @@ function brandFooter(): string {
 }
 
 function wrapEmail(content: string, withBrand = true): string {
+  const footer = withBrand
+    ? brandFooter()
+    : `
+      <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
+        style="background:#F1F5F9;border-top:1px solid #E2E8F0;border-radius:0 0 14px 14px;padding:16px 24px;text-align:center">
+        <tr><td>
+          <p style="font-size:10px;color:#CBD5E1;margin:0;font-family:Arial,sans-serif">
+            © 2026 ClientLabs. Todos los derechos reservados.
+          </p>
+        </td></tr>
+      </table>
+    `
+
   return `<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta name="x-apple-disable-message-reformatting">
 </head>
-<body style="margin:0;padding:0;background:#E2E8F0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif">
-  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background:#E2E8F0;padding:32px 16px">
+<body style="margin:0;padding:0;background:#DDE3EA;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif">
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
+    style="background:#DDE3EA;padding:40px 16px">
     <tr><td align="center">
-      <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="560" style="max-width:560px;width:100%">
+      <table role="presentation" cellspacing="0" cellpadding="0" border="0"
+        style="max-width:580px;width:100%;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.10)">
         <tr><td>
           ${withBrand ? brandHeader() : ""}
-          <div style="background:#fff;padding:32px;${withBrand ? "" : "border-radius:16px"}">
+          <div style="background:#ffffff;padding:36px 36px 28px;${withBrand ? "" : "border-radius:14px 14px 0 0"}">
             ${content}
           </div>
-          ${withBrand ? brandFooter() : `
-            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background:#F8FAFB;border-top:1px solid #E2E8F0;border-radius:0 0 16px 16px;padding:16px 24px;text-align:center">
-              <tr><td><p style="font-size:10px;color:#CBD5E1;margin:0">© 2026 ClientLabs · hola@clientlabs.io</p></td></tr>
-            </table>
-          `}
+          ${footer}
         </td></tr>
       </table>
     </td></tr>
@@ -75,45 +116,79 @@ function wrapEmail(content: string, withBrand = true): string {
 </html>`
 }
 
-function btn(label: string, url: string): string {
-  return `<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:24px auto">
-    <tr><td style="background:${BRAND_GREEN};border-radius:8px">
-      <a href="${url}" style="display:block;padding:12px 28px;font-size:14px;font-weight:600;color:#fff;text-decoration:none;white-space:nowrap">${label}</a>
-    </td></tr>
-  </table>`
+function btn(label: string, url: string, color = BRAND_GREEN): string {
+  return `
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:24px auto 0">
+      <tr>
+        <td style="background:${color};border-radius:9px;mso-padding-alt:0">
+          <a href="${url}"
+            style="display:block;padding:13px 32px;font-size:14px;font-weight:700;color:#fff;text-decoration:none;white-space:nowrap;font-family:Arial,sans-serif;letter-spacing:0.01em">
+            ${label}
+          </a>
+        </td>
+      </tr>
+    </table>
+  `
+}
+
+function divider(): string {
+  return `<div style="height:1px;background:#E2E8F0;margin:24px 0"></div>`
 }
 
 // ─── 1. Welcome email ────────────────────────────────────────────────────────
 
 export function welcomeEmail(name: string): string {
   const content = `
-    <h1 style="font-size:24px;font-weight:700;color:#0F172A;margin:0 0 8px">¡Bienvenido/a, ${name}!</h1>
-    <p style="font-size:15px;color:#0F172A;font-weight:500;margin:0 0 6px">Tu CRM inteligente para autónomos y pymes ya está listo.</p>
-    <p style="font-size:14px;color:#475569;line-height:1.75;margin:0 0 24px">
-      Con ClientLabs puedes gestionar tus clientes, leads, tareas, finanzas y mucho más desde un único lugar.
-      Empieza explorando el dashboard y configura tu perfil de negocio.
+    <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 6px;letter-spacing:-0.02em">
+      ¡Bienvenido/a, ${name}!
+    </h1>
+    <p style="font-size:15px;font-weight:600;color:${BRAND_GREEN};margin:0 0 16px">
+      Tu negocio, bajo control.
     </p>
-    ${btn("Ir al dashboard", "https://app.clientlabs.io/dashboard")}
-    <p style="font-size:13px;color:#64748B;line-height:1.75;margin:16px 0 0">
-      Si tienes cualquier pregunta, responde directamente a este email.<br>
-      — El equipo de ClientLabs
+    <p style="font-size:14px;color:#475569;line-height:1.8;margin:0 0 20px">
+      Con ClientLabs puedes gestionar tus clientes, leads, tareas y finanzas desde un único lugar.
+      Tu cuenta está lista — empieza por el dashboard y configura tu perfil de negocio.
+    </p>
+    <div style="background:#F0FDF9;border:1px solid #BBF7E0;border-radius:10px;padding:16px 20px;margin-bottom:8px">
+      <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+        <tr>
+          <td style="font-size:13px;color:#0F172A;padding:4px 0">✅ &nbsp;Gestión de clientes y leads</td>
+        </tr>
+        <tr>
+          <td style="font-size:13px;color:#0F172A;padding:4px 0">✅ &nbsp;Facturación y presupuestos</td>
+        </tr>
+        <tr>
+          <td style="font-size:13px;color:#0F172A;padding:4px 0">✅ &nbsp;Tareas y calendario</td>
+        </tr>
+        <tr>
+          <td style="font-size:13px;color:#0F172A;padding:4px 0">✅ &nbsp;Automatizaciones y recordatorios</td>
+        </tr>
+      </table>
+    </div>
+    ${btn("Abrir mi dashboard", "https://app.clientlabs.io/dashboard")}
+    ${divider()}
+    <p style="font-size:12px;color:#94A3B8;margin:0;line-height:1.6">
+      ¿Tienes alguna pregunta? Escríbenos a
+      <a href="mailto:hola@clientlabs.io" style="color:${BRAND_GREEN};text-decoration:none;font-weight:600">hola@clientlabs.io</a>
+      y te respondemos lo antes posible.
     </p>
   `
   return wrapEmail(content, true)
 }
 
-// ─── 2. Verification email ───────────────────────────────────────────────────
+// ─── 2. Verification email (link-based) ─────────────────────────────────────
 
 export function verificationEmail(name: string, verifyUrl: string): string {
   const content = `
-    <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 8px">Verifica tu email</h1>
-    <p style="font-size:14px;color:#475569;line-height:1.75;margin:0 0 20px">
-      Hola ${name}, haz clic en el botón de abajo para confirmar tu dirección de correo y activar tu cuenta.
+    <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 12px;letter-spacing:-0.02em">Verifica tu email</h1>
+    <p style="font-size:14px;color:#475569;line-height:1.8;margin:0 0 20px">
+      Hola ${name}, haz clic en el botón de abajo para confirmar tu dirección de correo y activar tu cuenta en ClientLabs.
     </p>
-    ${btn("Verificar email", verifyUrl)}
-    <p style="font-size:12px;color:#94A3B8;line-height:1.6;margin:16px 0 0">
-      Si no has creado una cuenta en ClientLabs, ignora este email.
-      El enlace expira en 24 horas.
+    ${btn("Verificar mi email", verifyUrl)}
+    ${divider()}
+    <p style="font-size:12px;color:#94A3B8;line-height:1.6;margin:0">
+      El enlace expira en <strong>24 horas</strong>.<br>
+      Si no has creado una cuenta en ClientLabs, ignora este mensaje.
     </p>
   `
   return wrapEmail(content, true)
@@ -123,18 +198,23 @@ export function verificationEmail(name: string, verifyUrl: string): string {
 
 export function trialExpiringEmail(name: string, daysLeft: number): string {
   const content = `
-    <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 8px">Tu periodo de prueba termina en ${daysLeft} día${daysLeft === 1 ? "" : "s"}</h1>
-    <p style="font-size:14px;color:#475569;line-height:1.75;margin:0 0 20px">
-      Hola ${name}, tu prueba gratuita de ClientLabs está por finalizar.
-      No pierdas el acceso a tus datos y funcionalidades.
+    <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 12px;letter-spacing:-0.02em">
+      Tu periodo de prueba termina en ${daysLeft} día${daysLeft === 1 ? "" : "s"}
+    </h1>
+    <p style="font-size:14px;color:#475569;line-height:1.8;margin:0 0 20px">
+      Hola ${name}, tu prueba gratuita de ClientLabs está llegando a su fin. Activa tu plan para seguir accediendo a todos tus datos y funcionalidades sin interrupción.
     </p>
-    <div style="background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;padding:16px;margin-bottom:20px;text-align:center">
-      <p style="font-size:13px;font-weight:600;color:#92400E;margin:0">
-        ⏰ ${daysLeft} día${daysLeft === 1 ? "" : "s"} restante${daysLeft === 1 ? "" : "s"}
+    <div style="background:#FEF9EC;border:1px solid #FDE68A;border-radius:10px;padding:18px;margin-bottom:8px;text-align:center">
+      <p style="font-size:28px;font-weight:800;color:#92400E;margin:0 0 4px;letter-spacing:-0.02em">
+        ${daysLeft} día${daysLeft === 1 ? "" : "s"}
+      </p>
+      <p style="font-size:12px;color:#92400E;font-weight:600;margin:0;text-transform:uppercase;letter-spacing:0.08em">
+        restante${daysLeft === 1 ? "" : "s"} de prueba
       </p>
     </div>
-    ${btn("Activar mi plan", "https://app.clientlabs.io/dashboard/settings/billing")}
-    <p style="font-size:12px;color:#94A3B8;line-height:1.6;margin:16px 0 0">
+    ${btn("Activar mi plan ahora", "https://app.clientlabs.io/dashboard/settings/billing")}
+    ${divider()}
+    <p style="font-size:12px;color:#94A3B8;line-height:1.6;margin:0">
       Si ya has actualizado tu plan, ignora este mensaje.
     </p>
   `
@@ -150,20 +230,31 @@ export function newLeadEmail(
   source: string
 ): string {
   const content = `
-    <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 8px">🎯 Nuevo lead: ${leadName}</h1>
-    <p style="font-size:14px;color:#475569;line-height:1.75;margin:0 0 20px">
-      Hola ${name}, tienes un nuevo lead en ClientLabs.
+    <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 12px;letter-spacing:-0.02em">
+      Nuevo lead capturado
+    </h1>
+    <p style="font-size:14px;color:#475569;line-height:1.8;margin:0 0 20px">
+      Hola ${name}, tienes un nuevo lead registrado en ClientLabs. Respóndele lo antes posible para aumentar tus posibilidades de conversión.
     </p>
-    <div style="background:#F0FDF9;border:1px solid #9FE1CB;border-radius:10px;padding:16px;margin-bottom:20px">
+    <div style="background:#F0FDF9;border:1px solid #BBF7E0;border-radius:10px;padding:18px 20px;margin-bottom:8px">
       <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
         <tr>
-          <td style="font-size:12px;color:#64748B;padding-bottom:6px"><strong style="color:#0F172A">Nombre:</strong> ${leadName}</td>
+          <td style="padding:5px 0;border-bottom:1px solid #D1FAE5">
+            <span style="font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:0.08em">Nombre</span><br>
+            <span style="font-size:14px;font-weight:600;color:#0F172A">${leadName}</span>
+          </td>
         </tr>
         <tr>
-          <td style="font-size:12px;color:#64748B;padding-bottom:6px"><strong style="color:#0F172A">Email:</strong> ${leadEmail}</td>
+          <td style="padding:10px 0;border-bottom:1px solid #D1FAE5">
+            <span style="font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:0.08em">Email</span><br>
+            <span style="font-size:14px;font-weight:600;color:#0F172A">${leadEmail}</span>
+          </td>
         </tr>
         <tr>
-          <td style="font-size:12px;color:#64748B"><strong style="color:#0F172A">Fuente:</strong> ${source}</td>
+          <td style="padding:10px 0 0">
+            <span style="font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:0.08em">Fuente</span><br>
+            <span style="font-size:14px;font-weight:600;color:#0F172A">${source}</span>
+          </td>
         </tr>
       </table>
     </div>
@@ -182,16 +273,21 @@ export function invoiceSentEmail(
 ): string {
   const totalFormatted = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(total)
   const content = `
-    <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 8px">Factura ${invoiceNumber}</h1>
-    <p style="font-size:14px;color:#475569;line-height:1.75;margin:0 0 20px">
-      Hola ${clientName}, te adjuntamos la factura ${invoiceNumber} de ${businessName}.
+    <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 4px;letter-spacing:-0.02em">
+      Factura ${invoiceNumber}
+    </h1>
+    <p style="font-size:13px;color:#64748B;margin:0 0 20px">${businessName}</p>
+    <p style="font-size:14px;color:#475569;line-height:1.8;margin:0 0 20px">
+      Hola ${clientName}, te adjuntamos la factura <strong>${invoiceNumber}</strong>.
     </p>
-    <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:20px;margin-bottom:20px;text-align:center">
-      <p style="font-size:12px;color:#64748B;text-transform:uppercase;letter-spacing:0.1em;margin:0 0 6px">Total factura</p>
-      <p style="font-size:32px;font-weight:700;color:#0F172A;margin:0;letter-spacing:-0.02em">${totalFormatted}</p>
+    <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:22px;margin-bottom:20px;text-align:center">
+      <p style="font-size:11px;color:#64748B;text-transform:uppercase;letter-spacing:0.1em;margin:0 0 8px;font-weight:600">
+        Total factura
+      </p>
+      <p style="font-size:36px;font-weight:800;color:#0F172A;margin:0;letter-spacing:-0.03em">${totalFormatted}</p>
     </div>
     <p style="font-size:12px;color:#94A3B8;line-height:1.6;margin:0">
-      Si tienes alguna consulta sobre esta factura, contacta con ${businessName} directamente.
+      Para cualquier consulta sobre esta factura, contacta directamente con ${businessName}.
     </p>
   `
   return wrapEmail(content, false)
@@ -209,24 +305,25 @@ interface TaskItem {
 export function dailyTasksEmail(name: string, tasks: TaskItem[]): string {
   const PRIORITY_COLORS: Record<string, string> = {
     HIGH:   "#EF4444",
+    URGENT: "#EF4444",
     MEDIUM: "#F59E0B",
     LOW:    "#10B981",
-    URGENT: "#EF4444",
   }
 
   const taskRows = tasks
-    .map((t) => {
+    .map((t, i) => {
       const color = PRIORITY_COLORS[t.priority ?? "MEDIUM"] ?? PRIORITY_COLORS.MEDIUM
+      const isLast = i === tasks.length - 1
       return `
         <tr>
-          <td style="padding:8px 0;border-bottom:1px solid #F1F5F9">
+          <td style="padding:10px 0;${isLast ? "" : "border-bottom:1px solid #F1F5F9"}">
             <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
               <tr>
-                <td style="vertical-align:middle;padding-right:10px;width:8px">
+                <td style="vertical-align:middle;width:10px;padding-right:12px">
                   <div style="width:8px;height:8px;border-radius:50%;background:${color}"></div>
                 </td>
                 <td style="vertical-align:middle">
-                  <p style="font-size:13px;font-weight:500;color:#0F172A;margin:0">${t.title}</p>
+                  <p style="font-size:13px;font-weight:600;color:#0F172A;margin:0">${t.title}</p>
                   ${t.time ? `<p style="font-size:11px;color:#94A3B8;margin:2px 0 0">${t.time}</p>` : ""}
                 </td>
               </tr>
@@ -238,11 +335,13 @@ export function dailyTasksEmail(name: string, tasks: TaskItem[]): string {
     .join("")
 
   const content = `
-    <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 6px">Buenos días, ${name} ☀️</h1>
-    <p style="font-size:14px;color:#475569;line-height:1.75;margin:0 0 20px">
-      Tienes <strong>${tasks.length} tarea${tasks.length === 1 ? "" : "s"}</strong> para mañana.
+    <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 4px;letter-spacing:-0.02em">
+      Buenos días, ${name} ☀️
+    </h1>
+    <p style="font-size:14px;color:#475569;margin:0 0 20px">
+      Tienes <strong>${tasks.length} tarea${tasks.length === 1 ? "" : "s"}</strong> programadas para hoy.
     </p>
-    <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:16px;margin-bottom:20px">
+    <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:6px 16px;margin-bottom:8px">
       <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
         ${taskRows}
       </table>
@@ -263,13 +362,15 @@ export function invoiceDueEmail(
 ): string {
   const totalFormatted = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(total)
   const content = `
-    <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 8px">⚠️ Factura próxima a vencer</h1>
-    <p style="font-size:14px;color:#475569;line-height:1.75;margin:0 0 20px">
-      Hola ${name}, la factura <strong>${invoiceNumber}</strong> de <strong>${clientName}</strong> vence el <strong>${dueDate}</strong>.
+    <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 12px;letter-spacing:-0.02em">
+      Factura próxima a vencer
+    </h1>
+    <p style="font-size:14px;color:#475569;line-height:1.8;margin:0 0 20px">
+      Hola ${name}, la factura <strong>${invoiceNumber}</strong> de <strong>${clientName}</strong> vence el <strong>${dueDate}</strong>. Recuerda hacer el seguimiento para cobrarla a tiempo.
     </p>
-    <div style="background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;padding:16px;margin-bottom:20px;text-align:center">
-      <p style="font-size:12px;color:#92400E;font-weight:600;margin:0 0 4px">Total pendiente</p>
-      <p style="font-size:28px;font-weight:700;color:#92400E;margin:0">${totalFormatted}</p>
+    <div style="background:#FEF9EC;border:1px solid #FDE68A;border-radius:10px;padding:20px;margin-bottom:8px;text-align:center">
+      <p style="font-size:11px;color:#92400E;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 6px">Total pendiente</p>
+      <p style="font-size:32px;font-weight:800;color:#92400E;margin:0;letter-spacing:-0.02em">${totalFormatted}</p>
     </div>
     ${btn("Ver factura", "https://app.clientlabs.io/dashboard/finance/invoicing")}
   `
@@ -285,14 +386,32 @@ export function teamInviteEmail(
   acceptUrl: string
 ): string {
   const content = `
-    <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 8px">Invitación a ${workspaceName}</h1>
-    <p style="font-size:14px;color:#475569;line-height:1.75;margin:0 0 20px">
-      <strong>${inviterName}</strong> te ha invitado a unirte al espacio de trabajo <strong>${workspaceName}</strong> en ClientLabs como <strong>${role}</strong>.
+    <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 12px;letter-spacing:-0.02em">
+      Invitación a unirte al equipo
+    </h1>
+    <p style="font-size:14px;color:#475569;line-height:1.8;margin:0 0 20px">
+      <strong>${inviterName}</strong> te ha invitado a unirte al espacio de trabajo <strong>${workspaceName}</strong> en ClientLabs con el rol de <strong>${role}</strong>.
     </p>
+    <div style="background:#F0FDF9;border:1px solid #BBF7E0;border-radius:10px;padding:16px 20px;margin-bottom:8px">
+      <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+        <tr>
+          <td style="padding:4px 0;border-bottom:1px solid #D1FAE5">
+            <span style="font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:0.08em">Workspace</span><br>
+            <span style="font-size:14px;font-weight:600;color:#0F172A">${workspaceName}</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:10px 0 0">
+            <span style="font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:0.08em">Tu rol</span><br>
+            <span style="font-size:14px;font-weight:600;color:#0F172A">${role}</span>
+          </td>
+        </tr>
+      </table>
+    </div>
     ${btn("Aceptar invitación", acceptUrl)}
-    <p style="font-size:12px;color:#94A3B8;line-height:1.6;margin:16px 0 0">
-      Si no esperabas esta invitación, puedes ignorar este email.
-      El enlace expira en 7 días.
+    ${divider()}
+    <p style="font-size:12px;color:#94A3B8;line-height:1.6;margin:0">
+      Si no esperabas esta invitación, ignora este mensaje. El enlace expira en <strong>7 días</strong>.
     </p>
   `
   return wrapEmail(content, true)
@@ -302,14 +421,17 @@ export function teamInviteEmail(
 
 export function passwordResetEmail(name: string, resetUrl: string): string {
   const content = `
-    <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 8px">Restablecer contraseña</h1>
-    <p style="font-size:14px;color:#475569;line-height:1.75;margin:0 0 20px">
-      Hola ${name}, hemos recibido una solicitud para restablecer la contraseña de tu cuenta en ClientLabs.
+    <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 12px;letter-spacing:-0.02em">
+      Restablecer tu contraseña
+    </h1>
+    <p style="font-size:14px;color:#475569;line-height:1.8;margin:0 0 20px">
+      Hola ${name}, hemos recibido una solicitud para restablecer la contraseña de tu cuenta en ClientLabs. Haz clic en el botón para crear una nueva.
     </p>
     ${btn("Restablecer contraseña", resetUrl)}
-    <p style="font-size:12px;color:#94A3B8;line-height:1.6;margin:16px 0 0">
-      Si no solicitaste el restablecimiento, ignora este email.
-      El enlace expira en 1 hora.
+    ${divider()}
+    <p style="font-size:12px;color:#94A3B8;line-height:1.6;margin:0">
+      El enlace expira en <strong>1 hora</strong>.<br>
+      Si no solicitaste este cambio, ignora este mensaje — tu contraseña actual sigue siendo válida.
     </p>
   `
   return wrapEmail(content, true)
@@ -319,12 +441,15 @@ export function passwordResetEmail(name: string, resetUrl: string): string {
 
 export function leadConvertedEmail(name: string, leadName: string): string {
   const content = `
-    <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 8px">🎉 ¡Nuevo cliente!</h1>
-    <p style="font-size:14px;color:#475569;line-height:1.75;margin:0 0 20px">
-      Hola ${name}, el lead <strong>${leadName}</strong> ha sido convertido a cliente.
+    <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 12px;letter-spacing:-0.02em">
+      Tienes un nuevo cliente 🎉
+    </h1>
+    <p style="font-size:14px;color:#475569;line-height:1.8;margin:0 0 20px">
+      Hola ${name}, el lead <strong>${leadName}</strong> ha sido convertido a cliente con éxito. Ya aparece en tu lista de clientes en ClientLabs.
     </p>
-    <div style="background:#F0FDF9;border:1px solid #9FE1CB;border-radius:10px;padding:16px;margin-bottom:20px;text-align:center">
-      <p style="font-size:15px;font-weight:600;color:#0F6E56;margin:0">${leadName} → Cliente</p>
+    <div style="background:#F0FDF9;border:1px solid #BBF7E0;border-radius:10px;padding:18px;margin-bottom:8px;text-align:center">
+      <p style="font-size:11px;color:#0F6E56;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 6px">Cliente añadido</p>
+      <p style="font-size:20px;font-weight:700;color:#0F172A;margin:0">${leadName}</p>
     </div>
     ${btn("Ver clientes", "https://app.clientlabs.io/dashboard/clients")}
   `
@@ -339,21 +464,287 @@ export function planLimitEmail(
   current: number,
   max: number
 ): string {
+  const pct = Math.round((current / max) * 100)
   const content = `
-    <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 8px">Has alcanzado el límite de tu plan</h1>
-    <p style="font-size:14px;color:#475569;line-height:1.75;margin:0 0 20px">
-      Hola ${name}, has alcanzado el límite de <strong>${resource}</strong> en tu plan actual
-      (${current} de ${max}).
+    <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 12px;letter-spacing:-0.02em">
+      Has alcanzado el límite de tu plan
+    </h1>
+    <p style="font-size:14px;color:#475569;line-height:1.8;margin:0 0 20px">
+      Hola ${name}, has utilizado el <strong>${pct}%</strong> de tu cuota de <strong>${resource}</strong> (${current} de ${max}). Actualiza tu plan para seguir creciendo sin límites.
     </p>
-    <div style="background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;padding:16px;margin-bottom:20px;text-align:center">
-      <p style="font-size:13px;font-weight:600;color:#92400E;margin:0">
-        ${current} / ${max} ${resource} utilizados
+    <div style="background:#FEF9EC;border:1px solid #FDE68A;border-radius:10px;padding:18px;margin-bottom:8px">
+      <p style="font-size:12px;color:#92400E;font-weight:700;margin:0 0 8px;text-transform:uppercase;letter-spacing:0.06em">${resource}</p>
+      <div style="background:#FDE68A;border-radius:99px;height:10px;overflow:hidden">
+        <div style="background:#D97706;height:10px;width:${pct}%;border-radius:99px"></div>
+      </div>
+      <p style="font-size:12px;color:#92400E;margin:6px 0 0;text-align:right">${current} / ${max}</p>
+    </div>
+    ${btn("Ver planes disponibles", "https://app.clientlabs.io/dashboard/settings/billing")}
+  `
+  return wrapEmail(content, true)
+}
+
+// ─── 12. Verification code email (6-digit OTP) ───────────────────────────────
+
+export function verificationCodeEmail(code: string): string {
+  const content = `
+    <div style="text-align:center">
+      <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 10px;letter-spacing:-0.02em">
+        Verifica tu email
+      </h1>
+      <p style="font-size:14px;color:#475569;line-height:1.8;margin:0 0 28px">
+        Introduce el siguiente código en ClientLabs para activar tu cuenta:
+      </p>
+      <div style="background:#F8FAFC;border:2px dashed #CBD5E1;border-radius:14px;padding:22px 36px;display:inline-block;margin-bottom:24px">
+        <span style="font-size:40px;font-weight:800;letter-spacing:12px;color:#0B1F2A;font-family:'Courier New',Courier,monospace">
+          ${code}
+        </span>
+      </div>
+      <p style="font-size:13px;color:#64748B;margin:0 0 6px">
+        ⏱ Este código expira en <strong>10 minutos</strong>.
       </p>
     </div>
-    <p style="font-size:14px;color:#475569;margin:0 0 20px">
-      Actualiza tu plan para continuar creciendo sin límites.
+    ${divider()}
+    <p style="font-size:12px;color:#94A3B8;text-align:center;margin:0;line-height:1.6">
+      Si no has creado una cuenta en ClientLabs, ignora este mensaje.
     </p>
-    ${btn("Ver planes", "https://app.clientlabs.io/dashboard/settings/billing")}
+  `
+  return wrapEmail(content, true)
+}
+
+// ─── 13. Invoice paid email ──────────────────────────────────────────────────
+
+export function invoicePaidEmail(
+  name: string,
+  invoiceNumber: string,
+  clientName: string,
+  total: number
+): string {
+  const totalFormatted = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(total)
+  const content = `
+    <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 12px;letter-spacing:-0.02em">
+      Factura cobrada
+    </h1>
+    <p style="font-size:14px;color:#475569;line-height:1.8;margin:0 0 20px">
+      Hola ${name}, la factura <strong>${invoiceNumber}</strong> de <strong>${clientName}</strong> ha sido marcada como pagada.
+    </p>
+    <div style="background:#F0FDF9;border:1px solid #BBF7E0;border-radius:10px;padding:22px;margin-bottom:8px;text-align:center">
+      <p style="font-size:11px;color:#0F6E56;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 8px">Importe cobrado</p>
+      <p style="font-size:36px;font-weight:800;color:#0F6E56;margin:0;letter-spacing:-0.03em">${totalFormatted}</p>
+    </div>
+    ${btn("Ver factura", "https://app.clientlabs.io/dashboard/finance/invoicing")}
+  `
+  return wrapEmail(content, true)
+}
+
+// ─── 14. Invoice overdue email ───────────────────────────────────────────────
+
+export function invoiceOverdueEmail(
+  name: string,
+  invoiceNumber: string,
+  clientName: string,
+  dueDate: string,
+  total: number
+): string {
+  const totalFormatted = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(total)
+  const content = `
+    <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 12px;letter-spacing:-0.02em">
+      Factura vencida sin cobrar
+    </h1>
+    <p style="font-size:14px;color:#475569;line-height:1.8;margin:0 0 20px">
+      Hola ${name}, la factura <strong>${invoiceNumber}</strong> de <strong>${clientName}</strong> venció el <strong>${dueDate}</strong> y sigue pendiente de cobro. Te recomendamos enviar un recordatorio al cliente.
+    </p>
+    <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:22px;margin-bottom:8px;text-align:center">
+      <p style="font-size:11px;color:#991B1B;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 8px">Importe vencido</p>
+      <p style="font-size:36px;font-weight:800;color:#991B1B;margin:0;letter-spacing:-0.03em">${totalFormatted}</p>
+    </div>
+    ${btn("Ver factura", "https://app.clientlabs.io/dashboard/finance/invoicing")}
+  `
+  return wrapEmail(content, true)
+}
+
+// ─── 15. Quote sent email (NO ClientLabs branding) ───────────────────────────
+
+export function quoteSentEmail(
+  clientName: string,
+  quoteNumber: string,
+  total: number,
+  businessName: string
+): string {
+  const totalFormatted = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(total)
+  const content = `
+    <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 4px;letter-spacing:-0.02em">
+      Presupuesto ${quoteNumber}
+    </h1>
+    <p style="font-size:13px;color:#64748B;margin:0 0 20px">${businessName}</p>
+    <p style="font-size:14px;color:#475569;line-height:1.8;margin:0 0 20px">
+      Hola ${clientName}, te enviamos el presupuesto <strong>${quoteNumber}</strong> para tu revisión.
+    </p>
+    <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:22px;margin-bottom:20px;text-align:center">
+      <p style="font-size:11px;color:#64748B;text-transform:uppercase;letter-spacing:0.1em;margin:0 0 8px;font-weight:600">
+        Total presupuestado
+      </p>
+      <p style="font-size:36px;font-weight:800;color:#0F172A;margin:0;letter-spacing:-0.03em">${totalFormatted}</p>
+    </div>
+    <p style="font-size:12px;color:#94A3B8;line-height:1.6;margin:0">
+      Para cualquier consulta, contacta directamente con ${businessName}.
+    </p>
+  `
+  return wrapEmail(content, false)
+}
+
+// ─── 16. Subscription activated email ────────────────────────────────────────
+
+export function subscriptionActivatedEmail(
+  name: string,
+  plan: string,
+  nextBillingDate: string
+): string {
+  const content = `
+    <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 12px;letter-spacing:-0.02em">
+      Suscripción activada 🎉
+    </h1>
+    <p style="font-size:14px;color:#475569;line-height:1.8;margin:0 0 20px">
+      Hola ${name}, tu suscripción al plan <strong>${plan}</strong> está activa. Ya tienes acceso completo a todas las funcionalidades de ClientLabs.
+    </p>
+    <div style="background:#F0FDF9;border:1px solid #BBF7E0;border-radius:10px;padding:18px 20px;margin-bottom:8px">
+      <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+        <tr>
+          <td style="padding:5px 0;border-bottom:1px solid #D1FAE5">
+            <span style="font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:0.08em">Plan activo</span><br>
+            <span style="font-size:14px;font-weight:700;color:#0F172A">${plan}</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:10px 0 0">
+            <span style="font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:0.08em">Próxima facturación</span><br>
+            <span style="font-size:14px;font-weight:600;color:#0F172A">${nextBillingDate}</span>
+          </td>
+        </tr>
+      </table>
+    </div>
+    ${btn("Ir al dashboard", "https://app.clientlabs.io/dashboard")}
+    ${divider()}
+    <p style="font-size:12px;color:#94A3B8;line-height:1.6;margin:0">
+      Puedes gestionar tu suscripción en cualquier momento desde
+      <a href="https://app.clientlabs.io/dashboard/settings/billing" style="color:${BRAND_GREEN};text-decoration:none">Ajustes → Facturación</a>.
+    </p>
+  `
+  return wrapEmail(content, true)
+}
+
+// ─── 17. Payment failed email ─────────────────────────────────────────────────
+
+export function paymentFailedEmail(
+  name: string,
+  plan: string,
+  retryDate: string
+): string {
+  const content = `
+    <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 12px;letter-spacing:-0.02em">
+      No hemos podido procesar tu pago
+    </h1>
+    <p style="font-size:14px;color:#475569;line-height:1.8;margin:0 0 20px">
+      Hola ${name}, el cobro de tu suscripción al plan <strong>${plan}</strong> no ha podido completarse. Actualiza tu método de pago para evitar la suspensión de tu cuenta.
+    </p>
+    <div style="background:#FEF9EC;border:1px solid #FDE68A;border-radius:10px;padding:18px;margin-bottom:8px;text-align:center">
+      <p style="font-size:11px;color:#92400E;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 6px">
+        Próximo intento de cobro
+      </p>
+      <p style="font-size:18px;font-weight:700;color:#92400E;margin:0">${retryDate}</p>
+    </div>
+    ${btn("Actualizar método de pago", "https://app.clientlabs.io/dashboard/settings/billing")}
+    ${divider()}
+    <p style="font-size:12px;color:#94A3B8;line-height:1.6;margin:0">
+      Si crees que se trata de un error bancario, contacta con tu entidad financiera o escríbenos a
+      <a href="mailto:hola@clientlabs.io" style="color:${BRAND_GREEN};text-decoration:none">hola@clientlabs.io</a>.
+    </p>
+  `
+  return wrapEmail(content, true)
+}
+
+// ─── 18. Subscription cancelled email ────────────────────────────────────────
+
+export function subscriptionCancelledEmail(
+  name: string,
+  plan: string,
+  accessUntil: string
+): string {
+  const content = `
+    <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 12px;letter-spacing:-0.02em">
+      Suscripción cancelada
+    </h1>
+    <p style="font-size:14px;color:#475569;line-height:1.8;margin:0 0 20px">
+      Hola ${name}, hemos procesado la cancelación de tu plan <strong>${plan}</strong>. Seguirás teniendo acceso completo hasta la fecha indicada.
+    </p>
+    <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:20px;margin-bottom:8px;text-align:center">
+      <p style="font-size:11px;color:#64748B;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 6px">
+        Acceso hasta
+      </p>
+      <p style="font-size:20px;font-weight:700;color:#0F172A;margin:0">${accessUntil}</p>
+    </div>
+    ${btn("Reactivar mi suscripción", "https://app.clientlabs.io/dashboard/settings/billing")}
+    ${divider()}
+    <p style="font-size:12px;color:#94A3B8;line-height:1.6;margin:0">
+      Gracias por haber confiado en ClientLabs. Si quieres contarnos por qué cancelaste o tienes algún comentario, escríbenos a
+      <a href="mailto:hola@clientlabs.io" style="color:${BRAND_GREEN};text-decoration:none">hola@clientlabs.io</a>.
+    </p>
+  `
+  return wrapEmail(content, true)
+}
+
+// ─── 19. Weekly business summary email ───────────────────────────────────────
+
+interface WeeklyStats {
+  newLeads: number
+  invoicedAmount: number
+  tasksCompleted: number
+  openInvoices: number
+  weekLabel: string
+}
+
+export function weeklyBusinessSummaryEmail(name: string, stats: WeeklyStats): string {
+  const invoicedFormatted = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(stats.invoicedAmount)
+
+  function statCard(emoji: string, label: string, value: string, accent = "#0F172A"): string {
+    return `
+      <td style="width:50%;padding:5px">
+        <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:16px 10px;text-align:center">
+          <p style="font-size:20px;margin:0 0 6px">${emoji}</p>
+          <p style="font-size:20px;font-weight:800;color:${accent};margin:0 0 4px;letter-spacing:-0.02em">${value}</p>
+          <p style="font-size:10px;color:#94A3B8;margin:0;text-transform:uppercase;letter-spacing:0.07em;font-weight:600">${label}</p>
+        </div>
+      </td>
+    `
+  }
+
+  const overdueColor = stats.openInvoices > 0 ? "#92400E" : "#0F172A"
+
+  const content = `
+    <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 4px;letter-spacing:-0.02em">
+      Resumen semanal
+    </h1>
+    <p style="font-size:14px;color:#94A3B8;margin:0 0 22px">${stats.weekLabel}</p>
+    <p style="font-size:14px;color:#475569;line-height:1.8;margin:0 0 18px">
+      Hola ${name}, aquí tienes un resumen de lo que ha pasado en tu negocio esta semana.
+    </p>
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom:8px">
+      <tr>
+        ${statCard("🎯", "Nuevos leads", String(stats.newLeads), BRAND_GREEN)}
+        ${statCard("💶", "Facturado", invoicedFormatted, BRAND_GREEN)}
+      </tr>
+      <tr>
+        ${statCard("✅", "Tareas completadas", String(stats.tasksCompleted))}
+        ${statCard("⏳", "Facturas abiertas", String(stats.openInvoices), overdueColor)}
+      </tr>
+    </table>
+    ${btn("Ver dashboard completo", "https://app.clientlabs.io/dashboard")}
+    ${divider()}
+    <p style="font-size:12px;color:#94A3B8;margin:0;text-align:center;line-height:1.6">
+      Recibes este resumen cada lunes a las 9:00.<br>
+      Puedes desactivarlo en
+      <a href="https://app.clientlabs.io/dashboard/settings" style="color:${BRAND_GREEN};text-decoration:none">Ajustes → Notificaciones</a>.
+    </p>
   `
   return wrapEmail(content, true)
 }

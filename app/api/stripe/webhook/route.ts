@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
 import { stripe, getPlanFromPriceId } from "@/lib/stripe"
-import { prisma } from "@/lib/prisma"
+import { prisma, safePrismaQuery } from "@/lib/prisma"
 import type Stripe from "stripe"
 
 export const runtime = "nodejs"
 
 // Stripe requires the raw body to verify the signature.
-// Next.js App Router gives us access to the raw request body via req.text().
 export async function POST(req: NextRequest) {
   const rawBody = await req.text()
   const sig = req.headers.get("stripe-signature")
@@ -27,87 +26,96 @@ export async function POST(req: NextRequest) {
 
   try {
     switch (event.type) {
+
+      // ── Checkout completado (nueva suscripción o trial) ─────────────────
       case "checkout.session.completed": {
         const sess = event.data.object as Stripe.Checkout.Session
-        if (sess.mode !== "subscription" || !sess.subscription) break
+        if (sess.mode !== "subscription") break
 
-        const sub = await stripe.subscriptions.retrieve(sess.subscription as string)
-        const userId = sub.metadata?.userId ?? sess.metadata?.userId
-        if (!userId) break
+        // sess.subscription puede ser string o Subscription expandido
+        const subscriptionId =
+          typeof sess.subscription === "string"
+            ? sess.subscription
+            : (sess.subscription as Stripe.Subscription | null)?.id
 
-        const item = sub.items.data[0]
-        const priceId = item?.price.id
-        const plan = getPlanFromPriceId(priceId) ?? "PRO"
+        if (!subscriptionId) {
+          console.warn("[Stripe webhook] checkout.session.completed: no subscription ID")
+          break
+        }
 
-        await prisma.user.update({
-          where: { id: userId },
-          data: {
-            plan,
-            isTrial:              sub.status === "trialing",
-            stripeCustomerId:     sub.customer as string,
-            stripeSubscriptionId: sub.id,
-            planStartedAt:        item?.current_period_start ? new Date(item.current_period_start * 1000) : new Date(),
-            planExpiresAt:        item?.current_period_end   ? new Date(item.current_period_end   * 1000) : null,
-            billingCycle:         item?.plan?.interval ?? null,
-          },
-        })
+        const sub = await stripe.subscriptions.retrieve(subscriptionId)
+        const userId = sub.metadata?.userId ?? sess.metadata?.userId ?? sess.client_reference_id ?? null
+
+        if (!userId) {
+          console.error("[Stripe webhook] checkout.session.completed: userId not found in metadata", {
+            subMetadata: sub.metadata,
+            sessMetadata: sess.metadata,
+            clientRef: sess.client_reference_id,
+          })
+          break
+        }
+
+        await upsertSubscription(userId, sub)
+        console.log(`[Stripe webhook] checkout.session.completed: user ${userId} → plan updated`)
         break
       }
 
+      // ── Suscripción creada (complementa checkout.session.completed) ─────
+      case "customer.subscription.created":
+      // ── Suscripción actualizada (upgrade, downgrade, trial→active…) ─────
       case "customer.subscription.updated": {
         const sub = event.data.object as Stripe.Subscription
         const userId = sub.metadata?.userId
-        if (!userId) break
 
-        const item = sub.items.data[0]
-        const priceId = item?.price.id
-        const plan = getPlanFromPriceId(priceId)
+        if (!userId) {
+          console.warn(`[Stripe webhook] ${event.type}: no userId in metadata`, sub.metadata)
+          break
+        }
 
         if (sub.status === "canceled" || sub.status === "unpaid") {
-          await prisma.user.update({
-            where: { id: userId },
-            data: {
-              plan:                "FREE",
-              isTrial:             false,
-              stripeSubscriptionId: null,
-              planExpiresAt:       null,
-            },
-          })
-        } else if (plan) {
-          await prisma.user.update({
-            where: { id: userId },
-            data: {
-              plan,
-              isTrial:      sub.status === "trialing",
-              planStartedAt: item?.current_period_start ? new Date(item.current_period_start * 1000) : undefined,
-              planExpiresAt: item?.current_period_end   ? new Date(item.current_period_end   * 1000) : null,
-              billingCycle:  item?.plan?.interval ?? null,
-            },
-          })
+          await safePrismaQuery(() =>
+            prisma.user.update({
+              where: { id: userId },
+              data: {
+                plan: "FREE",
+                isTrial: false,
+                stripeSubscriptionId: null,
+                planExpiresAt: null,
+              },
+            })
+          )
+        } else {
+          await upsertSubscription(userId, sub)
         }
+
+        console.log(`[Stripe webhook] ${event.type}: user ${userId} → status ${sub.status}`)
         break
       }
 
+      // ── Suscripción eliminada ────────────────────────────────────────────
       case "customer.subscription.deleted": {
         const sub = event.data.object as Stripe.Subscription
         const userId = sub.metadata?.userId
         if (!userId) break
 
-        await prisma.user.update({
-          where: { id: userId },
-          data: {
-            plan:                "FREE",
-            isTrial:             false,
-            stripeSubscriptionId: null,
-            planExpiresAt:       null,
-          },
-        })
+        await safePrismaQuery(() =>
+          prisma.user.update({
+            where: { id: userId },
+            data: {
+              plan: "FREE",
+              isTrial: false,
+              stripeSubscriptionId: null,
+              planExpiresAt: null,
+            },
+          })
+        )
+        console.log(`[Stripe webhook] subscription.deleted: user ${userId} → FREE`)
         break
       }
 
+      // ── Pago realizado (renovación de ciclo) ─────────────────────────────
       case "invoice.payment_succeeded": {
         const invoice = event.data.object as Stripe.Invoice
-        // In Stripe API 2026-02-25.clover, subscription is under invoice.parent
         const subscriptionId =
           (invoice as unknown as { parent?: { subscription_details?: { subscription?: string } } })
             ?.parent?.subscription_details?.subscription
@@ -119,16 +127,19 @@ export async function POST(req: NextRequest) {
         if (!userId) break
 
         const item = sub.items.data[0]
-        await prisma.user.update({
-          where: { id: userId },
-          data: {
-            planExpiresAt: item?.current_period_end ? new Date(item.current_period_end * 1000) : null,
-            isTrial: false,
-          },
-        })
+        await safePrismaQuery(() =>
+          prisma.user.update({
+            where: { id: userId },
+            data: {
+              planExpiresAt: item?.current_period_end ? new Date(item.current_period_end * 1000) : null,
+              isTrial: false,
+            },
+          })
+        )
         break
       }
 
+      // ── Pago fallido ─────────────────────────────────────────────────────
       case "invoice.payment_failed": {
         const invoice = event.data.object as Stripe.Invoice
         const subscriptionId =
@@ -141,19 +152,52 @@ export async function POST(req: NextRequest) {
         const userId = sub.metadata?.userId
         if (!userId) break
 
-        // Payment failed — don't downgrade immediately, Stripe retries. Log it.
-        console.warn(`[Stripe webhook] Payment failed for user ${userId}, subscription ${sub.id}`)
+        console.warn(`[Stripe webhook] Payment failed for user ${userId}, sub ${sub.id}`)
         break
       }
 
       default:
-        // Unhandled event type — ignore
         break
     }
   } catch (err) {
-    console.error("[Stripe webhook] Handler error:", err)
+    const errMsg = err instanceof Error ? err.stack ?? err.message : String(err)
+    console.error("[Stripe webhook] Handler error:", errMsg)
     return NextResponse.json({ error: "Internal error" }, { status: 500 })
   }
 
   return NextResponse.json({ received: true })
+}
+
+// ── Helper: persiste suscripción activa o en trial en la DB ──────────────────
+async function upsertSubscription(userId: string, sub: Stripe.Subscription) {
+  const item = sub.items.data[0]
+  const priceId = item?.price?.id
+  const plan = getPlanFromPriceId(priceId ?? "") ?? "PRO"
+
+  // Intervalo de facturación: price.recurring es la fuente correcta en Stripe 2026
+  const billingCycle =
+    (item?.price as Stripe.Price & { recurring?: { interval?: string } })?.recurring?.interval ??
+    null
+
+  const periodStart = item?.current_period_start
+    ? new Date(item.current_period_start * 1000)
+    : new Date()
+  const periodEnd = item?.current_period_end
+    ? new Date(item.current_period_end * 1000)
+    : null
+
+  await safePrismaQuery(() =>
+    prisma.user.update({
+      where: { id: userId },
+      data: {
+        plan,
+        isTrial:              sub.status === "trialing",
+        stripeCustomerId:     typeof sub.customer === "string" ? sub.customer : sub.customer?.id ?? null,
+        stripeSubscriptionId: sub.id,
+        planStartedAt:        periodStart,
+        planExpiresAt:        periodEnd,
+        billingCycle,
+      },
+    })
+  )
 }

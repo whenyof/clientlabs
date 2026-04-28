@@ -1,6 +1,6 @@
 /**
  * scripts/test-emails.ts
- * Envía los 11 emails de ClientLabs a una dirección de test.
+ * Envía los 19 emails de ClientLabs a una dirección de test.
  *
  * Ejecutar con:
  *   npx tsx scripts/test-emails.ts
@@ -34,13 +34,21 @@ import {
   passwordResetEmail,
   leadConvertedEmail,
   planLimitEmail,
+  verificationCodeEmail,
+  invoicePaidEmail,
+  invoiceOverdueEmail,
+  quoteSentEmail,
+  subscriptionActivatedEmail,
+  paymentFailedEmail,
+  subscriptionCancelledEmail,
+  weeklyBusinessSummaryEmail,
 } from "../lib/email-templates"
 
 const TEST_EMAIL = "iyanrimada@gmail.com"
 const TEST_NAME  = "Iyan"
 const MOCK_MODE  = !process.env.RESEND_API_KEY
 
-// ─── Definición de los 11 emails de test ────────────────────────────────────
+// ─── Definición de los 19 emails de test ────────────────────────────────────
 
 const emails: Array<{ name: string; subject: string; html: string }> = [
   {
@@ -49,27 +57,47 @@ const emails: Array<{ name: string; subject: string; html: string }> = [
     html: welcomeEmail(TEST_NAME),
   },
   {
-    name: "2. Verificación de email",
+    name: "2. Verificación de email (enlace)",
     subject: "Verifica tu email — ClientLabs",
     html: verificationEmail(TEST_NAME, "https://clientlabs.io/verify?token=test123"),
   },
   {
-    name: "3. Trial expirando (3 días)",
+    name: "3. Código de verificación (6 dígitos)",
+    subject: "482916 — Tu código de verificación de ClientLabs",
+    html: verificationCodeEmail("482916"),
+  },
+  {
+    name: "4. Trial expirando (3 días)",
     subject: "Tu periodo de prueba termina en 3 días — ClientLabs",
     html: trialExpiringEmail(TEST_NAME, 3),
   },
   {
-    name: "4. Nuevo lead capturado",
+    name: "5. Nuevo lead capturado",
     subject: "🎯 Nuevo lead: María García — ClientLabs",
     html: newLeadEmail(TEST_NAME, "María García", "maria@ejemplo.com", "Formulario web"),
   },
   {
-    name: "5. Factura enviada al cliente (SIN branding CL)",
+    name: "6. Factura enviada al cliente (SIN branding CL)",
     subject: "Factura F-2026-0042 de Estudio Iyan",
-    html: invoiceSentEmail("Carlos López", "F-2026-0042", "1.450,00", "Estudio Iyan"),
+    html: invoiceSentEmail("Carlos López", "F-2026-0042", 1450, "Estudio Iyan"),
   },
   {
-    name: "6. Resumen diario de tareas",
+    name: "7. Factura cobrada",
+    subject: "✅ Factura cobrada: F-2026-0042 — ClientLabs",
+    html: invoicePaidEmail(TEST_NAME, "F-2026-0042", "Carlos López", 1450),
+  },
+  {
+    name: "8. Factura vencida",
+    subject: "🔴 Factura vencida: F-2026-0035 — ClientLabs",
+    html: invoiceOverdueEmail(TEST_NAME, "F-2026-0035", "Cafetería Sol", "15 de abril de 2026", 320),
+  },
+  {
+    name: "9. Presupuesto enviado al cliente (SIN branding CL)",
+    subject: "Presupuesto P-2026-0018 de Estudio Iyan",
+    html: quoteSentEmail("Ana Martínez", "P-2026-0018", 2800, "Estudio Iyan"),
+  },
+  {
+    name: "10. Resumen diario de tareas",
     subject: "📋 Tus tareas para mañana (4) — ClientLabs",
     html: dailyTasksEmail(TEST_NAME, [
       { title: "Reunión con proveedor Acme",        time: "09:00", type: "meeting",  priority: "HIGH"   },
@@ -79,29 +107,55 @@ const emails: Array<{ name: string; subject: string; html: string }> = [
     ]),
   },
   {
-    name: "7. Factura próxima a vencer",
+    name: "11. Factura próxima a vencer",
     subject: "⚠️ Factura F-2026-0038 vence pronto — ClientLabs",
-    html: invoiceDueEmail(TEST_NAME, "F-2026-0038", "Restaurante El Marinero", "28 de abril de 2026", "890,00"),
+    html: invoiceDueEmail(TEST_NAME, "F-2026-0038", "Restaurante El Marinero", "28 de abril de 2026", 890),
   },
   {
-    name: "8. Invitación al equipo",
+    name: "12. Invitación al equipo",
     subject: "Iyan te ha invitado a Estudio Iyan — ClientLabs",
     html: teamInviteEmail(TEST_NAME, "Estudio Iyan", "Admin", "https://clientlabs.io/invite?token=test456"),
   },
   {
-    name: "9. Reseteo de contraseña",
+    name: "13. Reseteo de contraseña",
     subject: "Restablecer contraseña — ClientLabs",
     html: passwordResetEmail(TEST_NAME, "https://clientlabs.io/reset?token=test789"),
   },
   {
-    name: "10. Lead convertido a cliente",
+    name: "14. Lead convertido a cliente",
     subject: "🎉 Lead convertido: María García — ClientLabs",
     html: leadConvertedEmail(TEST_NAME, "María García"),
   },
   {
-    name: "11. Límite de plan alcanzado",
+    name: "15. Límite de plan alcanzado",
     subject: "Has alcanzado el límite de leads — ClientLabs",
     html: planLimitEmail(TEST_NAME, "leads", 48, 50),
+  },
+  {
+    name: "16. Suscripción activada",
+    subject: "🎉 Plan Pro activado — ClientLabs",
+    html: subscriptionActivatedEmail(TEST_NAME, "Pro Mensual", "26 de mayo de 2026"),
+  },
+  {
+    name: "17. Pago fallido",
+    subject: "⚠️ Pago fallido — ClientLabs",
+    html: paymentFailedEmail(TEST_NAME, "Pro Mensual", "3 de mayo de 2026"),
+  },
+  {
+    name: "18. Suscripción cancelada",
+    subject: "Suscripción cancelada — ClientLabs",
+    html: subscriptionCancelledEmail(TEST_NAME, "Pro Mensual", "26 de mayo de 2026"),
+  },
+  {
+    name: "19. Resumen semanal del negocio",
+    subject: "📊 Tu resumen semanal — 21–27 abril 2026 — ClientLabs",
+    html: weeklyBusinessSummaryEmail(TEST_NAME, {
+      newLeads: 7,
+      invoicedAmount: 4350,
+      tasksCompleted: 12,
+      openInvoices: 3,
+      weekLabel: "21 – 27 abril 2026",
+    }),
   },
 ]
 
@@ -121,7 +175,7 @@ async function run() {
     console.log("")
   } else {
     console.log(`✅ Resend configurado — enviando a ${TEST_EMAIL}`)
-    console.log(`   From: ${process.env.RESEND_FROM_EMAIL || "ClientLabs <onboarding@resend.dev>"}`)
+    console.log(`   From: ${process.env.RESEND_FROM_EMAIL || process.env.EMAIL_FROM || "ClientLabs <onboarding@resend.dev>"}`)
     console.log("")
   }
 

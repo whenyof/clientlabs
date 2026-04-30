@@ -99,7 +99,7 @@ export function ClientsKPIs({ kpis, activeKpi, onKpiClick }: ClientsKPIsProps) {
                 <Icon className={cn("h-3.5 w-3.5", card.iconColor)} />
               </div>
             </div>
-            <div className={cn("text-[26px] font-bold leading-none tracking-tight", card.valueColor)}>
+            <div className={cn("text-[20px] sm:text-[26px] font-bold leading-none tracking-tight", card.valueColor)}>
               {card.format === "currency" ? formatCurrency(card.value) : card.value}
             </div>
             <p className="text-[12px] text-slate-500 mt-1.5">{card.sub}</p>

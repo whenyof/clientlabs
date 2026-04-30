@@ -160,45 +160,50 @@ export function LeadsTable({ initialLeads, initialTotal, leads: leadsOverride }:
         background: "var(--bg-card)",
         border: "0.5px solid var(--border-subtle)",
         borderRadius: 12,
-        overflow: "visible",
+        overflow: "hidden",
       }}
     >
-      {/* Table header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 24,
-          padding: "12px 20px",
-          background: "var(--bg-surface)",
-          borderBottom: "0.5px solid var(--border-subtle)",
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
-        }}
-      >
-        <span style={{ width: 280, flexShrink: 0, fontSize: 11, fontWeight: 500, letterSpacing: "0.05em", color: "var(--text-secondary)" }}>LEAD</span>
-        <span style={{ width: 120, flexShrink: 0, fontSize: 11, fontWeight: 500, letterSpacing: "0.05em", color: "var(--text-secondary)" }}>ESTADO</span>
-        <span className="hidden md:block" style={{ width: 120, flexShrink: 0, fontSize: 11, fontWeight: 500, letterSpacing: "0.05em", color: "var(--text-secondary)" }}>FUENTE</span>
-        <span className="hidden md:block" style={{ width: 160, flexShrink: 0, fontSize: 11, fontWeight: 500, letterSpacing: "0.05em", color: "var(--text-secondary)" }}>SCORE</span>
-        <span style={{ marginLeft: "auto" }}></span>
-      </div>
-
-      {/* Rows */}
-      {leads.map((lead, index) => {
-        const isLast = index === leads.length - 1
-        return (
-          <div key={`${lead.id}-${index}`} ref={isLast ? lastLeadRef : undefined}>
-            <LeadCard lead={lead} />
+      {/* Scrollable content area */}
+      <div className="overflow-x-auto">
+        <div style={{ minWidth: 480 }}>
+          {/* Table header */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 16,
+              padding: "12px 16px",
+              background: "var(--bg-surface)",
+              borderBottom: "0.5px solid var(--border-subtle)",
+              position: "sticky",
+              top: 0,
+              zIndex: 10,
+            }}
+          >
+            <span style={{ minWidth: 200, flex: 1, fontSize: 11, fontWeight: 500, letterSpacing: "0.05em", color: "var(--text-secondary)" }}>LEAD</span>
+            <span style={{ width: 110, flexShrink: 0, fontSize: 11, fontWeight: 500, letterSpacing: "0.05em", color: "var(--text-secondary)" }}>ESTADO</span>
+            <span className="hidden md:block" style={{ width: 110, flexShrink: 0, fontSize: 11, fontWeight: 500, letterSpacing: "0.05em", color: "var(--text-secondary)" }}>FUENTE</span>
+            <span className="hidden md:block" style={{ width: 140, flexShrink: 0, fontSize: 11, fontWeight: 500, letterSpacing: "0.05em", color: "var(--text-secondary)" }}>SCORE</span>
+            <span style={{ marginLeft: "auto", width: 32, flexShrink: 0 }}></span>
           </div>
-        )
-      })}
 
-      {isFetchingNextPage && (
-        <div style={{ display: "flex", justifyContent: "center", padding: 16 }}>
-          <Loader2 size={20} className="animate-spin" style={{ color: "var(--text-secondary)" }} />
+          {/* Rows */}
+          {leads.map((lead, index) => {
+            const isLast = index === leads.length - 1
+            return (
+              <div key={`${lead.id}-${index}`} ref={isLast ? lastLeadRef : undefined}>
+                <LeadCard lead={lead} />
+              </div>
+            )
+          })}
+
+          {isFetchingNextPage && (
+            <div style={{ display: "flex", justifyContent: "center", padding: 16 }}>
+              <Loader2 size={20} className="animate-spin" style={{ color: "var(--text-secondary)" }} />
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       {/* Footer */}
       <div
@@ -206,7 +211,7 @@ export function LeadsTable({ initialLeads, initialTotal, leads: leadsOverride }:
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "12px 20px",
+          padding: "12px 16px",
           borderTop: "0.5px solid var(--border-subtle)",
           fontSize: 12,
           color: "var(--text-secondary)",
@@ -226,7 +231,7 @@ export function LeadsTable({ initialLeads, initialTotal, leads: leadsOverride }:
                 animation: "pulse-dot 2s ease-in-out infinite",
               }}
             />
-            Actualizando en tiempo real
+            <span className="hidden sm:inline">Actualizando en tiempo real</span>
           </span>
         )}
       </div>

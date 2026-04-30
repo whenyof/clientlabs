@@ -25,14 +25,16 @@ export function DashboardView({ data }: Props) {
 
           <DashboardPipeline leadsByStatus={leadsByStatus} />
 
-          {/* KPIs + Métricas */}
-          <div className="grid grid-cols-3 gap-4">
-            <DashboardKPIs
-              invoicedThisMonth={kpis.invoicedThisMonth}
-              invoicedPrevMonth={kpis.invoicedPrevMonth}
-              pendingCobro={kpis.pendingCobro}
-              pendingCobroCount={kpis.pendingCobroCount}
-            />
+          {/* KPIs + Métricas — stack on mobile, side-by-side on md+ */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="md:col-span-2">
+              <DashboardKPIs
+                invoicedThisMonth={kpis.invoicedThisMonth}
+                invoicedPrevMonth={kpis.invoicedPrevMonth}
+                pendingCobro={kpis.pendingCobro}
+                pendingCobroCount={kpis.pendingCobroCount}
+              />
+            </div>
             <DashboardMetrics
               leadsActive={kpis.leadsActive}
               leadsNewThisWeek={kpis.leadsNewThisWeek}
@@ -43,8 +45,8 @@ export function DashboardView({ data }: Props) {
             />
           </div>
 
-          {/* Leads + Tareas */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Leads + Tareas — stack on mobile, side-by-side on md+ */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <DashboardLeads leads={leadsRecent} leadsActive={kpis.leadsActive} />
             <DashboardTasks
               tasks={tasksHighPriority}
@@ -54,7 +56,7 @@ export function DashboardView({ data }: Props) {
           </div>
         </div>
 
-        {/* Sidebar */}
+        {/* Sidebar — only on large screens */}
         <DashboardSidebar
           activityFeed={activityFeed}
           kpis={{

@@ -1,7 +1,6 @@
 "use client"
 
 import { Users, AlertTriangle, Building2, FileWarning } from "lucide-react"
-import { cn } from "@/lib/utils"
 
 interface Props {
   leadsActive: number
@@ -12,17 +11,6 @@ interface Props {
   invoicesOverdue: number
 }
 
-interface MetricRow {
-  icon: React.ElementType
-  label: string
-  barColor: string
-  barWidth: number
-  sublabel: string
-  sublabelColor?: string
-  value: number
-  valueColor?: string
-}
-
 export function DashboardMetrics({
   leadsActive,
   leadsNewThisWeek,
@@ -31,78 +19,75 @@ export function DashboardMetrics({
   clientsActive,
   invoicesOverdue,
 }: Props) {
-  const metrics: MetricRow[] = [
+  const tiles = [
     {
       icon: Users,
       label: "Leads activos",
-      barColor: "bg-[#1FA97A]",
-      barWidth: Math.min(100, leadsActive * 5),
-      sublabel: `${leadsNewThisWeek} nuevos esta semana`,
       value: leadsActive,
+      sublabel: leadsNewThisWeek > 0 ? `+${leadsNewThisWeek} esta semana` : "Sin nuevos",
+      color: "#1FA97A",
+      bg: "#ECFDF5",
+      borderColor: "#6EE7B7",
     },
     {
       icon: AlertTriangle,
       label: "Tareas urgentes",
-      barColor: tasksHighPriority > 0 ? "bg-red-400" : "bg-[#1FA97A]",
-      barWidth: Math.min(100, tasksHighPriority * 20),
-      sublabel: tasksOverdue > 0 ? `${tasksOverdue} atrasada${tasksOverdue !== 1 ? "s" : ""}` : "Al día",
-      sublabelColor: tasksOverdue > 0 ? "text-red-500" : undefined,
       value: tasksHighPriority,
-      valueColor: tasksHighPriority > 0 ? "text-red-500" : undefined,
+      sublabel: tasksOverdue > 0 ? `${tasksOverdue} atrasada${tasksOverdue !== 1 ? "s" : ""}` : "Al día",
+      color: tasksHighPriority > 0 ? "#DC2626" : "#1FA97A",
+      bg: tasksHighPriority > 0 ? "#FEF2F2" : "#ECFDF5",
+      borderColor: tasksHighPriority > 0 ? "#FECACA" : "#6EE7B7",
     },
     {
       icon: Building2,
       label: "Clientes activos",
-      barColor: "bg-blue-400",
-      barWidth: Math.min(100, clientsActive),
-      sublabel: "en total",
       value: clientsActive,
+      sublabel: "en cartera",
+      color: "#2563EB",
+      bg: "#EFF6FF",
+      borderColor: "#BFDBFE",
     },
     {
       icon: FileWarning,
       label: "Facturas vencidas",
-      barColor: invoicesOverdue > 0 ? "bg-red-400" : "bg-[#1FA97A]",
-      barWidth: Math.min(100, invoicesOverdue * 25),
-      sublabel: invoicesOverdue === 0 ? "Todo al día" : `${invoicesOverdue} vencida${invoicesOverdue !== 1 ? "s" : ""}`,
       value: invoicesOverdue,
-      valueColor: invoicesOverdue === 0 ? "text-[#1FA97A]" : "text-red-500",
+      sublabel: invoicesOverdue === 0 ? "Todo al día" : `${invoicesOverdue} vencida${invoicesOverdue !== 1 ? "s" : ""}`,
+      color: invoicesOverdue > 0 ? "#DC2626" : "#1FA97A",
+      bg: invoicesOverdue > 0 ? "#FEF2F2" : "#ECFDF5",
+      borderColor: invoicesOverdue > 0 ? "#FECACA" : "#6EE7B7",
     },
   ]
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4">
+    <div className="flex h-full flex-col rounded-xl border border-slate-200 bg-white p-4">
       <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-400">
         Indicadores clave
       </h3>
-      <div>
-        {metrics.map((m, i) => {
-          const Icon = m.icon
+      <div className="grid flex-1 grid-cols-2 gap-2">
+        {tiles.map((tile) => {
+          const Icon = tile.icon
           return (
             <div
-              key={m.label}
-              className={cn(
-                "flex items-center gap-2.5 rounded-lg px-1 py-2.5 transition-colors hover:bg-slate-50/50",
-                i < metrics.length - 1 && "border-b border-slate-100"
-              )}
+              key={tile.label}
+              className="flex flex-col justify-between rounded-lg p-2.5"
+              style={{
+                backgroundColor: tile.bg,
+                border: `1px solid ${tile.borderColor}`,
+              }}
             >
-              <div className="flex h-[22px] w-[22px] flex-shrink-0 items-center justify-center rounded-md bg-slate-50">
-                <Icon className="h-3 w-3 text-slate-400" />
+              <div className="mb-2">
+                <Icon className="h-3.5 w-3.5" style={{ color: tile.color }} />
               </div>
-              <span className="flex-1 text-[12px] text-slate-700">{m.label}</span>
-              <div className="w-[52px] flex-shrink-0">
-                <div className="h-1 rounded-full bg-slate-100 overflow-hidden">
-                  <div
-                    className={cn("h-full rounded-full transition-all duration-500", m.barColor)}
-                    style={{ width: `${m.barWidth}%` }}
-                  />
+              <div>
+                <div
+                  className="text-[20px] sm:text-[24px] font-bold leading-none"
+                  style={{ color: tile.color }}
+                >
+                  {tile.value}
                 </div>
+                <div className="mt-1 text-[9px] font-semibold text-slate-600">{tile.label}</div>
+                <div className="text-[9px] text-slate-400">{tile.sublabel}</div>
               </div>
-              <span className={cn("w-[72px] flex-shrink-0 text-right text-[10px] text-slate-400", m.sublabelColor)}>
-                {m.sublabel}
-              </span>
-              <span className={cn("w-[36px] flex-shrink-0 text-right text-[13px] font-semibold text-slate-900", m.valueColor)}>
-                {m.value}
-              </span>
             </div>
           )
         })}

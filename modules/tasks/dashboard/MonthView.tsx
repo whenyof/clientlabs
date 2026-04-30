@@ -109,6 +109,10 @@ export function MonthView({ tasks, onDayClick, onTaskClick }: MonthViewProps) {
         </button>
       </div>
 
+      {/* Calendar grid — horizontally scrollable on mobile */}
+      <div style={{ overflowX: "auto" }}>
+        <div style={{ minWidth: 420 }}>
+
       {/* Day labels */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", borderBottom: "0.5px solid var(--border-subtle)" }}>
         {DAY_LABELS.map((d, i) => (
@@ -204,6 +208,8 @@ export function MonthView({ tasks, onDayClick, onTaskClick }: MonthViewProps) {
           )
         })}
       </div>
+        </div>{/* end minWidth wrapper */}
+      </div>{/* end overflowX wrapper */}
     </div>
   )
 }

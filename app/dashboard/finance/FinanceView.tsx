@@ -1,20 +1,17 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter, usePathname, useSearchParams } from "next/navigation"
-import { Plus } from "lucide-react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { FinanceDataProvider } from "./context/FinanceDataContext"
 import { FinanceKPIs } from "./components/FinanceKPIs"
 import { OverdueAlert } from "./components/OverdueAlert"
 import { TrimestralAlert } from "./components/TrimestralAlert"
 import dynamic from "next/dynamic"
 const MainChart = dynamic(() => import("./components/MainChart").then(m => ({ default: m.MainChart })), { ssr: false })
+const ClientRevenueChart = dynamic(() => import("./components/ClientRevenueChart").then(m => ({ default: m.ClientRevenueChart })), { ssr: false })
 import { CFOInsights } from "./components/CFOInsights"
 import { CashflowBlock } from "./components/CashflowBlock"
 import { BusinessHealth } from "./components/BusinessHealth"
 import { Forecast } from "./components/Forecast"
-import { CreateTransactionModal } from "./components/CreateTransactionModal"
-import { BankConnectionBanner } from "./components/BankConnectionBanner"
 import type { FinancePageData } from "./lib/server-data"
 
 type Props = {
@@ -28,22 +25,23 @@ type Props = {
 function FinancialSummaryTab({ initialData }: { initialData: FinancePageData }) {
   return (
     <div className="space-y-5">
-      {/* 65/35 two-column layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-5">
-        {/* Left: chart + cashflow */}
-        <div className="space-y-5 min-w-0">
-          <MainChart />
-          <CashflowBlock />
-        </div>
-        {/* Right: insights + health + forecast */}
-        <div className="space-y-5">
-          <CFOInsights />
-          <BusinessHealth />
-          <Forecast />
-        </div>
+      {/* Row 1: Main chart (65%) + Client revenue donut (35%) */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-5 items-start">
+        <MainChart />
+        <ClientRevenueChart />
       </div>
 
-      {/* Quarterly fiscal summary */}
+      {/* Row 2: Three supporting metric panels */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <CashflowBlock />
+        <BusinessHealth />
+        <Forecast />
+      </div>
+
+      {/* Row 3: CFO Insights — full width */}
+      <CFOInsights />
+
+      {/* Row 4: Fiscal summary */}
       <FiscalSummary initialData={initialData} />
     </div>
   )
@@ -57,23 +55,31 @@ function FiscalSummary({ initialData }: { initialData: FinancePageData }) {
   const irpfRetenido = kpis.totalIncome * 0.15
 
   const items = [
-    { label: "IVA repercutido", value: ivaRepercutido, color: "text-emerald-400" },
-    { label: "IVA soportado", value: ivaSoportado, color: "text-red-400" },
-    { label: "IVA a declarar", value: ivaDeclarar, color: ivaDeclarar >= 0 ? "text-amber-400" : "text-emerald-400" },
-    { label: "IRPF retenido", value: irpfRetenido, color: "text-violet-400" },
+    { label: "IVA repercutido", value: ivaRepercutido, color: "text-[#1FA97A]",  dot: "bg-[#1FA97A]"   },
+    { label: "IVA soportado",   value: ivaSoportado,   color: "text-red-500",     dot: "bg-red-400"     },
+    { label: "IVA a declarar",  value: ivaDeclarar,    color: ivaDeclarar >= 0 ? "text-amber-600" : "text-[#1FA97A]", dot: ivaDeclarar >= 0 ? "bg-amber-400" : "bg-[#1FA97A]" },
+    { label: "IRPF retenido",   value: irpfRetenido,   color: "text-violet-600",  dot: "bg-violet-400"  },
   ]
 
+  const eurFmt = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 })
+
   return (
-    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-5">
-      <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-4">Resumen fiscal trimestral</h3>
+    <div className="rounded-xl border border-slate-200 bg-white p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <h3 className="text-[13px] font-semibold text-slate-900">Resumen fiscal trimestral</h3>
+        <span className="text-[10px] text-slate-400">estimaciones automáticas</span>
+      </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {items.map((item) => (
-          <div key={item.label} className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-4 py-3">
-            <p className="text-[10px] uppercase tracking-wider text-[var(--text-secondary)] mb-1">{item.label}</p>
-            <p className={`text-base font-bold tabular-nums ${item.color}`}>
-              {new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(item.value)}
+          <div key={item.label} className="rounded-lg border border-slate-100 bg-slate-50 px-4 py-3">
+            <div className="flex items-center gap-1.5 mb-2">
+              <div className={`h-1.5 w-1.5 rounded-full ${item.dot}`} />
+              <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400">{item.label}</p>
+            </div>
+            <p className={`text-[18px] font-bold tabular-nums leading-none ${item.color}`}>
+              {eurFmt.format(item.value)}
             </p>
-            <p className="text-[10px] text-[var(--text-secondary)] mt-0.5">estimado</p>
+            <p className="text-[10px] text-slate-400 mt-1">estimado</p>
           </div>
         ))}
       </div>
@@ -82,7 +88,6 @@ function FiscalSummary({ initialData }: { initialData: FinancePageData }) {
 }
 
 export function FinanceView({ initialData, period, view, billingNode, purchasesNode }: Props) {
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -96,11 +101,6 @@ export function FinanceView({ initialData, period, view, billingNode, purchasesN
     router.refresh()
   }
 
-  const handleTransactionCreated = () => {
-    setIsCreateModalOpen(false)
-    router.refresh()
-  }
-
   return (
     <div className="flex flex-col w-full min-h-0 pb-10">
       <FinanceDataProvider
@@ -110,20 +110,6 @@ export function FinanceView({ initialData, period, view, billingNode, purchasesN
         onSetPeriod={handleSetPeriod}
         onRefetch={handleRefetch}
       >
-        {/* Action bar */}
-        <div className="flex items-center justify-end mb-5">
-          <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#1FA97A] hover:bg-[#178a64] px-4 py-2 text-sm font-semibold text-white transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            Nuevo movimiento
-          </button>
-        </div>
-
-        {/* Bank connection banner */}
-        <BankConnectionBanner />
-
         {/* Trimestral alert */}
         <div className="mb-5">
           <TrimestralAlert />
@@ -141,12 +127,6 @@ export function FinanceView({ initialData, period, view, billingNode, purchasesN
 
         {/* Main content */}
         <FinancialSummaryTab initialData={initialData} />
-
-        <CreateTransactionModal
-          isOpen={isCreateModalOpen}
-          onClose={() => setIsCreateModalOpen(false)}
-          onSuccess={handleTransactionCreated}
-        />
       </FinanceDataProvider>
     </div>
   )

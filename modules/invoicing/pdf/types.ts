@@ -50,4 +50,7 @@ export type InvoicePdfData = {
   rectificationReason?: string | null
   originalInvoiceNumber?: string
   originalIssueDate?: Date
+  /** Verifactu: QR base64 PNG and verification URL */
+  verifactuQr?: string | null
+  verifactuUrl?: string | null
 }

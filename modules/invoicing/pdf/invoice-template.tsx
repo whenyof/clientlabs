@@ -64,6 +64,8 @@ export type InvoiceDocumentModel = {
     paymentReference: string
     notes: string | null
     terms: string | null
+    verifactuQr?: string | null
+    verifactuUrl?: string | null
   }
 }
 
@@ -156,6 +158,8 @@ export function buildInvoiceDocument(data: InvoicePdfData): InvoiceDocumentModel
       paymentReference: data.paymentReference ?? "",
       notes: data.notes,
       terms: data.terms,
+      verifactuQr: data.verifactuQr ?? null,
+      verifactuUrl: data.verifactuUrl ?? null,
     },
   }
 }

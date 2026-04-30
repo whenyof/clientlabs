@@ -56,24 +56,23 @@ function DashboardSkeleton() {
     <div className="mx-auto w-full max-w-[1400px]">
       <div className="flex gap-5">
         <div className="min-w-0 flex-1 space-y-4">
-          <div className="flex items-start justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="space-y-2">
               <div className="h-6 w-52 animate-pulse rounded-lg bg-slate-100" />
               <div className="h-3.5 w-36 animate-pulse rounded-lg bg-slate-100" />
             </div>
             <div className="flex gap-2">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-8 w-28 animate-pulse rounded-lg bg-slate-100" />
+                <div key={i} className="h-8 w-20 sm:w-28 animate-pulse rounded-lg bg-slate-100" />
               ))}
             </div>
           </div>
           <div className="h-[108px] animate-pulse rounded-xl bg-slate-100" />
-          <div className="grid grid-cols-3 gap-4">
-            <div className="h-[130px] animate-pulse rounded-xl bg-slate-100" />
-            <div className="h-[130px] animate-pulse rounded-xl bg-slate-100" />
-            <div className="h-[130px] animate-pulse rounded-xl bg-slate-100" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="md:col-span-2 h-[180px] animate-pulse rounded-xl bg-slate-100" />
+            <div className="h-[180px] animate-pulse rounded-xl bg-slate-100" />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="h-[240px] animate-pulse rounded-xl bg-slate-100" />
             <div className="h-[240px] animate-pulse rounded-xl bg-slate-100" />
           </div>

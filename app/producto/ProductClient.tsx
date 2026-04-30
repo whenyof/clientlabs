@@ -464,15 +464,15 @@ function IASection() {
       <span className="pointer-events-none absolute right-0 top-16 text-[160px] font-black leading-none select-none" style={{ color: "rgba(255,255,255,0.03)", transform: "translateX(30%)" }}>04</span>
 
       {/* Ambient glow */}
-      <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-[#EC4899]/10 blur-[80px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 h-48 w-48 rounded-full bg-[#1FA97A]/10 blur-[60px] pointer-events-none" />
+      <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-[#1FA97A]/10 blur-[80px] pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 h-48 w-48 rounded-full bg-[#1FA97A]/8 blur-[60px] pointer-events-none" />
 
       <div className="mx-auto w-full max-w-7xl">
         <div className="mb-12">
-          <p className="ia-headline text-xs uppercase tracking-[0.3em] text-[#EC4899] mb-3">Inteligencia artificial</p>
+          <p className="ia-headline text-xs uppercase tracking-[0.3em] text-[#1FA97A] mb-3">Inteligencia artificial</p>
           <h2 className="text-4xl md:text-5xl font-bold text-[#E6F1F5] leading-tight">
             <span className="ia-headline inline-block">Tu co-piloto.</span>{" "}
-            <span className="ia-headline inline-block text-[#EC4899]">Siempre activo.</span>
+            <span className="ia-headline inline-block text-[#1FA97A]">Siempre activo.</span>
           </h2>
           <p className="ia-headline mt-4 text-[#8FA6B2] max-w-xl leading-relaxed">
             Pregunta en lenguaje natural, recibe análisis profundos. La IA trabaja sobre tus datos reales, no demos.
@@ -483,17 +483,27 @@ function IASection() {
           {/* Chat */}
           <div ref={chatRef} className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm overflow-hidden">
             <div className="flex items-center gap-3 border-b border-white/10 px-5 py-4">
-              <div className="h-2 w-2 rounded-full bg-[#EC4899] animate-pulse" />
-              <span className="text-sm font-medium text-[#E6F1F5]">Asistente IA — ClientLabs</span>
-              <span className="ml-auto text-xs text-[#8FA6B2]">GPT-4o</span>
+              <img src="/logo-trimmed.png" alt="ClientLabs" className="h-9 w-9 flex-shrink-0 object-contain" />
+              <div>
+                <p className="text-sm font-semibold text-[#E6F1F5] leading-none">Asistente IA</p>
+                <p className="text-[11px] text-[#8FA6B2] mt-0.5">responde en 0.4s · conoce tu negocio</p>
+              </div>
+              <div className="ml-auto flex items-center gap-1.5">
+                <div className="h-1.5 w-1.5 rounded-full bg-[#1FA97A] animate-pulse" />
+                <span className="text-[11px] text-[#8FA6B2]">En línea</span>
+              </div>
             </div>
             <div className="p-5 space-y-4 min-h-[320px]">
               {AI_MESSAGES.map((m, i) => (
                 <div key={i} className={`ia-chat-bubble flex gap-3 ${m.role === "user" ? "flex-row-reverse" : ""}`}>
-                  <div className={`h-7 w-7 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${m.role === "ai" ? "bg-[#EC4899]/20 text-[#EC4899]" : "bg-[#1FA97A]/20 text-[#1FA97A]"}`}>
-                    {m.role === "ai" ? "IA" : "Tú"}
-                  </div>
-                  <div className={`rounded-2xl px-4 py-3 text-sm max-w-[80%] leading-relaxed ${m.role === "ai" ? "bg-white/10 text-[#E6F1F5] rounded-tl-sm" : "bg-[#1FA97A]/20 text-[#E6F1F5] rounded-tr-sm"}`}>
+                  {m.role === "ai" ? (
+                    <img src="/logo-trimmed.png" alt="ClientLabs" className="h-8 w-8 flex-shrink-0 object-contain" />
+                  ) : (
+                    <div className="h-7 w-7 rounded-full flex items-center justify-center text-xs flex-shrink-0 bg-[#1FA97A]/20 text-[#1FA97A] font-semibold">
+                      Tú
+                    </div>
+                  )}
+                  <div className={`rounded-2xl px-4 py-3 text-sm max-w-[80%] leading-relaxed ${m.role === "ai" ? "border border-[#1FA97A]/20 bg-[#1FA97A]/[0.07] text-[#E6F1F5] rounded-tl-sm" : "bg-[#1FA97A]/20 text-[#E6F1F5] rounded-tr-sm"}`}>
                     {m.text}
                   </div>
                 </div>
@@ -501,7 +511,7 @@ function IASection() {
             </div>
             <div className="border-t border-white/10 px-4 py-3 flex items-center gap-3">
               <input readOnly placeholder="Pregunta algo sobre tu negocio..." className="flex-1 bg-transparent text-sm text-[#8FA6B2] placeholder-[#8FA6B2]/50 outline-none" />
-              <button className="rounded-lg bg-[#EC4899]/20 border border-[#EC4899]/30 px-3 py-1.5 text-xs text-[#EC4899] hover:bg-[#EC4899]/30 transition-colors">Enviar</button>
+              <button className="rounded-lg bg-[#1FA97A]/20 border border-[#1FA97A]/30 px-3 py-1.5 text-xs text-[#1FA97A] hover:bg-[#1FA97A]/30 transition-colors">Enviar</button>
             </div>
           </div>
 

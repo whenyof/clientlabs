@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { createVerifactuInvoice, formatDateForVerifactu, isVerifactuEnabled } from "@/lib/verifactu"
 
 async function nextInvoiceNumber(userId: string): Promise<string> {
   const year = new Date().getFullYear()
@@ -61,6 +62,37 @@ export async function POST(_: NextRequest, { params }: { params: Promise<{ id: s
       where: { id },
       data: { convertedToInvoiceId: invoice.id, status: "COMPLETED" },
     })
+
+    if (isVerifactuEnabled() && invoice.type === "CUSTOMER") {
+      createVerifactuInvoice({
+        serie: "F",
+        numero: number,
+        fecha_expedicion: formatDateForVerifactu(now),
+        tipo_factura: "F1",
+        descripcion: "Factura ClientLabs",
+        lineas: [{
+          base_imponible: Number(order.subtotal).toFixed(2),
+          tipo_impositivo: "21.00",
+          cuota_repercutida: Number(order.taxTotal).toFixed(2),
+        }],
+        importe_total: Number(order.total).toFixed(2),
+      }).then(async (result) => {
+        await prisma.invoice.update({
+          where: { id: invoice.id },
+          data: {
+            verifactuUuid: result.uuid,
+            verifactuStatus: result.estado,
+            verifactuQr: result.qr || null,
+            verifactuHuella: result.huella || null,
+            verifactuUrl: result.url || null,
+            verifactuSentAt: new Date(),
+          },
+        })
+      }).catch((err) => {
+        console.error("[Verifactu] Error al enviar factura:", err instanceof Error ? err.message : err)
+      })
+    }
+
     return NextResponse.json({ success: true, invoice }, { status: 201 })
   } catch (e) {
     console.error("PO convert-invoice error:", e)

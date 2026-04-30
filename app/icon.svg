@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Dark teal C shape — three rectangles that union into a C/bracket -->
+  <rect x="7" y="7" width="86" height="32" rx="10" fill="#157a68"/>
+  <rect x="7" y="7" width="35" height="86" rx="10" fill="#157a68"/>
+  <rect x="7" y="61" width="86" height="32" rx="10" fill="#157a68"/>
+  <!-- Lighter cyan L shape -->
+  <rect x="42" y="39" width="17" height="54" rx="7" fill="#26c4b0"/>
+  <rect x="42" y="61" width="51" height="32" rx="7" fill="#26c4b0"/>
+</svg>

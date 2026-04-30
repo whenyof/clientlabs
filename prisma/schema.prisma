@@ -1880,6 +1880,15 @@ model Invoice {
   irpfAmount             Float?               @default(0)
   /// Date when the invoice was sent by email to the client
   sentAt                 DateTime?
+
+  // ═══ VERIFACTU ═══
+  verifactuUuid          String?
+  verifactuStatus        String?   // Pendiente / Aceptado / Rechazado / Error
+  verifactuQr            String?   // QR base64 PNG
+  verifactuHuella        String?   // Hash/huella del registro
+  verifactuUrl           String?   // URL de verificación AEAT
+  verifactuSentAt        DateTime?
+
   Client                 Client?              @relation(fields: [clientId], references: [id], onDelete: Restrict)
   LinkedInvoicePayment   InvoicePayment?      @relation("LinkedFromPayment", fields: [linkedInvoicePaymentId], references: [id])
   Provider               Provider?            @relation(fields: [providerId], references: [id], onDelete: Restrict)

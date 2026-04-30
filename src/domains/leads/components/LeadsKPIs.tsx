@@ -81,7 +81,7 @@ const cards = [
 
 export function LeadsKPIs({ kpis, activeKpi, onKpiClick }: LeadsKPIsProps) {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
       {cards.map((card) => {
         const active = activeKpi === card.key
         return (
@@ -94,7 +94,7 @@ export function LeadsKPIs({ kpis, activeKpi, onKpiClick }: LeadsKPIsProps) {
               border: active ? "1px solid #1FA97A" : "0.5px solid var(--border-subtle)",
               boxShadow: active ? "0 0 0 3px rgba(31,169,122,0.10)" : "none",
               borderRadius: 12,
-              padding: "20px 24px",
+              padding: "14px 16px",
               textAlign: "left",
               cursor: "pointer",
               transition: "background 0.15s, border 0.15s, box-shadow 0.15s",
@@ -115,8 +115,7 @@ export function LeadsKPIs({ kpis, activeKpi, onKpiClick }: LeadsKPIsProps) {
             }}>
               {card.label}
             </p>
-            <p style={{
-              fontSize: 32,
+            <p className="text-[24px] sm:text-[30px]" style={{
               fontWeight: 500,
               color: "var(--text-primary)",
               margin: "4px 0 0",
@@ -127,7 +126,7 @@ export function LeadsKPIs({ kpis, activeKpi, onKpiClick }: LeadsKPIsProps) {
             <div style={{
               height: 1,
               background: active ? "rgba(31,169,122,0.2)" : "var(--border-subtle)",
-              margin: "12px 0",
+              margin: "10px 0",
             }} />
             <p style={{ fontSize: 12, margin: 0, lineHeight: 1.4 }}>
               {card.renderSub(kpis)}

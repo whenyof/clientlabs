@@ -1,5 +1,4 @@
 import { footerContent } from "@/components/landing/content"
-import { NewsletterForm } from "@/components/landing/newsletter-form"
 
 export function Footer() {
   return (
@@ -16,10 +15,6 @@ export function Footer() {
             <p className="mb-[22px] mt-3 max-w-[280px] text-[14.5px] leading-[1.5] text-[#8fa0aa]">
               {footerContent.brand.tagline}
             </p>
-            <p className="mb-2.5 font-mono text-[11px] uppercase tracking-[0.14em] text-white/55">
-              {footerContent.newsletter.eyebrow}
-            </p>
-            <NewsletterForm />
           </div>
 
           {/* Link columns */}
@@ -81,7 +76,6 @@ export function Footer() {
             </a>
           </div>
 
-          <div>{footerContent.bottom.version}</div>
         </div>
       </div>
     </footer>

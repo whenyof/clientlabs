@@ -228,6 +228,30 @@ export async function renderInvoiceToBuffer(
     y += block.blockGap
   }
 
+  // ----- Verifactu QR or disclaimer -----
+  if (doc.footer.verifactuQr) {
+    const qrImage = `data:image/png;base64,${doc.footer.verifactuQr}`
+    try {
+      pdf.addImage(qrImage, "PNG", M, y, 28, 28)
+    } catch {
+      // ignore invalid QR image
+    }
+    pdf.setFontSize(7)
+    pdf.setTextColor(100, 100, 100)
+    pdf.setFont("helvetica", "normal")
+    pdf.text("Factura verificada · AEAT", M, y + 30)
+    if (doc.footer.verifactuUrl) {
+      pdf.text(doc.footer.verifactuUrl, M, y + 33, { maxWidth: 50 })
+    }
+    y += 36
+  } else {
+    pdf.setFontSize(7)
+    pdf.setTextColor(150, 150, 150)
+    pdf.setFont("helvetica", "italic")
+    pdf.text("Documento orientativo — Pendiente de certificacion Verifactu.", M, y)
+    y += 8
+  }
+
   // ----- Footer -----
   const footer = PDF_LAYOUT.footer
   let footerCur = PDF_LAYOUT.page.height - PDF_LAYOUT.page.marginBottom - 25

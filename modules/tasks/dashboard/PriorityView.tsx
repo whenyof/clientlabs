@@ -17,7 +17,7 @@ export function PriorityView({ tasks, search, onAddTask }: PriorityViewProps) {
     : tasks
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, alignItems: "flex-start" }}>
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3" style={{ alignItems: "flex-start" }}>
       {BANDS.map((priority) => (
         <PriorityBand
           key={priority}

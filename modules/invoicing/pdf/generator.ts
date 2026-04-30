@@ -89,6 +89,8 @@ function toPdfData(invoice: NonNullable<InvoiceForPdf>): InvoicePdfData {
       isRectification: true,
       rectificationReason: inv.rectificationReason ?? null,
     }),
+    verifactuQr: (invoice as { verifactuQr?: string | null }).verifactuQr ?? null,
+    verifactuUrl: (invoice as { verifactuUrl?: string | null }).verifactuUrl ?? null,
   }
 }
 
@@ -145,6 +147,8 @@ function toPdfDataFromSnapshots(
       isRectification: true,
       rectificationReason: inv.rectificationReason ?? null,
     }),
+    verifactuQr: (invoice as { verifactuQr?: string | null }).verifactuQr ?? null,
+    verifactuUrl: (invoice as { verifactuUrl?: string | null }).verifactuUrl ?? null,
     branding: {
       logoUrl: (company.logoUrl as string | null) ?? null,
       companyName: (company.companyName as string) ?? "",

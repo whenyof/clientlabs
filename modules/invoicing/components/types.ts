@@ -100,6 +100,12 @@ export type InvoiceListItem = {
   isRectification?: boolean
   rectifiesInvoiceId?: string | null
   rectificationReason?: string | null
+
+  /** Verifactu fields */
+  verifactuStatus?: string | null
+  verifactuUuid?: string | null
+  verifactuUrl?: string | null
+  verifactuQr?: string | null
 }
 
 /**

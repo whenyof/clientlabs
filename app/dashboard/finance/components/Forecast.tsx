@@ -1,91 +1,104 @@
 "use client"
 
-import { TrendingUp, BarChart3, Calendar, ArrowUp, ArrowDown } from "lucide-react"
+import { TrendingUp, TrendingDown, Calendar, Info } from "lucide-react"
 import { formatCurrency } from "../lib/formatters"
 import { useFinanceData } from "../context/FinanceDataContext"
 
 export function Forecast() {
   const { analytics, loading } = useFinanceData()
-  const pred = analytics?.predictions
-  const netProfit = analytics?.kpis?.netProfit ?? 0
-  const nextCashFlow = pred?.nextMonthCashFlow ?? 0
+  const pred        = analytics?.predictions
+  const monthly     = analytics?.monthlyTrend ?? []
+  const netProfit   = analytics?.kpis?.netProfit   ?? 0
+  const nextCashFlow= pred?.nextMonthCashFlow ?? 0
+  const nextRevenue = pred?.nextMonthRevenue  ?? 0
+  const nextExpenses= pred?.nextMonthExpenses ?? 0
 
   if (loading) {
-    return <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] border-[var(--border-subtle)] p-5 animate-pulse h-48" />
+    return <div className="rounded-xl border border-slate-200 bg-white p-5 animate-pulse h-[176px]" />
   }
 
+  // Predictions are unreliable with < 3 months of data
+  const monthsWithData  = monthly.filter((m) => m.income > 0 || m.expenses > 0).length
+  const hasEnoughData   = monthsWithData >= 3
+  const profitPositive  = netProfit   >= 0
+  const nextPositive    = nextCashFlow >= 0
+
   return (
-    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] border-[var(--border-subtle)] p-5">
-      <div className="flex items-center justify-between mb-5">
+    <div className="rounded-xl border border-slate-200 bg-white p-5 flex flex-col justify-between">
+      <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-sm font-semibold text-[var(--text-primary)]">Pronóstico financiero</h3>
-          <p className="text-xs text-[var(--text-secondary)]">Predicciones de flujo de caja</p>
+          <h3 className="text-[13px] font-semibold text-slate-900">Pronóstico</h3>
+          <p className="text-[10px] text-slate-400 mt-0.5">
+            {hasEnoughData ? "Basado en regresión histórica" : "Acumulando historial…"}
+          </p>
         </div>
-        <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)]">
-          <Calendar className="w-3.5 h-3.5" />
-          <span>Basado en datos reales</span>
+        <div className="flex items-center gap-1 text-[10px] text-slate-400">
+          <Calendar className="h-3 w-3" />
+          <span>Próximo mes</span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-        <div className="p-3.5 bg-blue-500/[0.08] border border-blue-500/15 rounded-xl">
-          <div className="flex items-center gap-2 mb-2">
-            <BarChart3 className="w-4 h-4 text-blue-400" />
-            <span className="text-xs text-blue-400 font-medium">Este período</span>
+      {/* Current vs next */}
+      <div className="grid grid-cols-2 gap-2 mb-4">
+        <div className="rounded-lg bg-slate-50 border border-slate-100 px-3 py-2.5">
+          <div className="flex items-center gap-1 mb-1">
+            {profitPositive
+              ? <TrendingUp className="h-3 w-3 text-[#1FA97A]" />
+              : <TrendingDown className="h-3 w-3 text-red-500" />}
+            <span className="text-[9px] font-semibold uppercase tracking-[0.08em] text-slate-400">Este mes</span>
           </div>
-          <div className="text-xl font-bold text-[var(--text-primary)] mb-0.5">
+          <p className={`text-[15px] font-bold tabular-nums leading-none ${profitPositive ? "text-[#1FA97A]" : "text-red-500"}`}>
             {formatCurrency(netProfit)}
-          </div>
-          <div className="text-xs text-[var(--text-secondary)]">Beneficio neto actual</div>
-          <div className="mt-2 flex items-center gap-1">
-            {netProfit >= 0
-              ? <ArrowUp className="w-3.5 h-3.5 text-emerald-400" />
-              : <ArrowDown className="w-3.5 h-3.5 text-red-400" />}
-            <span className={`text-xs font-medium ${netProfit >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-              {netProfit >= 0 ? "Positivo" : "Negativo"}
-            </span>
-          </div>
+          </p>
+          <p className="text-[9px] text-slate-400 mt-0.5">beneficio neto</p>
         </div>
 
-        <div className="p-3.5 bg-emerald-500/[0.08] border border-emerald-500/15 rounded-xl">
-          <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="w-4 h-4 text-emerald-400" />
-            <span className="text-xs text-emerald-400 font-medium">Próximo mes</span>
-          </div>
-          <div className="text-xl font-bold text-[var(--text-primary)] mb-0.5">
-            {formatCurrency(nextCashFlow)}
-          </div>
-          <div className="text-xs text-[var(--text-secondary)]">Flujo previsto (modelo)</div>
+        <div className="rounded-lg bg-slate-50 border border-slate-100 px-3 py-2.5">
+          {hasEnoughData ? (
+            <>
+              <div className="flex items-center gap-1 mb-1">
+                {nextPositive
+                  ? <TrendingUp className="h-3 w-3 text-[#1FA97A]" />
+                  : <TrendingDown className="h-3 w-3 text-red-500" />}
+                <span className="text-[9px] font-semibold uppercase tracking-[0.08em] text-slate-400">Próximo</span>
+              </div>
+              <p className={`text-[15px] font-bold tabular-nums leading-none ${nextPositive ? "text-[#1FA97A]" : "text-red-500"}`}>
+                {formatCurrency(nextCashFlow)}
+              </p>
+              <p className="text-[9px] text-slate-400 mt-0.5">flujo previsto</p>
+            </>
+          ) : (
+            <>
+              <div className="flex items-center gap-1 mb-1">
+                <Info className="h-3 w-3 text-slate-300" />
+                <span className="text-[9px] font-semibold uppercase tracking-[0.08em] text-slate-400">Próximo</span>
+              </div>
+              <p className="text-[12px] font-semibold text-slate-300 leading-tight">Sin datos</p>
+              <p className="text-[9px] text-slate-300 mt-0.5">
+                necesitas {3 - monthsWithData} mes{3 - monthsWithData !== 1 ? "es" : ""} más
+              </p>
+            </>
+          )}
         </div>
       </div>
 
-      {pred && (pred.nextMonthRevenue != null || pred.nextMonthExpenses != null) ? (
-        <div className="p-3 bg-[var(--bg-card)] rounded-xl border border-[var(--border-subtle)]">
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            {pred.nextMonthRevenue != null && (
-              <div>
-                <div className="text-xs text-[var(--text-secondary)] mb-0.5">Ingresos previstos</div>
-                <div className="text-emerald-400 font-semibold text-sm">{formatCurrency(pred.nextMonthRevenue)}</div>
-              </div>
-            )}
-            {pred.nextMonthExpenses != null && (
-              <div>
-                <div className="text-xs text-[var(--text-secondary)] mb-0.5">Gastos previstos</div>
-                <div className="text-red-400 font-semibold text-sm">{formatCurrency(pred.nextMonthExpenses)}</div>
-              </div>
-            )}
+      {/* Breakdown */}
+      {hasEnoughData ? (
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] text-slate-400">Ingresos previstos</span>
+            <span className="text-[11px] font-semibold tabular-nums text-[#1FA97A]">{formatCurrency(nextRevenue)}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] text-slate-400">Gastos previstos</span>
+            <span className="text-[11px] font-semibold tabular-nums text-red-500">{formatCurrency(nextExpenses)}</span>
           </div>
         </div>
       ) : (
-        <div className="py-4 text-center text-[var(--text-secondary)] text-xs">
-          Sin datos de pronóstico. Añade más transacciones para ver predicciones.
-        </div>
-      )}
-
-      {pred?.nextMonthCashFlow != null && pred.nextMonthCashFlow < 0 && (
-        <div className="mt-3 p-3 bg-orange-500/10 border border-orange-500/20 rounded-xl">
-          <div className="text-orange-400 text-xs font-medium">Flujo previsto negativo el próximo mes</div>
-          <div className="text-xs text-[var(--text-secondary)] mt-0.5">Revisa gastos e ingresos previstos.</div>
+        <div className="rounded-lg border border-dashed border-slate-200 px-3 py-2.5 text-center">
+          <p className="text-[10px] text-slate-400">
+            Sigue registrando ingresos y gastos — el modelo de predicción se activa con {3 - monthsWithData} mes{3 - monthsWithData !== 1 ? "es" : ""} más de historial.
+          </p>
         </div>
       )}
     </div>

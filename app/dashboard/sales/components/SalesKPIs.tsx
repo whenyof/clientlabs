@@ -52,7 +52,7 @@ export function SalesKPIs({ data }: SalesKPIsProps) {
           className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-main)] p-5 backdrop-blur-xl shadow-[var(--shadow-card)] transition hover:-translate-y-0.5"
         >
           <p className="text-[11px] uppercase tracking-[0.4em] text-[var(--text-secondary)]">{card.label}</p>
-          <p className="mt-4 text-3xl font-semibold text-[var(--text-primary)]">{card.value}</p>
+          <p className="mt-4 text-2xl sm:text-3xl font-semibold text-[var(--text-primary)]">{card.value}</p>
           <p className="text-xs text-[var(--text-secondary)] mt-2">{card.hint}</p>
         </article>
       ))}

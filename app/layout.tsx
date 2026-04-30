@@ -76,7 +76,10 @@ export const metadata: Metadata = {
     canonical: "https://clientlabs.io",
   },
   icons: {
-    icon: '/icon.png',
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/icon.png', sizes: '32x32', type: 'image/png' },
+    ],
     apple: '/apple-icon.png',
   },
 }

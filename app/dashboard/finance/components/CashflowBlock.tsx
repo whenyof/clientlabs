@@ -1,99 +1,76 @@
 "use client"
 
-import { ArrowUp, ArrowDown, ArrowLeftRight } from "lucide-react"
 import { formatCurrency } from "../lib/formatters"
 import { useFinanceData } from "../context/FinanceDataContext"
 
 export function CashflowBlock() {
   const { analytics, loading } = useFinanceData()
   const k = analytics?.kpis
-  const cashFlow = k?.netProfit ?? 0
   const inflow = k?.totalIncome ?? 0
   const outflow = Math.abs(k?.totalExpenses ?? 0)
+  const net = k?.netProfit ?? 0
 
   if (loading) {
-    return <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-5 animate-pulse h-56" />
+    return <div className="rounded-xl border border-slate-200 bg-white p-5 animate-pulse h-[176px]" />
   }
 
-  if (inflow === 0 && outflow === 0) {
-    return (
-      <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-5">
-        <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-1">Flujo de caja</h3>
-        <p className="text-xs text-[var(--text-secondary)] mb-4">Entradas, salidas y neto</p>
-        <div className="py-6 text-center text-[var(--text-secondary)] text-sm">Sin datos en este período</div>
-      </div>
-    )
-  }
-
-  const flowItems = [
-    {
-      label: "Entradas",
-      amount: inflow,
-      icon: ArrowUp,
-      color: "text-green-400",
-      bgColor: "bg-green-500/10",
-      borderColor: "border-green-500/20",
-    },
-    {
-      label: "Salidas",
-      amount: outflow,
-      icon: ArrowDown,
-      color: "text-red-400",
-      bgColor: "bg-red-500/10",
-      borderColor: "border-red-500/20",
-    },
-    {
-      label: "Flujo Neto",
-      amount: cashFlow,
-      icon: ArrowLeftRight,
-      color: cashFlow >= 0 ? "text-blue-400" : "text-orange-400",
-      bgColor: cashFlow >= 0 ? "bg-blue-500/10" : "bg-orange-500/10",
-      borderColor: cashFlow >= 0 ? "border-blue-500/20" : "border-orange-500/20",
-    },
-  ]
-
-  const total = Math.max(inflow, outflow, 1)
-  const percentage = (v: number) => (Math.abs(v) / total) * 100
+  const total = Math.max(inflow, 1)
+  const inflowPct  = 100
+  const outflowPct = Math.min(100, Math.round((outflow / total) * 100))
+  const positive = net >= 0
 
   return (
-    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-5">
-      <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-1">Flujo de caja</h3>
-      <p className="text-xs text-[var(--text-secondary)] mb-4">Entradas, salidas y neto</p>
-
-      <div className="space-y-2.5">
-        {flowItems.map((item) => {
-          const Icon = item.icon
-          const pct = item.label === "Flujo Neto" ? undefined : percentage(item.amount)
-          return (
-            <div
-              key={item.label}
-              className={`flex items-center justify-between gap-3 p-3 rounded-lg border ${item.borderColor} ${item.bgColor}`}
-            >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className={`p-1.5 rounded-md ${item.bgColor}`}>
-                  <Icon className={`w-4 h-4 ${item.color}`} />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-medium text-[var(--text-secondary)]">{item.label}</p>
-                  {pct != null && (
-                    <p className="text-[10px] text-[var(--text-secondary)]">{pct.toFixed(0)}%</p>
-                  )}
-                </div>
-              </div>
-              <p className={`text-sm font-semibold tabular-nums shrink-0 ${item.color}`}>
-                {formatCurrency(item.amount)}
-              </p>
-            </div>
-          )
-        })}
+    <div className="rounded-xl border border-slate-200 bg-white p-5 flex flex-col justify-between">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h3 className="text-[13px] font-semibold text-slate-900">Flujo de caja</h3>
+          <p className="text-[10px] text-slate-400 mt-0.5">Entradas vs salidas</p>
+        </div>
+        <span
+          className={`text-[10px] font-semibold px-2 py-1 rounded-full ${
+            positive ? "bg-[#ECFDF5] text-[#1FA97A]" : "bg-red-50 text-red-500"
+          }`}
+        >
+          {positive ? "Positivo" : "Negativo"}
+        </span>
       </div>
 
-      <div className={`mt-3 flex items-center justify-between px-3 py-2.5 rounded-lg ${cashFlow >= 0 ? "bg-emerald-500/10 border border-emerald-500/20" : "bg-rose-500/10 border border-rose-500/20"}`}>
-        <span className="text-xs font-medium text-[var(--text-secondary)]">Estado</span>
-        <span className={`text-sm font-semibold ${cashFlow >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
-          {cashFlow >= 0 ? "Positivo" : "Negativo"}
-        </span>
-        <span className="text-xs text-[var(--text-secondary)]">{formatCurrency(Math.abs(cashFlow))}</span>
+      <div className="space-y-3">
+        {/* Inflow */}
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[11px] text-slate-500">Entradas</span>
+            <span className="text-[12px] font-semibold tabular-nums text-[#1FA97A]">{formatCurrency(inflow)}</span>
+          </div>
+          <div className="h-[5px] w-full bg-slate-100 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-[#1FA97A] rounded-full transition-all duration-700"
+              style={{ width: `${inflowPct}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Outflow */}
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[11px] text-slate-500">Salidas</span>
+            <span className="text-[12px] font-semibold tabular-nums text-red-500">{formatCurrency(outflow)}</span>
+          </div>
+          <div className="h-[5px] w-full bg-slate-100 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-red-400 rounded-full transition-all duration-700"
+              style={{ width: `${outflowPct}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Net */}
+        <div className={`flex items-center justify-between pt-2 border-t border-slate-100`}>
+          <span className="text-[11px] font-medium text-slate-600">Neto</span>
+          <span className={`text-[14px] font-bold tabular-nums ${positive ? "text-[#1FA97A]" : "text-red-500"}`}>
+            {formatCurrency(net)}
+          </span>
+        </div>
       </div>
     </div>
   )

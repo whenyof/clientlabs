@@ -151,8 +151,8 @@ export function ClientsCharts({ clients }: ClientsChartsProps) {
       </button>
 
       {isOpen && (
-        <div className="border-t border-slate-100 px-5 py-5">
-          <div style={{ display: "grid", gridTemplateColumns: "180px 1fr", gap: "24px", alignItems: "center" }}>
+        <div className="border-t border-slate-100 px-4 sm:px-5 py-4 sm:py-5">
+          <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-6" style={{ alignItems: "center" }}>
 
             {/* Donut izquierda */}
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>

@@ -129,12 +129,18 @@ export function Carousel() {
                 className="shrink-0 text-white flex flex-col justify-between overflow-hidden relative"
                 style={{ scrollSnapAlign: "center", background: TONE_BG[slide.tone], width: "85vw", aspectRatio: "5 / 3.2", borderRadius: 24, padding: "28px" }}
               >
-                <div className="font-display font-bold text-[clamp(18px,4vw,26px)] leading-[1.15] tracking-[-0.03em] z-[1]">
-                  <div className="text-[56px] leading-[0.5] mb-3 opacity-50">&ldquo;</div>
-                  {slide.quote}
+                <div className="z-[1] flex flex-col gap-3">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.14em] text-white/55">
+                    Paso {slide.num}
+                  </div>
+                  <div className="font-display font-extrabold text-[clamp(20px,4vw,28px)] leading-[1.1] tracking-[-0.03em]">
+                    {slide.who}
+                  </div>
+                  <p className="text-[13px] leading-[1.5] opacity-75">
+                    {slide.quote}
+                  </p>
                 </div>
-                <div className="flex justify-between items-end z-[1]">
-                  <div className="text-[13px] opacity-85">— {slide.who}</div>
+                <div className="flex justify-end items-end z-[1]">
                   <div className={`font-mono text-[12px] px-3 py-2 rounded-full border ${impactClass}`}>
                     <b className="font-display font-extrabold text-[14px] mr-1">{slide.impact[0]}</b>
                     {slide.impact[1]}
@@ -234,12 +240,18 @@ export function Carousel() {
                   >
                     {slide.num}
                   </div>
-                  <div className="font-display font-bold text-[clamp(26px,2.4vw,38px)] leading-[1.1] tracking-[-0.03em] max-w-[640px] z-[1]">
-                    <div className="text-[80px] leading-[0.5] mb-5 opacity-50">&ldquo;</div>
-                    {slide.quote}
+                  <div className="z-[1] flex flex-col gap-4">
+                    <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-white/55">
+                      Paso {slide.num}
+                    </div>
+                    <div className="font-display font-extrabold text-[clamp(28px,2.8vw,42px)] leading-[1.05] tracking-[-0.03em] max-w-[560px]">
+                      {slide.who}
+                    </div>
+                    <p className="text-[16px] leading-[1.55] opacity-75 max-w-[500px]">
+                      {slide.quote}
+                    </p>
                   </div>
-                  <div className="flex justify-between items-end z-[1]">
-                    <div className="text-[14px] opacity-85">— {slide.who}</div>
+                  <div className="flex justify-end items-end z-[1]">
                     <div className={`font-mono text-[13px] px-[14px] py-[10px] rounded-full border ${impactClass}`}>
                       <b className="font-display font-extrabold text-[16px] mr-1.5">{slide.impact[0]}</b>
                       {slide.impact[1]}

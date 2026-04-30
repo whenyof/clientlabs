@@ -14,6 +14,7 @@ import * as repo from "../repositories/invoice.repository"
 import * as engine from "../engine/invoice.engine"
 import type { CreateInvoiceInput, AddPaymentInput, InvoiceWithRelations, InvoiceStatus } from "../types"
 import { INVOICE_STATUS } from "../types"
+import { createVerifactuInvoice, formatDateForVerifactu, isVerifactuEnabled } from "@/lib/verifactu"
 
 // --- Attach helpers: single source of truth for invoice ↔ sale / provider order / payment ---
 
@@ -187,6 +188,37 @@ export async function createInvoice(input: CreateInvoiceInput): Promise<{ id: st
     lines: computed,
   })
   await repo.addEvent(invoice.id, "CREATED", { at: new Date().toISOString() })
+
+  if (isVerifactuEnabled()) {
+    createVerifactuInvoice({
+      serie: input.series || "CL",
+      numero: invoice.number,
+      fecha_expedicion: formatDateForVerifactu(input.issueDate),
+      tipo_factura: "F1",
+      descripcion: "Factura ClientLabs",
+      lineas: [{
+        base_imponible: subtotal.toFixed(2),
+        tipo_impositivo: "21.00",
+        cuota_repercutida: taxAmount.toFixed(2),
+      }],
+      importe_total: total.toFixed(2),
+    }).then(async (result) => {
+      await prisma.invoice.update({
+        where: { id: invoice.id },
+        data: {
+          verifactuUuid: result.uuid,
+          verifactuStatus: result.estado,
+          verifactuQr: result.qr || null,
+          verifactuHuella: result.huella || null,
+          verifactuUrl: result.url || null,
+          verifactuSentAt: new Date(),
+        },
+      })
+    }).catch((err) => {
+      console.error("[Verifactu] Error al enviar factura:", err instanceof Error ? err.message : err)
+    })
+  }
+
   return { id: invoice.id, number: invoice.number }
 }
 

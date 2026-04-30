@@ -44,7 +44,7 @@ export function Pricing() {
   return (
     <section
       id="Precios"
-      className="relative overflow-hidden bg-navy pt-[120px] pb-[80px] text-white"
+      className="relative overflow-hidden bg-navy pt-[70px] pb-[60px] text-white"
     >
       <GridBackground variant="dark" className="opacity-50" />
 
@@ -56,15 +56,15 @@ export function Pricing() {
             {eyebrow}
           </span>
           <h2
-            className="mt-4 mb-4 font-display font-extrabold leading-[1] tracking-[-0.04em]"
-            style={{ fontSize: "clamp(42px,5vw,76px)" }}
+            className="mt-3 mb-3 font-display font-extrabold leading-[1] tracking-[-0.04em]"
+            style={{ fontSize: "clamp(36px,4vw,60px)" }}
           >
             {headline}
           </h2>
-          <p className="text-[17px] leading-[1.55] text-[#a8b5bc]">{sub}</p>
+          <p className="text-[15px] leading-[1.5] text-[#a8b5bc]">{sub}</p>
 
           {/* ── Toggle — ref: .price-toggle ── */}
-          <div className="mt-7 inline-flex items-center gap-1 rounded-full border border-line-dark-2 bg-white/[0.06] p-1">
+          <div className="mt-5 inline-flex items-center gap-1 rounded-full border border-line-dark-2 bg-white/[0.06] p-1">
             <button
               type="button"
               onClick={() => setAnnual(false)}
@@ -92,7 +92,7 @@ export function Pricing() {
         </div>
 
         {/* ── Plans — ref: .plans-grid { grid-template-columns: repeat(3,1fr); gap: 20px; margin-top: 48px } ── */}
-        <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3">
+        <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-3">
           {plans.map((plan) => {
             const displayPrice = annual ? plan.yearly : plan.monthly
             const savings = Math.round((plan.monthly - plan.yearly) * 12)

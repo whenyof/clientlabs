@@ -22,15 +22,6 @@ export function FinalCTA() {
 
       {/* Content */}
       <div className="relative z-10 mx-auto max-w-[860px] px-7 text-center">
-        {/* Pill */}
-        <span className="mb-5 inline-flex items-center gap-2 rounded-full border border-line-dark-2 bg-white/[0.06] px-3 py-1.5 text-[12.5px] font-medium text-[#d9e1e5]">
-          <span className="relative flex h-1.5 w-1.5 shrink-0">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald opacity-75" />
-            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald" />
-          </span>
-          {finalCtaContent.pill}
-        </span>
-
         {/* Headline */}
         <h2
           className="my-4 font-display font-extrabold leading-[0.98] tracking-[-0.045em] text-[clamp(54px,7vw,104px)]"

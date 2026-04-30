@@ -54,68 +54,109 @@ export function DashboardSidebar({ activityFeed, kpis, leadsThisMonth, invoicedT
     { label: "Clientes activos", value: kpis.clientsActive, problem: false },
   ]
 
+  const healthScore = healthItems.filter((h) => !h.problem).length
+  const healthPct = (healthScore / 4) * 100
+  const healthColor =
+    healthScore === 4 ? "#1FA97A" : healthScore === 3 ? "#D97706" : "#DC2626"
+  const healthLabel =
+    healthScore === 4 ? "Excelente" : healthScore === 3 ? "Buena" : healthScore === 2 ? "Regular" : "Atención"
+
   return (
     <aside className="hidden w-[248px] flex-shrink-0 lg:flex lg:flex-col gap-4">
       {/* Clock + Progreso del mes */}
-      <div className="relative overflow-hidden rounded-xl bg-[#1E3A4A]">
+      <div className="relative overflow-hidden rounded-xl bg-[#0B1F2A]">
+        {/* Subtle grid texture */}
         <div
-          className="absolute inset-0"
+          className="pointer-events-none absolute inset-0"
           style={{
-            backgroundImage: `linear-gradient(rgba(31,169,122,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(31,169,122,0.06) 1px, transparent 1px)`,
-            backgroundSize: "28px 28px",
+            backgroundImage: `linear-gradient(rgba(31,169,122,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(31,169,122,0.05) 1px, transparent 1px)`,
+            backgroundSize: "24px 24px",
           }}
         />
+        {/* Top accent line */}
+        <div className="absolute left-0 right-0 top-0 h-[2px] bg-[#1FA97A]/40" />
+
         <div className="relative z-10 p-4">
-          <div className="text-[32px] font-bold leading-none tracking-[-0.04em] text-white">
-            {pad(now.getHours())}:{pad(now.getMinutes())}
-          </div>
-          <div className="mt-1 text-[10px] text-white/70 mb-4 capitalize">
-            {now.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" })}
+          {/* Clock */}
+          <div className="mb-3">
+            <div className="text-[38px] font-bold leading-none tracking-[-0.04em] text-white tabular-nums">
+              {pad(now.getHours())}:{pad(now.getMinutes())}
+            </div>
+            <div className="mt-1 text-[10px] capitalize text-white/40">
+              {now.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" })}
+            </div>
           </div>
 
-          <div className="rounded-lg border border-[#1FA97A]/30 bg-[#1FA97A]/15 p-3">
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-[9px] uppercase tracking-[0.1em] text-white/70">
-                {currentMonth} · día {dayOfMonth} de {daysInMonth}
+          {/* Month progress — inline, no nested card */}
+          <div className="mb-4">
+            <div className="mb-1.5 flex items-center justify-between">
+              <span className="text-[9px] uppercase tracking-[0.08em] text-white/40">
+                {currentMonth} · día {dayOfMonth}/{daysInMonth}
               </span>
-              <span className="text-[11px] font-semibold text-[#1FA97A]">{progress}%</span>
+              <span className="text-[11px] font-bold text-[#1FA97A]">{progress}%</span>
             </div>
-            <div className="mb-2 h-[2px] overflow-hidden rounded-full bg-white/20">
+            <div className="h-[3px] overflow-hidden rounded-full bg-white/[0.08]">
               <div
-                className="h-full rounded-full bg-[#1FA97A] transition-all"
+                className="h-full rounded-full bg-[#1FA97A] transition-all duration-700"
                 style={{ width: `${progress}%` }}
               />
             </div>
-            <div className="flex justify-between">
-              <span className="text-[9px] text-white/60">Progreso del mes</span>
-              <span className="text-[9px] text-white/60">Quedan {daysLeft} días</span>
-            </div>
+            <p className="mt-1 text-[8px] text-white/25">
+              Quedan {daysLeft} día{daysLeft !== 1 ? "s" : ""} para {nextMonth}
+            </p>
           </div>
 
-          <div className="mt-3 flex gap-4">
-            <div>
-              <div className="text-[9px] uppercase tracking-wider text-white/60 mb-0.5">Leads mes</div>
-              <div className="text-[15px] font-bold text-[#1FA97A]">{leadsThisMonth}</div>
+          {/* Stats grid */}
+          <div className="grid grid-cols-2 gap-2">
+            <div
+              className="rounded-lg p-2.5"
+              style={{ backgroundColor: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}
+            >
+              <div className="mb-1.5 text-[8px] font-semibold uppercase tracking-[0.1em] text-white/30">
+                Leads este mes
+              </div>
+              <div className="text-[24px] font-bold leading-none text-[#1FA97A] tabular-nums">
+                {leadsThisMonth}
+              </div>
             </div>
-            <div>
-              <div className="text-[9px] uppercase tracking-wider text-white/60 mb-0.5">Facturado</div>
-              <div className={cn("text-[15px] font-bold", invoicedThisMonth > 0 ? "text-white" : "text-white/50")}>
+            <div
+              className="rounded-lg p-2.5"
+              style={{ backgroundColor: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}
+            >
+              <div className="mb-1.5 text-[8px] font-semibold uppercase tracking-[0.1em] text-white/30">
+                Facturado
+              </div>
+              <div className={cn("text-[16px] font-bold leading-none tabular-nums", invoicedThisMonth > 0 ? "text-white" : "text-white/25")}>
                 {currencyFmt.format(invoicedThisMonth)}
               </div>
             </div>
           </div>
-
-          <p className="mt-3 text-[9px] text-white/50">
-            Quedan {daysLeft} días para {nextMonth}
-          </p>
         </div>
       </div>
 
       {/* Salud del negocio */}
       <div className="rounded-xl border border-slate-200 bg-white p-4">
-        <h3 className="mb-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-400">
-          Salud del negocio
-        </h3>
+        {/* Health score ring */}
+        <div className="mb-3 flex items-center gap-3">
+          <div
+            className="relative h-10 w-10 flex-shrink-0 rounded-full"
+            style={{
+              background: `conic-gradient(${healthColor} ${healthPct * 3.6}deg, #E2E8F0 0deg)`,
+            }}
+          >
+            <div className="absolute inset-1.5 flex items-center justify-center rounded-full bg-white">
+              <span className="text-[9px] font-bold" style={{ color: healthColor }}>
+                {healthScore}/4
+              </span>
+            </div>
+          </div>
+          <div>
+            <p className="text-[13px] font-semibold text-slate-900">{healthLabel}</p>
+            <p className="text-[9px] uppercase tracking-[0.08em] text-slate-400">Salud del negocio</p>
+          </div>
+        </div>
+
+        {/* Items */}
         {healthItems.map((item) => (
           <div
             key={item.label}
@@ -123,9 +164,9 @@ export function DashboardSidebar({ activityFeed, kpis, leadsThisMonth, invoicedT
           >
             <div className="flex items-center gap-2">
               <div className={cn("h-1.5 w-1.5 rounded-full", item.problem ? "bg-red-400" : "bg-[#1FA97A]")} />
-              <span className="text-[12px] text-slate-600">{item.label}</span>
+              <span className="text-[11px] text-slate-600">{item.label}</span>
             </div>
-            <span className={cn("text-[13px] font-semibold", item.problem ? "text-red-500" : "text-slate-900")}>
+            <span className={cn("text-[12px] font-semibold", item.problem ? "text-red-500" : "text-slate-900")}>
               {item.value}
             </span>
           </div>

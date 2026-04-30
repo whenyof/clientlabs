@@ -22,11 +22,39 @@ const VIEWS: { id: ViewMode; label: string; Icon: React.ElementType }[] = [
 
 export function TasksTopbar({ view, onViewChange, search, onSearchChange, onNewTask }: TasksTopbarProps) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-      {/* Title */}
-      <h1 style={{ fontSize: 22, fontWeight: 600, color: "var(--text-primary)", margin: 0, marginRight: 8 }}>
-        Tareas
-      </h1>
+    <div className="flex flex-col gap-3 mb-5 sm:flex-row sm:items-center sm:gap-3">
+      {/* Row 1 on mobile: title + new task button */}
+      <div className="flex items-center gap-2">
+        <h1 style={{ fontSize: 20, fontWeight: 600, color: "var(--text-primary)", margin: 0, marginRight: 4 }}>
+          Tareas
+        </h1>
+
+        {/* Spacer — only on sm+ (row 1 on mobile) */}
+        <div className="flex-1 sm:hidden" />
+
+        {/* New task button — shown inline on mobile */}
+        <button
+          type="button"
+          onClick={onNewTask}
+          className="sm:hidden"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "7px 14px",
+            background: "#1FA97A",
+            color: "#fff",
+            border: "none",
+            borderRadius: 8,
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: "pointer",
+          }}
+        >
+          <Plus style={{ width: 14, height: 14 }} />
+          Nueva
+        </button>
+      </div>
 
       {/* View tabs */}
       <div style={{
@@ -36,6 +64,7 @@ export function TasksTopbar({ view, onViewChange, search, onSearchChange, onNewT
         borderRadius: 8,
         padding: 3,
         gap: 2,
+        flexShrink: 0,
       }}>
         {VIEWS.map(({ id, label, Icon }) => (
           <button
@@ -46,10 +75,10 @@ export function TasksTopbar({ view, onViewChange, search, onSearchChange, onNewT
               display: "inline-flex",
               alignItems: "center",
               gap: 6,
-              padding: "5px 12px",
+              padding: "5px 10px",
               borderRadius: 6,
               border: "none",
-              fontSize: 13,
+              fontSize: 12,
               fontWeight: 500,
               cursor: "pointer",
               transition: "all 0.15s",
@@ -58,13 +87,13 @@ export function TasksTopbar({ view, onViewChange, search, onSearchChange, onNewT
             }}
           >
             <Icon style={{ width: 13, height: 13 }} />
-            {label}
+            <span className="hidden sm:inline">{label}</span>
           </button>
         ))}
       </div>
 
       {/* Spacer */}
-      <div style={{ flex: 1 }} />
+      <div className="hidden sm:block" style={{ flex: 1 }} />
 
       {/* Google Calendar */}
       <Suspense fallback={null}>
@@ -72,7 +101,7 @@ export function TasksTopbar({ view, onViewChange, search, onSearchChange, onNewT
       </Suspense>
 
       {/* Search */}
-      <div style={{ position: "relative" }}>
+      <div style={{ position: "relative", flexShrink: 0 }}>
         <Search style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", width: 14, height: 14, color: "var(--text-secondary)" }} />
         <input
           type="text"
@@ -89,18 +118,19 @@ export function TasksTopbar({ view, onViewChange, search, onSearchChange, onNewT
             borderRadius: 8,
             fontSize: 13,
             color: "var(--text-primary)",
-            width: 220,
+            width: "100%",
+            maxWidth: 220,
             outline: "none",
           }}
         />
       </div>
 
-      {/* New task button */}
+      {/* New task button — desktop only */}
       <button
         type="button"
         onClick={onNewTask}
+        className="hidden sm:inline-flex"
         style={{
-          display: "inline-flex",
           alignItems: "center",
           gap: 6,
           padding: "8px 16px",
@@ -111,6 +141,7 @@ export function TasksTopbar({ view, onViewChange, search, onSearchChange, onNewT
           fontSize: 13,
           fontWeight: 600,
           cursor: "pointer",
+          flexShrink: 0,
         }}
       >
         <Plus style={{ width: 14, height: 14 }} />

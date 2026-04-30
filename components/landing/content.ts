@@ -28,7 +28,7 @@ export const navbarContent = {
 
 export const heroContent = {
   pill: "Sistema operativo para negocios",
-  headline: "Todo tu negocio.",
+  headline: "Todo tu negocio",
   headlineAccent: "Un solo sistema.",
   sub: "CRM, tareas, facturación, automatizaciones, IA y recomendaciones inteligentes — conectados, en tiempo real.",
   ctas: {
@@ -385,45 +385,45 @@ export const aiContent = {
 /* ─── Carousel ───────────────────────────────────────────────────── */
 
 export const carouselContent = {
-  eyebrow: "Casos reales",
-  headline: "Los autónomos que más facturan",
-  headlineAccent: "tienen algo en común.",
-  progress: "01 — 05",
+  eyebrow: "Configuración",
+  headline: "En marcha en",
+  headlineAccent: "4 pasos sencillos.",
+  progress: "01 — 04",
   progressHint: "desliza",
   slides: [
     {
       tone: "tone-navy" as const,
       num: "01",
-      quote: "Antes perdía 3 leads por semana por no hacer seguimiento a tiempo.",
-      who: "María G. · Diseñadora web · Madrid",
-      impact: ["−100%", "leads perdidos"] as [string, string],
+      who: "Crea tu perfil",
+      quote: "Añade tu información de negocio, logo y datos fiscales. Tu panel está listo en menos de 2 minutos.",
+      impact: ["2 min", "para empezar"] as [string, string],
     },
     {
       tone: "tone-emerald" as const,
       num: "02",
-      quote: "Tardaba 2 horas en hacer una factura. Ahora son 30 segundos.",
-      who: "Restaurante Mirador · Barcelona",
-      impact: ["−95%", "tiempo en facturación"] as [string, string],
+      who: "Importa tus contactos",
+      quote: "Sube tu lista de clientes y leads desde Excel, Notion o cualquier herramienta. Migración en un solo clic.",
+      impact: ["1 clic", "para migrar"] as [string, string],
     },
     {
       tone: "tone-neutral" as const,
       num: "03",
-      quote: "No sabía cuánto estaba facturando en tiempo real. Ahora lo veo todo.",
-      who: "Estudio Vega · Arquitectos · Valencia",
-      impact: ["+40%", "visibilidad financiera"] as [string, string],
+      who: "Activa tu pipeline",
+      quote: "Personaliza las etapas de tu proceso de ventas y empieza a mover oportunidades desde el primer día.",
+      impact: ["0 código", "necesario"] as [string, string],
     },
     {
       tone: "tone-emerald" as const,
       num: "04",
-      quote: "Las automatizaciones me ahorran 2 horas al día de tareas repetitivas.",
-      who: "Hotel Miramar · Barcelona",
-      impact: ["+2h/día", "recuperadas"] as [string, string],
+      who: "Automatiza tu flujo",
+      quote: "Configura seguimientos, recordatorios y facturas automáticas. Trabaja en lo que realmente importa.",
+      impact: ["+2h/día", "ahorradas"] as [string, string],
     },
   ],
   ctaCard: {
     num: "05",
-    eyebrow: "Tu turno",
-    headline: "¿Listo\npara unirte?",
+    eyebrow: "Empieza ya",
+    headline: "Regístrate\ngratis hoy.",
     cta: { label: "Empezar gratis", href: "/register" },
     hint: "Sin tarjeta de crédito · cancela cuando quieras",
   },
@@ -568,8 +568,8 @@ export const footerContent = {
     },
   ],
   bottom: {
-    copy: "© 2026 ClientLabs. Hecho en España 🇪🇸",
-    version: "v1.0 · Lanzamiento Junio 2026",
+    copy: "© 2026 ClientLabs",
+    version: "",
   },
 } as const
 

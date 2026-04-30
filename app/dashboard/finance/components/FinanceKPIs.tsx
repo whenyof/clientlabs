@@ -1,105 +1,147 @@
 "use client"
 
-import { TrendingUp, TrendingDown, BarChart2, Clock } from "lucide-react"
-import { formatCurrency } from "../lib/formatters"
+import { ArrowUpRight, ArrowDownRight } from "lucide-react"
 import { useFinanceData } from "../context/FinanceDataContext"
 
-interface FinanceKPIsProps {
-  onKpiClick?: (id: string) => void
+const fmt = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 })
+
+function MiniSparkline({
+  data, color, id,
+}: { data: number[]; color: string; id: string }) {
+  if (data.length < 2) return <div className="h-10" />
+  const w = 100, h = 36
+  const max = Math.max(...data)
+  const min = Math.min(...data)
+  const range = max - min || 1
+  const pts = data.map((v, i) => [
+    ((i / (data.length - 1)) * w).toFixed(1),
+    (h - ((v - min) / range) * (h - 6) - 3).toFixed(1),
+  ])
+  const line = pts.map(([x, y]) => `${x},${y}`).join(" ")
+  const area = `M ${pts[0][0]},${h} ${pts.map(([x, y]) => `L ${x},${y}`).join(" ")} L ${pts[pts.length - 1][0]},${h} Z`
+  const gradId = `sg-${id}`
+  return (
+    <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className="overflow-visible">
+      <defs>
+        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity={0.25} />
+          <stop offset="100%" stopColor={color} stopOpacity={0} />
+        </linearGradient>
+      </defs>
+      <path d={area} fill={`url(#${gradId})`} />
+      <polyline points={line} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx={pts[pts.length - 1][0]} cy={pts[pts.length - 1][1]} r="2.5" fill={color} />
+    </svg>
+  )
 }
 
-export function FinanceKPIs({ onKpiClick }: FinanceKPIsProps) {
+function Delta({ pct }: { pct: number }) {
+  const up = pct >= 0
+  return (
+    <span className={`inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[10px] font-semibold tabular-nums ${
+      up ? "bg-[#ECFDF5] text-[#1FA97A]" : "bg-red-50 text-red-500"
+    }`}>
+      {up ? <ArrowUpRight className="h-2.5 w-2.5" /> : <ArrowDownRight className="h-2.5 w-2.5" />}
+      {up ? "+" : ""}{pct.toFixed(1)}%
+    </span>
+  )
+}
+
+export function FinanceKPIs() {
   const { analytics, loading } = useFinanceData()
-  const k = analytics?.kpis
-  const trends = analytics?.trends
+  const k       = analytics?.kpis
+  const trends  = analytics?.trends
+  const monthly = analytics?.monthlyTrend ?? []
 
-  const incomeGrowth = trends?.incomeGrowth ?? null
-  const netProfit = k?.netProfit ?? 0
-  const pendingPayments = k?.pendingPayments ?? 0
+  const totalIncome    = k?.totalIncome    ?? 0
+  const totalExpenses  = Math.abs(k?.totalExpenses ?? 0)
+  const netProfit      = k?.netProfit      ?? 0
+  const pendingPayments= k?.pendingPayments ?? 0
+  const marginPct = totalIncome > 0 ? Math.round((netProfit / totalIncome) * 100) : 0
+  const pendingPct = (totalIncome + pendingPayments) > 0
+    ? Math.round((pendingPayments / (totalIncome + pendingPayments)) * 100) : 0
 
-  const kpis = [
+  const cards = [
     {
       id: "income",
-      label: "Ingresos del mes",
-      Icon: TrendingUp,
-      value: formatCurrency(k?.totalIncome ?? 0),
-      valueClass: "text-slate-900",
-      sublabel:
-        incomeGrowth != null
-          ? `vs mes anterior: ${incomeGrowth >= 0 ? "+" : ""}${incomeGrowth.toFixed(1)}%`
-          : "vs mes anterior: —",
-      sublabelClass:
-        incomeGrowth != null
-          ? incomeGrowth >= 0
-            ? "text-[#1FA97A]"
-            : "text-red-500"
-          : "text-slate-400",
-    },
-    {
-      id: "expenses",
-      label: "Gastos del mes",
-      Icon: TrendingDown,
-      value: formatCurrency(Math.abs(k?.totalExpenses ?? 0)),
-      valueClass: "text-slate-900",
-      sublabel: "del total presupuestado",
-      sublabelClass: "text-slate-500",
+      label: "Facturación total",
+      value: fmt.format(totalIncome),
+      valueColor: "text-slate-900",
+      delta: trends?.incomeGrowth ?? null,
+      sub: "cobrado este mes",
+      spark: monthly.map((m) => m.income),
+      sparkColor: "#1FA97A",
+      accent: "border-t-[#1FA97A]",
     },
     {
       id: "profit",
       label: "Beneficio neto",
-      Icon: BarChart2,
-      value: formatCurrency(netProfit),
-      valueClass: netProfit >= 0 ? "text-[#1FA97A]" : "text-red-500",
-      sublabel: "margen del mes",
-      sublabelClass: "text-slate-500",
+      value: fmt.format(netProfit),
+      valueColor: netProfit >= 0 ? "text-[#1FA97A]" : "text-red-500",
+      delta: trends?.profitGrowth ?? null,
+      sub: `${marginPct}% de margen`,
+      spark: monthly.map((m) => m.profit),
+      sparkColor: netProfit >= 0 ? "#6366F1" : "#EF4444",
+      accent: "border-t-indigo-400",
+    },
+    {
+      id: "expenses",
+      label: "Gastos del período",
+      value: fmt.format(totalExpenses),
+      valueColor: "text-slate-900",
+      delta: trends?.expenseGrowth != null ? -trends.expenseGrowth : null,
+      sub: "costes totales",
+      spark: monthly.map((m) => m.expenses),
+      sparkColor: "#F87171",
+      accent: "border-t-red-300",
     },
     {
       id: "pending",
-      label: "Pendiente de cobro",
-      Icon: Clock,
-      value: formatCurrency(pendingPayments),
-      valueClass: pendingPayments > 0 ? "text-amber-600" : "text-slate-900",
-      sublabel: "en facturas enviadas",
-      sublabelClass: "text-slate-500",
+      label: "Facturas pendientes",
+      value: fmt.format(pendingPayments),
+      valueColor: pendingPayments > 0 ? "text-amber-600" : "text-slate-400",
+      delta: null as number | null,
+      sub: pendingPct > 0 ? `${pendingPct}% aún por cobrar` : "al corriente de pago",
+      spark: [] as number[],
+      sparkColor: "#F59E0B",
+      accent: "border-t-amber-400",
     },
   ]
 
-  return (
-    <section aria-label="KPIs principales">
+  if (loading) {
+    return (
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {kpis.map((kpi) => {
-          const { Icon } = kpi
-          return (
-            <div
-              key={kpi.id}
-              className="bg-white border border-slate-200 rounded-xl p-4 cursor-pointer hover:border-[#1FA97A]/40 hover:shadow-[0_2px_12px_rgba(31,169,122,0.06)] transition-all duration-200"
-              role={onKpiClick ? "button" : undefined}
-              tabIndex={onKpiClick ? 0 : undefined}
-              onClick={() => !loading && onKpiClick?.(kpi.id)}
-              onKeyDown={(e) =>
-                !loading && onKpiClick && (e.key === "Enter" || e.key === " ") && onKpiClick(kpi.id)
-              }
-            >
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-[11px] uppercase tracking-[0.08em] font-medium text-slate-500">
-                  {kpi.label}
-                </span>
-                <div className="w-7 h-7 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center">
-                  <Icon className="h-3.5 w-3.5 text-slate-400" />
-                </div>
-              </div>
-              <div
-                className={`text-[26px] font-semibold leading-none tracking-tight ${kpi.valueClass} ${loading ? "animate-pulse opacity-60" : ""}`}
-              >
-                {loading ? "—" : kpi.value}
-              </div>
-              <p className={`text-[12px] mt-1.5 leading-snug ${kpi.sublabelClass}`}>
-                {loading ? "—" : kpi.sublabel}
-              </p>
-            </div>
-          )
-        })}
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="rounded-xl border border-slate-200 bg-white h-[148px] animate-pulse" />
+        ))}
       </div>
-    </section>
+    )
+  }
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {cards.map((card) => (
+        <div
+          key={card.id}
+          className={`rounded-xl border border-slate-200 bg-white overflow-hidden border-t-2 ${card.accent}`}
+        >
+          <div className="px-4 pt-4 pb-2">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-400 mb-2.5">
+              {card.label}
+            </p>
+            <div className="flex items-start justify-between gap-1">
+              <span className={`text-[16px] sm:text-[21px] font-bold leading-none tracking-tight tabular-nums ${card.valueColor}`}>
+                {card.value}
+              </span>
+              {card.delta != null && <Delta pct={card.delta} />}
+            </div>
+            <p className="text-[10px] text-slate-400 mt-1.5">{card.sub}</p>
+          </div>
+          <div className="px-3 pb-3 mt-0.5">
+            <MiniSparkline data={card.spark} color={card.sparkColor} id={card.id} />
+          </div>
+        </div>
+      ))}
+    </div>
   )
 }

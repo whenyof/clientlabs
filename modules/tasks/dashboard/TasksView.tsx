@@ -75,10 +75,10 @@ export function TasksView() {
         <TasksKPIs />
       </div>
 
-      {/* Main layout: content + sidebar */}
-      <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
+      {/* Main layout: content + sidebar — sidebar hidden on mobile */}
+      <div className="flex gap-4 items-start">
         {/* Main area */}
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="flex-1 min-w-0 overflow-x-auto">
           {view === "priority" && (
             <PriorityView tasks={tasks} search={search} onAddTask={handleAddTask} />
           )}
@@ -93,8 +93,8 @@ export function TasksView() {
           )}
         </div>
 
-        {/* Right sidebar */}
-        <div style={{
+        {/* Right sidebar — only on large screens */}
+        <div className="hidden lg:block" style={{
           width: 260,
           flexShrink: 0,
           background: "var(--bg-card)",

@@ -43,7 +43,7 @@ function SalesTableComponent({ data, onSelect, onManualRegister }: SalesTablePro
         </button>
       </div>
 
-      <div className="max-h-[520px] overflow-y-auto">
+      <div className="max-h-[520px] overflow-y-auto overflow-x-auto">
         {data.length === 0 ? (
           <div className="py-16 text-center text-[var(--text-secondary)]">
             <p className="text-lg font-medium text-[var(--text-secondary)]">{t.emptyState ?? "No hay ventas registradas"}</p>

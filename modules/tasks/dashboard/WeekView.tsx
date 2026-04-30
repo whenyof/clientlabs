@@ -134,6 +134,10 @@ export function WeekView({ tasks, onTaskClick, onCellClick }: WeekViewProps) {
         <button type="button" onClick={() => setWeekStart(getMonday(new Date()))} style={{ ...btn, padding: "4px 10px", fontSize: 12 }}>Hoy</button>
       </div>
 
+      {/* Calendar grid — horizontally scrollable on mobile */}
+      <div style={{ overflowX: "auto" }}>
+        <div style={{ minWidth: 560 }}>
+
       {/* Day headers */}
       <div style={{ display: "grid", gridTemplateColumns: "52px repeat(7,1fr)", borderBottom: "0.5px solid var(--border-subtle)" }}>
         <div />
@@ -253,6 +257,8 @@ export function WeekView({ tasks, onTaskClick, onCellClick }: WeekViewProps) {
           })}
         </div>
       </div>
+        </div>{/* end minWidth wrapper */}
+      </div>{/* end overflowX wrapper */}
     </div>
   )
 }

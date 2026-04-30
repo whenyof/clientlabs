@@ -62,7 +62,7 @@ export function TasksKPIs() {
   }
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 12 }}>
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
       {CARDS.map(({ key, label, Icon, color, sub, alert, format }) => {
         const value = kpis[key]
         const isAlert = alert && value > 0
@@ -73,21 +73,21 @@ export function TasksKPIs() {
               background: "var(--bg-card)",
               border: "0.5px solid var(--border-subtle)",
               borderRadius: 12,
-              padding: "20px 24px",
+              padding: "16px 18px",
             }}
           >
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
               <p style={{ fontSize: 11, fontWeight: 500, color: "var(--text-secondary)", letterSpacing: "0.06em", margin: 0 }}>
                 {label}
               </p>
-              <div style={{ width: 28, height: 28, borderRadius: 8, background: `${color}18`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ width: 28, height: 28, borderRadius: 8, background: `${color}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                 <Icon style={{ width: 14, height: 14, color }} />
               </div>
             </div>
-            <p style={{ fontSize: 32, fontWeight: 500, color: isAlert ? color : "var(--text-primary)", margin: "4px 0 0", lineHeight: 1.1 }}>
+            <p style={{ fontSize: 26, fontWeight: 500, color: isAlert ? color : "var(--text-primary)", margin: "4px 0 0", lineHeight: 1.1 }}>
               {format === "percent" ? `${value}%` : value}
             </p>
-            <div style={{ height: 1, background: "var(--border-subtle)", margin: "12px 0" }} />
+            <div style={{ height: 1, background: "var(--border-subtle)", margin: "10px 0" }} />
             <p style={{ fontSize: 12, color: "var(--text-secondary)", margin: 0 }}>
               {sub(kpis)}
             </p>

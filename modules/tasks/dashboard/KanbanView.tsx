@@ -342,7 +342,7 @@ export function KanbanView({ tasks, search, onAddTask, onTaskClick }: KanbanView
   const byStatus = (status: TaskStatus) => tasks.filter((t) => t.status === status)
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, alignItems: "flex-start" }}>
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3" style={{ alignItems: "flex-start" }}>
       {COLUMNS.map((col) => (
         <KanbanColumnUI
           key={col.id}

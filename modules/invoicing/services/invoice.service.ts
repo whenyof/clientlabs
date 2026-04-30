@@ -409,91 +409,97 @@ export async function issueInvoice(invoiceId: string, userId: string): Promise<I
     issuedTotalsSnapshot: issuedTotalsSnapshot as Prisma.InputJsonValue,
   })
 
-  // Envío a Verifactu (fire-and-forget — nunca bloquear la emisión)
+  // Envío a Verifactu — awaited con try/catch (errores nunca fallan la emisión)
   if (inv.type === "CUSTOMER") {
-    const { resolveVerifactuApiKey, createVerifactuInvoice: sendToVerifactu, formatDateForVerifactu } = await import("@/lib/verifactu")
-    resolveVerifactuApiKey(userId).then(async (nifApiKey) => {
-      if (!nifApiKey) return
-      const bizProfile2 = await prisma.businessProfile.findUnique({
-        where: { userId },
-        select: { verifactuEnabled: true },
-      })
-      if (!bizProfile2?.verifactuEnabled) return
-      const clientSnap = (inv as { issuedClientSnapshot?: Record<string, unknown> | null }).issuedClientSnapshot
-      const clientTaxId = typeof clientSnap?.taxId === "string" ? clientSnap.taxId : undefined
-      const clientName = typeof clientSnap?.name === "string" ? clientSnap.name : undefined
-      const invoiceDocType = (inv as { invoiceDocType?: string | null }).invoiceDocType ?? "F1"
-      const rectificationMethod = (inv as { rectificationMethod?: string | null }).rectificationMethod ?? "S"
-      const isRectificative = ["R1", "R2", "R3", "R4", "R5"].includes(invoiceDocType)
+    try {
+      const { resolveVerifactuApiKey, createVerifactuInvoice: sendToVerifactu, formatDateForVerifactu } = await import("@/lib/verifactu")
+      const nifApiKey = await resolveVerifactuApiKey(userId)
+      if (!nifApiKey) {
+        console.error("[Verifactu] SKIP: no hay API key configurada (ni personal ni env VERIFACTI_ACCOUNT_KEY)")
+      } else {
+        const bizProfile2 = await prisma.businessProfile.findUnique({
+          where: { userId },
+          select: { verifactuEnabled: true },
+        })
+        if (!bizProfile2?.verifactuEnabled) {
+          console.error("[Verifactu] SKIP: verifactuEnabled=false en BusinessProfile del usuario", userId)
+        } else {
+          const clientSnap = issuedClientSnapshot as Record<string, unknown>
+          const clientTaxId = typeof clientSnap?.taxId === "string" ? clientSnap.taxId : undefined
+          const clientName = typeof clientSnap?.name === "string" ? clientSnap.name : undefined
+          const invoiceDocType = (inv as { invoiceDocType?: string | null }).invoiceDocType ?? "F1"
+          const rectificationMethod = (inv as { rectificationMethod?: string | null }).rectificationMethod ?? "S"
+          const isRectificative = ["R1", "R2", "R3", "R4", "R5"].includes(invoiceDocType)
 
-      // Group lines by tax rate for accurate reporting
-      const taxGroups = new Map<number, { base: number; tax: number }>()
-      for (const line of inv.lines) {
-        const rate = line.taxPercent ?? 0
-        const existing = taxGroups.get(rate) ?? { base: 0, tax: 0 }
-        existing.base += line.subtotal
-        existing.tax += line.taxAmount
-        taxGroups.set(rate, existing)
-      }
-      const lineas = taxGroups.size > 0
-        ? Array.from(taxGroups.entries()).map(([rate, { base, tax }]) => ({
-            base_imponible: base.toFixed(2),
-            tipo_impositivo: rate.toFixed(2),
-            cuota_repercutida: tax.toFixed(2),
-          }))
-        : [{ base_imponible: inv.subtotal.toFixed(2), tipo_impositivo: "0.00", cuota_repercutida: "0.00" }]
-
-      // Build description from lines or notes
-      const firstLineDesc = inv.lines[0]?.description
-      const descripcion = firstLineDesc || inv.notes?.substring(0, 100) || `Factura ${inv.series}-${number}`
-
-      const data: import("@/lib/verifactu").VerifactuCreateData = {
-        serie: inv.series || "CL",
-        numero: number,
-        fecha_expedicion: formatDateForVerifactu(issuedAt),
-        tipo_factura: invoiceDocType as import("@/lib/verifactu").AllInvoiceTypes,
-        descripcion,
-        ...(clientTaxId && { nif: clientTaxId }),
-        ...(clientName && { nombre: clientName }),
-        lineas,
-        importe_total: inv.total.toFixed(2),
-      }
-
-      // For rectifications, add mandatory fields
-      if (isRectificative) {
-        data.tipo_rectificativa = rectificationMethod as import("@/lib/verifactu").RectificationMethod
-        const rectifiesId = (inv as { rectifiesInvoiceId?: string | null }).rectifiesInvoiceId
-        if (rectifiesId) {
-          const originalInv = await prisma.invoice.findUnique({
-            where: { id: rectifiesId },
-            select: { series: true, number: true, issueDate: true },
-          })
-          if (originalInv) {
-            data.factura_rectificada_serie = originalInv.series || "CL"
-            data.factura_rectificada_numero = originalInv.number
-            data.factura_rectificada_fecha = formatDateForVerifactu(originalInv.issueDate)
+          // Group lines by tax rate for accurate reporting
+          const taxGroups = new Map<number, { base: number; tax: number }>()
+          for (const line of inv.lines) {
+            const rate = line.taxPercent ?? 0
+            const existing = taxGroups.get(rate) ?? { base: 0, tax: 0 }
+            existing.base += line.subtotal
+            existing.tax += line.taxAmount
+            taxGroups.set(rate, existing)
           }
+          const lineas = taxGroups.size > 0
+            ? Array.from(taxGroups.entries()).map(([rate, { base, tax }]) => ({
+                base_imponible: base.toFixed(2),
+                tipo_impositivo: rate.toFixed(2),
+                cuota_repercutida: tax.toFixed(2),
+              }))
+            : [{ base_imponible: inv.subtotal.toFixed(2), tipo_impositivo: "0.00", cuota_repercutida: "0.00" }]
+
+          // Build description from lines or notes
+          const firstLineDesc = inv.lines[0]?.description
+          const descripcion = firstLineDesc || inv.notes?.substring(0, 100) || `Factura ${inv.series}-${number}`
+
+          const data: import("@/lib/verifactu").VerifactuCreateData = {
+            serie: inv.series || "CL",
+            numero: number,
+            fecha_expedicion: formatDateForVerifactu(issuedAt),
+            tipo_factura: invoiceDocType as import("@/lib/verifactu").AllInvoiceTypes,
+            descripcion,
+            ...(clientTaxId && invoiceDocType !== "F2" && invoiceDocType !== "R5" && { nif: clientTaxId }),
+            ...(clientName && invoiceDocType !== "F2" && invoiceDocType !== "R5" && { nombre: clientName }),
+            lineas,
+            importe_total: inv.total.toFixed(2),
+          }
+
+          // For rectifications, add mandatory fields
+          if (isRectificative) {
+            data.tipo_rectificativa = rectificationMethod as import("@/lib/verifactu").RectificationMethod
+            const rectifiesId = (inv as { rectifiesInvoiceId?: string | null }).rectifiesInvoiceId
+            if (rectifiesId) {
+              const originalInv = await prisma.invoice.findUnique({
+                where: { id: rectifiesId },
+                select: { series: true, number: true, issueDate: true },
+              })
+              if (originalInv) {
+                data.factura_rectificada_serie = originalInv.series || "CL"
+                data.factura_rectificada_numero = originalInv.number
+                data.factura_rectificada_fecha = formatDateForVerifactu(originalInv.issueDate)
+              }
+            }
+          }
+
+          console.error("[Verifactu] Enviando factura:", JSON.stringify(data))
+          const result = await sendToVerifactu(nifApiKey, data)
+          await prisma.invoice.update({
+            where: { id: invoiceId },
+            data: {
+              verifactuUuid: result.uuid,
+              verifactuStatus: result.estado,
+              verifactuQr: result.qr || null,
+              verifactuHuella: result.huella || null,
+              verifactuUrl: result.url || null,
+              verifactuSentAt: new Date(),
+            },
+          })
+          console.error("[Verifactu] OK — UUID:", result.uuid, "Estado:", result.estado)
         }
       }
-      try {
-        const result = await sendToVerifactu(nifApiKey, data)
-        await prisma.invoice.update({
-          where: { id: invoiceId },
-          data: {
-            verifactuUuid: result.uuid,
-            verifactuStatus: result.estado,
-            verifactuQr: result.qr || null,
-            verifactuHuella: result.huella || null,
-            verifactuUrl: result.url || null,
-            verifactuSentAt: new Date(),
-          },
-        })
-      } catch (err) {
-        console.error("[Verifactu] Error al enviar factura:", err instanceof Error ? err.message : err)
-      }
-    }).catch((err) => {
-      console.error("[Verifactu] Error resolving API key:", err instanceof Error ? err.message : err)
-    })
+    } catch (err) {
+      console.error("[Verifactu] Error al enviar factura:", err instanceof Error ? err.message : err)
+    }
   }
 
   await repo.addEvent(invoiceId, "SENT", {

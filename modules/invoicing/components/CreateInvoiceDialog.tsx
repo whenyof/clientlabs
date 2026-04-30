@@ -488,22 +488,22 @@ export function CreateInvoiceDialog({
     <>
       <div
         aria-hidden
-        className="fixed inset-0 z-40 bg-black/50"
+        className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm"
         onClick={onClose}
       />
       <div
         role="dialog"
         aria-label={editInvoiceId ? "Editar factura" : "Nueva factura"}
-        className="fixed left-1/2 top-1/2 z-50 w-full max-w-2xl max-h-[90vh] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-white/10 bg-[#0f0f12] shadow-2xl flex flex-col overflow-hidden"
+        className="fixed left-1/2 top-1/2 z-50 w-full max-w-2xl max-h-[90vh] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-slate-200 bg-white shadow-xl flex flex-col overflow-hidden"
       >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 shrink-0">
-          <h2 className="text-lg font-semibold text-white">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 shrink-0">
+          <h2 className="text-[16px] font-semibold text-slate-900">
             {editInvoiceId ? "Editar factura" : "Nueva factura"}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-lg text-white/60 hover:text-white hover:bg-white/10"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
             aria-label="Cerrar"
           >
             <XMarkIcon className="w-5 h-5" />
@@ -513,14 +513,14 @@ export function CreateInvoiceDialog({
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
           <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
             {error && (
-              <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
                 {error}
               </p>
             )}
 
             {editInvoiceId && !editableInEditMode && (
-              <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3">
-                <p className="text-sm text-amber-200/95">
+              <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+                <p className="text-sm text-amber-700">
                   Factura emitida. No se puede modificar.
                   Debe crear una rectificativa.
                 </p>
@@ -552,8 +552,8 @@ export function CreateInvoiceDialog({
                     onClick={() => setInvoiceDocType(type)}
                     className={`flex-1 rounded-lg border px-3 py-2.5 text-left transition-colors ${
                       invoiceDocType === type
-                        ? "border-[#1FA97A] bg-[#1FA97A]/10 text-[#1FA97A]"
-                        : "border-slate-200/20 text-white/60 hover:border-slate-300/30"
+                        ? "border-[#1FA97A] bg-[#1FA97A]/8 text-[#1FA97A]"
+                        : "border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50"
                     }`}
                   >
                     <div className="text-xs font-bold">{type}</div>
@@ -567,7 +567,7 @@ export function CreateInvoiceDialog({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">
                   Cliente
                 </label>
                 <select
@@ -575,7 +575,7 @@ export function CreateInvoiceDialog({
                   onChange={(e) => setClientId(e.target.value)}
                   required
                   disabled={!editableInEditMode}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/20 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-[#1FA97A] focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/20 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <option value="">Seleccionar cliente</option>
                   {clients.map((c) => (
@@ -586,14 +586,14 @@ export function CreateInvoiceDialog({
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">
                   Pedido (opcional)
                 </label>
                 <select
                   value={saleId}
                   onChange={(e) => setSaleId(e.target.value)}
                   disabled={!editableInEditMode || !clientId || loadingSales}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/20 disabled:opacity-50"
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-[#1FA97A] focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/20 disabled:opacity-50"
                 >
                   <option value="">
                     {loadingSales
@@ -612,7 +612,7 @@ export function CreateInvoiceDialog({
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">
                   Fecha emisión
                 </label>
                 <input
@@ -621,11 +621,11 @@ export function CreateInvoiceDialog({
                   onChange={(e) => setIssueDate(e.target.value)}
                   required
                   disabled={!editableInEditMode}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/20 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-[#1FA97A] focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/20 disabled:opacity-60 disabled:cursor-not-allowed"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">
                   Vencimiento
                 </label>
                 <input
@@ -634,27 +634,27 @@ export function CreateInvoiceDialog({
                   onChange={(e) => setDueDate(e.target.value)}
                   required
                   disabled={!editableInEditMode}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/20 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-[#1FA97A] focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/20 disabled:opacity-60 disabled:cursor-not-allowed"
                 />
               </div>
             </div>
 
             {clientId && (
-              <div ref={billingRef} className="space-y-3 rounded-xl border border-white/10 bg-white/[0.02] p-4">
+              <div ref={billingRef} className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-medium text-white/50 uppercase tracking-wider">Datos de facturación</h3>
+                  <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider">Datos de facturación</h3>
                   {billingLockedFromClient && editableInEditMode && (
                     <button
                       type="button"
                       onClick={() => setBillingLockedFromClient(false)}
-                      className="text-xs text-white/70 hover:text-white underline"
+                      className="text-xs text-[#1FA97A] hover:text-[#178a64] underline"
                     >
                       Editar datos para esta factura
                     </button>
                   )}
                 </div>
                 {billingLockedFromClient && (
-                  <p className="text-xs text-white/50">Procedente de ficha de cliente</p>
+                  <p className="text-xs text-slate-400">Procedente de ficha de cliente</p>
                 )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {[
@@ -668,7 +668,7 @@ export function CreateInvoiceDialog({
                     { label: "País", value: billingData.country, set: (v: string) => setBillingData((b) => ({ ...b, country: v })) },
                   ].map(({ label, value, set }) => (
                     <div key={label}>
-                      <label className="block text-xs text-white/60 mb-1">{label}</label>
+                      <label className="block text-xs text-slate-500 mb-1">{label}</label>
                       <input
                         type="text"
                         value={value ?? ""}
@@ -676,21 +676,21 @@ export function CreateInvoiceDialog({
                         readOnly={billingLockedFromClient}
                         disabled={!editableInEditMode}
                         placeholder={label}
-                        className={`w-full rounded-lg border px-3 py-2 text-sm text-white placeholder-white/40 disabled:opacity-60 ${billingLockedFromClient
-                          ? "border-white/10 bg-white/[0.06] cursor-default"
-                          : "border-white/10 bg-white/5 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/20"
+                        className={`w-full rounded-lg border px-3 py-2 text-sm text-slate-800 placeholder-slate-400 disabled:opacity-60 ${billingLockedFromClient
+                          ? "border-slate-200 bg-slate-100 cursor-default"
+                          : "border-slate-200 bg-white focus:border-[#1FA97A] focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/20"
                           }`}
                       />
                     </div>
                   ))}
                 </div>
                 {!billingLockedFromClient && (
-                  <div className="flex justify-end pt-2 border-t border-white/5">
+                  <div className="flex justify-end pt-2 border-t border-slate-200">
                     <button
                       type="button"
                       onClick={handleUpdateClient}
                       disabled={updatingClient}
-                      className="text-xs font-medium text-emerald-400 hover:text-emerald-300 disabled:opacity-50 transition-colors"
+                      className="text-xs font-medium text-[#1FA97A] hover:text-[#178a64] disabled:opacity-50 transition-colors"
                     >
                       {updatingClient ? "Actualizando ficha..." : "Guardar cambios en ficha de cliente"}
                     </button>
@@ -701,31 +701,31 @@ export function CreateInvoiceDialog({
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium text-white/50 uppercase tracking-wider">Líneas</span>
+                <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Líneas</span>
                 <button
                   type="button"
                   onClick={addLine}
                   disabled={!editableInEditMode}
-                  className="inline-flex items-center gap-1 text-sm text-white/80 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-1 text-sm text-slate-600 hover:text-slate-900 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <PlusIcon className="w-4 h-4" /> Añadir línea
                 </button>
               </div>
-              <div className="rounded-lg border border-white/10 overflow-hidden">
+              <div className="rounded-lg border border-slate-200 overflow-hidden">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="bg-white/[0.03] border-b border-white/10">
-                      <th className="text-left py-2 px-2 text-white/60 font-medium">Descripción</th>
-                      <th className="text-right py-2 px-2 text-white/60 font-medium w-20">Cant.</th>
-                      <th className="text-right py-2 px-2 text-white/60 font-medium w-24">Precio unit.</th>
-                      <th className="text-right py-2 px-2 text-white/60 font-medium w-20">% IVA</th>
-                      <th className="text-right py-2 px-2 text-white/60 font-medium w-20">Total</th>
+                    <tr className="bg-slate-50 border-b border-slate-200">
+                      <th className="text-left py-2 px-2 text-slate-500 font-medium">Descripción</th>
+                      <th className="text-right py-2 px-2 text-slate-500 font-medium w-20">Cant.</th>
+                      <th className="text-right py-2 px-2 text-slate-500 font-medium w-24">Precio unit.</th>
+                      <th className="text-right py-2 px-2 text-slate-500 font-medium w-20">% IVA</th>
+                      <th className="text-right py-2 px-2 text-slate-500 font-medium w-20">Total</th>
                       <th className="w-10" />
                     </tr>
                   </thead>
                   <tbody>
                     {lines.map((line) => (
-                      <tr key={line.id} className="border-b border-white/6">
+                      <tr key={line.id} className="border-b border-slate-100">
                         <td className="py-1.5 px-2">
                           <input
                             type="text"
@@ -733,7 +733,7 @@ export function CreateInvoiceDialog({
                             onChange={(e) => updateLine(line.id, { description: e.target.value })}
                             placeholder="Descripción"
                             disabled={!editableInEditMode}
-                            className="w-full rounded border border-white/10 bg-white/5 px-2 py-1.5 text-white placeholder-white/40 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-slate-800 placeholder-slate-400 text-sm focus:border-[#1FA97A] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
                           />
                         </td>
                         <td className="py-1.5 px-2 text-right">
@@ -744,7 +744,7 @@ export function CreateInvoiceDialog({
                             value={line.quantity || ""}
                             onChange={(e) => handleQtyChange(line, Number(e.target.value) || 0)}
                             disabled={!editableInEditMode}
-                            className="w-full rounded border border-white/10 bg-white/5 px-2 py-1.5 text-white text-sm text-right disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-slate-800 text-sm text-right focus:border-[#1FA97A] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
                           />
                         </td>
                         <td className="py-1.5 px-2 text-right">
@@ -755,7 +755,7 @@ export function CreateInvoiceDialog({
                             value={line.unitPrice || ""}
                             onChange={(e) => handleUnitChange(line, Number(e.target.value) || 0)}
                             disabled={!editableInEditMode}
-                            className="w-full rounded border border-white/10 bg-white/5 px-2 py-1.5 text-white text-sm text-right disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-slate-800 text-sm text-right focus:border-[#1FA97A] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
                           />
                         </td>
                         <td className="py-1.5 px-2 text-right">
@@ -766,10 +766,10 @@ export function CreateInvoiceDialog({
                             value={line.taxPercent ?? ""}
                             onChange={(e) => handleVatChange(line, Number(e.target.value) || 0)}
                             disabled={!editableInEditMode}
-                            className="w-full rounded border border-white/10 bg-white/5 px-2 py-1.5 text-white text-sm text-right disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-slate-800 text-sm text-right focus:border-[#1FA97A] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
                           />
                         </td>
-                        <td className="py-1.5 px-2 text-right tabular-nums text-white/80">
+                        <td className="py-1.5 px-2 text-right tabular-nums text-slate-700">
                           <input
                             type="number"
                             min={0}
@@ -777,7 +777,7 @@ export function CreateInvoiceDialog({
                             value={line.quantity <= 0 ? "" : computeLineTotal(line) || ""}
                             onChange={(e) => handleTotalChange(line, Number(e.target.value) || 0)}
                             disabled={!editableInEditMode || line.quantity <= 0}
-                            className="w-full rounded border border-white/10 bg-white/5 px-2 py-1.5 text-white text-sm text-right disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-slate-800 text-sm text-right focus:border-[#1FA97A] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
                           />
                         </td>
                         <td className="py-1.5 px-1">
@@ -785,7 +785,7 @@ export function CreateInvoiceDialog({
                             type="button"
                             onClick={() => removeLine(line.id)}
                             disabled={!editableInEditMode}
-                            className="p-1 rounded text-white/50 hover:text-red-400 hover:bg-red-500/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="p-1 rounded text-slate-400 hover:text-red-500 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
                             aria-label="Quitar línea"
                           >
                             <TrashIcon className="w-4 h-4" />
@@ -798,22 +798,22 @@ export function CreateInvoiceDialog({
               </div>
             </div>
 
-            <div className="text-sm text-white/80 flex flex-wrap gap-x-4 gap-y-1">
-              <span><span className="text-white/50">Subtotal </span><span className="tabular-nums">{formatCurrency(subtotal, currency)}</span></span>
-              <span><span className="text-white/50">IVA </span><span className="tabular-nums">{formatCurrency(taxAmount, currency)}</span></span>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 flex flex-wrap gap-x-5 gap-y-1">
+              <span><span className="text-slate-400">Subtotal </span><span className="tabular-nums font-medium">{formatCurrency(subtotal, currency)}</span></span>
+              <span><span className="text-slate-400">IVA </span><span className="tabular-nums font-medium">{formatCurrency(taxAmount, currency)}</span></span>
               {irpfAmount > 0 && (
-                <span><span className="text-red-400/80">IRPF -{irpfRate}% </span><span className="tabular-nums text-red-400">-{formatCurrency(irpfAmount, currency)}</span></span>
+                <span><span className="text-red-500">IRPF -{irpfRate}% </span><span className="tabular-nums font-medium text-red-500">-{formatCurrency(irpfAmount, currency)}</span></span>
               )}
-              <span><span className="text-white/50 font-medium text-white">Total </span><span className="tabular-nums font-medium">{formatCurrency(total, currency)}</span></span>
+              <span className="ml-auto"><span className="text-slate-500 font-medium">Total </span><span className="tabular-nums font-semibold text-slate-900">{formatCurrency(total, currency)}</span></span>
             </div>
 
-            <div className="space-y-3 rounded-xl border border-white/10 bg-white/[0.02] p-4">
-              <h3 className="text-xs font-medium text-white/50 uppercase tracking-wider">Retención IRPF</h3>
+            <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider">Retención IRPF</h3>
               <select
                 value={irpfRate}
                 onChange={(e) => setIrpfRate(parseFloat(e.target.value))}
                 disabled={!editableInEditMode}
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white disabled:opacity-60"
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-[#1FA97A] focus:outline-none disabled:opacity-60"
               >
                 <option value={0}>Sin retención</option>
                 <option value={7}>7% — Primer año de actividad</option>
@@ -823,16 +823,16 @@ export function CreateInvoiceDialog({
               </select>
             </div>
 
-            <div className="space-y-3 rounded-xl border border-white/10 bg-white/[0.02] p-4">
-              <h3 className="text-xs font-medium text-white/50 uppercase tracking-wider">Información de pago</h3>
+            <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider">Información de pago</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-white/60 mb-1">Forma de pago</label>
+                  <label className="block text-xs text-slate-500 mb-1">Forma de pago</label>
                   <select
                     value={paymentMethod}
                     onChange={(e) => setPaymentMethod(e.target.value)}
                     disabled={!editableInEditMode}
-                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white disabled:opacity-60"
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-[#1FA97A] focus:outline-none disabled:opacity-60"
                   >
                     <option value="transferencia">Transferencia</option>
                     <option value="tarjeta">Tarjeta</option>
@@ -840,45 +840,45 @@ export function CreateInvoiceDialog({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs text-white/60 mb-1">Referencia</label>
+                  <label className="block text-xs text-slate-500 mb-1">Referencia</label>
                   <input
                     type="text"
                     value={paymentReference}
                     onChange={(e) => setPaymentReference(e.target.value)}
                     disabled={!editableInEditMode}
                     placeholder="Referencia de pago"
-                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-white/40 disabled:opacity-60"
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-[#1FA97A] focus:outline-none disabled:opacity-60"
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-xs text-white/60 mb-1">IBAN</label>
+                  <label className="block text-xs text-slate-500 mb-1">IBAN</label>
                   <input
                     type="text"
                     value={iban}
                     onChange={(e) => setIban(e.target.value)}
                     disabled={!editableInEditMode}
                     placeholder="ES00 0000 0000 0000 0000 0000"
-                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-white/40 disabled:opacity-60"
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-[#1FA97A] focus:outline-none disabled:opacity-60"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-white/60 mb-1">BIC</label>
+                  <label className="block text-xs text-slate-500 mb-1">BIC</label>
                   <input
                     type="text"
                     value={bic}
                     onChange={(e) => setBic(e.target.value)}
                     disabled={!editableInEditMode}
                     placeholder="BIC/SWIFT"
-                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-white/40 disabled:opacity-60"
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-[#1FA97A] focus:outline-none disabled:opacity-60"
                   />
                 </div>
               </div>
             </div>
 
             <div className="space-y-3">
-              <h3 className="text-xs font-medium text-white/50 uppercase tracking-wider">Legal</h3>
+              <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider">Legal</h3>
               <div>
-                <label className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">
                   Notas
                 </label>
                 <textarea
@@ -886,11 +886,11 @@ export function CreateInvoiceDialog({
                   onChange={(e) => setNotes(e.target.value)}
                   rows={2}
                   disabled={!editableInEditMode}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-white/40 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/20 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-[#1FA97A] focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/20 disabled:opacity-60 disabled:cursor-not-allowed"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">
                   Condiciones
                 </label>
                 <textarea
@@ -898,24 +898,24 @@ export function CreateInvoiceDialog({
                   onChange={(e) => setTerms(e.target.value)}
                   rows={2}
                   disabled={!editableInEditMode}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-white/40 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/20 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-[#1FA97A] focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/20 disabled:opacity-60 disabled:cursor-not-allowed"
                 />
               </div>
             </div>
           </div>
 
-          <div className="shrink-0 flex justify-end gap-2 px-5 py-4 border-t border-white/10">
+          <div className="shrink-0 flex justify-end gap-2 px-5 py-4 border-t border-slate-100">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-white/10 px-4 py-2 text-sm text-white/80 hover:bg-white/5"
+              className="rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={!editableInEditMode || saving || !clientId || lines.some((l) => !l.description.trim())}
-              className="rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/15 disabled:opacity-50"
+              className="rounded-lg bg-[#1FA97A] px-4 py-2 text-sm font-medium text-white hover:bg-[#178a64] disabled:opacity-50 transition-colors"
             >
               {saving ? "Guardando…" : editInvoiceId ? "Actualizar borrador" : "Guardar como borrador"}
             </button>

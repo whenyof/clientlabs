@@ -98,43 +98,43 @@ export function CreateRectificativaModal({
     <>
       <div
         aria-hidden
-        className="fixed inset-0 z-50 bg-black/60"
+        className="fixed inset-0 z-50 bg-black/40"
         onClick={handleClose}
       />
       <div
         role="dialog"
         aria-labelledby="rectificativa-title"
-        className="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl border border-white/10 bg-[#0f0f12] p-6 shadow-2xl max-h-[90vh] overflow-y-auto"
+        className="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl border border-slate-200 bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto"
       >
         <div className="flex items-center justify-between mb-4">
-          <h2 id="rectificativa-title" className="text-lg font-semibold text-white">
+          <h2 id="rectificativa-title" className="text-lg font-semibold text-slate-900">
             Crear rectificativa
           </h2>
           <button
             type="button"
             onClick={handleClose}
             disabled={submitting}
-            className="p-2 rounded-lg text-white/60 hover:text-white hover:bg-white/10 disabled:opacity-50"
+            className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 disabled:opacity-50 transition-colors"
             aria-label="Cerrar"
           >
             <XMarkIcon className="h-5 w-5" />
           </button>
         </div>
 
-        <p className="text-sm text-white/70 mb-5">
-          Rectifica factura <strong className="text-white/90">{invoiceNumber}</strong>.
+        <p className="text-sm text-slate-600 mb-5">
+          Rectifica factura <strong className="text-slate-800">{invoiceNumber}</strong>.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Tipo de rectificativa (Verifactu) */}
           <div>
-            <label className="block text-xs font-semibold text-white/60 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
               Tipo de rectificativa
             </label>
             {isF2 ? (
-              <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2.5">
-                <p className="text-sm font-semibold text-amber-200">R5 — Rectificativa de factura simplificada</p>
-                <p className="text-xs text-amber-200/70 mt-0.5">La factura original es simplificada (F2), por lo que el tipo siempre es R5.</p>
+              <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
+                <p className="text-sm font-semibold text-amber-700">R5 — Rectificativa de factura simplificada</p>
+                <p className="text-xs text-amber-600 mt-0.5">La factura original es simplificada (F2), por lo que el tipo siempre es R5.</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -143,8 +143,8 @@ export function CreateRectificativaModal({
                     key={value}
                     className={`flex items-start gap-3 rounded-lg border px-3 py-2.5 cursor-pointer transition-colors ${
                       rectType === value
-                        ? "border-amber-500/50 bg-amber-500/10"
-                        : "border-white/10 hover:border-white/20"
+                        ? "border-amber-400 bg-amber-50"
+                        : "border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                     }`}
                   >
                     <input
@@ -153,11 +153,11 @@ export function CreateRectificativaModal({
                       value={value}
                       checked={rectType === value}
                       onChange={() => setRectType(value)}
-                      className="mt-0.5 shrink-0"
+                      className="mt-0.5 shrink-0 accent-amber-500"
                     />
                     <div>
-                      <p className="text-sm font-medium text-white/90">{label}</p>
-                      <p className="text-xs text-white/50 mt-0.5">{description}</p>
+                      <p className="text-sm font-medium text-slate-800">{label}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">{description}</p>
                     </div>
                   </label>
                 ))}
@@ -167,7 +167,7 @@ export function CreateRectificativaModal({
 
           {/* Método de rectificación */}
           <div>
-            <label className="block text-xs font-semibold text-white/60 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
               Método de rectificación
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -181,23 +181,23 @@ export function CreateRectificativaModal({
                   onClick={() => setRectMethod(value)}
                   className={`text-left rounded-lg border px-3 py-2.5 transition-colors ${
                     rectMethod === value
-                      ? "border-amber-500/50 bg-amber-500/10"
-                      : "border-white/10 hover:border-white/20"
+                      ? "border-amber-400 bg-amber-50"
+                      : "border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                   }`}
                 >
-                  <p className="text-sm font-medium text-white/90">{label}</p>
-                  <p className="text-xs text-white/50 mt-0.5">{desc}</p>
+                  <p className="text-sm font-medium text-slate-800">{label}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{desc}</p>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Tipo de factura rectificativa (total/parcial) */}
+          {/* Alcance */}
           <div>
-            <label className="block text-xs font-semibold text-white/60 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
               Alcance
             </label>
-            <div className="flex gap-3">
+            <div className="flex gap-4">
               {(["TOTAL", "PARTIAL"] as const).map((t) => (
                 <label key={t} className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -206,13 +206,13 @@ export function CreateRectificativaModal({
                     value={t}
                     checked={type === t}
                     onChange={() => setType(t)}
-                    className="text-amber-500"
+                    className="accent-amber-500"
                   />
-                  <span className="text-sm text-white/90">{t === "TOTAL" ? "Total (anulación)" : "Parcial"}</span>
+                  <span className="text-sm text-slate-800">{t === "TOTAL" ? "Total (anulación)" : "Parcial"}</span>
                 </label>
               ))}
             </div>
-            <p className="text-xs text-white/50 mt-1">
+            <p className="text-xs text-slate-500 mt-1.5">
               {type === "TOTAL"
                 ? "Misma factura con importes negativos."
                 : "Borrador con una línea en cero para que indiques el importe a rectificar."}
@@ -221,8 +221,8 @@ export function CreateRectificativaModal({
 
           {/* Motivo */}
           <div>
-            <label htmlFor="rectificativa-reason" className="block text-xs font-semibold text-white/60 uppercase tracking-wider mb-1">
-              Motivo <span className="text-red-400">*</span>
+            <label htmlFor="rectificativa-reason" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+              Motivo <span className="text-red-500">*</span>
             </label>
             <textarea
               id="rectificativa-reason"
@@ -231,7 +231,7 @@ export function CreateRectificativaModal({
               required
               rows={3}
               placeholder="Ej.: Error en importe de IVA, devolución total..."
-              className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-white/40 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/20"
+              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-[#1FA97A] focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/20 transition-colors"
             />
           </div>
 
@@ -240,14 +240,14 @@ export function CreateRectificativaModal({
               type="button"
               onClick={handleClose}
               disabled={submitting}
-              className="rounded-lg border border-white/10 px-4 py-2 text-sm text-white/80 hover:bg-white/5 disabled:opacity-50"
+              className="rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-colors"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={submitting || !reason.trim()}
-              className="inline-flex items-center gap-2 rounded-lg border border-amber-500/40 bg-amber-500/20 px-4 py-2 text-sm font-medium text-amber-200 hover:bg-amber-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-white hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <DocumentDuplicateIcon className="h-4 w-4" />
               {submitting ? "Creando…" : "Crear rectificativa"}

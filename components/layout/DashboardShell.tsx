@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
-import { Menu, X } from "lucide-react"
+import { Menu } from "lucide-react"
 import Sidebar from "@/app/dashboard/components/Sidebar"
 import { DashboardHeader } from "@/components/layout/DashboardHeader"
-import { FinanceNavbar } from "@/components/finance/FinanceNavbar"
 import { TourProvider } from "@/components/tour/TourContext"
 import { TourOverlay } from "@/components/tour/TourOverlay"
 import { TrialBanner } from "@/components/layout/TrialBanner"
@@ -23,7 +22,6 @@ export default function DashboardShell({
     const [isCollapsed, setIsCollapsed] = useState(false)
     const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
     const pathname = usePathname()
-    const isFinance = pathname.startsWith("/dashboard/finance")
 
     // Close mobile sidebar on route change
     useEffect(() => {
@@ -84,28 +82,17 @@ export default function DashboardShell({
                     {/* Trial / free plan banner */}
                     <TrialBanner />
 
-                    {/* Header: normal en resto del panel, reemplazado por FinanceNavbar en finanzas */}
                     <div className="hidden lg:block">
-                        {isFinance ? <FinanceNavbar /> : <DashboardHeader />}
+                        <DashboardHeader />
                     </div>
-                    {/* Finance navbar on mobile too */}
-                    {isFinance && (
-                        <div className="lg:hidden">
-                            <FinanceNavbar />
-                        </div>
-                    )}
 
                     <main
                         className="flex-1 overflow-y-auto overflow-x-hidden bg-[var(--bg-main)] text-[var(--text-primary)] relative"
                         data-debug="shell-main"
                     >
-                        {isFinance ? (
-                            children
-                        ) : (
-                            <div className="mx-auto w-full max-w-[1400px] flex-1 flex flex-col px-4 sm:px-6 py-4 sm:py-8">
-                                {children}
-                            </div>
-                        )}
+                        <div className="mx-auto w-full max-w-[1400px] flex-1 flex flex-col px-4 sm:px-6 py-4 sm:py-8">
+                            {children}
+                        </div>
                     </main>
                 </div>
 

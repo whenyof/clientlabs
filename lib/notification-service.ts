@@ -102,3 +102,57 @@ export async function notifyTrialExpiring(userId: string, daysLeft: number) {
     // Never crash
   }
 }
+
+export async function notifyClientCreated(userId: string, clientName: string, clientId?: string) {
+  await createNotification(userId, {
+    type: "client_created",
+    title: "Nuevo cliente",
+    message: `${clientName} ha sido añadido como cliente.`,
+    actionUrl: clientId ? `/dashboard/clients/${clientId}` : "/dashboard/clients",
+  })
+}
+
+export async function notifyTaskCreated(userId: string, taskTitle: string, taskId?: string) {
+  await createNotification(userId, {
+    type: "task_created",
+    title: "Tarea creada",
+    message: `Nueva tarea: ${taskTitle}`,
+    actionUrl: taskId ? `/dashboard/tasks/${taskId}` : "/dashboard/tasks",
+  })
+}
+
+export async function notifyTaskDue(userId: string, taskTitle: string, taskId?: string) {
+  await createNotification(userId, {
+    type: "task_due",
+    title: "Tarea próxima a vencer",
+    message: `La tarea "${taskTitle}" vence hoy.`,
+    actionUrl: taskId ? `/dashboard/tasks/${taskId}` : "/dashboard/tasks",
+  })
+}
+
+export async function notifyInvoiceCreated(userId: string, invoiceNumber: string, clientName: string, invoiceId?: string) {
+  await createNotification(userId, {
+    type: "invoice_created",
+    title: "Factura emitida",
+    message: `Factura ${invoiceNumber} emitida para ${clientName}.`,
+    actionUrl: invoiceId ? `/dashboard/finance/cobros` : "/dashboard/finance/cobros",
+  })
+}
+
+export async function notifyPaymentReceived(userId: string, amount: string, clientName: string) {
+  await createNotification(userId, {
+    type: "payment_received",
+    title: "Pago recibido",
+    message: `${clientName} ha pagado ${amount}.`,
+    actionUrl: "/dashboard/finance/cobros",
+  })
+}
+
+export async function notifyInvoiceOverdue(userId: string, invoiceNumber: string, clientName: string, daysOverdue: number) {
+  await createNotification(userId, {
+    type: "invoice_overdue",
+    title: "Factura vencida",
+    message: `La factura ${invoiceNumber} de ${clientName} lleva ${daysOverdue} ${daysOverdue === 1 ? "día" : "días"} sin pagar.`,
+    actionUrl: "/dashboard/finance/cobros",
+  })
+}

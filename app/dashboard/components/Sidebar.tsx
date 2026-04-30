@@ -1,26 +1,26 @@
 "use client"
 
+import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
-import { useSession } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react"
 import { motion } from "framer-motion"
 import { useEffect, useState } from "react"
 import { useSectorConfig } from "@/hooks/useSectorConfig"
 import { usePlan } from "@/hooks/use-plan"
 import { useTour } from "@/components/tour/TourContext"
+import { cn } from "@/lib/utils"
 import {
   LayoutDashboard,
   Users,
   Target,
-  TrendingUp,
   CheckSquare,
   DollarSign,
-  CreditCard,
   BarChart3,
   Zap,
   Settings,
-  ShieldCheck,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Building2,
   Sparkles,
   Crown,
@@ -28,6 +28,15 @@ import {
   Lock,
   Receipt,
   Megaphone,
+  LogOut,
+  Landmark,
+  ShoppingCart,
+  FileText,
+  Wallet,
+  Banknote,
+  Wrench,
+  UserPlus,
+  Radio,
 } from "lucide-react"
 
 interface SidebarProps {
@@ -37,38 +46,19 @@ interface SidebarProps {
   onNavItemClick?: () => void
 }
 
-interface BadgeProps {
-  variant: 'pro' | 'beta' | 'premium'
-}
-
-function Badge({ variant }: BadgeProps) {
-  const variants = {
-    pro: 'bg-gradient-to-r from-emerald-500 to-teal-500 text-[var(--text-primary)]',
-    beta: 'bg-teal-500 text-[var(--text-primary)]',
-    premium: 'bg-gradient-to-r from-emerald-400 to-teal-500 text-[var(--text-primary)]'
-  }
-
-  const labels = {
-    pro: 'PRO',
-    beta: 'BETA',
-    premium: 'PREMIUM'
-  }
-
-  return (
-    <span className={`
-      text-xs font-bold px-2 py-0.5 rounded-full
-      ${variants[variant]}
-    `}>
-      {labels[variant]}
-    </span>
-  )
+interface SubItem {
+  label: string
+  href: string
+  icon?: React.ComponentType<{ className?: string }>
 }
 
 interface MenuItem {
   label: string
-  href: string
-  icon: any
+  icon: React.ComponentType<{ className?: string }>
+  href?: string
+  badge?: string
   count?: number
+  children?: SubItem[]
 }
 
 interface MenuGroup {
@@ -76,17 +66,193 @@ interface MenuGroup {
   items: MenuItem[]
 }
 
-export default function Sidebar({ isCollapsed = false, onToggleCollapsed, onNavItemClick }: SidebarProps) {
+// ─── NavItem ────────────────────────────────────────────────────────────────
+
+function NavItem({
+  item,
+  isCollapsed,
+  onNavigate,
+  isTourHighlighted,
+}: {
+  item: MenuItem
+  isCollapsed: boolean
+  onNavigate?: () => void
+  isTourHighlighted?: boolean
+}) {
+  const pathname = usePathname()
+  const hasChildren = !!item.children?.length
+
+  const isChildActive = hasChildren
+    ? item.children!.some(
+        (c) => pathname === c.href || pathname.startsWith(c.href + "/")
+      )
+    : false
+
+  const [open, setOpen] = useState(isChildActive)
+
+  useEffect(() => {
+    if (isChildActive) setOpen(true)
+  }, [pathname, isChildActive])
+
+  const isActive = item.href
+    ? pathname === item.href ||
+      (item.href !== "/dashboard" && pathname.startsWith(item.href + "/"))
+    : false
+
+  const Icon = item.icon
+
+  // ── Dropdown parent ──────────────────────────────────────────────────────
+  if (hasChildren) {
+    return (
+      <div className="relative">
+        {isTourHighlighted && (
+          <span
+            className="absolute inset-0 rounded-r-md pointer-events-none z-10 animate-[tour-pulse_1.6s_ease-in-out_infinite]"
+            style={{ boxShadow: "0 0 0 2px #1FA97A, 0 0 12px rgba(31,169,122,0.4)" }}
+          />
+        )}
+        <button
+          onClick={() => setOpen((v) => !v)}
+          className={cn(
+            "w-full flex items-center gap-3 px-3 py-2 text-sm rounded-r-md transition-all border-l-[4px]",
+            isChildActive
+              ? "text-[var(--accent)] font-medium border-[var(--accent)] bg-[var(--accent-soft)]"
+              : "text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)] border-transparent",
+            isTourHighlighted ? "bg-[#1FA97A]/8 text-[#1FA97A]" : ""
+          )}
+        >
+          <Icon className="h-[18px] w-[18px] shrink-0" />
+          {!isCollapsed && (
+            <>
+              <span className="flex-1 text-left">{item.label}</span>
+              {item.badge && (
+                <span className="text-[9px] font-bold tracking-wider bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded uppercase mr-1">
+                  {item.badge}
+                </span>
+              )}
+              <ChevronDown
+                className={cn(
+                  "h-3.5 w-3.5 shrink-0 transition-transform duration-200",
+                  open ? "rotate-0" : "-rotate-90"
+                )}
+              />
+            </>
+          )}
+        </button>
+
+        {open && !isCollapsed && (
+          <div className="ml-[22px] mt-0.5 mb-1 space-y-0.5 border-l border-white/[0.08] pl-3">
+            {item.children!.map((child) => {
+              const childActive =
+                pathname === child.href ||
+                pathname.startsWith(child.href + "/")
+              const ChildIcon = child.icon
+              return (
+                <Link
+                  key={child.href}
+                  href={child.href}
+                  onClick={onNavigate}
+                  className={cn(
+                    "flex items-center gap-2.5 px-3 py-[7px] rounded-lg text-[13px] transition-colors",
+                    childActive
+                      ? "bg-[#1FA97A]/15 text-[#1FA97A] font-medium"
+                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
+                  )}
+                >
+                  {ChildIcon ? (
+                    <ChildIcon className="h-[14px] w-[14px] shrink-0" />
+                  ) : (
+                    <span className="h-1.5 w-1.5 rounded-full bg-current shrink-0" />
+                  )}
+                  <span>{child.label}</span>
+                </Link>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // ── Direct link ──────────────────────────────────────────────────────────
+  return (
+    <div className="relative">
+      {isTourHighlighted && (
+        <span
+          className="absolute inset-0 rounded-r-md pointer-events-none z-10 animate-[tour-pulse_1.6s_ease-in-out_infinite]"
+          style={{ boxShadow: "0 0 0 2px #1FA97A, 0 0 12px rgba(31,169,122,0.4)" }}
+        />
+      )}
+      {isTourHighlighted && (
+        <span className="absolute right-2 top-1/2 -translate-y-1/2 z-20 flex items-center gap-1 bg-[#1FA97A] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full pointer-events-none">
+          <span className="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse" />
+          AQUÍ
+        </span>
+      )}
+      <Link
+        href={item.href!}
+        onClick={onNavigate}
+        className={cn(
+          "w-full flex items-center gap-3 px-3 py-2 text-sm rounded-r-md transition-all border-l-[4px]",
+          isActive
+            ? "bg-[var(--accent-soft)] text-[var(--accent)] font-medium border-[var(--accent)]"
+            : "text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)] border-transparent",
+          isTourHighlighted ? "bg-[#1FA97A]/8 text-[#1FA97A]" : ""
+        )}
+      >
+        <Icon className="h-[18px] w-[18px] shrink-0" />
+        {!isCollapsed && (
+          <div className="flex justify-between w-full items-center">
+            <span>{item.label}</span>
+            <div className="flex items-center gap-1">
+              {item.count !== undefined && item.count > 0 && (
+                <span
+                  className="text-xs px-2 rounded-full font-semibold"
+                  style={{
+                    background:
+                      item.href === "/dashboard/tasks"
+                        ? "#FEF2F2"
+                        : "var(--accent-soft)",
+                    color:
+                      item.href === "/dashboard/tasks"
+                        ? "#EF4444"
+                        : "var(--accent)",
+                  }}
+                >
+                  {item.count}
+                </span>
+              )}
+              {item.badge && (
+                <span className="text-[9px] font-bold tracking-wider bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded uppercase">
+                  {item.badge}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+      </Link>
+    </div>
+  )
+}
+
+// ─── Sidebar ─────────────────────────────────────────────────────────────────
+
+export default function Sidebar({
+  isCollapsed = false,
+  onToggleCollapsed,
+  onNavItemClick,
+}: SidebarProps) {
   const router = useRouter()
   const pathname = usePathname()
   const { data: session, status } = useSession()
   const { labels } = useSectorConfig()
-  const { can } = usePlan()
   const { active: tourActive, currentStep: tourStep } = useTour()
   const nav = labels.nav
   const isAdmin = session?.user?.role === "ADMIN"
 
   const [urgentCount, setUrgentCount] = useState(0)
+  const [showLogoutModal, setShowLogoutModal] = useState(false)
+
   useEffect(() => {
     if (!session?.user?.id) return
     fetch("/api/tasks/kpis")
@@ -95,7 +261,6 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed, onNavI
       .catch(() => {})
   }, [session?.user?.id])
 
-  // Show loading state while session is loading
   if (status === "loading") {
     return (
       <div className="w-64 bg-[var(--bg-card)] border-r border-[var(--border-subtle)] flex items-center justify-center">
@@ -108,238 +273,268 @@ export default function Sidebar({ isCollapsed = false, onToggleCollapsed, onNavI
     {
       title: "CORE",
       items: [
-        { label: nav.dashboard, href: "/dashboard", icon: LayoutDashboard },
-        { label: nav.leads, href: "/dashboard/leads", icon: Target },
-        { label: nav.clients, href: "/dashboard/clients", icon: Users },
-        { label: nav.providers, href: "/dashboard/providers", icon: Building2 },
-        { label: nav.tasks, href: "/dashboard/tasks", icon: CheckSquare, count: urgentCount || undefined },
-        { label: nav.finance, href: "/dashboard/finance", icon: DollarSign },
+        { label: nav.dashboard, icon: LayoutDashboard, href: "/dashboard" },
+        { label: nav.leads, icon: Target, href: "/dashboard/leads" },
+        { label: nav.clients, icon: Users, href: "/dashboard/clients" },
+        { label: nav.providers, icon: Building2, href: "/dashboard/providers" },
+        {
+          label: nav.tasks,
+          icon: CheckSquare,
+          href: "/dashboard/tasks",
+          count: urgentCount || undefined,
+        },
+        {
+          label: nav.finance,
+          icon: DollarSign,
+          children: [
+            { label: "Resumen", href: "/dashboard/finance", icon: BarChart3 },
+            { label: "Gastos", href: "/dashboard/finance/gastos", icon: Receipt },
+            { label: "Cobros", href: "/dashboard/finance/cobros", icon: Wallet },
+            { label: "Pagos", href: "/dashboard/finance/pagos", icon: Banknote },
+            { label: "Banco", href: "/dashboard/finance/banco", icon: Landmark },
+            { label: "Compras", href: "/dashboard/finance/purchases", icon: ShoppingCart },
+            { label: "Rectificativas", href: "/dashboard/finance/rectificativas", icon: FileText },
+            { label: "Configuración", href: "/dashboard/finance/configuracion", icon: Wrench },
+          ],
+        },
       ],
     },
     {
       title: "INTELIGENCIA",
       items: [
-        { label: "Automatizaciones", href: "/dashboard/automatizaciones", icon: Zap },
-        { label: "Marketing", href: "/dashboard/marketing", icon: Megaphone },
-        { label: "Conectar", href: "/dashboard/connect", icon: Link2 },
+        { label: "Automatizaciones", icon: Zap, href: "/dashboard/automatizaciones" },
+        { label: "Marketing", icon: Megaphone, href: "/dashboard/marketing" },
+        { label: "Conectar", icon: Link2, href: "/dashboard/connect" },
       ],
     },
     {
       title: "SISTEMA",
       items: [
-        ...(session?.user?.plan === "PRO" || session?.user?.plan === "BUSINESS" || isAdmin
-          ? [{ label: "Sistema de Backups", href: "/dashboard/system/backups", icon: ShieldCheck }]
-          : []
-        ),
-        { label: nav.settings, href: "/dashboard/settings", icon: Settings },
+        { label: nav.settings, icon: Settings, href: "/dashboard/settings" },
       ],
     },
   ]
 
-  // Add admin section if user is admin
   if (isAdmin) {
     menu.push({
       title: "ADMIN",
-      items: [
-        { label: "Admin Panel", href: "/admin", icon: Crown },
-      ],
+      items: [{ label: "Admin Panel", icon: Crown, href: "/admin" }],
     })
   }
 
   return (
-    <motion.aside
-      animate={{ width: isCollapsed ? 72 : 240 }}
-      transition={{ duration: 0.25, ease: "easeInOut" }}
-      className="h-screen bg-[var(--bg-card)] border-r border-[var(--border-subtle)] flex flex-col shrink-0"
-    >
-
-      {/* HEADER */}
-      <div className="h-16 px-4 flex items-center justify-between border-b border-[var(--border-subtle)]">
-
-        {!isCollapsed && (
-          <span className="text-[var(--text-primary)] font-bold text-lg">
-            Client<span className="text-[var(--accent)]">Labs</span>
-          </span>
-        )}
-
-        <div className="flex items-center gap-2">
-
-          {/* COLLAPSE */}
-          {onToggleCollapsed && (
-            <button
-              onClick={onToggleCollapsed}
-              className="p-2 rounded-lg hover:bg-[var(--border-subtle)]"
-            >
-              {isCollapsed ? (
-                <ChevronRight size={18} className="text-[var(--text-secondary)]" />
-              ) : (
-                <ChevronLeft size={18} className="text-[var(--text-secondary)]" />
-              )}
-            </button>
+    <>
+      <motion.aside
+        animate={{ width: isCollapsed ? 72 : 240 }}
+        transition={{ duration: 0.25, ease: "easeInOut" }}
+        className="h-screen bg-[var(--bg-card)] border-r border-[var(--border-subtle)] flex flex-col shrink-0"
+      >
+        {/* HEADER */}
+        <div className="h-16 px-4 flex items-center justify-between border-b border-[var(--border-subtle)]">
+          {!isCollapsed && (
+            <span className="text-[var(--text-primary)] font-bold text-lg">
+              Client<span className="text-[var(--accent)]">Labs</span>
+            </span>
           )}
-
+          <div className="flex items-center gap-2">
+            {onToggleCollapsed && (
+              <button
+                onClick={onToggleCollapsed}
+                className="p-2 rounded-lg hover:bg-[var(--border-subtle)]"
+              >
+                {isCollapsed ? (
+                  <ChevronRight size={18} className="text-[var(--text-secondary)]" />
+                ) : (
+                  <ChevronLeft size={18} className="text-[var(--text-secondary)]" />
+                )}
+              </button>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* NAV */}
-      <nav className="flex-1 px-3 py-4 space-y-6 overflow-y-auto">
-        {/* CORE + rest of menu groups */}
-        {menu.map((group, groupIdx) => (
-          <>
+        {/* NAV */}
+        <nav className="flex-1 px-3 py-4 space-y-6 overflow-y-auto">
+          {menu.map((group, groupIdx) => (
             <div key={group.title}>
               {!isCollapsed && (
                 <p className="text-xs uppercase tracking-widest text-[var(--text-secondary)] mb-2 px-2">
                   {group.title}
                 </p>
               )}
-
               <div className="space-y-1">
                 {group.items.map((item) => {
-                  const active = pathname === item.href
-                  const isTourHighlighted = tourActive && tourStep.href === item.href
-                  const Icon = item.icon
-
+                  const itemHref = item.href ?? item.children?.[0]?.href ?? ""
+                  const isTourHighlighted =
+                    tourActive && tourStep.href === itemHref
                   return (
-                    <div key={`${group.title}-${item.href}`} className="relative">
-                      {/* Tour pulse ring */}
-                      {isTourHighlighted && (
-                        <span className="absolute inset-0 rounded-r-md pointer-events-none z-10 animate-[tour-pulse_1.6s_ease-in-out_infinite]"
-                          style={{ boxShadow: "0 0 0 2px #1FA97A, 0 0 12px rgba(31,169,122,0.4)" }} />
-                      )}
-                      {/* Tour dot badge */}
-                      {isTourHighlighted && !isCollapsed && (
-                        <span className="absolute right-2 top-1/2 -translate-y-1/2 z-20 flex items-center gap-1 bg-[#1FA97A] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full pointer-events-none">
-                          <span className="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse" />
-                          AQUÍ
-                        </span>
-                      )}
-                    <button
-                      onClick={() => { router.push(item.href); onNavItemClick?.() }}
-                      className={`
-                        w-full flex items-center gap-3 px-3 py-2 text-sm rounded-r-md
-                        transition-all
-                        ${active
-                          ? "bg-[var(--accent-soft)] text-[var(--accent)] font-medium border-l-[4px] border-[var(--accent)]"
-                          : "text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)] border-l-[4px] border-transparent"
-                        }
-                        ${isTourHighlighted ? "bg-[#1FA97A]/8 text-[#1FA97A]" : ""}
-                      `}
-                    >
-                      <Icon size={18} />
-
-                      {!isCollapsed && (
-                        <div className="flex justify-between w-full items-center">
-                          <span>{item.label}</span>
-
-                          <div className="flex items-center gap-1">
-                            {item.count && (
-                              <span
-                                className="text-xs px-2 rounded-full font-semibold"
-                                style={{
-                                  background: item.href === "/dashboard/tasks" ? "#FEF2F2" : "var(--accent-soft)",
-                                  color: item.href === "/dashboard/tasks" ? "#EF4444" : "var(--accent)",
-                                }}
-                              >
-                                {item.count}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </button>
-                    </div>
+                    <NavItem
+                      key={item.label}
+                      item={item}
+                      isCollapsed={isCollapsed}
+                      onNavigate={onNavItemClick}
+                      isTourHighlighted={isTourHighlighted}
+                    />
                   )
                 })}
               </div>
+
+              {/* PRÓXIMAMENTE — inserted after the last non-admin group */}
+              {groupIdx === menu.length - (isAdmin ? 2 : 1) && (
+                <div className="mt-3">
+                  {!isCollapsed && (
+                    <p className="text-xs uppercase tracking-widest text-[var(--text-secondary)] mb-2 px-2 opacity-60">
+                      Próximamente
+                    </p>
+                  )}
+                  {[
+                    { icon: Sparkles, label: labels.aiAssistant.title },
+                    { icon: Receipt, label: "Verifactu" },
+                  ].map(({ icon: Icon, label }) => (
+                    <div
+                      key={label}
+                      title={isCollapsed ? `${label} — Próximamente` : undefined}
+                      className="w-full flex items-center gap-3 px-3 py-2 text-sm rounded-r-md border-l-[4px] border-transparent opacity-45 cursor-not-allowed select-none"
+                      style={{ color: "var(--text-secondary)" }}
+                    >
+                      <Icon size={18} />
+                      {!isCollapsed && (
+                        <div className="flex justify-between w-full items-center">
+                          <span>{label}</span>
+                          <span
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 3,
+                              fontSize: 10,
+                              fontWeight: 600,
+                              letterSpacing: "0.04em",
+                              padding: "2px 6px",
+                              borderRadius: 4,
+                              background: "var(--bg-surface)",
+                              border: "0.5px solid var(--border-subtle)",
+                              color: "var(--text-secondary)",
+                            }}
+                          >
+                            <Lock size={9} />
+                            Pronto
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </nav>
+
+        {/* FOOTER */}
+        <div className="border-t border-[var(--border-subtle)] p-4 space-y-3">
+          {/* USER */}
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-full flex items-center justify-center text-[var(--accent)] font-bold overflow-hidden shrink-0">
+              {session?.user?.image ? (
+                <img
+                  src={session.user.image}
+                  alt="Avatar"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-sm">
+                  {session?.user?.name?.charAt(0)?.toUpperCase() ||
+                    session?.user?.email?.charAt(0)?.toUpperCase() ||
+                    "U"}
+                </span>
+              )}
             </div>
 
-            {/* PRÓXIMAMENTE — inserted after SISTEMA (last non-admin group) */}
-            {groupIdx === menu.length - (isAdmin ? 2 : 1) && (
-              <div key="proximamente">
-                {!isCollapsed && (
-                  <p className="text-xs uppercase tracking-widest text-[var(--text-secondary)] mb-2 px-2 opacity-60">
-                    Próximamente
-                  </p>
-                )}
-                {[
-                  { icon: Sparkles, label: labels.aiAssistant.title },
-                  { icon: Receipt,  label: "Verifactu" },
-                ].map(({ icon: Icon, label }) => (
-                  <div
-                    key={label}
-                    title={isCollapsed ? `${label} — Próximamente` : undefined}
-                    className="w-full flex items-center gap-3 px-3 py-2 text-sm rounded-r-md border-l-[4px] border-transparent opacity-45 cursor-not-allowed select-none"
-                    style={{ color: "var(--text-secondary)" }}
-                  >
-                    <Icon size={18} />
-                    {!isCollapsed && (
-                      <div className="flex justify-between w-full items-center">
-                        <span>{label}</span>
-                        <span style={{
-                          display: "flex", alignItems: "center", gap: 3,
-                          fontSize: 10, fontWeight: 600, letterSpacing: "0.04em",
-                          padding: "2px 6px", borderRadius: 4,
-                          background: "var(--bg-surface)",
-                          border: "0.5px solid var(--border-subtle)",
-                          color: "var(--text-secondary)",
-                        }}>
-                          <Lock size={9} />
-                          Pronto
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                ))}
+            {!isCollapsed && (
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
+                  {session?.user?.name || "Usuario"}
+                </p>
+                <p className="text-xs text-[var(--text-secondary)] truncate">
+                  {session?.user?.email || "user@email.com"}
+                </p>
               </div>
             )}
-          </>
-        ))}
-      </nav>
 
-      {/* FOOTER */}
-      <div className="border-t border-[var(--border-subtle)] p-4 space-y-3">
-
-        {/* USER */}
-        <div className="flex items-center gap-3">
-          {/* AVATAR */}
-          <div className="h-9 w-9 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-full flex items-center justify-center text-[var(--accent)] font-bold overflow-hidden">
-            {session?.user?.image ? (
-              <img
-                src={session.user.image}
-                alt="Avatar"
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <span className="text-sm">
-                {session?.user?.name?.charAt(0)?.toUpperCase() || session?.user?.email?.charAt(0)?.toUpperCase() || "U"}
-              </span>
-            )}
+            <button
+              onClick={() => setShowLogoutModal(true)}
+              title="Cerrar sesión"
+              className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-150 shrink-0"
+            >
+              <LogOut size={15} />
+            </button>
           </div>
 
-          {!isCollapsed && (
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
-                {session?.user?.name || "Usuario"}
-              </p>
-              <p className="text-xs text-[var(--text-secondary)] truncate">
-                {session?.user?.email || "user@email.com"}
-              </p>
-            </div>
-          )}
+          {/* PLAN */}
+          {!isCollapsed && session?.user?.plan && (() => {
+            const plan = session.user.plan.toUpperCase()
+            const isFree = plan === "FREE"
+            const isPro = plan === "PRO"
+            return (
+              <button
+                onClick={() => router.push("/dashboard/finance/billing")}
+                className="w-full group flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg border border-[var(--border-subtle)] hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] transition-all"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 text-[9px] font-black ${isFree ? "bg-slate-100 text-slate-500" : isPro ? "bg-[#1FA97A]/15 text-[#1FA97A]" : "bg-amber-100 text-amber-600"}`}>
+                    {isFree ? "F" : isPro ? "P" : "B"}
+                  </div>
+                  <div className="text-left min-w-0">
+                    <p className="text-[11px] font-semibold text-[var(--text-primary)] leading-tight truncate">
+                      Plan {isFree ? "Free" : isPro ? "Pro" : "Business"}
+                    </p>
+                    {isFree && (
+                      <p className="text-[10px] text-[var(--accent)] leading-tight">Actualizar plan</p>
+                    )}
+                  </div>
+                </div>
+                <ChevronRight size={12} className="text-[var(--text-secondary)] group-hover:text-[var(--accent)] shrink-0 transition-colors" />
+              </button>
+            )
+          })()}
         </div>
+      </motion.aside>
 
-        {/* PLAN */}
-        {!isCollapsed && session?.user?.plan && (
-          <button
-            onClick={() => router.push("/dashboard/finance/billing")}
-            className="w-full text-left text-xs text-[var(--accent)] hover:text-[var(--text-primary)] transition-colors"
+      {/* LOGOUT CONFIRM MODAL */}
+      {showLogoutModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(4px)" }}
+          onClick={() => setShowLogoutModal(false)}
+        >
+          <div
+            className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl p-6 w-full max-w-sm mx-4 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
           >
-            Plan: <b>{session.user.plan.toUpperCase()}</b>
-          </button>
-        )}
-
-      </div>
-
-    </motion.aside>
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-50 dark:bg-red-900/20 mx-auto mb-4">
+              <LogOut size={22} className="text-red-500" />
+            </div>
+            <h2 className="text-[16px] font-bold text-[var(--text-primary)] text-center mb-1">
+              ¿Cerrar sesión?
+            </h2>
+            <p className="text-[13px] text-[var(--text-secondary)] text-center mb-6">
+              Se cerrará tu sesión en este dispositivo.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                className="flex-1 py-2.5 rounded-xl text-[13.5px] font-medium text-[var(--text-secondary)] border border-[var(--border-subtle)] hover:bg-[var(--bg-surface)] transition-all"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => signOut({ callbackUrl: "/auth" })}
+                className="flex-1 py-2.5 rounded-xl text-[13.5px] font-semibold text-white bg-red-500 hover:bg-red-600 transition-all"
+              >
+                Cerrar sesión
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }

@@ -459,32 +459,74 @@ function IncluyeSection() {
       scrollTrigger: { trigger: ref.current, start: "top 82%", once: true },
     })
     gsap.from(".inc-module", {
-      y: 70, opacity: 0, scale: 0.96, duration: 0.75, stagger: 0.15, ease: "back.out(1.3)",
+      y: 70, opacity: 0, scale: 0.96, duration: 0.75, stagger: 0.1, ease: "back.out(1.3)",
       scrollTrigger: { trigger: ".inc-grid", start: "top 82%", once: true },
     })
   }, { scope: ref })
 
-  const modules = [
+  const coreModules = [
     {
       num: "01",
+      name: "Dashboard",
+      desc: "Vista general de tu negocio con métricas clave en tiempo real.",
+      icon: "M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z",
+      features: ["KPIs en tiempo real", "Resumen de ingresos y gastos", "Actividad reciente", "Alertas y notificaciones inteligentes"],
+    },
+    {
+      num: "02",
       name: "Leads",
       desc: "Captura y convierte oportunidades desde cualquier fuente.",
       icon: "M3 4h18l-7 8v6l-4 2V12L3 4z",
       features: ["Script embebible en tu web", "Plugin WordPress listo", "Pipeline visual con drag & drop", "Scoring automático con IA", "Conversión a cliente en 1 clic", "Formularios personalizados"],
     },
     {
-      num: "02",
+      num: "03",
       name: "Clientes",
       desc: "Ficha completa, historial y seguimiento de cada cliente.",
       icon: "M12 8a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 20c0-4 4-7 8-7s8 3 8 7",
       features: ["Ficha 360° por cliente", "Historial de facturas y pagos", "Notas y recordatorios", "Vinculación automática leads→cliente", "Exportación de datos", "Google Calendar sync (Pro+)"],
     },
     {
-      num: "03",
-      name: "Facturación",
-      desc: "Facturas profesionales, control de cobros y cumplimiento.",
+      num: "04",
+      name: "Proveedores",
+      desc: "Gestiona tus proveedores y el gasto con cada uno.",
+      icon: "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z",
+      features: ["Ficha de proveedor completa", "Historial de compras", "Facturas de compra vinculadas", "Control de pagos pendientes"],
+    },
+    {
+      num: "05",
+      name: "Tareas",
+      desc: "Recordatorios, follow-ups y gestión de trabajo diario.",
+      icon: "M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11",
+      features: ["Prioridad y fecha de vencimiento", "Recordatorios automáticos", "Vinculadas a leads y clientes", "Panel de tareas urgentes"],
+    },
+    {
+      num: "06",
+      name: "Finanzas",
+      desc: "Control total de tu economía: facturas, gastos y banco.",
       icon: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm0 0v6h6M8 13h8M8 17h5",
-      features: ["PDF profesional en 30 segundos", "Series de facturación propias", "Control de cobros y vencimientos", "Recordatorios automáticos", "Rectificativas y abonos", "Verifactu (Max)"],
+      features: ["Facturas PDF profesionales", "Control de cobros y vencimientos", "Gestión de gastos y compras", "Conciliación bancaria", "Rectificativas y abonos", "Verifactu (Business)"],
+    },
+    {
+      num: "07",
+      name: "Automatizaciones",
+      desc: "Flujos que trabajan por ti, 24 horas al día.",
+      icon: "M13 2L3 14h9l-1 8 10-12h-9l1-8z",
+      features: ["Flujos de trabajo visuales", "Email automático a leads y clientes", "Reglas de seguimiento personalizadas", "5 activas en Pro · ilimitadas en Business"],
+    },
+    {
+      num: "08",
+      name: "Marketing",
+      desc: "Campañas y acciones comerciales para crecer más rápido.",
+      icon: "M22 12h-4l-3 9L9 3l-3 9H2",
+      features: ["Gestión de campañas", "Seguimiento de resultados", "Segmentación de contactos", "Métricas de conversión"],
+    },
+    {
+      num: "09",
+      name: "Conectar",
+      desc: "Integra ClientLabs con tu web y tus herramientas.",
+      icon: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71",
+      features: ["Script web embebible", "Google Calendar sync", "Webhooks y API (Business)", "Integraciones con herramientas externas"],
     },
   ]
 
@@ -495,33 +537,33 @@ function IncluyeSection() {
         backgroundSize: "60px 60px",
       }}>
 
-      <div className="relative z-10 max-w-5xl mx-auto">
+      <div className="relative z-10 max-w-6xl mx-auto">
         <div className="text-center mb-16">
           <p className="inc-eyebrow text-[11px] uppercase tracking-[0.12em] text-[#1FA97A] mb-3">Qué incluye</p>
           <h2 className="inc-h2 text-[44px] font-bold text-white leading-[1.1] tracking-[-0.025em]">
-            Tres módulos. Un sistema completo.
+            Nueve módulos. Un solo sistema.
           </h2>
-          <p className="inc-sub text-[16px] text-[#8FA6B2] mt-3 max-w-lg mx-auto">
-            Todos los planes incluyen los tres módulos. Solo cambia la escala.
+          <p className="inc-sub text-[16px] text-[#8FA6B2] mt-3 max-w-xl mx-auto">
+            Todos los planes incluyen todos los módulos. Solo cambia la escala y los límites.
           </p>
         </div>
 
-        <div className="inc-grid grid grid-cols-1 md:grid-cols-3 gap-5">
-          {modules.map((mod) => (
-            <div key={mod.num} className="inc-module bg-white/[0.04] border border-white/[0.08] rounded-xl p-7 hover:border-[#1FA97A]/30 transition-colors">
-              <div className="flex items-center gap-3 mb-5">
-                <div className="w-10 h-10 bg-[#1FA97A]/10 rounded-lg flex items-center justify-center text-[#1FA97A] shrink-0">
-                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <div className="inc-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {coreModules.map((mod) => (
+            <div key={mod.num} className="inc-module bg-white/[0.04] border border-white/[0.08] rounded-xl p-6 hover:border-[#1FA97A]/30 transition-colors">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-9 h-9 bg-[#1FA97A]/10 rounded-lg flex items-center justify-center text-[#1FA97A] shrink-0">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d={mod.icon} />
                   </svg>
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.1em] text-[#1FA97A]/70 font-medium">{mod.num}</p>
-                  <p className="text-[17px] font-bold text-white leading-tight">{mod.name}</p>
+                  <p className="text-[10px] uppercase tracking-[0.1em] text-[#1FA97A]/60 font-medium">{mod.num}</p>
+                  <p className="text-[16px] font-bold text-white leading-tight">{mod.name}</p>
                 </div>
               </div>
-              <p className="text-[13px] text-[#8FA6B2] leading-relaxed mb-5">{mod.desc}</p>
-              <ul className="space-y-2">
+              <p className="text-[12.5px] text-[#8FA6B2] leading-relaxed mb-4">{mod.desc}</p>
+              <ul className="space-y-1.5">
                 {mod.features.map((f) => (
                   <li key={f} className="flex items-start gap-2">
                     <Tick />
@@ -532,6 +574,10 @@ function IncluyeSection() {
             </div>
           ))}
         </div>
+
+        <p className="text-center text-[13px] text-[#8FA6B2]/50 mt-10">
+          Ajustes, API Keys, backups y más — todo incluido en el panel de administración.
+        </p>
       </div>
     </section>
   )

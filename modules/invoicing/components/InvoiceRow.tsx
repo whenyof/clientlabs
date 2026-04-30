@@ -14,7 +14,9 @@ import {
   Trash2,
 } from "lucide-react"
 import type { InvoiceListItem } from "./types"
-import { INVOICE_STATUS, isInvoiceEditable, invoiceStatusLabel } from "@domains/invoicing"
+import { INVOICE_STATUS } from "@/modules/invoicing/types"
+import { isInvoiceEditable } from "@/modules/invoicing/utils/isInvoiceEditable"
+import { invoiceStatusLabel } from "@/modules/invoicing/utils/invoiceStatusLabel"
 
 const STATUS_STYLES: Record<string, string> = {
   DRAFT: "bg-slate-100 text-slate-600",

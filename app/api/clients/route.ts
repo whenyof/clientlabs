@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { gateLimit } from "@/lib/api-gate"
+import { notifyClientCreated } from "@/lib/notification-service"
 
 const createClientSchema = z.object({
   name: z.string().min(1, "Nombre requerido").max(200).trim(),
@@ -83,6 +84,7 @@ export async function POST(req: Request) {
       12000
     )
 
+    notifyClientCreated(session.user.id, client.name ?? "Cliente", client.id).catch(() => {})
     return NextResponse.json(client)
   } catch (err) {
     console.error("POST /api/clients error:", err)

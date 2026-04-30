@@ -6,6 +6,7 @@ import "server-only"
 import { prisma } from "@/lib/prisma"
 import { sendInvoiceReminder } from "@/lib/sendpulse"
 import { getTotalPaid } from "./invoice-status.service"
+import { notifyInvoiceDue, notifyInvoiceOverdue } from "@/lib/notification-service"
 import type { Decimal } from "@prisma/client/runtime/library"
 
 function toNum(d: Decimal | number | null | undefined): number {
@@ -121,6 +122,12 @@ export async function processInvoiceReminders(): Promise<{
           stage,
         },
       })
+      // In-app notification to the business owner
+      if (type === "BEFORE") {
+        notifyInvoiceDue(inv.userId, inv.number, inv.id).catch(() => {})
+      } else {
+        notifyInvoiceOverdue(inv.userId, inv.number, inv.Client?.name ?? "cliente", daysLate).catch(() => {})
+      }
       sent++
       console.log("Reminder sent", inv.id, stage)
     } catch (err) {

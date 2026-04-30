@@ -7,8 +7,10 @@ import { prisma } from "@/lib/prisma"
 
 /**
  * GET /api/finance/cobros
- * Returns received payments (InvoicePayment) for the authenticated user.
- * Query: period (month|quarter|year), method
+ * Returns:
+ *   - pendingInvoices: open invoices (SENT, VIEWED, PARTIAL, OVERDUE) with client + payment details
+ *   - cobros: received payments for the selected period
+ *   - kpis: totals for both views
  */
 export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions)
@@ -31,6 +33,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    // ── Received payments (historial) ──────────────────────────────────────
     const payments = await prisma.invoicePayment.findMany({
       where: {
         paidAt: { gte: fromDate },
@@ -47,7 +50,6 @@ export async function GET(request: NextRequest) {
           select: {
             id: true,
             number: true,
-            status: true,
             Client: { select: { id: true, name: true, email: true } },
           },
         },
@@ -55,32 +57,66 @@ export async function GET(request: NextRequest) {
       orderBy: { paidAt: "desc" },
     })
 
-    const totalCobrado = payments.reduce((sum, p) => sum + Number(p.amount), 0)
-
-    // Pending invoices (SENT or PARTIAL)
-    const pendingInvoices = await prisma.invoice.findMany({
-      where: {
-        userId: session.user.id,
-        status: { in: ["SENT", "PARTIAL"] },
-      },
-      select: { total: true },
-    })
-    const pendienteCobrar = pendingInvoices.reduce((sum, inv) => sum + Number(inv.total), 0)
-
-    // Total invoiced this period for percentage
-    const periodInvoices = await prisma.invoice.findMany({
+    // ── Pending / open invoices ────────────────────────────────────────────
+    const openInvoices = await prisma.invoice.findMany({
       where: {
         userId: session.user.id,
         type: "CUSTOMER",
-        issuedAt: { gte: fromDate },
+        status: { in: ["SENT", "VIEWED", "PARTIAL", "OVERDUE"] },
       },
+      select: {
+        id: true,
+        number: true,
+        issueDate: true,
+        dueDate: true,
+        total: true,
+        status: true,
+        Client: { select: { id: true, name: true, email: true } },
+        payments: { select: { amount: true } },
+      },
+      orderBy: { dueDate: "asc" },
+    })
+
+    // ── KPIs ──────────────────────────────────────────────────────────────
+    const totalCobrado = payments.reduce((s, p) => s + Number(p.amount), 0)
+
+    const pendingInvoices = openInvoices.map((inv) => {
+      const totalPaid = inv.payments.reduce((s, p) => s + Number(p.amount), 0)
+      const pendiente = Math.max(0, Number(inv.total) - totalPaid)
+      const daysFromNow = Math.round((inv.dueDate.getTime() - now.getTime()) / 86_400_000)
+      return {
+        id: inv.id,
+        number: inv.number,
+        issueDate: inv.issueDate,
+        dueDate: inv.dueDate,
+        total: Number(inv.total),
+        totalPaid,
+        pendiente,
+        status: inv.status,
+        daysFromNow, // negative = overdue
+        cliente: inv.Client?.name ?? inv.Client?.email ?? "—",
+        clienteId: inv.Client?.id ?? null,
+      }
+    })
+
+    // Sort: OVERDUE first (most days overdue first), then by dueDate asc
+    pendingInvoices.sort((a, b) => {
+      if (a.daysFromNow < 0 && b.daysFromNow >= 0) return -1
+      if (a.daysFromNow >= 0 && b.daysFromNow < 0) return 1
+      return a.daysFromNow - b.daysFromNow
+    })
+
+    const totalPendiente = pendingInvoices.reduce((s, inv) => s + inv.pendiente, 0)
+    const overdueInvoices = pendingInvoices.filter((inv) => inv.daysFromNow < 0)
+    const totalVencido = overdueInvoices.reduce((s, inv) => s + inv.pendiente, 0)
+
+    // Cobrado % vs total invoiced this period
+    const periodInvoices = await prisma.invoice.findMany({
+      where: { userId: session.user.id, type: "CUSTOMER", issueDate: { gte: fromDate } },
       select: { total: true },
     })
-    const totalFacturado = periodInvoices.reduce((sum, inv) => sum + Number(inv.total), 0)
-
-    const porcentajeCobrado = totalFacturado > 0
-      ? Math.round((totalCobrado / totalFacturado) * 100)
-      : 0
+    const totalFacturado = periodInvoices.reduce((s, inv) => s + Number(inv.total), 0)
+    const porcentajeCobrado = totalFacturado > 0 ? Math.round((totalCobrado / totalFacturado) * 100) : 0
 
     const cobros = payments.map((p) => ({
       id: p.id,
@@ -95,10 +131,13 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      pendingInvoices,
       cobros,
       kpis: {
         totalCobrado,
-        pendienteCobrar,
+        totalPendiente,
+        totalVencido,
+        countVencidas: overdueInvoices.length,
         porcentajeCobrado,
       },
     })

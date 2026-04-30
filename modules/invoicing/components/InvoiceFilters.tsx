@@ -2,7 +2,7 @@
 
 import { Search } from "lucide-react"
 import { FilterDropdown } from "@/components/ui/FilterDropdown"
-import { invoiceStatusLabel } from "@domains/invoicing"
+import { invoiceStatusLabel } from "@/modules/invoicing/utils/invoiceStatusLabel"
 import type { ClientOption } from "./types"
 
 const PERIOD_OPTIONS = [

@@ -15,6 +15,7 @@ import {
 import { recalculateClientStatus } from "@/modules/clients/actions"
 import { enqueueTaskSyncForAllProviders } from "@/lib/calendar-sync"
 import { syncTaskToGoogle } from "@/lib/google-calendar"
+import { notifyTaskCreated } from "@/lib/notification-service"
 
 /**
  * GET /api/tasks
@@ -178,6 +179,7 @@ export async function POST(request: NextRequest) {
 
  invalidateCache(`tasks-kpis-${userId}`)
  invalidateCache(`dashboard-summary-${userId}`)
+ notifyTaskCreated(userId, task.title, task.id).catch(() => {})
  return NextResponse.json(task, { status: 201 })
  } catch (error) {
  console.error("[POST /api/tasks]:", error)

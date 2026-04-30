@@ -4,7 +4,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { getVerifactuStatus } from "@/lib/verifactu"
+import { getVerifactuStatus, resolveVerifactuApiKey } from "@/lib/verifactu"
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions)
@@ -31,17 +31,14 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ status: "Aceptado" })
   }
 
-  const bizProfile = await prisma.businessProfile.findUnique({
-    where: { userId: session.user.id },
-    select: { verifactuApiKey: true },
-  })
+  const apiKey = await resolveVerifactuApiKey(session.user.id)
 
-  if (!bizProfile?.verifactuApiKey) {
+  if (!apiKey) {
     return NextResponse.json({ error: "Verifactu no configurado" }, { status: 503 })
   }
 
   try {
-    const status = await getVerifactuStatus(bizProfile.verifactuApiKey, invoice.verifactuUuid)
+    const status = await getVerifactuStatus(apiKey, invoice.verifactuUuid)
 
     if (status.estado !== invoice.verifactuStatus) {
       await prisma.invoice.update({

@@ -423,20 +423,57 @@ export async function issueInvoice(invoiceId: string, userId: string): Promise<I
       const clientTaxId = typeof clientSnap?.taxId === "string" ? clientSnap.taxId : undefined
       const clientName = typeof clientSnap?.name === "string" ? clientSnap.name : undefined
       const invoiceDocType = (inv as { invoiceDocType?: string | null }).invoiceDocType ?? "F1"
-      const data = {
+      const rectificationMethod = (inv as { rectificationMethod?: string | null }).rectificationMethod ?? "S"
+      const isRectificative = ["R1", "R2", "R3", "R4", "R5"].includes(invoiceDocType)
+
+      // Group lines by tax rate for accurate reporting
+      const taxGroups = new Map<number, { base: number; tax: number }>()
+      for (const line of inv.lines) {
+        const rate = line.taxPercent ?? 0
+        const existing = taxGroups.get(rate) ?? { base: 0, tax: 0 }
+        existing.base += line.subtotal
+        existing.tax += line.taxAmount
+        taxGroups.set(rate, existing)
+      }
+      const lineas = taxGroups.size > 0
+        ? Array.from(taxGroups.entries()).map(([rate, { base, tax }]) => ({
+            base_imponible: base.toFixed(2),
+            tipo_impositivo: rate.toFixed(2),
+            cuota_repercutida: tax.toFixed(2),
+          }))
+        : [{ base_imponible: inv.subtotal.toFixed(2), tipo_impositivo: "0.00", cuota_repercutida: "0.00" }]
+
+      // Build description from lines or notes
+      const firstLineDesc = inv.lines[0]?.description
+      const descripcion = firstLineDesc || inv.notes?.substring(0, 100) || `Factura ${inv.series}-${number}`
+
+      const data: import("@/lib/verifactu").VerifactuCreateData = {
         serie: inv.series || "CL",
         numero: number,
         fecha_expedicion: formatDateForVerifactu(issuedAt),
         tipo_factura: invoiceDocType as import("@/lib/verifactu").AllInvoiceTypes,
-        descripcion: "Factura ClientLabs",
+        descripcion,
         ...(clientTaxId && { nif: clientTaxId }),
         ...(clientName && { nombre: clientName }),
-        lineas: [{
-          base_imponible: inv.subtotal.toString(),
-          tipo_impositivo: "21.00",
-          cuota_repercutida: inv.taxAmount.toString(),
-        }],
-        importe_total: inv.total.toString(),
+        lineas,
+        importe_total: inv.total.toFixed(2),
+      }
+
+      // For rectifications, add mandatory fields
+      if (isRectificative) {
+        data.tipo_rectificativa = rectificationMethod as import("@/lib/verifactu").RectificationMethod
+        const rectifiesId = (inv as { rectifiesInvoiceId?: string | null }).rectifiesInvoiceId
+        if (rectifiesId) {
+          const originalInv = await prisma.invoice.findUnique({
+            where: { id: rectifiesId },
+            select: { series: true, number: true, issueDate: true },
+          })
+          if (originalInv) {
+            data.factura_rectificada_serie = originalInv.series || "CL"
+            data.factura_rectificada_numero = originalInv.number
+            data.factura_rectificada_fecha = formatDateForVerifactu(originalInv.issueDate)
+          }
+        }
       }
       try {
         const result = await sendToVerifactu(nifApiKey, data)
@@ -564,19 +601,24 @@ export type CreateRectificationResult =
 export async function createRectification(
   originalInvoiceId: string,
   userId: string,
-  params: { reason: string; type: "TOTAL" | "PARTIAL" }
+  params: { reason: string; type: "TOTAL" | "PARTIAL"; invoiceDocType?: string; rectificationMethod?: string }
 ): Promise<CreateRectificationResult> {
   const original = await repo.findById(originalInvoiceId, userId)
   if (!original) return { success: false, error: "Factura no encontrada" }
   if (original.status === INVOICE_STATUS.DRAFT) {
     return { success: false, error: "Solo se puede crear rectificativa de facturas emitidas." }
   }
-  const orig = original as { rectifiesInvoiceId?: string | null }
+  const orig = original as { rectifiesInvoiceId?: string | null; invoiceDocType?: string | null }
   if (orig.rectifiesInvoiceId != null) {
     return { success: false, error: "No se puede crear rectificativa de una factura rectificativa." }
   }
   const reason = params.reason?.trim()
   if (!reason) return { success: false, error: "El motivo es obligatorio." }
+
+  // Determine correct Verifactu type: if original was F2 → always R5, else use provided or default R1
+  const originalDocType = orig.invoiceDocType ?? "F1"
+  const rectDocType = originalDocType === "F2" ? "R5" : (params.invoiceDocType ?? "R1")
+  const rectMethod = params.rectificationMethod ?? "S"
 
   const now = new Date()
   const due = new Date(now)
@@ -623,6 +665,8 @@ export async function createRectification(
       isRectification: true,
       rectifiesInvoiceId: originalInvoiceId,
       rectificationReason: reason,
+      invoiceDocType: rectDocType,
+      rectificationMethod: rectMethod,
       lines,
     })
     await repo.addEvent(created.id, "RECTIFIES", {
@@ -669,6 +713,8 @@ export async function createRectification(
     isRectification: true,
     rectifiesInvoiceId: originalInvoiceId,
     rectificationReason: reason,
+    invoiceDocType: rectDocType,
+    rectificationMethod: rectMethod,
     lines,
   })
   await repo.addEvent(created.id, "RECTIFIES", {

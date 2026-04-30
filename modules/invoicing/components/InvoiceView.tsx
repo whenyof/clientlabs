@@ -131,7 +131,15 @@ export function InvoiceView() {
   const [editBlockedModalOpen, setEditBlockedModalOpen] = useState(false)
   const [forceOpenRectificativaModal, setForceOpenRectificativaModal] = useState(false)
   const [modalImportar, setModalImportar] = useState(false)
+  const [verifactuTestMode, setVerifactuTestMode] = useState<boolean | null>(null)
   const skipInitialFetch = useRef(false)
+
+  useEffect(() => {
+    fetch("/api/settings/verifactu/status", { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => { if (d.enabled) setVerifactuTestMode(d.testMode ?? false) })
+      .catch(() => {})
+  }, [])
 
   const fetchList = useCallback(async () => {
     setLoading(true)
@@ -418,6 +426,12 @@ export function InvoiceView() {
   return (
     <div className="w-full space-y-5">
       <BannerLegal />
+
+      {verifactuTestMode === true && (
+        <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+          <strong>Modo pruebas</strong> — Las facturas se envían al entorno de test de la AEAT. No tienen validez fiscal real.
+        </div>
+      )}
 
       {/* Header bar */}
       <div className="flex items-center justify-between flex-wrap gap-3">

@@ -661,6 +661,7 @@ export function InvoiceDrawer({
         onClose={() => { setRectificativaModalOpen(false); onRectificativaModalOpenChange?.(false) }}
         invoiceId={invoice.id}
         invoiceNumber={invoice.number === DRAFT_NUMBER_PLACEHOLDER ? "—" : invoice.number}
+        originalDocType={invoice.invoiceDocType}
         onSuccess={(newId) => { onRefresh(); onRectificationCreated?.(newId) }}
       />
 

@@ -27,6 +27,8 @@ export async function POST(
   const b = body as Record<string, unknown>
   const reason = typeof b.reason === "string" ? b.reason.trim() : ""
   const type = b.type === "TOTAL" || b.type === "PARTIAL" ? b.type : undefined
+  const invoiceDocType = typeof b.invoiceDocType === "string" ? b.invoiceDocType : undefined
+  const rectificationMethod = b.rectificationMethod === "S" || b.rectificationMethod === "I" ? b.rectificationMethod : "S"
   if (!reason) {
     return NextResponse.json({ error: "El motivo es obligatorio." }, { status: 400 })
   }
@@ -37,6 +39,8 @@ export async function POST(
     const result = await invoiceService.createRectification(originalId, session.user.id, {
       reason,
       type,
+      invoiceDocType,
+      rectificationMethod,
     })
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 })

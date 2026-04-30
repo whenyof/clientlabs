@@ -4,7 +4,6 @@ import { authOptions } from "@/lib/auth"
 import { loadFinancePageData } from "@/app/dashboard/finance/lib/server-data"
 import { FinanceView } from "@/app/dashboard/finance/FinanceView"
 import { BillingView } from "@domains/billing"
-import PurchasesPage from "./purchases/page"
 
 type PageProps = {
   searchParams: Promise<{ period?: string; view?: string }>
@@ -25,7 +24,7 @@ export default async function FinancePage({ searchParams }: PageProps) {
       period={period}
       view={view}
       billingNode={<BillingView />}
-      purchasesNode={<PurchasesPage />}
+      purchasesNode={null}
     />
   )
 }

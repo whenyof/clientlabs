@@ -19,7 +19,7 @@ type Props = {
   period: string
   view?: string
   billingNode: React.ReactNode
-  purchasesNode: React.ReactNode
+  purchasesNode?: React.ReactNode
 }
 
 function FinancialSummaryTab({ initialData }: { initialData: FinancePageData }) {

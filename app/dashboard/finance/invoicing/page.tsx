@@ -1,6 +1,7 @@
-import { redirect } from "next/navigation"
+"use client"
 
-// /dashboard/finance/invoicing → /dashboard/finance/facturas
-export default function InvoicingRootPage() {
-  redirect("/dashboard/finance/facturas")
+import { InvoiceView } from "@domains/invoicing"
+
+export default function InvoicingPage() {
+  return <InvoiceView />
 }

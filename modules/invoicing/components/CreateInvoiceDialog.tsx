@@ -72,6 +72,8 @@ interface CreateInvoiceDialogProps {
     clientSnapshot?: ClientSnapshot | null
   } | null
   onClientUpdated?: () => void
+  /** Pre-selects F1 or F2 when opening a new invoice (ignored when editing) */
+  initialDocType?: "F1" | "F2"
 }
 
 export function CreateInvoiceDialog({
@@ -83,6 +85,7 @@ export function CreateInvoiceDialog({
   editInvoiceStatus,
   editInvoice,
   onClientUpdated,
+  initialDocType,
 }: CreateInvoiceDialogProps) {
   const editableInEditMode = !editInvoiceId || isInvoiceEditable({ status: editInvoiceStatus ?? undefined })
   const [clientId, setClientId] = useState("")
@@ -183,7 +186,7 @@ export function CreateInvoiceDialog({
     setPaymentReference("")
     setInvoiceLanguage(null)
     setCurrency("EUR")
-    setInvoiceDocType("F1")
+    setInvoiceDocType(initialDocType ?? "F1")
     setLines([{ id: nextLineId(), description: "", quantity: 1, unitPrice: 0, taxPercent: 0, lastEditedField: "unit" }])
     setBillingData(emptyBilling())
     setBillingLockedFromClient(false)
@@ -302,6 +305,7 @@ export function CreateInvoiceDialog({
       hasAppliedDefaultTexts.current = false
     } else if (open && !editInvoiceId) {
       reset()
+      if (initialDocType) setInvoiceDocType(initialDocType)
       if (!hasAppliedDefaultTexts.current) {
         hasAppliedDefaultTexts.current = true
         const issueDateStr = new Date().toISOString().slice(0, 10)
@@ -333,7 +337,7 @@ export function CreateInvoiceDialog({
     } else if (!open) {
       hasAppliedDefaultTexts.current = false
     }
-  }, [open, editInvoiceId, editInvoice, reset])
+  }, [open, editInvoiceId, editInvoice, reset, initialDocType])
 
   const subtotal = Math.round(
     lines.reduce((sum, l) => {

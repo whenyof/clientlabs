@@ -2,9 +2,8 @@
 import { getBaseUrl } from "@/lib/api/baseUrl"
 
 
-import { useState, useCallback, useEffect, useRef } from "react"
-import { Upload, X } from "lucide-react"
-import { Download } from "lucide-react"
+import { useState, useCallback, useEffect, useRef, useMemo } from "react"
+import { Plus, ChevronDown, X } from "lucide-react"
 import { BannerLegal } from "@/components/finance/BannerLegal"
 import { ImportarDocumento } from "@/components/finance/ImportarDocumento"
 import { InvoiceKPIs } from "./InvoiceKPIs"
@@ -14,6 +13,8 @@ import { InvoiceDrawer } from "./InvoiceDrawer"
 import { CreateInvoiceDialog } from "./CreateInvoiceDialog"
 import { CreateInvoiceSelectorDialog } from "./CreateInvoiceSelectorDialog"
 import { SelectSaleForInvoiceDialog } from "./SelectSaleForInvoiceDialog"
+import { SelectInvoiceForRectificationDialog } from "./SelectInvoiceForRectificationDialog"
+import { CreateRectificativaModal } from "./CreateRectificativaModal"
 import { IssuedInvoiceEditBlockedModal } from "./IssuedInvoiceEditBlockedModal"
 import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog"
 import { InvoicePreviewModal } from "@/components/billing/InvoicePreview"
@@ -21,6 +22,19 @@ import type { InvoiceListItem, InvoiceDetail, InvoiceKPIsResponse, ClientOption 
 import type { InvoiceLineInput } from "@domains/invoicing"
 import { INVOICE_STATUS, isInvoiceEditable } from "@domains/invoicing"
 import { formatCurrency } from "@/app/dashboard/finance/lib/formatters"
+import { cn } from "@/lib/utils"
+
+type QuickTab = "all" | "issued" | "draft" | "rectificativa" | "canceled"
+
+const QUICK_TABS: { id: QuickTab; label: string }[] = [
+  { id: "all", label: "Todas" },
+  { id: "issued", label: "Emitidas" },
+  { id: "draft", label: "Borradores" },
+  { id: "rectificativa", label: "Rectificativas" },
+  { id: "canceled", label: "Anuladas" },
+]
+
+const ISSUED_STATUSES = new Set(["SENT", "VIEWED", "PARTIAL", "PAID", "OVERDUE"])
 
 const defaultFilters: InvoiceFiltersState = {
   search: "",
@@ -132,14 +146,45 @@ export function InvoiceView() {
   const [forceOpenRectificativaModal, setForceOpenRectificativaModal] = useState(false)
   const [modalImportar, setModalImportar] = useState(false)
   const [verifactuTestMode, setVerifactuTestMode] = useState<boolean | null>(null)
+  const [verifactuEnabled, setVerifactuEnabled] = useState<boolean | null>(null)
   const skipInitialFetch = useRef(false)
+
+  // Quick-tab filter state
+  const [quickTab, setQuickTab] = useState<QuickTab>("all")
+  // "+ Nueva factura" dropdown
+  const [newDropdownOpen, setNewDropdownOpen] = useState(false)
+  const newDropdownRef = useRef<HTMLDivElement>(null)
+  // initialDocType for CreateInvoiceDialog
+  const [createDocType, setCreateDocType] = useState<"F1" | "F2" | undefined>(undefined)
+  // Select-invoice-for-rectification dialog (from top dropdown)
+  const [selectForRectOpen, setSelectForRectOpen] = useState(false)
+  // Standalone rectificativa modal (from top dropdown, after invoice selected)
+  const [standaloneRectInvoiceId, setStandaloneRectInvoiceId] = useState<string | null>(null)
+  const [standaloneRectInvoiceNumber, setStandaloneRectInvoiceNumber] = useState<string>("")
+  const [standaloneRectDocType, setStandaloneRectDocType] = useState<string | null>(null)
+  const [standaloneRectOpen, setStandaloneRectOpen] = useState(false)
 
   useEffect(() => {
     fetch("/api/settings/verifactu/status", { credentials: "include" })
       .then((r) => r.json())
-      .then((d) => { if (d.enabled) setVerifactuTestMode(d.testMode ?? false) })
+      .then((d) => {
+        setVerifactuEnabled(d.enabled ?? false)
+        if (d.enabled) setVerifactuTestMode(d.testMode ?? false)
+      })
       .catch(() => {})
   }, [])
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!newDropdownOpen) return
+    function handleClick(e: MouseEvent) {
+      if (newDropdownRef.current && !newDropdownRef.current.contains(e.target as Node)) {
+        setNewDropdownOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClick)
+    return () => document.removeEventListener("mousedown", handleClick)
+  }, [newDropdownOpen])
 
   const fetchList = useCallback(async () => {
     setLoading(true)
@@ -423,10 +468,43 @@ export function InvoiceView() {
   const selectedInvoice = detail ?? (selectedId ? invoices.find((i) => i.id === selectedId) ?? null : null)
   const editable = isInvoiceEditable(selectedInvoice)
 
+  const filteredInvoices = useMemo(() => {
+    switch (quickTab) {
+      case "issued":
+        return invoices.filter((i) => ISSUED_STATUSES.has(i.status) && !i.isRectification && i.type === "CUSTOMER")
+      case "draft":
+        return invoices.filter((i) => i.status === INVOICE_STATUS.DRAFT)
+      case "rectificativa":
+        return invoices.filter((i) => i.isRectification)
+      case "canceled":
+        return invoices.filter((i) => i.status === INVOICE_STATUS.CANCELED)
+      default:
+        return invoices
+    }
+  }, [invoices, quickTab])
+
+  const tabCounts = useMemo(() => ({
+    all: invoices.length,
+    issued: invoices.filter((i) => ISSUED_STATUSES.has(i.status) && !i.isRectification && i.type === "CUSTOMER").length,
+    draft: invoices.filter((i) => i.status === INVOICE_STATUS.DRAFT).length,
+    rectificativa: invoices.filter((i) => i.isRectification).length,
+    canceled: invoices.filter((i) => i.status === INVOICE_STATUS.CANCELED).length,
+  }), [invoices])
+
+  const hasIssuedInvoices = tabCounts.issued > 0
+
   return (
     <div className="w-full space-y-5">
       <BannerLegal />
 
+      {/* Verifactu banners */}
+      {verifactuEnabled === false && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <strong>Facturación orientativa</strong> — Activa Verifactu en{" "}
+          <a href="/dashboard/settings" className="underline font-medium">Ajustes</a>{" "}
+          para emitir facturas con validez legal ante la AEAT.
+        </div>
+      )}
       {verifactuTestMode === true && (
         <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
           <strong>Modo pruebas</strong> — Las facturas se envían al entorno de test de la AEAT. No tienen validez fiscal real.
@@ -435,33 +513,129 @@ export function InvoiceView() {
 
       {/* Header bar */}
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-3">
-          <h2 className="text-[15px] font-semibold text-slate-900">Facturas</h2>
-          {!loading && (
-            <span className="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
-              {invoices.length} {invoices.length === 1 ? "factura" : "facturas"}
-            </span>
+        <div>
+          <h1 className="text-[17px] font-semibold text-slate-900">Facturación</h1>
+          {!loading && invoices.length > 0 && (
+            <p className="text-[12px] text-slate-400 mt-0.5">
+              {invoices.length} {invoices.length === 1 ? "factura" : "facturas"} en total
+            </p>
           )}
         </div>
-        <button
-          type="button"
-          onClick={() => setModalImportar(true)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#1FA97A] text-white rounded-xl text-[13px] font-semibold hover:bg-[#1a9068] transition-colors shrink-0"
-        >
-          <Upload className="h-4 w-4" /> Importar documento
-        </button>
+
+        {/* "+ Nueva factura" dropdown */}
+        <div className="relative" ref={newDropdownRef}>
+          <button
+            type="button"
+            onClick={() => setNewDropdownOpen((v) => !v)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#1FA97A] text-white rounded-lg text-[13px] font-semibold hover:bg-[#178a64] transition-colors shrink-0"
+          >
+            <Plus className="h-4 w-4" />
+            Nueva factura
+            <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-150", newDropdownOpen && "rotate-180")} />
+          </button>
+
+          {newDropdownOpen && (
+            <div className="absolute right-0 z-30 mt-1.5 w-64 rounded-xl border border-slate-200 bg-white shadow-lg overflow-hidden">
+              <div className="p-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCreateDocType("F1")
+                    setEditInvoiceId(null)
+                    setEditInvoice(null)
+                    setCreateOpen(true)
+                    setNewDropdownOpen(false)
+                  }}
+                  className="w-full text-left flex items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-50 transition-colors"
+                >
+                  <div className="mt-0.5 shrink-0 w-5 h-5 rounded-md bg-blue-100 flex items-center justify-center text-[9px] font-bold text-blue-700">F1</div>
+                  <div>
+                    <p className="text-[13px] font-medium text-slate-800">Factura completa</p>
+                    <p className="text-[11px] text-slate-400">Con datos del destinatario</p>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCreateDocType("F2")
+                    setEditInvoiceId(null)
+                    setEditInvoice(null)
+                    setCreateOpen(true)
+                    setNewDropdownOpen(false)
+                  }}
+                  className="w-full text-left flex items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-50 transition-colors"
+                >
+                  <div className="mt-0.5 shrink-0 w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center text-[9px] font-bold text-slate-500">F2</div>
+                  <div>
+                    <p className="text-[13px] font-medium text-slate-800">Factura simplificada</p>
+                    <p className="text-[11px] text-slate-400">Sin NIF, tipo ticket · max. 3.000€</p>
+                  </div>
+                </button>
+                {hasIssuedInvoices && (
+                  <>
+                    <div className="my-1 h-px bg-slate-100" />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectForRectOpen(true)
+                        setNewDropdownOpen(false)
+                      }}
+                      className="w-full text-left flex items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-amber-50 transition-colors"
+                    >
+                      <div className="mt-0.5 shrink-0 w-5 h-5 rounded-md bg-amber-100 flex items-center justify-center text-[9px] font-bold text-amber-700">R</div>
+                      <div>
+                        <p className="text-[13px] font-medium text-slate-800">Rectificativa</p>
+                        <p className="text-[11px] text-slate-400">Corregir una factura emitida</p>
+                      </div>
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Quick-tab filter */}
+      <div className="flex items-center gap-0.5 border-b border-slate-200 -mb-2">
+        {QUICK_TABS.map((tab) => {
+          const count = tabCounts[tab.id]
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setQuickTab(tab.id)}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-2 text-[12px] font-medium border-b-2 transition-colors -mb-px",
+                quickTab === tab.id
+                  ? "border-[#1FA97A] text-[#1FA97A]"
+                  : "border-transparent text-slate-500 hover:text-slate-700"
+              )}
+            >
+              {tab.label}
+              {count > 0 && (
+                <span className={cn(
+                  "text-[10px] font-semibold px-1.5 py-0.5 rounded-full",
+                  quickTab === tab.id ? "bg-[#1FA97A]/15 text-[#1FA97A]" : "bg-slate-100 text-slate-500"
+                )}>
+                  {count}
+                </span>
+              )}
+            </button>
+          )
+        })}
       </div>
 
       <InvoiceFilters filters={filters} onFiltersChange={setFilters} clients={clients} />
 
       {(() => {
-        const kpis = computeKPIsFromInvoices(invoices)
+        const kpis = computeKPIsFromInvoices(filteredInvoices)
         return <InvoiceKPIs kpis={kpis} loading={loading} />
       })()}
 
       {/* Totals summary bar */}
-      {!loading && invoices.length > 0 && (() => {
-        const totals = computeHeaderTotals(invoices)
+      {!loading && filteredInvoices.length > 0 && (() => {
+        const totals = computeHeaderTotals(filteredInvoices)
         return (
           <div className="flex flex-wrap items-center gap-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm">
             <span className="text-slate-500">
@@ -478,7 +652,7 @@ export function InvoiceView() {
       })()}
 
       <InvoiceTable
-        invoices={invoices}
+        invoices={filteredInvoices}
         selectedId={selectedId}
         onSelectInvoice={handleSelectInvoice}
         onPreviewInvoice={handlePreviewInvoice}
@@ -542,6 +716,35 @@ export function InvoiceView() {
         editInvoiceStatus={editInvoiceStatus}
         editInvoice={editInvoice}
         onClientUpdated={refresh}
+        initialDocType={createDocType}
+      />
+
+      <SelectInvoiceForRectificationDialog
+        open={selectForRectOpen}
+        invoices={invoices}
+        onClose={() => setSelectForRectOpen(false)}
+        onSelect={(invoiceId, invoiceNumber, invoiceDocType) => {
+          setStandaloneRectInvoiceId(invoiceId)
+          setStandaloneRectInvoiceNumber(invoiceNumber)
+          setStandaloneRectDocType(invoiceDocType)
+          setStandaloneRectOpen(true)
+        }}
+      />
+
+      <CreateRectificativaModal
+        open={standaloneRectOpen}
+        onClose={() => {
+          setStandaloneRectOpen(false)
+          setStandaloneRectInvoiceId(null)
+        }}
+        invoiceId={standaloneRectInvoiceId ?? ""}
+        invoiceNumber={standaloneRectInvoiceNumber}
+        originalDocType={standaloneRectDocType}
+        onSuccess={(newId) => {
+          fetchList()
+          setSelectedId(newId)
+          fetchDetail(newId)
+        }}
       />
 
       <InvoicePreviewModal

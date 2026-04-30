@@ -33,6 +33,39 @@ function VerifactuBadge({ status }: { status: string | null | undefined }) {
   )
 }
 
+function DocTypeBadge({ docType, isRectification }: { docType?: string | null; isRectification?: boolean }) {
+  if (isRectification || (docType && docType.startsWith("R"))) {
+    const label = docType === "R5" ? "Rect. simplificada" : "Rectificativa"
+    const code = docType && docType.startsWith("R") ? docType : "R"
+    return (
+      <span
+        title={`Factura rectificativa (${code})`}
+        className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700"
+      >
+        {label}
+      </span>
+    )
+  }
+  if (docType === "F2") {
+    return (
+      <span
+        title="Factura simplificada sin NIF (tipo ticket)"
+        className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-medium text-slate-500"
+      >
+        Simplificada
+      </span>
+    )
+  }
+  return (
+    <span
+      title="Factura completa con datos del destinatario"
+      className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-700"
+    >
+      Completa
+    </span>
+  )
+}
+
 const STATUS_STYLES: Record<string, string> = {
   DRAFT: "bg-slate-100 text-slate-600",
   SENT: "bg-blue-50 text-blue-700 border border-blue-200",
@@ -121,17 +154,19 @@ function InvoiceRowComponent({ invoice, isSelected, actions }: InvoiceRowProps) 
     >
       <td className="py-3.5 px-4">
         <div className="flex flex-wrap items-center gap-1.5">
-          <span
-            className={cn(
-              "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium",
-              typeStyle
-            )}
-          >
-            {typeLabel}
-          </span>
-          {invoice.isRectification && (
-            <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700">
-              RECT.
+          {invoice.type === "CUSTOMER" ? (
+            <DocTypeBadge
+              docType={(invoice as { invoiceDocType?: string | null }).invoiceDocType}
+              isRectification={invoice.isRectification}
+            />
+          ) : (
+            <span
+              className={cn(
+                "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium",
+                typeStyle
+              )}
+            >
+              {typeLabel}
             </span>
           )}
         </div>

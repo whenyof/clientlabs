@@ -288,13 +288,8 @@ export default function Sidebar({
           icon: DollarSign,
           children: [
             { label: "Resumen", href: "/dashboard/finance", icon: BarChart3 },
+            { label: "Facturación", href: "/dashboard/finance/invoicing", icon: FileText },
             { label: "Gastos", href: "/dashboard/finance/gastos", icon: Receipt },
-            { label: "Cobros", href: "/dashboard/finance/cobros", icon: Wallet },
-            { label: "Pagos", href: "/dashboard/finance/pagos", icon: Banknote },
-            { label: "Banco", href: "/dashboard/finance/banco", icon: Landmark },
-            { label: "Compras", href: "/dashboard/finance/purchases", icon: ShoppingCart },
-            { label: "Rectificativas", href: "/dashboard/finance/rectificativas", icon: FileText },
-            { label: "Configuración", href: "/dashboard/finance/configuracion", icon: Wrench },
           ],
         },
       ],
@@ -388,7 +383,6 @@ export default function Sidebar({
                   )}
                   {[
                     { icon: Sparkles, label: labels.aiAssistant.title },
-                    { icon: Receipt, label: "Verifactu" },
                   ].map(({ icon: Icon, label }) => (
                     <div
                       key={label}

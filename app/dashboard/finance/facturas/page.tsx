@@ -1,7 +1,5 @@
-"use client"
-
-import { BillingView } from "@domains/billing"
+import { redirect } from "next/navigation"
 
 export default function FacturasPage() {
-  return <BillingView />
+  redirect("/dashboard/finance/invoicing")
 }

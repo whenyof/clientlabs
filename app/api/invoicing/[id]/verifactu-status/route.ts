@@ -31,8 +31,17 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ status: "Aceptado" })
   }
 
+  const bizProfile = await prisma.businessProfile.findUnique({
+    where: { userId: session.user.id },
+    select: { verifactuApiKey: true },
+  })
+
+  if (!bizProfile?.verifactuApiKey) {
+    return NextResponse.json({ error: "Verifactu no configurado" }, { status: 503 })
+  }
+
   try {
-    const status = await getVerifactuStatus(invoice.verifactuUuid)
+    const status = await getVerifactuStatus(bizProfile.verifactuApiKey, invoice.verifactuUuid)
 
     if (status.estado !== invoice.verifactuStatus) {
       await prisma.invoice.update({

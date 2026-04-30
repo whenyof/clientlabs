@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { createVerifactuInvoice, formatDateForVerifactu, isVerifactuEnabled } from "@/lib/verifactu"
+import { createVerifactuInvoice, formatDateForVerifactu } from "@/lib/verifactu"
 
 async function nextInvoiceNumber(userId: string): Promise<string> {
   const year = new Date().getFullYear()
@@ -63,8 +63,13 @@ export async function POST(_: NextRequest, { params }: { params: Promise<{ id: s
       data: { convertedToInvoiceId: invoice.id, status: "COMPLETED" },
     })
 
-    if (isVerifactuEnabled() && invoice.type === "CUSTOMER") {
-      createVerifactuInvoice({
+    const bizProfile = await prisma.businessProfile.findUnique({
+      where: { userId: session.user.id },
+      select: { verifactuEnabled: true, verifactuApiKey: true },
+    })
+
+    if (bizProfile?.verifactuEnabled && bizProfile.verifactuApiKey && invoice.type === "CUSTOMER") {
+      createVerifactuInvoice(bizProfile.verifactuApiKey, {
         serie: "F",
         numero: number,
         fecha_expedicion: formatDateForVerifactu(now),

@@ -196,6 +196,10 @@ model BusinessProfile {
   website              String?
   ivaRegime            String   @default("GENERAL")
   epigrafIAE           String?
+  // Verifactu
+  verifactuApiKey      String?
+  verifactuEnabled     Boolean   @default(false)
+  verifactuActivatedAt DateTime?
   user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])

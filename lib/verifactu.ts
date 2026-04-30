@@ -1,7 +1,12 @@
 const VERIFACTI_API_URL = process.env.VERIFACTI_API_URL || "https://api.verifacti.com"
-const VERIFACTI_API_KEY = process.env.VERIFACTI_API_KEY
+const VERIFACTI_ACCOUNT_KEY = process.env.VERIFACTI_API_KEY // API Key de cuenta para gestionar NIFs
 
-interface VerifactuInvoiceData {
+interface CreateNifResponse {
+  api_key: string
+  [key: string]: unknown
+}
+
+export interface VerifactuInvoiceData {
   serie: string
   numero: string
   fecha_expedicion: string // DD-MM-YYYY
@@ -17,7 +22,7 @@ interface VerifactuInvoiceData {
   importe_total: string
 }
 
-interface VerifactuResponse {
+export interface VerifactuResponse {
   estado: "Pendiente" | "Aceptado" | "Rechazado"
   uuid: string
   url: string
@@ -26,55 +31,61 @@ interface VerifactuResponse {
   error?: string
 }
 
-interface VerifactuStatusResponse {
+export interface VerifactuStatusResponse {
   estado: "Pendiente" | "Aceptado" | "Rechazado" | "Error"
   mensaje_error?: string
   fecha_expedicion?: string
 }
 
-export async function createVerifactuInvoice(data: VerifactuInvoiceData): Promise<VerifactuResponse> {
-  if (!VERIFACTI_API_KEY) {
-    console.warn("[Verifactu] API key no configurada — modo simulación")
-    return {
-      estado: "Pendiente",
-      uuid: `sim-${Date.now()}`,
-      url: "",
-      qr: "",
-      huella: "",
-    }
+// ══════════════════════════════════════
+// GESTIÓN DE NIFs (usa API Key de CUENTA)
+// ══════════════════════════════════════
+
+export async function createVerifactuNif(nif: string, nombre: string): Promise<CreateNifResponse> {
+  if (!VERIFACTI_ACCOUNT_KEY) {
+    throw new Error("Verifacti no configurado en el servidor")
   }
 
+  const res = await fetch(`${VERIFACTI_API_URL}/nifs`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${VERIFACTI_ACCOUNT_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ nif, nombre }),
+  })
+
+  const json = await res.json()
+  if (json.error) throw new Error(json.error)
+  return json as CreateNifResponse
+}
+
+// ══════════════════════════════════════
+// FACTURACIÓN (usa API Key del NIF específico)
+// ══════════════════════════════════════
+
+export async function createVerifactuInvoice(nifApiKey: string, data: VerifactuInvoiceData): Promise<VerifactuResponse> {
   const res = await fetch(`${VERIFACTI_API_URL}/verifactu/create`, {
     method: "POST",
     headers: {
-      "Authorization": `Bearer ${VERIFACTI_API_KEY}`,
+      "Authorization": `Bearer ${nifApiKey}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
   })
 
   const json = await res.json()
-
-  if (json.error) {
-    console.error("[Verifactu] Error:", json.error)
-    throw new Error(json.error)
-  }
-
+  if (json.error) throw new Error(json.error)
   return json as VerifactuResponse
 }
 
-export async function getVerifactuStatus(uuid: string): Promise<VerifactuStatusResponse> {
-  if (!VERIFACTI_API_KEY) {
-    return { estado: "Pendiente" }
-  }
-
+export async function getVerifactuStatus(nifApiKey: string, uuid: string): Promise<VerifactuStatusResponse> {
   const res = await fetch(`${VERIFACTI_API_URL}/verifactu/status?uuid=${uuid}`, {
     headers: {
-      "Authorization": `Bearer ${VERIFACTI_API_KEY}`,
+      "Authorization": `Bearer ${nifApiKey}`,
       "Content-Type": "application/json",
     },
   })
-
   return await res.json()
 }
 
@@ -85,12 +96,11 @@ export function formatDateForVerifactu(date: Date): string {
   return `${d}-${m}-${y}`
 }
 
-export function isVerifactuTest(): boolean {
-  return VERIFACTI_API_KEY?.startsWith("vf_test_") ?? true
+export function isVerifactuConfigured(): boolean {
+  return !!VERIFACTI_ACCOUNT_KEY
 }
 
+// Kept for backwards compat with old single-key mode
 export function isVerifactuEnabled(): boolean {
-  return !!VERIFACTI_API_KEY
+  return !!VERIFACTI_ACCOUNT_KEY
 }
-
-

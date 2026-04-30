@@ -15,6 +15,7 @@ import { AppearanceSettings } from "./components/AppearanceSettings"
 import { DangerZone } from "./components/DangerZone"
 import { ProductCatalog } from "./components/ProductCatalog"
 import { ActivityLogSection } from "./components/ActivityLogSection"
+import { VerifactuSettings } from "./components/VerifactuSettings"
 
 export default function SettingsPage() {
   const searchParams = useSearchParams()
@@ -24,6 +25,7 @@ export default function SettingsPage() {
     { id: 'profile', component: ProfileForm },
     { id: 'security', component: SecuritySettings },
     { id: 'company', component: CompanySettings },
+    { id: 'verifactu', component: VerifactuSettings },
     { id: 'notifications', component: NotificationSettings },
     { id: 'team', component: TeamMembers },
     { id: 'activity', component: ActivityLogSection },

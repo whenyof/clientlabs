@@ -14,7 +14,7 @@ import * as repo from "../repositories/invoice.repository"
 import * as engine from "../engine/invoice.engine"
 import type { CreateInvoiceInput, AddPaymentInput, InvoiceWithRelations, InvoiceStatus } from "../types"
 import { INVOICE_STATUS } from "../types"
-import { createVerifactuInvoice, formatDateForVerifactu, isVerifactuEnabled } from "@/lib/verifactu"
+import { createVerifactuInvoice, formatDateForVerifactu } from "@/lib/verifactu"
 
 // --- Attach helpers: single source of truth for invoice ↔ sale / provider order / payment ---
 
@@ -189,8 +189,13 @@ export async function createInvoice(input: CreateInvoiceInput): Promise<{ id: st
   })
   await repo.addEvent(invoice.id, "CREATED", { at: new Date().toISOString() })
 
-  if (isVerifactuEnabled()) {
-    createVerifactuInvoice({
+  const bizProfile = await prisma.businessProfile.findUnique({
+    where: { userId: input.userId },
+    select: { verifactuEnabled: true, verifactuApiKey: true },
+  })
+
+  if (bizProfile?.verifactuEnabled && bizProfile.verifactuApiKey) {
+    createVerifactuInvoice(bizProfile.verifactuApiKey, {
       serie: input.series || "CL",
       numero: invoice.number,
       fecha_expedicion: formatDateForVerifactu(input.issueDate),

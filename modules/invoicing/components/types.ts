@@ -106,6 +106,8 @@ export type InvoiceListItem = {
   verifactuUuid?: string | null
   verifactuUrl?: string | null
   verifactuQr?: string | null
+  invoiceDocType?: string | null
+  rectificationMethod?: string | null
 }
 
 /**

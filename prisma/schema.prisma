@@ -1892,6 +1892,11 @@ model Invoice {
   verifactuHuella        String?   // Hash/huella del registro
   verifactuUrl           String?   // URL de verificación AEAT
   verifactuSentAt        DateTime?
+  verifactuCancelledAt   DateTime?
+
+  // Tipo de documento Verifactu
+  invoiceDocType         String?               // F1, F2, F3, R1-R5 (null = legacy)
+  rectificationMethod    String?               // S (sustitución) o I (diferencias)
 
   Client                 Client?              @relation(fields: [clientId], references: [id], onDelete: Restrict)
   LinkedInvoicePayment   InvoicePayment?      @relation("LinkedFromPayment", fields: [linkedInvoicePaymentId], references: [id])

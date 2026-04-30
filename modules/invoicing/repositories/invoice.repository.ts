@@ -179,6 +179,8 @@ type CreatePayload = {
   isRectification?: boolean
   rectifiesInvoiceId?: string | null
   rectificationReason?: string | null
+  /** Verifactu document type */
+  invoiceDocType?: string | null
   lines: Array<{
     description: string
     quantity: number

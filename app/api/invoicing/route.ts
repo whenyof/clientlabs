@@ -153,14 +153,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(_request: NextRequest) {
-  return NextResponse.json(
-    { error: "Creación deshabilitada hasta implementación Verifactu", code: "VERIFACTU_PENDING" },
-    { status: 503 }
-  )
-}
-
-async function _POST_disabled(request: NextRequest) {
+export async function POST(request: NextRequest) {
   const gate = await gateLimit("maxInvoicesPerMonth", (userId) => {
     const start = new Date()
     start.setDate(1)
@@ -195,6 +188,7 @@ async function _POST_disabled(request: NextRequest) {
   const bic = typeof b.bic === "string" ? b.bic : null
   const paymentReference = typeof b.paymentReference === "string" ? b.paymentReference : null
   const priceMode = (b.priceMode === "total" ? "total" : "base") as "base" | "total"
+  const invoiceDocType = typeof b.invoiceDocType === "string" ? b.invoiceDocType : "F1"
   const rawLines = Array.isArray(b.lines) ? b.lines : []
   const lines = rawLines.map((l: Record<string, unknown>) => ({
     description: String(l.description ?? ""),
@@ -241,6 +235,7 @@ async function _POST_disabled(request: NextRequest) {
     paymentReference,
     clientSnapshot: clientSnapshot ?? undefined,
     lines,
+    invoiceDocType,
   }
   const irpfRate = typeof b.irpfRate === "number" ? b.irpfRate : 0
   const irpfAmount = typeof b.irpfAmount === "number" ? b.irpfAmount : 0

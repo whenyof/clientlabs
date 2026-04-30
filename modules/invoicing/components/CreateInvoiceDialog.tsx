@@ -116,6 +116,7 @@ export function CreateInvoiceDialog({
   const [invoiceLanguage, setInvoiceLanguage] = useState<string | null>(null)
   const [currency, setCurrency] = useState("EUR")
   const [lines, setLines] = useState<LineRow[]>([])
+  const [invoiceDocType, setInvoiceDocType] = useState<"F1" | "F2">("F1")
   const [irpfRate, setIrpfRate] = useState(0)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -182,6 +183,7 @@ export function CreateInvoiceDialog({
     setPaymentReference("")
     setInvoiceLanguage(null)
     setCurrency("EUR")
+    setInvoiceDocType("F1")
     setLines([{ id: nextLineId(), description: "", quantity: 1, unitPrice: 0, taxPercent: 0, lastEditedField: "unit" }])
     setBillingData(emptyBilling())
     setBillingLockedFromClient(false)
@@ -395,6 +397,10 @@ export function CreateInvoiceDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+    if (invoiceDocType === "F2" && total > 3000) {
+      setError("Las facturas simplificadas (F2) no pueden superar 3.000€")
+      return
+    }
     setSaving(true)
     const payload = {
       clientId,
@@ -422,6 +428,7 @@ export function CreateInvoiceDialog({
         country: billingData.country?.trim() || null,
         email: billingData.email?.trim() || null,
       },
+      invoiceDocType: invoiceDocType,
       irpfRate,
       irpfAmount,
       lines: lines.map(({ id: _id, lastEditedField: _le, ...l }) => ({
@@ -530,6 +537,29 @@ export function CreateInvoiceDialog({
                 />
               )
             })()}
+
+            {/* Tipo de factura */}
+            {!editInvoiceId && (
+              <div className="flex gap-2">
+                {(["F1", "F2"] as const).map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => setInvoiceDocType(type)}
+                    className={`flex-1 rounded-lg border px-3 py-2.5 text-left transition-colors ${
+                      invoiceDocType === type
+                        ? "border-[#1FA97A] bg-[#1FA97A]/10 text-[#1FA97A]"
+                        : "border-slate-200/20 text-white/60 hover:border-slate-300/30"
+                    }`}
+                  >
+                    <div className="text-xs font-bold">{type}</div>
+                    <div className="text-[11px] mt-0.5 opacity-80">
+                      {type === "F1" ? "Factura completa (con NIF)" : "Simplificada (sin NIF, máx. 3.000€)"}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-4">
               <div>

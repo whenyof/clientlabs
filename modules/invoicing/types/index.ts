@@ -70,6 +70,8 @@ export type CreateInvoiceInput = {
   paymentReference?: string | null
   /** Billing snapshot (stored on invoice; immutable). */
   clientSnapshot?: ClientSnapshotInput | null
+  /** Verifactu document type: F1 (full), F2 (simplified), F3 (substitution), R1-R5 (rectification). */
+  invoiceDocType?: string | null
 }
 
 export type AddPaymentInput = {

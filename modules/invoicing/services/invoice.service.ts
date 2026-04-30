@@ -14,7 +14,7 @@ import * as repo from "../repositories/invoice.repository"
 import * as engine from "../engine/invoice.engine"
 import type { CreateInvoiceInput, AddPaymentInput, InvoiceWithRelations, InvoiceStatus } from "../types"
 import { INVOICE_STATUS } from "../types"
-import { createVerifactuInvoice, formatDateForVerifactu } from "@/lib/verifactu"
+// Verifactu is imported dynamically inside issueInvoice to avoid top-level server-only constraints
 
 // --- Attach helpers: single source of truth for invoice ↔ sale / provider order / payment ---
 
@@ -185,44 +185,10 @@ export async function createInvoice(input: CreateInvoiceInput): Promise<{ id: st
     bic: input.bic ?? null,
     paymentReference: input.paymentReference ?? null,
     issuedClientSnapshot: input.clientSnapshot ?? undefined,
+    invoiceDocType: input.invoiceDocType ?? "F1",
     lines: computed,
   })
   await repo.addEvent(invoice.id, "CREATED", { at: new Date().toISOString() })
-
-  const bizProfile = await prisma.businessProfile.findUnique({
-    where: { userId: input.userId },
-    select: { verifactuEnabled: true, verifactuApiKey: true },
-  })
-
-  if (bizProfile?.verifactuEnabled && bizProfile.verifactuApiKey) {
-    createVerifactuInvoice(bizProfile.verifactuApiKey, {
-      serie: input.series || "CL",
-      numero: invoice.number,
-      fecha_expedicion: formatDateForVerifactu(input.issueDate),
-      tipo_factura: "F1",
-      descripcion: "Factura ClientLabs",
-      lineas: [{
-        base_imponible: subtotal.toFixed(2),
-        tipo_impositivo: "21.00",
-        cuota_repercutida: taxAmount.toFixed(2),
-      }],
-      importe_total: total.toFixed(2),
-    }).then(async (result) => {
-      await prisma.invoice.update({
-        where: { id: invoice.id },
-        data: {
-          verifactuUuid: result.uuid,
-          verifactuStatus: result.estado,
-          verifactuQr: result.qr || null,
-          verifactuHuella: result.huella || null,
-          verifactuUrl: result.url || null,
-          verifactuSentAt: new Date(),
-        },
-      })
-    }).catch((err) => {
-      console.error("[Verifactu] Error al enviar factura:", err instanceof Error ? err.message : err)
-    })
-  }
 
   return { id: invoice.id, number: invoice.number }
 }
@@ -442,6 +408,57 @@ export async function issueInvoice(invoiceId: string, userId: string): Promise<I
     issuedItemsSnapshot: issuedItemsSnapshot as Prisma.InputJsonValue,
     issuedTotalsSnapshot: issuedTotalsSnapshot as Prisma.InputJsonValue,
   })
+
+  // Envío a Verifactu (fire-and-forget — nunca bloquear la emisión)
+  if (inv.type === "CUSTOMER") {
+    const { resolveVerifactuApiKey, createVerifactuInvoice: sendToVerifactu, formatDateForVerifactu } = await import("@/lib/verifactu")
+    resolveVerifactuApiKey(userId).then(async (nifApiKey) => {
+      if (!nifApiKey) return
+      const bizProfile2 = await prisma.businessProfile.findUnique({
+        where: { userId },
+        select: { verifactuEnabled: true },
+      })
+      if (!bizProfile2?.verifactuEnabled) return
+      const clientSnap = (inv as { issuedClientSnapshot?: Record<string, unknown> | null }).issuedClientSnapshot
+      const clientTaxId = typeof clientSnap?.taxId === "string" ? clientSnap.taxId : undefined
+      const clientName = typeof clientSnap?.name === "string" ? clientSnap.name : undefined
+      const invoiceDocType = (inv as { invoiceDocType?: string | null }).invoiceDocType ?? "F1"
+      const data = {
+        serie: inv.series || "CL",
+        numero: number,
+        fecha_expedicion: formatDateForVerifactu(issuedAt),
+        tipo_factura: invoiceDocType as import("@/lib/verifactu").AllInvoiceTypes,
+        descripcion: "Factura ClientLabs",
+        ...(clientTaxId && { nif: clientTaxId }),
+        ...(clientName && { nombre: clientName }),
+        lineas: [{
+          base_imponible: inv.subtotal.toString(),
+          tipo_impositivo: "21.00",
+          cuota_repercutida: inv.taxAmount.toString(),
+        }],
+        importe_total: inv.total.toString(),
+      }
+      try {
+        const result = await sendToVerifactu(nifApiKey, data)
+        await prisma.invoice.update({
+          where: { id: invoiceId },
+          data: {
+            verifactuUuid: result.uuid,
+            verifactuStatus: result.estado,
+            verifactuQr: result.qr || null,
+            verifactuHuella: result.huella || null,
+            verifactuUrl: result.url || null,
+            verifactuSentAt: new Date(),
+          },
+        })
+      } catch (err) {
+        console.error("[Verifactu] Error al enviar factura:", err instanceof Error ? err.message : err)
+      }
+    }).catch((err) => {
+      console.error("[Verifactu] Error resolving API key:", err instanceof Error ? err.message : err)
+    })
+  }
+
   await repo.addEvent(invoiceId, "SENT", {
     at: issuedAt.toISOString(),
     number,

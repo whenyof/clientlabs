@@ -76,7 +76,16 @@ export function SaleDialog({ clientId, sale, isOpen, onClose, onSuccess }: SaleD
  status,
  notes: notes.trim() || undefined,
  })
- toast.success("Venta creada correctamente")
+ const saleAmount = parseFloat(total)
+ const saleConcept = product.trim()
+ toast.success("Venta registrada", {
+ action: {
+ label: "Crear factura",
+ onClick: () => {
+ window.location.href = `/dashboard/finance/invoicing?newInvoice=1&clientId=${encodeURIComponent(clientId)}&concept=${encodeURIComponent(saleConcept)}&amount=${saleAmount}`
+ },
+ },
+ })
  onSuccess(result)
  }
  onClose()

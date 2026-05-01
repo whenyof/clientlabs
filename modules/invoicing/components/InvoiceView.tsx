@@ -249,6 +249,35 @@ export function InvoiceView() {
     else setDetail(null)
   }, [selectedId, fetchDetail])
 
+  // Open create dialog with pre-filled client/line when navigating from a quick sale
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const params = new URLSearchParams(window.location.search)
+    if (params.get("newInvoice") !== "1") return
+    const preClientId = params.get("clientId") ?? ""
+    const preConcept = params.get("concept") ?? ""
+    const preAmount = parseFloat(params.get("amount") ?? "0") || 0
+    window.history.replaceState({}, "", window.location.pathname)
+    const today = new Date().toISOString()
+    const due = new Date()
+    due.setDate(due.getDate() + 30)
+    setEditInvoiceId(null)
+    setEditInvoice({
+      clientId: preClientId,
+      issueDate: today,
+      dueDate: due.toISOString(),
+      serviceDate: null,
+      notes: null,
+      terms: null,
+      currency: "EUR",
+      lines: preAmount > 0
+        ? [{ description: preConcept || "Servicio", quantity: 1, unitPrice: preAmount, taxPercent: 21 }]
+        : [],
+    })
+    setCreateDocType("F1")
+    setCreateOpen(true)
+  }, [])
+
   const refresh = useCallback(() => {
     fetchList()
     fetchClients()

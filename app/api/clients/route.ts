@@ -11,6 +11,14 @@ const createClientSchema = z.object({
   email: z.string().email("Email no válido").max(255).optional().or(z.literal("")),
   phone: z.string().max(50).trim().optional(),
   totalSpent: z.union([z.string().max(20), z.number()]).optional(),
+  taxId: z.string().max(20).trim().optional(),
+  legalName: z.string().max(300).trim().optional(),
+  companyName: z.string().max(300).trim().optional(),
+  address: z.string().max(500).trim().optional(),
+  city: z.string().max(100).trim().optional(),
+  postalCode: z.string().max(20).trim().optional(),
+  country: z.string().max(100).trim().optional(),
+  notes: z.string().max(2000).trim().optional(),
 })
 
 export const dynamic = "force-dynamic"
@@ -68,7 +76,8 @@ export async function POST(req: Request) {
         { status: 400 }
       )
     }
-    const { name, email, phone, totalSpent } = parsed.data
+    const { name, email, phone, totalSpent, taxId, legalName, companyName, address, city, postalCode, country, notes } = parsed.data
+    const isFiscalComplete = !!(taxId && (legalName || companyName))
 
     const client = await withTimeout(
       prisma.client.create({
@@ -79,6 +88,15 @@ export async function POST(req: Request) {
           phone: phone || null,
           status: "ACTIVE",
           totalSpent: totalSpent !== undefined ? parseFloat(String(totalSpent)) : 0,
+          taxId: taxId || null,
+          legalName: legalName || null,
+          companyName: companyName || null,
+          address: address || null,
+          city: city || null,
+          postalCode: postalCode || null,
+          country: country || null,
+          additionalInfo: notes || null,
+          isFiscalComplete,
         },
       }),
       12000

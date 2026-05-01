@@ -50,9 +50,16 @@ export function CreateClientButton() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: form.name,
-          email: form.email,
-          phone: form.phone,
+          email: form.email || undefined,
+          phone: form.phone || undefined,
           totalSpent: form.estimatedValue ? parseFloat(form.estimatedValue) : 0,
+          taxId: form.taxId || undefined,
+          companyName: form.companyName || undefined,
+          address: form.address || undefined,
+          city: form.city || undefined,
+          postalCode: form.postalCode || undefined,
+          country: form.country || undefined,
+          notes: form.notes || undefined,
         }),
       })
 

@@ -163,6 +163,7 @@ export function InvoiceView() {
   const [standaloneRectInvoiceId, setStandaloneRectInvoiceId] = useState<string | null>(null)
   const [standaloneRectInvoiceNumber, setStandaloneRectInvoiceNumber] = useState<string>("")
   const [standaloneRectDocType, setStandaloneRectDocType] = useState<string | null>(null)
+  const [standaloneRectOriginal, setStandaloneRectOriginal] = useState<InvoiceListItem | null>(null)
   const [standaloneRectOpen, setStandaloneRectOpen] = useState(false)
 
   useEffect(() => {
@@ -729,19 +730,22 @@ export function InvoiceView() {
           setStandaloneRectInvoiceId(invoiceId)
           setStandaloneRectInvoiceNumber(invoiceNumber)
           setStandaloneRectDocType(invoiceDocType)
+          setStandaloneRectOriginal(invoices.find((i) => i.id === invoiceId) ?? null)
           setStandaloneRectOpen(true)
         }}
       />
 
       <CreateRectificativaModal
         open={standaloneRectOpen}
-        onClose={() => {
-          setStandaloneRectOpen(false)
-          setStandaloneRectInvoiceId(null)
-        }}
+        onClose={() => { setStandaloneRectOpen(false); setStandaloneRectInvoiceId(null); setStandaloneRectOriginal(null) }}
         invoiceId={standaloneRectInvoiceId ?? ""}
         invoiceNumber={standaloneRectInvoiceNumber}
         originalDocType={standaloneRectDocType}
+        originalLines={standaloneRectOriginal?.lines}
+        originalTotal={standaloneRectOriginal?.total}
+        originalSubtotal={standaloneRectOriginal?.subtotal}
+        originalTaxAmount={standaloneRectOriginal?.taxAmount}
+        currency={standaloneRectOriginal?.currency}
         onSuccess={(newId) => {
           fetchList()
           setSelectedId(newId)

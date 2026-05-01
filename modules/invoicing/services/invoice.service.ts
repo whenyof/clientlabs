@@ -466,17 +466,30 @@ export async function issueInvoice(invoiceId: string, userId: string): Promise<I
 
           // For rectifications, add mandatory fields
           if (isRectificative) {
-            data.tipo_rectificativa = rectificationMethod as import("@/lib/verifactu").RectificationMethod
+            const method = rectificationMethod as import("@/lib/verifactu").RectificationMethod
+            data.tipo_rectificativa = method
             const rectifiesId = (inv as { rectifiesInvoiceId?: string | null }).rectifiesInvoiceId
             if (rectifiesId) {
               const originalInv = await prisma.invoice.findUnique({
                 where: { id: rectifiesId },
-                select: { series: true, number: true, issueDate: true },
+                select: { series: true, number: true, issueDate: true, total: true, subtotal: true, taxAmount: true },
               })
               if (originalInv) {
                 data.factura_rectificada_serie = originalInv.series || "CL"
                 data.factura_rectificada_numero = originalInv.number
                 data.factura_rectificada_fecha = formatDateForVerifactu(originalInv.issueDate)
+                // importe_rectificativa object required for "S" and "I"
+                if (method === "S") {
+                  data.importe_rectificativa = {
+                    base_rectificada: Math.abs(originalInv.subtotal.toNumber()).toFixed(2),
+                    cuota_rectificada: Math.abs(originalInv.taxAmount.toNumber()).toFixed(2),
+                  }
+                } else if (method === "I") {
+                  data.importe_rectificativa = {
+                    base_rectificada: Math.abs(Number(inv.subtotal)).toFixed(2),
+                    cuota_rectificada: Math.abs(Number(inv.taxAmount)).toFixed(2),
+                  }
+                }
               }
             }
           }
@@ -604,10 +617,15 @@ export type CreateRectificationResult =
  * Create a rectifying invoice (credit/rectificativa). Only from issued invoices.
  * TOTAL = clone with negative amounts. PARTIAL = draft with one zero line for user to edit.
  */
+type CustomLine = {
+  description: string; quantity: number; unitPrice: number
+  taxPercent: number; subtotal: number; taxAmount: number; total: number
+}
+
 export async function createRectification(
   originalInvoiceId: string,
   userId: string,
-  params: { reason: string; type: "TOTAL" | "PARTIAL"; invoiceDocType?: string; rectificationMethod?: string }
+  params: { reason: string; type: "TOTAL" | "PARTIAL"; invoiceDocType?: string; rectificationMethod?: string; lines?: CustomLine[] }
 ): Promise<CreateRectificationResult> {
   const original = await repo.findById(originalInvoiceId, userId)
   if (!original) return { success: false, error: "Factura no encontrada" }
@@ -631,102 +649,71 @@ export async function createRectification(
   due.setDate(due.getDate() + 30)
   const clientSnap = (original as { issuedClientSnapshot?: unknown }).issuedClientSnapshot ?? undefined
 
+  // Helper: compute totals and map from custom lines
+  const buildFromCustomLines = (customLines: CustomLine[]) => {
+    const linesOut = customLines.map((l) => ({
+      description: l.description, quantity: l.quantity, unitPrice: l.unitPrice,
+      discountPercent: null as number | null, taxPercent: l.taxPercent,
+      subtotal: l.subtotal, taxAmount: l.taxAmount, total: l.total,
+    }))
+    const subtotal = customLines.reduce((s, l) => s + l.subtotal, 0)
+    const taxAmount = customLines.reduce((s, l) => s + l.taxAmount, 0)
+    const total = customLines.reduce((s, l) => s + l.total, 0)
+    return { linesOut, subtotal, taxAmount, total }
+  }
+
   if (params.type === "TOTAL") {
     const neg = (n: number) => Math.round(-n * 100) / 100
-    const lines = original.lines.map((l) => ({
-      description: l.description,
-      quantity: l.quantity,
-      unitPrice: neg(l.unitPrice),
-      discountPercent: l.discountPercent ?? null,
-      taxPercent: l.taxPercent,
-      subtotal: neg(l.subtotal),
-      taxAmount: neg(l.taxAmount),
-      total: neg(l.total),
-    }))
-    const subtotal = neg(original.subtotal)
-    const taxAmount = neg(original.taxAmount)
-    const total = neg(original.total)
+    const { linesOut, subtotal, taxAmount, total } = params.lines && params.lines.length > 0
+      ? buildFromCustomLines(params.lines)
+      : (() => {
+          const linesOut = original.lines.map((l) => ({
+            description: l.description, quantity: l.quantity, unitPrice: neg(l.unitPrice),
+            discountPercent: l.discountPercent ?? null, taxPercent: l.taxPercent,
+            subtotal: neg(l.subtotal), taxAmount: neg(l.taxAmount), total: neg(l.total),
+          }))
+          return { linesOut, subtotal: neg(original.subtotal), taxAmount: neg(original.taxAmount), total: neg(original.total) }
+        })()
     const created = await repo.create({
-      userId,
-      number: engine.DRAFT_NUMBER_PLACEHOLDER,
-      series: original.series,
-      type: "CUSTOMER",
-      clientId: original.clientId,
-      issueDate: now,
-      dueDate: due,
-      serviceDate: original.serviceDate,
-      currency: original.currency,
+      userId, number: engine.DRAFT_NUMBER_PLACEHOLDER, series: original.series,
+      type: "CUSTOMER", clientId: original.clientId, issueDate: now, dueDate: due,
+      serviceDate: original.serviceDate, currency: original.currency,
       invoiceLanguage: original.invoiceLanguage ?? null,
-      subtotal,
-      taxAmount,
-      total,
-      status: INVOICE_STATUS.DRAFT,
-      notes: `Rectificativa total. Motivo: ${reason}`,
-      terms: original.terms,
-      paymentMethod: original.paymentMethod ?? null,
-      iban: original.iban ?? null,
-      bic: original.bic ?? null,
-      paymentReference: original.paymentReference ?? null,
+      subtotal, taxAmount, total, status: INVOICE_STATUS.DRAFT,
+      notes: `Rectificativa total. Motivo: ${reason}`, terms: original.terms,
+      paymentMethod: original.paymentMethod ?? null, iban: original.iban ?? null,
+      bic: original.bic ?? null, paymentReference: original.paymentReference ?? null,
       issuedClientSnapshot: clientSnap as Prisma.InputJsonValue,
-      isRectification: true,
-      rectifiesInvoiceId: originalInvoiceId,
-      rectificationReason: reason,
-      invoiceDocType: rectDocType,
-      rectificationMethod: rectMethod,
-      lines,
+      isRectification: true, rectifiesInvoiceId: originalInvoiceId,
+      rectificationReason: reason, invoiceDocType: rectDocType, rectificationMethod: rectMethod,
+      lines: linesOut,
     })
-    await repo.addEvent(created.id, "RECTIFIES", {
-      originalNumber: original.number,
-      at: now.toISOString(),
-    })
+    await repo.addEvent(created.id, "RECTIFIES", { originalNumber: original.number, at: now.toISOString() })
     return { success: true, id: created.id }
   }
 
-  const lines = [
-    {
-      description: "Rectificación parcial — editar líneas e importes",
-      quantity: 1,
-      unitPrice: 0,
-      discountPercent: null as number | null,
-      taxPercent: 0,
-      subtotal: 0,
-      taxAmount: 0,
-      total: 0,
-    },
-  ]
+  const { linesOut: partialLines, subtotal: partialSub, taxAmount: partialTax, total: partialTotal } =
+    params.lines && params.lines.length > 0
+      ? buildFromCustomLines(params.lines)
+      : {
+          linesOut: [{ description: "Rectificación parcial — editar líneas e importes", quantity: 1, unitPrice: 0, discountPercent: null as number | null, taxPercent: 0, subtotal: 0, taxAmount: 0, total: 0 }],
+          subtotal: 0, taxAmount: 0, total: 0,
+        }
   const created = await repo.create({
-    userId,
-    number: engine.DRAFT_NUMBER_PLACEHOLDER,
-    series: original.series,
-    type: "CUSTOMER",
-    clientId: original.clientId,
-    issueDate: now,
-    dueDate: due,
-    serviceDate: null,
-    currency: original.currency,
-    invoiceLanguage: original.invoiceLanguage ?? null,
-    subtotal: 0,
-    taxAmount: 0,
-    total: 0,
+    userId, number: engine.DRAFT_NUMBER_PLACEHOLDER, series: original.series,
+    type: "CUSTOMER", clientId: original.clientId, issueDate: now, dueDate: due,
+    serviceDate: null, currency: original.currency, invoiceLanguage: original.invoiceLanguage ?? null,
+    subtotal: partialSub, taxAmount: partialTax, total: partialTotal,
     status: INVOICE_STATUS.DRAFT,
-    notes: `Rectificativa parcial. Motivo: ${reason}`,
-    terms: null,
-    paymentMethod: original.paymentMethod ?? null,
-    iban: original.iban ?? null,
-    bic: original.bic ?? null,
-    paymentReference: original.paymentReference ?? null,
+    notes: `Rectificativa parcial. Motivo: ${reason}`, terms: null,
+    paymentMethod: original.paymentMethod ?? null, iban: original.iban ?? null,
+    bic: original.bic ?? null, paymentReference: original.paymentReference ?? null,
     issuedClientSnapshot: clientSnap as Prisma.InputJsonValue,
-    isRectification: true,
-    rectifiesInvoiceId: originalInvoiceId,
-    rectificationReason: reason,
-    invoiceDocType: rectDocType,
-    rectificationMethod: rectMethod,
-    lines,
+    isRectification: true, rectifiesInvoiceId: originalInvoiceId,
+    rectificationReason: reason, invoiceDocType: rectDocType, rectificationMethod: rectMethod,
+    lines: partialLines,
   })
-  await repo.addEvent(created.id, "RECTIFIES", {
-    originalNumber: original.number,
-    at: now.toISOString(),
-  })
+  await repo.addEvent(created.id, "RECTIFIES", { originalNumber: original.number, at: now.toISOString() })
   return { success: true, id: created.id }
 }
 

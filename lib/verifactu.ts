@@ -30,8 +30,10 @@ export interface VerifactuCreateData {
   factura_rectificada_serie?: string
   factura_rectificada_numero?: string
   factura_rectificada_fecha?: string
-  base_rectificada?: string
-  cuota_rectificada?: string
+  importe_rectificativa?: {
+    base_rectificada: string
+    cuota_rectificada: string
+  }
   facturas_sustituidas?: { serie: string; numero: string; fecha: string }[]
 }
 

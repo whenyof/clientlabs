@@ -662,6 +662,11 @@ export function InvoiceDrawer({
         invoiceId={invoice.id}
         invoiceNumber={invoice.number === DRAFT_NUMBER_PLACEHOLDER ? "—" : invoice.number}
         originalDocType={invoice.invoiceDocType}
+        originalLines={invoice.lines}
+        originalTotal={invoice.total}
+        originalSubtotal={invoice.subtotal}
+        originalTaxAmount={invoice.taxAmount}
+        currency={invoice.currency}
         onSuccess={(newId) => { onRefresh(); onRectificationCreated?.(newId) }}
       />
 

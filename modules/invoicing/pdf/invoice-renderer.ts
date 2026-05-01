@@ -438,7 +438,8 @@ export async function renderInvoiceToBuffer(
     pdf.setFontSize(5.5)
     pdf.setFont("helvetica", "normal")
     pdf.setTextColor(180, 180, 180)
-    const rgpdText = `${doc.header.companyName} es responsable del tratamiento de sus datos personales conforme al Reglamento (UE) 2016/679 (RGPD) y la Ley Orgánica 3/2018 (LOPDGDD). Sus datos serán tratados para el mantenimiento de la relación comercial. Puede ejercer sus derechos de acceso, rectificación, supresión y portabilidad dirigiéndose a ${doc.header.email}.`
+    const rgpdResponsible = doc.header.legalName || doc.header.companyName
+    const rgpdText = `${rgpdResponsible} es responsable del tratamiento de sus datos personales conforme al Reglamento (UE) 2016/679 (RGPD) y la Ley Orgánica 3/2018 (LOPDGDD). Sus datos serán tratados para el mantenimiento de la relación comercial. Puede ejercer sus derechos de acceso, rectificación, supresión y portabilidad dirigiéndose a ${doc.header.email}.`
     const rgpdLines = pdf.splitTextToSize(rgpdText, W) as string[]
     rgpdLines.forEach((line: string) => {
       if (y > PAGE_MAX) return

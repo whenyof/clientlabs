@@ -156,6 +156,7 @@ function toPdfDataFromSnapshots(
     branding: {
       logoUrl: (company.logoUrl as string | null) ?? null,
       companyName: (company.companyName as string) ?? "",
+      legalName: (company.legalName as string | null) ?? null,
       taxId: (company.taxId as string) ?? "",
       address: (company.address as string) ?? "",
       email: (company.email as string) ?? "",
@@ -232,7 +233,7 @@ export async function generateInvoicePDF(
 async function fetchLogoAsDataUrl(url: string): Promise<string | null> {
   if (url.startsWith("/")) {
     try {
-      const filePath = path.join(process.cwd(), url.slice(1))
+      const filePath = path.join(process.cwd(), "public", url.slice(1))
       const buf = await readFile(filePath)
       const base64 = buf.toString("base64")
       const ext = path.extname(url).toLowerCase()

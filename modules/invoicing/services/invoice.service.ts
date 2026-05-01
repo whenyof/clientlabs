@@ -355,6 +355,7 @@ export async function issueInvoice(invoiceId: string, userId: string): Promise<I
   }
   const issuedCompanySnapshot = {
     companyName: branding.companyName,
+    legalName: branding.legalName ?? null,
     taxId: branding.taxId,
     address: branding.address,
     email: branding.email,

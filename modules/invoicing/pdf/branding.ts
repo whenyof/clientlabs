@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma"
 export type InvoiceBranding = {
   logoUrl: string | null
   companyName: string
+  legalName?: string | null
   taxId: string
   address: string
   email: string
@@ -60,6 +61,7 @@ export async function getBrandingForUser(userId: string): Promise<InvoiceBrandin
         ...DEFAULT_BRANDING,
         logoUrl: profile.logoUrl ?? user?.image ?? null,
         companyName: profile.companyName ?? profile.name ?? user?.name ?? DEFAULT_BRANDING.companyName,
+        legalName: profile.legalName ?? null,
         taxId: profile.taxId ?? DEFAULT_BRANDING.taxId,
         address: addressLine,
         email: profile.email ?? user?.email ?? DEFAULT_BRANDING.email,

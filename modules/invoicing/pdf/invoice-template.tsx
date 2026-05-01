@@ -9,6 +9,7 @@ import type { InvoicePdfData, InvoiceLinePdf } from "./types"
 export type InvoiceDocumentModel = {
   header: {
     companyName: string
+    legalName?: string | null
     taxId: string
     address: string
     email: string
@@ -114,6 +115,7 @@ export function buildInvoiceDocument(data: InvoicePdfData): InvoiceDocumentModel
   return {
     header: {
       companyName: branding.companyName,
+      legalName: branding.legalName ?? null,
       taxId: branding.taxId,
       address: branding.address,
       email: branding.email,

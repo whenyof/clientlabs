@@ -1,4 +1,10 @@
+import Link from "next/link"
 import { footerContent } from "@/components/landing/content"
+
+const FOOTER_LINK_HREFS: Record<string, string> = {
+  "Seguridad": "/seguridad",
+  "Declaración responsable": "/legal/declaracion-responsable",
+}
 
 export function Footer() {
   return (
@@ -26,12 +32,21 @@ export function Footer() {
               <ul className="m-0 grid list-none gap-2.5 p-0">
                 {col.links.map((link) => (
                   <li key={link}>
-                    <a
-                      href="#"
-                      className="text-sm text-[#a8b5bc] transition-colors hover:text-white"
-                    >
-                      {link}
-                    </a>
+                    {FOOTER_LINK_HREFS[link] ? (
+                      <Link
+                        href={FOOTER_LINK_HREFS[link]}
+                        className="text-sm text-[#a8b5bc] transition-colors hover:text-white"
+                      >
+                        {link}
+                      </Link>
+                    ) : (
+                      <a
+                        href="#"
+                        className="text-sm text-[#a8b5bc] transition-colors hover:text-white"
+                      >
+                        {link}
+                      </a>
+                    )}
                   </li>
                 ))}
               </ul>

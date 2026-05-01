@@ -564,7 +564,7 @@ export const footerContent = {
     },
     {
       heading: "Legal",
-      links: ["Términos", "Privacidad", "Cookies", "RGPD", "Seguridad"],
+      links: ["Términos", "Privacidad", "Cookies", "RGPD", "Seguridad", "Declaración responsable"],
     },
   ],
   bottom: {

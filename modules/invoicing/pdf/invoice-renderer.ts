@@ -153,12 +153,13 @@ export async function renderInvoiceToBuffer(
   }
 
   // =========================================================
-  // LEFT COLUMN — logo + company info
+  // LEFT COLUMN — logo above company info (stacked)
   // =========================================================
   let y = TOP
-  const LOGO_W = 34
-  const LOGO_H = 22
+  const LOGO_W = 40
+  const LOGO_H = 20
   const HAS_LOGO = !!options.logoDataUrl
+  const textAreaW = RIGHT_COL_X - M - 4
 
   if (HAS_LOGO) {
     try {
@@ -169,40 +170,38 @@ export async function renderInvoiceToBuffer(
     } catch {
       // ignore invalid logo
     }
+    y += LOGO_H + 5
   }
 
-  const textX = HAS_LOGO ? M + LOGO_W + 4 : M
-  const textAreaW = RIGHT_COL_X - textX - 4
-
-  pdf.setFontSize(14)
+  pdf.setFontSize(13)
   pdf.setFont("helvetica", "bold")
   pdf.setTextColor(...hexToRgb(colors.primary))
-  pdf.text(doc.header.companyName, textX, y + 7)
-  y += 11
+  pdf.text(doc.header.companyName, M, y + 5)
+  y += 9
 
   pdf.setFontSize(8.5)
   pdf.setFont("helvetica", "normal")
   pdf.setTextColor(...hexToRgb(colors.textMuted))
 
-  pdf.text(`NIF/CIF: ${doc.header.taxId}`, textX, y)
+  pdf.text(`NIF/CIF: ${doc.header.taxId}`, M, y)
   y += 5
 
   const addrLines = pdf.splitTextToSize(doc.header.address, textAreaW) as string[]
   addrLines.forEach((line: string) => {
-    pdf.text(line, textX, y)
+    pdf.text(line, M, y)
     y += 4.5
   })
 
   if (doc.header.email) {
-    pdf.text(doc.header.email, textX, y)
+    pdf.text(doc.header.email, M, y)
     y += 4.5
   }
   if (doc.header.phone) {
-    pdf.text(doc.header.phone, textX, y)
+    pdf.text(`Tel: ${doc.header.phone}`, M, y)
     y += 4.5
   }
   if (doc.header.website) {
-    pdf.text(doc.header.website, textX, y)
+    pdf.text(doc.header.website, M, y)
     y += 4.5
   }
 
@@ -218,36 +217,38 @@ export async function renderInvoiceToBuffer(
   y += 6
 
   // =========================================================
-  // RECIPIENT BLOCK
+  // RECIPIENT BLOCK — omitted for F2 (simplified invoices have no client data)
   // =========================================================
-  pdf.setFontSize(block.titleSize)
-  pdf.setTextColor(...hexToRgb(colors.textMuted))
-  pdf.setFont("helvetica", "bold")
-  pdf.text(doc.recipient.label.toUpperCase(), M, y)
-  y += block.titleSize + block.titleSpacing
+  if (doc.invoiceDocType !== "F2") {
+    pdf.setFontSize(block.titleSize)
+    pdf.setTextColor(...hexToRgb(colors.textMuted))
+    pdf.setFont("helvetica", "bold")
+    pdf.text(doc.recipient.label.toUpperCase(), M, y)
+    y += block.titleSize + block.titleSpacing
 
-  pdf.setFontSize(block.contentSize)
-  pdf.setTextColor(...hexToRgb(colors.text))
-  pdf.setFont("helvetica", "normal")
-  pdf.text(doc.recipient.name, M, y)
-  y += block.lineHeight
-  if (doc.recipient.taxId) {
-    pdf.text(`NIF/CIF: ${doc.recipient.taxId}`, M, y)
+    pdf.setFontSize(block.contentSize)
+    pdf.setTextColor(...hexToRgb(colors.text))
+    pdf.setFont("helvetica", "normal")
+    pdf.text(doc.recipient.name, M, y)
     y += block.lineHeight
+    if (doc.recipient.taxId && doc.recipient.taxId.trim()) {
+      pdf.text(`NIF/CIF: ${doc.recipient.taxId}`, M, y)
+      y += block.lineHeight
+    }
+    if (doc.recipient.address && doc.recipient.address.trim()) {
+      pdf.text(doc.recipient.address, M, y)
+      y += block.lineHeight
+    }
+    if (doc.recipient.email && doc.recipient.email.trim()) {
+      pdf.text(doc.recipient.email, M, y)
+      y += block.lineHeight
+    }
+    if (doc.recipient.phone && doc.recipient.phone.trim()) {
+      pdf.text(doc.recipient.phone, M, y)
+      y += block.lineHeight
+    }
+    y += block.blockGap
   }
-  if (doc.recipient.address) {
-    pdf.text(doc.recipient.address, M, y)
-    y += block.lineHeight
-  }
-  if (doc.recipient.email && doc.recipient.email.trim()) {
-    pdf.text(doc.recipient.email, M, y)
-    y += block.lineHeight
-  }
-  if (doc.recipient.phone && doc.recipient.phone.trim()) {
-    pdf.text(doc.recipient.phone, M, y)
-    y += block.lineHeight
-  }
-  y += block.blockGap
 
   // =========================================================
   // TABLE
@@ -316,31 +317,88 @@ export async function renderInvoiceToBuffer(
   y += 4
 
   // =========================================================
-  // TOTALS
+  // TOTALS — multi-rate breakdown when multiple IVA rates present
   // =========================================================
-  const totalsX = M + W - 55
-  pdf.setFontSize(totals.labelSize)
-  pdf.setFont("helvetica", "normal")
-  pdf.setTextColor(...hexToRgb(colors.textMuted))
-  pdf.text("Subtotal", totalsX, y)
-  pdf.text(doc.totals.subtotal, M + W - 25, y)
-  y += totals.lineHeight
-  pdf.text("IVA", totalsX, y)
-  pdf.text(doc.totals.taxAmount, M + W - 25, y)
-  y += totals.lineHeight
-  if (doc.totals.irpfAmount && doc.totals.irpfRate) {
-    pdf.setTextColor(220, 38, 38)
-    pdf.text(`Retención IRPF (${doc.totals.irpfRate}%)`, totalsX, y)
-    pdf.text(`-${doc.totals.irpfAmount}`, M + W - 25, y)
+  const totalsX = M + W - 68
+  const totalsValX = M + W
+
+  const multiRate = doc.totals.taxBreakdown.length > 1
+
+  if (multiRate) {
+    // Per-rate lines
+    pdf.setFontSize(totals.labelSize)
+    pdf.setFont("helvetica", "normal")
+    pdf.setTextColor(...hexToRgb(colors.textMuted))
+    for (const tl of doc.totals.taxBreakdown) {
+      pdf.text(`Base imponible (${tl.rate}%):`, totalsX, y)
+      pdf.setTextColor(...hexToRgb(colors.text))
+      pdf.text(tl.base, totalsValX, y, { align: "right" })
+      pdf.setTextColor(...hexToRgb(colors.textMuted))
+      y += totals.lineHeight
+      pdf.text(`IVA ${tl.rate}%:`, totalsX, y)
+      pdf.setTextColor(...hexToRgb(colors.text))
+      pdf.text(tl.taxAmount, totalsValX, y, { align: "right" })
+      pdf.setTextColor(...hexToRgb(colors.textMuted))
+      y += totals.lineHeight
+    }
+    // Divider
+    pdf.setDrawColor(...hexToRgb(colors.border))
+    pdf.setLineWidth(0.3)
+    pdf.line(totalsX, y, totalsValX, y)
+    y += 3.5
+    // Summary subtotals
+    pdf.text("Subtotal:", totalsX, y)
+    pdf.setTextColor(...hexToRgb(colors.text))
+    pdf.text(doc.totals.subtotal, totalsValX, y, { align: "right" })
     pdf.setTextColor(...hexToRgb(colors.textMuted))
     y += totals.lineHeight
+    pdf.text("Total IVA:", totalsX, y)
+    pdf.setTextColor(...hexToRgb(colors.text))
+    pdf.text(doc.totals.taxAmount, totalsValX, y, { align: "right" })
+    pdf.setTextColor(...hexToRgb(colors.textMuted))
+    y += totals.lineHeight
+    if (doc.totals.irpfAmount && doc.totals.irpfRate) {
+      pdf.setTextColor(220, 38, 38)
+      pdf.text(`Retención IRPF (${doc.totals.irpfRate}%):`, totalsX, y)
+      pdf.text(`-${doc.totals.irpfAmount}`, totalsValX, y, { align: "right" })
+      pdf.setTextColor(...hexToRgb(colors.textMuted))
+      y += totals.lineHeight
+    }
+    // TOTAL final
+    pdf.setFont("helvetica", "bold")
+    pdf.setFontSize(totals.finalSize)
+    pdf.setTextColor(...hexToRgb(colors.primary))
+    pdf.text("TOTAL:", totalsX, y)
+    pdf.text(doc.totals.total, totalsValX, y, { align: "right" })
+    y += totals.lineHeight + 6
+  } else {
+    // Simple single-rate totals
+    pdf.setFontSize(totals.labelSize)
+    pdf.setFont("helvetica", "normal")
+    pdf.setTextColor(...hexToRgb(colors.textMuted))
+    const rateLabel = doc.totals.taxBreakdown[0]?.rate != null
+      ? `IVA (${doc.totals.taxBreakdown[0].rate}%)`
+      : "IVA"
+    pdf.text("Subtotal", totalsX, y)
+    pdf.text(doc.totals.subtotal, totalsValX, y, { align: "right" })
+    y += totals.lineHeight
+    pdf.text(rateLabel, totalsX, y)
+    pdf.text(doc.totals.taxAmount, totalsValX, y, { align: "right" })
+    y += totals.lineHeight
+    if (doc.totals.irpfAmount && doc.totals.irpfRate) {
+      pdf.setTextColor(220, 38, 38)
+      pdf.text(`Retención IRPF (${doc.totals.irpfRate}%)`, totalsX, y)
+      pdf.text(`-${doc.totals.irpfAmount}`, totalsValX, y, { align: "right" })
+      pdf.setTextColor(...hexToRgb(colors.textMuted))
+      y += totals.lineHeight
+    }
+    pdf.setFont("helvetica", "bold")
+    pdf.setFontSize(totals.finalSize)
+    pdf.setTextColor(...hexToRgb(colors.primary))
+    pdf.text("Total", totalsX, y)
+    pdf.text(doc.totals.total, totalsValX, y, { align: "right" })
+    y += totals.lineHeight + 6
   }
-  pdf.setFont("helvetica", "bold")
-  pdf.setFontSize(totals.finalSize)
-  pdf.setTextColor(...hexToRgb(colors.primary))
-  pdf.text("Total", totalsX, y)
-  pdf.text(doc.totals.total, M + W - 25, y)
-  y += totals.lineHeight + 6
 
   // =========================================================
   // PAYMENT BLOCK
@@ -446,6 +504,15 @@ export async function renderInvoiceToBuffer(
       pdf.text(line, M, y)
       y += 3
     })
+  }
+
+  // Declaración responsable del fabricante
+  if (y + 4 <= PAGE_MAX) {
+    y += 2
+    pdf.setFontSize(5)
+    pdf.setFont("helvetica", "normal")
+    pdf.setTextColor(200, 200, 200)
+    pdf.text("Declaración responsable del fabricante: clientlabs.io/legal/declaracion-responsable", M, y)
   }
 
   // =========================================================

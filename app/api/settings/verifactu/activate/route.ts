@@ -10,6 +10,13 @@ export const maxDuration = 30
 const schema = z.object({
   nif: z.string().min(8).max(15),
   nombre: z.string().min(2).max(200),
+  direccion: z.string().max(300).optional(),
+  cp: z.string().max(10).optional(),
+  ciudad: z.string().max(100).optional(),
+  provincia: z.string().max(100).optional(),
+  signedBy: z.string().min(2).max(200).optional(),
+  agreementAccepted: z.literal(true).optional(),
+  declaracionAccepted: z.literal(true).optional(),
 })
 
 export async function POST(request: Request) {
@@ -28,7 +35,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "NIF y nombre fiscal son obligatorios" }, { status: 400 })
   }
 
-  const { nif, nombre } = parsed.data
+  const { nif, nombre, signedBy, direccion, cp, ciudad, provincia } = parsed.data
 
   const profile = await prisma.businessProfile.findUnique({
     where: { userId: session.user.id },
@@ -46,14 +53,23 @@ export async function POST(request: Request) {
   try {
     const result = await createVerifactuNif(nif, nombre)
 
+    const now = new Date()
     await prisma.businessProfile.update({
       where: { id: profile.id },
       data: {
         verifactuApiKey: result.api_key,
         verifactuEnabled: true,
-        verifactuActivatedAt: new Date(),
+        verifactuActivatedAt: now,
+        verifactuAgreementAccepted: true,
+        verifactuAgreementAcceptedAt: now,
+        verifactuAgreementSignedBy: signedBy ?? nombre,
+        verifactuAgreementSignedNif: nif,
         taxId: nif,
         legalName: nombre,
+        ...(direccion && { address: direccion }),
+        ...(cp && { postalCode: cp }),
+        ...(ciudad && { city: ciudad }),
+        ...(provincia && { country: provincia }),
       },
     })
 

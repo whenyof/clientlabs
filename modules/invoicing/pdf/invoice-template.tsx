@@ -35,6 +35,7 @@ export type InvoiceDocumentModel = {
     invoiceTypeTitle: string
   }
   invoiceStatus: string
+  invoiceDocType: string | null
   /** When present, PDF shows "FACTURA RECTIFICATIVA" and original ref */
   rectification?: {
     title: string
@@ -56,6 +57,7 @@ export type InvoiceDocumentModel = {
   totals: {
     subtotal: string
     taxAmount: string
+    taxBreakdown: Array<{ rate: number; base: string; taxAmount: string }>
     irpfRate?: number | null
     irpfAmount?: string | null
     total: string
@@ -140,6 +142,7 @@ export function buildInvoiceDocument(data: InvoicePdfData): InvoiceDocumentModel
       invoiceTypeTitle: buildInvoiceTypeTitle(data),
     },
     invoiceStatus: data.status,
+    invoiceDocType: data.invoiceDocType ?? null,
     ...(data.isRectification && (data.originalInvoiceNumber != null || data.rectificationReason)
       ? {
           rectification: {
@@ -166,6 +169,21 @@ export function buildInvoiceDocument(data: InvoicePdfData): InvoiceDocumentModel
     totals: {
       subtotal: formatMoney(data.subtotal, currency),
       taxAmount: formatMoney(data.taxAmount, currency),
+      taxBreakdown: (() => {
+        const byRate = new Map<number, { base: number; tax: number }>()
+        for (const line of lines) {
+          const r = line.taxPercent
+          const cur = byRate.get(r) ?? { base: 0, tax: 0 }
+          byRate.set(r, { base: cur.base + line.subtotal, tax: cur.tax + line.taxAmount })
+        }
+        return Array.from(byRate.entries())
+          .sort((a, b) => b[0] - a[0])
+          .map(([rate, { base, tax }]) => ({
+            rate,
+            base: formatMoney(base, currency),
+            taxAmount: formatMoney(tax, currency),
+          }))
+      })(),
       irpfRate: data.irpfRate ?? null,
       irpfAmount: data.irpfAmount && data.irpfAmount > 0 ? formatMoney(data.irpfAmount, currency) : null,
       total: formatMoney(data.total, currency),

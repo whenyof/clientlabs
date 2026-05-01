@@ -197,9 +197,13 @@ model BusinessProfile {
   ivaRegime            String   @default("GENERAL")
   epigrafIAE           String?
   // Verifactu
-  verifactuApiKey      String?
-  verifactuEnabled     Boolean   @default(false)
-  verifactuActivatedAt DateTime?
+  verifactuApiKey               String?
+  verifactuEnabled              Boolean   @default(false)
+  verifactuActivatedAt          DateTime?
+  verifactuAgreementAccepted    Boolean   @default(false)
+  verifactuAgreementAcceptedAt  DateTime?
+  verifactuAgreementSignedBy    String?
+  verifactuAgreementSignedNif   String?
   user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])

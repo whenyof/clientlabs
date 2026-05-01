@@ -448,27 +448,37 @@ export async function renderInvoiceToBuffer(
   }
 
   // =========================================================
-  // STATUS WATERMARK — PAGADA / ANULADA (drawn last, on top)
+  // STATUS WATERMARK — drawn last, on top of all content
+  // BORRADOR → gray | PAGADA → green | ANULADA → red
   // =========================================================
   const status = doc.invoiceStatus
-  const isPaid = status === "PAID" || status === "PAGADO"
-  const isCanceled = status === "CANCELED" || status === "ANULADA" || status === "CANCELLED"
+  const isDraft = status === "DRAFT"
+  const isPaid = status === "PAID"
+  const isCanceled = status === "CANCELED" || status === "CANCELLED"
 
-  if (isPaid || isCanceled) {
+  type WatermarkColor = [number, number, number]
+  type WatermarkConfig = { label: string; color: WatermarkColor }
+  const watermark: WatermarkConfig | null =
+    isDraft   ? { label: "BORRADOR", color: [150, 150, 150] } :
+    isPaid    ? { label: "PAGADA",   color: [30,  160, 100]  } :
+    isCanceled? { label: "ANULADA",  color: [220, 50,  50]   } :
+    null
+
+  if (watermark) {
     try {
       pdf.setPage(1)
       pdf.saveGraphicsState()
-      const gState = new (pdf as unknown as { GState: new (opts: { opacity: number }) => unknown }).GState({ opacity: 0.12 })
+      const gState = new (pdf as unknown as { GState: new (opts: { opacity: number }) => unknown }).GState({ opacity: 0.13 })
       pdf.setGState(gState as Parameters<typeof pdf.setGState>[0])
-      pdf.setFontSize(72)
+      pdf.setFontSize(68)
       pdf.setFont("helvetica", "bold")
-      if (isPaid) {
-        pdf.setTextColor(220, 38, 38)
-        pdf.text("PAGADA", PDF_LAYOUT.page.width / 2, PDF_LAYOUT.page.height / 2, { align: "center", angle: 30 })
-      } else {
-        pdf.setTextColor(120, 120, 120)
-        pdf.text("ANULADA", PDF_LAYOUT.page.width / 2, PDF_LAYOUT.page.height / 2, { align: "center", angle: 30 })
-      }
+      pdf.setTextColor(...watermark.color)
+      pdf.text(
+        watermark.label,
+        PDF_LAYOUT.page.width / 2,
+        PDF_LAYOUT.page.height / 2,
+        { align: "center", angle: 30 }
+      )
       pdf.restoreGraphicsState()
     } catch {
       // GState not supported — skip watermark

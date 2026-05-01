@@ -17,7 +17,6 @@ import { SelectInvoiceForRectificationDialog } from "./SelectInvoiceForRectifica
 import { CreateRectificativaModal } from "./CreateRectificativaModal"
 import { IssuedInvoiceEditBlockedModal } from "./IssuedInvoiceEditBlockedModal"
 import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog"
-import { InvoicePreviewModal } from "@/components/billing/InvoicePreview"
 import { VerifactuActivationBanner } from "./VerifactuActivationBanner"
 import type { InvoiceListItem, InvoiceDetail, InvoiceKPIsResponse, ClientOption } from "./types"
 import type { InvoiceLineInput } from "@domains/invoicing"
@@ -139,7 +138,6 @@ export function InvoiceView() {
   } | null>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [deleteId, setDeleteId] = useState<string | null>(null)
-  const [previewId, setPreviewId] = useState<string | null>(null)
   const [selectorOpen, setSelectorOpen] = useState(false)
   const [salePickerOpen, setSalePickerOpen] = useState(false)
   const [creatingFromSale, setCreatingFromSale] = useState(false)
@@ -393,13 +391,6 @@ export function InvoiceView() {
     setSelectedId(invoice.id)
   }, [])
 
-  const handlePreviewInvoice = useCallback(
-    (invoiceId: string) => {
-      setPreviewId(invoiceId)
-    },
-    []
-  )
-
   const handleDeleteConfirm = useCallback(async () => {
     if (!deleteId) return
     const idToDelete = deleteId
@@ -538,8 +529,9 @@ export function InvoiceView() {
         />
       )}
       {verifactuTestMode === true && (
-        <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
-          <strong>Modo pruebas</strong> — Las facturas se envían al entorno de test de la AEAT. No tienen validez fiscal real.
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <strong>Verifactu en modo test</strong> — Las facturas se registran en el entorno de pruebas de la AEAT (prewww2) y no tienen validez fiscal. Para emitir facturas legales, cambia a producción en{" "}
+          <a href="/dashboard/ajustes" className="underline font-medium hover:text-amber-900">Ajustes → Verifactu</a>.
         </div>
       )}
 
@@ -629,7 +621,7 @@ export function InvoiceView() {
       </div>
 
       {/* Quick-tab filter */}
-      <div className="flex items-center gap-0.5 border-b border-slate-200 -mb-2">
+      <div className="flex items-center gap-0.5 border-b border-slate-200">
         {QUICK_TABS.map((tab) => {
           const count = tabCounts[tab.id]
           return (
@@ -687,11 +679,7 @@ export function InvoiceView() {
         invoices={filteredInvoices}
         selectedId={selectedId}
         onSelectInvoice={handleSelectInvoice}
-        onPreviewInvoice={handlePreviewInvoice}
-        onEditInvoice={handleEditFromRow}
         onDownloadPdf={handleDownloadPdf}
-        onRegisterPayment={handleRegisterPayment}
-        onCancelInvoice={handleCancelInvoice}
         onDeleteInvoice={handleDeleteRequested}
         onCreateClick={handleOpenNewInvoice}
         loading={loading}
@@ -780,12 +768,6 @@ export function InvoiceView() {
           setSelectedId(newId)
           fetchDetail(newId)
         }}
-      />
-
-      <InvoicePreviewModal
-        invoiceId={previewId}
-        onClose={() => setPreviewId(null)}
-        onPaid={() => { setPreviewId(null); refresh() }}
       />
 
       {modalImportar && (

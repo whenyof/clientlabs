@@ -6,16 +6,11 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   Eye,
-  Pencil,
-  Copy,
   ArrowDownToLine,
-  Banknote,
-  X,
   Trash2,
 } from "lucide-react"
 import type { InvoiceListItem } from "./types"
 import { INVOICE_STATUS } from "@/modules/invoicing/types"
-import { isInvoiceEditable } from "@/modules/invoicing/utils/isInvoiceEditable"
 import { invoiceStatusLabel } from "@/modules/invoicing/utils/invoiceStatusLabel"
 
 function VerifactuBadge({ status }: { status: string | null | undefined }) {
@@ -88,12 +83,7 @@ const TYPE_LABELS: Record<string, string> = {
 
 export interface InvoiceRowActionCallbacks {
   onView: () => void
-  onPreview: (invoiceId: string) => void
-  onEdit: (invoice: InvoiceListItem) => void
-  onDuplicate: (invoice: InvoiceListItem) => void
   onDownloadPdf: (invoiceId: string) => void
-  onRegisterPayment: (invoice: InvoiceListItem) => void
-  onCancel: (invoice: InvoiceListItem) => void
   onDelete: (invoiceId: string) => void
 }
 
@@ -109,7 +99,6 @@ function InvoiceRowComponent({ invoice, isSelected, actions }: InvoiceRowProps) 
   const typeStyle = TYPE_STYLES[invoice.type] ?? "bg-slate-100 text-slate-600"
   const typeLabel = TYPE_LABELS[invoice.type] ?? invoice.type
   const isDraft = invoice.status === INVOICE_STATUS.DRAFT
-  const editable = isInvoiceEditable(invoice)
   const isPaidOrCanceled =
     invoice.status === INVOICE_STATUS.PAID || invoice.status === INVOICE_STATUS.CANCELED
   const dueInfo = invoice.dueInfo
@@ -125,13 +114,17 @@ function InvoiceRowComponent({ invoice, isSelected, actions }: InvoiceRowProps) 
   const iconButtonClass =
     "h-8 w-8 p-0 text-slate-400 hover:text-slate-600 hover:bg-slate-100 shrink-0"
 
-  const handleEdit = (e: React.MouseEvent) => { e.stopPropagation(); actions.onEdit(invoice) }
-  const handleDuplicate = (e: React.MouseEvent) => { e.stopPropagation(); actions.onDuplicate(invoice) }
   const handlePdf = (e: React.MouseEvent) => { e.stopPropagation(); actions.onDownloadPdf(invoice.id) }
-  const handleRegisterPayment = (e: React.MouseEvent) => { e.stopPropagation(); actions.onRegisterPayment(invoice) }
-  const handleCancel = (e: React.MouseEvent) => { e.stopPropagation(); actions.onCancel(invoice) }
   const handleDelete = (e: React.MouseEvent) => { e.stopPropagation(); actions.onDelete(invoice.id) }
-  const handlePreview = (e: React.MouseEvent) => { e.stopPropagation(); actions.onPreview(invoice.id) }
+  const handlePreview = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    const url = (invoice as { verifactuUrl?: string | null }).verifactuUrl
+    if (url) {
+      window.open(url, "_blank", "noopener,noreferrer")
+    } else {
+      actions.onView()
+    }
+  }
 
   return (
     <tr
@@ -228,7 +221,7 @@ function InvoiceRowComponent({ invoice, isSelected, actions }: InvoiceRowProps) 
             variant="ghost"
             size="sm"
             className={iconButtonClass}
-            title="Visualizar"
+            title="Ver factura verificada"
             onClick={handlePreview}
           >
             <Eye className="h-4 w-4" />
@@ -237,55 +230,17 @@ function InvoiceRowComponent({ invoice, isSelected, actions }: InvoiceRowProps) 
             variant="ghost"
             size="sm"
             className={iconButtonClass}
-            title={editable ? "Editar" : "Factura emitida — edición limitada por normativa fiscal"}
-            onClick={handleEdit}
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className={iconButtonClass}
-            title="Duplicar"
-            onClick={handleDuplicate}
-          >
-            <Copy className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className={iconButtonClass}
-            title="Descargar"
+            title="Descargar PDF"
             onClick={handlePdf}
           >
             <ArrowDownToLine className="h-4 w-4" />
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className={iconButtonClass}
-            title="Registrar pago"
-            onClick={handleRegisterPayment}
-          >
-            <Banknote className="h-4 w-4" />
-          </Button>
-          {!isPaidOrCanceled && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className={iconButtonClass}
-              title="Cancelar"
-              onClick={handleCancel}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
           {isDraft && (
             <Button
               variant="ghost"
               size="sm"
               className="h-8 w-8 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 shrink-0"
-              title="Eliminar"
+              title="Eliminar borrador"
               onClick={handleDelete}
             >
               <Trash2 className="h-4 w-4" />

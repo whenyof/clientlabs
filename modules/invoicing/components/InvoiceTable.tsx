@@ -10,12 +10,7 @@ export interface InvoiceTableProps {
   selectedId: string | null
   loading?: boolean
   onSelectInvoice: (id: string) => void
-  onPreviewInvoice?: (invoiceId: string) => void
-  onEditInvoice: (invoice: InvoiceListItem) => void
-  onDuplicateInvoice?: (invoice: InvoiceListItem) => void
   onDownloadPdf: (invoiceId: string) => void
-  onRegisterPayment?: (invoice: InvoiceListItem) => void
-  onCancelInvoice?: (invoice: InvoiceListItem) => void
   onDeleteInvoice: (invoiceId: string) => void
   onCreateClick?: () => void
 }
@@ -98,12 +93,7 @@ function InvoiceTableComponent({
   invoices,
   selectedId,
   onSelectInvoice,
-  onPreviewInvoice,
-  onEditInvoice,
-  onDuplicateInvoice,
   onDownloadPdf,
-  onRegisterPayment,
-  onCancelInvoice,
   onDeleteInvoice,
   onCreateClick,
   loading,
@@ -159,19 +149,7 @@ function InvoiceTableComponent({
 
   const buildActions = (inv: InvoiceListItem): InvoiceRowActionCallbacks => ({
     onView: () => onSelectInvoice(inv.id),
-    onPreview: (invoiceId) => (onPreviewInvoice ? onPreviewInvoice(invoiceId) : onSelectInvoice(inv.id)),
-    onEdit: onEditInvoice,
-    onDuplicate: (invoice) => {
-      if (onDuplicateInvoice) onDuplicateInvoice(invoice)
-    },
     onDownloadPdf,
-    onRegisterPayment: (invoice) => {
-      if (onRegisterPayment) onRegisterPayment(invoice)
-      else onSelectInvoice(invoice.id)
-    },
-    onCancel: (invoice) => {
-      if (onCancelInvoice) onCancelInvoice(invoice)
-    },
     onDelete: onDeleteInvoice,
   })
 

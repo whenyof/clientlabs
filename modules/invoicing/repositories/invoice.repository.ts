@@ -119,7 +119,7 @@ export async function listByUser(userId: string, options?: ListInvoicesOptions) 
   }
   const list = await prisma.invoice.findMany({
     where,
-    orderBy: [{ issueDate: "desc" }, { createdAt: "desc" }],
+    orderBy: [{ createdAt: "desc" }],
     take: limit,
     skip: offset,
     include: {

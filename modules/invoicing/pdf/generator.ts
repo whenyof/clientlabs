@@ -91,6 +91,8 @@ function toPdfData(invoice: NonNullable<InvoiceForPdf>): InvoicePdfData {
     }),
     verifactuQr: (invoice as { verifactuQr?: string | null }).verifactuQr ?? null,
     verifactuUrl: (invoice as { verifactuUrl?: string | null }).verifactuUrl ?? null,
+    invoiceDocType: (invoice as { invoiceDocType?: string | null }).invoiceDocType ?? null,
+    rectificationMethod: (invoice as { rectificationMethod?: string | null }).rectificationMethod ?? null,
   }
 }
 
@@ -149,6 +151,8 @@ function toPdfDataFromSnapshots(
     }),
     verifactuQr: (invoice as { verifactuQr?: string | null }).verifactuQr ?? null,
     verifactuUrl: (invoice as { verifactuUrl?: string | null }).verifactuUrl ?? null,
+    invoiceDocType: (invoice as { invoiceDocType?: string | null }).invoiceDocType ?? null,
+    rectificationMethod: (invoice as { rectificationMethod?: string | null }).rectificationMethod ?? null,
     branding: {
       logoUrl: (company.logoUrl as string | null) ?? null,
       companyName: (company.companyName as string) ?? "",

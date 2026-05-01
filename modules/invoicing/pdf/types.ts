@@ -53,4 +53,8 @@ export type InvoicePdfData = {
   /** Verifactu: QR base64 PNG and verification URL */
   verifactuQr?: string | null
   verifactuUrl?: string | null
+  /** Verifactu document type: F1, F2, R1-R5 */
+  invoiceDocType?: string | null
+  /** Rectification method: S (sustitución) | I (diferencias) */
+  rectificationMethod?: string | null
 }

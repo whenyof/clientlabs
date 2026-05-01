@@ -13,6 +13,7 @@ export type InvoiceDocumentModel = {
     address: string
     email: string
     phone: string
+    website: string | null
     logoUrl: string | null
   }
   recipient: {
@@ -29,13 +30,17 @@ export type InvoiceDocumentModel = {
     issueDate: string
     dueDate: string
     serviceDate: string | null
+    /** "FACTURA COMPLETA" | "FACTURA SIMPLIFICADA" | "FACTURA RECTIFICATIVA (R1)" etc. */
+    invoiceTypeTitle: string
   }
+  invoiceStatus: string
   /** When present, PDF shows "FACTURA RECTIFICATIVA" and original ref */
   rectification?: {
     title: string
     originalNumber: string
     originalIssueDate: string
     reason: string
+    method?: string | null
   }
   table: {
     headers: string[]
@@ -86,6 +91,17 @@ function formatMoney(amount: number, currency: string): string {
   }).format(amount)
 }
 
+function buildInvoiceTypeTitle(data: InvoicePdfData): string {
+  if (data.isRectification) {
+    const dt = (data.invoiceDocType ?? "").toUpperCase()
+    if (/^R[1-5]$/.test(dt)) return `FACTURA RECTIFICATIVA (${dt})`
+    return "FACTURA RECTIFICATIVA"
+  }
+  const dt = (data.invoiceDocType ?? "F1").toUpperCase()
+  if (dt === "F2") return "FACTURA SIMPLIFICADA"
+  return "FACTURA COMPLETA"
+}
+
 /**
  * Builds the document model for the invoice PDF. Used by invoice-renderer.
  */
@@ -102,6 +118,7 @@ export function buildInvoiceDocument(data: InvoicePdfData): InvoiceDocumentModel
       address: branding.address,
       email: branding.email,
       phone: branding.phone,
+      website: branding.website ?? null,
       logoUrl: branding.logoUrl,
     },
     recipient: {
@@ -118,16 +135,19 @@ export function buildInvoiceDocument(data: InvoicePdfData): InvoiceDocumentModel
       issueDate: formatDate(issueDate),
       dueDate: formatDate(dueDate),
       serviceDate: serviceDate ? formatDate(serviceDate) : null,
+      invoiceTypeTitle: buildInvoiceTypeTitle(data),
     },
+    invoiceStatus: data.status,
     ...(data.isRectification && (data.originalInvoiceNumber != null || data.rectificationReason)
       ? {
           rectification: {
-            title: "FACTURA RECTIFICATIVA",
+            title: buildInvoiceTypeTitle(data),
             originalNumber: data.originalInvoiceNumber ?? "—",
             originalIssueDate: data.originalIssueDate
               ? formatDate(new Date(data.originalIssueDate))
               : "—",
             reason: data.rectificationReason ?? "—",
+            method: data.rectificationMethod ?? null,
           },
         }
       : {}),

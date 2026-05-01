@@ -570,46 +570,52 @@ export function CreateInvoiceDialog({
                 <label className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">
                   Cliente
                 </label>
-                <select
-                  value={clientId}
-                  onChange={(e) => setClientId(e.target.value)}
-                  required
-                  disabled={!editableInEditMode}
-                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-[#1FA97A] focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/20 disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  <option value="">Seleccionar cliente</option>
-                  {clients.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name || c.email || c.id}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <select
+                    value={clientId}
+                    onChange={(e) => setClientId(e.target.value)}
+                    required
+                    disabled={!editableInEditMode}
+                    className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-8 text-sm text-slate-800 focus:border-[#1FA97A] focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/20 disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    <option value="">Seleccionar cliente</option>
+                    {clients.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name || c.email || c.id}
+                      </option>
+                    ))}
+                  </select>
+                  <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                </div>
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">
                   Pedido (opcional)
                 </label>
-                <select
-                  value={saleId}
-                  onChange={(e) => setSaleId(e.target.value)}
-                  disabled={!editableInEditMode || !clientId || loadingSales}
-                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-[#1FA97A] focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/20 disabled:opacity-50"
-                >
-                  <option value="">
-                    {loadingSales
-                      ? "Cargando…"
-                      : !clientId
-                        ? "Selecciona un cliente"
-                        : salesForClient.length === 0
-                          ? "No hay pedidos pendientes de facturar para este cliente"
-                          : "Ninguno"}
-                  </option>
-                  {salesForClient.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {(s.reference || s.number || s.id).slice(0, 20)} · {typeof s.date === "string" ? s.date.slice(0, 10) : ""} · {formatCurrency(s.total, s.currency ?? "EUR")}
+                <div className="relative">
+                  <select
+                    value={saleId}
+                    onChange={(e) => setSaleId(e.target.value)}
+                    disabled={!editableInEditMode || !clientId || loadingSales}
+                    className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-8 text-sm text-slate-800 focus:border-[#1FA97A] focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/20 disabled:opacity-50"
+                  >
+                    <option value="">
+                      {loadingSales
+                        ? "Cargando…"
+                        : !clientId
+                          ? "Selecciona un cliente"
+                          : salesForClient.length === 0
+                            ? "No hay pedidos pendientes de facturar para este cliente"
+                            : "Ninguno"}
                     </option>
-                  ))}
-                </select>
+                    {salesForClient.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {(s.reference || s.number || s.id).slice(0, 20)} · {typeof s.date === "string" ? s.date.slice(0, 10) : ""} · {formatCurrency(s.total, s.currency ?? "EUR")}
+                      </option>
+                    ))}
+                  </select>
+                  <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                </div>
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">
@@ -809,18 +815,21 @@ export function CreateInvoiceDialog({
 
             <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
               <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider">Retención IRPF</h3>
-              <select
-                value={irpfRate}
-                onChange={(e) => setIrpfRate(parseFloat(e.target.value))}
-                disabled={!editableInEditMode}
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-[#1FA97A] focus:outline-none disabled:opacity-60"
-              >
-                <option value={0}>Sin retención</option>
-                <option value={7}>7% — Primer año de actividad</option>
-                <option value={15}>15% — General (autónomos)</option>
-                <option value={19}>19% — Capital mobiliario</option>
-                <option value={2}>2% — Arrendamiento de inmuebles</option>
-              </select>
+              <div className="relative">
+                <select
+                  value={irpfRate}
+                  onChange={(e) => setIrpfRate(parseFloat(e.target.value))}
+                  disabled={!editableInEditMode}
+                  className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-8 text-sm text-slate-800 focus:border-[#1FA97A] focus:outline-none disabled:opacity-60"
+                >
+                  <option value={0}>Sin retención</option>
+                  <option value={7}>7% — Primer año de actividad</option>
+                  <option value={15}>15% — General (autónomos)</option>
+                  <option value={19}>19% — Capital mobiliario</option>
+                  <option value={2}>2% — Arrendamiento de inmuebles</option>
+                </select>
+                <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+              </div>
             </div>
 
             <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
@@ -828,16 +837,19 @@ export function CreateInvoiceDialog({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs text-slate-500 mb-1">Forma de pago</label>
-                  <select
-                    value={paymentMethod}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                    disabled={!editableInEditMode}
-                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-[#1FA97A] focus:outline-none disabled:opacity-60"
-                  >
-                    <option value="transferencia">Transferencia</option>
-                    <option value="tarjeta">Tarjeta</option>
-                    <option value="efectivo">Efectivo</option>
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={paymentMethod}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      disabled={!editableInEditMode}
+                      className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-8 text-sm text-slate-800 focus:border-[#1FA97A] focus:outline-none disabled:opacity-60"
+                    >
+                      <option value="transferencia">Transferencia</option>
+                      <option value="tarjeta">Tarjeta</option>
+                      <option value="efectivo">Efectivo</option>
+                    </select>
+                    <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-xs text-slate-500 mb-1">Referencia</label>

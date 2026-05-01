@@ -37,7 +37,10 @@ export async function renderInvoiceToBuffer(
   const header = PDF_LAYOUT.header
   if (options.logoDataUrl) {
     try {
-      pdf.addImage(options.logoDataUrl, "PNG", M, y, 40, header.logoHeight)
+      const imgFmt = /data:image\/jpe?g/i.test(options.logoDataUrl) ? "JPEG"
+        : /data:image\/webp/i.test(options.logoDataUrl) ? "WEBP"
+        : "PNG"
+      pdf.addImage(options.logoDataUrl, imgFmt, M, y, 40, header.logoHeight)
     } catch {
       // ignore invalid image
     }
@@ -192,7 +195,7 @@ export async function renderInvoiceToBuffer(
   pdf.setTextColor(...hexToRgb(colors.primary))
   pdf.text("Total", totalsX, y)
   pdf.text(doc.totals.total, M + W - 25, y)
-  y += totals.lineHeight + 8
+  y += totals.lineHeight + 6
 
   // ----- Payment block (Forma de pago, IBAN, Referencia) -----
   const hasPaymentInfo =
@@ -225,62 +228,98 @@ export async function renderInvoiceToBuffer(
       pdf.text("Referencia: " + doc.footer.paymentReference.trim(), M, y)
       y += block.lineHeight
     }
-    y += block.blockGap
+    y += 6
   }
 
   // ----- Verifactu QR or disclaimer -----
+  const PAGE_MAX_BODY = PDF_LAYOUT.page.height - PDF_LAYOUT.page.marginBottom - 4
   if (doc.footer.verifactuQr) {
+    const qrSize = 22
+    if (y + qrSize + 4 > PAGE_MAX_BODY) { pdf.addPage(); y = TOP }
     const qrImage = `data:image/png;base64,${doc.footer.verifactuQr}`
     try {
-      pdf.addImage(qrImage, "PNG", M, y, 28, 28)
+      pdf.addImage(qrImage, "PNG", M, y, qrSize, qrSize)
     } catch {
       // ignore invalid QR image
     }
+    // Text to the right of the QR
+    const txtX = M + qrSize + 4
+    const txtW = W - qrSize - 4
     pdf.setFontSize(7)
-    pdf.setTextColor(100, 100, 100)
-    pdf.setFont("helvetica", "normal")
-    pdf.text("Factura verificada · AEAT", M, y + 30)
+    pdf.setFont("helvetica", "bold")
+    pdf.setTextColor(60, 60, 60)
+    pdf.text("Factura verificada · AEAT", txtX, y + 7)
     if (doc.footer.verifactuUrl) {
-      pdf.text(doc.footer.verifactuUrl, M, y + 33, { maxWidth: 50 })
+      pdf.setFont("helvetica", "normal")
+      pdf.setFontSize(6)
+      pdf.setTextColor(100, 100, 100)
+      const urlLines = pdf.splitTextToSize(doc.footer.verifactuUrl, txtW) as string[]
+      urlLines.forEach((line, i) => {
+        pdf.text(line, txtX, y + 12 + i * 3)
+      })
     }
-    y += 36
+    y += qrSize + 4
   } else {
+    if (y + 6 > PAGE_MAX_BODY) { pdf.addPage(); y = TOP }
     pdf.setFontSize(7)
     pdf.setTextColor(150, 150, 150)
     pdf.setFont("helvetica", "italic")
     pdf.text("Documento orientativo — Pendiente de certificacion Verifactu.", M, y)
-    y += 8
+    y += 6
   }
 
-  // ----- Footer -----
+  // ----- Footer (legal, conditions, notes, terms) -----
+  // Uses dynamic y cursor — no fixed anchor — to prevent overlap with body content above.
   const footer = PDF_LAYOUT.footer
-  let footerCur = PDF_LAYOUT.page.height - PDF_LAYOUT.page.marginBottom - 25
+  const PAGE_MAX = PDF_LAYOUT.page.height - PDF_LAYOUT.page.marginBottom - 4
+
+  y += 4
+
   pdf.setFontSize(footer.size)
   pdf.setTextColor(...hexToRgb(colors.textMuted))
   pdf.setFont("helvetica", "normal")
+
   if (doc.footer.legal && doc.footer.legal.trim()) {
+    if (y > PAGE_MAX) { pdf.addPage(); y = TOP }
     const splitLegal = pdf.splitTextToSize(doc.footer.legal, W)
-    splitLegal.forEach((line: string) => {
-      pdf.text(line, M, footerCur)
-      footerCur += footer.lineHeight
-    })
-    pdf.setDrawColor(...hexToRgb(colors.border))
-    footerCur += 2
+    for (const line of splitLegal) {
+      if (y > PAGE_MAX) { pdf.addPage(); y = TOP }
+      pdf.text(line, M, y)
+      y += footer.lineHeight
+    }
+    y += 2
   }
+
   if (doc.footer.paymentConditions && doc.footer.paymentConditions.trim()) {
+    if (y > PAGE_MAX) { pdf.addPage(); y = TOP }
     const splitPay = pdf.splitTextToSize(doc.footer.paymentConditions, W)
-    splitPay.forEach((line: string) => {
-      pdf.text(line, M, footerCur)
-      footerCur += footer.lineHeight
-    })
+    for (const line of splitPay) {
+      if (y > PAGE_MAX) { pdf.addPage(); y = TOP }
+      pdf.text(line, M, y)
+      y += footer.lineHeight
+    }
+    y += 2
   }
+
   if (doc.footer.notes && doc.footer.notes.trim()) {
-    footerCur += 2
-    pdf.text("Notas: " + doc.footer.notes.slice(0, 200), M, footerCur)
-    footerCur += footer.lineHeight
+    if (y > PAGE_MAX) { pdf.addPage(); y = TOP }
+    const splitNotes = pdf.splitTextToSize("Notas: " + doc.footer.notes, W)
+    for (const line of splitNotes) {
+      if (y > PAGE_MAX) { pdf.addPage(); y = TOP }
+      pdf.text(line, M, y)
+      y += footer.lineHeight
+    }
+    y += 2
   }
+
   if (doc.footer.terms && doc.footer.terms.trim()) {
-    pdf.text("Condiciones: " + doc.footer.terms.slice(0, 150), M, footerCur)
+    if (y > PAGE_MAX) { pdf.addPage(); y = TOP }
+    const splitTerms = pdf.splitTextToSize("Condiciones: " + doc.footer.terms, W)
+    for (const line of splitTerms) {
+      if (y > PAGE_MAX) { pdf.addPage(); y = TOP }
+      pdf.text(line, M, y)
+      y += footer.lineHeight
+    }
   }
 
   const buf = Buffer.from(pdf.output("arraybuffer"))

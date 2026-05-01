@@ -18,6 +18,7 @@ import { CreateRectificativaModal } from "./CreateRectificativaModal"
 import { IssuedInvoiceEditBlockedModal } from "./IssuedInvoiceEditBlockedModal"
 import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog"
 import { InvoicePreviewModal } from "@/components/billing/InvoicePreview"
+import { VerifactuActivationBanner } from "./VerifactuActivationBanner"
 import type { InvoiceListItem, InvoiceDetail, InvoiceKPIsResponse, ClientOption } from "./types"
 import type { InvoiceLineInput } from "@domains/invoicing"
 import { INVOICE_STATUS, isInvoiceEditable } from "@domains/invoicing"
@@ -497,13 +498,14 @@ export function InvoiceView() {
     <div className="w-full space-y-5">
       <BannerLegal />
 
-      {/* Verifactu banners */}
+      {/* Verifactu onboarding / activation */}
       {verifactuEnabled === false && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          <strong>Facturación orientativa</strong> — Activa Verifactu en{" "}
-          <a href="/dashboard/settings" className="underline font-medium">Ajustes</a>{" "}
-          para emitir facturas con validez legal ante la AEAT.
-        </div>
+        <VerifactuActivationBanner
+          onActivated={() => {
+            setVerifactuEnabled(true)
+            setVerifactuTestMode(false)
+          }}
+        />
       )}
       {verifactuTestMode === true && (
         <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">

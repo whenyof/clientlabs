@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowRightIcon } from "@heroicons/react/24/outline"
+import { ExclamationTriangleIcon, ArrowRightIcon } from "@heroicons/react/24/outline"
 
 const FISCAL_TOOLTIP = "Completa los datos fiscales del cliente"
 
@@ -11,46 +11,46 @@ interface FiscalWarningProps {
   onFix?: () => void
 }
 
-/**
- * Shows a warning banner when the client does not have minimum legal data for invoicing (Spain).
- * Return null when isFiscalComplete is true.
- */
 export function FiscalWarning({ clientId, isFiscalComplete, onFix }: FiscalWarningProps) {
   if (isFiscalComplete) return null
 
   return (
     <div
-      className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3"
+      className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3"
       role="alert"
       aria-live="polite"
     >
-      <p className="text-sm font-medium text-amber-200/95">
-        ⚠ Datos fiscales incompletos
-      </p>
-      <p className="text-xs text-amber-200/80 mt-1">
-        Este cliente no tiene la información mínima obligatoria para emitir una factura legal.
-      </p>
-      {onFix ? (
-        <button
-          type="button"
-          onClick={onFix}
-          className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-amber-500/40 bg-amber-500/20 px-3 py-2 text-sm font-medium text-amber-200 hover:bg-amber-500/30 transition-colors"
-        >
-          <ArrowRightIcon className="w-4 h-4 shrink-0" aria-hidden />
-          → Completar datos en esta factura
-        </button>
-      ) : (
-        <Link
-          href={`/dashboard/clients/${clientId}`}
-          className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-amber-500/40 bg-amber-500/20 px-3 py-2 text-sm font-medium text-amber-200 hover:bg-amber-500/30 transition-colors"
-        >
-          <ArrowRightIcon className="w-4 h-4 shrink-0" aria-hidden />
-          → Completar datos del cliente
-        </Link>
-      )}
+      <div className="flex items-start gap-2.5">
+        <ExclamationTriangleIcon className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-amber-800">
+            Datos fiscales incompletos
+          </p>
+          <p className="text-xs text-amber-700 mt-0.5">
+            Este cliente no tiene la información mínima obligatoria para emitir una factura legal.
+          </p>
+          {onFix ? (
+            <button
+              type="button"
+              onClick={onFix}
+              className="mt-2.5 inline-flex items-center gap-1.5 rounded-lg bg-amber-100 border border-amber-300 px-3 py-1.5 text-xs font-medium text-amber-800 hover:bg-amber-200 transition-colors"
+            >
+              Completar datos en esta factura
+              <ArrowRightIcon className="w-3.5 h-3.5 shrink-0" aria-hidden />
+            </button>
+          ) : (
+            <Link
+              href={`/dashboard/clients/${clientId}`}
+              className="mt-2.5 inline-flex items-center gap-1.5 rounded-lg bg-amber-100 border border-amber-300 px-3 py-1.5 text-xs font-medium text-amber-800 hover:bg-amber-200 transition-colors"
+            >
+              Completar datos del cliente
+              <ArrowRightIcon className="w-3.5 h-3.5 shrink-0" aria-hidden />
+            </Link>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
 
-/** Tooltip text for disabled invoice actions when client is not fiscally complete. */
 export const FISCAL_DISABLED_TOOLTIP = FISCAL_TOOLTIP

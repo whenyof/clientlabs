@@ -56,7 +56,6 @@ export async function getBrandingForUser(userId: string): Promise<InvoiceBrandin
       const addressLine =
         [profile.address, profile.postalCode, profile.city, profile.country].filter(Boolean).join(", ") ||
         DEFAULT_BRANDING.address
-      console.log("PROFILE USED:", profile.companyName ?? profile.name)
       return {
         ...DEFAULT_BRANDING,
         logoUrl: profile.logoUrl ?? user?.image ?? null,

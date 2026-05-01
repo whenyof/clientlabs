@@ -1,5 +1,5 @@
 /**
- * Invoice PDF generator — load invoice, render, upload to Cloudinary, update DB, return URL.
+ * Invoice PDF generator — load invoice, render, return buffer.
  * Only import from API routes (server-only by usage).
  */
 import { readFile } from "fs/promises"
@@ -164,25 +164,16 @@ function toPdfDataFromSnapshots(
 }
 
 /**
- * Generates the invoice PDF, saves it to storage, updates invoice.pdfUrl and pdfGeneratedAt, returns the public URL.
- * If forceRegenerate is false and invoice already has a valid pdfUrl (file exists), returns that URL without regenerating.
+ * Generates the invoice PDF buffer. Returns the raw bytes and invoice number for serving inline.
  */
 export async function generateInvoicePDF(
   invoiceId: string,
   userId: string,
   options: { forceRegenerate?: boolean } = {}
-): Promise<{ url: string; regenerated: boolean } | null> {
+): Promise<{ buffer: Buffer; number: string } | null> {
+  void options // forceRegenerate unused — always regenerate fresh
   const invoice = await invoiceRepo.findById(invoiceId, userId)
   if (!invoice) return null
-
-  const pdfUrl = invoice.pdfUrl as string | null | undefined
-  if (!options.forceRegenerate && pdfUrl) {
-    // If already in Cloudinary (https URL), return directly
-    if (pdfUrl.startsWith("https://")) {
-      return { url: pdfUrl, regenerated: false }
-    }
-    // Legacy local path — fall through to regenerate and upload to Cloudinary
-  }
 
   const snap = invoice as NonNullable<InvoiceForPdf> & IssuedSnapshots
   const useSnapshots =
@@ -231,30 +222,7 @@ export async function generateInvoicePDF(
     logoDataUrl,
   })
 
-  // Upload to Cloudinary instead of filesystem
-  const { default: cloudinary } = await import("@/lib/cloudinary")
-  const uploadResult = await new Promise<{ secure_url: string }>((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      {
-        resource_type: "raw",
-        folder: "invoices",
-        public_id: `factura-${invoiceId}`,
-        format: "pdf",
-        overwrite: true,
-      },
-      (error, result) => {
-        if (error || !result) reject(error ?? new Error("Cloudinary upload failed"))
-        else resolve(result as { secure_url: string })
-      }
-    )
-    stream.end(buffer)
-  })
-
-  const url = uploadResult.secure_url
-  const now = new Date()
-  await invoiceRepo.updateInvoicePdf(invoiceId, userId, url, now)
-
-  return { url, regenerated: true }
+  return { buffer, number: invoice.number }
 }
 
 async function fetchLogoAsDataUrl(url: string): Promise<string | null> {

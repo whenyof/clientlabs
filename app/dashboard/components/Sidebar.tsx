@@ -306,9 +306,8 @@ export default function Sidebar({
           label: "Conectar",
           icon: Link2,
           children: [
+            { label: "Analíticas", href: "/dashboard/connect/analytics", icon: Activity },
             { label: "Conexiones", href: "/dashboard/connect", icon: Globe },
-            { label: "Script web", href: "/dashboard/connect/web", icon: Code2 },
-            { label: "Analytics", href: "/dashboard/connect/analytics", icon: Activity },
           ],
         },
       ],

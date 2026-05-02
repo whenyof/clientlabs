@@ -3,7 +3,8 @@ export const maxDuration = 10
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { isVerifactuEnabled, isVerifactuTest, resolveVerifactuApiKey } from "@/lib/verifactu"
+import { prisma } from "@/lib/prisma"
+import { isVerifactuEnabled, isVerifactuTest } from "@/lib/verifactu"
 
 export async function GET() {
   const session = await getServerSession(authOptions)
@@ -11,8 +12,13 @@ export async function GET() {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 })
   }
 
-  const apiKey = await resolveVerifactuApiKey(session.user.id)
-  const enabled = !!apiKey
+  const profile = await prisma.businessProfile.findUnique({
+    where: { userId: session.user.id },
+    select: { verifactuEnabled: true, verifactuApiKey: true },
+  })
+
+  const enabled = profile?.verifactuEnabled ?? false
+  const apiKey = enabled ? (profile?.verifactuApiKey ?? null) : null
   const testMode = apiKey?.startsWith("vf_test_") ?? isVerifactuTest()
 
   return NextResponse.json({

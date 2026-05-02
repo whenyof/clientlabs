@@ -62,9 +62,10 @@ const sortedArticles = [...ARTICLES].sort(
     new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
 )
 
-type PageProps = { searchParams: { cat?: string } }
+type PageProps = { searchParams: Promise<{ cat?: string }> }
 
-export default function BlogPage({ searchParams }: PageProps) {
+export default async function BlogPage({ searchParams: searchParamsPromise }: PageProps) {
+  const searchParams = await searchParamsPromise
   const activeCategory = searchParams.cat ?? "all"
   const filtered =
     activeCategory === "all"

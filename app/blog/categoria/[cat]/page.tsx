@@ -4,7 +4,7 @@ import { notFound } from "next/navigation"
 import { Navbar } from "../../../ui/chrome"
 import { ARTICLES } from "../../data"
 
-type Props = { params: { cat: string } }
+type Props = { params: Promise<{ cat: string }> }
 
 const CATEGORY_MAP: Record<string, { label: string; description: string }> = {
   normativa: {
@@ -55,23 +55,25 @@ export function generateStaticParams() {
   return Object.keys(CATEGORY_MAP).map((cat) => ({ cat }))
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const cat = CATEGORY_MAP[params.cat]
+export async function generateMetadata({ params: paramsPromise }: Props): Promise<Metadata> {
+  const { cat: catKey } = await paramsPromise
+  const cat = CATEGORY_MAP[catKey]
   return {
-    title: `${cat?.label ?? params.cat} | Blog ClientLabs`,
+    title: `${cat?.label ?? catKey} | Blog ClientLabs`,
     description: cat?.description ?? "",
     alternates: {
-      canonical: `https://clientlabs.io/blog/categoria/${params.cat}`,
+      canonical: `https://clientlabs.io/blog/categoria/${catKey}`,
     },
   }
 }
 
-export default function CategoryPage({ params }: Props) {
-  const cat = CATEGORY_MAP[params.cat]
+export default async function CategoryPage({ params: paramsPromise }: Props) {
+  const { cat: catKey } = await paramsPromise
+  const cat = CATEGORY_MAP[catKey]
   if (!cat) notFound()
 
-  const accent = CATEGORY_ACCENT[params.cat] ?? CATEGORY_ACCENT.guia
-  const articles = ARTICLES.filter((a) => a.categoryKey === params.cat)
+  const accent = CATEGORY_ACCENT[catKey] ?? CATEGORY_ACCENT.guia
+  const articles = ARTICLES.filter((a) => a.categoryKey === catKey)
 
   return (
     <main className="min-h-screen bg-[#0B1F2A] text-white">

@@ -8,7 +8,7 @@ import { ARTICLE_CONTENT } from "../content"
 
 export const revalidate = 86400
 
-type Props = { params: { slug: string } }
+type Props = { params: Promise<{ slug: string }> }
 
 function formatDate(iso: string): string {
   const [y, m, d] = iso.split("-").map(Number)
@@ -23,8 +23,9 @@ export function generateStaticParams() {
   return ARTICLES.map((a) => ({ slug: a.slug }))
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const article = ARTICLES.find((a) => a.slug === params.slug)
+export async function generateMetadata({ params: paramsPromise }: Props): Promise<Metadata> {
+  const { slug } = await paramsPromise
+  const article = ARTICLES.find((a) => a.slug === slug)
   if (!article) return {}
   return {
     title: `${article.title} | ClientLabs Blog`,
@@ -33,8 +34,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default function BlogArticlePage({ params }: Props) {
-  const article = ARTICLES.find((a) => a.slug === params.slug)
+export default async function BlogArticlePage({ params: paramsPromise }: Props) {
+  const { slug } = await paramsPromise
+  const article = ARTICLES.find((a) => a.slug === slug)
   if (!article) notFound()
 
   const content = ARTICLE_CONTENT[article.slug]

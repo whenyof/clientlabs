@@ -1,4 +1,5 @@
 import { Inter, Inter_Tight, JetBrains_Mono } from "next/font/google"
+import Script from "next/script"
 import { CookieBanner } from "./components/CookieBanner"
 
 const interTight = Inter_Tight({
@@ -22,6 +23,12 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 })
 
+const SDK_KEY = process.env.NEXT_PUBLIC_CLIENTLABS_SDK_KEY ?? ""
+const SDK_CONFIG = JSON.stringify({
+  key: SDK_KEY,
+  features: { pageview: true, forms: true, intent: true, utm: true, cta: true },
+})
+
 export default function PublicLayout({
   children,
 }: {
@@ -29,6 +36,13 @@ export default function PublicLayout({
 }) {
   return (
     <div className={`min-h-screen ${interTight.variable} ${inter.variable} ${jetbrainsMono.variable}`}>
+      {/* ClientLabs tracking — self-hosted SDK */}
+      {SDK_KEY && (
+        <>
+          <Script id="cl-config" strategy="beforeInteractive">{`window.clientlabsConfig=${SDK_CONFIG};`}</Script>
+          <Script src="/v1/loader.js" strategy="afterInteractive" />
+        </>
+      )}
       {children}
       <CookieBanner />
     </div>

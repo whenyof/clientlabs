@@ -200,10 +200,13 @@ export async function POST(request: NextRequest) {
             userAgent,
         } : null
 
+        let identifiedLead: { id: string } | null = null
+
         for (const event of validEvents) {
             const normType = normalizeEventType(getEventType(event as unknown as Record<string, unknown>))
             if (normType === 'identify') {
-                await handleIdentify(userId, visitorId, (event as TrackEvent).metadata)
+                const result = await handleIdentify(userId, visitorId, (event as TrackEvent).metadata)
+                if (result) identifiedLead = result
             } else if (normType === 'sdk_loaded' || normType === 'sdk_heartbeat') {
                 // 📡 Installation verification: update lastSeen for dashboard
                 await prisma.sdkConnection.upsert({
@@ -225,8 +228,7 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        // Lead model has no visitorId; visitor–lead link not available — treat as anonymous unless identified elsewhere
-        const lead = null as { id: string } | null
+        const lead = identifiedLead
 
         let sessionId: string | undefined = undefined
         if (sessionCtx) {
@@ -282,10 +284,14 @@ export async function POST(request: NextRequest) {
     }
 }
 
-async function handleIdentify(userId: string, visitorId: string, metadata: Record<string, unknown>): Promise<void> {
+async function handleIdentify(
+    userId: string,
+    visitorId: string,
+    metadata: Record<string, unknown>
+): Promise<{ id: string } | null> {
     const rawEmail = metadata.email as string | undefined
     const email = rawEmail?.toLowerCase().trim()
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return null
 
     const sanitizedName = (metadata.name as string | undefined)?.substring(0, 100)
     const sanitizedPhone = (metadata.phone as string | undefined)?.substring(0, 30)
@@ -298,6 +304,7 @@ async function handleIdentify(userId: string, visitorId: string, metadata: Recor
         ? await prisma.lead.update({
             where: { id: existing.id },
             data: { name: sanitizedName, phone: sanitizedPhone },
+            select: { id: true },
         })
         : await prisma.lead.create({
             data: {
@@ -307,7 +314,9 @@ async function handleIdentify(userId: string, visitorId: string, metadata: Recor
                 phone: sanitizedPhone,
                 source: "WEB",
             },
+            select: { id: true },
         })
 
     await linkSessionsToLead(visitorId, userId, lead.id).catch(() => { })
+    return { id: lead.id }
 }

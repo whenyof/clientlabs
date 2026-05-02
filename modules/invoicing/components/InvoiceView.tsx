@@ -3,7 +3,7 @@ import { getBaseUrl } from "@/lib/api/baseUrl"
 
 
 import { useState, useCallback, useEffect, useRef, useMemo } from "react"
-import { Plus, ChevronDown, X } from "lucide-react"
+import { Plus, ChevronDown, X, Shield } from "lucide-react"
 import { BannerLegal } from "@/components/finance/BannerLegal"
 import { ImportarDocumento } from "@/components/finance/ImportarDocumento"
 import { InvoiceKPIs } from "./InvoiceKPIs"
@@ -17,7 +17,7 @@ import { SelectInvoiceForRectificationDialog } from "./SelectInvoiceForRectifica
 import { CreateRectificativaModal } from "./CreateRectificativaModal"
 import { IssuedInvoiceEditBlockedModal } from "./IssuedInvoiceEditBlockedModal"
 import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog"
-import { VerifactuActivationBanner } from "./VerifactuActivationBanner"
+import { VerifactuActivationModal } from "@/app/dashboard/settings/components/VerifactuActivationModal"
 import type { InvoiceListItem, InvoiceDetail, InvoiceKPIsResponse, ClientOption } from "./types"
 import type { InvoiceLineInput } from "@domains/invoicing"
 import { INVOICE_STATUS, isInvoiceEditable } from "@domains/invoicing"
@@ -146,6 +146,7 @@ export function InvoiceView() {
   const [modalImportar, setModalImportar] = useState(false)
   const [verifactuTestMode, setVerifactuTestMode] = useState<boolean | null>(null)
   const [verifactuEnabled, setVerifactuEnabled] = useState<boolean | null>(null)
+  const [showActivationModal, setShowActivationModal] = useState(false)
   const skipInitialFetch = useRef(false)
 
   // Quick-tab filter state
@@ -516,18 +517,58 @@ export function InvoiceView() {
   const hasIssuedInvoices = tabCounts.issued > 0
 
   return (
-    <div className="w-full space-y-5">
-      <BannerLegal />
+    <div className="w-full">
 
-      {/* Verifactu onboarding / activation */}
-      {verifactuEnabled === false && (
-        <VerifactuActivationBanner
-          onActivated={() => {
-            setVerifactuEnabled(true)
-            setVerifactuTestMode(false)
-          }}
-        />
+      {/* Gate: checking status */}
+      {verifactuEnabled === null && (
+        <div className="flex items-center justify-center py-32">
+          <p className="text-[13px] text-slate-400 animate-pulse">Cargando facturación...</p>
+        </div>
       )}
+
+      {/* Gate: Verifactu not activated — blocking screen */}
+      {verifactuEnabled === false && (
+        <>
+          <div className="flex flex-col items-center justify-center py-24 text-center max-w-lg mx-auto">
+            <div className="mb-6 grid h-16 w-16 place-items-center rounded-2xl bg-emerald-50">
+              <Shield className="h-8 w-8 text-[#1FA97A]" />
+            </div>
+            <h2 className="text-2xl font-bold text-slate-900">Activa la facturación legal</h2>
+            <p className="mt-3 text-slate-500 text-sm leading-relaxed">
+              Para emitir facturas desde ClientLabs necesitas activar el sistema VERI*FACTU.
+              Tus facturas se enviarán automáticamente a la AEAT con QR verificable,
+              cumpliendo con la Ley Antifraude.
+            </p>
+            <p className="mt-2 text-slate-400 text-xs">
+              Solo necesitas aceptar el acuerdo una vez. Es gratis en tu plan.
+            </p>
+            <button
+              type="button"
+              onClick={() => setShowActivationModal(true)}
+              className="mt-6 rounded-lg bg-[#1FA97A] px-6 py-3 text-sm font-medium text-white hover:bg-[#178a64] shadow-sm transition-colors"
+            >
+              Activar Verifactu
+            </button>
+          </div>
+          {showActivationModal && (
+            <VerifactuActivationModal
+              nifDefault=""
+              nombreDefault=""
+              onSuccess={() => {
+                setVerifactuEnabled(true)
+                setVerifactuTestMode(false)
+                setShowActivationModal(false)
+              }}
+              onClose={() => setShowActivationModal(false)}
+            />
+          )}
+        </>
+      )}
+
+      {/* Normal invoicing view — only when Verifactu is enabled */}
+      {verifactuEnabled === true && (
+      <div className="space-y-5">
+      <BannerLegal />
       {verifactuTestMode === true && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
           <strong>Verifactu en modo test</strong> — Las facturas se registran en el entorno de pruebas de la AEAT (prewww2) y no tienen validez fiscal. Para emitir facturas legales, cambia a producción en{" "}
@@ -796,6 +837,8 @@ export function InvoiceView() {
             </div>
           </div>
         </div>
+      )}
+      </div>
       )}
     </div>
   )

@@ -7,17 +7,20 @@ import Link from "next/link"
 interface Props {
   nifDefault: string
   nombreDefault: string
-  onSuccess: (nif: string, nombre: string) => void
+  direccionDefault?: string
+  cpDefault?: string
+  ciudadDefault?: string
+  onSuccess: (nif: string, nombre: string, address?: string, postalCode?: string, city?: string) => void
   onClose: () => void
 }
 
-export function VerifactuActivationModal({ nifDefault, nombreDefault, onSuccess, onClose }: Props) {
+export function VerifactuActivationModal({ nifDefault, nombreDefault, direccionDefault = "", cpDefault = "", ciudadDefault = "", onSuccess, onClose }: Props) {
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [nif, setNif] = useState(nifDefault)
   const [nombre, setNombre] = useState(nombreDefault)
-  const [direccion, setDireccion] = useState("")
-  const [cp, setCp] = useState("")
-  const [ciudad, setCiudad] = useState("")
+  const [direccion, setDireccion] = useState(direccionDefault)
+  const [cp, setCp] = useState(cpDefault)
+  const [ciudad, setCiudad] = useState(ciudadDefault)
   const [provincia, setProvincia] = useState("")
   const [agreementChecked, setAgreementChecked] = useState(false)
   const [declaracionChecked, setDeclaracionChecked] = useState(false)
@@ -212,7 +215,7 @@ export function VerifactuActivationModal({ nifDefault, nombreDefault, onSuccess,
                 <li>Envío automático a VERI*FACTU</li>
               </ul>
               <button
-                onClick={() => onSuccess(nif, nombre)}
+                onClick={() => onSuccess(nif, nombre, direccion || undefined, cp || undefined, ciudad || undefined)}
                 className="w-full rounded-lg bg-[#1FA97A] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#1a9469] transition-colors"
               >
                 Continuar

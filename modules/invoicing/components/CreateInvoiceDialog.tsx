@@ -228,14 +228,11 @@ export function CreateInvoiceDialog({
       return
     }
     const url = `/api/invoicing/client-sales?clientId=${encodeURIComponent(clientId)}`
-    console.log("CLIENT SELECTED:", clientId)
-    console.log("FETCHING SALES:", url)
     setLoadingSales(true)
     fetch(url, { credentials: "include" })
       .then((res) => res.ok ? res.json() : [])
       .then((data) => {
         const list = Array.isArray(data) ? data : []
-        console.log("SALES RECEIVED:", list.length, list)
         setSalesForClient(list)
         setSaleId("")
       })
@@ -330,8 +327,6 @@ export function CreateInvoiceDialog({
             setTerms(termsText)
             const lang = data?.company?.invoiceLanguage?.trim()
             if (lang) setInvoiceLanguage(lang)
-            console.log("AUTO NOTES:", notesText)
-            console.log("AUTO TERMS:", termsText)
           })
       }
     } else if (!open) {

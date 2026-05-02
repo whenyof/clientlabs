@@ -69,7 +69,7 @@ export async function POST(request: Request) {
         ...(direccion && { address: direccion }),
         ...(cp && { postalCode: cp }),
         ...(ciudad && { city: ciudad }),
-        ...(provincia && { country: provincia }),
+        country: "España",
       },
     })
 

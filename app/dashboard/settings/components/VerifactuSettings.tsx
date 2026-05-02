@@ -10,6 +10,9 @@ interface VerifactuProfile {
   verifactuActivatedAt: string | null
   taxId: string | null
   legalName: string | null
+  address: string | null
+  postalCode: string | null
+  city: string | null
 }
 
 export function VerifactuSettings() {
@@ -27,16 +30,19 @@ export function VerifactuSettings() {
             verifactuActivatedAt: data.profile.verifactuActivatedAt ?? null,
             taxId: data.profile.taxId ?? null,
             legalName: data.profile.legalName ?? data.profile.companyName ?? null,
+            address: data.profile.address ?? null,
+            postalCode: data.profile.postalCode ?? null,
+            city: data.profile.city ?? null,
           })
         }
       })
       .finally(() => setLoading(false))
   }, [])
 
-  const handleSuccess = (nif: string, nombre: string) => {
+  const handleSuccess = (nif: string, nombre: string, address?: string, postalCode?: string, city?: string) => {
     setProfile((prev) =>
       prev
-        ? { ...prev, verifactuEnabled: true, verifactuActivatedAt: new Date().toISOString(), taxId: nif, legalName: nombre }
+        ? { ...prev, verifactuEnabled: true, verifactuActivatedAt: new Date().toISOString(), taxId: nif, legalName: nombre, address: address ?? prev.address, postalCode: postalCode ?? prev.postalCode, city: city ?? prev.city }
         : prev
     )
     setShowModal(false)
@@ -111,6 +117,9 @@ export function VerifactuSettings() {
         <VerifactuActivationModal
           nifDefault={profile?.taxId ?? ""}
           nombreDefault={profile?.legalName ?? ""}
+          direccionDefault={profile?.address ?? ""}
+          cpDefault={profile?.postalCode ?? ""}
+          ciudadDefault={profile?.city ?? ""}
           onSuccess={handleSuccess}
           onClose={() => setShowModal(false)}
         />

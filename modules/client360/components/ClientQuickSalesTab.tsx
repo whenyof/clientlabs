@@ -290,7 +290,7 @@ export function ClientQuickSalesTab({ clientId }: Props) {
         action: {
           label: "Generar factura",
           onClick: () => {
-            window.location.href = `/dashboard/finance/invoicing/new?clientId=${clientId}&concept=${encodeURIComponent(sale.concept)}&total=${sale.total}`
+            window.location.href = `/dashboard/finance/invoicing?newInvoice=1&clientId=${clientId}&concept=${encodeURIComponent(sale.concept)}&amount=${sale.total}`
           },
         },
         duration: 8000,
@@ -445,7 +445,7 @@ export function ClientQuickSalesTab({ clientId }: Props) {
                           <button
                             title="Generar factura"
                             onClick={() => {
-                              window.location.href = `/dashboard/finance/invoicing/new?clientId=${clientId}&concept=${encodeURIComponent(sale.concept)}&total=${sale.total}`
+                              window.location.href = `/dashboard/finance/invoicing?newInvoice=1&clientId=${clientId}&concept=${encodeURIComponent(sale.concept)}&amount=${sale.total}`
                             }}
                             className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                           >

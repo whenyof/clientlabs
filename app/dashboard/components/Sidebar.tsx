@@ -479,20 +479,16 @@ export default function Sidebar({
             const isPro = plan === "PRO"
             return (
               <button
-                onClick={() => router.push("/dashboard/finance/billing")}
+                onClick={() => router.push("/precios")}
                 className="w-full group flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg border border-[var(--border-subtle)] hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] transition-all"
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 text-[9px] font-black ${isFree ? "bg-slate-100 text-slate-500" : isPro ? "bg-[#1FA97A]/15 text-[#1FA97A]" : "bg-amber-100 text-amber-600"}`}>
-                    {isFree ? "F" : isPro ? "P" : "B"}
-                  </div>
+                  <Crown size={14} className={`shrink-0 ${isFree ? "text-slate-400" : isPro ? "text-[#1FA97A]" : "text-amber-500"}`} />
                   <div className="text-left min-w-0">
                     <p className="text-[11px] font-semibold text-[var(--text-primary)] leading-tight truncate">
                       Plan {isFree ? "Free" : isPro ? "Pro" : "Business"}
                     </p>
-                    {isFree && (
-                      <p className="text-[10px] text-[var(--accent)] leading-tight">Actualizar plan</p>
-                    )}
+                    <p className="text-[10px] text-[var(--accent)] leading-tight">Cambiar plan</p>
                   </div>
                 </div>
                 <ChevronRight size={12} className="text-[var(--text-secondary)] group-hover:text-[var(--accent)] shrink-0 transition-colors" />

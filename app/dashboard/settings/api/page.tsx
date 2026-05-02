@@ -20,6 +20,7 @@ import {
 } from "@heroicons/react/24/outline"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+import Link from "next/link"
 
 interface ApiKey {
     id: string
@@ -29,6 +30,16 @@ interface ApiKey {
     expiryDate: string | null
     lastUsed: string | null
     createdAt: string
+    revoked: boolean
+}
+
+interface PublicKey {
+    id: string
+    name: string
+    domain: string | null
+    rawKey: string | null
+    sdkStatus: "not_installed" | "active" | "inactive"
+    lastEventAt: string | null
     revoked: boolean
 }
 
@@ -44,10 +55,51 @@ export default function ApiSettingsPage() {
     const [revealingKeyId, setRevealingKeyId] = useState<string | null>(null)
     const [revealedKey, setRevealedKey] = useState<string | null>(null)
     const [isRevealedKeyVisible, setIsRevealedKeyVisible] = useState(false)
+    const [publicKeys, setPublicKeys] = useState<PublicKey[]>([])
+    const [publicKeyLoading, setPublicKeyLoading] = useState(true)
+    const [regeneratingPubKey, setRegeneratingPubKey] = useState(false)
 
     useEffect(() => {
         fetchKeys()
+        fetchPublicKeys()
     }, [])
+
+    const fetchPublicKeys = async () => {
+        setPublicKeyLoading(true)
+        try {
+            const res = await fetch(getBaseUrl() + "/api/settings/public-keys")
+            if (res.ok) {
+                const data = await res.json()
+                setPublicKeys((data as PublicKey[]).filter(k => !k.revoked))
+            }
+        } catch {
+            // silent
+        } finally {
+            setPublicKeyLoading(false)
+        }
+    }
+
+    const handleRegeneratePublicKey = async (id: string) => {
+        if (!confirm("¿Regenerar la clave pública SDK? El snippet dejará de funcionar hasta que actualices la clave en tu sitio.")) return
+        setRegeneratingPubKey(true)
+        try {
+            const res = await fetch(getBaseUrl() + "/api/settings/public-keys/regenerate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id })
+            })
+            if (res.ok) {
+                toast.success("Clave pública regenerada")
+                fetchPublicKeys()
+            } else {
+                toast.error("Error al regenerar la clave")
+            }
+        } catch {
+            toast.error("Error de conexión")
+        } finally {
+            setRegeneratingPubKey(false)
+        }
+    }
 
     const fetchKeys = async () => {
         setLoading(true)
@@ -167,8 +219,84 @@ export default function ApiSettingsPage() {
         { id: "logs", label: "Logs", icon: ListBulletIcon, disabled: true },
     ]
 
+    const activePubKey = publicKeys[0] ?? null
+
     return (
         <div className="space-y-6">
+            {/* SDK Public Key Card */}
+            <div className="bg-white rounded-xl border border-slate-200 p-5">
+                <div className="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 className="text-sm font-semibold text-[#0B1F2A]">Clave pública SDK</h3>
+                        <p className="text-xs text-slate-500 mt-0.5">Usada en el snippet de tracking web (cl_pub_…)</p>
+                    </div>
+                    {activePubKey && (
+                        <span className={cn(
+                            "inline-flex px-2 py-0.5 text-[10px] font-semibold uppercase rounded border",
+                            activePubKey.sdkStatus === "active"
+                                ? "bg-emerald-50 text-emerald-600 border-emerald-200"
+                                : activePubKey.sdkStatus === "inactive"
+                                    ? "bg-amber-50 text-amber-600 border-amber-200"
+                                    : "bg-slate-50 text-slate-400 border-slate-200"
+                        )}>
+                            {activePubKey.sdkStatus === "active" ? "Activo" : activePubKey.sdkStatus === "inactive" ? "Sin eventos" : "No instalado"}
+                        </span>
+                    )}
+                </div>
+
+                {publicKeyLoading ? (
+                    <div className="flex items-center gap-2 text-sm text-slate-400">
+                        <ArrowPathIcon className="w-4 h-4 animate-spin" />
+                        Cargando...
+                    </div>
+                ) : activePubKey ? (
+                    <div className="space-y-3">
+                        {activePubKey.domain && (
+                            <p className="text-xs text-slate-400">Dominio: <span className="font-mono text-slate-600">{activePubKey.domain}</span></p>
+                        )}
+                        <div className="relative">
+                            <div className="bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 font-mono text-sm text-[var(--accent)] break-all select-all pr-10">
+                                {activePubKey.rawKey ?? "••••••••••••••••••••••••••••••••"}
+                            </div>
+                            {activePubKey.rawKey && (
+                                <button
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(activePubKey.rawKey!)
+                                        setCopiedId("pubkey")
+                                        setTimeout(() => setCopiedId(null), 2000)
+                                        toast.success("Clave pública copiada")
+                                    }}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-[var(--accent)] border border-slate-200 rounded-lg bg-white transition-colors"
+                                >
+                                    {copiedId === "pubkey" ? <CheckIcon className="w-4 h-4" /> : <DocumentDuplicateIcon className="w-4 h-4" />}
+                                </button>
+                            )}
+                        </div>
+                        <div className="flex justify-end">
+                            <button
+                                onClick={() => handleRegeneratePublicKey(activePubKey.id)}
+                                disabled={regeneratingPubKey}
+                                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-500 hover:text-[#0B1F2A] border border-slate-200 rounded-lg bg-white transition-colors disabled:opacity-50"
+                            >
+                                <ArrowPathIcon className={cn("w-3.5 h-3.5", regeneratingPubKey && "animate-spin")} />
+                                Regenerar
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="flex items-center gap-3 p-4 bg-slate-50 border border-slate-100 rounded-lg">
+                        <ShieldCheckIcon className="w-5 h-5 text-slate-300 flex-shrink-0" />
+                        <p className="text-sm text-slate-500">
+                            No hay clave pública generada.{" "}
+                            <Link href="/dashboard/connect/web" className="text-[var(--accent)] hover:underline font-medium">
+                                Configura tu dominio en Conectar → Web
+                            </Link>{" "}
+                            para generarla automáticamente.
+                        </p>
+                    </div>
+                )}
+            </div>
+
             {/* Section Header */}
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>

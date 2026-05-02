@@ -22,7 +22,7 @@ export function VerificationCard({ status, lastUsed, domain }: VerificationCardP
             const interval = setInterval(() => {
                 router.refresh()
                 setPulse(prev => !prev)
-            }, 8000)
+            }, 10_000)
             return () => clearInterval(interval)
         }
     }, [status, router])

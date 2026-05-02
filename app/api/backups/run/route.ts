@@ -38,8 +38,6 @@ export async function POST(request: NextRequest) {
  // Execute backup script
  const scriptPath = path.join(process.cwd(), 'scripts', 'au')
 
- console.log('Starting manual backup via API:', { user: accessCheck.user?.email })
-
  // Run backup with timeout (10 minutes)
  const { stdout, stderr } = await execAsync(`bash "${scriptPath}"`, {
  cwd: process.cwd(),
@@ -52,8 +50,6 @@ export async function POST(request: NextRequest) {
  // Extract backup info from output
  const backupMatch = output.match(/📦 Backup: ([^\n]+)/)
  const backupName = backupMatch ? backupMatch[1].replace(/`/g, '') : 'Unknown'
-
- console.log('Manual backup completed via API:', { backupName, user: accessCheck.user?.email })
 
  return NextResponse.json({
  success: true,

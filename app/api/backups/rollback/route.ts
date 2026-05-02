@@ -72,11 +72,6 @@ export async function POST(request: NextRequest) {
  )
  }
 
- console.log('Starting rollback via API:', {
- backupName,
- user: accessCheck.user?.email
- })
-
  // Execute rollback script
  const scriptPath = path.join(process.cwd(), 'scripts', 'restore-backup.sh')
 
@@ -87,11 +82,6 @@ export async function POST(request: NextRequest) {
  })
 
  const output = stdout + stderr
-
- console.log('Rollback completed via API:', {
- backupName,
- user: accessCheck.user?.email
- })
 
  return NextResponse.json({
  success: true,

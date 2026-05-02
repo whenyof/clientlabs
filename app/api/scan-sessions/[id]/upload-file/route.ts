@@ -38,12 +38,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const { id } = await params
     const token = req.nextUrl.searchParams.get("token")
 
-    console.log("[upload-file] request", {
-      sessionId: id,
-      hasToken: Boolean(token),
-      tokenLength: token?.length ?? 0,
-    })
-
     if (!id || !token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
@@ -51,19 +45,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const scanSession = await prisma.scanSession.findUnique({
       where: { id },
     })
-
-    console.log(
-      "[upload-file] session:",
-      scanSession
-        ? {
-            id: scanSession.id,
-            status: scanSession.status,
-            expiresAt: scanSession.expiresAt.toISOString(),
-            hasPublicToken: Boolean(scanSession.publicToken),
-            tokenMatches: scanSession.publicToken === token,
-          }
-        : null,
-    )
 
     if (!scanSession) {
       return NextResponse.json({ error: "Not found" }, { status: 404 })
@@ -90,15 +71,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
 
     const formData = await req.formData()
-    console.log("FORM DATA RECEIVED")
-
     const file = formData.get("file") as File | null
-    console.log(
-      "file:",
-      file instanceof File
-        ? { name: file.name, size: file.size, type: file.type }
-        : file,
-    )
 
     if (!file || !(file instanceof File)) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 })
@@ -121,8 +94,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       where: { id },
       data: { fileUrl: secureUrl },
     })
-
-    console.log("[upload-file] success", { url: secureUrl })
 
     return NextResponse.json({
       success: true,

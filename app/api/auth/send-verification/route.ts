@@ -1,3 +1,4 @@
+export const maxDuration = 15
 import { NextResponse } from "next/server"
 import { prisma, safePrismaQuery } from "@/lib/prisma"
 import { z } from "zod"

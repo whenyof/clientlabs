@@ -3,6 +3,7 @@ import { stripe, getPlanFromPriceId } from "@/lib/stripe"
 import { prisma, safePrismaQuery } from "@/lib/prisma"
 import type Stripe from "stripe"
 
+export const maxDuration = 30
 export const runtime = "nodejs"
 
 // Stripe requires the raw body to verify the signature.
@@ -56,7 +57,6 @@ export async function POST(req: NextRequest) {
         }
 
         await upsertSubscription(userId, sub)
-        console.log(`[Stripe webhook] checkout.session.completed: user ${userId} → plan updated`)
         break
       }
 
@@ -88,7 +88,6 @@ export async function POST(req: NextRequest) {
           await upsertSubscription(userId, sub)
         }
 
-        console.log(`[Stripe webhook] ${event.type}: user ${userId} → status ${sub.status}`)
         break
       }
 
@@ -109,7 +108,6 @@ export async function POST(req: NextRequest) {
             },
           })
         )
-        console.log(`[Stripe webhook] subscription.deleted: user ${userId} → FREE`)
         break
       }
 

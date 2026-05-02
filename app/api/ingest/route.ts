@@ -19,8 +19,6 @@ export async function POST(req: NextRequest) {
     const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
     const { searchParams } = new URL(req.url)
 
-    console.log("[INGEST] START - Request from", clientIp)
-
     try {
         // 🛡️ 0. Body size cap
         const contentLength = Number(req.headers.get("content-length")) || 0
@@ -34,10 +32,8 @@ export async function POST(req: NextRequest) {
         let rawBody: string | null = null
         try {
             rawBody = await req.text()
-            console.log("[INGEST] RAW BODY:", rawBody?.slice(0, 500))
             if (rawBody) {
                 payload = JSON.parse(rawBody)
-                console.log("[INGEST] PARSED:", JSON.stringify(payload).slice(0, 500))
             }
         } catch (e) {
             console.warn("[INGEST] INVALID_JSON:", clientIp)
@@ -58,7 +54,6 @@ export async function POST(req: NextRequest) {
         }
 
         // 🛡️ 3. Key Identification & Hashing
-        console.log("[INGEST] KEY PREFIX:", rawKey?.slice(0, 10))
         if (!rawKey || (!rawKey.startsWith("cl_sec_") && !rawKey.startsWith("cl_pub_"))) {
             console.warn("[INGEST] UNAUTHORIZED: Missing or invalid key")
             return NextResponse.json({ error: "Unauthorized: Missing or invalid key" }, { status: 401 })
@@ -69,7 +64,6 @@ export async function POST(req: NextRequest) {
         // 🔎 4. API Key Lookup
         let apiKey: any = null
         try {
-            console.log("[INGEST] DB: searching api key")
             apiKey = await safePrismaQuery(() => prisma.apiKey.findUnique({
                 where: { keyHash: hash }
             }))
@@ -133,7 +127,6 @@ export async function POST(req: NextRequest) {
 
             for (const [idx, l] of items.entries()) {
                 try {
-                    console.log(`[INGEST] ITEM #${idx} START`)
                     const email = typeof l.email === 'string' ? l.email.toLowerCase().trim() : null
                     const phone = typeof l.phone === 'string' ? l.phone.trim() : null
                     
@@ -146,7 +139,6 @@ export async function POST(req: NextRequest) {
                     const metadata = (l.metadata && typeof l.metadata === 'object') ? l.metadata : {}
                     
                     // Duplicate check
-                    console.log("[INGEST] DB: searching existing lead", email)
                     let existing: any = null
                     try {
                         existing = await safePrismaQuery(() => prisma.lead.findFirst({
@@ -159,7 +151,6 @@ export async function POST(req: NextRequest) {
                     }
 
                     if (existing) {
-                        console.log("[INGEST] DB: updating lead", email)
                         const safeMetadata = (existing.metadata && typeof existing.metadata === 'object' && existing.metadata !== null)
                             ? (existing.metadata as Record<string, any>) 
                             : {}
@@ -180,7 +171,6 @@ export async function POST(req: NextRequest) {
                         }))
                         results.push(updateResult)
                     } else {
-                        console.log("[INGEST] DB: creating lead", email)
                         const createResult = await safePrismaQuery(() => prisma.lead.create({
                             data: {
                                 userId,
@@ -201,11 +191,9 @@ export async function POST(req: NextRequest) {
                 }
             }
 
-            console.log("[INGEST] SUCCESS - Items processed:", items.length)
             return NextResponse.json({ success: true, count: results.length })
         }
 
-        console.log("[INGEST] SUCCESS - Verification only")
         return NextResponse.json({ success: true, status: "Verified" })
 
     } catch (err) {

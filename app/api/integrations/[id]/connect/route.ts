@@ -14,8 +14,6 @@ export async function POST(
  const integrationId = params.id
 
  // TODO: Implement real connection logic
- console.log(`Connecting integration ${integrationId} with config:`, config)
-
  // Mock response
  const response = {
  success: true,

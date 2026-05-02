@@ -13,8 +13,6 @@ export async function GET() {
   if (!featureGate.allowed) return featureGate.error!
 
   const session = await getServerSession(authOptions)
-  console.log("=== GET /api/automatizaciones ===")
-  console.log("Session userId:", session?.user?.id)
   if (!session?.user?.id) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 })
   }
@@ -23,9 +21,6 @@ export async function GET() {
 
   // Siempre sincroniza — el upsert no duplica, solo actualiza
   await seedAutomations(userId).catch(console.error)
-
-  const countAfterSeed = await prisma.automatizacion.count({ where: { userId } })
-  console.log("Count en DB:", countAfterSeed)
 
   const automatizaciones = await prisma.automatizacion.findMany({
     where: { userId },
@@ -60,6 +55,5 @@ export async function GET() {
     },
   })
 
-  console.log("Devolviendo:", automatizaciones.length, "automatizaciones")
   return NextResponse.json({ automatizaciones, actividadReciente })
 }

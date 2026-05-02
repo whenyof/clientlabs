@@ -14,7 +14,7 @@ export const navbarContent = {
     { label: "Producto",   href: "/producto" },
     { label: "Precios",    href: "/precios" },
     { label: "Soluciones", href: "/soluciones" },
-    { label: "Recursos",   href: "/recursos" },
+    { label: "Blog",       href: "/blog" },
     { label: "Novedades",  href: "/changelog" },
     { label: "Contacto",   href: "/contacto" },
   ],

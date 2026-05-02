@@ -10,6 +10,15 @@ export const revalidate = 86400
 
 type Props = { params: { slug: string } }
 
+function formatDate(iso: string): string {
+  const [y, m, d] = iso.split("-").map(Number)
+  const months = [
+    "enero", "febrero", "marzo", "abril", "mayo", "junio",
+    "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+  ]
+  return `${d} de ${months[m - 1]} de ${y}`
+}
+
 export function generateStaticParams() {
   return ARTICLES.map((a) => ({ slug: a.slug }))
 }
@@ -58,7 +67,7 @@ export default function BlogArticlePage({ params }: Props) {
               "description": article.description,
               "author": { "@type": "Organization", "name": "ClientLabs" },
               "publisher": { "@type": "Organization", "name": "ClientLabs", "url": "https://clientlabs.io" },
-              "datePublished": article.date,
+              "datePublished": article.publishedAt,
               "url": `https://clientlabs.io/blog/${article.slug}`,
             }),
           }}
@@ -72,8 +81,8 @@ export default function BlogArticlePage({ params }: Props) {
             {article.category}
           </span>
           <h1 className="text-[28px] font-bold leading-tight mb-4">{article.title}</h1>
-          <p className="text-slate-400 text-[13px] mb-10">{article.readTime} lectura · {article.date}</p>
-          <div className="prose-content text-[15px] leading-relaxed text-slate-700 space-y-4 [&_h2]:text-[20px] [&_h2]:font-bold [&_h2]:text-[#0B1F2A] [&_h2]:mt-8 [&_h2]:mb-3 [&_h3]:text-[16px] [&_h3]:font-semibold [&_h3]:text-[#0B1F2A] [&_h3]:mt-6 [&_h3]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_strong]:text-[#0B1F2A] [&_strong]:font-semibold">
+          <p className="text-slate-400 text-[13px] mb-10">{article.readTime} lectura · {formatDate(article.publishedAt)}</p>
+          <div className="prose-content text-[15px] leading-relaxed text-slate-700 space-y-4 [&_h2]:text-[20px] [&_h2]:font-bold [&_h2]:text-[#0B1F2A] [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:text-[16px] [&_h3]:font-semibold [&_h3]:text-[#0B1F2A] [&_h3]:mt-6 [&_h3]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-1.5 [&_strong]:text-[#0B1F2A] [&_strong]:font-semibold [&_a]:text-[#1FA97A] [&_a]:hover:underline [&_table]:w-full [&_table]:border-collapse [&_table]:text-[13px] [&_table]:my-5 [&_th]:text-left [&_th]:py-2 [&_th]:px-3 [&_th]:border-b-2 [&_th]:border-slate-200 [&_th]:font-semibold [&_th]:text-[#0B1F2A] [&_th]:bg-slate-50 [&_td]:py-2 [&_td]:px-3 [&_td]:border-b [&_td]:border-slate-100">
             {content}
           </div>
 

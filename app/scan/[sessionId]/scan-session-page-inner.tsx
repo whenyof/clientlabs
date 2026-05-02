@@ -3,7 +3,6 @@
 
 import { useEffect, useRef, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { PDFDocument, rgb } from "pdf-lib"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { LiveScanner } from "@/components/scanner/LiveScanner"
@@ -897,6 +896,7 @@ export function ScanSessionPageInner({ sessionId }: { sessionId: string }) {
         jpegQuality: number,
         maxEdgePx: number,
       ): Promise<Blob> => {
+        const { PDFDocument, rgb } = await import("pdf-lib")
         const pdfDoc = await PDFDocument.create()
         for (const scanPage of pagesSnapshot) {
           if (!isMountedRef.current) throw new Error("cancelled")

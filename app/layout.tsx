@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Script from "next/script"
-import { Geist, Geist_Mono, Inter, Inter_Tight, JetBrains_Mono } from "next/font/google"
+import { Geist, Geist_Mono } from "next/font/google"
 
 import "./globals.css"
 
@@ -26,24 +26,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 })
 
-// Landing design system fonts
-const interTight = Inter_Tight({
-  variable: "--font-display",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-})
-
-const inter = Inter({
-  variable: "--font-body",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-})
-
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-})
 
 /* ================================
    Metadata
@@ -143,9 +125,6 @@ export default function RootLayout({
         className={`
           ${geistSans.variable}
           ${geistMono.variable}
-          ${interTight.variable}
-          ${inter.variable}
-          ${jetbrainsMono.variable}
           antialiased
           min-h-screen
           bg-[var(--bg-main)]
@@ -179,7 +158,7 @@ export default function RootLayout({
           </ThemeProvider>
         </QueryProvider>
         {/* ClientLabs Tracking */}
-        <Script id="clientlabs-config" strategy="beforeInteractive">
+        <Script id="clientlabs-config" strategy="afterInteractive">
           {`
             window.clientlabsConfig = {
               "key": "cl_pub_16413eafbfdbbe6ab8bde12e2cb69678b596ecad673a5e71fd653ec7faa7467a",

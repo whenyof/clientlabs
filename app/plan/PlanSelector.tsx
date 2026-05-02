@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { Check, Loader2, Zap } from "lucide-react"
 
 type PlanId = "FREE" | "PRO" | "BUSINESS"
@@ -158,7 +159,7 @@ export default function PlanSelector() {
 
       {/* Logo */}
       <div className="relative z-10 flex items-center gap-2.5 mb-10" style={{ animation: "fadeSlideUp .5s ease both" }}>
-        <img src="/logo-trimmed.png" width={28} height={28} alt="ClientLabs" className="rounded-lg object-contain" />
+        <Image src="/logo-trimmed.png" width={28} height={28} alt="ClientLabs" className="rounded-lg object-contain" />
         <span className="font-bold text-[22px] tracking-tight leading-none text-white">
           Client<span style={{ color: "#1FA97A" }}>Labs</span>
         </span>

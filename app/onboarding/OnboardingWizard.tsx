@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { AnimatePresence, motion } from "framer-motion"
 import {
   Check, ChevronLeft, ArrowRight, ChevronDown,
@@ -277,7 +278,7 @@ export default function OnboardingWizard() {
 
       {/* Logo */}
       <div className="flex items-center gap-2 mb-10">
-        <img src="/logo-trimmed.png" alt="ClientLabs" className="h-6 w-auto" />
+        <Image src="/logo-trimmed.png" alt="ClientLabs" width={24} height={24} className="w-auto object-contain" />
         <span className="text-[20px] font-bold tracking-tight text-[#0B1F2A]">
           Client<span className="text-[#1FA97A]">Labs</span>
         </span>

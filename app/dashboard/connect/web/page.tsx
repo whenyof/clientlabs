@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { ApiKeyType } from "@prisma/client"
+import { decrypt } from "@/lib/security/encryption"
 import { ConnectView } from "./ConnectView"
 import { ConnectStatus } from "@/components/connect/ConnectStatusCard"
 
@@ -12,37 +13,29 @@ export default async function WebConnectPage() {
 
     const userId = session.user.id
 
-    // 🛡️ Obtener última llave pública activa para este usuario (Web SDK Core)
     const apiKey = await prisma.apiKey.findFirst({
-        where: {
-            userId,
-            type: ApiKeyType.public,
-            revoked: false
-        },
-        orderBy: { createdAt: "desc" }
+        where: { userId, type: ApiKeyType.public, revoked: false },
+        orderBy: { createdAt: "desc" },
+        select: { id: true, domain: true, lastUsed: true, encryptedKey: true },
     })
 
-    // Integrations DB 
     const integrations = await prisma.integration.findMany({
-        where: {
-            userId,
-            type: "web"
-        },
-        select: {
-            id: true,
-            type: true,
-            provider: true,
-            status: true,
-            config: true,
-            health: true,
-            lastSync: true
-        }
+        where: { userId, type: "web" },
+        select: { id: true, type: true, provider: true, status: true, config: true, health: true, lastSync: true },
     })
 
-    // ⛓️ Calcular estado inicial del canal web principal SDK
     let coreStatus: ConnectStatus = "setup_required"
-    if (apiKey && apiKey.domain) {
+    if (apiKey?.domain) {
         coreStatus = apiKey.lastUsed ? "connected" : "waiting"
+    }
+
+    let rawPublicKey: string | null = null
+    if (apiKey?.encryptedKey) {
+        try {
+            rawPublicKey = decrypt(apiKey.encryptedKey)
+        } catch {
+            rawPublicKey = null
+        }
     }
 
     return (
@@ -50,7 +43,7 @@ export default async function WebConnectPage() {
             coreStatus={coreStatus}
             initialDomain={apiKey?.domain}
             lastUsed={apiKey?.lastUsed}
-            rawKeyHint={apiKey?.id} // Only for hints, not raw
+            rawKeyHint={rawPublicKey}
             integrations={integrations}
         />
     )

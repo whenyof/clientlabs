@@ -37,6 +37,9 @@ import {
   Wrench,
   UserPlus,
   Radio,
+  Globe,
+  Code2,
+  Activity,
 } from "lucide-react"
 
 interface SidebarProps {
@@ -299,7 +302,15 @@ export default function Sidebar({
       items: [
         { label: "Automatizaciones", icon: Zap, href: "/dashboard/automatizaciones" },
         { label: "Marketing", icon: Megaphone, href: "/dashboard/marketing" },
-        { label: "Conectar", icon: Link2, href: "/dashboard/connect" },
+        {
+          label: "Conectar",
+          icon: Link2,
+          children: [
+            { label: "Conexiones", href: "/dashboard/connect", icon: Globe },
+            { label: "Script web", href: "/dashboard/connect/web", icon: Code2 },
+            { label: "Analytics", href: "/dashboard/connect/analytics", icon: Activity },
+          ],
+        },
       ],
     },
     {

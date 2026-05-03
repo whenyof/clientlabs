@@ -3,9 +3,7 @@
 import React, { useState } from "react"
 import {
     ArrowLeft, CheckCircle2, Copy,
-    ShieldCheck, XCircle, Loader2, RefreshCw,
-    Code2, FileCode, ShoppingBag, Tag, Paintbrush, Blocks,
-    Layers, Info, type LucideIcon
+    ShieldCheck, XCircle, Loader2, RefreshCw, Info,
 } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
@@ -13,6 +11,7 @@ import { cn } from "@/lib/utils"
 import { getClientlabsSnippet } from "@/lib/clientlabs-loader"
 import { DomainCard } from "@/components/connect/DomainCard"
 import { ConnectStatus } from "@/components/connect/ConnectStatusCard"
+import { IntegrationIcon, getIconBg } from "../integration-icons"
 
 interface Integration {
     id: string
@@ -33,19 +32,16 @@ interface ConnectViewProps {
 }
 
 interface ProviderMeta {
-    icon: LucideIcon
-    iconColor: string
-    iconBg: string
     description: string
 }
 
 const PROVIDER_META: Record<string, ProviderMeta> = {
-    web_sdk:   { icon: Code2,       iconColor: "text-[#1FA97A]",  iconBg: "bg-[#1FA97A]/10", description: "Librería JS 2 kb. Compatible con HTML, React, Next.js, Astro y cualquier stack web." },
-    wordpress: { icon: FileCode,    iconColor: "text-sky-600",    iconBg: "bg-sky-50",        description: "Plugin oficial con soporte nativo para Elementor y Contact Form 7." },
-    shopify:   { icon: ShoppingBag, iconColor: "text-lime-600",   iconBg: "bg-lime-50",       description: "WebPixels integrados: Add to Cart, Checkout Initiate y Purchase." },
-    gtm:       { icon: Tag,         iconColor: "text-orange-500", iconBg: "bg-orange-50",     description: "Plantilla oficial para GTM DataLayer. Sin tocar código del sitio." },
-    wix:       { icon: Paintbrush,  iconColor: "text-violet-600", iconBg: "bg-violet-50",     description: "Inyección vía Wix Custom Code o Velo. Compatible con Wix Stores." },
-    webflow:   { icon: Blocks,      iconColor: "text-indigo-600", iconBg: "bg-indigo-50",     description: "Script en Footer Code + Webflow Forms out-of-the-box." },
+    web_sdk:   { description: "Librería JS 2 kb. Compatible con HTML, React, Next.js, Astro y cualquier stack web." },
+    wordpress: { description: "Plugin oficial con soporte nativo para Elementor y Contact Form 7." },
+    shopify:   { description: "WebPixels integrados: Add to Cart, Checkout Initiate y Purchase." },
+    gtm:       { description: "Plantilla oficial para GTM DataLayer. Sin tocar código del sitio." },
+    wix:       { description: "Inyección vía Wix Custom Code o Velo. Compatible con Wix Stores." },
+    webflow:   { description: "Script en Footer Code + Webflow Forms out-of-the-box." },
 }
 
 const PROVIDER_LABELS: Record<string, string> = {
@@ -62,10 +58,12 @@ export function ConnectView({ coreStatus, initialDomain, lastUsed, rawKeyHint, i
     const [activeModal, setActiveModal] = useState<string | null>(null)
 
     // Verification state — keyed by provider
-    const [verifiedProviders, setVerifiedProviders] = useState<string[]>([])
+    const [verifiedProviders, setVerifiedProviders] = useState<string[]>(
+        integrations.filter(i => i.health === "verified").map(i => i.provider)
+    )
     const [verifyingProvider, setVerifyingProvider] = useState<string | null>(null)
     const [failedProviders, setFailedProviders] = useState<string[]>([])
-    const [verifyCounts, setVerifyCounts] = useState<Record<string, number>>({})
+    const [failReasons, setFailReasons] = useState<Record<string, string>>({})
 
     const handleDomainSuccess = (newDomain: string, _rawKey: string) => {
         setDomain(newDomain)
@@ -76,18 +74,23 @@ export function ConnectView({ coreStatus, initialDomain, lastUsed, rawKeyHint, i
         setVerifyingProvider(provider)
         setFailedProviders(prev => prev.filter(p => p !== provider))
         try {
-            const res = await fetch("/api/connect/verify", { method: "POST" })
+            const res = await fetch("/api/connect/ping", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ provider }),
+            })
             const data = await res.json()
-            if (res.ok && data.connected) {
+            if (res.ok && data.detected) {
                 setVerifiedProviders(prev => [...new Set([...prev, provider])])
-                setVerifyCounts(prev => ({ ...prev, [provider]: data.eventsCount ?? 0 }))
                 setStatus("connected")
-                toast.success("Conexión verificada correctamente")
+                toast.success("Instalación verificada correctamente")
             } else {
                 setFailedProviders(prev => [...new Set([...prev, provider])])
+                setFailReasons(prev => ({ ...prev, [provider]: data.reason ?? "script_not_found" }))
             }
         } catch {
             setFailedProviders(prev => [...new Set([...prev, provider])])
+            setFailReasons(prev => ({ ...prev, [provider]: "domain_unreachable" }))
         } finally {
             setVerifyingProvider(null)
         }
@@ -184,13 +187,29 @@ export function ConnectView({ coreStatus, initialDomain, lastUsed, rawKeyHint, i
         const isVerifying = verifyingProvider === provider
         const isVerified = verifiedProviders.includes(provider)
         const isFailed = failedProviders.includes(provider)
-        const count = verifyCounts[provider] ?? 0
+        const failReason = failReasons[provider]
+
+        const platformNames: Record<string, string> = {
+            wordpress: "WordPress", shopify: "Shopify", gtm: "Google Tag Manager",
+            wix: "Wix", webflow: "Webflow",
+        }
+
+        const failMessage =
+            failReason === "no_domain_configured"
+                ? "Configura un dominio antes de verificar"
+                : failReason === "domain_unreachable"
+                ? "No se pudo acceder al dominio — verifica que esté publicado"
+                : failReason === "platform_mismatch"
+                ? `Tu web no parece ser ${platformNames[provider] ?? "esta plataforma"} — usa la instalación correcta para tu CMS`
+                : provider === "gtm"
+                ? "Google Tag Manager no detectado — verifica que el contenedor esté publicado"
+                : "Script no detectado — revisa que el código esté en el <head> de tu web"
 
         return (
             <div className="space-y-3 pt-4 border-t border-slate-100">
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Verificar conexión</p>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Verificar instalación</p>
                 <p className="text-sm text-slate-600">
-                    Detectamos eventos de los últimos 5 minutos para confirmar que los datos están llegando correctamente.
+                    Analizamos el HTML de tu web para confirmar que el script de ClientLabs está instalado correctamente.
                 </p>
                 <div className="flex flex-wrap items-center gap-2">
                     {!isVerified && !isVerifying && (
@@ -199,26 +218,26 @@ export function ConnectView({ coreStatus, initialDomain, lastUsed, rawKeyHint, i
                             className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-[#1FA97A] hover:bg-[#178f68] rounded-lg transition-colors"
                         >
                             <ShieldCheck className="w-4 h-4" />
-                            Verificar conexión
+                            Verificar instalación
                         </button>
                     )}
                     {isVerifying && (
                         <div className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-500 bg-slate-50 border border-slate-200 rounded-lg">
                             <Loader2 className="w-4 h-4 animate-spin" />
-                            Verificando...
+                            Analizando tu web...
                         </div>
                     )}
                     {isVerified && (
                         <div className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-[#1FA97A] bg-[#1FA97A]/8 border border-[#1FA97A]/20 rounded-lg">
                             <CheckCircle2 className="w-4 h-4" />
-                            {count} evento{count !== 1 ? "s" : ""} — Conexión activa
+                            Script detectado — instalación correcta
                         </div>
                     )}
                     {isFailed && !isVerifying && (
                         <>
                             <div className="flex items-center gap-1.5 px-3 py-2.5 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg">
                                 <XCircle className="w-4 h-4" />
-                                Sin eventos en los últimos 5 min
+                                {failMessage}
                             </div>
                             <button
                                 onClick={() => handleVerifyProvider(provider)}
@@ -237,7 +256,6 @@ export function ConnectView({ coreStatus, initialDomain, lastUsed, rawKeyHint, i
     const renderPlatformCard = (providerKey: string) => {
         const meta = PROVIDER_META[providerKey]
         if (!meta) return null
-        const Icon = meta.icon
         const intDb = localIntegrations.find(i => i.type === "web" && i.provider === providerKey)
         const isConnected = intDb?.status === "CONNECTED"
         const isVerified = verifiedProviders.includes(providerKey)
@@ -251,8 +269,8 @@ export function ConnectView({ coreStatus, initialDomain, lastUsed, rawKeyHint, i
                 isBlocked ? "opacity-50 pointer-events-none" : "hover:border-slate-300"
             )}>
                 <div className="flex items-start gap-3">
-                    <div className={cn("h-9 w-9 flex-shrink-0 rounded-lg flex items-center justify-center", meta.iconBg)}>
-                        <Icon className={cn("h-4 w-4", meta.iconColor)} />
+                    <div className={cn("h-9 w-9 flex-shrink-0 rounded-lg flex items-center justify-center", getIconBg(providerKey))}>
+                        <IntegrationIcon id={providerKey} size={18} />
                     </div>
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
@@ -304,14 +322,13 @@ export function ConnectView({ coreStatus, initialDomain, lastUsed, rawKeyHint, i
         if (!activeModal) return null
         const onClose = () => setActiveModal(null)
 
-        const modalBox = (title: string, icon: LucideIcon, iconColor: string, iconBg: string, content: React.ReactNode) => {
-            const Icon = icon
+        const modalBox = (providerKey: string, title: string, content: React.ReactNode) => {
             return (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
                     <div className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-lg border border-slate-200">
                         <div className="flex items-center gap-3 px-6 py-4 border-b border-slate-100 sticky top-0 bg-white z-10">
-                            <div className={cn("p-2 rounded-lg", iconBg)}>
-                                <Icon className={cn("w-4 h-4", iconColor)} />
+                            <div className={cn("p-2 rounded-lg", getIconBg(providerKey))}>
+                                <IntegrationIcon id={providerKey} size={16} />
                             </div>
                             <h2 className="text-base font-semibold text-[#0B1F2A] flex-1">{title}</h2>
                             <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors">
@@ -331,7 +348,7 @@ export function ConnectView({ coreStatus, initialDomain, lastUsed, rawKeyHint, i
 
         switch (activeModal) {
             case "web_sdk":
-                return modalBox("SDK Universal", Code2, "text-[#1FA97A]", "bg-[#1FA97A]/10", (
+                return modalBox("web_sdk", "SDK Universal", (
                     <div className="space-y-5">
                         <p className="text-sm text-slate-600">
                             Copia el siguiente script y pégalo dentro del <code className="bg-slate-100 px-1.5 py-0.5 rounded text-xs font-mono">&lt;head&gt;</code> de tu HTML, justo antes de <code className="bg-slate-100 px-1.5 py-0.5 rounded text-xs font-mono">&lt;/head&gt;</code>. La carga es asíncrona y no afecta al rendimiento de tu sitio.
@@ -343,7 +360,7 @@ export function ConnectView({ coreStatus, initialDomain, lastUsed, rawKeyHint, i
                 ))
 
             case "wordpress":
-                return modalBox("WordPress", FileCode, "text-sky-600", "bg-sky-50", (
+                return modalBox("wordpress", "WordPress", (
                     <div className="space-y-5">
                         <p className="text-sm text-slate-600">
                             La forma más sencilla es instalar el plugin oficial. Si prefieres hacerlo manualmente, también puedes pegar el script directamente en el tema.
@@ -359,7 +376,7 @@ export function ConnectView({ coreStatus, initialDomain, lastUsed, rawKeyHint, i
                             >
                                 <div className="flex items-center gap-3">
                                     <div className="h-9 w-9 rounded-lg bg-sky-500/20 flex items-center justify-center flex-shrink-0">
-                                        <FileCode className="w-4 h-4 text-sky-400" />
+                                        <IntegrationIcon id="wordpress" size={16} />
                                     </div>
                                     <div>
                                         <p className="text-sm font-semibold text-white">Lead Capture for ClientLabs</p>
@@ -394,7 +411,7 @@ export function ConnectView({ coreStatus, initialDomain, lastUsed, rawKeyHint, i
                 ))
 
             case "shopify":
-                return modalBox("Shopify", ShoppingBag, "text-lime-600", "bg-lime-50", (
+                return modalBox("shopify", "Shopify", (
                     <div className="space-y-5">
                         <p className="text-sm text-slate-600">
                             Añade el script al archivo <code className="bg-slate-100 px-1 py-0.5 rounded text-xs font-mono">theme.liquid</code> de tu tema para que se cargue en todas las páginas de la tienda.
@@ -419,7 +436,7 @@ export function ConnectView({ coreStatus, initialDomain, lastUsed, rawKeyHint, i
                 ))
 
             case "gtm":
-                return modalBox("Google Tag Manager", Tag, "text-orange-500", "bg-orange-50", (
+                return modalBox("gtm", "Google Tag Manager", (
                     <div className="space-y-5">
                         <p className="text-sm text-slate-600">
                             Si ya tienes Google Tag Manager instalado en tu web, puedes inyectar el script sin modificar el código fuente — ideal para equipos sin acceso al servidor.
@@ -445,7 +462,7 @@ export function ConnectView({ coreStatus, initialDomain, lastUsed, rawKeyHint, i
                 ))
 
             case "wix":
-                return modalBox("Wix", Paintbrush, "text-violet-600", "bg-violet-50", (
+                return modalBox("wix", "Wix", (
                     <div className="space-y-5">
                         <p className="text-sm text-slate-600">
                             Añade el script desde el panel de configuración de Wix sin necesidad de editar archivos del tema ni usar Velo.
@@ -472,7 +489,7 @@ export function ConnectView({ coreStatus, initialDomain, lastUsed, rawKeyHint, i
                 ))
 
             case "webflow":
-                return modalBox("Webflow", Blocks, "text-indigo-600", "bg-indigo-50", (
+                return modalBox("webflow", "Webflow", (
                     <div className="space-y-5">
                         <p className="text-sm text-slate-600">
                             Inyecta el script desde la configuración del proyecto para que aparezca automáticamente en todas las páginas publicadas.

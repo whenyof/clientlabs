@@ -9,6 +9,7 @@ import {
   verificationEmail,
   trialExpiringEmail,
   newLeadEmail,
+  type NewLeadEmailData,
   invoiceSentEmail,
   dailyTasksEmail,
   invoiceDueEmail,
@@ -49,17 +50,15 @@ export async function sendTrialExpiringEmail(to: string, name: string, daysLeft:
   )
 }
 
-export async function sendNewLeadEmail(
-  to: string,
-  name: string,
-  leadName: string,
-  leadEmail: string,
-  source: string
-) {
+export interface SendNewLeadEmailOptions extends NewLeadEmailData {
+  to: string
+}
+
+export async function sendNewLeadEmail(opts: SendNewLeadEmailOptions) {
   return sendEmail(
-    to,
-    `Nuevo lead: ${leadName} — ClientLabs`,
-    newLeadEmail(name, leadName, leadEmail, source)
+    opts.to,
+    `Nuevo lead: ${opts.leadName || opts.leadEmail} — ClientLabs`,
+    newLeadEmail(opts)
   )
 }
 

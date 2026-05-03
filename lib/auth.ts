@@ -109,6 +109,22 @@ export const authOptions: NextAuthOptions = {
  token.selectedSector = dbUser.selectedSector ?? null
  }
  }
+ return token
+ }
+
+ // Subsequent session refreshes — re-read mutable fields from DB
+ if (token.userId) {
+ const dbUser = await prisma.user.findUnique({
+ where: { id: token.userId as string },
+ select: { role: true, plan: true, name: true, onboardingCompleted: true, selectedSector: true },
+ })
+ if (dbUser) {
+ token.role = dbUser.role as "USER" | "ADMIN"
+ token.plan = dbUser.plan as "FREE" | "PRO" | "BUSINESS"
+ token.name = dbUser.name ?? token.name
+ token.onboardingCompleted = dbUser.onboardingCompleted
+ token.selectedSector = dbUser.selectedSector ?? null
+ }
  }
  return token
  },

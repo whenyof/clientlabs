@@ -6,6 +6,7 @@ import { usePlan } from "@/hooks/use-plan"
 import { UpgradeWall } from "@/components/ui/upgrade-wall"
 import { getBaseUrl } from "@/lib/api/baseUrl"
 import { toast } from "sonner"
+import { IntegrationIcon, getIconBg } from "./integration-icons"
 import {
   Globe,
   MessageCircle,
@@ -107,10 +108,8 @@ function ConnectModal({
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#E2E8ED]">
           <div className="flex items-center gap-3">
-            <div className={`w-9 h-9 rounded-lg ${integration.color} flex items-center justify-center`}>
-              <span className={`text-xs font-bold ${integration.textColor}`}>
-                {integration.initials}
-              </span>
+            <div className={`w-9 h-9 rounded-lg ${getIconBg(integration.id)} flex items-center justify-center`}>
+              <IntegrationIcon id={integration.id} size={18} />
             </div>
             <div>
               <p className="text-sm font-semibold text-[#0B1F2A]">{integration.name}</p>
@@ -260,8 +259,8 @@ function IntegrationCard({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <div className={`w-10 h-10 rounded-lg ${integration.color} flex items-center justify-center flex-shrink-0`}>
-            <span className={`text-xs font-bold ${integration.textColor}`}>{integration.initials}</span>
+          <div className={`w-10 h-10 rounded-lg ${getIconBg(integration.id)} flex items-center justify-center flex-shrink-0`}>
+            <IntegrationIcon id={integration.id} size={20} />
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-[#0B1F2A] leading-tight">{integration.name}</p>
@@ -375,7 +374,6 @@ export default function ConnectPage() {
   const [loadingStatus, setLoadingStatus] = useState(true)
 
   useEffect(() => {
-    if (!can("calendarSync")) return
     const controller = new AbortController()
     fetch(getBaseUrl() + "/api/integrations", { signal: controller.signal })
       .then((r) => r.json())
@@ -397,7 +395,7 @@ export default function ConnectPage() {
       .catch(() => {})
       .finally(() => setLoadingStatus(false))
     return () => controller.abort()
-  }, [can])
+  }, [])
 
   if (!can("calendarSync")) return <UpgradeWall feature="Conectar integraciones" requiredPlan="Pro" />
 

@@ -45,14 +45,15 @@ export async function notifyNewLead(
     })
     if (user?.email) {
       const prefs = user.notificationPrefs as Record<string, unknown> | null
-      if (!prefs || prefs.newLeadEmail !== false) {
-        sendNewLeadEmail(
-          user.email,
-          user.name ?? "Usuario",
+      const newLeadPrefs = prefs?.newLead as Record<string, unknown> | undefined
+      if (!prefs || newLeadPrefs?.email !== false) {
+        sendNewLeadEmail({
+          to: user.email,
+          userName: user.name ?? "Usuario",
           leadName,
-          leadEmail ?? "",
-          source ?? "directo"
-        ).catch(console.error)
+          leadEmail: leadEmail ?? "",
+          source: source ?? "directo",
+        }).catch(() => {})
       }
     }
   } catch {

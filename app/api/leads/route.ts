@@ -8,7 +8,8 @@ import { invalidateCachedData } from '@/lib/redis-cache'
 import { updateLeadScore } from '@/lib/scoring/updateLeadScore'
 import { runAutomation } from '@/lib/automations/engine'
 import { gateLimit } from '@/lib/api-gate'
-import { notifyNewLead, notifyPlanLimit } from '@/lib/notification-service'
+import { notifyPlanLimit } from '@/lib/notification-service'
+import { notifyNewLeadCaptured } from '@/lib/notify-new-lead'
 import { getLimit } from '@/lib/plan-gates'
 import type { PlanType } from '@prisma/client'
 
@@ -304,7 +305,13 @@ export async function POST(request: NextRequest) {
     await invalidateCachedData(`leads-kpis-${session.user.id}`)
 
     // Notificación + alerta de límite (non-blocking)
-    notifyNewLead(session.user.id, lead.name ?? "Sin nombre", lead.id).catch(() => {})
+    notifyNewLeadCaptured(session.user.id, {
+      leadId: lead.id,
+      leadName: lead.name,
+      leadEmail: email,
+      phone,
+      source: source || "manual",
+    })
     // Warn at 80% of plan limit
     const currentCount = await prisma.lead.count({ where: { userId: session.user.id } }).catch(() => 0)
     const planType = (session.user.plan ?? "FREE") as PlanType

@@ -223,39 +223,87 @@ export function trialExpiringEmail(name: string, daysLeft: number): string {
 
 // ─── 4. New lead notification ────────────────────────────────────────────────
 
-export function newLeadEmail(
-  name: string,
-  leadName: string,
-  leadEmail: string,
+export interface NewLeadEmailData {
+  userName: string
+  leadName: string
+  leadEmail: string
+  phone?: string | null
   source: string
-): string {
+  capturedAt?: Date
+  pageUrl?: string
+  utmSource?: string
+  utmMedium?: string
+  utmCampaign?: string
+}
+
+const SOURCE_LABELS: Record<string, string> = {
+  WEB: "SDK Web",
+  sdk: "SDK Web",
+  API: "API",
+  manual: "Manual (dashboard)",
+  MANUAL: "Manual (dashboard)",
+  csv: "Importación CSV",
+  excel: "Importación Excel",
+  directo: "Directo",
+  Web: "Web",
+}
+
+export function newLeadEmail(data: NewLeadEmailData): string {
+  const {
+    userName, leadName, leadEmail, phone, source,
+    capturedAt, pageUrl, utmSource, utmMedium, utmCampaign,
+  } = data
+
+  const sourceLabel = SOURCE_LABELS[source] ?? source
+
+  const dateStr = (capturedAt ?? new Date()).toLocaleString("es-ES", {
+    day: "2-digit", month: "long", year: "numeric",
+    hour: "2-digit", minute: "2-digit",
+  })
+
+  interface Row { label: string; value: string }
+  const rows: Row[] = [{ label: "Email", value: leadEmail }]
+  if (phone) rows.push({ label: "Teléfono", value: phone })
+  rows.push({ label: "Fuente", value: sourceLabel })
+  rows.push({ label: "Capturado", value: dateStr })
+  if (pageUrl) {
+    const displayUrl = pageUrl.length > 60 ? pageUrl.substring(0, 60) + "…" : pageUrl
+    rows.push({ label: "Página", value: displayUrl })
+  }
+  const utmParts = [
+    utmSource ? `source: ${utmSource}` : null,
+    utmMedium ? `medium: ${utmMedium}` : null,
+    utmCampaign ? `campaign: ${utmCampaign}` : null,
+  ].filter(Boolean)
+  if (utmParts.length > 0) rows.push({ label: "UTM", value: utmParts.join(" · ") })
+
+  const rowsHtml = rows.map((r, i) => {
+    const isLast = i === rows.length - 1
+    const paddingTop = i === 0 ? "5px" : "10px"
+    const border = isLast ? "" : "border-bottom:1px solid #D1FAE5;"
+    return `
+      <tr>
+        <td style="padding:${paddingTop} 0 ${isLast ? "0" : "0"};${border}">
+          <span style="font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:0.08em">${r.label}</span><br>
+          <span style="font-size:13px;font-weight:600;color:#0F172A;word-break:break-all">${r.value}</span>
+        </td>
+      </tr>
+    `
+  }).join("")
+
   const content = `
-    <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 12px;letter-spacing:-0.02em">
+    <h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 6px;letter-spacing:-0.02em">
       Nuevo lead capturado
     </h1>
+    <p style="font-size:15px;font-weight:600;color:${BRAND_GREEN};margin:0 0 16px">
+      ${leadName || leadEmail}
+    </p>
     <p style="font-size:14px;color:#475569;line-height:1.8;margin:0 0 20px">
-      Hola ${name}, tienes un nuevo lead registrado en ClientLabs. Respóndele lo antes posible para aumentar tus posibilidades de conversión.
+      Hola ${userName}, tienes un nuevo lead registrado en ClientLabs. Respóndele lo antes posible para aumentar tus posibilidades de conversión.
     </p>
     <div style="background:#F0FDF9;border:1px solid #BBF7E0;border-radius:10px;padding:18px 20px;margin-bottom:8px">
       <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-        <tr>
-          <td style="padding:5px 0;border-bottom:1px solid #D1FAE5">
-            <span style="font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:0.08em">Nombre</span><br>
-            <span style="font-size:14px;font-weight:600;color:#0F172A">${leadName}</span>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:10px 0;border-bottom:1px solid #D1FAE5">
-            <span style="font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:0.08em">Email</span><br>
-            <span style="font-size:14px;font-weight:600;color:#0F172A">${leadEmail}</span>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:10px 0 0">
-            <span style="font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:0.08em">Fuente</span><br>
-            <span style="font-size:14px;font-weight:600;color:#0F172A">${source}</span>
-          </td>
-        </tr>
+        ${rowsHtml}
       </table>
     </div>
     ${btn("Ver lead en ClientLabs", "https://app.clientlabs.io/dashboard/leads")}

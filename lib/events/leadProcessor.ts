@@ -7,6 +7,7 @@
 import { startOfDay } from "date-fns"
 import { prisma } from "@/lib/prisma"
 import type { QueuedEvent } from "./types"
+import { notifyNewLeadCaptured } from "@/lib/notify-new-lead"
 
 const LEAD_EVENT_TYPES = new Set([
   "lead_identified",
@@ -89,7 +90,7 @@ export async function detectLead(event: QueuedEvent): Promise<void> {
 
   } else {
 
-    await prisma.lead.create({
+    const newLead = await prisma.lead.create({
       data: {
         userId: event.userId,
         email,
@@ -111,6 +112,13 @@ export async function detectLead(event: QueuedEvent): Promise<void> {
     })
 
     console.log("[lead] created:", email)
+
+    notifyNewLeadCaptured(event.userId, {
+      leadId: newLead.id,
+      leadName: name,
+      leadEmail: email,
+      source: "sdk",
+    })
 
     const day = startOfDay(ts)
 

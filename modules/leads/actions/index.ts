@@ -491,6 +491,16 @@ export async function createLead(data: {
     revalidatePath("/dashboard/other/leads")
     revalidatePath("/dashboard/other")
     await invalidateCachedData(`leads-kpis-${session.user.id}`)
+
+    const { notifyNewLeadCaptured } = await import("@/lib/notify-new-lead")
+    notifyNewLeadCaptured(session.user.id, {
+        leadId: lead.id,
+        leadName: data.name.trim(),
+        leadEmail: data.email?.trim(),
+        phone: data.phone?.trim(),
+        source: data.source?.trim() || "manual",
+    })
+
     return { success: true, leadId: lead.id }
 }
 

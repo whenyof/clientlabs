@@ -277,9 +277,30 @@ export default function Sidebar({
       title: "CORE",
       items: [
         { label: nav.dashboard, icon: LayoutDashboard, href: "/dashboard" },
-        { label: nav.leads, icon: Target, href: "/dashboard/leads" },
-        { label: nav.clients, icon: Users, href: "/dashboard/clients" },
-        { label: nav.providers, icon: Building2, href: "/dashboard/providers" },
+        {
+          label: nav.leads,
+          icon: Target,
+          children: [
+            { label: "Analíticas", href: "/dashboard/leads/analytics", icon: BarChart3 },
+            { label: "Lista", href: "/dashboard/leads", icon: Target },
+          ],
+        },
+        {
+          label: nav.clients,
+          icon: Users,
+          children: [
+            { label: "Analíticas", href: "/dashboard/clients/analytics", icon: BarChart3 },
+            { label: "Lista", href: "/dashboard/clients", icon: Users },
+          ],
+        },
+        {
+          label: nav.providers,
+          icon: Building2,
+          children: [
+            { label: "Analíticas", href: "/dashboard/providers/analytics", icon: BarChart3 },
+            { label: "Lista", href: "/dashboard/providers", icon: Building2 },
+          ],
+        },
         {
           label: nav.tasks,
           icon: CheckSquare,
@@ -300,8 +321,22 @@ export default function Sidebar({
     {
       title: "INTELIGENCIA",
       items: [
-        { label: "Automatizaciones", icon: Zap, href: "/dashboard/automatizaciones" },
-        { label: "Marketing", icon: Megaphone, href: "/dashboard/marketing" },
+        {
+          label: "Automatizaciones",
+          icon: Zap,
+          children: [
+            { label: "Analíticas", href: "/dashboard/automatizaciones/analytics", icon: BarChart3 },
+            { label: "Lista", href: "/dashboard/automatizaciones", icon: Zap },
+          ],
+        },
+        {
+          label: "Marketing",
+          icon: Megaphone,
+          children: [
+            { label: "Analíticas", href: "/dashboard/marketing/analytics", icon: BarChart3 },
+            { label: "Campañas", href: "/dashboard/marketing", icon: Megaphone },
+          ],
+        },
         {
           label: "Conectar",
           icon: Link2,
@@ -479,7 +514,7 @@ export default function Sidebar({
             const isPro = plan === "PRO"
             return (
               <button
-                onClick={() => router.push("/precios")}
+                onClick={() => router.push("/dashboard/settings?section=plans")}
                 className="w-full group flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg border border-[var(--border-subtle)] hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] transition-all"
               >
                 <div className="flex items-center gap-2 min-w-0">

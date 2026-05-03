@@ -7,6 +7,7 @@ import { ApiKeyScope, Prisma } from "@prisma/client"
 
 import { redis } from "@/lib/security/redis"
 import { checkDistributedRateLimit } from "@/lib/security/distributedRateLimiter"
+import { notifyNewLeadCaptured } from "@/lib/notify-new-lead"
 
 const MAX_REQUEST_BYTES = 100 * 1024 // 100KB for lead ingestion
 
@@ -184,6 +185,15 @@ export async function POST(req: NextRequest) {
                             }
                         }))
                         results.push(createResult)
+                        if (createResult?.id) {
+                            notifyNewLeadCaptured(userId, {
+                                leadId: createResult.id,
+                                leadName: typeof l.name === 'string' ? l.name : undefined,
+                                leadEmail: email,
+                                phone: phone || undefined,
+                                source: "API",
+                            })
+                        }
                     }
                 } catch (e) {
                     console.error(`[INGEST][ITEM ERROR] #${idx} failed for user ${userId}:`, e instanceof Error ? e.message : "Unknown error")

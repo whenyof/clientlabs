@@ -13,23 +13,27 @@ export async function GET(request: NextRequest) {
 
         const userId = session.user.id
 
-        // Check DB for Integrations (WhatsApp, Facebook)
+        // Check DB for Integrations (WhatsApp, Facebook, Web)
         const integrations = await prisma.integration.findMany({
             where: { userId },
-            select: { id: true, category: true, provider: true, status: true, lastSync: true, config: true }
+            select: { id: true, type: true, category: true, provider: true, status: true, lastSync: true, config: true, health: true }
         })
 
-        // Web tracking: no LeadSource/VisitorSession models in schema; use SdkInstallation as proxy for "web connected"
-        let webLastSync: string | null = null
-        try {
-            const sdk = await prisma.sdkInstallation.findFirst({
-                where: { userId },
-                orderBy: { lastSeenAt: 'desc' },
-                select: { lastSeenAt: true },
-            })
-            if (sdk?.lastSeenAt) webLastSync = sdk.lastSeenAt.toISOString()
-        } catch {
-            // ignore
+        // Web: verified integration OR SdkInstallation with real traffic
+        const verifiedWebInt = integrations.find(i => i.type === "web" && i.health === "verified")
+        let webLastSync: string | null = (verifiedWebInt?.lastSync as Date | null)?.toISOString() ?? null
+
+        if (!webLastSync) {
+            try {
+                const sdk = await prisma.sdkInstallation.findFirst({
+                    where: { userId },
+                    orderBy: { lastSeenAt: 'desc' },
+                    select: { lastSeenAt: true },
+                })
+                if (sdk?.lastSeenAt) webLastSync = sdk.lastSeenAt.toISOString()
+            } catch {
+                // ignore
+            }
         }
         const hasWebConnection = webLastSync !== null
 

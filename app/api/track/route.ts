@@ -29,6 +29,7 @@ import {
   validatePropertiesFields,
 } from '@/lib/events'
 import * as crypto from 'node:crypto'
+import { notifyNewLeadCaptured } from '@/lib/notify-new-lead'
 
 const MAX_REQUEST_BYTES = 50 * 1024 // 50KB
 const MAX_EVENTS_PER_REQUEST = 20
@@ -300,6 +301,8 @@ async function handleIdentify(
         where: { userId, email },
         select: { id: true },
     })
+
+    const isNew = !existing
     const lead = existing
         ? await prisma.lead.update({
             where: { id: existing.id },
@@ -318,5 +321,20 @@ async function handleIdentify(
         })
 
     await linkSessionsToLead(visitorId, userId, lead.id).catch(() => { })
+
+    if (isNew) {
+        notifyNewLeadCaptured(userId, {
+            leadId: lead.id,
+            leadName: sanitizedName,
+            leadEmail: email,
+            phone: sanitizedPhone,
+            source: "WEB",
+            pageUrl: metadata.pageUrl as string | undefined,
+            utmSource: metadata.utmSource as string | undefined,
+            utmMedium: metadata.utmMedium as string | undefined,
+            utmCampaign: metadata.utmCampaign as string | undefined,
+        })
+    }
+
     return { id: lead.id }
 }

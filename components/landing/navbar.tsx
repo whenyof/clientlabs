@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { useSession, signOut } from "next-auth/react"
 import { LayoutDashboard, User, Settings, LogOut, ChevronDown, Menu, X } from "lucide-react"
 
@@ -34,7 +35,7 @@ function ProfileDropdown({ name, email, image }: { name?: string | null; email?:
         aria-haspopup="true"
       >
         {image ? (
-          <img src={image} alt={name ?? "Perfil"} className="h-7 w-7 rounded-full object-cover" />
+          <Image src={image} alt={name ?? "Perfil"} width={28} height={28} className="rounded-full object-cover" />
         ) : (
           <div className="h-7 w-7 rounded-full bg-emerald flex items-center justify-center text-[11px] font-bold text-white" style={{ background: "#1FA97A" }}>
             {initials}
@@ -123,7 +124,7 @@ export function Navbar() {
           href="/"
           className="flex shrink-0 items-center gap-1 font-display text-[18px] font-extrabold tracking-[-0.02em]"
         >
-          <img src="/logo-trimmed.png" alt="ClientLabs" className="h-7 w-7 object-contain" />
+          <Image src="/logo-trimmed.png" alt="ClientLabs" width={28} height={28} className="object-contain" />
           <span>{navbarContent.brand}</span>
         </Link>
 

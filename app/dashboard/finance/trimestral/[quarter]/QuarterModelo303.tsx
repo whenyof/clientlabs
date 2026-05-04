@@ -79,6 +79,7 @@ export function QuarterModelo303({ data, loading }: Props) {
             ))}
           </div>
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full">
             <tbody>
               <tr>
@@ -106,6 +107,7 @@ export function QuarterModelo303({ data, loading }: Props) {
               />
             </tbody>
           </table>
+          </div>
         )}
       </div>
 

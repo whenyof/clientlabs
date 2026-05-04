@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { useRouter, usePathname } from "next/navigation"
 import { useSession, signOut } from "next-auth/react"
 import { motion } from "framer-motion"
@@ -473,9 +474,11 @@ export default function Sidebar({
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-full flex items-center justify-center text-[var(--accent)] font-bold overflow-hidden shrink-0">
               {session?.user?.image ? (
-                <img
+                <Image
                   src={session.user.image}
                   alt="Avatar"
+                  width={36}
+                  height={36}
                   className="w-full h-full object-cover"
                 />
               ) : (

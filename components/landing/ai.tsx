@@ -1,3 +1,4 @@
+import Image from "next/image"
 import { aiContent } from "@/components/landing/content"
 import { LandingIcons } from "@/components/landing/icons"
 import { GridBackground, NoiseOverlay } from "@/components/landing/utils"
@@ -50,7 +51,7 @@ export function AI() {
         <div className="rounded-card-lg border border-line-dark bg-navy-2 p-7">
           {/* Demo header */}
           <div className="mb-[18px] flex items-center gap-2.5 border-b border-line-dark pb-4">
-            <img src="/logo-trimmed.png" alt="ClientLabs" className="h-10 w-10 object-contain" />
+            <Image src="/logo-trimmed.png" alt="ClientLabs" width={40} height={40} className="object-contain" />
             <div>
               <h4 className="m-0 font-display text-[16px] font-bold tracking-[-0.015em]">
                 {demo.label}
@@ -71,7 +72,7 @@ export function AI() {
                     YO
                   </div>
                 ) : (
-                  <img src="/logo-trimmed.png" alt="CL" className="h-10 w-10 shrink-0 object-contain" />
+                  <Image src="/logo-trimmed.png" alt="CL" width={40} height={40} className="shrink-0 object-contain" />
                 )}
                 <div
                   className={[

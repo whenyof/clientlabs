@@ -118,6 +118,7 @@ export function BillingHistory() {
 
       {/* Payments Table */}
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div className="overflow-x-auto">
         <table className="w-full text-left">
           <thead>
             <tr className="border-b border-slate-100 text-xs font-medium text-slate-500 uppercase">
@@ -182,6 +183,7 @@ export function BillingHistory() {
             ))}
           </tbody>
         </table>
+        </div>
 
         {fetched && invoices.length === 0 && (
           <div className="p-12 text-center">

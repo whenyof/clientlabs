@@ -202,6 +202,7 @@ export function ProductCatalog() {
             <p className="text-[12px] text-slate-400">Añade productos para usarlos en presupuestos</p>
           </div>
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50">
@@ -273,6 +274,7 @@ export function ProductCatalog() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

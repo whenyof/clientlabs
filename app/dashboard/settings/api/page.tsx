@@ -375,6 +375,7 @@ export default function ApiSettingsPage() {
                         </div>
                     ) : (
                         <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                            <div className="overflow-x-auto">
                             <table className="w-full text-left">
                                 <thead>
                                     <tr className="border-b border-slate-100 text-xs font-medium text-slate-500 uppercase">
@@ -451,6 +452,7 @@ export default function ApiSettingsPage() {
                                     ))}
                                 </tbody>
                             </table>
+                            </div>
                         </div>
                     )}
                 </div>

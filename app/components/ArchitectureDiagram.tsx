@@ -35,7 +35,7 @@ export const ArchitectureDiagram = memo(function ArchitectureDiagram() {
  <div className="flex items-center gap-3">
  <div className="relative h-10 w-10">
  <Image
- src="/logo-trimmed.png"
+ src="/logo-trimmed.webp"
  alt="ClientLabs"
  fill
  className="object-contain"
@@ -110,7 +110,7 @@ export const ArchitectureDiagram = memo(function ArchitectureDiagram() {
  <div className="flex items-center gap-3">
  <div className="relative h-10 w-10">
  <Image
- src="/logo-trimmed.png"
+ src="/logo-trimmed.webp"
  alt="ClientLabs"
  fill
  className="object-contain"
@@ -157,7 +157,7 @@ export const ArchitectureDiagram = memo(function ArchitectureDiagram() {
  <div className="flex items-center gap-3">
  <div className="relative h-10 w-10">
  <Image
- src="/logo-trimmed.png"
+ src="/logo-trimmed.webp"
  alt="ClientLabs"
  fill
  className="object-contain"

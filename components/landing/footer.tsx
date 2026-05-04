@@ -16,7 +16,7 @@ export function Footer() {
           {/* Brand column */}
           <div>
             <div className="flex items-center gap-1 font-display text-lg font-extrabold tracking-[-0.02em] text-white">
-              <Image src="/logo-trimmed.png" alt="ClientLabs" width={28} height={28} className="object-contain" />
+              <Image src="/logo-trimmed.webp" alt="ClientLabs" width={28} height={28} className="object-contain" />
               <span className="leading-none">{footerContent.brand.name}</span>
             </div>
             <p className="mb-[22px] mt-3 max-w-[280px] text-[14.5px] leading-[1.5] text-[#8fa0aa]">

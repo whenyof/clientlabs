@@ -278,7 +278,7 @@ export default function OnboardingWizard() {
 
       {/* Logo */}
       <div className="flex items-center gap-2 mb-10">
-        <Image src="/logo-trimmed.png" alt="ClientLabs" width={24} height={24} className="w-auto object-contain" />
+        <Image src="/logo-trimmed.webp" alt="ClientLabs" width={24} height={24} className="w-auto object-contain" />
         <span className="text-[20px] font-bold tracking-tight text-[#0B1F2A]">
           Client<span className="text-[#1FA97A]">Labs</span>
         </span>

@@ -11,7 +11,7 @@ export function LogoMark({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
   return (
     <div className="flex items-center justify-center" style={{ width: dimension, height: dimension }}>
       <Image
-        src="/logo-trimmed.png"
+        src="/logo-trimmed.webp"
         alt="ClientLabs"
         width={dimension}
         height={dimension}

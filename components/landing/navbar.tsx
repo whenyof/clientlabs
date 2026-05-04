@@ -124,7 +124,7 @@ export function Navbar() {
           href="/"
           className="flex shrink-0 items-center gap-1 font-display text-[18px] font-extrabold tracking-[-0.02em]"
         >
-          <Image src="/logo-trimmed.png" alt="ClientLabs" width={28} height={28} className="object-contain" />
+          <Image src="/logo-trimmed.webp" alt="ClientLabs" width={28} height={28} className="object-contain" />
           <span>{navbarContent.brand}</span>
         </Link>
 

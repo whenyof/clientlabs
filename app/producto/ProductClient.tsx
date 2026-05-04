@@ -484,7 +484,7 @@ function IASection() {
           {/* Chat */}
           <div ref={chatRef} className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm overflow-hidden">
             <div className="flex items-center gap-3 border-b border-white/10 px-5 py-4">
-              <Image src="/logo-trimmed.png" alt="ClientLabs" width={36} height={36} className="flex-shrink-0 object-contain" />
+              <Image src="/logo-trimmed.webp" alt="ClientLabs" width={36} height={36} className="flex-shrink-0 object-contain" />
               <div>
                 <p className="text-sm font-semibold text-[#E6F1F5] leading-none">Asistente IA</p>
                 <p className="text-[11px] text-[#8FA6B2] mt-0.5">responde en 0.4s · conoce tu negocio</p>
@@ -498,7 +498,7 @@ function IASection() {
               {AI_MESSAGES.map((m, i) => (
                 <div key={i} className={`ia-chat-bubble flex gap-3 ${m.role === "user" ? "flex-row-reverse" : ""}`}>
                   {m.role === "ai" ? (
-                    <Image src="/logo-trimmed.png" alt="ClientLabs" width={32} height={32} className="flex-shrink-0 object-contain" />
+                    <Image src="/logo-trimmed.webp" alt="ClientLabs" width={32} height={32} className="flex-shrink-0 object-contain" />
                   ) : (
                     <div className="h-7 w-7 rounded-full flex items-center justify-center text-xs flex-shrink-0 bg-[#1FA97A]/20 text-[#1FA97A] font-semibold">
                       Tú

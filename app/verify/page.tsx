@@ -164,7 +164,7 @@ function VerifyForm() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <Image src="/logo-trimmed.png" width={32} height={32} alt="ClientLabs" className="rounded-lg" priority />
+            <Image src="/logo-trimmed.webp" width={32} height={32} alt="ClientLabs" className="rounded-lg" priority />
             <span className="font-bold text-[18px] tracking-tight text-slate-900">
               Client<span style={{ color: "#1FA97A" }}>Labs</span>
             </span>

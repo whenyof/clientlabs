@@ -533,90 +533,115 @@ export async function importLeads(
 
     await ensureUserExists(session.user as any)
 
-    // Rate limiting: max 1000 leads per import
-    if (leads.length > 1000) {
-        return { success: false, error: "Máximo 1000 leads por importación", created: 0, skipped: 0, invalid: 0 }
+    if (leads.length > 3000) {
+        return { success: false, error: "Máximo 3000 leads por importación", created: 0, skipped: 0, invalid: 0 }
     }
 
-    let created = 0
     let skipped = 0
     let invalid = 0
 
-    const batchDate = new Date().toISOString().split('T')[0] // YYYY-MM-DD
+    const batchDate = new Date().toISOString().split('T')[0]
+
+    // 1. Normalize and validate all leads upfront
+    const normalized: Array<{
+        email: string | null
+        phone: string | null
+        name: string
+        source: string
+        status?: string
+        temperature?: LeadTemp
+        additionalInfo?: string
+    }> = []
 
     for (const leadData of leads) {
-        try {
-            // Validation: must have at least email OR phone
-            if (!leadData.email && !leadData.phone) {
-                invalid++
-                continue
-            }
-
-            // Normalize data
-            const email = leadData.email?.trim().toLowerCase() || null
-            const phone = leadData.phone?.trim() || null
-            const name = leadData.name?.trim() || email || phone || "Sin nombre"
-            const source = leadData.source?.trim() || "import"
-
-            // Check for duplicates (email OR phone)
-            const existingLead = await prisma.lead.findFirst({
-                where: {
-                    userId: session.user.id,
-                    OR: [
-                        email ? { email: { equals: email, mode: 'insensitive' as const } } : undefined,
-                        phone ? { phone } : undefined
-                    ].filter((obj): obj is NonNullable<typeof obj> => obj !== undefined)
-                }
-            })
-
-            if (existingLead) {
-                skipped++
-                continue
-            }
-
-            // Generate auto-tags
-            const tags: string[] = []
-            tags.push("imported")
-            tags.push(fileType) // "csv" or "excel"
-
-            if (source && source !== "import") {
-                tags.push(`source:${source}`)
-            }
-
-            if (email) {
-                const domain = email.split('@')[1]
-                if (domain) {
-                    tags.push(`domain:${domain}`)
-                }
-            }
-
-            tags.push(`batch:${batchDate}`)
-
-            const leadStatus = sanitizeStatus(leadData.status)
-
-            // Create lead with safe defaults
-            await prisma.lead.create({
-                data: {
-                    userId: session.user.id,
-                    name,
-                    email,
-                    phone,
-                    source,
-                    leadStatus,
-                    status: leadStatus, // @deprecated — kept in sync
-                    temperature: leadData.temperature || "COLD",
-                    score: 0,
-                    converted: leadStatus === "CONVERTED",
-                    tags,
-                    additionalInfo: leadData.additionalInfo?.trim() || null,
-                    lastActionAt: new Date(),
-                }
-            })
-
-            created++
-        } catch (error) {
-            console.error("Error creating lead:", error)
+        if (!leadData.email && !leadData.phone) {
             invalid++
+            continue
+        }
+        normalized.push({
+            email: leadData.email?.trim().toLowerCase() || null,
+            phone: leadData.phone?.trim() || null,
+            name: leadData.name?.trim() || leadData.email?.trim() || leadData.phone?.trim() || "Sin nombre",
+            source: leadData.source?.trim() || "import",
+            status: leadData.status,
+            temperature: leadData.temperature,
+            additionalInfo: leadData.additionalInfo,
+        })
+    }
+
+    // 2. One bulk query to find all existing duplicates
+    const incomingEmails = normalized.filter(l => l.email).map(l => l.email!)
+    const incomingPhones = normalized.filter(l => l.phone).map(l => l.phone!)
+
+    const orConditions: object[] = []
+    if (incomingEmails.length > 0) orConditions.push({ email: { in: incomingEmails, mode: "insensitive" as const } })
+    if (incomingPhones.length > 0) orConditions.push({ phone: { in: incomingPhones } })
+
+    const existingLeads = orConditions.length > 0
+        ? await prisma.lead.findMany({
+            where: { userId: session.user.id, OR: orConditions },
+            select: { email: true, phone: true },
+        })
+        : []
+
+    const existingEmails = new Set(existingLeads.filter(l => l.email).map(l => l.email!.toLowerCase()))
+    const existingPhones = new Set(existingLeads.filter(l => l.phone).map(l => l.phone!))
+
+    // 3. Filter out duplicates (including within-file duplicates)
+    type LeadInput = import("@prisma/client").Prisma.LeadCreateManyInput
+    const toCreate: LeadInput[] = []
+
+    for (const lead of normalized) {
+        const isDuplicate =
+            (lead.email && existingEmails.has(lead.email)) ||
+            (lead.phone && existingPhones.has(lead.phone))
+
+        if (isDuplicate) {
+            skipped++
+            continue
+        }
+
+        // Track within-file duplicates
+        if (lead.email) existingEmails.add(lead.email)
+        if (lead.phone) existingPhones.add(lead.phone)
+
+        const tags: string[] = ["imported", fileType]
+        if (lead.source && lead.source !== "import") tags.push(`source:${lead.source}`)
+        if (lead.email) {
+            const domain = lead.email.split("@")[1]
+            if (domain) tags.push(`domain:${domain}`)
+        }
+        tags.push(`batch:${batchDate}`)
+
+        const leadStatus = sanitizeStatus(lead.status)
+
+        toCreate.push({
+            userId: session.user.id,
+            name: lead.name,
+            email: lead.email,
+            phone: lead.phone,
+            source: lead.source,
+            leadStatus,
+            status: leadStatus,
+            temperature: lead.temperature || "COLD",
+            score: 0,
+            converted: leadStatus === "CONVERTED",
+            tags,
+            additionalInfo: lead.additionalInfo?.trim() || null,
+            lastActionAt: new Date(),
+        })
+    }
+
+    // 4. One bulk insert
+    let created = 0
+    if (toCreate.length > 0) {
+        try {
+            const result = await prisma.lead.createMany({ data: toCreate, skipDuplicates: true })
+            created = result.count
+            skipped += toCreate.length - result.count
+        } catch (error) {
+            console.error("[importLeads] createMany error:", error)
+            return { success: false, error: "Error al guardar los leads en la base de datos", created: 0, skipped, invalid }
         }
     }
 

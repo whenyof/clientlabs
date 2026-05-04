@@ -168,6 +168,7 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
  }
  } catch (error) {
  console.error("Duplicate check error:", error)
+ toast.warning("No se pudo verificar duplicados — se revisarán al importar")
  }
 
  setLeads(validatedLeads)

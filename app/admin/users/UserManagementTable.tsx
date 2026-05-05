@@ -19,7 +19,7 @@ type UserData = {
  email: string
  name: string | null
  role: "USER" | "ADMIN"
- plan: "FREE" | "PRO" | "BUSINESS"
+ plan: "FREE" | "TRIAL" | "STARTER" | "PRO" | "BUSINESS"
  onboardingCompleted: boolean
  createdAt: string
  image: string | null
@@ -48,10 +48,12 @@ function RoleBadge({ role }: { role: string }) {
 }
 
 function PlanBadge({ plan }: { plan: string }) {
- const colors = {
+ const colors: Record<string, string> = {
  FREE: "bg-gray-500/20 text-[var(--text-secondary)] border-gray-500/30",
- PRO: "bg-[var(--accent-soft)]-primary/15 text-[var(--accent)]-bg-emerald-600 border-[var(--accent)]-primary/30",
- BUSINESS: "bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border-subtle)]"
+ TRIAL: "bg-yellow-500/20 text-yellow-500 border-yellow-500/30",
+ STARTER: "bg-sky-500/20 text-sky-400 border-sky-500/30",
+ PRO: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+ BUSINESS: "bg-amber-500/20 text-amber-400 border-amber-500/30",
  }
 
  return (
@@ -107,7 +109,7 @@ export function UserManagementTable({ initialUsers }: { initialUsers: UserData[]
  }
  }
 
- const handlePlanChange = async (userId: string, newPlan: "FREE" | "PRO" | "BUSINESS") => {
+ const handlePlanChange = async (userId: string, newPlan: "STARTER" | "PRO" | "BUSINESS") => {
  try {
  const response = await fetch(`${getBaseUrl()}/api/admin/users/${userId}`, {
  method: "PATCH",

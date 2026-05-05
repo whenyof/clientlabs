@@ -7,13 +7,14 @@ import type { PlanType } from "@prisma/client"
 
 export function usePlan() {
   const { data: session } = useSession()
-  const plan = (session?.user?.plan ?? "FREE") as PlanType
+  const plan = (session?.user?.plan ?? "STARTER") as PlanType
 
   return {
     plan,
     isPro: planAtLeast(plan, "PRO"),
     isBusiness: planAtLeast(plan, "BUSINESS"),
-    isFree: plan === "FREE",
+    isStarter: plan === "STARTER" || plan === "FREE",
+    isTrial: plan === "TRIAL",
     can: (feature: FeatureKey) => hasFeature(plan, feature),
     limit: (key: LimitKey) => getLimit(plan, key),
     requiredPlan: (feature: FeatureKey) => requiredPlanFor(feature),

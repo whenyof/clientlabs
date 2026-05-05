@@ -645,6 +645,23 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
 
     const suggestedAction = getSuggestedAction()
 
+    const handleNewOrder = () => {
+        if (products.length === 0) {
+            toast.error("Importa el catálogo de productos antes de crear un pedido.")
+            setActiveTab("productos")
+            setShowImportProductsDialog(true)
+            return
+        }
+        if (templates.length === 0) {
+            toast.error("Crea una plantilla de mensaje antes de crear un pedido.")
+            setActiveTab("plantillas")
+            setTemplateToEdit(null)
+            setShowTemplateDialog(true)
+            return
+        }
+        setShowNewOrderModal(true)
+    }
+
     const summaryData = useMemo(() => {
         const lastOrder = orders.length > 0
             ? orders.reduce((latest, o) => (new Date(o.orderDate) > new Date(latest.orderDate) ? o : latest))
@@ -705,7 +722,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
                 id: "critical-inactive",
                 severity: "warning",
                 message: `Proveedor ${provider.dependencyLevel === "CRITICAL" ? "crítico" : "de alta dependencia"} sin pedidos desde hace ${daysSinceLastOrder} días`,
-                action: { label: "Nuevo pedido", onClick: () => setShowNewOrderModal(true) },
+                action: { label: "Nuevo pedido", onClick: handleNewOrder },
             })
         }
         if (
@@ -835,7 +852,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
                         <Button
                             size="sm"
                             className="bg-[var(--accent)] hover:opacity-90 text-white shadow-sm"
-                            onClick={() => setShowNewOrderModal(true)}
+                            onClick={handleNewOrder}
                         >
                             <ShoppingBag className="h-4 w-4 mr-1.5" />
                             Nuevo pedido
@@ -942,7 +959,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
                                             <Button
                                                 size="sm"
                                                 className="bg-[var(--accent)] hover:opacity-90 text-white shadow-sm"
-                                                onClick={() => setShowNewOrderModal(true)}
+                                                onClick={handleNewOrder}
                                             >
                                                 <ShoppingBag className="h-4 w-4 mr-1.5" />
                                                 Nuevo pedido
@@ -1050,7 +1067,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
                                 hasOrderEmail={!!provider.contactEmail?.trim()}
                                 hasCatalog={products.length > 0}
                                 hasDefaultTemplate={templates.some((t) => t.isDefault)}
-                                onNewOrder={() => setShowNewOrderModal(true)}
+                                onNewOrder={handleNewOrder}
                                 onAddEmail={() => toast.info("Configura el correo del proveedor en la ficha de contacto.")}
                                 onImportProducts={() => { setActiveTab("productos"); setShowImportProductsDialog(true) }}
                                 onCreateTemplate={() => { setActiveTab("plantillas"); setTemplateToEdit(null); setShowTemplateDialog(true) }}
@@ -1066,7 +1083,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
                                 runtimeAlerts={summaryData.runtimeAlerts}
                                 onAddProduct={() => setShowProductDialog(true)}
                                 onGoToProductos={() => setActiveTab("productos")}
-                                onQuickOrder={() => setShowNewOrderModal(true)}
+                                onQuickOrder={handleNewOrder}
                                 onQuickTask={() => setShowTaskDialog(true)}
                                 onQuickNote={() => setShowNoteDialog(true)}
                                 onQuickFile={() => { setFileUploadContext({ entityType: "PROVIDER", entityId: provider.id }); setShowFileDialog(true) }}
@@ -1091,7 +1108,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
                                 labels={{ orders: { plural: (labels as any).orders?.plural ?? (labels as any).orders?.title ?? "Pedidos" }, providers: { actions: { newOrder: (labels as any).providers?.actions?.newOrder ?? "Nuevo pedido", markReceived: "Marcar recibido" } } }}
                                 formatCurrency={formatCurrency}
                                 fileCategoryLabel={fileCategoryLabel}
-                                onNewOrder={() => setShowNewOrderModal(true)}
+                                onNewOrder={handleNewOrder}
                                 onExpandOrder={(id) => setExpandedOrderId(id || null)}
                                 onMarkReceived={async (id) => { const r = await completeProviderOrder(id, "RECEIVED"); if (r.success) { loadData(); toast.success("Pedido marcado recibido") } else toast.error(r?.error) }}
                                 onCancelOrder={async (id) => { const r = await cancelProviderOrder(id); if (r.success) { loadData(); toast.success("Pedido cancelado") } else toast.error(r?.error) }}
@@ -1403,19 +1420,19 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
             />
 
             <AlertDialog open={!!fileToDelete} onOpenChange={(open) => !open && setFileToDelete(null)}>
-                <AlertDialogContent className="bg-zinc-900 border-white/10">
+                <AlertDialogContent className="bg-white border-slate-200 shadow-xl">
                     <AlertDialogHeader>
-                        <AlertDialogTitle className="text-white">Eliminar archivo</AlertDialogTitle>
-                        <AlertDialogDescription className="text-zinc-400">
+                        <AlertDialogTitle className="text-slate-900">Eliminar archivo</AlertDialogTitle>
+                        <AlertDialogDescription className="text-slate-500">
                             ¿Eliminar &quot;{fileToDelete?.name}&quot;? Esta acción no se puede deshacer.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel className="text-zinc-300 border-zinc-600 hover:bg-zinc-800">Cancelar</AlertDialogCancel>
+                        <AlertDialogCancel className="text-slate-700 border-slate-200 hover:bg-slate-50">Cancelar</AlertDialogCancel>
                         <Button
                             type="button"
                             onClick={() => { if (fileToDelete) handleDeleteFile(fileToDelete.id) }}
-                            className="bg-red-600 hover:bg-red-700 text-white"
+                            className="bg-red-600 hover:bg-red-700 text-white border-0"
                         >
                             Eliminar
                         </Button>
@@ -1425,12 +1442,12 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
 
             {/* Modal: nota completa al hacer click en evento NOTE del timeline */}
             <Dialog open={!!selectedNoteContent} onOpenChange={(open) => !open && setSelectedNoteContent(null)}>
-                <DialogContent className="bg-zinc-900 border-white/10 max-w-md">
+                <DialogContent className="bg-white border-slate-200 shadow-xl max-w-md">
                     <DialogHeader>
-                        <DialogTitle className="text-white">Nota</DialogTitle>
+                        <DialogTitle className="text-slate-900">Nota</DialogTitle>
                     </DialogHeader>
-                    <div className="bg-teal-500/10 border border-teal-500/20 rounded-lg p-4 max-h-[60vh] overflow-y-auto">
-                        <p className="text-sm text-white/90 whitespace-pre-wrap">{selectedNoteContent}</p>
+                    <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 max-h-[60vh] overflow-y-auto">
+                        <p className="text-sm text-slate-700 whitespace-pre-wrap">{selectedNoteContent}</p>
                     </div>
                 </DialogContent>
             </Dialog>

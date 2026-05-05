@@ -6,7 +6,7 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
 const schema = z.object({
-  plan: z.enum(["FREE", "PRO", "BUSINESS"]),
+  plan: z.enum(["STARTER", "PRO", "BUSINESS"]),
 })
 
 export async function POST(req: Request) {

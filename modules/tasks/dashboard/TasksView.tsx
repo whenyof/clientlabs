@@ -6,7 +6,6 @@ import type { DashboardTask, TaskPriority, ViewMode } from "./types"
 import { TasksKPIs } from "./TasksKPIs"
 import { TasksTopbar } from "./TasksTopbar"
 import { PriorityView } from "./PriorityView"
-import { KanbanView } from "./KanbanView"
 import { WeekView } from "./WeekView"
 import { MonthView } from "./MonthView"
 import { TasksSidebarRight } from "./TasksSidebarRight"
@@ -81,9 +80,6 @@ export function TasksView() {
         <div className="flex-1 min-w-0 overflow-x-auto">
           {view === "priority" && (
             <PriorityView tasks={tasks} search={search} onAddTask={handleAddTask} />
-          )}
-          {view === "kanban" && (
-            <KanbanView tasks={tasks} search={search} onAddTask={handleAddTask} onTaskClick={handleTaskClick} />
           )}
           {view === "week" && (
             <WeekView tasks={tasks} onTaskClick={handleTaskClick} onCellClick={handleDayClick} />

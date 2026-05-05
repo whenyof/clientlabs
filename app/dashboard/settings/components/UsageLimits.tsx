@@ -19,7 +19,8 @@ function getStatus(current: number, limit: number) {
 }
 
 function planLabel(plan: string) {
-  if (plan === "FREE") return "Free"
+  if (plan === "TRIAL") return "Prueba (Pro)"
+  if (plan === "FREE" || plan === "STARTER") return "Starter"
   if (plan === "PRO") return "Pro"
   if (plan === "BUSINESS") return "Business"
   return plan
@@ -35,7 +36,7 @@ const DEFAULT_USAGE: UsageItem[] = [
 
 export function UsageLimits() {
   const [usage, setUsage] = useState<UsageItem[]>(DEFAULT_USAGE)
-  const [plan, setPlan] = useState<string>("FREE")
+  const [plan, setPlan] = useState<string>("STARTER")
   const [loading, setLoading] = useState(true)
 
   const loadUsage = useCallback(async () => {
@@ -44,7 +45,7 @@ export function UsageLimits() {
       const data = await res.json()
       if (data.success) {
         setUsage(data.usage ?? DEFAULT_USAGE)
-        setPlan(data.plan ?? "FREE")
+        setPlan(data.plan ?? "STARTER")
       }
     } catch {
       // silently use defaults

@@ -141,7 +141,7 @@ export function TaskDialog({ open, onOpenChange, task, clientId, leadId, onSucce
 
  return (
  <Dialog open={open} onOpenChange={onOpenChange}>
- <DialogContent className="sm:max-w-[425px] bg-zinc-900 border-[var(--border-subtle)] text-[var(--text-primary)]">
+ <DialogContent className="sm:max-w-[425px] bg-white border-slate-100 shadow-xl text-[var(--text-primary)]">
  <DialogHeader>
  <DialogTitle>{task ? ui.dialogTitleEdit : ui.dialogTitleNew}</DialogTitle>
  </DialogHeader>

@@ -18,7 +18,7 @@ type UserData = {
  email: string
  name: string | null
  role: "USER" | "ADMIN"
- plan: "FREE" | "PRO" | "BUSINESS"
+ plan: "FREE" | "TRIAL" | "STARTER" | "PRO" | "BUSINESS"
 }
 
 type RoleChangeDialogProps = {

@@ -25,7 +25,7 @@ interface Invoice {
 
 export function BillingHistory() {
   const [invoices, setInvoices] = useState<Invoice[]>([])
-  const [plan, setPlan] = useState("FREE")
+  const [plan, setPlan] = useState("STARTER")
   const [planExpiresAt, setPlanExpiresAt] = useState<string | null>(null)
   const [fetched, setFetched] = useState(false)
   const { openPortal, loading } = useStripeCheckout()
@@ -85,14 +85,14 @@ export function BillingHistory() {
         </div>
         <div className="bg-white rounded-xl border border-slate-200 p-4 text-center">
           <div className="text-lg font-bold text-[#0B1F2A]">
-            {plan === "FREE" ? "Gratis" : plan.charAt(0) + plan.slice(1).toLowerCase()}
+            {plan === "TRIAL" ? "Prueba (Pro)" : plan === "FREE" || plan === "STARTER" ? "Starter" : plan.charAt(0) + plan.slice(1).toLowerCase()}
           </div>
           <div className="text-xs text-slate-500 mt-0.5">Plan activo</div>
         </div>
       </div>
 
       {/* Manage billing */}
-      {plan !== "FREE" && (
+      {plan !== "FREE" && plan !== "TRIAL" && (
         <div className="bg-white rounded-xl border border-slate-200 p-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center">

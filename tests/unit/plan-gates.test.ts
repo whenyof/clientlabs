@@ -9,8 +9,8 @@ import {
 } from "@/lib/plan-gates"
 
 describe("hasFeature", () => {
-  it("FREE no tiene ai", () => {
-    expect(hasFeature("FREE", "ai")).toBe(false)
+  it("STARTER no tiene ai", () => {
+    expect(hasFeature("STARTER", "ai")).toBe(false)
   })
 
   it("PRO tiene ai", () => {
@@ -25,78 +25,98 @@ describe("hasFeature", () => {
     expect(hasFeature("PRO", "aiPredictions")).toBe(false)
   })
 
-  it("FREE tiene leads (base)", () => {
-    expect(hasFeature("FREE", "leads")).toBe(true)
+  it("STARTER tiene leads (base)", () => {
+    expect(hasFeature("STARTER", "leads")).toBe(true)
   })
 
-  it("FREE no tiene automations", () => {
-    expect(hasFeature("FREE", "automations")).toBe(false)
+  it("STARTER no tiene automations", () => {
+    expect(hasFeature("STARTER", "automations")).toBe(false)
   })
 
   it("BUSINESS tiene emailMarketing", () => {
     expect(hasFeature("BUSINESS", "emailMarketing")).toBe(true)
   })
 
-  it("PRO no tiene emailMarketing", () => {
-    expect(hasFeature("PRO", "emailMarketing")).toBe(false)
+  it("PRO tiene emailMarketing", () => {
+    expect(hasFeature("PRO", "emailMarketing")).toBe(true)
+  })
+
+  it("STARTER tiene verifactu", () => {
+    expect(hasFeature("STARTER", "verifactu")).toBe(true)
+  })
+
+  it("PRO tiene verifactu", () => {
+    expect(hasFeature("PRO", "verifactu")).toBe(true)
   })
 })
 
 describe("getLimit", () => {
-  it("FREE maxLeadsTotal es 50", () => {
-    expect(getLimit("FREE", "maxLeadsTotal")).toBe(50)
+  it("STARTER maxLeadsTotal es 200", () => {
+    expect(getLimit("STARTER", "maxLeadsTotal")).toBe(200)
   })
 
   it("PRO maxLeadsTotal es Infinity", () => {
     expect(getLimit("PRO", "maxLeadsTotal")).toBe(Infinity)
   })
 
-  it("FREE maxClients es 20", () => {
-    expect(getLimit("FREE", "maxClients")).toBe(20)
+  it("STARTER maxClients es Infinity", () => {
+    expect(getLimit("STARTER", "maxClients")).toBe(Infinity)
   })
 
   it("BUSINESS maxActiveAutomations es Infinity", () => {
     expect(getLimit("BUSINESS", "maxActiveAutomations")).toBe(Infinity)
   })
 
-  it("FREE maxActiveAutomations es 0", () => {
-    expect(getLimit("FREE", "maxActiveAutomations")).toBe(0)
+  it("STARTER maxActiveAutomations es 0", () => {
+    expect(getLimit("STARTER", "maxActiveAutomations")).toBe(0)
   })
 
-  it("PRO maxActiveAutomations es 5", () => {
-    expect(getLimit("PRO", "maxActiveAutomations")).toBe(5)
+  it("PRO maxActiveAutomations es 10", () => {
+    expect(getLimit("PRO", "maxActiveAutomations")).toBe(10)
+  })
+
+  it("STARTER maxUsers es 1", () => {
+    expect(getLimit("STARTER", "maxUsers")).toBe(1)
+  })
+
+  it("PRO maxUsers es 5", () => {
+    expect(getLimit("PRO", "maxUsers")).toBe(5)
+  })
+
+  it("BUSINESS maxUsers es Infinity", () => {
+    expect(getLimit("BUSINESS", "maxUsers")).toBe(Infinity)
   })
 })
 
 describe("isAtLimit", () => {
-  it("FREE con 50 leads está en el límite", () => {
-    expect(isAtLimit("FREE", "maxLeadsTotal", 50)).toBe(true)
+  it("STARTER con 200 leads está en el límite", () => {
+    expect(isAtLimit("STARTER", "maxLeadsTotal", 200)).toBe(true)
   })
 
-  it("FREE con 49 leads NO está en el límite", () => {
-    expect(isAtLimit("FREE", "maxLeadsTotal", 49)).toBe(false)
+  it("STARTER con 199 leads NO está en el límite", () => {
+    expect(isAtLimit("STARTER", "maxLeadsTotal", 199)).toBe(false)
   })
 
   it("PRO con 10000 leads NO está en el límite", () => {
     expect(isAtLimit("PRO", "maxLeadsTotal", 10_000)).toBe(false)
   })
 
-  it("FREE con 0 leads NO está en el límite", () => {
-    expect(isAtLimit("FREE", "maxLeadsTotal", 0)).toBe(false)
+  it("STARTER con 0 leads NO está en el límite", () => {
+    expect(isAtLimit("STARTER", "maxLeadsTotal", 0)).toBe(false)
   })
 
-  it("FREE con 51 leads supera el límite", () => {
-    expect(isAtLimit("FREE", "maxLeadsTotal", 51)).toBe(true)
+  it("STARTER con 201 leads supera el límite", () => {
+    expect(isAtLimit("STARTER", "maxLeadsTotal", 201)).toBe(true)
   })
 })
 
 describe("planAtLeast", () => {
-  it("FREE >= FREE", () => {
-    expect(planAtLeast("FREE", "FREE")).toBe(true)
+  it("STARTER >= STARTER", () => {
+    expect(planAtLeast("STARTER", "STARTER")).toBe(true)
   })
 
-  it("PRO >= FREE", () => {
-    expect(planAtLeast("PRO", "FREE")).toBe(true)
+  it("PRO >= STARTER", () => {
+    expect(planAtLeast("PRO", "STARTER")).toBe(true)
   })
 
   it("PRO >= PRO", () => {
@@ -107,12 +127,12 @@ describe("planAtLeast", () => {
     expect(planAtLeast("BUSINESS", "PRO")).toBe(true)
   })
 
-  it("FREE NO >= PRO", () => {
-    expect(planAtLeast("FREE", "PRO")).toBe(false)
+  it("STARTER NO >= PRO", () => {
+    expect(planAtLeast("STARTER", "PRO")).toBe(false)
   })
 
-  it("FREE NO >= BUSINESS", () => {
-    expect(planAtLeast("FREE", "BUSINESS")).toBe(false)
+  it("STARTER NO >= BUSINESS", () => {
+    expect(planAtLeast("STARTER", "BUSINESS")).toBe(false)
   })
 
   it("PRO NO >= BUSINESS", () => {
@@ -121,8 +141,8 @@ describe("planAtLeast", () => {
 })
 
 describe("requiredPlanFor", () => {
-  it("leads requiere FREE", () => {
-    expect(requiredPlanFor("leads")).toBe("FREE")
+  it("leads requiere STARTER", () => {
+    expect(requiredPlanFor("leads")).toBe("STARTER")
   })
 
   it("ai requiere PRO", () => {
@@ -141,12 +161,12 @@ describe("requiredPlanFor", () => {
     expect(requiredPlanFor("api")).toBe("BUSINESS")
   })
 
-  it("emailMarketing requiere BUSINESS", () => {
-    expect(requiredPlanFor("emailMarketing")).toBe("BUSINESS")
+  it("emailMarketing requiere PRO", () => {
+    expect(requiredPlanFor("emailMarketing")).toBe("PRO")
   })
 
-  it("verifactu requiere BUSINESS", () => {
-    expect(requiredPlanFor("verifactu")).toBe("BUSINESS")
+  it("verifactu requiere STARTER", () => {
+    expect(requiredPlanFor("verifactu")).toBe("STARTER")
   })
 })
 

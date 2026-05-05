@@ -554,7 +554,7 @@ export const ARTICLES_16_20: Record<string, React.ReactNode> = {
       <p>En Google Sheets, el proceso es aún más sencillo: <strong>Archivo &gt; Descargar &gt; Valores separados por comas (.csv)</strong>.</p>
 
       <h2>Paso 2: Crea tu cuenta en ClientLabs (gratis, sin tarjeta)</h2>
-      <p>Accede a <Link href="/register">clientlabs.io/register</Link> e introduce tu email y una contraseña. El proceso completo tarda menos de 2 minutos. No necesitas tarjeta de crédito para el plan gratuito, que te permite emitir hasta 5 facturas al mes.</p>
+      <p>Accede a <Link href="/register">clientlabs.io/register</Link> e introduce tu email y una contraseña. El proceso completo tarda menos de 2 minutos. No necesitas tarjeta de crédito: los primeros 14 días son completamente gratis con acceso al plan Pro completo.</p>
       <p>Una vez creada la cuenta, recibirás un email de verificación. Haz clic en el enlace del email para confirmar tu dirección. Si no recibes el email en 2 minutos, revisa la carpeta de spam.</p>
       <p>Tras la verificación, accede al panel principal de ClientLabs. El asistente de configuración inicial te guiará por los primeros pasos.</p>
 

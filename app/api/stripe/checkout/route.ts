@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json()
-  const { plan, period } = body as { plan: "PRO" | "BUSINESS"; period: "monthly" | "yearly" }
+  const { plan, period } = body as { plan: "STARTER" | "PRO" | "BUSINESS"; period: "monthly" | "yearly" }
 
   if (!plan || !period) {
     return NextResponse.json({ error: "plan y period son requeridos" }, { status: 400 })
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
       if (sub.status === "active" || sub.status === "trialing") {
         const portal = await stripe.billingPortal.sessions.create({
           customer: user.stripeCustomerId!,
-          return_url: `${process.env.NEXTAUTH_URL}/dashboard/settings?tab=plans`,
+          return_url: `${process.env.NEXTAUTH_URL}/dashboard/settings?section=subscription`,
         })
         return NextResponse.json({ url: portal.url })
       }

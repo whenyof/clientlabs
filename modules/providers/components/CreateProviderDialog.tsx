@@ -31,7 +31,7 @@ const inputClass = "w-full px-4 py-2.5 rounded-xl border border-slate-200 text-[
 const selectClass = "w-full px-4 py-2.5 rounded-xl border border-slate-200 text-[14px] text-slate-900 bg-slate-50 focus:bg-white focus:border-[#1FA97A] focus:ring-2 focus:ring-[#1FA97A]/10 outline-none transition-all appearance-none cursor-pointer"
 const labelClass = "text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500"
 
-const empty = { name: "", type: "OTHER", monthlyCost: "", dependency: "LOW", contactEmail: "", contactPhone: "", website: "", notes: "" }
+const empty = { name: "", type: "OTHER", dependency: "LOW", contactEmail: "", contactPhone: "", website: "", notes: "" }
 
 export function CreateProviderDialog({ open, onOpenChange, onProviderCreated }: Props) {
   const [loading, setLoading] = useState(false)
@@ -48,7 +48,7 @@ export function CreateProviderDialog({ open, onOpenChange, onProviderCreated }: 
       const result = await createProvider({
         name: form.name,
         type: form.type,
-        monthlyCost: form.monthlyCost ? parseFloat(form.monthlyCost) : null,
+        monthlyCost: null,
         dependency: form.dependency as "LOW" | "MEDIUM" | "HIGH" | "CRITICAL",
         isCritical: form.dependency === "CRITICAL" || form.dependency === "HIGH",
         contactEmail: form.contactEmail || null,
@@ -90,20 +90,14 @@ export function CreateProviderDialog({ open, onOpenChange, onProviderCreated }: 
               <input type="text" value={form.name} onChange={e => set("name", e.target.value)} placeholder="AWS, Google Workspace, etc." required className={inputClass} />
             </div>
 
-            {/* Tipo + Coste */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <label className={labelClass}>TIPO</label>
-                <div className="relative">
-                  <select value={form.type} onChange={e => set("type", e.target.value)} className={selectClass}>
-                    {TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <label className={labelClass}>COSTE MENSUAL (€)</label>
-                <input type="number" step="0.01" min="0" value={form.monthlyCost} onChange={e => set("monthlyCost", e.target.value)} placeholder="0.00" className={inputClass} />
+            {/* Tipo */}
+            <div className="space-y-1.5">
+              <label className={labelClass}>TIPO</label>
+              <div className="relative">
+                <select value={form.type} onChange={e => set("type", e.target.value)} className={selectClass}>
+                  {TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
               </div>
             </div>
 

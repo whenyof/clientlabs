@@ -7,14 +7,13 @@ import { pricingContent } from "@/components/landing/content"
 import { LandingIcons } from "@/components/landing/icons"
 import { GridBackground } from "@/components/landing/utils"
 
-async function startCheckout(plan: "PRO" | "BUSINESS", period: "monthly" | "yearly") {
+async function startCheckout(plan: "STARTER" | "PRO" | "BUSINESS", period: "monthly" | "yearly") {
   const res = await fetch("/api/stripe/checkout", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ plan, period }),
   })
   if (res.status === 401) {
-    // Not logged in — send to register with hint
     window.location.href = `/register?plan=${plan.toLowerCase()}&period=${period}`
     return
   }
@@ -156,40 +155,27 @@ export function Pricing() {
                   <p className="mb-4 text-[12px] text-[#8fa0aa]">{plan.note as string}</p>
                 )}
 
-                {/* CTA — ref: .plan .btn */}
-                {plan.name === "Free" ? (
-                  <Link
-                    href="/register"
-                    className={[
-                      "flex w-full items-center justify-center gap-2 rounded-full py-3 font-display text-[15px] font-semibold transition-opacity hover:opacity-90",
-                      "border border-line-dark text-[#c6d0d6] hover:bg-white/[0.06]",
-                    ].join(" ")}
-                  >
-                    {plan.cta}
-                    <LandingIcons.arrow className="h-4 w-4" />
-                  </Link>
-                ) : (
-                  <button
-                    type="button"
-                    disabled={loadingPlan !== null}
-                    onClick={async () => {
-                      const stripePlan = plan.name.toUpperCase() as "PRO" | "BUSINESS"
-                      const period = annual ? "yearly" : "monthly"
-                      setLoadingPlan(plan.name)
-                      try { await startCheckout(stripePlan, period) }
-                      finally { setLoadingPlan(null) }
-                    }}
-                    className={[
-                      "flex w-full items-center justify-center gap-2 rounded-full py-3 font-display text-[15px] font-semibold transition-opacity hover:opacity-90 disabled:opacity-60",
-                      plan.featured
-                        ? "bg-emerald text-white"
-                        : "border border-line-dark text-[#c6d0d6] hover:bg-white/[0.06]",
-                    ].join(" ")}
-                  >
-                    {loadingPlan === plan.name ? "Cargando..." : plan.cta}
-                    {loadingPlan !== plan.name && <LandingIcons.arrow className="h-4 w-4" />}
-                  </button>
-                )}
+                {/* CTA */}
+                <button
+                  type="button"
+                  disabled={loadingPlan !== null}
+                  onClick={async () => {
+                    const stripePlan = plan.name.toUpperCase() as "STARTER" | "PRO" | "BUSINESS"
+                    const period = annual ? "yearly" : "monthly"
+                    setLoadingPlan(plan.name)
+                    try { await startCheckout(stripePlan, period) }
+                    finally { setLoadingPlan(null) }
+                  }}
+                  className={[
+                    "flex w-full items-center justify-center gap-2 rounded-full py-3 font-display text-[15px] font-semibold transition-opacity hover:opacity-90 disabled:opacity-60",
+                    plan.featured
+                      ? "bg-emerald text-white"
+                      : "border border-line-dark text-[#c6d0d6] hover:bg-white/[0.06]",
+                  ].join(" ")}
+                >
+                  {loadingPlan === plan.name ? "Cargando..." : plan.cta}
+                  {loadingPlan !== plan.name && <LandingIcons.arrow className="h-4 w-4" />}
+                </button>
               </div>
             )
           })}

@@ -1,7 +1,7 @@
 "use client"
 
 import { Suspense } from "react"
-import { Search, Plus, LayoutList, CalendarDays, Calendar, Columns3 } from "lucide-react"
+import { Search, Plus, LayoutList, CalendarDays, Calendar } from "lucide-react"
 import type { ViewMode } from "./types"
 import { GoogleCalendarButton } from "./GoogleCalendarButton"
 
@@ -15,7 +15,6 @@ interface TasksTopbarProps {
 
 const VIEWS: { id: ViewMode; label: string; Icon: React.ElementType }[] = [
   { id: "priority", label: "Prioridad", Icon: LayoutList },
-  { id: "kanban",   label: "Kanban",    Icon: Columns3 },
   { id: "week",     label: "Semana",    Icon: CalendarDays },
   { id: "month",    label: "Mes",       Icon: Calendar },
 ]

@@ -47,7 +47,7 @@ export function CallDialog({ clientId, isOpen, onClose, onSuccess }: CallDialogP
 
  return (
  <Dialog open={isOpen} onOpenChange={onClose}>
- <DialogContent className="bg-zinc-900 border-[var(--border-subtle)]">
+ <DialogContent className="bg-white border-slate-100 shadow-xl">
  <DialogHeader>
  <DialogTitle className="text-[var(--text-primary)]">Registrar Llamada</DialogTitle>
  </DialogHeader>

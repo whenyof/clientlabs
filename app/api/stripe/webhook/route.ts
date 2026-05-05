@@ -28,12 +28,66 @@ export async function POST(req: NextRequest) {
   try {
     switch (event.type) {
 
-      // ── Checkout completado (nueva suscripción o trial) ─────────────────
+      // ── Checkout completado (nueva suscripción, trial, plantilla, asiento) ──
       case "checkout.session.completed": {
         const sess = event.data.object as Stripe.Checkout.Session
+        const sessType = sess.metadata?.type
+
+        // ── Compra de plantilla individual ───────────────────────────────────
+        if (sess.mode === "payment" && sessType === "template") {
+          const userId = sess.metadata?.userId ?? sess.client_reference_id ?? null
+          const templateId = sess.metadata?.templateId ?? null
+          if (userId && templateId) {
+            await safePrismaQuery(() =>
+              prisma.userTemplate.upsert({
+                where: { userId_templateId: { userId, templateId } },
+                update: {},
+                create: { userId, templateId },
+              })
+            )
+          }
+          break
+        }
+
+        // ── Compra del pack completo de plantillas ───────────────────────────
+        if (sess.mode === "payment" && sessType === "template_pack_all") {
+          const userId = sess.metadata?.userId ?? sess.client_reference_id ?? null
+          if (userId) {
+            const premiumTemplates = await prisma.invoiceTemplate.findMany({
+              where: { category: "premium" },
+              select: { id: true },
+            })
+            for (const t of premiumTemplates) {
+              await safePrismaQuery(() =>
+                prisma.userTemplate.upsert({
+                  where: { userId_templateId: { userId, templateId: t.id } },
+                  update: {},
+                  create: { userId, templateId: t.id },
+                })
+              )
+            }
+          }
+          break
+        }
+
+        // ── Asiento extra comprado ───────────────────────────────────────────
+        if (sess.mode === "subscription" && sessType === "extra_seat") {
+          const userId = sess.metadata?.userId ?? sess.client_reference_id ?? null
+          if (userId) {
+            await safePrismaQuery(() =>
+              prisma.businessProfile.upsert({
+                where: { userId },
+                update: { extraSeats: { increment: 1 } },
+                create: { userId, sector: "general", extraSeats: 1 },
+              })
+            )
+          }
+          break
+        }
+
+        // ── Suscripción de plan ──────────────────────────────────────────────
         if (sess.mode !== "subscription") break
 
-        // sess.subscription puede ser string o Subscription expandido
         const subscriptionId =
           typeof sess.subscription === "string"
             ? sess.subscription
@@ -57,6 +111,9 @@ export async function POST(req: NextRequest) {
         }
 
         await upsertSubscription(userId, sub)
+
+        // ── Actualizar referido si el usuario fue referido ───────────────────
+        await convertReferral(userId)
         break
       }
 
@@ -77,7 +134,7 @@ export async function POST(req: NextRequest) {
             prisma.user.update({
               where: { id: userId },
               data: {
-                plan: "FREE",
+                plan: "STARTER",
                 isTrial: false,
                 stripeSubscriptionId: null,
                 planExpiresAt: null,
@@ -101,7 +158,7 @@ export async function POST(req: NextRequest) {
           prisma.user.update({
             where: { id: userId },
             data: {
-              plan: "FREE",
+              plan: "STARTER",
               isTrial: false,
               stripeSubscriptionId: null,
               planExpiresAt: null,
@@ -164,6 +221,42 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json({ received: true })
+}
+
+// ── Helper: marca el referido como suscrito y recalcula nivel del referrer ───
+async function convertReferral(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { referredByCode: true },
+  })
+  if (!user?.referredByCode) return
+
+  await safePrismaQuery(() =>
+    prisma.referral.updateMany({
+      where: { code: user.referredByCode!, referredId: userId },
+      data: { status: "subscribed", convertedAt: new Date() },
+    })
+  )
+
+  const referrer = await prisma.user.findFirst({
+    where: { referralCode: user.referredByCode },
+    select: { id: true },
+  })
+  if (!referrer) return
+
+  const subscribedCount = await prisma.referral.count({
+    where: { referrerId: referrer.id, status: "subscribed" },
+  })
+
+  const { getLevelForReferrals } = await import("@/lib/referral-rewards")
+  const newLevel = getLevelForReferrals(subscribedCount)
+
+  await safePrismaQuery(() =>
+    prisma.user.update({
+      where: { id: referrer.id },
+      data: { referralLevel: newLevel.level, referralPoints: subscribedCount },
+    })
+  )
 }
 
 // ── Helper: persiste suscripción activa o en trial en la DB ──────────────────

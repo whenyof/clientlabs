@@ -1,16 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { toast } from "sonner"
 import { updateProviderProduct } from "@/app/dashboard/providers/actions"
 import { useRouter } from "next/navigation"
 import { useSectorConfig } from "@/hooks/useSectorConfig"
+import { Loader2 } from "lucide-react"
 
 export type ProviderProductRow = {
     id: string
@@ -31,6 +27,9 @@ type EditProviderProductDialogProps = {
     onOpenChange: (open: boolean) => void
     onSuccess?: () => void
 }
+
+const inputClass = "w-full px-4 py-2.5 rounded-xl border border-slate-200 text-[14px] text-slate-900 placeholder:text-slate-400 bg-slate-50 focus:bg-white focus:border-[#1FA97A] focus:ring-2 focus:ring-[#1FA97A]/10 outline-none transition-all"
+const labelClass = "text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500"
 
 export function EditProviderProductDialog({
     providerId,
@@ -83,7 +82,6 @@ export function EditProviderProductDialog({
             toast.error("Introduce un precio válido")
             return
         }
-
         setLoading(true)
         try {
             const result = await updateProviderProduct(product.id, {
@@ -95,7 +93,6 @@ export function EditProviderProductDialog({
                 category: formData.category.trim() || null,
                 isActive: formData.isActive
             })
-
             if (result.success) {
                 toast.success("Producto actualizado")
                 onOpenChange(false)
@@ -115,110 +112,102 @@ export function EditProviderProductDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="bg-zinc-900 border-white/10 max-w-md">
-                <DialogHeader>
-                    <DialogTitle className="text-white">Editar producto</DialogTitle>
-                    <p className="text-sm text-white/60">{providerName} · {product.code}</p>
-                </DialogHeader>
+            <DialogContent className="bg-white rounded-2xl p-0 !max-w-md w-full overflow-hidden border-0 shadow-xl">
+                <div className="px-6 pt-6 pb-5 border-b border-slate-100">
+                    <h2 className="text-[17px] font-semibold text-slate-900">Editar producto</h2>
+                    <p className="text-[13px] text-slate-500 mt-1">{providerName} · {product.code}</p>
+                </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <Label htmlFor="edit-product-name" className="text-white/80">Nombre *</Label>
-                        <Input
-                            id="edit-product-name"
-                            value={formData.name}
-                            onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-                            className="bg-white/5 border-white/10 text-white"
-                            placeholder="Ej: Servicio mensual"
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <Label htmlFor="edit-product-code" className="text-white/80">Código *</Label>
-                        <Input
-                            id="edit-product-code"
-                            value={formData.code}
-                            onChange={(e) => setFormData((prev) => ({ ...prev, code: e.target.value }))}
-                            className="bg-white/5 border-white/10 text-white"
-                            placeholder="Ej: SRV-01"
-                            required
-                        />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <Label htmlFor="edit-product-unit" className="text-white/80">Unidad</Label>
-                            <Input
-                                id="edit-product-unit"
-                                value={formData.unit}
-                                onChange={(e) => setFormData((prev) => ({ ...prev, unit: e.target.value }))}
-                                className="bg-white/5 border-white/10 text-white"
-                                placeholder="ud, kg"
+                <form onSubmit={handleSubmit}>
+                    <div className="px-6 py-5 space-y-4 max-h-[65vh] overflow-y-auto">
+                        <div className="space-y-1.5">
+                            <label className={labelClass}>NOMBRE <span className="text-[#1FA97A]">*</span></label>
+                            <input
+                                value={formData.name}
+                                onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                                placeholder="Ej: Servicio mensual"
+                                required
+                                className={inputClass}
                             />
                         </div>
-                        <div>
-                            <Label htmlFor="edit-product-category" className="text-white/80">Categoría</Label>
-                            <Input
-                                id="edit-product-category"
-                                value={formData.category}
-                                onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
-                                className="bg-white/5 border-white/10 text-white"
-                                placeholder="Material"
+
+                        <div className="space-y-1.5">
+                            <label className={labelClass}>CÓDIGO <span className="text-[#1FA97A]">*</span></label>
+                            <input
+                                value={formData.code}
+                                onChange={(e) => setFormData((prev) => ({ ...prev, code: e.target.value }))}
+                                placeholder="Ej: SRV-01"
+                                required
+                                className={inputClass}
                             />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1.5">
+                                <label className={labelClass}>UNIDAD</label>
+                                <input
+                                    value={formData.unit}
+                                    onChange={(e) => setFormData((prev) => ({ ...prev, unit: e.target.value }))}
+                                    placeholder="ud, kg"
+                                    className={inputClass}
+                                />
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className={labelClass}>CATEGORÍA</label>
+                                <input
+                                    value={formData.category}
+                                    onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
+                                    placeholder="Material"
+                                    className={inputClass}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label className={labelClass}>PRECIO (€) <span className="text-[#1FA97A]">*</span></label>
+                            <input
+                                type="text"
+                                inputMode="decimal"
+                                value={formData.price}
+                                onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))}
+                                placeholder="0,00"
+                                required
+                                className={inputClass}
+                            />
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label className={labelClass}>DESCRIPCIÓN</label>
+                            <textarea
+                                value={formData.description}
+                                onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
+                                placeholder="Detalles del producto..."
+                                rows={2}
+                                className={`${inputClass} resize-none`}
+                            />
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                id="edit-product-active"
+                                checked={formData.isActive}
+                                onChange={(e) => setFormData((prev) => ({ ...prev, isActive: e.target.checked }))}
+                                className="w-4 h-4 rounded border-slate-300 accent-[#1FA97A]"
+                            />
+                            <label htmlFor="edit-product-active" className="text-sm text-slate-700 cursor-pointer">
+                                Producto activo (visible en catálogo y pedidos)
+                            </label>
                         </div>
                     </div>
 
-                    <div>
-                        <Label htmlFor="edit-product-price" className="text-white/80">Precio (€) *</Label>
-                        <Input
-                            id="edit-product-price"
-                            type="text"
-                            inputMode="decimal"
-                            value={formData.price}
-                            onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))}
-                            className="bg-white/5 border-white/10 text-white"
-                            placeholder="0,00"
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <Label htmlFor="edit-product-description" className="text-white/80">Descripción</Label>
-                        <Textarea
-                            id="edit-product-description"
-                            value={formData.description}
-                            onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-                            className="bg-white/5 border-white/10 text-white resize-none"
-                            placeholder="Detalles del producto..."
-                            rows={2}
-                        />
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                        <Checkbox
-                            id="edit-product-active"
-                            checked={formData.isActive}
-                            onCheckedChange={(c) => setFormData((prev) => ({ ...prev, isActive: Boolean(c) }))}
-                            className="border-white/30 data-[state=checked]:bg-emerald-600"
-                        />
-                        <Label htmlFor="edit-product-active" className="text-sm text-white/80 cursor-pointer">
-                            Producto activo (visible en catálogo y pedidos)
-                        </Label>
-                    </div>
-
-                    <div className="flex justify-end gap-3 pt-4">
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            onClick={() => onOpenChange(false)}
-                            className="text-white/60 hover:text-white hover:bg-white/10"
-                        >
+                    <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3">
+                        <button type="button" onClick={() => onOpenChange(false)} className="px-5 py-2.5 rounded-xl border border-slate-200 text-[13px] font-medium text-slate-700 hover:bg-slate-50 transition-colors">
                             {labels.common.cancel}
-                        </Button>
-                        <Button type="submit" disabled={loading} className="bg-[var(--accent)] hover:opacity-90 text-white">
-                            {loading ? labels.common.loading : "Guardar cambios"}
-                        </Button>
+                        </button>
+                        <button type="submit" disabled={loading} className="px-5 py-2.5 rounded-xl bg-[#1FA97A] text-white text-[13px] font-medium hover:bg-[#178f68] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+                            {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Guardando...</> : "Guardar cambios"}
+                        </button>
                     </div>
                 </form>
             </DialogContent>

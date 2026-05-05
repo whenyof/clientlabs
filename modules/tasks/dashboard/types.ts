@@ -26,7 +26,7 @@ export interface TasksKPIsData {
   overdue: number
 }
 
-export type ViewMode = "priority" | "kanban" | "week" | "month"
+export type ViewMode = "priority" | "week" | "month"
 
 export const PRIORITY_CONFIG = {
   URGENT: {

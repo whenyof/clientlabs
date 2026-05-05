@@ -9,8 +9,10 @@ import { z } from "zod"
 
 const TEAM_LIMITS: Record<string, number> = {
   FREE: 1,
-  PRO: 3,
-  BUSINESS: 10,
+  TRIAL: 5,
+  STARTER: 1,
+  PRO: 5,
+  BUSINESS: Infinity,
 }
 
 const inviteSchema = z.object({
@@ -39,7 +41,7 @@ export async function POST(req: NextRequest) {
     })
   )
 
-  const plan = user?.plan ?? "FREE"
+  const plan = user?.plan ?? "STARTER"
   const limit = TEAM_LIMITS[plan] ?? 1
 
   const result = await getUserWorkspace(session.user.id)

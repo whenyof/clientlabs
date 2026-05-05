@@ -51,9 +51,9 @@ export async function PATCH(
  )
  }
 
- if (plan && !["FREE", "PRO", "BUSINESS"].includes(plan)) {
+ if (plan && !["STARTER", "PRO", "BUSINESS"].includes(plan)) {
  return NextResponse.json(
- { error: "Invalid plan. Must be FREE, PRO, or BUSINESS" },
+ { error: "Plan no válido. Debe ser STARTER, PRO o BUSINESS" },
  { status: 400 }
  )
  }

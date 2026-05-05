@@ -35,7 +35,7 @@ async function getSystemStats() {
     ] = await Promise.all([
       prisma.user.count(),
       prisma.user.count({ where: { role: "ADMIN" } }),
-      prisma.user.count({ where: { plan: "FREE" } }),
+      prisma.user.count({ where: { plan: { in: ["FREE", "TRIAL", "STARTER"] } } }),
       prisma.user.count({ where: { plan: "PRO" } }),
       prisma.user.count({ where: { plan: "BUSINESS" } }),
       prisma.user.count({ where: { isBlocked: true } }),
@@ -165,7 +165,7 @@ export default async function AdminDashboard() {
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-white/60">FREE</span>
+              <span className="text-white/60">STARTER</span>
               <span className="text-white font-medium">{stats.plans.free}</span>
             </div>
             <div className="flex justify-between text-sm">

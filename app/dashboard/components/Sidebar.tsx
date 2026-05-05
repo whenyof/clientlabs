@@ -41,6 +41,7 @@ import {
   Globe,
   Code2,
   Activity,
+  Gift,
 } from "lucide-react"
 
 interface SidebarProps {
@@ -351,6 +352,7 @@ export default function Sidebar({
     {
       title: "SISTEMA",
       items: [
+        { label: "Referidos", icon: Gift, href: "/dashboard/referrals" },
         { label: nav.settings, icon: Settings, href: "/dashboard/settings" },
       ],
     },
@@ -513,20 +515,21 @@ export default function Sidebar({
           {/* PLAN */}
           {!isCollapsed && session?.user?.plan && (() => {
             const plan = session.user.plan.toUpperCase()
-            const isFree = plan === "FREE"
+            const isTrial  = plan === "TRIAL"
+            const isStarter = plan === "FREE" || plan === "STARTER"
             const isPro = plan === "PRO"
             return (
               <button
-                onClick={() => router.push("/dashboard/settings?section=plans")}
+                onClick={() => router.push(isTrial ? "/plan" : "/dashboard/settings?section=subscription")}
                 className="w-full group flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg border border-[var(--border-subtle)] hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] transition-all"
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <Crown size={14} className={`shrink-0 ${isFree ? "text-slate-400" : isPro ? "text-[#1FA97A]" : "text-amber-500"}`} />
+                  <Crown size={14} className={`shrink-0 ${isTrial ? "text-yellow-500" : isStarter ? "text-sky-500" : isPro ? "text-[#1FA97A]" : "text-amber-500"}`} />
                   <div className="text-left min-w-0">
                     <p className="text-[11px] font-semibold text-[var(--text-primary)] leading-tight truncate">
-                      Plan {isFree ? "Free" : isPro ? "Pro" : "Business"}
+                      {isTrial ? "Prueba gratuita" : isStarter ? "Plan Starter" : isPro ? "Plan Pro" : "Plan Business"}
                     </p>
-                    <p className="text-[10px] text-[var(--accent)] leading-tight">Cambiar plan</p>
+                    <p className="text-[10px] text-[var(--accent)] leading-tight">{isTrial ? "Elegir plan" : "Cambiar plan"}</p>
                   </div>
                 </div>
                 <ChevronRight size={12} className="text-[var(--text-secondary)] group-hover:text-[var(--accent)] shrink-0 transition-colors" />

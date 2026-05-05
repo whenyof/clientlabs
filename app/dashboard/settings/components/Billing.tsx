@@ -190,7 +190,7 @@ export function Billing() {
           <div>
             <p className="font-medium text-yellow-300">Límite de uso alcanzado</p>
             <p className="text-sm text-yellow-200 mt-1">
-              Has alcanzado el límite de 100 clientes en tu plan gratuito.
+              Has alcanzado el límite de clientes de tu plan actual.
               Actualiza a Pro para clientes ilimitados.
             </p>
           </div>

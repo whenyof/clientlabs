@@ -91,28 +91,28 @@ export function CreateSaleDialog({ open, onOpenChange, onSuccess }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-zinc-900 border-white/10 max-w-md">
+      <DialogContent className="bg-white border-slate-200 shadow-xl max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-white">{sl.newButton}</DialogTitle>
-          <p className="text-sm text-white/60">{sl.ui.manualRegister}</p>
+          <DialogTitle className="text-slate-900">{sl.newButton}</DialogTitle>
+          <p className="text-sm text-slate-500">{sl.ui.manualRegister}</p>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="clientName" className="text-white/80">
+            <Label htmlFor="clientName" className="text-slate-700">
               {sl.table.client} *
             </Label>
             <Input
               id="clientName"
               value={clientName}
               onChange={(e) => setClientName(e.target.value)}
-              className="bg-white/5 border-white/10 text-white"
+              className="bg-slate-50 border-slate-200 text-slate-900 focus:bg-white focus:border-[#1FA97A]"
               placeholder="Nombre del cliente"
               required
             />
           </div>
           <div>
-            <Label htmlFor="clientEmail" className="text-white/80">
+            <Label htmlFor="clientEmail" className="text-slate-700">
               Email
             </Label>
             <Input
@@ -120,26 +120,26 @@ export function CreateSaleDialog({ open, onOpenChange, onSuccess }: Props) {
               type="email"
               value={clientEmail}
               onChange={(e) => setClientEmail(e.target.value)}
-              className="bg-white/5 border-white/10 text-white"
+              className="bg-slate-50 border-slate-200 text-slate-900 focus:bg-white focus:border-[#1FA97A]"
               placeholder="email@ejemplo.com"
             />
           </div>
           <div>
-            <Label htmlFor="product" className="text-white/80">
+            <Label htmlFor="product" className="text-slate-700">
               {sl.table.product} *
             </Label>
             <Input
               id="product"
               value={product}
               onChange={(e) => setProduct(e.target.value)}
-              className="bg-white/5 border-white/10 text-white"
+              className="bg-slate-50 border-slate-200 text-slate-900 focus:bg-white focus:border-[#1FA97A]"
               placeholder="Concepto o producto"
               required
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="total" className="text-white/80">
+              <Label htmlFor="total" className="text-slate-700">
                 {sl.table.amount} *
               </Label>
               <Input
@@ -149,13 +149,13 @@ export function CreateSaleDialog({ open, onOpenChange, onSuccess }: Props) {
                 min="0"
                 value={total}
                 onChange={(e) => setTotal(e.target.value)}
-                className="bg-white/5 border-white/10 text-white"
+                className="bg-slate-50 border-slate-200 text-slate-900 focus:bg-white focus:border-[#1FA97A]"
                 placeholder="0"
                 required
               />
             </div>
             <div>
-              <Label htmlFor="saleDate" className="text-white/80">
+              <Label htmlFor="saleDate" className="text-slate-700">
                 {sl.table.date}
               </Label>
               <Input
@@ -163,24 +163,23 @@ export function CreateSaleDialog({ open, onOpenChange, onSuccess }: Props) {
                 type="date"
                 value={saleDate}
                 onChange={(e) => setSaleDate(e.target.value)}
-                className="bg-white/5 border-white/10 text-white"
+                className="bg-slate-50 border-slate-200 text-slate-900 focus:bg-white focus:border-[#1FA97A]"
               />
             </div>
           </div>
           <div>
-            <Label htmlFor="status" className="text-white/80">
+            <Label htmlFor="status" className="text-slate-700">
               {sl.table.state}
             </Label>
             <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger className="bg-zinc-800 border-zinc-600 text-white">
+              <SelectTrigger className="bg-slate-50 border-slate-200 text-slate-900">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-zinc-900 border-white/10">
+              <SelectContent>
                 {paymentOptions.map((opt) => (
                   <SelectItem
                     key={opt.value}
                     value={opt.value}
-                    className="text-white focus:bg-zinc-700"
                   >
                     {opt.label}
                   </SelectItem>
@@ -196,7 +195,7 @@ export function CreateSaleDialog({ open, onOpenChange, onSuccess }: Props) {
               id="notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="bg-white/5 border-white/10 text-white resize-none"
+              className="bg-slate-50 border-slate-200 text-slate-900 resize-none focus:bg-white focus:border-[#1FA97A]"
               placeholder="Notas opcionales..."
               rows={2}
             />
@@ -207,14 +206,14 @@ export function CreateSaleDialog({ open, onOpenChange, onSuccess }: Props) {
               type="button"
               variant="ghost"
               onClick={() => onOpenChange(false)}
-              className="text-white/60 hover:text-white hover:bg-white/10"
+              className="text-slate-600 hover:text-slate-900 hover:bg-slate-50"
             >
               {labels.common.cancel}
             </Button>
             <Button
               type="submit"
               disabled={loading}
-              className="bg-emerald-600 hover:bg-violet-700 text-white"
+              className="bg-[#1FA97A] hover:bg-[#178f68] text-white"
             >
               {loading ? labels.common.loading : sl.ui.saveSale}
             </Button>

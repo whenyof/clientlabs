@@ -94,7 +94,7 @@ export const authOptions: NextAuthOptions = {
  const fromDb = user as { role?: string; plan?: string; onboardingCompleted?: boolean; selectedSector?: string | null }
  if (fromDb.role != null && fromDb.plan != null && typeof fromDb.onboardingCompleted === "boolean") {
  token.role = fromDb.role as "USER" | "ADMIN"
- token.plan = fromDb.plan as "FREE" | "PRO" | "BUSINESS"
+ token.plan = fromDb.plan as "FREE" | "TRIAL" | "PRO" | "BUSINESS"
  token.onboardingCompleted = fromDb.onboardingCompleted
  token.selectedSector = fromDb.selectedSector ?? null
  } else {
@@ -104,7 +104,7 @@ export const authOptions: NextAuthOptions = {
  })
  if (dbUser) {
  token.role = dbUser.role as "USER" | "ADMIN"
- token.plan = dbUser.plan as "FREE" | "PRO" | "BUSINESS"
+ token.plan = dbUser.plan as "FREE" | "TRIAL" | "STARTER" | "PRO" | "BUSINESS"
  token.onboardingCompleted = dbUser.onboardingCompleted
  token.selectedSector = dbUser.selectedSector ?? null
  }
@@ -120,7 +120,7 @@ export const authOptions: NextAuthOptions = {
  })
  if (dbUser) {
  token.role = dbUser.role as "USER" | "ADMIN"
- token.plan = dbUser.plan as "FREE" | "PRO" | "BUSINESS"
+ token.plan = dbUser.plan as "FREE" | "TRIAL" | "STARTER" | "PRO" | "BUSINESS"
  token.name = dbUser.name ?? token.name
  token.onboardingCompleted = dbUser.onboardingCompleted
  token.selectedSector = dbUser.selectedSector ?? null
@@ -136,7 +136,7 @@ export const authOptions: NextAuthOptions = {
  if (session.user) {
  session.user.id = token.userId as string
  session.user.role = token.role as "USER" | "ADMIN"
- session.user.plan = token.plan as "FREE" | "PRO" | "BUSINESS"
+ session.user.plan = token.plan as "FREE" | "TRIAL" | "STARTER" | "PRO" | "BUSINESS"
  session.user.onboardingCompleted =
  token.onboardingCompleted as boolean
  session.user.selectedSector = token.selectedSector as string | null

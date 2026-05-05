@@ -41,7 +41,7 @@ export function ReminderDialog({ open, onClose, onSave, loading }: ReminderDialo
 
  return (
  <Dialog open={open} onOpenChange={onClose}>
- <DialogContent className="bg-zinc-900 border-[var(--border-subtle)]">
+ <DialogContent className="bg-white border-slate-100 shadow-xl">
  <DialogHeader>
  <DialogTitle className="text-[var(--text-primary)]">Crear Recordatorio</DialogTitle>
  <DialogDescription className="text-[var(--text-secondary)]">

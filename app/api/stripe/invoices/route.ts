@@ -17,7 +17,7 @@ export async function GET(_req: NextRequest) {
   })
 
   if (!user?.stripeCustomerId) {
-    return NextResponse.json({ invoices: [], plan: user?.plan ?? "FREE", planExpiresAt: null })
+    return NextResponse.json({ invoices: [], plan: user?.plan ?? "STARTER", planExpiresAt: null })
   }
 
   const stripeInvoices = await stripe.invoices.list({

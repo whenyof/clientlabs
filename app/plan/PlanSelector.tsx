@@ -4,7 +4,7 @@ import { useState } from "react"
 import Image from "next/image"
 import { Check, Loader2, Zap } from "lucide-react"
 
-type PlanId = "FREE" | "PRO" | "BUSINESS"
+type PlanId = "STARTER" | "PRO" | "BUSINESS"
 type Period = "monthly" | "yearly"
 
 interface PlanConfig {
@@ -23,58 +23,59 @@ interface PlanConfig {
 
 const PLANS: PlanConfig[] = [
   {
-    id: "FREE",
-    name: "Free",
-    monthly: "0€",
-    yearly: "0€",
-    yearlyBilled: "",
-    yearlySaving: "",
-    description: "Para empezar a organizar tu negocio",
-    cta: "Continuar gratis",
+    id: "STARTER",
+    name: "Starter",
+    monthly: "12,99€",
+    yearly: "9,99€",
+    yearlyBilled: "119,88€/año",
+    yearlySaving: "Ahorras 36€",
+    description: "Para autónomos que empiezan",
+    cta: "Empezar 14 días gratis",
     features: [
-      "Hasta 50 leads",
-      "20 clientes activos",
-      "10 facturas/mes",
-      "Tareas y calendario",
+      "Facturas ilimitadas",
+      "Verifactu incluido",
+      "CRM hasta 200 leads",
+      "1 usuario",
+      "QR verificable AEAT",
       "Soporte por email",
     ],
   },
   {
     id: "PRO",
     name: "Pro",
-    monthly: "14.99€",
-    yearly: "11.99€",
-    yearlyBilled: "143.88€/año",
-    yearlySaving: "Ahorras 36€",
-    description: "Para autónomos y freelancers que crecen",
-    cta: "Empezar prueba gratis",
-    badge: "Popular",
+    monthly: "24,99€",
+    yearly: "19,99€",
+    yearlyBilled: "239,88€/año",
+    yearlySaving: "Ahorras 60€",
+    description: "Para autónomos y pymes establecidos",
+    cta: "Empezar 14 días gratis",
+    badge: "Más popular",
     highlight: true,
     features: [
-      "Leads ilimitados",
-      "Clientes ilimitados",
-      "Facturas ilimitadas",
-      "IA para scoring de leads",
-      "Automatizaciones",
+      "Todo lo de Starter",
+      "Leads y clientes ilimitados",
+      "Hasta 5 usuarios",
+      "Automatizaciones (10 reglas)",
+      "Email marketing (1.000/mes)",
       "Soporte prioritario",
     ],
   },
   {
     id: "BUSINESS",
     name: "Business",
-    monthly: "29.99€",
-    yearly: "23.99€",
-    yearlyBilled: "287.88€/año",
-    yearlySaving: "Ahorras 72€",
-    description: "Para pymes y equipos que escalan",
-    cta: "Empezar prueba gratis",
+    monthly: "39,99€",
+    yearly: "29,99€",
+    yearlyBilled: "359,88€/año",
+    yearlySaving: "Ahorras 120€",
+    description: "Para pymes en crecimiento",
+    cta: "Empezar 14 días gratis",
     features: [
-      "Todo de Pro",
-      "Usuarios de equipo",
-      "IA avanzada",
+      "Todo lo de Pro",
+      "Usuarios ilimitados",
+      "Automatizaciones ilimitadas",
+      "Email marketing ilimitado",
       "API completa",
-      "Informes avanzados",
-      "Soporte dedicado",
+      "Soporte premium + onboarding",
     ],
   },
 ]
@@ -83,28 +84,7 @@ export default function PlanSelector() {
   const [period, setPeriod]   = useState<Period>("monthly")
   const [loading, setLoading] = useState<PlanId | null>(null)
 
-  async function selectFree() {
-    setLoading("FREE")
-    try {
-      const res = await fetch("/api/user/select-plan", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: "FREE" }),
-      })
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        alert(data.error ?? "Error al seleccionar el plan.")
-        setLoading(null)
-        return
-      }
-      window.location.href = "/onboarding"
-    } catch {
-      alert("Error de conexión. Comprueba tu internet.")
-      setLoading(null)
-    }
-  }
-
-  async function startCheckout(plan: "PRO" | "BUSINESS") {
+  async function startCheckout(plan: PlanId) {
     setLoading(plan)
     try {
       const res = await fetch("/api/stripe/checkout", {
@@ -123,11 +103,6 @@ export default function PlanSelector() {
       alert("Error de conexión. Comprueba tu internet.")
       setLoading(null)
     }
-  }
-
-  function handlePlan(id: PlanId) {
-    if (id === "FREE") return selectFree()
-    return startCheckout(id)
   }
 
   const isLoading = loading !== null
@@ -169,7 +144,7 @@ export default function PlanSelector() {
       <div className="relative z-10 text-center mb-8" style={{ animation: "fadeSlideUp .6s .05s ease both" }}>
         <h1 className="text-[32px] font-bold text-white leading-tight mb-2">Elige tu plan</h1>
         <p className="text-[14px]" style={{ color: "rgba(255,255,255,0.45)" }}>
-          Empieza gratis · Sin tarjeta para el trial
+          14 días gratis en todos los planes · Sin tarjeta
         </p>
       </div>
 
@@ -195,7 +170,7 @@ export default function PlanSelector() {
                   className="absolute -top-2.5 -right-1 text-[9px] font-bold px-1.5 py-0.5 rounded-full"
                   style={{ background: "#F59E0B", color: "#000" }}
                 >
-                  -20%
+                  -25%
                 </span>
               )}
             </button>
@@ -210,7 +185,6 @@ export default function PlanSelector() {
       >
         {PLANS.map((plan) => {
           const price = period === "monthly" ? plan.monthly : plan.yearly
-          const isPaid = plan.id !== "FREE"
 
           return (
             <div
@@ -229,7 +203,7 @@ export default function PlanSelector() {
                     className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10.5px] font-semibold tracking-wide"
                     style={{ background: "rgba(31,169,122,0.18)", color: "#1FA97A", border: "1px solid rgba(31,169,122,0.3)" }}
                   >
-                    ✦ {plan.badge}
+                    {plan.badge}
                   </span>
                 )}
               </div>
@@ -241,11 +215,9 @@ export default function PlanSelector() {
                 </p>
                 <div className="flex items-baseline gap-1 mb-1">
                   <span className="text-[36px] font-bold text-white leading-none">{price}</span>
-                  {plan.id !== "FREE" && (
-                    <span className="text-[13px]" style={{ color: "rgba(255,255,255,0.35)" }}>/mes</span>
-                  )}
+                  <span className="text-[13px]" style={{ color: "rgba(255,255,255,0.35)" }}>/mes</span>
                 </div>
-                {period === "yearly" && isPaid && (
+                {period === "yearly" && (
                   <p className="text-[11px]" style={{ color: "#F59E0B" }}>
                     {plan.yearlyBilled} · {plan.yearlySaving}
                   </p>
@@ -255,16 +227,14 @@ export default function PlanSelector() {
                 </p>
               </div>
 
-              {/* Trial badge para planes de pago */}
-              {isPaid && (
-                <div
-                  className="flex items-center gap-1.5 rounded-lg px-3 py-2 mb-5 text-[11.5px] font-semibold"
-                  style={{ background: "rgba(31,169,122,0.12)", border: "1px solid rgba(31,169,122,0.25)", color: "#1FA97A" }}
-                >
-                  <Zap className="w-3 h-3 shrink-0" />
-                  14 días gratis · Sin tarjeta
-                </div>
-              )}
+              {/* Trial badge */}
+              <div
+                className="flex items-center gap-1.5 rounded-lg px-3 py-2 mb-5 text-[11.5px] font-semibold"
+                style={{ background: "rgba(31,169,122,0.12)", border: "1px solid rgba(31,169,122,0.25)", color: "#1FA97A" }}
+              >
+                <Zap className="w-3 h-3 shrink-0" />
+                14 días gratis · Sin tarjeta
+              </div>
 
               {/* Features */}
               <ul className="space-y-2.5 mb-8 flex-1">
@@ -288,7 +258,7 @@ export default function PlanSelector() {
 
               {/* Botón */}
               <button
-                onClick={() => handlePlan(plan.id)}
+                onClick={() => startCheckout(plan.id)}
                 disabled={isLoading}
                 className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-[13.5px] font-semibold transition-all duration-150 disabled:opacity-60 hover:opacity-90 active:scale-[.99]"
                 style={
@@ -300,7 +270,7 @@ export default function PlanSelector() {
                 {loading === plan.id ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    {isPaid ? "Abriendo pago..." : "Cargando..."}
+                    Abriendo pago...
                   </>
                 ) : (
                   plan.cta
@@ -313,7 +283,7 @@ export default function PlanSelector() {
 
       {/* Nota inferior */}
       <p className="relative z-10 text-center text-[12px] mt-8" style={{ color: "rgba(255,255,255,0.25)", animation: "fadeSlideUp .6s .15s ease both" }}>
-        Los planes de pago incluyen 14 días de prueba sin coste. Puedes cancelar en cualquier momento.
+        14 días de prueba sin coste en todos los planes. Puedes cancelar en cualquier momento.
       </p>
     </div>
   )

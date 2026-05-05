@@ -314,7 +314,7 @@ export async function POST(request: NextRequest) {
     })
     // Warn at 80% of plan limit
     const currentCount = await prisma.lead.count({ where: { userId: session.user.id } }).catch(() => 0)
-    const planType = (session.user.plan ?? "FREE") as PlanType
+    const planType = (session.user.plan ?? "STARTER") as PlanType
     const maxLeads = getLimit(planType, "maxLeadsTotal")
     if (maxLeads !== Infinity && currentCount >= Math.floor(maxLeads * 0.8)) {
       notifyPlanLimit(session.user.id, "leads", currentCount, maxLeads).catch(() => {})

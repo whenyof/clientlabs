@@ -9,8 +9,10 @@ import { z } from "zod"
 
 const TEAM_LIMITS: Record<string, number> = {
   FREE: 1,
-  PRO: 3,
-  BUSINESS: 10,
+  TRIAL: 5,
+  STARTER: 1,
+  PRO: 5,
+  BUSINESS: Infinity,
 }
 
 export async function GET() {
@@ -19,12 +21,21 @@ export async function GET() {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 })
   }
 
-  const user = await safePrismaQuery(() =>
-    prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { plan: true, name: true, email: true },
-    })
-  )
+  const [user, profile] = await Promise.all([
+    safePrismaQuery(() =>
+      prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { plan: true, name: true, email: true },
+      })
+    ),
+    safePrismaQuery(() =>
+      prisma.businessProfile.findUnique({
+        where: { userId: session.user.id },
+        select: { extraSeats: true },
+      })
+    ),
+  ])
+  const extraSeats = profile?.extraSeats ?? 0
 
   const result = await getUserWorkspace(session.user.id)
 
@@ -49,12 +60,12 @@ export async function GET() {
       })
     )
 
-    const plan = user?.plan ?? "FREE"
+    const plan = user?.plan ?? "STARTER"
     return NextResponse.json({
       success: true,
       myRole: "OWNER",
       plan,
-      limit: TEAM_LIMITS[plan] ?? 1,
+      limit: TEAM_LIMITS[plan] === Infinity ? Infinity : (TEAM_LIMITS[plan] ?? 1) + extraSeats,
       members: workspace.members.map((m) => ({
         id: m.id,
         userId: m.userId,
@@ -68,7 +79,7 @@ export async function GET() {
   }
 
   const { workspace, role: myRole } = result
-  const plan = user?.plan ?? "FREE"
+  const plan = user?.plan ?? "STARTER"
 
   const members = workspace.members.map((m) => ({
     id: m.id,
@@ -84,7 +95,7 @@ export async function GET() {
     success: true,
     myRole,
     plan,
-    limit: TEAM_LIMITS[plan] ?? 1,
+    limit: TEAM_LIMITS[plan] === Infinity ? Infinity : (TEAM_LIMITS[plan] ?? 1) + extraSeats,
     workspaceId: workspace.id,
     workspaceName: workspace.name,
     members,

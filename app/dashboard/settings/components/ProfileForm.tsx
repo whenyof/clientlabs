@@ -89,7 +89,8 @@ export function ProfileForm() {
   }
 
   const planLabel = (plan: string) => {
-    if (plan === "FREE") return "Free"
+    if (plan === "TRIAL") return "Prueba (Pro)"
+    if (plan === "FREE" || plan === "STARTER") return "Starter"
     if (plan === "PRO") return "Pro"
     if (plan === "BUSINESS") return "Business"
     return plan
@@ -205,7 +206,7 @@ export function ProfileForm() {
         <h4 className="text-sm font-medium text-slate-500 mb-4">Estado de cuenta</h4>
         <div className="grid grid-cols-3 gap-4">
           <div className="text-center p-3 bg-slate-50 rounded-lg">
-            <div className="text-sm font-bold text-[var(--accent)]">{planLabel(profile?.plan ?? "FREE")}</div>
+            <div className="text-sm font-bold text-[var(--accent)]">{planLabel(profile?.plan ?? "STARTER")}</div>
             <div className="text-xs text-slate-500 mt-0.5">Plan activo</div>
           </div>
           <div className="text-center p-3 bg-slate-50 rounded-lg">

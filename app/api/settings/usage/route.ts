@@ -20,8 +20,8 @@ export async function GET() {
     })
   )
 
-  const plan = user?.plan ?? "FREE"
-  const limits = PLAN_LIMITS[plan as keyof typeof PLAN_LIMITS] ?? PLAN_LIMITS.FREE
+  const plan = user?.plan ?? "STARTER"
+  const limits = PLAN_LIMITS[plan as keyof typeof PLAN_LIMITS] ?? PLAN_LIMITS.STARTER
 
   const [leadsCount, clientsCount, teamCount, automationsCount] = await safePrismaQuery(() =>
     Promise.all([

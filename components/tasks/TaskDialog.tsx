@@ -141,7 +141,7 @@ export function TaskDialog({ open, onOpenChange, task, clientId, leadId, entityN
 
  return (
  <Dialog open={open} onOpenChange={onOpenChange}>
- <DialogContent className="bg-zinc-900 border-[var(--border-subtle)] max-w-md">
+ <DialogContent className="bg-white border-slate-100 shadow-xl max-w-md">
  <DialogHeader>
  <DialogTitle className="text-[var(--text-primary)]">{dialogTitle}</DialogTitle>
  {entityName && <p className="text-sm text-[var(--text-secondary)]">{entityName}</p>}
@@ -179,10 +179,10 @@ export function TaskDialog({ open, onOpenChange, task, clientId, leadId, entityN
  value={priority}
  onValueChange={(value: "LOW" | "MEDIUM" | "HIGH") => setPriority(value)}
  >
- <SelectTrigger className="bg-zinc-800 border-zinc-600 text-[var(--text-primary)] hover:bg-zinc-700 data-[state=open]:bg-zinc-700">
+ <SelectTrigger className="bg-slate-50 border-slate-200 text-[var(--text-primary)] hover:bg-white data-[state=open]:bg-white">
  <SelectValue />
  </SelectTrigger>
- <SelectContent className="bg-zinc-900 border-[var(--border-subtle)] text-[var(--text-primary)]">
+ <SelectContent className="bg-white border-slate-200 text-[var(--text-primary)]">
  <SelectItem value="LOW" className="text-[var(--text-primary)] bg-transparent data-[highlighted]:bg-zinc-700 data-[highlighted]:text-[var(--text-primary)] cursor-pointer">
  {labels.providers.dependency.LOW}
  </SelectItem>
@@ -238,7 +238,7 @@ export function TaskDialog({ open, onOpenChange, task, clientId, leadId, entityN
  <SelectTrigger id="duration" className="bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-primary)]">
  <SelectValue placeholder="Minutos" />
  </SelectTrigger>
- <SelectContent className="bg-zinc-900 border-[var(--border-subtle)] text-[var(--text-primary)]">
+ <SelectContent className="bg-white border-slate-200 text-[var(--text-primary)]">
  {DURATION_PRESETS.map((m) => (
  <SelectItem key={m} value={String(m)} className="text-[var(--text-primary)] focus:bg-zinc-700 cursor-pointer">
  {m} min

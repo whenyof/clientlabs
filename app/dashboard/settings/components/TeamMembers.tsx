@@ -163,7 +163,7 @@ export function TeamMembers() {
       <div className="bg-slate-50 border border-slate-200 rounded-xl px-5 py-4 space-y-2">
         <div className="flex items-center justify-between text-sm">
           <span className="text-slate-600">
-            <strong>{members.length}</strong> / <strong>{limit}</strong> miembro{limit !== 1 ? "s" : ""} — Plan{" "}
+            <strong>{members.length}</strong> / <strong>{limit === Infinity ? "Ilimitado" : limit}</strong> miembro{limit !== 1 ? "s" : ""} — Plan{" "}
             <span className="font-semibold text-[#0B1F2A]">{PLAN_LABELS[plan] ?? plan}</span>
           </span>
           {atLimit && (
@@ -172,13 +172,36 @@ export function TeamMembers() {
             </span>
           )}
         </div>
-        <div className="w-full bg-slate-200 rounded-full h-1.5">
-          <div
-            className={`h-1.5 rounded-full transition-all ${atLimit ? "bg-amber-400" : "bg-[var(--accent)]"}`}
-            style={{ width: `${progressPct}%` }}
-          />
-        </div>
+        {limit !== Infinity && (
+          <div className="w-full bg-slate-200 rounded-full h-1.5">
+            <div
+              className={`h-1.5 rounded-full transition-all ${atLimit ? "bg-amber-400" : "bg-[var(--accent)]"}`}
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
+        )}
       </div>
+
+      {/* Add seat CTA */}
+      {atLimit && plan !== "BUSINESS" && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div>
+            <h4 className="font-semibold text-amber-900 text-sm">Límite de usuarios alcanzado</h4>
+            <p className="text-xs text-amber-700 mt-0.5">Tu plan incluye {limit} usuario{limit !== 1 ? "s" : ""}. Añade más por <strong>3,99€/mes</strong> cada uno.</p>
+          </div>
+          <button
+            onClick={async () => {
+              const res = await fetch("/api/stripe/add-seat", { method: "POST" })
+              const data = await res.json()
+              if (data.url) window.location.href = data.url
+              else toast.error(data.error ?? "Error al procesar la compra")
+            }}
+            className="flex-shrink-0 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-medium px-4 py-2 text-sm transition-colors"
+          >
+            + Añadir usuario — 3,99€/mes
+          </button>
+        </div>
+      )}
 
       {/* Inline Invite Form */}
       {showInviteForm && (

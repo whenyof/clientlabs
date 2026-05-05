@@ -10,7 +10,7 @@ import { Navbar, LogoMark } from "../ui/chrome"
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin, useGSAP)
 
-async function startCheckout(plan: "PRO" | "BUSINESS", period: "monthly" | "yearly") {
+async function startCheckout(plan: "STARTER" | "PRO" | "BUSINESS", period: "monthly" | "yearly") {
   const res = await fetch("/api/stripe/checkout", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -28,43 +28,42 @@ async function startCheckout(plan: "PRO" | "BUSINESS", period: "monthly" | "year
 
 const PLANS = [
   {
-    id: "free",
-    name: "Free",
-    monthly: 0,
-    yearly: 0,
-    yearlyBilled: 0,
-    tag: "Para probar sin compromiso",
-    limits: ["50 leads totales", "20 clientes activos", "10 facturas / mes"],
+    id: "starter",
+    name: "Starter",
+    monthly: 12.99,
+    yearly: 9.99,
+    yearlyBilled: 119.88,
+    tag: "Para autónomos que empiezan",
+    limits: ["Hasta 200 leads", "1 usuario", "Facturas ilimitadas"],
     features: [
-      "Panel de leads en tiempo real",
-      "Pipeline visual básico",
-      "1 formulario embebible",
-      "Facturación PDF con marca de agua",
-      "Historial de contactos",
-      "Exportación CSV",
-      "Soporte por email (48h)",
+      "Facturas ilimitadas",
+      "Verifactu incluido (F1, F2, rectificativas)",
+      "CRM hasta 200 leads",
+      "SDK tracking web (6 plataformas)",
+      "QR verificable AEAT",
+      "PDF profesional con logo",
+      "Soporte por email",
     ],
-    note: "Sin tarjeta · Sin límite de tiempo",
+    note: "14 días gratis · Sin tarjeta",
     highlight: false,
   },
   {
     id: "pro",
     name: "Pro",
-    monthly: 14.99,
-    yearly: 11.99,
-    yearlyBilled: 143.88,
-    tag: "Para profesionales que quieren crecer",
-    badge: "Popular",
-    limits: ["Leads ilimitados", "Clientes ilimitados", "Facturas ilimitadas", "Hasta 3 usuarios"],
+    monthly: 24.99,
+    yearly: 19.99,
+    yearlyBilled: 239.88,
+    tag: "Para autónomos y pymes establecidos",
+    badge: "Más popular",
+    limits: ["Leads ilimitados", "Clientes ilimitados", "Hasta 5 usuarios"],
     features: [
-      "Todo lo del Free",
-      "Sin marca de agua en facturas",
-      "IA para calificar y puntuar leads",
-      "Scoring automático",
-      "Automatizaciones básicas (5 activas)",
-      "Dashboards personalizables",
-      "Google Calendar sync",
-      "Soporte prioritario por chat (24h)",
+      "Todo lo de Starter",
+      "Leads y clientes ilimitados",
+      "Hasta 5 usuarios",
+      "Automatizaciones (10 reglas)",
+      "Email marketing (1.000 emails/mes)",
+      "Analytics avanzados por módulo",
+      "Soporte prioritario",
     ],
     note: "14 días gratis · Sin tarjeta",
     highlight: true,
@@ -72,20 +71,18 @@ const PLANS = [
   {
     id: "business",
     name: "Business",
-    monthly: 29.99,
-    yearly: 23.99,
-    yearlyBilled: 287.88,
-    tag: "Para negocios que escalan",
-    limits: ["Todo ilimitado", "Hasta 10 usuarios"],
+    monthly: 39.99,
+    yearly: 29.99,
+    yearlyBilled: 359.88,
+    tag: "Para pymes en crecimiento",
+    limits: ["Usuarios ilimitados", "Todo ilimitado"],
     features: [
-      "Todo lo del Pro",
-      "IA avanzada con predicciones de cierre",
+      "Todo lo de Pro",
+      "Usuarios ilimitados",
       "Automatizaciones ilimitadas",
-      "Segmentación avanzada de clientes",
-      "Webhooks y API completa",
-      "Roles y permisos de equipo",
-      "Verifactu incluido",
-      "Soporte dedicado (videollamada mensual)",
+      "Email marketing ilimitado",
+      "API completa",
+      "Soporte premium + onboarding personalizado",
     ],
     note: "14 días gratis · Sin tarjeta",
     highlight: false,
@@ -96,59 +93,60 @@ const COMPARISON = [
   {
     group: "Límites",
     items: [
-      { label: "Leads capturados", free: "50 totales", pro: "∞", business: "∞" },
-      { label: "Clientes activos", free: "20", pro: "∞", business: "∞" },
-      { label: "Facturas emitidas / mes", free: "10", pro: "∞", business: "∞" },
-      { label: "Usuarios", free: "1", pro: "3", business: "10" },
+      { label: "Leads capturados", starter: "200 totales", pro: "∞", business: "∞" },
+      { label: "Clientes activos", starter: "∞", pro: "∞", business: "∞" },
+      { label: "Facturas emitidas / mes", starter: "∞", pro: "∞", business: "∞" },
+      { label: "Usuarios", starter: "1", pro: "5", business: "∞" },
     ],
   },
   {
     group: "CRM & Leads",
     items: [
-      { label: "Panel en tiempo real", free: true, pro: true, business: true },
-      { label: "Pipeline visual", free: true, pro: true, business: true },
-      { label: "Formularios embebibles", free: "1", pro: "∞", business: "∞" },
-      { label: "Scoring de leads con IA", free: false, pro: true, business: true },
-      { label: "Etiquetas inteligentes", free: false, pro: true, business: true },
-      { label: "Segmentación avanzada", free: false, pro: false, business: true },
+      { label: "Panel en tiempo real", starter: true, pro: true, business: true },
+      { label: "Pipeline visual", starter: true, pro: true, business: true },
+      { label: "Formularios embebibles", starter: "∞", pro: "∞", business: "∞" },
+      { label: "Scoring de leads con IA", starter: false, pro: true, business: true },
+      { label: "Etiquetas inteligentes", starter: false, pro: true, business: true },
+      { label: "Segmentación avanzada", starter: false, pro: false, business: true },
     ],
   },
   {
     group: "Clientes & Facturación",
     items: [
-      { label: "Ficha 360° del cliente", free: true, pro: true, business: true },
-      { label: "Historial de pagos", free: true, pro: true, business: true },
-      { label: "Facturas PDF profesionales", free: "Con marca de agua", pro: true, business: true },
-      { label: "Control de cobros", free: true, pro: true, business: true },
-      { label: "Series de facturación propias", free: false, pro: true, business: true },
-      { label: "Verifactu", free: false, pro: false, business: true },
+      { label: "Ficha 360° del cliente", starter: true, pro: true, business: true },
+      { label: "Historial de pagos", starter: true, pro: true, business: true },
+      { label: "Facturas PDF profesionales", starter: true, pro: true, business: true },
+      { label: "Verifactu (F1, F2, rectificativas)", starter: true, pro: true, business: true },
+      { label: "QR verificable AEAT", starter: true, pro: true, business: true },
+      { label: "Control de cobros", starter: true, pro: true, business: true },
     ],
   },
   {
     group: "Automatización & IA",
     items: [
-      { label: "Automatizaciones activas", free: false, pro: "5", business: "∞" },
-      { label: "IA operativa", free: false, pro: true, business: true },
-      { label: "IA avanzada (predicciones de cierre)", free: false, pro: false, business: true },
-      { label: "Google Calendar sync", free: false, pro: true, business: true },
-      { label: "Webhooks y API", free: false, pro: false, business: true },
+      { label: "Automatizaciones activas", starter: false, pro: "10", business: "∞" },
+      { label: "Email marketing", starter: false, pro: "1.000/mes", business: "∞" },
+      { label: "IA operativa", starter: false, pro: true, business: true },
+      { label: "IA avanzada (predicciones de cierre)", starter: false, pro: false, business: true },
+      { label: "Google Calendar sync", starter: false, pro: true, business: true },
+      { label: "Webhooks y API", starter: false, pro: false, business: true },
     ],
   },
   {
     group: "Equipo & Soporte",
     items: [
-      { label: "Roles y permisos de equipo", free: false, pro: false, business: true },
-      { label: "Soporte por email", free: "48h", pro: true, business: true },
-      { label: "Soporte por chat prioritario", free: false, pro: "24h", business: true },
-      { label: "Soporte dedicado (videollamada)", free: false, pro: false, business: "Mensual" },
+      { label: "Roles y permisos de equipo", starter: false, pro: false, business: true },
+      { label: "Soporte por email", starter: true, pro: true, business: true },
+      { label: "Soporte por chat prioritario", starter: false, pro: "24h", business: true },
+      { label: "Soporte premium + onboarding", starter: false, pro: false, business: true },
     ],
   },
 ]
 
 const FAQS = [
-  { q: "¿El plan Free es realmente gratis?", a: "Sí. Sin tarjeta, sin trampas, sin límite de tiempo. Úsalo todo lo que quieras. Cuando necesites más leads, clientes o funciones, eliges un plan de pago." },
+  { q: "¿Hay un plan gratuito?", a: "No hay plan gratuito permanente. Todos los planes incluyen 14 días de prueba completa (nivel Pro) sin necesidad de tarjeta. Al terminar el trial, eliges el plan que mejor se adapta a tu negocio." },
   { q: "¿Puedo cambiar de plan en cualquier momento?", a: "Sí. Puedes subir o bajar de plan cuando quieras. El cambio se aplica inmediatamente y se prorratea en tu próxima factura." },
-  { q: "¿Verifactu está incluido en todos los planes?", a: "Verifactu está incluido en el plan Business. En Free y Pro puedes añadirlo como complemento por 5€/mes." },
+  { q: "¿Verifactu está incluido en todos los planes?", a: "Sí. Verifactu (F1, F2, rectificativas y anulaciones) está incluido en todos los planes: Starter, Pro y Business." },
   { q: "¿Puedo cancelar sin penalización?", a: "Absolutamente. Sin permanencia, sin letras pequeñas. Cancela en un clic desde tu panel." },
 ]
 
@@ -331,7 +329,7 @@ function PlanesSection({ billing, setBilling }: { billing: "monthly" | "annual";
                 className={`px-5 py-2 rounded-md text-[13px] font-medium transition-all duration-200 ${
                   billing === b ? "bg-[#1FA97A] text-white shadow-sm" : "text-[#6B7280] hover:text-[#0B1F2A]"
                 }`}>
-                {b === "monthly" ? "Mensual" : "Anual — 2 meses gratis"}
+                {b === "monthly" ? "Mensual" : "Anual — Ahorra 25%"}
               </button>
             ))}
           </div>
@@ -410,26 +408,19 @@ function PlanesSection({ billing, setBilling }: { billing: "monthly" | "annual";
 
                 <p className={`text-[11px] mb-5 ${plan.highlight ? "text-[#8FA6B2]" : "text-[#9CA3AF]"}`}>{plan.note}</p>
 
-                {plan.id === "free" ? (
-                  <Link href="/register"
-                    className={`w-full inline-flex items-center justify-center py-3 rounded-md text-[14px] font-semibold transition-colors border border-[#E5E7EB] hover:border-[#1FA97A]/40 hover:text-[#1FA97A] text-[#0B1F2A]`}>
-                    Empezar gratis
-                  </Link>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => startCheckout(
-                      plan.id.toUpperCase() as "PRO" | "BUSINESS",
-                      billing === "annual" ? "yearly" : "monthly"
-                    )}
-                    className={`w-full inline-flex items-center justify-center py-3 rounded-md text-[14px] font-semibold transition-colors ${
-                      plan.highlight
-                        ? "bg-[#1FA97A] hover:bg-[#178f68] text-white"
-                        : "border border-[#E5E7EB] hover:border-[#1FA97A]/40 hover:text-[#1FA97A] text-[#0B1F2A]"
-                    }`}>
-                    Empezar gratis 14 días
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={() => startCheckout(
+                    plan.id.toUpperCase() as "STARTER" | "PRO" | "BUSINESS",
+                    billing === "annual" ? "yearly" : "monthly"
+                  )}
+                  className={`w-full inline-flex items-center justify-center py-3 rounded-md text-[14px] font-semibold transition-colors ${
+                    plan.highlight
+                      ? "bg-[#1FA97A] hover:bg-[#178f68] text-white"
+                      : "border border-[#E5E7EB] hover:border-[#1FA97A]/40 hover:text-[#1FA97A] text-[#0B1F2A]"
+                  }`}>
+                  Empezar 14 días gratis
+                </button>
                 <p className={`text-[10px] text-center mt-2 ${plan.highlight ? "text-[#8FA6B2]/60" : "text-[#9CA3AF]"}`}>
                   Sin tarjeta · Cancela cuando quieras
                 </p>
@@ -622,7 +613,7 @@ function ComparativaSection() {
           {/* Sticky header */}
           <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-2 mb-3 sticky top-16 z-20 bg-[#F8FAFB] pb-2">
             <div />
-            {["Free", "Pro", "Business"].map((name, i) => (
+            {["Starter", "Pro", "Business"].map((name, i) => (
               <div key={name} className={`cmp-header rounded-lg py-3 text-center ${
                 i === 1 ? "bg-[#0B1F2A] border border-[#1FA97A]/40" : "bg-white border border-[#E5E7EB]"
               }`}>
@@ -640,11 +631,11 @@ function ComparativaSection() {
                 </div>
                 <div className="divide-y divide-[#F9FAFB]">
                   {group.items.map((item) => {
-                    const vals = { free: item.free, pro: item.pro, business: item.business }
+                    const vals = { starter: item.starter, pro: item.pro, business: item.business }
                     return (
                       <div key={item.label} className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-2 px-5 py-3 items-center">
                         <p className="text-[13px] text-[#374151]">{item.label}</p>
-                        {(["free", "pro", "business"] as const).map((col, ci) => (
+                        {(["starter", "pro", "business"] as const).map((col, ci) => (
                           <div key={col} className={`flex justify-center items-center ${ci === 1 ? "font-semibold" : ""}`}>
                             {typeof vals[col] === "string"
                               ? <span className="text-[13px] font-semibold text-[#1FA97A]">{vals[col] as string}</span>

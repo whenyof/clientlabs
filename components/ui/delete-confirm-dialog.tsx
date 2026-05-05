@@ -35,20 +35,20 @@ export function DeleteConfirmDialog({
 
  return (
  <AlertDialog open={open} onOpenChange={onOpenChange}>
- <AlertDialogContent className="bg-zinc-900 border-[var(--border-subtle)]">
+ <AlertDialogContent className="bg-white border-slate-200 shadow-xl">
  <AlertDialogHeader>
- <AlertDialogTitle className="text-[var(--text-primary)]">{title}</AlertDialogTitle>
- <AlertDialogDescription className="text-[var(--text-secondary)]">
+ <AlertDialogTitle className="text-slate-900">{title}</AlertDialogTitle>
+ <AlertDialogDescription className="text-slate-500">
  {description}
  </AlertDialogDescription>
  </AlertDialogHeader>
  <AlertDialogFooter>
- <AlertDialogCancel className="bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-primary)] hover:bg-[var(--bg-card)]">
+ <AlertDialogCancel className="bg-white border-slate-200 text-slate-700 hover:bg-slate-50">
  {cancelText}
  </AlertDialogCancel>
  <AlertDialogAction
  onClick={handleConfirm}
- className="bg-[var(--bg-card)] text-[var(--text-primary)] hover:bg-[var(--bg-card)]"
+ className="bg-red-600 text-white hover:bg-red-700 border-0"
  >
  {confirmText}
  </AlertDialogAction>

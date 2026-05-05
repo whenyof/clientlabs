@@ -9,37 +9,42 @@ import { CompanySettings } from "./components/CompanySettings"
 import { NotificationSettings } from "./components/NotificationSettings"
 import { TeamMembers } from "./components/TeamMembers"
 import { PermissionsPanel } from "./components/PermissionsPanel"
-import { PlansSection } from "./components/PlansSection"
-import { BillingHistory } from "./components/BillingHistory"
 import { UsageLimits } from "./components/UsageLimits"
 import { AppearanceSettings } from "./components/AppearanceSettings"
 import { DangerZone } from "./components/DangerZone"
 import { ProductCatalog } from "./components/ProductCatalog"
 import { ActivityLogSection } from "./components/ActivityLogSection"
-import { VerifactuSettings } from "./components/VerifactuSettings"
+import { InvoicingSettings } from "./components/InvoicingSettings"
+import { SubscriptionSettings } from "./components/SubscriptionSettings"
 
-const sections = [
-  { id: 'profile', component: ProfileForm },
-  { id: 'security', component: SecuritySettings },
-  { id: 'company', component: CompanySettings },
-  { id: 'verifactu', component: VerifactuSettings },
-  { id: 'notifications', component: NotificationSettings },
-  { id: 'team', component: TeamMembers },
-  { id: 'activity', component: ActivityLogSection },
-  { id: 'permissions', component: PermissionsPanel },
-  { id: 'plans', component: PlansSection },
-  { id: 'billing', component: BillingHistory },
-  { id: 'usage', component: UsageLimits },
-  { id: 'appearance', component: AppearanceSettings },
-  { id: 'catalog', component: ProductCatalog },
-  { id: 'danger', component: DangerZone },
-]
+const sections: Record<string, React.ComponentType> = {
+  // Primary sections
+  account:       ProfileForm,
+  company:       CompanySettings,
+  team:          TeamMembers,
+  invoicing:     InvoicingSettings,
+  subscription:  SubscriptionSettings,
+  notifications: NotificationSettings,
+  limits:        UsageLimits,
+  // Secondary sections
+  security:    SecuritySettings,
+  appearance:  AppearanceSettings,
+  activity:    ActivityLogSection,
+  permissions: PermissionsPanel,
+  catalog:     ProductCatalog,
+  danger:      DangerZone,
+  // Backward-compat aliases
+  profile:    ProfileForm,
+  verifactu:  InvoicingSettings,
+  plans:      SubscriptionSettings,
+  billing:    SubscriptionSettings,
+  usage:      UsageLimits,
+}
 
 function SettingsContent() {
   const searchParams = useSearchParams()
-  const activeSection = searchParams.get('section') || 'profile'
-
-  const ActiveComponent = sections.find(s => s.id === activeSection)?.component || ProfileForm
+  const activeSection = searchParams.get("section") || "account"
+  const ActiveComponent = sections[activeSection] ?? ProfileForm
 
   return (
     <AnimatePresence mode="wait">

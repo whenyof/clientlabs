@@ -1,30 +1,30 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { PLANS, canUpgrade } from "../lib/plans"
+import { PLANS, Plan, canUpgrade } from "../lib/plans"
 import { Check, CreditCard, Zap, Gift, Building2, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useStripeCheckout } from "@/hooks/use-stripe"
 
 const PLAN_ICONS = {
-  free: Gift,
-  pro: Zap,
+  starter:  Gift,
+  pro:      Zap,
   business: Building2,
 }
 
 const PLAN_COLORS = {
-  free:     { accent: "#94A3B8", bg: "#94A3B818", border: "#94A3B830" },
+  starter:  { accent: "#0EA5E9", bg: "#0EA5E918", border: "#0EA5E930" },
   pro:      { accent: "#1FA97A", bg: "#1FA97A18", border: "#1FA97A35" },
   business: { accent: "#F59E0B", bg: "#F59E0B18", border: "#F59E0B35" },
 }
 
 function mapPlanId(plan: string): string {
-  const map: Record<string, string> = { FREE: "free", PRO: "pro", BUSINESS: "business" }
+  const map: Record<string, string> = { FREE: "starter", STARTER: "starter", PRO: "pro", BUSINESS: "business" }
   return map[plan] ?? plan.toLowerCase()
 }
 
-function toStripePlan(planId: string): "PRO" | "BUSINESS" {
-  return planId.toUpperCase() as "PRO" | "BUSINESS"
+function toStripePlan(planId: string): "STARTER" | "PRO" | "BUSINESS" {
+  return planId.toUpperCase() as "STARTER" | "PRO" | "BUSINESS"
 }
 
 function centsToString(cents: number): string {
@@ -34,16 +34,16 @@ function centsToString(cents: number): string {
   return rem === 0 ? `${euros}€` : `${euros},${String(rem).padStart(2, "0")}€`
 }
 
-function formatMonthlyPrice(price: number, billingCycle: "monthly" | "yearly"): string {
-  return centsToString(billingCycle === "yearly" ? Math.round(price * 0.8) : price)
+function formatMonthlyPrice(plan: Plan, billingCycle: "monthly" | "yearly"): string {
+  return centsToString(billingCycle === "yearly" ? plan.priceYearly : plan.price)
 }
 
-function formatAnnualTotal(price: number): string {
-  return centsToString(Math.round(price * 0.8) * 12)
+function formatAnnualTotal(plan: Plan): string {
+  return centsToString(plan.priceYearly * 12)
 }
 
 export function PlansSection() {
-  const [currentPlan, setCurrentPlan] = useState("free")
+  const [currentPlan, setCurrentPlan] = useState("starter")
   const [planExpiresAt, setPlanExpiresAt] = useState<string | null>(null)
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly")
   const { checkout, openPortal, loading } = useStripeCheckout()
@@ -63,7 +63,7 @@ export function PlansSection() {
     : null
 
   function handleUpgrade(planId: string) {
-    if (planId === "free") return openPortal()
+    if (planId === "starter") return checkout("STARTER", billingCycle)
     checkout(toStripePlan(planId), billingCycle)
   }
 
@@ -94,7 +94,7 @@ export function PlansSection() {
               {nextBillingDate && <span className="text-[11px] font-normal text-slate-400 ml-2">· Renueva {nextBillingDate}</span>}
             </p>
           </div>
-          {currentPlan !== "free" && (
+          {true && (
             <button
               onClick={() => openPortal()}
               disabled={loading}
@@ -120,7 +120,7 @@ export function PlansSection() {
               {cycle === "monthly" ? "Mensual" : "Anual"}
               {cycle === "yearly" && (
                 <span className="absolute -top-2 -right-1 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#F59E0B] text-black">
-                  -20%
+                  -25%
                 </span>
               )}
             </button>
@@ -185,15 +185,13 @@ export function PlansSection() {
               <div className="mb-5">
                 <div className="flex items-baseline gap-1">
                   <span className="text-[30px] font-bold text-[#0B1F2A] leading-none">
-                    {formatMonthlyPrice(plan.price, billingCycle)}
+                    {formatMonthlyPrice(plan, billingCycle)}
                   </span>
-                  {plan.price > 0 && (
-                    <span className="text-[12px] text-slate-400">/mes</span>
-                  )}
+                  <span className="text-[12px] text-slate-400">/mes</span>
                 </div>
-                {billingCycle === "yearly" && plan.price > 0 && (
+                {billingCycle === "yearly" && (
                   <p className="text-[11px] text-[#F59E0B] font-medium mt-1">
-                    {formatAnnualTotal(plan.price)} facturado anualmente
+                    {formatAnnualTotal(plan)} facturado anualmente
                   </p>
                 )}
               </div>
@@ -247,7 +245,7 @@ export function PlansSection() {
         Los planes de pago incluyen 14 días de prueba sin coste. Puedes cancelar en cualquier momento.
       </p>
 
-      {currentPlan !== "free" && (
+      {true && (
         <div className="flex justify-center pt-1">
           <button
             onClick={() => openPortal()}

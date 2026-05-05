@@ -18,6 +18,7 @@ import {
     TaskPriority
 } from "@prisma/client"
 import { renderOrderEmail, formatProductsTableSpanish } from "@/modules/providers/services/renderOrderEmail"
+import { createTask as createMainTask } from "@/lib/api/tasks"
 
 // ...
 
@@ -484,8 +485,22 @@ export async function createProviderTask(data: {
             return task
         }))
 
+        // Also register in main tasks for cross-module visibility
+        try {
+            await createMainTask({
+                title: data.title,
+                description: data.description ?? null,
+                dueDate: data.dueDate?.toISOString() ?? null,
+                priority: data.priority,
+                entityType: "PROVIDER",
+                entityId: data.providerId,
+            })
+        } catch {
+            // Non-fatal: provider task was created, main task sync failed silently
+        }
+
         revalidatePath("/dashboard/providers")
-        revalidatePath("/dashboard/providers")
+        revalidatePath("/dashboard/tasks")
         return { success: true, task: result }
     } catch (error) {
         console.error("Error creating task:", error)

@@ -324,7 +324,7 @@ Total: 6,80 €`}
                                     onChange={(e) => setBody(e.target.value)}
                                     onFocus={() => setActiveField("body")}
                                     className={cn(
-                                        "mt-1.5 w-full min-h-[160px] max-h-[220px] rounded-md border px-3 py-2 text-sm resize-y",
+                                        "mt-1.5 w-full flex-1 min-h-[280px] rounded-md border px-3 py-2 text-sm resize-y",
                                         "bg-[var(--bg-main)] border-[var(--border-main)]",
                                         "placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0"
                                     )}

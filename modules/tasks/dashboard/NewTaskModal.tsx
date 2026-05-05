@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
-import { X, Loader2, CheckSquare, ChevronDown, Trash2, RotateCcw } from "lucide-react"
+import { useState, useEffect, useCallback, useRef } from "react"
+import { X, Loader2, CheckSquare, ChevronDown, Trash2, RotateCcw, User } from "lucide-react"
 import { DatePickerField } from "./DatePickerField"
 import { TimePickerField } from "./TimePickerField"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -11,6 +11,7 @@ import type { TaskPriority, TaskStatus, DashboardTask } from "./types"
 import { PRIORITY_CONFIG } from "./types"
 
 interface EntityOption { id: string; name: string }
+interface TeamMember { id: string; name: string | null; email: string }
 
 interface NewTaskModalProps {
   open: boolean
@@ -113,6 +114,19 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
     }
   }, [open, editTask, defaultPriority, defaultDueDate, defaultDueTime])
 
+  const [assignedToId, setAssignedToId] = useState<string>("")
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
+  const teamFetchedRef = useRef(false)
+
+  useEffect(() => {
+    if (!open || teamFetchedRef.current) return
+    teamFetchedRef.current = true
+    fetch("/api/workspace/members")
+      .then(r => r.ok ? r.json() : [])
+      .then((data: TeamMember[]) => { if (Array.isArray(data)) setTeamMembers(data) })
+      .catch(() => {})
+  }, [open])
+
   const [entityOptions, setEntityOptions] = useState<EntityOption[]>([])
   const [isLoadingEntities, setIsLoadingEntities] = useState(false)
   const [isErrorEntities, setIsErrorEntities] = useState(false)
@@ -158,7 +172,7 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
   const [isDeleting, setIsDeleting] = useState(false)
 
   const handleClose = () => {
-    setTitle(""); setDescription(""); setEntityType(""); setEntityId("")
+    setTitle(""); setDescription(""); setEntityType(""); setEntityId(""); setAssignedToId("")
     setShowDeleteConfirm(false)
     onClose()
   }
@@ -211,6 +225,7 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
         startAt,
         entityType: entityType || null,
         entityId: entityId || null,
+        assignedToId: assignedToId || null,
       }
       const url = editTask ? `/api/tasks/${editTask.id}` : "/api/tasks"
       const method = editTask ? "PATCH" : "POST"
@@ -339,6 +354,21 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
               <TimePickerField value={dueTime} onChange={setDueTime} />
             </div>
           </div>
+
+          {/* Asignar a miembro del equipo — solo si hay más de 1 miembro */}
+          {teamMembers.length > 1 && (
+            <div>
+              <Label>Asignar a</Label>
+              <SelectWrapper>
+                <select value={assignedToId} onChange={(e) => setAssignedToId(e.target.value)} style={selectResetStyle}>
+                  <option value="">Sin asignar (general)</option>
+                  {teamMembers.map((m) => (
+                    <option key={m.id} value={m.id}>{m.name ?? m.email}</option>
+                  ))}
+                </select>
+              </SelectWrapper>
+            </div>
+          )}
 
           {/* Linked entity — type + entity select */}
           <div>

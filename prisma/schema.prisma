@@ -204,6 +204,8 @@ model BusinessProfile {
   verifactuAgreementAcceptedAt  DateTime?
   verifactuAgreementSignedBy    String?
   verifactuAgreementSignedNif   String?
+  activeTemplateId String?
+  extraSeats       Int      @default(0)
   user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -839,7 +841,7 @@ model User {
   phone                  String?
   emailVerified          DateTime?
   role                   UserRole                @default(USER)
-  plan                   PlanType                @default(FREE)
+  plan                   PlanType                @default(STARTER)
   onboardingCompleted    Boolean                 @default(false)
   selectedSector         String?
   planId                 String?
@@ -951,6 +953,13 @@ model User {
   documentosImportados   DocumentoImportado[]
   clientSales            ClientSale[]
   clientPurchases        ClientPurchase[]
+  referralCode           String?                 @unique
+  referredByCode         String?
+  referralLevel          Int                     @default(0)
+  referralPoints         Int                     @default(0)
+  referrals              Referral[]              @relation("UserReferrals")
+  referredBy             Referral[]              @relation("UserReferred")
+  userTemplates          UserTemplate[]
 }
 
 model CalendarIntegration {
@@ -2215,6 +2224,8 @@ enum LeadTemp {
 
 enum PlanType {
   FREE
+  TRIAL
+  STARTER
   PRO
   BUSINESS
 }
@@ -2981,4 +2992,52 @@ model VerificationCode {
 
   @@index([email, code])
   @@map("verification_codes")
+}
+
+model InvoiceTemplate {
+  id          String         @id @default(cuid())
+  name        String
+  slug        String         @unique
+  description String?
+  thumbnail   String?
+  category    String         @default("free")
+  price       Float          @default(0)
+  style       Json
+  isDefault   Boolean        @default(false)
+  sortOrder   Int            @default(0)
+  createdAt   DateTime       @default(now())
+  userTemplates UserTemplate[]
+
+  @@index([category])
+  @@index([slug])
+}
+
+model UserTemplate {
+  id          String          @id @default(cuid())
+  userId      String
+  templateId  String
+  purchasedAt DateTime        @default(now())
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  template    InvoiceTemplate @relation(fields: [templateId], references: [id])
+
+  @@unique([userId, templateId])
+  @@index([userId])
+}
+
+model Referral {
+  id            String    @id @default(cuid())
+  referrerId    String
+  referredId    String?
+  referredEmail String?
+  code          String    @unique
+  status        String    @default("pending")
+  reward        String?
+  convertedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  referrer      User      @relation("UserReferrals", fields: [referrerId], references: [id], onDelete: Cascade)
+  referred      User?     @relation("UserReferred", fields: [referredId], references: [id])
+
+  @@index([referrerId])
+  @@index([code])
+  @@index([status])
 }

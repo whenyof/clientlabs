@@ -6,8 +6,8 @@ import Link from "next/link"
 
 async function getPlanStats() {
   try {
-    const [freeCount, proCount, enterpriseCount, totalUsers] = await Promise.all([
-      prisma.user.count({ where: { plan: "FREE" } }),
+    const [starterCount, proCount, businessCount, totalUsers] = await Promise.all([
+      prisma.user.count({ where: { plan: { in: ["FREE", "TRIAL", "STARTER"] } } }),
       prisma.user.count({ where: { plan: "PRO" } }),
       prisma.user.count({ where: { plan: "BUSINESS" } }),
       prisma.user.count(),
@@ -16,45 +16,45 @@ async function getPlanStats() {
     return {
       plans: [
         {
-          name: "FREE",
-          label: "Free",
-          description: "Basic features for getting started",
-          userCount: freeCount,
-          color: "bg-gray-500/20 text-gray-400 border-gray-500/30",
+          name: "STARTER",
+          label: "Starter",
+          description: "Para autónomos que empiezan — 12,99€/mes",
+          userCount: starterCount,
+          color: "bg-sky-500/20 text-sky-400 border-sky-500/30",
           features: [
-            "Basic dashboard access",
-            "Limited lead tracking",
-            "Email support",
-            "1 user seat"
+            "Facturas ilimitadas",
+            "Verifactu incluido",
+            "CRM hasta 200 leads",
+            "1 usuario",
+            "Soporte por email",
           ]
         },
         {
           name: "PRO",
           label: "Pro",
-          description: "Advanced features for growing businesses",
+          description: "Para pymes — 24,99€/mes",
           userCount: proCount,
           color: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
           features: [
-            "Full dashboard access",
-            "Unlimited lead tracking",
-            "Priority email support",
-            "AI-powered insights",
-            "Up to 5 user seats"
+            "Todo lo de Starter",
+            "Leads y clientes ilimitados",
+            "Hasta 5 usuarios",
+            "Automatizaciones (10 reglas)",
+            "Email marketing (1.000/mes)",
           ]
         },
         {
           name: "BUSINESS",
-          label: "Enterprise",
-          description: "Full features with priority support",
-          userCount: enterpriseCount,
+          label: "Business",
+          description: "Para empresas en crecimiento — 39,99€/mes",
+          userCount: businessCount,
           color: "bg-amber-500/20 text-amber-400 border-amber-500/30",
           features: [
-            "Everything in Pro",
-            "Custom integrations",
-            "24/7 phone support",
-            "Dedicated account manager",
-            "Unlimited user seats",
-            "Custom SLA"
+            "Todo lo de Pro",
+            "Usuarios ilimitados",
+            "Automatizaciones ilimitadas",
+            "Email marketing ilimitado",
+            "API completa",
           ]
         }
       ],

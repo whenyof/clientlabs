@@ -77,9 +77,9 @@ export async function changeUserRole(userId: string, newRole: "USER" | "ADMIN") 
 }
 
 /**
- * Change user plan (FREE/PRO/BUSINESS)
+ * Change user plan (STARTER/PRO/BUSINESS)
  */
-export async function changeUserPlan(userId: string, newPlan: "FREE" | "PRO" | "BUSINESS") {
+export async function changeUserPlan(userId: string, newPlan: "STARTER" | "PRO" | "BUSINESS") {
  const admin = await requireAdmin()
  const { ipAddress, userAgent } = await getClientInfo()
 

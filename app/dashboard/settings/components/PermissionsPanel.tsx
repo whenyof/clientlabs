@@ -12,8 +12,8 @@ export function PermissionsPanel() {
   useEffect(() => {
     fetch("/api/settings/profile")
       .then((r) => r.json())
-      .then((d) => { if (d.success) setPlan(d.user?.plan ?? "FREE") })
-      .catch(() => setPlan("FREE"))
+      .then((d) => { if (d.success) setPlan(d.user?.plan ?? "STARTER") })
+      .catch(() => setPlan("STARTER"))
   }, [])
 
   const currentRole = 'ADMIN'
@@ -36,7 +36,7 @@ export function PermissionsPanel() {
             Los roles y permisos avanzados de equipo están disponibles en el plan Business. Actualiza tu plan para gestionar el acceso de cada miembro.
           </p>
           <Link
-            href="/dashboard/settings?tab=plans"
+            href="/dashboard/settings?section=subscription"
             className="px-5 py-2.5 text-sm font-medium text-white bg-[var(--accent)] rounded-lg hover:opacity-90 transition-colors"
           >
             Ver planes

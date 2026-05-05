@@ -5,7 +5,7 @@ import { useState } from "react"
 export function useStripeCheckout() {
   const [loading, setLoading] = useState(false)
 
-  async function checkout(plan: "PRO" | "BUSINESS", period: "monthly" | "yearly") {
+  async function checkout(plan: "STARTER" | "PRO" | "BUSINESS", period: "monthly" | "yearly") {
     setLoading(true)
     try {
       const res = await fetch("/api/stripe/checkout", {

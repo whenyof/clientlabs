@@ -2,23 +2,47 @@ import { PlanType } from "@prisma/client"
 
 export const PLAN_LIMITS = {
   FREE: {
-    maxLeadsTotal: 50,
-    maxClients: 20,
-    maxInvoicesPerMonth: 10,
+    // Legacy — mismos límites que STARTER
+    maxLeadsTotal: 200,
+    maxClients: Infinity,
+    maxInvoicesPerMonth: Infinity,
     maxUsers: 1,
-    maxForms: 1,
+    maxForms: Infinity,
     maxActiveAutomations: 0,
-    maxProviders: 10,
-    maxTasksPerMonth: 50,
-    storageGB: 0.5,
+    maxProviders: Infinity,
+    maxTasksPerMonth: Infinity,
+    storageGB: 1,
+  },
+  TRIAL: {
+    // 14 días con acceso nivel Pro
+    maxLeadsTotal: Infinity,
+    maxClients: Infinity,
+    maxInvoicesPerMonth: Infinity,
+    maxUsers: 5,
+    maxForms: Infinity,
+    maxActiveAutomations: 10,
+    maxProviders: Infinity,
+    maxTasksPerMonth: Infinity,
+    storageGB: 10,
+  },
+  STARTER: {
+    maxLeadsTotal: 200,
+    maxClients: Infinity,
+    maxInvoicesPerMonth: Infinity,
+    maxUsers: 1,
+    maxForms: Infinity,
+    maxActiveAutomations: 0,
+    maxProviders: Infinity,
+    maxTasksPerMonth: Infinity,
+    storageGB: 1,
   },
   PRO: {
     maxLeadsTotal: Infinity,
     maxClients: Infinity,
     maxInvoicesPerMonth: Infinity,
-    maxUsers: 3,
+    maxUsers: 5,
     maxForms: Infinity,
-    maxActiveAutomations: 5,
+    maxActiveAutomations: 10,
     maxProviders: Infinity,
     maxTasksPerMonth: Infinity,
     storageGB: 10,
@@ -27,7 +51,7 @@ export const PLAN_LIMITS = {
     maxLeadsTotal: Infinity,
     maxClients: Infinity,
     maxInvoicesPerMonth: Infinity,
-    maxUsers: 10,
+    maxUsers: Infinity,
     maxForms: Infinity,
     maxActiveAutomations: Infinity,
     maxProviders: Infinity,
@@ -38,11 +62,12 @@ export const PLAN_LIMITS = {
 
 export const PLAN_FEATURES = {
   FREE: {
+    // Legacy — mismas features que STARTER
     leads: true,
     clients: true,
     providers: true,
     invoicing: true,
-    invoiceWatermark: true,
+    invoiceWatermark: false,
     pipelineBasic: true,
     dashboard: true,
     csvExport: true,
@@ -58,7 +83,62 @@ export const PLAN_FEATURES = {
     webhooks: false,
     api: false,
     teamRoles: false,
-    verifactu: false,
+    verifactu: true,
+    advancedReports: false,
+    prioritySupport: false,
+    dedicatedSupport: false,
+    emailMarketing: false,
+  },
+  TRIAL: {
+    // 14 días con acceso nivel Pro
+    leads: true,
+    clients: true,
+    providers: true,
+    invoicing: true,
+    invoiceWatermark: false,
+    pipelineBasic: true,
+    dashboard: true,
+    csvExport: true,
+    tasks: true,
+    ai: true,
+    aiScoring: true,
+    aiPredictions: false,
+    automations: true,
+    customDashboards: true,
+    calendarSync: true,
+    notifications: true,
+    advancedSegmentation: false,
+    webhooks: false,
+    api: false,
+    teamRoles: false,
+    verifactu: true,
+    advancedReports: false,
+    prioritySupport: true,
+    dedicatedSupport: false,
+    emailMarketing: true,
+  },
+  STARTER: {
+    leads: true,
+    clients: true,
+    providers: true,
+    invoicing: true,
+    invoiceWatermark: false,
+    pipelineBasic: true,
+    dashboard: true,
+    csvExport: true,
+    tasks: true,
+    ai: false,
+    aiScoring: false,
+    aiPredictions: false,
+    automations: false,
+    customDashboards: false,
+    calendarSync: false,
+    notifications: false,
+    advancedSegmentation: false,
+    webhooks: false,
+    api: false,
+    teamRoles: false,
+    verifactu: true,
     advancedReports: false,
     prioritySupport: false,
     dedicatedSupport: false,
@@ -85,11 +165,11 @@ export const PLAN_FEATURES = {
     webhooks: false,
     api: false,
     teamRoles: false,
-    verifactu: false,
+    verifactu: true,
     advancedReports: false,
     prioritySupport: true,
     dedicatedSupport: false,
-    emailMarketing: false,
+    emailMarketing: true,
   },
   BUSINESS: {
     leads: true,
@@ -120,8 +200,8 @@ export const PLAN_FEATURES = {
   },
 } as const satisfies Record<PlanType, Record<string, boolean>>
 
-export type FeatureKey = keyof typeof PLAN_FEATURES.FREE
-export type LimitKey = keyof typeof PLAN_LIMITS.FREE
+export type FeatureKey = keyof typeof PLAN_FEATURES.STARTER
+export type LimitKey = keyof typeof PLAN_LIMITS.STARTER
 
 export function hasFeature(plan: PlanType, feature: FeatureKey): boolean {
   return PLAN_FEATURES[plan]?.[feature] ?? false
@@ -137,13 +217,13 @@ export function isAtLimit(plan: PlanType, limit: LimitKey, currentCount: number)
 }
 
 export function requiredPlanFor(feature: FeatureKey): PlanType {
-  if (PLAN_FEATURES.FREE[feature]) return "FREE"
+  if (PLAN_FEATURES.STARTER[feature]) return "STARTER"
   if (PLAN_FEATURES.PRO[feature]) return "PRO"
   return "BUSINESS"
 }
 
 export function planAtLeast(userPlan: PlanType, requiredPlan: PlanType): boolean {
-  const hierarchy: Record<PlanType, number> = { FREE: 0, PRO: 1, BUSINESS: 2 }
+  const hierarchy: Record<PlanType, number> = { FREE: 1, TRIAL: 2, STARTER: 1, PRO: 2, BUSINESS: 3 }
   return hierarchy[userPlan] >= hierarchy[requiredPlan]
 }
 
@@ -159,10 +239,9 @@ export function upgradeMessage(feature: FeatureKey): string {
     webhooks: "Los webhooks están disponibles en el plan Business.",
     api: "El acceso API está disponible en el plan Business.",
     teamRoles: "Los roles de equipo están disponibles en el plan Business.",
-    verifactu: "Verifactu está disponible en el plan Business.",
     advancedReports: "Los informes avanzados están disponibles en el plan Business.",
     advancedSegmentation: "La segmentación avanzada está disponible en el plan Business.",
-    emailMarketing: "El email marketing está disponible en el plan Business.",
+    emailMarketing: "El email marketing está disponible desde el plan Pro.",
   }
   return messages[feature] ?? `Esta función requiere el plan ${required}.`
 }

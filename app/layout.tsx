@@ -92,9 +92,9 @@ const jsonLd = {
   description: "CRM y facturación para autónomos y pequeños negocios en España",
   url: "https://clientlabs.io",
   offers: [
-    { "@type": "Offer", price: "0",     priceCurrency: "EUR", name: "Free"     },
-    { "@type": "Offer", price: "14.99", priceCurrency: "EUR", name: "Pro"      },
-    { "@type": "Offer", price: "29.99", priceCurrency: "EUR", name: "Business" },
+    { "@type": "Offer", price: "12.99", priceCurrency: "EUR", name: "Starter"  },
+    { "@type": "Offer", price: "24.99", priceCurrency: "EUR", name: "Pro"      },
+    { "@type": "Offer", price: "39.99", priceCurrency: "EUR", name: "Business" },
   ],
   aggregateRating: {
     "@type": "AggregateRating",

@@ -13,12 +13,19 @@ interface GateResult {
   error?: NextResponse
 }
 
+function effectivePlan(raw: PlanType, planExpiresAt: Date | null): PlanType {
+  if (raw === "TRIAL") {
+    return planExpiresAt && planExpiresAt > new Date() ? "PRO" : "STARTER"
+  }
+  return raw
+}
+
 export async function gateFeature(feature: FeatureKey): Promise<GateResult> {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
     return {
       allowed: false,
-      plan: "FREE",
+      plan: "STARTER",
       userId: "",
       error: NextResponse.json({ error: "No autorizado" }, { status: 401 }),
     }
@@ -26,10 +33,10 @@ export async function gateFeature(feature: FeatureKey): Promise<GateResult> {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { plan: true },
+    select: { plan: true, planExpiresAt: true },
   })
 
-  const plan = (user?.plan ?? "FREE") as PlanType
+  const plan = effectivePlan((user?.plan ?? "STARTER") as PlanType, user?.planExpiresAt ?? null)
 
   if (!hasFeature(plan, feature)) {
     return {
@@ -58,7 +65,7 @@ export async function gateLimit(
   if (!session?.user?.id) {
     return {
       allowed: false,
-      plan: "FREE",
+      plan: "STARTER",
       userId: "",
       error: NextResponse.json({ error: "No autorizado" }, { status: 401 }),
     }
@@ -66,10 +73,10 @@ export async function gateLimit(
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { plan: true },
+    select: { plan: true, planExpiresAt: true },
   })
 
-  const plan = (user?.plan ?? "FREE") as PlanType
+  const plan = effectivePlan((user?.plan ?? "STARTER") as PlanType, user?.planExpiresAt ?? null)
   const currentCount = await getCurrentCount(session.user.id)
   const max = getLimit(plan, limit)
 

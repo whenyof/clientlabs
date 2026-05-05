@@ -182,12 +182,19 @@ export function TeamMembers() {
         )}
       </div>
 
-      {/* Add seat CTA */}
-      {atLimit && plan !== "BUSINESS" && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      {/* Add seat CTA — always visible on non-Business plans */}
+      {plan !== "BUSINESS" && (
+        <div className={`rounded-xl border p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${atLimit ? "border-amber-200 bg-amber-50" : "border-slate-200 bg-slate-50"}`}>
           <div>
-            <h4 className="font-semibold text-amber-900 text-sm">Límite de usuarios alcanzado</h4>
-            <p className="text-xs text-amber-700 mt-0.5">Tu plan incluye {limit} usuario{limit !== 1 ? "s" : ""}. Añade más por <strong>3,99€/mes</strong> cada uno.</p>
+            <h4 className={`font-semibold text-sm ${atLimit ? "text-amber-900" : "text-[#0B1F2A]"}`}>
+              {atLimit ? "Límite de usuarios alcanzado" : "Ampliar equipo"}
+            </h4>
+            <p className={`text-xs mt-0.5 ${atLimit ? "text-amber-700" : "text-slate-500"}`}>
+              {atLimit
+                ? `Tu plan incluye ${limit} usuario${limit !== 1 ? "s" : ""}. Añade más por `
+                : "Añade más usuarios a tu equipo por "}
+              <strong>3,99€/mes</strong> cada uno.
+            </p>
           </div>
           <button
             onClick={async () => {
@@ -196,7 +203,7 @@ export function TeamMembers() {
               if (data.url) window.location.href = data.url
               else toast.error(data.error ?? "Error al procesar la compra")
             }}
-            className="flex-shrink-0 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-medium px-4 py-2 text-sm transition-colors"
+            className={`flex-shrink-0 rounded-lg font-medium px-4 py-2 text-sm transition-colors text-white ${atLimit ? "bg-amber-500 hover:bg-amber-600" : "bg-[var(--accent)] hover:opacity-90"}`}
           >
             + Añadir usuario — 3,99€/mes
           </button>

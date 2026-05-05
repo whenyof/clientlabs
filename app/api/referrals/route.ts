@@ -38,7 +38,7 @@ export async function GET() {
       referrals,
       levels: REFERRAL_LEVELS,
       raffle: REFERRAL_RAFFLE,
-      qualifiesForRaffle: subscribedCount >= 1,
+      qualifiesForRaffle: subscribedCount >= REFERRAL_RAFFLE.minReferrals,
     })
   } catch (err) {
     console.error("[api/referrals]", err)

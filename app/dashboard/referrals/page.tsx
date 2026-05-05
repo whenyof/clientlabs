@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Copy, Check, Share2, Users, Star, Trophy, ChevronRight } from "lucide-react"
+import { Copy, Check, Share2, Users, Star, Trophy, ChevronRight, Gift, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import type { ReferralLevel } from "@/lib/referral-rewards"
@@ -23,7 +23,7 @@ type ReferralData = {
   subscribedCount: number
   referrals: Referral[]
   levels: ReferralLevel[]
-  raffle: { active: boolean; prize: string; description: string; drawDate: string }
+  raffle: { active: boolean; prize: string; description: string; drawDate: string; minReferrals: number }
   qualifiesForRaffle: boolean
 }
 
@@ -52,11 +52,11 @@ export default function ReferralsPage() {
   const [data, setData] = useState<ReferralData | null>(null)
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
-  const [claiming, setClaiming] = useState<string | null>(null)
+  const [claiming, setClaiming] = useState(false)
+  const [claimedLevels, setClaimedLevels] = useState<Set<number>>(new Set())
 
   const load = useCallback(async () => {
     try {
-      // Ensure referral code is generated
       await fetch("/api/referrals/link")
       const res = await fetch("/api/referrals")
       const json = await res.json()
@@ -93,21 +93,30 @@ export default function ReferralsPage() {
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Gestiono mi negocio con @ClientLabs. Pruébalo gratis 14 días: ${data.referralLink}`)}`, "_blank")
   }
 
-  const claimReward = async (desc: string) => {
-    setClaiming(desc)
+  const claimReward = async (lvl: ReferralLevel) => {
+    if (!data) return
+    setClaiming(true)
     try {
       const res = await fetch("/api/referrals/claim", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rewardDescription: desc }),
+        body: JSON.stringify({
+          rewardDescription: lvl.rewards.map(r => r.description).join(", "),
+          levelName: lvl.name,
+          subscribedCount: data.subscribedCount,
+        }),
       })
       const json = await res.json()
-      if (json.success) toast.success(json.message)
-      else toast.error(json.error ?? "Error al solicitar la recompensa")
+      if (json.success) {
+        setClaimedLevels(prev => new Set(prev).add(lvl.level))
+        toast.success("Recompensa solicitada correctamente")
+      } else {
+        toast.error(json.error ?? "Error al solicitar la recompensa")
+      }
     } catch {
       toast.error("Error de conexión")
     } finally {
-      setClaiming(null)
+      setClaiming(false)
     }
   }
 
@@ -125,6 +134,9 @@ export default function ReferralsPage() {
 
   const { level, nextLevel, progressPercent, subscribedCount, referrals, levels, raffle, qualifiesForRaffle } = data
 
+  const canClaimCurrentLevel = level.level > 0 && level.rewards.length > 0 && !claimedLevels.has(level.level)
+  const justClaimed = claimedLevels.has(level.level)
+
   return (
     <div className="space-y-6 pb-8">
       {/* Header */}
@@ -136,7 +148,7 @@ export default function ReferralsPage() {
       {/* Level card */}
       <div className="rounded-xl p-6 text-white" style={{ background: `linear-gradient(135deg, ${level.color}dd, ${level.color}99)` }}>
         <div className="flex items-center gap-4 mb-5">
-          <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center text-3xl select-none">
+          <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center">
             <Users className="w-7 h-7 text-white" />
           </div>
           <div>
@@ -144,15 +156,17 @@ export default function ReferralsPage() {
             <h2 className="text-2xl font-bold">{level.name}</h2>
             <p className="text-white/80 text-sm mt-0.5">
               {subscribedCount} referido{subscribedCount !== 1 ? "s" : ""} suscrito{subscribedCount !== 1 ? "s" : ""}
-              {nextLevel && ` · ${nextLevel.minReferrals - subscribedCount} más para el nivel ${nextLevel.name}`}
+              {nextLevel && ` · ${nextLevel.minReferrals - subscribedCount} más para ${nextLevel.name}`}
             </p>
           </div>
         </div>
+
+        {/* Progress bar */}
         {nextLevel && (
-          <div>
+          <div className="mb-4">
             <div className="flex justify-between text-xs text-white/70 mb-1.5">
-              <span>Nivel {level.level} — {level.name}</span>
-              <span>Nivel {nextLevel.level} — {nextLevel.name} ({nextLevel.minReferrals} referidos)</span>
+              <span>{level.name}</span>
+              <span>{nextLevel.name} ({nextLevel.minReferrals} referidos)</span>
             </div>
             <div className="h-2.5 bg-white/20 rounded-full overflow-hidden">
               <div
@@ -163,8 +177,36 @@ export default function ReferralsPage() {
           </div>
         )}
         {!nextLevel && (
-          <div className="text-center text-white/80 text-sm py-1">Has alcanzado el nivel máximo</div>
+          <div className="text-center text-white/80 text-sm py-1 mb-4">Has alcanzado el nivel máximo</div>
         )}
+
+        {/* Claim CTA — shown when user has rewards to claim at current level */}
+        {justClaimed ? (
+          <div className="flex items-start gap-3 rounded-xl bg-white/20 border border-white/30 px-4 py-3">
+            <Clock className="w-4 h-4 text-white mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-white/90">
+              Recompensa solicitada. En un plazo máximo de 24 horas nos pondremos en contacto contigo.
+            </p>
+          </div>
+        ) : canClaimCurrentLevel ? (
+          <div className="flex items-center justify-between gap-3 rounded-xl bg-white/20 border border-white/30 px-4 py-3">
+            <div className="flex items-start gap-2">
+              <Gift className="w-4 h-4 text-white mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-white">Tienes recompensas disponibles</p>
+                <p className="text-xs text-white/70 mt-0.5">{level.rewards.map(r => r.description).join(" · ")}</p>
+              </div>
+            </div>
+            <button
+              onClick={() => claimReward(level)}
+              disabled={claiming}
+              className="flex-shrink-0 flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-[#0B1F2A] hover:bg-white/90 transition-opacity disabled:opacity-60"
+            >
+              {claiming ? "Enviando…" : "Reclamar recompensas"}
+              {!claiming && <ChevronRight className="w-3 h-3" />}
+            </button>
+          </div>
+        ) : null}
       </div>
 
       {/* Referral link */}
@@ -212,7 +254,9 @@ export default function ReferralsPage() {
             {qualifiesForRaffle ? (
               <span className="inline-block mt-2 text-xs text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full font-medium">Participas en el sorteo</span>
             ) : (
-              <span className="inline-block mt-2 text-xs text-slate-500">Refiere al menos 1 persona para participar</span>
+              <span className="inline-block mt-2 text-xs text-slate-500">
+                Alcanza el nivel Embajador Pro ({raffle.minReferrals} referidos) para participar
+              </span>
             )}
           </div>
         </div>
@@ -224,6 +268,8 @@ export default function ReferralsPage() {
         <div className="space-y-2.5">
           {levels.map(lvl => {
             const unlocked = level.level >= lvl.level
+            const isCurrent = level.level === lvl.level
+            const alreadyClaimed = claimedLevels.has(lvl.level)
             return (
               <div
                 key={lvl.level}
@@ -243,16 +289,21 @@ export default function ReferralsPage() {
                   ))}
                   {lvl.rewards.length === 0 && <p className="text-xs text-slate-400 mt-0.5">Sin recompensa en este nivel</p>}
                 </div>
-                {unlocked && lvl.rewards.length > 0 && level.level === lvl.level && (
+                {isCurrent && lvl.rewards.length > 0 && !alreadyClaimed && (
                   <button
-                    onClick={() => claimReward(lvl.rewards.map(r => r.description).join(", "))}
-                    disabled={claiming !== null}
-                    className="flex-shrink-0 flex items-center gap-1 rounded-lg bg-[var(--accent)] px-3 py-1.5 text-xs font-medium text-white hover:opacity-90 transition-opacity"
+                    onClick={() => claimReward(lvl)}
+                    disabled={claiming}
+                    className="flex-shrink-0 flex items-center gap-1 rounded-lg bg-[var(--accent)] px-3 py-1.5 text-xs font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-60"
                   >
-                    {claiming ? "…" : "Canjear"} <ChevronRight className="w-3 h-3" />
+                    {claiming ? "…" : "Reclamar"} {!claiming && <ChevronRight className="w-3 h-3" />}
                   </button>
                 )}
-                {unlocked && level.level > lvl.level && lvl.level > 0 && (
+                {isCurrent && alreadyClaimed && (
+                  <span className="flex-shrink-0 flex items-center gap-1 text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-lg">
+                    <Clock className="w-3 h-3" /> Pendiente
+                  </span>
+                )}
+                {unlocked && !isCurrent && lvl.level > 0 && (
                   <Check className="w-4 h-4 text-emerald-500 flex-shrink-0" />
                 )}
               </div>

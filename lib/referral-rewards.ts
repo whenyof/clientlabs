@@ -1,4 +1,4 @@
-export type RewardType = "discount" | "free_month" | "free_months" | "free_year" | "template_pack" | "merch" | "lifetime" | "cash"
+export type RewardType = "discount" | "free_month" | "free_months" | "free_year" | "template_pack" | "consulting" | "lifetime" | "cash"
 
 export type ReferralReward = {
   type: RewardType
@@ -47,6 +47,7 @@ export const REFERRAL_LEVELS: ReferralLevel[] = [
     color: "#7C3AED",
     rewards: [
       { type: "free_month", value: 1, description: "1 mes gratis de tu plan actual" },
+      { type: "template_pack", value: 1, description: "Pack completo de plantillas premium gratis" },
     ],
   },
   {
@@ -55,18 +56,17 @@ export const REFERRAL_LEVELS: ReferralLevel[] = [
     minReferrals: 10,
     color: "#D4AF37",
     rewards: [
-      { type: "free_months", value: 3, description: "3 meses gratis de tu plan actual" },
-      { type: "template_pack", value: 1, description: "Pack completo de plantillas premium gratis" },
+      { type: "free_months", value: 3, description: "3 meses gratis del plan Business" },
     ],
   },
   {
     level: 5,
     name: "Embajador Platinum",
-    minReferrals: 20,
+    minReferrals: 25,
     color: "#1FA97A",
     rewards: [
       { type: "free_year", value: 1, description: "1 año gratis de ClientLabs Business" },
-      { type: "merch", value: 1, description: "Pack de merchandising ClientLabs" },
+      { type: "consulting", value: 1, description: "Sesión de consultoría personalizada 1:1 con el equipo de ClientLabs" },
     ],
   },
   {
@@ -84,9 +84,9 @@ export const REFERRAL_LEVELS: ReferralLevel[] = [
 export const REFERRAL_RAFFLE = {
   active: true,
   prize: "2.500€ en metálico",
-  description: "Todos los que refieran al menos 1 persona entran en el sorteo trimestral de 2.500€",
+  description: "Todos los Embajadores Pro o superior entran en el sorteo trimestral de 2.500€",
   drawDate: "Septiembre 2026",
-  requirement: "Mínimo 1 referido suscrito",
+  minReferrals: 3,
 }
 
 export function getLevelForReferrals(count: number): ReferralLevel {

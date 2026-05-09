@@ -423,19 +423,21 @@ export async function addEvent(
 
 /** Atomically consume the next number for a series and return it (then increment). */
 export async function consumeNextNumber(userId: string, seriesName: string): Promise<{ number: number; prefix: string }> {
+  const currentYear = new Date().getFullYear()
   return prisma.$transaction(async (tx) => {
     let series = await tx.invoiceSeries.findUnique({
       where: { userId_name: { userId, name: seriesName } },
     })
     if (!series) {
       series = await tx.invoiceSeries.create({
-        data: { userId, name: seriesName, prefix: seriesName, nextNumber: 1 },
+        data: { userId, name: seriesName, prefix: seriesName, nextNumber: 1, year: currentYear },
       })
     }
-    const numberToUse = series.nextNumber
+    const yearChanged = series.year !== currentYear
+    const numberToUse = yearChanged ? 1 : series.nextNumber
     await tx.invoiceSeries.update({
       where: { id: series.id },
-      data: { nextNumber: series.nextNumber + 1 },
+      data: { nextNumber: numberToUse + 1, year: currentYear },
     })
     return { number: numberToUse, prefix: series.prefix }
   })

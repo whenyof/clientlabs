@@ -106,7 +106,7 @@ export const defaultSectorConfig: SectorConfig = {
             leads: 'Leads',
             tasks: 'Tareas',
             sales: 'Ventas',
-            finance: 'Finanzas',
+            finance: 'Facturación',
             billing: 'Facturación',
             analytics: 'Análisis',
             reporting: 'Reporte Ejecutivo',

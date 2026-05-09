@@ -128,6 +128,9 @@ export function CreateInvoiceDialog({
   const router = useRouter()
   const billingRef = useRef<HTMLDivElement>(null)
   const [updatingClient, setUpdatingClient] = useState(false)
+  type CatalogProduct = { id: string; name: string; description: string | null; price: number; taxRate: number; unit: string }
+  const [catalogProducts, setCatalogProducts] = useState<CatalogProduct[]>([])
+  const [productAC, setProductAC] = useState<{ lineId: string; query: string; open: boolean }>({ lineId: "", query: "", open: false })
 
   const handleUpdateClient = async () => {
     if (!clientId) return
@@ -187,7 +190,7 @@ export function CreateInvoiceDialog({
     setInvoiceLanguage(null)
     setCurrency("EUR")
     setInvoiceDocType(initialDocType ?? "F1")
-    setLines([{ id: nextLineId(), description: "", quantity: 1, unitPrice: 0, taxPercent: 0, lastEditedField: "unit" }])
+    setLines([{ id: nextLineId(), description: "", quantity: 0, unitPrice: 0, taxPercent: 0, lastEditedField: "unit" }])
     setBillingData(emptyBilling())
     setBillingLockedFromClient(false)
     setSavedClientData(null)
@@ -268,6 +271,29 @@ export function CreateInvoiceDialog({
   }, [saleId, salesForClient])
 
   useEffect(() => {
+    if (!open) return
+    fetch("/api/products").then((r) => r.json()).then((d) => {
+      if (d.products) setCatalogProducts(d.products)
+    }).catch(() => {})
+  }, [open])
+
+  const filteredProductSuggestions = useCallback((q: string) => {
+    if (!q) return catalogProducts.slice(0, 6)
+    return catalogProducts.filter((p) => p.name.toLowerCase().includes(q.toLowerCase())).slice(0, 6)
+  }, [catalogProducts])
+
+  const selectProductForLine = useCallback((lineId: string, product: CatalogProduct) => {
+    setLines((prev) => prev.map((l) => l.id !== lineId ? l : {
+      ...l,
+      description: product.name,
+      unitPrice: product.price,
+      taxPercent: product.taxRate,
+      lastEditedField: "unit" as const,
+    }))
+    setProductAC({ lineId: "", query: "", open: false })
+  }, [])
+
+  useEffect(() => {
     if (open && editInvoice) {
       setClientId(editInvoice.clientId)
       setIssueDate(editInvoice.issueDate.slice(0, 10))
@@ -282,7 +308,7 @@ export function CreateInvoiceDialog({
       setLines(
         editInvoice.lines.length > 0
           ? editInvoice.lines.map((l) => ({ ...l, id: nextLineId(), lastEditedField: (l as LineRow).lastEditedField ?? "unit" }))
-          : [{ id: nextLineId(), description: "", quantity: 1, unitPrice: 0, taxPercent: 0, lastEditedField: "unit" }]
+          : [{ id: nextLineId(), description: "", quantity: 0, unitPrice: 0, taxPercent: 0, lastEditedField: "unit" }]
       )
       if (editInvoice.clientSnapshot) {
         setBillingData({
@@ -350,7 +376,7 @@ export function CreateInvoiceDialog({
   const total = Math.round((subtotal + taxAmount - irpfAmount) * 100) / 100
 
   const addLine = () => {
-    setLines((prev) => [...prev, { id: nextLineId(), description: "", quantity: 1, unitPrice: 0, taxPercent: 0, lastEditedField: "unit" as const }])
+    setLines((prev) => [...prev, { id: nextLineId(), description: "", quantity: 0, unitPrice: 0, taxPercent: 0, lastEditedField: "unit" as const }])
   }
 
   const removeLine = (id: string) => {
@@ -401,9 +427,37 @@ export function CreateInvoiceDialog({
       return
     }
     setSaving(true)
+
+    // Auto-create PO if user selected "new"
+    let resolvedSaleId = saleId || null
+    if (saleId === "new" && clientId) {
+      try {
+        const poRes = await fetch("/api/purchase-orders", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            clientId,
+            notes: notes || null,
+            items: lines.map((l) => ({
+              description: l.description || "Servicio",
+              quantity: l.quantity || 1,
+              unitPrice: l.unitPrice || 0,
+              taxRate: l.taxPercent ?? 0,
+            })),
+          }),
+        })
+        if (poRes.ok) {
+          const poData = await poRes.json()
+          resolvedSaleId = poData.order?.id ?? null
+        }
+      } catch {
+        // Non-fatal: proceed without linking PO
+      }
+    }
+
     const payload = {
       clientId,
-      saleId: saleId || null,
+      saleId: resolvedSaleId,
       series: "INV",
       issueDate: new Date(issueDate).toISOString(),
       dueDate: new Date(dueDate).toISOString(),
@@ -599,18 +653,24 @@ export function CreateInvoiceDialog({
                         ? "Cargando…"
                         : !clientId
                           ? "Selecciona un cliente"
-                          : salesForClient.length === 0
-                            ? "No hay pedidos pendientes de facturar para este cliente"
-                            : "Ninguno"}
+                          : "Sin pedido"}
                     </option>
                     {salesForClient.map((s) => (
                       <option key={s.id} value={s.id}>
                         {(s.reference || s.number || s.id).slice(0, 20)} · {typeof s.date === "string" ? s.date.slice(0, 10) : ""} · {formatCurrency(s.total, s.currency ?? "EUR")}
                       </option>
                     ))}
+                    {clientId && !loadingSales && (
+                      <option value="new">+ Crear nuevo pedido</option>
+                    )}
                   </select>
                   <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
                 </div>
+                {saleId === "new" && (
+                  <p className="mt-1.5 text-xs text-blue-700 bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-lg">
+                    Se creará un pedido automáticamente con los datos de esta factura al guardar.
+                  </p>
+                )}
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">
@@ -728,24 +788,52 @@ export function CreateInvoiceDialog({
                     {lines.map((line) => (
                       <tr key={line.id} className="border-b border-slate-100">
                         <td className="py-1.5 px-2">
-                          <input
-                            type="text"
-                            value={line.description}
-                            onChange={(e) => updateLine(line.id, { description: e.target.value })}
-                            placeholder="Descripción"
-                            disabled={!editableInEditMode}
-                            className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-slate-800 placeholder-slate-400 text-sm focus:border-[#1FA97A] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
-                          />
+                          <div className="relative">
+                            <input
+                              type="text"
+                              value={line.description}
+                              onChange={(e) => {
+                                updateLine(line.id, { description: e.target.value })
+                                setProductAC({ lineId: line.id, query: e.target.value, open: true })
+                              }}
+                              onFocus={() => setProductAC({ lineId: line.id, query: line.description, open: true })}
+                              onBlur={() => setTimeout(() => setProductAC((prev) => ({ ...prev, open: false })), 150)}
+                              placeholder="Descripción"
+                              disabled={!editableInEditMode}
+                              className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-slate-800 placeholder-slate-400 text-sm focus:border-[#1FA97A] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                            />
+                            {productAC.lineId === line.id && productAC.open && filteredProductSuggestions(productAC.query).length > 0 && (
+                              <div className="absolute left-0 top-full mt-1 w-72 bg-white border border-slate-200 rounded-lg shadow-lg z-20 overflow-hidden">
+                                {filteredProductSuggestions(productAC.query).map((p) => (
+                                  <button
+                                    key={p.id}
+                                    type="button"
+                                    onMouseDown={() => selectProductForLine(line.id, p)}
+                                    className="w-full flex items-center justify-between px-3 py-2 hover:bg-slate-50 text-left transition-colors"
+                                  >
+                                    <div className="min-w-0">
+                                      <p className="text-[12px] font-medium text-slate-900 truncate">{p.name}</p>
+                                      {p.description && <p className="text-[11px] text-slate-400 truncate">{p.description}</p>}
+                                    </div>
+                                    <span className="text-[11px] font-medium text-slate-600 shrink-0 ml-2">
+                                      {p.price.toLocaleString("es-ES", { style: "currency", currency: "EUR" })}
+                                    </span>
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         </td>
                         <td className="py-1.5 px-2 text-right">
                           <input
                             type="number"
                             min={0}
                             step={0.01}
+                            placeholder="1"
                             value={line.quantity || ""}
                             onChange={(e) => handleQtyChange(line, Number(e.target.value) || 0)}
                             disabled={!editableInEditMode}
-                            className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-slate-800 text-sm text-right focus:border-[#1FA97A] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-slate-800 placeholder-slate-300 text-sm text-right focus:border-[#1FA97A] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
                           />
                         </td>
                         <td className="py-1.5 px-2 text-right">
@@ -753,10 +841,11 @@ export function CreateInvoiceDialog({
                             type="number"
                             min={0}
                             step={0.01}
+                            placeholder="0"
                             value={line.unitPrice || ""}
                             onChange={(e) => handleUnitChange(line, Number(e.target.value) || 0)}
                             disabled={!editableInEditMode}
-                            className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-slate-800 text-sm text-right focus:border-[#1FA97A] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-slate-800 placeholder-slate-300 text-sm text-right focus:border-[#1FA97A] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
                           />
                         </td>
                         <td className="py-1.5 px-2 text-right">

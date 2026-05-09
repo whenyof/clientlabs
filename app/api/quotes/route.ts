@@ -1,8 +1,27 @@
 export const maxDuration = 10
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
+import { z } from "zod"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+
+const lineItemSchema = z.object({
+  productId: z.string().optional(),
+  description: z.string().min(1).max(500),
+  quantity: z.number().positive().max(99999),
+  unitPrice: z.number().min(0).max(9999999),
+  taxRate: z.number().min(0).max(100).optional(),
+})
+
+const createQuoteSchema = z.object({
+  clientId: z.string().min(1),
+  validUntil: z.string().min(1),
+  notes: z.string().max(5000).optional().nullable(),
+  terms: z.string().max(5000).optional().nullable(),
+  irpfRate: z.number().min(0).max(100).optional(),
+  items: z.array(lineItemSchema).max(200).default([]),
+  quoteType: z.enum(["quote", "proforma"]).optional().default("quote"),
+})
 
 async function nextQuoteNumber(userId: string): Promise<string> {
   const year = new Date().getFullYear()
@@ -37,27 +56,45 @@ export async function GET(req: NextRequest) {
         ],
       }),
     },
-    include: { client: { select: { id: true, name: true, email: true } }, items: true },
+    include: {
+      client: { select: { id: true, name: true, email: true } },
+      items: true,
+      purchaseOrder: { select: { id: true, number: true, status: true } },
+      deliveryNote: { select: { id: true, number: true, status: true } },
+    },
     orderBy: { createdAt: "desc" },
   })
-  return NextResponse.json({ success: true, quotes })
+
+  // Batch-fetch linked invoices
+  const invoiceIds = quotes.map(q => q.convertedToInvoiceId).filter(Boolean) as string[]
+  const invoiceMap: Record<string, { id: string; number: string; status: string }> = {}
+  if (invoiceIds.length > 0) {
+    const invoices = await prisma.invoice.findMany({
+      where: { id: { in: invoiceIds } },
+      select: { id: true, number: true, status: true },
+    })
+    for (const inv of invoices) invoiceMap[inv.id] = inv
+  }
+
+  const enriched = quotes.map(q => ({
+    ...q,
+    invoice: q.convertedToInvoiceId ? (invoiceMap[q.convertedToInvoiceId] ?? null) : null,
+  }))
+
+  return NextResponse.json({ success: true, quotes: enriched })
 }
 
-export async function POST(_req: NextRequest) {
-  return NextResponse.json(
-    { error: "Creación deshabilitada hasta implementación Verifactu", code: "VERIFACTU_PENDING" },
-    { status: 503 }
-  )
-}
-
-async function _POST_disabled(req: NextRequest) {
+export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   try {
     const body = await req.json()
-    const { clientId, validUntil, notes, terms, items = [] } = body
-    if (!clientId || !validUntil) return NextResponse.json({ error: "clientId and validUntil required" }, { status: 400 })
+    const parsed = createQuoteSchema.safeParse(body)
+    if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Datos inválidos" }, { status: 400 })
+    const { clientId, validUntil, notes, terms, irpfRate: rawIrpf, items, quoteType } = parsed.data
+
+    const irpfRate = Math.max(0, Math.min(100, Number(rawIrpf) || 0))
 
     type ItemInput = { productId?: string; description: string; quantity: number; unitPrice: number; taxRate?: number }
     const lineItems: ItemInput[] = items
@@ -74,6 +111,7 @@ async function _POST_disabled(req: NextRequest) {
       return { ...item, quantity: qty, unitPrice: price, taxRate, subtotal: lineSub }
     })
 
+    const irpfAmount = subtotal * (irpfRate / 100)
     const number = await nextQuoteNumber(session.user.id)
 
     const quote = await prisma.quote.create({
@@ -86,7 +124,10 @@ async function _POST_disabled(req: NextRequest) {
         terms: terms ?? null,
         subtotal,
         taxTotal,
-        total: subtotal + taxTotal,
+        irpfRate: irpfRate > 0 ? irpfRate : null,
+        irpfAmount: irpfAmount > 0 ? irpfAmount : null,
+        total: subtotal + taxTotal - irpfAmount,
+        quoteType: quoteType ?? "quote",
         items: {
           create: computedItems.map((i) => ({
             productId: i.productId ?? null,

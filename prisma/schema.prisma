@@ -963,6 +963,7 @@ model User {
   referrals              Referral[]              @relation("UserReferrals")
   referredBy             Referral[]              @relation("UserReferred")
   userTemplates          UserTemplate[]
+  recurringInvoices      RecurringInvoice[]
 }
 
 model CalendarIntegration {
@@ -2056,6 +2057,8 @@ model InvoiceSeries {
   name       String
   prefix     String
   nextNumber Int    @default(1)
+  year       Int    @default(2026)
+  isDefault  Boolean @default(false)
   User       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, name])
@@ -2576,6 +2579,7 @@ model Quote {
   pdfUrl                    String?
   convertedToInvoiceId      String?
   convertedToDeliveryNoteId String?
+  quoteType                 String      @default("quote")
   createdAt                 DateTime    @default(now())
   updatedAt                 DateTime    @updatedAt
   deletedAt                 DateTime?
@@ -3104,4 +3108,48 @@ model TaskAssignee {
 
   @@unique([taskId, userId])
   @@map("task_assignees")
+}
+
+enum RecurringFrequency {
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+model RecurringInvoice {
+  id            String              @id @default(cuid())
+  userId        String
+  user          User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clientId      String
+  frequency     RecurringFrequency  @default(MONTHLY)
+  nextRunAt     DateTime
+  lastRunAt     DateTime?
+  active        Boolean             @default(true)
+  notes         String?
+  terms         String?
+  currency      String              @default("EUR")
+  irpfRate      Float               @default(0)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  items         RecurringInvoiceItem[]
+
+  @@index([userId])
+  @@index([nextRunAt])
+  @@map("recurring_invoices")
+}
+
+model RecurringInvoiceItem {
+  id                  String           @id @default(cuid())
+  recurringInvoiceId  String
+  recurringInvoice    RecurringInvoice @relation(fields: [recurringInvoiceId], references: [id], onDelete: Cascade)
+  description         String
+  quantity            Float            @default(1)
+  unitPrice           Float
+  taxPercent          Float            @default(21)
+  discountPercent     Float            @default(0)
+  createdAt           DateTime         @default(now())
+
+  @@index([recurringInvoiceId])
+  @@map("recurring_invoice_items")
 }

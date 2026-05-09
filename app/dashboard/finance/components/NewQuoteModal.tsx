@@ -34,7 +34,7 @@ const DEFAULT_ITEM = (): LineItem => ({
   _key: newKey(),
   productId: null,
   description: "",
-  quantity: 1,
+  quantity: 0,
   unitPrice: 0,
   taxRate: 21,
 })
@@ -49,7 +49,9 @@ export function NewQuoteModal({ open, onClose, onSuccess, defaultClientId }: Pro
   })
   const [notes, setNotes] = useState("")
   const [terms, setTerms] = useState("")
+  const [irpfRate, setIrpfRate] = useState(0)
   const [items, setItems] = useState<LineItem[]>([DEFAULT_ITEM()])
+  const [quoteType, setQuoteType] = useState<"quote" | "proforma">("quote")
   const [saving, setSaving] = useState(false)
   const [autocomplete, setAutocomplete] = useState<{ idx: number; query: string; open: boolean }>({ idx: -1, query: "", open: false })
 
@@ -95,7 +97,8 @@ export function NewQuoteModal({ open, onClose, onSuccess, defaultClientId }: Pro
   // Computed totals
   const subtotal = items.reduce((s, i) => s + i.quantity * i.unitPrice, 0)
   const taxTotal = items.reduce((s, i) => s + i.quantity * i.unitPrice * (i.taxRate / 100), 0)
-  const total = subtotal + taxTotal
+  const irpfAmount = subtotal * (irpfRate / 100)
+  const total = subtotal + taxTotal - irpfAmount
 
   const handleSave = async (sendAfter = false) => {
     if (!clientId || !validUntil) return
@@ -109,7 +112,9 @@ export function NewQuoteModal({ open, onClose, onSuccess, defaultClientId }: Pro
           validUntil,
           notes: notes || null,
           terms: terms || null,
+          irpfRate: irpfRate > 0 ? irpfRate : 0,
           items: items.map(({ _key: _, ...rest }) => rest),
+          quoteType,
         }),
       })
       const data = await res.json()
@@ -130,7 +135,9 @@ export function NewQuoteModal({ open, onClose, onSuccess, defaultClientId }: Pro
     setValidUntil(d.toISOString().slice(0, 10))
     setNotes("")
     setTerms("")
+    setIrpfRate(0)
     setItems([DEFAULT_ITEM()])
+    setQuoteType("quote")
   }
 
   const handleClose = () => { reset(); onClose() }
@@ -146,7 +153,27 @@ export function NewQuoteModal({ open, onClose, onSuccess, defaultClientId }: Pro
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-          <h2 className="text-[15px] font-semibold text-slate-900">Nuevo presupuesto</h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-[15px] font-semibold text-slate-900">
+              {quoteType === "proforma" ? "Nueva factura proforma" : "Nuevo presupuesto"}
+            </h2>
+            <div className="flex rounded-lg border border-slate-200 overflow-hidden text-[12px]">
+              <button
+                type="button"
+                onClick={() => setQuoteType("quote")}
+                className={`px-3 py-1 transition-colors ${quoteType === "quote" ? "bg-[#1FA97A] text-white font-medium" : "text-slate-500 hover:bg-slate-50"}`}
+              >
+                Presupuesto
+              </button>
+              <button
+                type="button"
+                onClick={() => setQuoteType("proforma")}
+                className={`px-3 py-1 border-l border-slate-200 transition-colors ${quoteType === "proforma" ? "bg-[#1FA97A] text-white font-medium" : "text-slate-500 hover:bg-slate-50"}`}
+              >
+                Proforma
+              </button>
+            </div>
+          </div>
           <button onClick={handleClose} className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
             <X className="h-4 w-4" />
           </button>
@@ -250,17 +277,19 @@ export function NewQuoteModal({ open, onClose, onSuccess, defaultClientId }: Pro
                         type="number"
                         min={0}
                         step={1}
-                        value={item.quantity}
+                        placeholder="1"
+                        value={item.quantity || ""}
                         onChange={e => updateItem(item._key, { quantity: Math.max(0, Number(e.target.value)) })}
-                        className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 text-center focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+                        className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 placeholder-slate-300 text-center focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
                       />
                       <input
                         type="number"
                         min={0}
                         step={0.01}
-                        value={item.unitPrice}
+                        placeholder="0"
+                        value={item.unitPrice || ""}
                         onChange={e => updateItem(item._key, { unitPrice: Math.max(0, Number(e.target.value)) })}
-                        className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 text-right focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+                        className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 placeholder-slate-300 text-right focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
                       />
                       <input
                         type="number"
@@ -300,7 +329,7 @@ export function NewQuoteModal({ open, onClose, onSuccess, defaultClientId }: Pro
 
             {/* Totals */}
             <div className="mt-3 flex justify-end">
-              <div className="w-52 space-y-1.5">
+              <div className="w-60 space-y-1.5">
                 <div className="flex justify-between text-[12px] text-slate-500">
                   <span>Subtotal</span>
                   <span className="tabular-nums">{fmt(subtotal)}</span>
@@ -309,6 +338,12 @@ export function NewQuoteModal({ open, onClose, onSuccess, defaultClientId }: Pro
                   <span>IVA</span>
                   <span className="tabular-nums">{fmt(taxTotal)}</span>
                 </div>
+                {irpfRate > 0 && (
+                  <div className="flex justify-between text-[12px] text-red-600">
+                    <span>IRPF -{irpfRate}%</span>
+                    <span className="tabular-nums">-{fmt(irpfAmount)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-[14px] font-semibold text-slate-900 border-t border-slate-200 pt-1.5">
                   <span>Total</span>
                   <span className="tabular-nums">{fmt(total)}</span>
@@ -317,27 +352,48 @@ export function NewQuoteModal({ open, onClose, onSuccess, defaultClientId }: Pro
             </div>
           </div>
 
-          {/* SECCIÓN 3 — Notas y términos */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* SECCIÓN 3 — IRPF + Notas + Condiciones */}
+          <div className="space-y-4">
+
+            {/* IRPF */}
             <div>
-              <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider mb-1.5">Notas internas</label>
-              <textarea
-                value={notes}
-                onChange={e => setNotes(e.target.value)}
-                placeholder="Notas visibles en el PDF..."
-                rows={3}
-                className="w-full text-[12px] border border-slate-200 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
-              />
+              <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider mb-1.5">Retención IRPF</label>
+              <div className="relative w-60">
+                <select
+                  value={irpfRate}
+                  onChange={e => setIrpfRate(Number(e.target.value))}
+                  className="w-full appearance-none text-[13px] border border-slate-200 rounded-lg px-3 py-2.5 text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A] pr-8"
+                >
+                  <option value={0}>Sin retención (0%)</option>
+                  <option value={7}>7% — primeros 2 años de autónomo</option>
+                  <option value={15}>15% — retención estándar</option>
+                </select>
+                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+              </div>
+              <p className="text-[11px] text-slate-400 mt-1">Se aplica a servicios profesionales. No aplica si vendes productos.</p>
             </div>
-            <div>
-              <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider mb-1.5">Condiciones</label>
-              <textarea
-                value={terms}
-                onChange={e => setTerms(e.target.value)}
-                placeholder="Términos y condiciones del presupuesto..."
-                rows={3}
-                className="w-full text-[12px] border border-slate-200 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
-              />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider mb-1.5">Notas</label>
+                <textarea
+                  value={notes}
+                  onChange={e => setNotes(e.target.value)}
+                  placeholder="Notas visibles en el PDF..."
+                  rows={3}
+                  className="w-full text-[12px] border border-slate-200 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider mb-1.5">Condiciones</label>
+                <textarea
+                  value={terms}
+                  onChange={e => setTerms(e.target.value)}
+                  placeholder="Términos y condiciones del presupuesto..."
+                  rows={3}
+                  className="w-full text-[12px] border border-slate-200 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+                />
+              </div>
             </div>
           </div>
         </div>

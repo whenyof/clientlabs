@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef } from "react"
-import { X, Loader2, CheckSquare, ChevronDown, Trash2, RotateCcw, User } from "lucide-react"
+import { X, Loader2, CheckSquare, ChevronDown, Trash2, RotateCcw, User, Users } from "lucide-react"
 import { DatePickerField } from "./DatePickerField"
 import { TimePickerField } from "./TimePickerField"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -12,6 +12,7 @@ import { PRIORITY_CONFIG } from "./types"
 
 interface EntityOption { id: string; name: string }
 interface TeamMember { id: string; name: string | null; email: string }
+interface ProjectOption { id: string; name: string; color: string }
 
 interface NewTaskModalProps {
   open: boolean
@@ -22,6 +23,7 @@ interface NewTaskModalProps {
   defaultDueTime?: string
   defaultEntityType?: "CLIENT" | "LEAD" | "PROVIDER"
   defaultEntityId?: string
+  defaultProjectId?: string
   editTask?: DashboardTask
 }
 
@@ -74,7 +76,7 @@ function Label({ children }: { children: React.ReactNode }) {
   )
 }
 
-export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDIUM", defaultDueDate, defaultDueTime, defaultEntityType, defaultEntityId, editTask }: NewTaskModalProps) {
+export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDIUM", defaultDueDate, defaultDueTime, defaultEntityType, defaultEntityId, defaultProjectId, editTask }: NewTaskModalProps) {
   const qc = useQueryClient()
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
@@ -115,8 +117,21 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
   }, [open, editTask, defaultPriority, defaultDueDate, defaultDueTime])
 
   const [assignedToId, setAssignedToId] = useState<string>("")
+  const [selectedAssignees, setSelectedAssignees] = useState<string[]>([])
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
+  const [projectId, setProjectId] = useState<string>(defaultProjectId ?? "")
+  const [projects, setProjects] = useState<ProjectOption[]>([])
   const teamFetchedRef = useRef(false)
+
+  const MEMBER_COLORS = ["#3B82F6", "#8B5CF6", "#F59E0B", "#EF4444", "#EC4899", "#06B6D4", "#84CC16", "#F97316"]
+  function getMemberColor(idx: number) { return MEMBER_COLORS[idx % MEMBER_COLORS.length] }
+  function getInitials(name: string | null, email: string) {
+    if (name) return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
+    return email.slice(0, 2).toUpperCase()
+  }
+  function toggleAssignee(id: string) {
+    setSelectedAssignees(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
+  }
 
   useEffect(() => {
     if (!open || teamFetchedRef.current) return
@@ -125,7 +140,15 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
       .then(r => r.ok ? r.json() : [])
       .then((data: TeamMember[]) => { if (Array.isArray(data)) setTeamMembers(data) })
       .catch(() => {})
+    fetch("/api/projects")
+      .then(r => r.ok ? r.json() : [])
+      .then((data: ProjectOption[]) => { if (Array.isArray(data)) setProjects(data) })
+      .catch(() => {})
   }, [open])
+
+  useEffect(() => {
+    if (open) setProjectId(defaultProjectId ?? "")
+  }, [open, defaultProjectId])
 
   const [entityOptions, setEntityOptions] = useState<EntityOption[]>([])
   const [isLoadingEntities, setIsLoadingEntities] = useState(false)
@@ -172,7 +195,7 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
   const [isDeleting, setIsDeleting] = useState(false)
 
   const handleClose = () => {
-    setTitle(""); setDescription(""); setEntityType(""); setEntityId(""); setAssignedToId("")
+    setTitle(""); setDescription(""); setEntityType(""); setEntityId(""); setAssignedToId(""); setProjectId(""); setSelectedAssignees([])
     setShowDeleteConfirm(false)
     onClose()
   }
@@ -226,6 +249,8 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
         entityType: entityType || null,
         entityId: entityId || null,
         assignedToId: assignedToId || null,
+        projectId: projectId || null,
+        assigneeIds: selectedAssignees.length > 0 ? selectedAssignees : null,
       }
       const url = editTask ? `/api/tasks/${editTask.id}` : "/api/tasks"
       const method = editTask ? "PATCH" : "POST"
@@ -355,15 +380,57 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
             </div>
           </div>
 
-          {/* Asignar a miembro del equipo — solo si hay más de 1 miembro */}
-          {teamMembers.length > 1 && (
+          {/* Asignar a — checkboxes multi-selección si hay equipo, hint si no */}
+          {teamMembers.length > 1 ? (
             <div>
               <Label>Asignar a</Label>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {teamMembers.map((m, idx) => {
+                  const isSelected = selectedAssignees.includes(m.id)
+                  return (
+                    <label key={m.id} style={{
+                      display: "flex", alignItems: "center", gap: 10, padding: "8px 10px",
+                      borderRadius: 8, cursor: "pointer",
+                      border: isSelected ? "1px solid #1FA97A" : "1px solid var(--border-subtle)",
+                      background: isSelected ? "#1FA97A10" : "var(--bg-card)",
+                      transition: "all 0.12s",
+                    }}>
+                      <input
+                        type="checkbox" checked={isSelected} onChange={() => toggleAssignee(m.id)}
+                        style={{ width: 14, height: 14, accentColor: "#1FA97A", cursor: "pointer", flexShrink: 0 }}
+                      />
+                      <div style={{
+                        width: 24, height: 24, borderRadius: "50%", flexShrink: 0,
+                        background: getMemberColor(idx),
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        fontSize: 9, fontWeight: 700, color: "#fff",
+                      }}>
+                        {getInitials(m.name, m.email)}
+                      </div>
+                      <span style={{ fontSize: 13, color: "var(--text-primary)", flex: 1 }}>{m.name ?? m.email}</span>
+                    </label>
+                  )
+                })}
+              </div>
+            </div>
+          ) : (
+            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", background: "var(--bg-surface)", borderRadius: 8, border: "1px solid var(--border-subtle)" }}>
+              <Users style={{ width: 14, height: 14, color: "var(--text-secondary)", flexShrink: 0 }} />
+              <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>
+                Asignada a ti. Invita miembros en <strong>Ajustes → Equipo</strong> para asignar tareas.
+              </span>
+            </div>
+          )}
+
+          {/* Project */}
+          {projects.length > 0 && (
+            <div>
+              <Label>Proyecto</Label>
               <SelectWrapper>
-                <select value={assignedToId} onChange={(e) => setAssignedToId(e.target.value)} style={selectResetStyle}>
-                  <option value="">Sin asignar (general)</option>
-                  {teamMembers.map((m) => (
-                    <option key={m.id} value={m.id}>{m.name ?? m.email}</option>
+                <select value={projectId} onChange={(e) => setProjectId(e.target.value)} style={selectResetStyle}>
+                  <option value="">Sin proyecto</option>
+                  {projects.map((p) => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
                   ))}
                 </select>
               </SelectWrapper>

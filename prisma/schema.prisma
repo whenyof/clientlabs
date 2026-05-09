@@ -933,6 +933,9 @@ model User {
   ownedWorkspaces        Workspace[]           @relation("WorkspaceOwner")
   workspaceMemberships   WorkspaceMember[]     @relation("WorkspaceMembers")
   activityLogs           ActivityLog[]         @relation("ActivityLogs")
+  projects               Project[]             @relation("UserProjects")
+  projectMembers         ProjectMember[]       @relation("UserProjectMembers")
+  taskAssignees          TaskAssignee[]        @relation("UserTaskAssignees")
   TrackingEvent          TrackingEvent[]
   transactions           Transaction[]
   planRelation           Plan?                   @relation(fields: [planId], references: [id])
@@ -1509,6 +1512,9 @@ model Task {
   subtasks               Task[]             @relation("TaskSubtasks")
   User                   User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   calendarSyncs          TaskCalendarSync[]
+  projectId              String?
+  project                Project?            @relation(fields: [projectId], references: [id])
+  assignees              TaskAssignee[]
 
   @@index([userId])
   @@index([clientId])
@@ -1522,6 +1528,7 @@ model Task {
   @@index([completedAt])
   @@index([startAt])
   @@index([endAt])
+  @@index([projectId])
 }
 
 model TaskCalendarSync {
@@ -2563,6 +2570,8 @@ model Quote {
   terms                     String?
   subtotal                  Float       @default(0)
   taxTotal                  Float       @default(0)
+  irpfRate                  Float?      @default(0)
+  irpfAmount                Float?      @default(0)
   total                     Float       @default(0)
   pdfUrl                    String?
   convertedToInvoiceId      String?
@@ -3040,4 +3049,59 @@ model Referral {
   @@index([referrerId])
   @@index([code])
   @@index([status])
+}
+
+// ─── Projects ─────────────────────────────────────────────────────────────────
+
+enum ProjectStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ARCHIVED
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  color       String        @default("#1FA97A")
+  status      ProjectStatus @default(ACTIVE)
+  startDate   DateTime?
+  endDate     DateTime?
+  userId      String
+  user        User          @relation("UserProjects", fields: [userId], references: [id])
+  clientId    String?
+  tasks       Task[]
+  members     ProjectMember[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([clientId])
+  @@map("projects")
+}
+
+model ProjectMember {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation("UserProjectMembers", fields: [userId], references: [id])
+  role      String   @default("member")
+  createdAt DateTime @default(now())
+
+  @@unique([projectId, userId])
+  @@map("project_members")
+}
+
+model TaskAssignee {
+  id        String   @id @default(cuid())
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation("UserTaskAssignees", fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([taskId, userId])
+  @@map("task_assignees")
 }

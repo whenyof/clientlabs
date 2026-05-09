@@ -41,7 +41,10 @@ import {
   Globe,
   Code2,
   Activity,
-  Gift,
+  ClipboardList,
+  Truck,
+  Package,
+  FolderKanban,
 } from "lucide-react"
 
 interface SidebarProps {
@@ -306,15 +309,20 @@ export default function Sidebar({
         {
           label: nav.tasks,
           icon: CheckSquare,
-          href: "/dashboard/tasks",
-          count: urgentCount || undefined,
+          children: [
+            { label: "Mis tareas", href: "/dashboard/tasks", icon: CheckSquare },
+            { label: "Proyectos", href: "/dashboard/tasks/projects", icon: FolderKanban },
+          ],
         },
         {
           label: nav.finance,
           icon: DollarSign,
           children: [
             { label: "Resumen", href: "/dashboard/finance", icon: BarChart3 },
+            { label: "Presupuestos", href: "/dashboard/finance/presupuestos", icon: ClipboardList },
+            { label: "Pedidos", href: "/dashboard/finance/pedidos", icon: Truck },
             { label: "Facturación", href: "/dashboard/finance/invoicing", icon: FileText },
+            { label: "Albaranes", href: "/dashboard/finance/albaranes", icon: Package },
             { label: "Gastos", href: "/dashboard/finance/gastos", icon: Receipt },
           ],
         },
@@ -352,7 +360,6 @@ export default function Sidebar({
     {
       title: "SISTEMA",
       items: [
-        { label: "Referidos", icon: Gift, href: "/dashboard/referrals" },
         { label: nav.settings, icon: Settings, href: "/dashboard/settings" },
       ],
     },

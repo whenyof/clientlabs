@@ -1,6 +1,13 @@
 export type TaskPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT"
 export type TaskStatus = "PENDING" | "IN_PROGRESS" | "DONE" | "CANCELLED"
 
+export interface TaskAssigneeUser {
+  id: string
+  name: string | null
+  email: string
+  image: string | null
+}
+
 export interface DashboardTask {
   id: string
   title: string
@@ -14,8 +21,12 @@ export interface DashboardTask {
   updatedAt: string
   clientId: string | null
   leadId: string | null
+  assignedTo: string | null
+  projectId: string | null
   Client: { id: string; name: string } | null
   Lead: { id: string; name: string } | null
+  project: { id: string; name: string; color: string } | null
+  assignees: { userId: string; user: TaskAssigneeUser }[]
 }
 
 export interface TasksKPIsData {

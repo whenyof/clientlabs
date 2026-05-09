@@ -1,11 +1,18 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Building2, UserCircle2, Clock, AlertCircle } from "lucide-react"
+import { Plus, Building2, UserCircle2, Clock, AlertCircle, User } from "lucide-react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import type { DashboardTask, TaskPriority, TaskStatus } from "./types"
 import { PRIORITY_CONFIG } from "./types"
+
+const MEMBER_COLORS = ["#3B82F6", "#8B5CF6", "#F59E0B", "#EF4444", "#EC4899", "#06B6D4", "#84CC16", "#F97316"]
+function getMemberColor(idx: number) { return MEMBER_COLORS[idx % MEMBER_COLORS.length] }
+function getInitials(name: string | null, email: string) {
+  if (name) return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
+  return email.slice(0, 2).toUpperCase()
+}
 
 interface KanbanViewProps {
   tasks: DashboardTask[]
@@ -185,51 +192,72 @@ function KanbanCard({ task, onClick }: KanbanCardProps) {
         {task.title}
       </p>
 
-      {/* Footer — due date + linked entity */}
-      <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-        {dueLabel && (
-          <span style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 3,
-            fontSize: 10,
-            fontWeight: 500,
-            padding: "2px 6px",
-            borderRadius: 20,
-            background: overdue ? "#FEF2F2" : "var(--bg-surface)",
-            color: overdue ? "#EF4444" : "var(--text-secondary)",
-            border: `0.5px solid ${overdue ? "#FECACA" : "var(--border-subtle)"}`,
-          }}>
-            {overdue ? <AlertCircle style={{ width: 9, height: 9 }} /> : <Clock style={{ width: 9, height: 9 }} />}
-            {dueLabel}
-          </span>
-        )}
-
-        {(task.Client || task.Lead) && (
-          <span style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 3,
-            fontSize: 10,
-            fontWeight: 500,
-            padding: "2px 6px",
-            borderRadius: 20,
-            background: "var(--bg-surface)",
-            color: "var(--text-secondary)",
-            border: "0.5px solid var(--border-subtle)",
-            maxWidth: 120,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}>
-            {task.Client
-              ? <Building2 style={{ width: 9, height: 9, flexShrink: 0 }} />
-              : <UserCircle2 style={{ width: 9, height: 9, flexShrink: 0 }} />}
-            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {task.Client?.name ?? task.Lead?.name}
+      {/* Footer — due date + linked entity + project + assignees */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 5, flexWrap: "wrap" }}>
+          {dueLabel && (
+            <span style={{
+              display: "inline-flex", alignItems: "center", gap: 3, fontSize: 10, fontWeight: 500,
+              padding: "2px 6px", borderRadius: 20,
+              background: overdue ? "#FEF2F2" : "var(--bg-surface)",
+              color: overdue ? "#EF4444" : "var(--text-secondary)",
+              border: `0.5px solid ${overdue ? "#FECACA" : "var(--border-subtle)"}`,
+            }}>
+              {overdue ? <AlertCircle style={{ width: 9, height: 9 }} /> : <Clock style={{ width: 9, height: 9 }} />}
+              {dueLabel}
             </span>
-          </span>
-        )}
+          )}
+
+          {(task.Client || task.Lead) && (
+            <span style={{
+              display: "inline-flex", alignItems: "center", gap: 3, fontSize: 10, fontWeight: 500,
+              padding: "2px 6px", borderRadius: 20, background: "var(--bg-surface)",
+              color: "var(--text-secondary)", border: "0.5px solid var(--border-subtle)",
+              maxWidth: 100, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+            }}>
+              {task.Client
+                ? <Building2 style={{ width: 9, height: 9, flexShrink: 0 }} />
+                : <UserCircle2 style={{ width: 9, height: 9, flexShrink: 0 }} />}
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {task.Client?.name ?? task.Lead?.name}
+              </span>
+            </span>
+          )}
+
+          {task.project && (
+            <span style={{
+              display: "inline-flex", alignItems: "center", gap: 3, fontSize: 10, fontWeight: 500,
+              padding: "2px 6px", borderRadius: 20,
+              background: task.project.color + "20", color: task.project.color,
+              maxWidth: 90, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+            }}>
+              <span style={{ width: 5, height: 5, borderRadius: "50%", background: task.project.color, flexShrink: 0 }} />
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {task.project.name}
+              </span>
+            </span>
+          )}
+        </div>
+
+        {/* Assignee avatars */}
+        <div style={{ display: "flex" }}>
+          {(!task.assignees || task.assignees.length === 0) ? (
+            <div style={{ width: 18, height: 18, borderRadius: "50%", background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <User style={{ width: 10, height: 10, color: "var(--text-secondary)" }} />
+            </div>
+          ) : (
+            task.assignees.slice(0, 3).map((a, idx) => (
+              <div key={a.userId} title={a.user.name ?? a.user.email} style={{
+                width: 18, height: 18, borderRadius: "50%", marginLeft: idx > 0 ? -4 : 0,
+                background: getMemberColor(idx), border: "1.5px solid white",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 6, fontWeight: 700, color: "#fff", flexShrink: 0,
+              }}>
+                {getInitials(a.user.name, a.user.email)}
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   )

@@ -43,7 +43,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
  }
 }
 
-/** PATCH body: allow editing title, description, dueDate, startAt, endAt, priority, assignedToId, status, completedAt, estimatedMinutes, latitude, longitude, routeOrder */
+/** PATCH body: allow editing title, description, dueDate, startAt, endAt, priority, assignedToId, status, completedAt, estimatedMinutes, latitude, longitude, routeOrder, projectId, assigneeIds */
 export type UpdateTaskBody = {
  title?: string
  description?: string | null
@@ -59,6 +59,8 @@ export type UpdateTaskBody = {
  latitude?: number | null
  longitude?: number | null
  routeOrder?: number | null
+ projectId?: string | null
+ assigneeIds?: string[] | null
 }
 
 /**
@@ -101,6 +103,7 @@ export async function PATCH(
  latitude?: number | null
  longitude?: number | null
  routeOrder?: number | null
+ projectId?: string | null
  updatedAt: Date
  } = { updatedAt: new Date() }
 
@@ -126,6 +129,19 @@ export async function PATCH(
  if (body.latitude !== undefined) data.latitude = body.latitude ?? null
  if (body.longitude !== undefined) data.longitude = body.longitude ?? null
  if (body.routeOrder !== undefined) data.routeOrder = body.routeOrder ?? null
+ if (body.projectId !== undefined) data.projectId = body.projectId ?? null
+
+ // Handle multi-assignee update
+ if (body.assigneeIds !== undefined) {
+   const validIds = (body.assigneeIds ?? []).filter(Boolean)
+   await prisma.taskAssignee.deleteMany({ where: { taskId: id } })
+   if (validIds.length > 0) {
+     await prisma.taskAssignee.createMany({
+       data: validIds.map((uid) => ({ taskId: id, userId: uid })),
+       skipDuplicates: true,
+     })
+   }
+ }
 
  const task = await prisma.task.update({
  where: { id },
@@ -133,6 +149,10 @@ export async function PATCH(
  include: {
  Client: { select: { id: true, name: true } },
  Lead: { select: { id: true, name: true } },
+ project: { select: { id: true, name: true, color: true } },
+ assignees: {
+   include: { user: { select: { id: true, name: true, email: true, image: true } } },
+ },
  },
  })
 

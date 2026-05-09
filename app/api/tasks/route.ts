@@ -52,6 +52,10 @@ export async function GET(request: NextRequest) {
  include: {
  Client: { select: { id: true, name: true } },
  Lead: { select: { id: true, name: true } },
+ project: { select: { id: true, name: true, color: true } },
+ assignees: {
+   include: { user: { select: { id: true, name: true, email: true, image: true } } },
+ },
  },
  })
 
@@ -77,6 +81,8 @@ export type CreateTaskBody = {
  assignedToId?: string | null
  entityType?: TaskEntityType | null
  entityId?: string | null
+ projectId?: string | null
+ assigneeIds?: string[] | null
 }
 
 /**
@@ -104,6 +110,8 @@ export async function POST(request: NextRequest) {
  assignedToId,
  entityType,
  entityId,
+ projectId,
+ assigneeIds,
  } = body
 
  let resolvedStartAt: Date | null = startAt ? new Date(startAt) : null
@@ -120,6 +128,8 @@ export async function POST(request: NextRequest) {
  }
 
  const entity = mapEntityToTaskFields(entityType, entityId)
+
+ const validAssigneeIds = Array.isArray(assigneeIds) ? assigneeIds.filter(Boolean) : []
 
  const task = await prisma.task.create({
  data: {
@@ -139,11 +149,20 @@ export async function POST(request: NextRequest) {
  clientId: entity.clientId ?? null,
  sourceModule: entity.sourceModule ?? null,
  sourceId: entity.sourceId ?? null,
+ projectId: projectId ?? null,
  updatedAt: new Date(),
+ ...(validAssigneeIds.length > 0 && {
+   assignees: {
+     create: validAssigneeIds.map((uid) => ({ userId: uid })),
+   },
+ }),
  },
  include: {
  Client: { select: { id: true, name: true } },
  Lead: { select: { id: true, name: true } },
+ assignees: {
+   include: { user: { select: { id: true, name: true, email: true, image: true } } },
+ },
  },
  })
 

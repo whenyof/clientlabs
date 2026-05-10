@@ -7,6 +7,7 @@ import { UpgradeWall } from "@/components/ui/upgrade-wall"
 import { getBaseUrl } from "@/lib/api/baseUrl"
 import { toast } from "sonner"
 import { IntegrationIcon, getIconBg } from "./integration-icons"
+import { ConnectCalendarModal } from "@/modules/tasks/dashboard/ConnectCalendarModal"
 import {
   Globe,
   MessageCircle,
@@ -301,6 +302,8 @@ function IntegrationCard({
             ? "Webhook"
             : integration.connectType === "web_sdk"
             ? "SDK"
+            : integration.connectType === "ical"
+            ? "iCal"
             : "—"}
         </span>
         <button
@@ -372,28 +375,40 @@ export default function ConnectPage() {
   const [integrations, setIntegrations] = useState<IntegrationDef[]>(INTEGRATIONS)
   const [selectedIntegration, setSelectedIntegration] = useState<IntegrationDef | null>(null)
   const [loadingStatus, setLoadingStatus] = useState(true)
+  const [showCalendarModal, setShowCalendarModal] = useState(false)
 
   useEffect(() => {
     const controller = new AbortController()
-    fetch(getBaseUrl() + "/api/integrations", { signal: controller.signal })
+
+    const integrationsPromise = fetch(getBaseUrl() + "/api/integrations", { signal: controller.signal })
       .then((r) => r.json())
-      .then((data) => {
-        setIntegrations((prev) =>
-          prev.map((int) => {
-            if (int.id === "web") return { ...int, status: data.web?.connected ? "connected" : "disconnected" }
-            if (int.id === "whatsapp") return { ...int, status: data.whatsapp?.connected ? "connected" : "disconnected" }
-            if (int.id === "facebook") return { ...int, status: data.facebook?.connected ? "connected" : "disconnected" }
-            const item = data.items?.find(
-              (i: { provider: string; status: string }) =>
-                i.provider.toLowerCase() === int.id.toLowerCase()
-            )
-            if (item) return { ...int, status: item.status === "CONNECTED" ? "connected" : "disconnected" }
-            return int
-          })
-        )
-      })
-      .catch(() => {})
-      .finally(() => setLoadingStatus(false))
+      .catch(() => null)
+
+    const calendarPromise = fetch("/api/calendar/token", { signal: controller.signal })
+      .then((r) => r.json())
+      .catch(() => null)
+
+    Promise.allSettled([integrationsPromise, calendarPromise]).then(([intResult, calResult]) => {
+      const data = intResult.status === "fulfilled" ? intResult.value : null
+      const calData = calResult.status === "fulfilled" ? calResult.value : null
+
+      setIntegrations((prev) =>
+        prev.map((int) => {
+          if (int.id === "ical") return { ...int, status: calData?.token ? "connected" : "disconnected" }
+          if (!data) return int
+          if (int.id === "web") return { ...int, status: data.web?.connected ? "connected" : "disconnected" }
+          if (int.id === "whatsapp") return { ...int, status: data.whatsapp?.connected ? "connected" : "disconnected" }
+          if (int.id === "facebook") return { ...int, status: data.facebook?.connected ? "connected" : "disconnected" }
+          const item = data.items?.find(
+            (i: { provider: string; status: string }) =>
+              i.provider.toLowerCase() === int.id.toLowerCase()
+          )
+          if (item) return { ...int, status: item.status === "CONNECTED" ? "connected" : "disconnected" }
+          return int
+        })
+      )
+    }).finally(() => setLoadingStatus(false))
+
     return () => controller.abort()
   }, [])
 
@@ -402,6 +417,10 @@ export default function ConnectPage() {
   const handleAction = (integration: IntegrationDef) => {
     if (integration.id === "web") {
       router.push("/dashboard/connect/web")
+      return
+    }
+    if (integration.id === "ical") {
+      setShowCalendarModal(true)
       return
     }
     setSelectedIntegration(integration)
@@ -561,12 +580,25 @@ export default function ConnectPage() {
       {/* ── Tab: Actividad ───────────────────────────────────────────────── */}
       {activeTab === "actividad" && <ActivityEmptyState />}
 
-      {/* Modal */}
+      {/* Modal — generic integrations */}
       {selectedIntegration && (
         <ConnectModal
           integration={selectedIntegration}
           onClose={() => setSelectedIntegration(null)}
           onConnected={handleConnected}
+        />
+      )}
+
+      {/* Modal — iCal calendar */}
+      {showCalendarModal && (
+        <ConnectCalendarModal
+          onClose={() => {
+            setShowCalendarModal(false)
+            // Mark ical as connected after modal closes (token was generated on open)
+            setIntegrations((prev) =>
+              prev.map((i) => (i.id === "ical" ? { ...i, status: "connected" } : i))
+            )
+          }}
         />
       )}
     </section>

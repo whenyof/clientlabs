@@ -1,4 +1,4 @@
-export type ConnectType = "web_sdk" | "oauth" | "apikey" | "webhook" | "coming_soon"
+export type ConnectType = "web_sdk" | "oauth" | "apikey" | "webhook" | "coming_soon" | "ical"
 export type CategoryId = "leads" | "email" | "calendar" | "automation" | "payments" | "productivity"
 export type IntegrationStatus = "connected" | "disconnected" | "error" | "coming_soon"
 
@@ -152,40 +152,16 @@ export const INTEGRATIONS: IntegrationDef[] = [
 
   // ─── Calendario ───────────────────────────────────────────────────
   {
-    id: "google-calendar",
-    name: "Google Calendar",
+    id: "ical",
+    name: "Calendario",
     category: "calendar",
-    description: "Sincroniza tus tareas y reuniones de ClientLabs con Google Calendar en ambas direcciones.",
-    benefit: "Tareas con fecha límite aparecen en tu calendario. Reuniones crean automáticamente tareas.",
-    connectType: "oauth",
-    color: "bg-red-50",
-    textColor: "text-red-500",
-    initials: "GC",
-    status: "disconnected",
-  },
-  {
-    id: "calendly",
-    name: "Calendly",
-    category: "calendar",
-    description: "Cuando alguien reserva una reunión en Calendly, crea el contacto y la tarea en ClientLabs.",
-    benefit: "Cero fricción entre que un lead agenda y que aparece en tu pipeline.",
-    connectType: "webhook",
-    color: "bg-blue-50",
-    textColor: "text-blue-600",
-    initials: "Ca",
-    status: "disconnected",
-  },
-  {
-    id: "cal",
-    name: "Cal.com",
-    category: "calendar",
-    description: "Alternativa open-source a Calendly con integración webhook directa.",
-    benefit: "Reservas convertidas en leads y tareas de forma automática.",
-    connectType: "webhook",
-    color: "bg-gray-100",
-    textColor: "text-gray-700",
+    description: "Sincroniza tus tareas con Google Calendar, Apple Calendar u Outlook mediante feed iCal.",
+    benefit: "Las tareas con fecha límite aparecen como eventos en tu calendario. Se actualiza automáticamente cada 15 minutos.",
+    connectType: "ical",
+    color: "bg-emerald-50",
+    textColor: "text-emerald-600",
     initials: "Cal",
-    status: "coming_soon",
+    status: "disconnected",
   },
 
   // ─── Automatización ───────────────────────────────────────────────

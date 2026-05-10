@@ -964,6 +964,7 @@ model User {
   referredBy             Referral[]              @relation("UserReferred")
   userTemplates          UserTemplate[]
   recurringInvoices      RecurringInvoice[]
+  calendarFeedToken      String?                 @unique
 }
 
 model CalendarIntegration {

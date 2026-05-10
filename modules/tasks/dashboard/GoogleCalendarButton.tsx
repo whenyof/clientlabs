@@ -1,14 +1,16 @@
 "use client"
 
-import { useEffect } from "react"
+import { useState, useEffect } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { CalendarCheck, CalendarX, Loader2 } from "lucide-react"
+import { CalendarCheck, CalendarDays, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { useSearchParams } from "next/navigation"
+import { ConnectCalendarModal } from "./ConnectCalendarModal"
 
 export function GoogleCalendarButton() {
   const qc = useQueryClient()
   const searchParams = useSearchParams()
+  const [showModal, setShowModal] = useState(false)
 
   const { data, isLoading } = useQuery<{ connected: boolean; connectedAt: string | null }>({
     queryKey: ["calendar-status"],
@@ -18,9 +20,10 @@ export function GoogleCalendarButton() {
       return res.json()
     },
     staleTime: 60_000,
+    refetchOnWindowFocus: false,
+    retry: 0,
   })
 
-  // Show toast based on redirect param
   useEffect(() => {
     const param = searchParams.get("calendar")
     if (param === "connected") {
@@ -56,17 +59,10 @@ export function GoogleCalendarButton() {
         onClick={handleDisconnect}
         title="Desconectar Google Calendar"
         style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 6,
-          padding: "7px 12px",
-          border: "0.5px solid #1FA97A55",
-          borderRadius: 8,
-          background: "#1FA97A10",
-          cursor: "pointer",
-          color: "#1FA97A",
-          fontSize: 13,
-          fontWeight: 500,
+          display: "inline-flex", alignItems: "center", gap: 6,
+          padding: "7px 12px", border: "0.5px solid #1FA97A55", borderRadius: 8,
+          background: "#1FA97A10", cursor: "pointer", color: "#1FA97A",
+          fontSize: 13, fontWeight: 500,
         }}
       >
         <CalendarCheck style={{ width: 14, height: 14 }} />
@@ -76,25 +72,22 @@ export function GoogleCalendarButton() {
   }
 
   return (
-    <a
-      href="/api/calendar/google/connect"
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        padding: "7px 12px",
-        border: "0.5px solid var(--border-subtle)",
-        borderRadius: 8,
-        background: "var(--bg-card)",
-        cursor: "pointer",
-        color: "var(--text-secondary)",
-        fontSize: 13,
-        fontWeight: 500,
-        textDecoration: "none",
-      }}
-    >
-      <CalendarX style={{ width: 14, height: 14 }} />
-      Conectar Calendar
-    </a>
+    <>
+      <button
+        type="button"
+        onClick={() => setShowModal(true)}
+        style={{
+          display: "inline-flex", alignItems: "center", gap: 6,
+          padding: "7px 12px", border: "0.5px solid var(--border-subtle)", borderRadius: 8,
+          background: "var(--bg-card)", cursor: "pointer", color: "var(--text-secondary)",
+          fontSize: 13, fontWeight: 500,
+        }}
+      >
+        <CalendarDays style={{ width: 14, height: 14 }} />
+        Conectar Calendar
+      </button>
+
+      {showModal && <ConnectCalendarModal onClose={() => setShowModal(false)} />}
+    </>
   )
 }

@@ -1,6 +1,8 @@
 "use client"
 
-import { Calendar, Apple } from "lucide-react"
+import { useState } from "react"
+import { CalendarDays } from "lucide-react"
+import { ConnectCalendarModal } from "./ConnectCalendarModal"
 import type { DashboardTask } from "./types"
 
 interface TasksSidebarRightProps {
@@ -26,6 +28,7 @@ function getWeekRange(): { start: Date; end: Date } {
 }
 
 export function TasksSidebarRight({ tasks }: TasksSidebarRightProps) {
+  const [showCalendarModal, setShowCalendarModal] = useState(false)
   const today = new Date()
   const { start: weekStart, end: weekEnd } = getWeekRange()
 
@@ -101,26 +104,34 @@ export function TasksSidebarRight({ tasks }: TasksSidebarRightProps) {
 
       <div style={{ height: "0.5px", background: "var(--border-subtle)", margin: "0 16px" }} />
 
-      {/* Section: Integraciones */}
+      {/* Section: Calendario */}
       <div style={{ padding: "16px 16px" }}>
         <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.07em", color: "var(--text-secondary)", textTransform: "uppercase", margin: "0 0 10px" }}>
-          Integraciones
+          Calendario externo
         </p>
-        {[
-          { label: "Google Calendar", Icon: Calendar },
-          { label: "Apple Calendar", Icon: Apple },
-        ].map(({ label, Icon }) => (
-          <div key={label} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 0", opacity: 0.45 }}>
-            <div style={{ width: 28, height: 28, borderRadius: 8, background: "var(--bg-surface)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Icon style={{ width: 14, height: 14, color: "var(--text-secondary)" }} />
-            </div>
-            <span style={{ fontSize: 12, color: "var(--text-secondary)", flex: 1 }}>{label}</span>
-            <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 20, background: "var(--bg-surface)", color: "var(--text-secondary)", border: "0.5px solid var(--border-subtle)" }}>
-              Pronto
-            </span>
+        <button
+          type="button"
+          onClick={() => setShowCalendarModal(true)}
+          style={{
+            width: "100%", display: "flex", alignItems: "center", gap: 8, padding: "9px 10px",
+            borderRadius: 8, border: "0.5px solid var(--border-subtle)", background: "var(--bg-surface)",
+            cursor: "pointer", textAlign: "left",
+          }}
+        >
+          <div style={{ width: 28, height: 28, borderRadius: 7, background: "#1FA97A15", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <CalendarDays style={{ width: 14, height: 14, color: "#1FA97A" }} />
           </div>
-        ))}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)" }}>Sincronizar calendario</div>
+            <div style={{ fontSize: 10, color: "var(--text-secondary)", marginTop: 1 }}>Google, Apple, Outlook…</div>
+          </div>
+          <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 20, background: "#1FA97A15", color: "#1FA97A", flexShrink: 0 }}>
+            iCal
+          </span>
+        </button>
       </div>
+
+      {showCalendarModal && <ConnectCalendarModal onClose={() => setShowCalendarModal(false)} />}
     </div>
   )
 }

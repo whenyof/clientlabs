@@ -20,7 +20,7 @@ const PERMISSIONS: Record<TeamRole, Permission[]> = {
     "create_invoice", "delete_invoice", "create_automation",
     "delete_data", "view_logs", "manage_settings",
   ],
-  USER: ["create_invoice", "view_logs"],
+  MEMBER: ["create_invoice", "view_logs"],
 }
 
 export function hasPermission(role: TeamRole, permission: Permission): boolean {

@@ -104,7 +104,7 @@ export async function GET() {
 
 const patchSchema = z.object({
   memberId: z.string(),
-  role: z.enum(["ADMIN", "USER"]),
+  role: z.enum(["ADMIN", "MEMBER"]),
 })
 
 export async function PATCH(req: NextRequest) {

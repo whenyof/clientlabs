@@ -2935,7 +2935,7 @@ model DocumentoImportado {
 enum TeamRole {
   OWNER
   ADMIN
-  USER
+  MEMBER
 }
 
 model Workspace {
@@ -2953,16 +2953,57 @@ model Workspace {
 }
 
 model WorkspaceMember {
-  id          String    @id @default(cuid())
+  id          String              @id @default(cuid())
   workspaceId String
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspace   Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   userId      String
-  user        User      @relation("WorkspaceMembers", fields: [userId], references: [id], onDelete: Cascade)
-  role        TeamRole  @default(USER)
-  joinedAt    DateTime  @default(now())
+  user        User                @relation("WorkspaceMembers", fields: [userId], references: [id], onDelete: Cascade)
+  role        TeamRole            @default(MEMBER)
+  joinedAt    DateTime            @default(now())
+  permissions MemberPermissions?
 
   @@unique([workspaceId, userId])
   @@map("workspace_members")
+}
+
+model MemberPermissions {
+  id               String          @id @default(cuid())
+  memberId         String          @unique
+  member           WorkspaceMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  // Facturas
+  createInvoices   Boolean @default(true)
+  editInvoices     Boolean @default(true)
+  deleteInvoices   Boolean @default(false)
+  issueInvoices    Boolean @default(false)
+  viewInvoices     Boolean @default(true)
+  // Documentos (presupuestos, albaranes, pedidos)
+  createDocuments  Boolean @default(true)
+  editDocuments    Boolean @default(false)
+  deleteDocuments  Boolean @default(false)
+  // Clientes
+  createClients    Boolean @default(true)
+  editClients      Boolean @default(true)
+  deleteClients    Boolean @default(false)
+  viewAllClients   Boolean @default(true)
+  // Leads
+  viewLeads        Boolean @default(true)
+  editLeads        Boolean @default(false)
+  deleteLeads      Boolean @default(false)
+  // Informes
+  viewReports      Boolean @default(true)
+  exportData       Boolean @default(false)
+  // Automatizaciones
+  createAutomations Boolean @default(false)
+  editAutomations   Boolean @default(false)
+  deleteAutomations Boolean @default(false)
+  // Equipo / Admin
+  inviteMembers    Boolean @default(false)
+  manageMembers    Boolean @default(false)
+  manageSettings   Boolean @default(false)
+  manageBilling    Boolean @default(false)
+  updatedAt        DateTime @updatedAt
+
+  @@map("member_permissions")
 }
 
 model WorkspaceInvite {
@@ -2970,7 +3011,7 @@ model WorkspaceInvite {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   email       String
-  role        TeamRole  @default(USER)
+  role        TeamRole  @default(MEMBER)
   token       String    @unique @default(cuid())
   expiresAt   DateTime
   createdAt   DateTime  @default(now())

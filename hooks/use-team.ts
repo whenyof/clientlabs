@@ -8,7 +8,7 @@ const fetcher = (url: string) => fetch(url).then(r => r.json())
 export function useTeam() {
   const { data, mutate, isLoading } = useSWR("/api/settings/team", fetcher)
 
-  const myRole: TeamRole = data?.myRole ?? "USER"
+  const myRole: TeamRole = data?.myRole ?? "MEMBER"
 
   return {
     members: data?.members ?? [],

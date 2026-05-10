@@ -8,22 +8,22 @@ type PermissionRow = {
   label: string
   owner: boolean
   admin: boolean
-  user: boolean
+  member: boolean
 }
 
 const PERMISSION_ROWS: PermissionRow[] = [
-  { label: "Invitar / eliminar miembros", owner: true, admin: false, user: false },
-  { label: "Cambiar roles", owner: true, admin: false, user: false },
-  { label: "Gestionar facturación y plan", owner: true, admin: false, user: false },
-  { label: "Crear facturas", owner: true, admin: true, user: true },
-  { label: "Eliminar facturas", owner: true, admin: true, user: false },
-  { label: "Crear automatizaciones", owner: true, admin: true, user: false },
-  { label: "Eliminar datos en bloque", owner: true, admin: true, user: false },
-  { label: "Ver registro de actividad", owner: true, admin: true, user: true },
-  { label: "Gestionar ajustes de empresa", owner: true, admin: true, user: false },
+  { label: "Invitar / eliminar miembros", owner: true, admin: false, member: false },
+  { label: "Cambiar roles", owner: true, admin: false, member: false },
+  { label: "Gestionar facturación y plan", owner: true, admin: false, member: false },
+  { label: "Crear facturas", owner: true, admin: true, member: true },
+  { label: "Eliminar facturas", owner: true, admin: true, member: false },
+  { label: "Crear automatizaciones", owner: true, admin: true, member: false },
+  { label: "Eliminar datos en bloque", owner: true, admin: true, member: false },
+  { label: "Ver registro de actividad", owner: true, admin: true, member: true },
+  { label: "Gestionar ajustes de empresa", owner: true, admin: true, member: false },
 ]
 
-type RoleKey = "owner" | "admin" | "user"
+type RoleKey = "owner" | "admin" | "member"
 
 interface RoleTabProps {
   role: RoleKey
@@ -60,11 +60,11 @@ function RoleTab({ role }: RoleTabProps) {
         </div>
       ))}
 
-      {role === "user" && restricted.length > 0 && (
+      {role === "member" && restricted.length > 0 && (
         <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-4">
           <div className="flex items-center gap-2 mb-2">
             <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />
-            <span className="text-sm font-semibold text-red-700">Restricciones del rol Usuario</span>
+            <span className="text-sm font-semibold text-red-700">Restricciones del rol Miembro</span>
           </div>
           <ul className="space-y-1">
             {restricted.map((p) => (
@@ -107,8 +107,8 @@ export function RolesInfoModal() {
             <TabsTrigger value="admin">
               <span className="text-xs font-semibold">Admin</span>
             </TabsTrigger>
-            <TabsTrigger value="user">
-              <span className="text-xs font-semibold">Usuario</span>
+            <TabsTrigger value="member">
+              <span className="text-xs font-semibold">Miembro</span>
             </TabsTrigger>
           </TabsList>
 
@@ -118,8 +118,8 @@ export function RolesInfoModal() {
           <TabsContent value="admin">
             <RoleTab role="admin" />
           </TabsContent>
-          <TabsContent value="user">
-            <RoleTab role="user" />
+          <TabsContent value="member">
+            <RoleTab role="member" />
           </TabsContent>
         </Tabs>
       </DialogContent>

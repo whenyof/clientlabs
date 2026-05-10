@@ -2,9 +2,11 @@
 
 import { useState } from "react"
 import { UsersIcon, TrashIcon, UserPlusIcon, ChevronDownIcon } from "@heroicons/react/24/outline"
+import { Settings } from "lucide-react"
 import { toast } from "sonner"
 import { useTeam } from "@/hooks/use-team"
 import { RolesInfoModal } from "@/components/team/RolesInfoModal"
+import { PermissionsModal } from "./PermissionsModal"
 import type { TeamRole } from "@prisma/client"
 
 const PLAN_LABELS: Record<string, string> = {
@@ -22,7 +24,7 @@ function getRoleBadge(role: TeamRole) {
 function getRoleLabel(role: TeamRole) {
   if (role === "OWNER") return "Propietario"
   if (role === "ADMIN") return "Admin"
-  return "Usuario"
+  return "Miembro"
 }
 
 function getInitials(name?: string | null, email?: string | null) {
@@ -54,9 +56,10 @@ export function TeamMembers() {
   const { members, myRole, plan, limit, isAdmin, isOwner, mutate, isLoading } = useTeam()
   const [showInviteForm, setShowInviteForm] = useState(false)
   const [inviteEmail, setInviteEmail] = useState("")
-  const [inviteRole, setInviteRole] = useState<"ADMIN" | "USER">("USER")
+  const [inviteRole, setInviteRole] = useState<"ADMIN" | "MEMBER">("MEMBER")
   const [inviting, setInviting] = useState(false)
   const [changingRole, setChangingRole] = useState<string | null>(null)
+  const [permsMember, setPermsMember] = useState<Member | null>(null)
 
   const handleInviteMember = async () => {
     if (!inviteEmail.trim()) return
@@ -77,7 +80,7 @@ export function TeamMembers() {
           })
         }
         setInviteEmail("")
-        setInviteRole("USER")
+        setInviteRole("MEMBER")
         setShowInviteForm(false)
         mutate()
       } else {
@@ -90,7 +93,7 @@ export function TeamMembers() {
     }
   }
 
-  const handleChangeRole = async (memberId: string, newRole: "ADMIN" | "USER") => {
+  const handleChangeRole = async (memberId: string, newRole: "ADMIN" | "MEMBER") => {
     setChangingRole(memberId)
     try {
       const res = await fetch(`/api/settings/team/${memberId}`, {
@@ -193,7 +196,7 @@ export function TeamMembers() {
               {atLimit
                 ? `Tu plan incluye ${limit} usuario${limit !== 1 ? "s" : ""}. Añade más por `
                 : "Añade más usuarios a tu equipo por "}
-              <strong>3,99€/mes</strong> cada uno.
+              <strong>2,99€/mes</strong> cada uno.
             </p>
           </div>
           <button
@@ -205,7 +208,7 @@ export function TeamMembers() {
             }}
             className={`flex-shrink-0 rounded-lg font-medium px-4 py-2 text-sm transition-colors text-white ${atLimit ? "bg-amber-500 hover:bg-amber-600" : "bg-[var(--accent)] hover:opacity-90"}`}
           >
-            + Añadir usuario — 3,99€/mes
+            + Añadir usuario — 2,99€/mes
           </button>
         </div>
       )}
@@ -240,10 +243,10 @@ export function TeamMembers() {
               <label className="text-xs font-medium text-slate-600">Rol</label>
               <select
                 value={inviteRole}
-                onChange={(e) => setInviteRole(e.target.value as "ADMIN" | "USER")}
+                onChange={(e) => setInviteRole(e.target.value as "ADMIN" | "MEMBER")}
                 className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-[#0B1F2A] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition-colors"
               >
-                <option value="USER">Usuario</option>
+                <option value="MEMBER">Miembro</option>
                 <option value="ADMIN">Admin</option>
               </select>
             </div>
@@ -251,7 +254,7 @@ export function TeamMembers() {
 
           <div className="flex gap-2">
             <button
-              onClick={() => { setShowInviteForm(false); setInviteEmail(""); setInviteRole("USER") }}
+              onClick={() => { setShowInviteForm(false); setInviteEmail(""); setInviteRole("MEMBER") }}
               className="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors"
             >
               Cancelar
@@ -326,12 +329,12 @@ export function TeamMembers() {
                       <div className="relative">
                         <select
                           value={member.role}
-                          onChange={(e) => handleChangeRole(member.id, e.target.value as "ADMIN" | "USER")}
+                          onChange={(e) => handleChangeRole(member.id, e.target.value as "ADMIN" | "MEMBER")}
                           disabled={changingRole === member.id}
                           className={`appearance-none pr-6 pl-2.5 py-1 text-xs font-semibold rounded-md border cursor-pointer focus:outline-none ${getRoleBadge(member.role)} disabled:opacity-60`}
                         >
                           <option value="ADMIN">Admin</option>
-                          <option value="USER">Usuario</option>
+                          <option value="MEMBER">Miembro</option>
                         </select>
                         <ChevronDownIcon className="w-3 h-3 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none text-current opacity-60" />
                       </div>
@@ -341,6 +344,17 @@ export function TeamMembers() {
                       >
                         {getRoleLabel(member.role)}
                       </span>
+                    )}
+
+                    {/* Permissions button */}
+                    {canModify && member.role !== "OWNER" && (
+                      <button
+                        onClick={() => setPermsMember(member)}
+                        className="p-1.5 text-slate-300 hover:text-[var(--accent)] transition-colors opacity-0 group-hover:opacity-100 rounded"
+                        title="Permisos personalizados"
+                      >
+                        <Settings className="w-3.5 h-3.5" />
+                      </button>
                     )}
 
                     {/* Remove button */}
@@ -359,6 +373,14 @@ export function TeamMembers() {
             })}
           </div>
         </div>
+      )}
+      {permsMember && (
+        <PermissionsModal
+          memberId={permsMember.id}
+          memberName={permsMember.name ?? permsMember.email ?? permsMember.id}
+          memberRole={permsMember.role}
+          onClose={() => setPermsMember(null)}
+        />
       )}
     </div>
   )

@@ -7,6 +7,8 @@ import * as invoiceService from "@/modules/invoicing/services/invoice.service"
 import { computeDueState } from "@domains/invoicing"
 import type { CreateInvoiceInput } from "@domains/invoicing"
 import { gateLimit } from "@/lib/api-gate"
+import { getUserWorkspace } from "@/lib/get-workspace"
+import { checkPermission } from "@/lib/check-permission"
 
 export const dynamic = "force-dynamic"
 
@@ -166,6 +168,15 @@ export async function POST(request: NextRequest) {
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
+
+  const wsResult = await getUserWorkspace(session.user.id)
+  if (wsResult && wsResult.role !== "OWNER") {
+    const allowed = await checkPermission(session.user.id, wsResult.workspace.id, "createInvoices")
+    if (!allowed) {
+      return NextResponse.json({ error: "Sin permisos para crear facturas", upgradeUrl: "/precios" }, { status: 403 })
+    }
+  }
+
   let body: unknown
   try {
     body = await request.json()

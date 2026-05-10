@@ -5,13 +5,16 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { stripe } from "@/lib/stripe"
 
-export const ADD_SEAT_PRICE_EUR = 3.99
+export const ADD_SEAT_PRICE_EUR = 2.99
 
 export async function POST() {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 })
   }
+
+  const priceId = process.env.STRIPE_EXTRA_SEAT_PRICE_ID
+  if (!priceId) return NextResponse.json({ error: "Precio no configurado" }, { status: 500 })
 
   try {
     const user = await prisma.user.findUnique({
@@ -40,15 +43,8 @@ export async function POST() {
       payment_method_types: ["card"],
       client_reference_id: session.user.id,
       metadata: { userId: session.user.id, type: "extra_seat" },
-      line_items: [{
-        price_data: {
-          currency: "eur",
-          product_data: { name: "Usuario extra — ClientLabs", description: "Asiento adicional para un miembro del equipo" },
-          unit_amount: Math.round(ADD_SEAT_PRICE_EUR * 100),
-          recurring: { interval: "month" },
-        },
-        quantity: 1,
-      }],
+      line_items: [{ price: priceId, quantity: 1 }],
+      allow_promotion_codes: true,
       success_url: `${baseUrl}/dashboard/settings?section=team&seat_added=1`,
       cancel_url: `${baseUrl}/dashboard/settings?section=team`,
     })

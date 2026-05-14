@@ -631,6 +631,8 @@ model Lead {
   Task                  Task[]
   TrackingEvent         TrackingEvent[]
   Reminder              Reminder[]
+  contacts              LeadContact[]
+  customFieldValues     CustomFieldValue[]
 
   @@index([category])
   @@index([clientId])
@@ -661,6 +663,49 @@ model Lead {
   @@index([userId, lastActionAt(sort: Desc)])     // Last activity sort
   @@index([userId, email])                        // Duplicate checking (case-sensitive)
   @@index([userId, phone])                        // Duplicate checking (phone-based)
+}
+
+model LeadContact {
+  id        String   @id @default(cuid())
+  leadId    String
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  name      String
+  email     String?
+  phone     String?
+  role      String?
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([leadId])
+  @@map("lead_contacts")
+}
+
+model CustomField {
+  id        String             @id @default(cuid())
+  userId    String
+  user      User               @relation("UserCustomFields", fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  type      String
+  options   Json?
+  entity    String             @default("lead")
+  createdAt DateTime           @default(now())
+  values    CustomFieldValue[]
+
+  @@index([userId, entity])
+  @@map("custom_fields")
+}
+
+model CustomFieldValue {
+  id            String      @id @default(cuid())
+  customFieldId String
+  customField   CustomField @relation(fields: [customFieldId], references: [id], onDelete: Cascade)
+  entityId      String
+  leadId        String?
+  lead          Lead?       @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  value         String
+
+  @@unique([customFieldId, entityId])
+  @@map("custom_field_values")
 }
 
 model LeadAIInsight {
@@ -949,6 +994,7 @@ model User {
   projects               Project[]             @relation("UserProjects")
   projectMembers         ProjectMember[]       @relation("UserProjectMembers")
   taskAssignees          TaskAssignee[]        @relation("UserTaskAssignees")
+  customFields           CustomField[]         @relation("UserCustomFields")
   TrackingEvent          TrackingEvent[]
   transactions           Transaction[]
   planRelation           Plan?                   @relation(fields: [planId], references: [id])

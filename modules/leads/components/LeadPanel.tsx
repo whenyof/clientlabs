@@ -9,6 +9,8 @@ import { LeadNextActionCard } from "@domains/leads/components/LeadNextActionCard
 import { LeadNotesCard } from "@domains/leads/components/LeadNotesCard"
 import { LeadEmailModule } from "@domains/leads/components/LeadEmailModule"
 import { LeadQuickTaskCard } from "@/modules/leads/components/LeadQuickTaskCard"
+import { LeadContactsCard } from "@domains/leads/components/LeadContactsCard"
+import { LeadCustomFieldsCard } from "@domains/leads/components/LeadCustomFieldsCard"
 
 interface LeadPanelProps {
   lead: {
@@ -23,6 +25,7 @@ interface LeadPanelProps {
     source: string
     temperature?: string | null
     additionalInfo?: string | null
+    tags?: string[]
   }
 }
 
@@ -60,6 +63,7 @@ export function LeadPanel({ lead }: LeadPanelProps) {
             gap: 16,
           }}
         >
+          <LeadContactsCard leadId={lead.id} />
           <LeadEmailModule leadId={lead.id} leadEmail={lead.email} leadName={lead.name} />
           <LeadTimeline refreshTrigger={timelineKey} leadId={lead.id} createdAt={lead.createdAt} />
           <LeadNotesCard leadId={lead.id} onActivityCreated={() => setTimelineKey(k => k + 1)} />
@@ -77,6 +81,7 @@ export function LeadPanel({ lead }: LeadPanelProps) {
           className="lead-panel-sidebar"
         >
           <LeadInfoCard lead={lead} onUpdate={() => setTimelineKey(k => k + 1)} />
+          <LeadCustomFieldsCard leadId={lead.id} />
           <LeadQuickTaskCard leadId={lead.id} onTaskCreated={() => setTimelineKey(k => k + 1)} />
           <LeadAIRecommendations score={lead.score} phone={lead.phone} leadStatus={lead.leadStatus} />
           <LeadNextActionCard leadId={lead.id} leadStatus={lead.leadStatus} />

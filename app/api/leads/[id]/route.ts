@@ -35,12 +35,16 @@ export async function PATCH(
       }
     }
 
+    if (Array.isArray(body.tags)) {
+      data.tags = body.tags.filter((t: unknown) => typeof t === "string" && (t as string).trim().length > 0)
+    }
+
     // Keep deprecated status field in sync
     if (data.leadStatus) {
       data.status = data.leadStatus
     }
 
-    if (Object.keys(data).length === 0) {
+    if (Object.keys(data).length === 0 && !Array.isArray(body.tags)) {
       return NextResponse.json({ error: "No fields to update" }, { status: 400 })
     }
 

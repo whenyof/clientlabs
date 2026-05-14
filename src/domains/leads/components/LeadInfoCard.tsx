@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
-import { Pencil, Loader2, ChevronDown } from "lucide-react"
+import { Pencil, Loader2, ChevronDown, X, Plus } from "lucide-react"
 import { formatSource, STATUS_LABELS, TEMP_LABELS, getScoreColors } from "@domains/leads/utils/formatting"
 import { toast } from "sonner"
 
@@ -28,6 +28,7 @@ export interface LeadInfoCardLead {
   score: number
   temperature?: string | null
   createdAt: Date
+  tags?: string[]
   additionalInfo?: string | null
 }
 
@@ -60,6 +61,9 @@ export function LeadInfoCard({ lead, onUpdate }: LeadInfoCardProps) {
     phone: lead.phone || "",
     source: lead.source || "",
   })
+  const [tags, setTags] = useState<string[]>(lead.tags ?? [])
+  const [tagInput, setTagInput] = useState("")
+  const [savingTag, setSavingTag] = useState(false)
 
   const statusLabel = STATUS_LABELS[lead.leadStatus] ?? lead.leadStatus
   const tempLabel = lead.temperature ? TEMP_LABELS[lead.temperature] ?? lead.temperature : "—"
@@ -74,6 +78,32 @@ export function LeadInfoCard({ lead, onUpdate }: LeadInfoCardProps) {
       source: lead.source || "",
     })
   }
+
+  const saveTags = async (nextTags: string[]) => {
+    setSavingTag(true)
+    try {
+      await fetch(`/api/leads/${lead.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tags: nextTags }),
+      })
+      setTags(nextTags)
+      onUpdate?.()
+    } catch {
+      toast.error("Error al guardar etiqueta")
+    } finally {
+      setSavingTag(false)
+    }
+  }
+
+  const addTag = () => {
+    const t = tagInput.trim().toLowerCase()
+    if (!t || tags.includes(t)) { setTagInput(""); return }
+    saveTags([...tags, t])
+    setTagInput("")
+  }
+
+  const removeTag = (t: string) => saveTags(tags.filter(x => x !== t))
 
   const handleSave = async () => {
     setIsSaving(true)
@@ -196,9 +226,40 @@ export function LeadInfoCard({ lead, onUpdate }: LeadInfoCardProps) {
           <span className="text-[10px] uppercase tracking-[0.1em] text-slate-400 font-medium">Score</span>
           <ScoreBar score={lead.score} />
         </div>
-        <div className="flex flex-col gap-0.5 py-3">
+        <div className="flex flex-col gap-0.5 py-3 border-b border-slate-100">
           <span className="text-[10px] uppercase tracking-[0.1em] text-slate-400 font-medium">Creado</span>
           <span className="text-[13px] text-slate-900">{createdFormatted}</span>
+        </div>
+
+        {/* Tags section */}
+        <div className="flex flex-col gap-1.5 pt-3">
+          <span className="text-[10px] uppercase tracking-[0.1em] text-slate-400 font-medium">Etiquetas</span>
+          <div className="flex flex-wrap gap-1.5">
+            {tags.map(t => (
+              <span key={t} className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full border border-slate-200 bg-slate-50 text-slate-600">
+                {t}
+                <button onClick={() => removeTag(t)} disabled={savingTag} className="opacity-60 hover:opacity-100 ml-0.5">
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            ))}
+          </div>
+          <div className="flex gap-1.5 mt-0.5">
+            <input
+              value={tagInput}
+              onChange={e => setTagInput(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && addTag()}
+              placeholder="Nueva etiqueta..."
+              className="flex-1 px-2.5 py-1 rounded-lg border border-slate-200 text-[12px] text-slate-900 bg-slate-50 focus:bg-white focus:border-[#1FA97A] focus:ring-1 focus:ring-[#1FA97A]/20 outline-none"
+            />
+            <button
+              onClick={addTag}
+              disabled={savingTag || !tagInput.trim()}
+              className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 transition-colors"
+            >
+              <Plus className="h-3.5 w-3.5 text-slate-500" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

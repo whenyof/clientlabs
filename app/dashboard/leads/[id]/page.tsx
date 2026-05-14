@@ -34,6 +34,7 @@ export default async function LeadPage({
             source: true,
             temperature: true,
             additionalInfo: true,
+            tags: true,
         },
     })
 

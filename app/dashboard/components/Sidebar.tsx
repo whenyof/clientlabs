@@ -10,6 +10,7 @@ import { useSectorConfig } from "@/hooks/useSectorConfig"
 import { usePlan } from "@/hooks/use-plan"
 import { useTour } from "@/components/tour/TourContext"
 import { cn } from "@/lib/utils"
+import { ProfileCompletionBar } from "@/components/dashboard/ProfileCompletionBar"
 import {
   LayoutDashboard,
   Users,
@@ -319,13 +320,13 @@ export default function Sidebar({
           icon: FileText,
           children: [
             { label: "Resumen", href: "/dashboard/finance", icon: BarChart3 },
-            { label: "Presupuestos", href: "/dashboard/finance/presupuestos", icon: ClipboardList },
-            { label: "Pedidos", href: "/dashboard/finance/pedidos", icon: Truck },
-            { label: "Facturas", href: "/dashboard/finance/invoicing", icon: FileText },
-            { label: "Albaranes", href: "/dashboard/finance/albaranes", icon: Package },
-            { label: "Gastos", href: "/dashboard/finance/gastos", icon: Receipt },
-            { label: "Productos", href: "/dashboard/finance/productos", icon: Package },
             { label: "Informes", href: "/dashboard/finance/informes", icon: BarChart3 },
+            { label: "Facturas", href: "/dashboard/finance/invoicing", icon: Receipt },
+            { label: "Presupuestos", href: "/dashboard/finance/presupuestos", icon: FileText },
+            { label: "Albaranes", href: "/dashboard/finance/albaranes", icon: Package },
+            { label: "Pedidos", href: "/dashboard/finance/pedidos", icon: ClipboardList },
+            { label: "Gastos", href: "/dashboard/finance/gastos", icon: Wallet },
+            { label: "Productos", href: "/dashboard/finance/productos", icon: ShoppingCart },
             { label: "Configuración", href: "/dashboard/finance/configuracion", icon: Settings },
           ],
         },
@@ -521,6 +522,8 @@ export default function Sidebar({
               <LogOut size={15} />
             </button>
           </div>
+
+          {!isCollapsed && <ProfileCompletionBar />}
 
           {/* PLAN */}
           {!isCollapsed && session?.user?.plan && (() => {

@@ -25,6 +25,7 @@ import {
   paymentFailedEmail,
   subscriptionCancelledEmail,
   weeklyBusinessSummaryEmail,
+  onboardingWelcomeEmail,
 } from "@/lib/email-templates"
 
 interface TaskItem {
@@ -35,7 +36,15 @@ interface TaskItem {
 }
 
 export async function sendWelcomeEmail(to: string, name: string) {
-  return sendEmail(to, "Bienvenido/a a ClientLabs 🚀", welcomeEmail(name))
+  const tpl = onboardingWelcomeEmail(name)
+  return sendEmail(to, tpl.subject, tpl.html, tpl.from)
+}
+
+export async function sendOnboardingEmail(
+  to: string,
+  template: { subject: string; html: string; from: string }
+) {
+  return sendEmail(to, template.subject, template.html, template.from)
 }
 
 export async function sendVerificationEmail(to: string, name: string, verifyUrl: string) {

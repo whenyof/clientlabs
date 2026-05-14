@@ -796,3 +796,132 @@ export function weeklyBusinessSummaryEmail(name: string, stats: WeeklyStats): st
   `
   return wrapEmail(content, true)
 }
+
+// ─── Onboarding emails (texto plano, desde errepe@clientlabs.io) ────────────
+
+const ERREPE_FROM = "Errepe — ClientLabs <errepe@clientlabs.io>"
+const ERREPE_WA   = "https://wa.me/34622738109"
+const ERREPE_NUM  = "622 738 109"
+
+function erepeHtml(body: string): string {
+  return `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1E293B;max-width:560px;line-height:1.6;font-size:15px">${body}</div>`
+}
+
+export function onboardingWelcomeEmail(name: string): { subject: string; html: string; from: string } {
+  const first = name?.split(" ")[0] || "crack"
+  return {
+    from: ERREPE_FROM,
+    subject: `Bienvenido a ClientLabs, ${first}`,
+    html: erepeHtml(`
+      <p>Buenas ${first},</p>
+      <p>Soy Errepe, el que está detrás de ClientLabs.</p>
+      <p>Cree ClientLabs porque yo mismo perdi un cliente por no hacerle seguimiento. Desde ese dia decidi que tenia que existir algo simple, en español y pensado de verdad para autonomos como tu y como yo.</p>
+      <p>Tienes 14 dias para probarlo todo sin limites y sin meter tarjeta. Para que le saques el maximo partido desde ya, te recomiendo hacer estas 3 cosas hoy — no tardan mas de 5 minutos:</p>
+      <p style="padding-left:16px">
+        → <a href="https://app.clientlabs.io/dashboard/clients" style="color:#1FA97A">Anade tus primeros 3 clientes</a><br>
+        → <a href="https://app.clientlabs.io/dashboard/leads" style="color:#1FA97A">Crea tu primer lead</a><br>
+        → <a href="https://app.clientlabs.io/dashboard/finance/invoicing" style="color:#1FA97A">Genera una factura de prueba</a>
+      </p>
+      <p>Si en algun momento tienes una duda o algo no va como esperas — respondeme a este email directamente. Lo leo yo.</p>
+      <p>Bienvenido.</p>
+      <p>
+        <strong>Errepe</strong><br>
+        <span style="color:#64748B;font-size:13px">Founder de ClientLabs</span><br>
+        <span style="color:#64748B;font-size:13px">WhatsApp: <a href="${ERREPE_WA}" style="color:#1FA97A">${ERREPE_NUM}</a></span>
+      </p>
+      <p style="color:#94A3B8;font-size:12px;margin-top:24px">P.D. Puedes responderme directamente aqui — lo leo yo personalmente.</p>
+    `),
+  }
+}
+
+export function onboardingDay3Email(name: string, completedSteps: number): { subject: string; html: string; from: string } {
+  const first = name?.split(" ")[0] || ""
+  return {
+    from: ERREPE_FROM,
+    subject: `${first}, ¿todo bien con ClientLabs?`,
+    html: erepeHtml(`
+      <p>Ey ${first},</p>
+      <p>Vi que entraste a ClientLabs pero te quedaste en el paso ${completedSteps} de 5.</p>
+      <p>¿Hay algo que no quedo claro o que no encontraste? A veces el primer paso es el mas dificil.</p>
+      <p>Si me dices donde te atascaste te ayudo en 10 minutos — por aqui o por <a href="${ERREPE_WA}" style="color:#1FA97A">WhatsApp</a>.</p>
+      <p>
+        <strong>Errepe</strong><br>
+        <span style="color:#64748B;font-size:13px">${ERREPE_NUM}</span>
+      </p>
+    `),
+  }
+}
+
+export interface Day7Stats {
+  clients: number
+  leads: number
+  invoices: number
+  pendingQuotes: number
+  pendingAmount: number
+}
+
+export function onboardingDay7Email(name: string, stats: Day7Stats): { subject: string; html: string; from: string } {
+  const first = name?.split(" ")[0] || ""
+  const pending = stats.pendingQuotes > 0
+    ? `<p style="margin:4px 0;color:#F59E0B">→ <strong>${stats.pendingQuotes}</strong> presupuestos sin respuesta</p>`
+    : ""
+  const pendingAmt = stats.pendingAmount > 0
+    ? `<p style="margin:4px 0;color:#DC2626">→ <strong>${stats.pendingAmount.toFixed(2)}€</strong> pendientes de cobro</p>`
+    : ""
+  const followUp = stats.pendingQuotes > 0
+    ? `<p>Si tienes presupuestos sin respuesta — esta semana es el momento de hacer seguimiento. Los clientes que no contestan en 7 dias tienen el doble de probabilidades de irse con otro.</p>`
+    : ""
+  return {
+    from: ERREPE_FROM,
+    subject: `Tu primera semana en ClientLabs — esto es lo que tienes`,
+    html: erepeHtml(`
+      <p>Buenas ${first},</p>
+      <p>Llevas una semana en ClientLabs y queria ensenarte como va tu cuenta:</p>
+      <div style="background:#F8FAFC;border-radius:8px;padding:16px;margin:16px 0">
+        <p style="margin:4px 0">→ <strong>${stats.clients}</strong> clientes anadidos</p>
+        <p style="margin:4px 0">→ <strong>${stats.leads}</strong> leads activos</p>
+        <p style="margin:4px 0">→ <strong>${stats.invoices}</strong> facturas generadas</p>
+        ${pending}${pendingAmt}
+      </div>
+      ${followUp}
+      <p>¿Quieres que te explique como usar las automatizaciones para que esto no se te escape? Respondeme aqui o por <a href="${ERREPE_WA}" style="color:#1FA97A">WhatsApp</a>.</p>
+      <p><strong>Errepe</strong></p>
+    `),
+  }
+}
+
+export function onboardingDay10Email(name: string): { subject: string; html: string; from: string } {
+  const first = name?.split(" ")[0] || ""
+  return {
+    from: ERREPE_FROM,
+    subject: `${first}, faltan 4 dias — ¿hablamos?`,
+    html: erepeHtml(`
+      <p>Ey ${first},</p>
+      <p>Tu prueba gratuita termina en 4 dias.</p>
+      <p>Antes de que acabe queria preguntarte — ¿has podido probar todo lo que necesitabas? ¿Hay algo que no funcione como esperabas?</p>
+      <p>Si quieres te hago una llamada rapida de 10-15 minutos para ensenarte las partes que igual no has visto — las automatizaciones y los informes fiscales son las que mas gustan.</p>
+      <p>Dimelo por aqui o por <a href="${ERREPE_WA}" style="color:#1FA97A">WhatsApp (${ERREPE_NUM})</a> y lo cuadramos.</p>
+      <p><strong>Errepe</strong></p>
+      <p style="color:#94A3B8;font-size:12px;margin-top:20px">P.D. Si ya tienes claro que quieres continuar — <a href="https://clientlabs.io/plan" style="color:#1FA97A">elige tu plan aqui</a>.</p>
+    `),
+  }
+}
+
+export function onboardingDay14Email(name: string): { subject: string; html: string; from: string } {
+  const first = name?.split(" ")[0] || ""
+  return {
+    from: ERREPE_FROM,
+    subject: `${first}, tu prueba termina hoy`,
+    html: erepeHtml(`
+      <p>Buenas ${first},</p>
+      <p>Hoy es el ultimo dia de tu prueba gratuita.</p>
+      <p>Si ClientLabs te ha servido — puedes <a href="https://clientlabs.io/plan" style="color:#1FA97A">elegir tu plan aqui</a>. Todos incluyen IVA y puedes cancelar cuando quieras.</p>
+      <p>Si todavia no pudiste probarlo bien o tienes dudas — dimelo y <strong>te mantengo el acceso 7 dias mas</strong> para que termines de verlo sin prisas. Sin compromiso.</p>
+      <p>Y si ClientLabs no es para ti — tambien me lo puedes decir. Me ayuda saber por que para seguir mejorando.</p>
+      <p>
+        <strong>Errepe</strong><br>
+        <span style="color:#64748B;font-size:13px">WhatsApp: <a href="${ERREPE_WA}" style="color:#1FA97A">${ERREPE_NUM}</a></span>
+      </p>
+    `),
+  }
+}

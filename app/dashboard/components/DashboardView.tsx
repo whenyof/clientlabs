@@ -8,6 +8,8 @@ import { DashboardMetrics } from "./DashboardMetrics"
 import { DashboardLeads } from "./DashboardLeads"
 import { DashboardTasks } from "./DashboardTasks"
 import { DashboardSidebar } from "./DashboardSidebar"
+import { ActivationChecklist } from "@/components/dashboard/ActivationChecklist"
+import { TimeSavedWidget } from "@/components/dashboard/TimeSavedWidget"
 
 interface Props {
   data: SummaryData
@@ -22,6 +24,9 @@ export function DashboardView({ data }: Props) {
         {/* Contenido principal */}
         <div className="min-w-0 flex-1 space-y-4">
           <DashboardHeader userName={meta.userName} currentDate={meta.currentDate} />
+
+          <ActivationChecklist />
+          <TimeSavedWidget />
 
           <DashboardPipeline leadsByStatus={leadsByStatus} />
 

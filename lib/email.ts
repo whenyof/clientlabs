@@ -11,15 +11,15 @@ function getResend(): Resend | null {
 export async function sendEmail(
   to: string,
   subject: string,
-  html: string
+  html: string,
+  from?: string
 ): Promise<{ success: boolean; id?: string; mock?: boolean; error?: unknown }> {
   const resend = getResend()
   if (!resend) {
-    console.log("[EMAIL] Resend not configured. Would send to:", to, "| Subject:", subject)
     return { success: true, mock: true }
   }
   try {
-    const fromAddress = process.env.RESEND_FROM_EMAIL || process.env.EMAIL_FROM || "ClientLabs <onboarding@resend.dev>"
+    const fromAddress = from || process.env.RESEND_FROM_EMAIL || process.env.EMAIL_FROM || "ClientLabs <onboarding@resend.dev>"
     const { data, error } = await resend.emails.send({
       from: fromAddress,
       to,

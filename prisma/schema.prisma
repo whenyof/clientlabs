@@ -865,6 +865,16 @@ model User {
   lastActiveAt           DateTime?
   monthlyRevenueTarget   Int?
   notificationPrefs      Json?
+  onboardingStep         Int       @default(0)
+  activationChecklist    Json?
+  firstClientAt          DateTime?
+  firstLeadAt            DateTime?
+  firstInvoiceAt         DateTime?
+  firstAutomationAt      DateTime?
+  taxConfiguredAt        DateTime?
+  onboardingEmailsSent   Json?
+  totalInvoicesGenerated Int       @default(0)
+  totalTimesSaved        Int       @default(0)
   AIInsight              AIInsight[]
   AIPrediction           AIPrediction[]
   accounts               Account[]

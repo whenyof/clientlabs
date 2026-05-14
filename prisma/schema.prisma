@@ -206,6 +206,9 @@ model BusinessProfile {
   verifactuAgreementSignedNif   String?
   activeTemplateId String?
   extraSeats       Int      @default(0)
+  // Lotes y caducidad en documentos
+  enableProductLots   Boolean  @default(false)
+  enableProductExpiry Boolean  @default(false)
   user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -1664,6 +1667,7 @@ model ProviderOrder {
   notes                String?
   orderNumber          String?
   templateId           String?
+  includePrices        Boolean  @default(true)
   invoice              Invoice?
   files                ProviderFile[]          @relation("OrderFiles")
   Provider             Provider                @relation(fields: [providerId], references: [id], onDelete: Cascade)
@@ -1995,17 +1999,20 @@ model ScanSession {
 }
 
 model InvoiceLine {
-  id              String   @id @default(cuid())
+  id              String    @id @default(cuid())
   invoiceId       String
   description     String
-  quantity        Decimal  @db.Decimal(14, 4)
-  unitPrice       Decimal  @db.Decimal(14, 2)
-  discountPercent Decimal? @db.Decimal(5, 2)
-  taxPercent      Decimal  @db.Decimal(5, 2)
-  subtotal        Decimal  @db.Decimal(14, 2)
-  taxAmount       Decimal  @db.Decimal(14, 2)
-  total           Decimal  @db.Decimal(14, 2)
-  Invoice         Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  quantity        Decimal   @db.Decimal(14, 4)
+  unitPrice       Decimal   @db.Decimal(14, 2)
+  discountPercent Decimal?  @db.Decimal(5, 2)
+  taxPercent      Decimal   @db.Decimal(5, 2)
+  subtotal        Decimal   @db.Decimal(14, 2)
+  taxAmount       Decimal   @db.Decimal(14, 2)
+  total           Decimal   @db.Decimal(14, 2)
+  productRef      String?
+  lotNumber       String?
+  expiryDate      DateTime?
+  Invoice         Invoice   @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 
   @@index([invoiceId])
 }
@@ -2597,16 +2604,19 @@ model Quote {
 }
 
 model QuoteItem {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   quoteId     String
   productId   String?
   description String
-  quantity    Float    @default(1)
+  quantity    Float     @default(1)
   unitPrice   Float
-  taxRate     Float    @default(21)
+  taxRate     Float     @default(21)
   subtotal    Float
-  quote       Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
-  product     Product? @relation(fields: [productId], references: [id])
+  productRef  String?
+  lotNumber   String?
+  expiryDate  DateTime?
+  quote       Quote     @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  product     Product?  @relation(fields: [productId], references: [id])
 
   @@index([quoteId])
   @@map("quote_items")
@@ -2647,6 +2657,9 @@ model DeliveryNoteItem {
   quantity       Float        @default(1)
   unitPrice      Float        @default(0)
   delivered      Boolean      @default(true)
+  productRef     String?
+  lotNumber      String?
+  expiryDate     DateTime?
   deliveryNote   DeliveryNote @relation(fields: [deliveryNoteId], references: [id], onDelete: Cascade)
   product        Product?     @relation(fields: [productId], references: [id])
 
@@ -2703,6 +2716,9 @@ model PurchaseOrderItem {
   unitPrice       Float
   taxRate         Float         @default(21)
   subtotal        Float
+  productRef      String?
+  lotNumber       String?
+  expiryDate      DateTime?
   purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
   product         Product?      @relation(fields: [productId], references: [id])
 

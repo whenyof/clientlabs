@@ -140,6 +140,7 @@ export function CreateProviderOrderDialog({
   const [productSearch, setProductSearch] = useState("")
   const [saving, setSaving] = useState(false)
   const [loadedDraftOrder, setLoadedDraftOrder] = useState<LoadedDraft | null>(null)
+  const [includePrices, setIncludePrices] = useState(true)
 
   useEffect(() => {
     if (open && initialDraftOrderId) {
@@ -311,6 +312,7 @@ export function CreateProviderOrderDialog({
         templateId: selectedTemplate?.id ?? null,
         notes: notes.trim() || null,
         emailTo: contactEmail?.trim() || null,
+        includePrices,
         items: lineItems.map((l) => ({
           productId: l.productId,
           code: l.code,
@@ -387,6 +389,7 @@ export function CreateProviderOrderDialog({
           templateId: selectedTemplate?.id ?? null,
           notes: notes.trim() || null,
           emailTo: contactEmail?.trim() || null,
+          includePrices,
           items: lineItems.map((l) => ({
             productId: l.productId,
             code: l.code,
@@ -589,12 +592,26 @@ export function CreateProviderOrderDialog({
           {/* PASO 3 — Productos */}
           {step === 3 && (
             <div className="space-y-4">
-              <Input
-                value={productSearch}
-                onChange={(e) => setProductSearch(e.target.value)}
-                className={inputClass}
-                placeholder="Buscar por código o nombre"
-              />
+              <div className="flex items-center justify-between">
+                <Input
+                  value={productSearch}
+                  onChange={(e) => setProductSearch(e.target.value)}
+                  className={cn("flex-1 mr-3", inputClass)}
+                  placeholder="Buscar por código o nombre"
+                />
+                <label className="flex items-center gap-2 shrink-0 cursor-pointer select-none">
+                  <span className="text-xs text-[var(--text-secondary)]">Incluir precios</span>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={includePrices}
+                    onClick={() => setIncludePrices(p => !p)}
+                    className={`relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors ${includePrices ? "bg-[var(--accent)]" : "bg-[var(--border-main)]"}`}
+                  >
+                    <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ${includePrices ? "translate-x-4" : "translate-x-0"}`} />
+                  </button>
+                </label>
+              </div>
               <div className="rounded-lg border border-[var(--border-main)] overflow-hidden">
                 <div className="overflow-auto max-h-[280px]">
                   <table className="w-full text-sm">
@@ -603,9 +620,9 @@ export function CreateProviderOrderDialog({
                         <th className="text-left p-2 text-xs font-medium text-[var(--text-secondary)]">Código</th>
                         <th className="text-left p-2 text-xs font-medium text-[var(--text-secondary)]">Producto</th>
                         <th className="text-left p-2 text-xs font-medium text-[var(--text-secondary)]">Unidad</th>
-                        <th className="text-right p-2 text-xs font-medium text-[var(--text-secondary)]">P. unit.</th>
+                        {includePrices && <th className="text-right p-2 text-xs font-medium text-[var(--text-secondary)]">P. unit.</th>}
                         <th className="text-center p-2 text-xs font-medium text-[var(--text-secondary)]">Cantidad</th>
-                        <th className="text-right p-2 text-xs font-medium text-[var(--text-secondary)]">Subtotal</th>
+                        {includePrices && <th className="text-right p-2 text-xs font-medium text-[var(--text-secondary)]">Subtotal</th>}
                       </tr>
                     </thead>
                     <tbody>
@@ -629,7 +646,7 @@ export function CreateProviderOrderDialog({
                               <td className="p-2 font-mono text-xs text-[var(--text-primary)]">{p.code}</td>
                               <td className="p-2 text-[var(--text-primary)]">{p.name}</td>
                               <td className="p-2 text-[var(--text-secondary)]">{p.unit ?? "—"}</td>
-                              <td className="p-2 text-right text-[var(--text-primary)]">{formatCurrency(p.price)}</td>
+                              {includePrices && <td className="p-2 text-right text-[var(--text-primary)]">{formatCurrency(p.price)}</td>}
                               <td className="p-2">
                                 <div className="flex items-center justify-center gap-1">
                                   <Button
@@ -661,9 +678,11 @@ export function CreateProviderOrderDialog({
                                   </Button>
                                 </div>
                               </td>
-                              <td className="p-2 text-right font-medium text-[var(--text-primary)]">
-                                {subtotal > 0 ? formatCurrency(subtotal) : "—"}
-                              </td>
+                              {includePrices && (
+                                <td className="p-2 text-right font-medium text-[var(--text-primary)]">
+                                  {subtotal > 0 ? formatCurrency(subtotal) : "—"}
+                                </td>
+                              )}
                             </tr>
                           )
                         })
@@ -675,9 +694,11 @@ export function CreateProviderOrderDialog({
                   <div className="px-3 py-2 border-t border-[var(--border-main)] bg-[var(--bg-main)]/30 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[var(--text-secondary)]">
                     <span>{lineItems.length} línea{lineItems.length !== 1 ? "s" : ""}</span>
                     <span>{totalUnits} unidad{totalUnits !== 1 ? "es" : ""}</span>
-                    <span className="font-medium text-[var(--text-primary)]">
-                      Importe provisional: {formatCurrency(total)}
-                    </span>
+                    {includePrices && (
+                      <span className="font-medium text-[var(--text-primary)]">
+                        Importe provisional: {formatCurrency(total)}
+                      </span>
+                    )}
                   </div>
                 )}
               </div>
@@ -717,10 +738,12 @@ export function CreateProviderOrderDialog({
                     <dt className="text-[var(--text-muted)] text-xs">Nº de líneas</dt>
                     <dd className="text-[var(--text-primary)]">{lineItems.length}</dd>
                   </div>
-                  <div>
-                    <dt className="text-[var(--text-muted)] text-xs">Importe total</dt>
-                    <dd className="font-semibold text-[var(--text-primary)]">{formatCurrency(total)}</dd>
-                  </div>
+                  {includePrices && (
+                    <div>
+                      <dt className="text-[var(--text-muted)] text-xs">Importe total</dt>
+                      <dd className="font-semibold text-[var(--text-primary)]">{formatCurrency(total)}</dd>
+                    </div>
+                  )}
                 </dl>
                 {lineItems.length > 0 && (
                   <div className="mt-3 pt-3 border-t border-[var(--border-main)] flex-1 min-h-0 overflow-auto">
@@ -728,7 +751,10 @@ export function CreateProviderOrderDialog({
                     <ul className="text-xs text-[var(--text-secondary)] space-y-1">
                       {lineItems.map((l) => (
                         <li key={l.productId} className="leading-snug">
-                          {l.code} · {l.name} — {l.quantity} × {formatCurrency(l.unitPrice)} = {formatCurrency(l.subtotal)}
+                          {includePrices
+                            ? `${l.code} · ${l.name} — ${l.quantity} × ${formatCurrency(l.unitPrice)} = ${formatCurrency(l.subtotal)}`
+                            : `${l.code} · ${l.name} — ${l.quantity}${l.unit ? ` ${l.unit}` : ""}`
+                          }
                         </li>
                       ))}
                     </ul>

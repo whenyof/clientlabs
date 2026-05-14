@@ -13,6 +13,9 @@ type LineItem = {
   quantity: number
   unit: string
   delivered: boolean
+  productRef?: string
+  lotNumber?: string
+  expiryDate?: string
 }
 
 type Props = {
@@ -28,7 +31,7 @@ function newKey() { return String(++keySeq) }
 const DEFAULT_ITEM = (): LineItem => ({
   _key: newKey(),
   description: "",
-  quantity: 1,
+  quantity: 0,
   unit: "uds.",
   delivered: false,
 })
@@ -43,11 +46,19 @@ export function NewDeliveryNoteModal({ open, onClose, onSuccess, defaultClientId
   const [items, setItems] = useState<LineItem[]>([DEFAULT_ITEM()])
   const [saving, setSaving] = useState(false)
   const [loadingQuote, setLoadingQuote] = useState(false)
+  const [enableLots, setEnableLots] = useState(false)
+  const [enableExpiry, setEnableExpiry] = useState(false)
 
   useEffect(() => {
     if (!open) return
     fetch("/api/clients").then(r => r.json()).then(d => {
       if (Array.isArray(d)) setClients(d)
+    }).catch(() => {})
+    fetch("/api/settings/business-profile").then(r => r.json()).then(d => {
+      if (d.success && d.profile) {
+        setEnableLots(d.profile.enableProductLots ?? false)
+        setEnableExpiry(d.profile.enableProductExpiry ?? false)
+      }
     }).catch(() => {})
   }, [open])
 
@@ -206,43 +217,70 @@ export function NewDeliveryNoteModal({ open, onClose, onSuccess, defaultClientId
               {/* Rows */}
               <div className="divide-y divide-slate-100">
                 {items.map((item) => (
-                  <div key={item._key} className="grid grid-cols-[1fr_80px_72px_80px_32px] gap-px bg-white px-3 py-2 items-center">
-                    <input
-                      value={item.description}
-                      onChange={e => updateItem(item._key, { description: e.target.value })}
-                      placeholder="Descripción del artículo"
-                      className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A] mr-2"
-                    />
-                    <input
-                      type="number"
-                      min={0}
-                      step={1}
-                      value={item.quantity}
-                      onChange={e => updateItem(item._key, { quantity: Math.max(0, Number(e.target.value)) })}
-                      className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 text-center focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
-                    />
-                    <input
-                      value={item.unit}
-                      onChange={e => updateItem(item._key, { unit: e.target.value })}
-                      placeholder="uds."
-                      className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
-                    />
-                    <div className="flex justify-center">
+                  <div key={item._key} className="bg-white px-3 py-2">
+                    <div className="grid grid-cols-[1fr_80px_72px_80px_32px] gap-px items-center">
                       <input
-                        type="checkbox"
-                        checked={item.delivered}
-                        onChange={e => updateItem(item._key, { delivered: e.target.checked })}
-                        className="h-4 w-4 rounded border-slate-300 text-[#1FA97A] focus:ring-[#1FA97A]/30 accent-[#1FA97A]"
+                        value={item.description}
+                        onChange={e => updateItem(item._key, { description: e.target.value })}
+                        placeholder="Descripción del artículo"
+                        className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A] mr-2"
                       />
+                      <input
+                        type="number"
+                        min={0}
+                        step={1}
+                        placeholder="1"
+                        value={item.quantity || ""}
+                        onChange={e => updateItem(item._key, { quantity: Math.max(0, Number(e.target.value)) })}
+                        className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 placeholder-slate-300 text-center focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+                      />
+                      <input
+                        value={item.unit}
+                        onChange={e => updateItem(item._key, { unit: e.target.value })}
+                        placeholder="uds."
+                        className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+                      />
+                      <div className="flex justify-center">
+                        <input
+                          type="checkbox"
+                          checked={item.delivered}
+                          onChange={e => updateItem(item._key, { delivered: e.target.checked })}
+                          className="h-4 w-4 rounded border-slate-300 text-[#1FA97A] focus:ring-[#1FA97A]/30 accent-[#1FA97A]"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeItem(item._key)}
+                        disabled={items.length === 1}
+                        className="p-1 rounded hover:bg-red-50 text-slate-300 hover:text-red-400 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => removeItem(item._key)}
-                      disabled={items.length === 1}
-                      className="p-1 rounded hover:bg-red-50 text-slate-300 hover:text-red-400 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
+                    {enableLots && (
+                      <div className="grid grid-cols-2 gap-2 mt-1.5">
+                        <div>
+                          <label className="text-[10px] text-slate-400 uppercase tracking-wider">Lote</label>
+                          <input
+                            value={item.lotNumber ?? ""}
+                            onChange={e => updateItem(item._key, { lotNumber: e.target.value })}
+                            placeholder="Nº lote"
+                            className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+                          />
+                        </div>
+                        {enableExpiry && (
+                          <div>
+                            <label className="text-[10px] text-slate-400 uppercase tracking-wider">Caducidad</label>
+                            <input
+                              type="date"
+                              value={item.expiryDate ?? ""}
+                              onChange={e => updateItem(item._key, { expiryDate: e.target.value })}
+                              className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

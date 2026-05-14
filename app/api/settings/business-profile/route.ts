@@ -23,6 +23,8 @@ const ALLOWED_KEYS = [
   "defaultNotesTemplate",
   "defaultTermsTemplate",
   "sector",
+  "enableProductLots",
+  "enableProductExpiry",
 ] as const
 
 function toProfilePayload(body: Record<string, unknown>) {
@@ -56,6 +58,8 @@ function serializeProfile(profile: {
   invoiceLanguage: string | null
   defaultNotesTemplate: string | null
   defaultTermsTemplate: string | null
+  enableProductLots?: boolean
+  enableProductExpiry?: boolean
 }) {
   return {
     id: profile.id,
@@ -78,6 +82,8 @@ function serializeProfile(profile: {
     invoiceLanguage: profile.invoiceLanguage ?? null,
     defaultNotesTemplate: profile.defaultNotesTemplate ?? null,
     defaultTermsTemplate: profile.defaultTermsTemplate ?? null,
+    enableProductLots: profile.enableProductLots ?? false,
+    enableProductExpiry: profile.enableProductExpiry ?? false,
   }
 }
 

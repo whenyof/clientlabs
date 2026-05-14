@@ -17,17 +17,23 @@ async function nextInvoiceNumber(userId: string): Promise<{ number: string; seri
   return { number: `F-${year}-${String(seq).padStart(3, "0")}`, series }
 }
 
-export async function POST(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   const { id } = await params
+
+  let invoiceDocType: "F1" | "F2" = "F1"
+  try {
+    const body = await req.json()
+    if (body?.invoiceDocType === "F2") invoiceDocType = "F2"
+  } catch {}
 
   const note = await prisma.deliveryNote.findFirst({
     where: { id, userId: session.user.id, deletedAt: null },
     include: { items: true },
   })
   if (!note) return NextResponse.json({ error: "Not found" }, { status: 404 })
-  if (note.status === "CONVERTED") return NextResponse.json({ error: "Already converted" }, { status: 400 })
+  if (note.convertedToInvoiceId) return NextResponse.json({ error: "Already converted" }, { status: 400 })
 
   const { number, series } = await nextInvoiceNumber(session.user.id)
   const issueDate = new Date()
@@ -89,7 +95,7 @@ export async function POST(_: NextRequest, { params }: { params: Promise<{ id: s
       serie: series || "CL",
       numero: number,
       fecha_expedicion: formatDateForVerifactu(issueDate),
-      tipo_factura: "F1",
+      tipo_factura: invoiceDocType,
       descripcion: "Factura ClientLabs",
       lineas: [{
         base_imponible: subtotal.toFixed(2),
@@ -114,5 +120,5 @@ export async function POST(_: NextRequest, { params }: { params: Promise<{ id: s
     })
   }
 
-  return NextResponse.json({ success: true, invoiceId: invoice.id, invoiceNumber: number })
+  return NextResponse.json({ success: true, id: invoice.id, number, invoiceId: invoice.id, invoiceNumber: number })
 }

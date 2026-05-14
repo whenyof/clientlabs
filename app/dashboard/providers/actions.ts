@@ -3,6 +3,9 @@
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma, safeDbCheck, safePrismaQuery } from "@/lib/prisma"
+import { effectivePlan } from "@/lib/api-gate"
+import { getLimit, isAtLimit } from "@/lib/plan-gates"
+import type { PlanType } from "@prisma/client"
 import { revalidatePath, unstable_noStore } from "next/cache"
 import { ensureUserExists } from "@/lib/ensure-user"
 import { createInvoiceForProviderOrder } from "@/modules/invoicing/services/invoice.service"
@@ -81,6 +84,22 @@ export async function createProvider(data: {
     const session = await checkAuth()
     if (!session) return { success: false, error: "Unauthorized" }
 
+    // Gate de límite de proveedores
+    const userPlanData = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { plan: true, planExpiresAt: true },
+    })
+    const { plan: effectivePlanValue, readOnly } = effectivePlan(
+        (userPlanData?.plan ?? "STARTER") as PlanType,
+        userPlanData?.planExpiresAt ?? null
+    )
+    if (readOnly) return { success: false, error: "Tu periodo de prueba ha terminado. Selecciona un plan para continuar." }
+    const currentProviders = await prisma.provider.count({ where: { userId: session.user.id } })
+    if (isAtLimit(effectivePlanValue, "maxProviders", currentProviders)) {
+        const max = getLimit(effectivePlanValue, "maxProviders")
+        return { success: false, error: `Has alcanzado el límite de ${max} proveedores de tu plan. Actualiza tu plan para añadir más.` }
+    }
+
     // 🚀 PHASE 6: Connection check before critical write
     const isDbAlive = await safeDbCheck()
     if (!isDbAlive) return { success: false, error: "La base de datos está temporalmente fuera de línea. Reintente en unos segundos." }
@@ -88,7 +107,6 @@ export async function createProvider(data: {
     await ensureUserExists(session.user)
 
     try {
-        console.log("Creating provider with data:", JSON.stringify(data, null, 2))
         const provider = await safePrismaQuery(() => prisma.provider.create({
             data: {
                 userId: session.user.id,
@@ -2471,6 +2489,7 @@ export async function createProviderOrderWithItems(data: {
     templateId?: string | null
     notes?: string | null
     emailTo?: string | null
+    includePrices?: boolean
     items: { productId: string | null; code: string; name: string; unit: string | null; unitPrice: number; quantity: number; subtotal: number }[]
 }) {
     const session = await checkAuth()
@@ -2508,17 +2527,20 @@ export async function createProviderOrderWithItems(data: {
             month: "2-digit",
             year: "numeric"
         })
-        const productsTableText = formatProductsTableSpanish(
-            data.items.map((i) => ({
-                code: i.code,
-                name: i.name,
-                unit: i.unit,
-                quantity: i.quantity,
-                unitPrice: i.unitPrice,
-                subtotal: i.subtotal
-            })),
-            formatCurrencyForEmail
-        )
+        const includePrices = data.includePrices !== false
+        const productsTableText = includePrices
+            ? formatProductsTableSpanish(
+                data.items.map((i) => ({
+                    code: i.code,
+                    name: i.name,
+                    unit: i.unit,
+                    quantity: i.quantity,
+                    unitPrice: i.unitPrice,
+                    subtotal: i.subtotal
+                })),
+                formatCurrencyForEmail
+              )
+            : data.items.map(i => `${i.code} · ${i.name} — ${i.quantity}${i.unit ? ` ${i.unit}` : ""}`).join("\n")
         let emailSubject = ""
         let emailBody = ""
         const emailTo = data.emailTo?.trim() || provider.contactEmail?.trim() || ""
@@ -2529,7 +2551,7 @@ export async function createProviderOrderWithItems(data: {
                 orderDate: orderDateStr,
                 orderNumber,
                 productsTable: productsTableText,
-                totalAmount: formatCurrencyForEmail(total),
+                totalAmount: includePrices ? formatCurrencyForEmail(total) : "—",
                 notes: data.notes?.trim() || ""
             })
             emailSubject = rendered.subject
@@ -2552,7 +2574,8 @@ export async function createProviderOrderWithItems(data: {
                         templateId: template?.id ?? null,
                         emailTo: emailTo || null,
                         emailSubject: emailSubject || null,
-                        emailBody: emailBody || null
+                        emailBody: emailBody || null,
+                        includePrices,
                     }
                 })
 

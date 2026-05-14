@@ -12,6 +12,8 @@ interface InvoicingData {
   defaultNotesTemplate: string
   defaultTermsTemplate: string
   invoiceLanguage: string
+  enableProductLots: boolean
+  enableProductExpiry: boolean
 }
 
 const DEFAULT: InvoicingData = {
@@ -20,6 +22,8 @@ const DEFAULT: InvoicingData = {
   defaultNotesTemplate: "",
   defaultTermsTemplate: "",
   invoiceLanguage: "es",
+  enableProductLots: false,
+  enableProductExpiry: false,
 }
 
 const inputClasses =
@@ -44,6 +48,8 @@ export function InvoicingSettings() {
           defaultNotesTemplate: p.defaultNotesTemplate ?? "",
           defaultTermsTemplate: p.defaultTermsTemplate ?? "",
           invoiceLanguage: p.invoiceLanguage ?? "es",
+          enableProductLots: p.enableProductLots ?? false,
+          enableProductExpiry: p.enableProductExpiry ?? false,
         }
         setForm(values)
         setOriginal(values)
@@ -70,6 +76,8 @@ export function InvoicingSettings() {
           defaultNotesTemplate: form.defaultNotesTemplate || null,
           defaultTermsTemplate: form.defaultTermsTemplate || null,
           invoiceLanguage: form.invoiceLanguage || null,
+          enableProductLots: form.enableProductLots,
+          enableProductExpiry: form.enableProductExpiry,
         }),
       })
       const data = await res.json()
@@ -203,6 +211,70 @@ export function InvoicingSettings() {
               className={inputClasses + " resize-none"}
             />
           </div>
+        </div>
+      </div>
+
+      {/* Opciones avanzadas de líneas */}
+      <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <h3 className="text-sm font-medium text-slate-500 mb-4">Campos adicionales en líneas de documentos</h3>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+            <div>
+              <p className="text-sm font-medium text-slate-700">Número de lote</p>
+              <p className="text-xs text-slate-400 mt-0.5">Muestra un campo de lote en cada línea de facturas, albaranes y presupuestos.</p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={form.enableProductLots}
+              onClick={() => {
+                const next = { ...form, enableProductLots: !form.enableProductLots, enableProductExpiry: !form.enableProductLots ? form.enableProductExpiry : false }
+                setForm(next)
+                fetch("/api/settings/business-profile", {
+                  method: "PUT",
+                  headers: { "Content-Type": "application/json" },
+                  credentials: "include",
+                  body: JSON.stringify({ enableProductLots: next.enableProductLots, enableProductExpiry: next.enableProductExpiry }),
+                }).then(r => r.json()).then(d => {
+                  if (d.success) {
+                    setOriginal(next)
+                    toast.success("Configuración guardada")
+                  }
+                }).catch(() => toast.error("Error al guardar"))
+              }}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${form.enableProductLots ? "bg-[#1FA97A]" : "bg-slate-200"}`}
+            >
+              <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ${form.enableProductLots ? "translate-x-5" : "translate-x-0"}`} />
+            </button>
+          </div>
+          {form.enableProductLots && (
+            <div className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0 pl-4">
+              <div>
+                <p className="text-sm font-medium text-slate-700">Fecha de caducidad</p>
+                <p className="text-xs text-slate-400 mt-0.5">Añade también fecha de caducidad junto al lote.</p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={form.enableProductExpiry}
+                onClick={() => {
+                  const next = { ...form, enableProductExpiry: !form.enableProductExpiry }
+                  setForm(next)
+                  fetch("/api/settings/business-profile", {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({ enableProductLots: next.enableProductLots, enableProductExpiry: next.enableProductExpiry }),
+                  }).then(r => r.json()).then(d => {
+                    if (d.success) { setOriginal(next); toast.success("Configuración guardada") }
+                  }).catch(() => toast.error("Error al guardar"))
+                }}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${form.enableProductExpiry ? "bg-[#1FA97A]" : "bg-slate-200"}`}
+              >
+                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ${form.enableProductExpiry ? "translate-x-5" : "translate-x-0"}`} />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

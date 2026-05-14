@@ -540,7 +540,7 @@ export default function Sidebar({
                   <Crown size={14} className={`shrink-0 ${isTrial ? "text-yellow-500" : isStarter ? "text-sky-500" : isPro ? "text-[#1FA97A]" : "text-amber-500"}`} />
                   <div className="text-left min-w-0">
                     <p className="text-[11px] font-semibold text-[var(--text-primary)] leading-tight truncate">
-                      {isTrial ? "Prueba gratuita" : isStarter ? "Plan Starter" : isPro ? "Plan Pro" : "Plan Business"}
+                      {isTrial ? "Prueba gratuita" : isStarter ? "Plan Básico" : isPro ? "Plan Pro" : "Plan Negocio"}
                     </p>
                     <p className="text-[10px] text-[var(--accent)] leading-tight">{isTrial ? "Elegir plan" : "Cambiar plan"}</p>
                   </div>

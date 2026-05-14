@@ -6,6 +6,7 @@ import { prisma, safePrismaQuery } from "@/lib/prisma"
 import { getUserWorkspace } from "@/lib/get-workspace"
 import { TeamRole } from "@prisma/client"
 import { z } from "zod"
+import { sendTeamInviteEmail } from "@/lib/email-service"
 
 const TEAM_LIMITS: Record<string, number> = {
   FREE: 1,
@@ -96,6 +97,14 @@ export async function POST(req: NextRequest) {
   )
 
   const inviteLink = `${process.env.NEXTAUTH_URL ?? "https://app.clientlabs.es"}/invite/${invite.token}`
+
+  sendTeamInviteEmail(
+    email,
+    session.user.name || "Un miembro del equipo",
+    workspace.name || "ClientLabs",
+    role,
+    inviteLink
+  ).catch(() => {})
 
   return NextResponse.json({ success: true, invite, inviteLink }, { status: 201 })
 }

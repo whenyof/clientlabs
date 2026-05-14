@@ -178,7 +178,7 @@ const SEGMENTOS_DATA = [
   { nombre: "Clientes activos",       desc: "Con factura en últimos 90d",    count: 87, color: "text-[#1FA97A]",   bg: "bg-[#E1F5EE]"     },
   { nombre: "Sin contactar +14d",     desc: "Leads sin acción reciente",     count: 21, color: "text-amber-600",   bg: "bg-amber-50"      },
   { nombre: "Inactivos >6 meses",     desc: "Para reactivación",             count: 56, color: "text-indigo-600",  bg: "bg-indigo-50"     },
-  { nombre: "Clientes PRO / Business", desc: "Plan PRO o Business",           count: 12, color: "text-sky-600",     bg: "bg-sky-50"        },
+  { nombre: "Clientes PRO / Negocio", desc: "Plan PRO o Negocio",           count: 12, color: "text-sky-600",     bg: "bg-sky-50"        },
 ]
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -2171,7 +2171,7 @@ export default function MarketingPage() {
     creadaEn: string
   }>>([])
 
-  if (!can("emailMarketing")) return <UpgradeWall feature="Email Marketing" requiredPlan="Business" />
+  if (!can("emailMarketing")) return <UpgradeWall feature="Email Marketing" requiredPlan="Negocio" />
 
   function handleNuevaCampana() {
     setActiveTab("campanas")

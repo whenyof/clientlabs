@@ -24,7 +24,7 @@ interface ClientPaymentsListProps {
   kpis: ClientPaymentsKPIs
 }
 
-export function ClientPaymentsList({ payments }: ClientPaymentsListProps) {
+export function ClientPaymentsList({ payments, kpis }: ClientPaymentsListProps) {
   const router = useRouter()
 
   const handleViewInvoice = useCallback((id: string) => {
@@ -34,6 +34,16 @@ export function ClientPaymentsList({ payments }: ClientPaymentsListProps) {
   const handleViewSale = useCallback((id: string) => {
     router.push(`/dashboard/sales?sale=${id}`)
   }, [router])
+
+  const balanceCards = [
+    { label: "Cobrado total", value: formatCurrency(kpis.totalPaid) },
+    { label: "Cobrado este mes", value: formatCurrency(kpis.paidThisMonth) },
+    { label: "Ticket medio", value: kpis.averagePayment > 0 ? formatCurrency(kpis.averagePayment) : "—" },
+    {
+      label: "Último pago",
+      value: kpis.lastPayment ? formatDate(kpis.lastPayment) : "—",
+    },
+  ]
 
   if (payments.length === 0) {
     return (
@@ -45,6 +55,16 @@ export function ClientPaymentsList({ payments }: ClientPaymentsListProps) {
   }
 
   return (
+    <div>
+      {/* Balance summary */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-px border-b border-[var(--border-subtle)] bg-[var(--border-subtle)]">
+        {balanceCards.map((card) => (
+          <div key={card.label} className="bg-[var(--bg-card)] px-4 py-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] mb-0.5">{card.label}</p>
+            <p className="text-[15px] font-semibold text-[var(--text-primary)] tabular-nums">{card.value}</p>
+          </div>
+        ))}
+      </div>
     <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
         <thead>
@@ -103,6 +123,7 @@ export function ClientPaymentsList({ payments }: ClientPaymentsListProps) {
           ))}
         </tbody>
       </table>
+    </div>
     </div>
   )
 }

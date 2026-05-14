@@ -108,10 +108,17 @@ export async function GET(request: NextRequest) {
       ...(saleId && { saleId }),
       ...(providerOrderId && { providerOrderId }),
     })
-    const withDue = list.map((inv) => ({
-      ...inv,
-      dueInfo: computeDueState({ status: inv.status, dueDate: inv.dueDate }),
-    }))
+    const withDue = list.map((inv) => {
+      const dueInfo = computeDueState({ status: inv.status, dueDate: inv.dueDate })
+      // Promote SENT/VIEWED to OVERDUE in the response when the due date has passed.
+      // The DB keeps "SENT" until a payment triggers recomputeStatus; this ensures
+      // the UI filter and KPI counter see the correct effective status.
+      const effectiveStatus =
+        dueInfo.isOverdue && (inv.status === "SENT" || inv.status === "VIEWED")
+          ? "OVERDUE"
+          : inv.status
+      return { ...inv, status: effectiveStatus, dueInfo }
+    })
     const sorted = sortByDuePriority(withDue)
 
     let amountOverdue = 0

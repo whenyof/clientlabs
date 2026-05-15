@@ -85,7 +85,7 @@ export function BillingHistory() {
         </div>
         <div className="bg-white rounded-xl border border-slate-200 p-4 text-center">
           <div className="text-lg font-bold text-[#0B1F2A]">
-            {plan === "TRIAL" ? "Prueba (Pro)" : plan === "FREE" || plan === "STARTER" ? "Starter" : plan.charAt(0) + plan.slice(1).toLowerCase()}
+            {plan === "TRIAL" ? "Prueba (Pro)" : plan === "FREE" || plan === "STARTER" ? "Básico" : plan === "BUSINESS" ? "Negocio" : "Pro"}
           </div>
           <div className="text-xs text-slate-500 mt-0.5">Plan activo</div>
         </div>

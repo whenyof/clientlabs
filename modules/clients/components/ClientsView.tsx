@@ -126,8 +126,8 @@ export function ClientsView({ initialClients, allClientsBase, currentFilters, se
                     valB = b.name?.toLowerCase() || ""
                     break
                 case "totalSpent":
-                    valA = a.totalSpent || 0
-                    valB = b.totalSpent || 0
+                    valA = (a as any).invoiceRevenue ?? a.totalSpent ?? 0
+                    valB = (b as any).invoiceRevenue ?? b.totalSpent ?? 0
                     break
                 case "createdAt":
                 default:
@@ -147,7 +147,7 @@ export function ClientsView({ initialClients, allClientsBase, currentFilters, se
         const derived = kpiClients.map(derivedLogic)
         return {
             active: derived.filter(c => c.effectiveStatus === "ACTIVE" && !c.isForgotten).length,
-            totalRevenue: derived.reduce((sum, c) => sum + (c.totalSpent || 0), 0),
+            totalRevenue: derived.reduce((sum, c) => sum + ((c as any).invoiceRevenue ?? c.totalSpent ?? 0), 0),
             inactive: derived.filter(c => c.effectiveStatus === "INACTIVE" || c.isForgotten).length,
             vip: derived.filter(c => c.effectiveStatus === "VIP").length,
             followup: derived.filter(c => c.effectiveStatus === "FOLLOW_UP").length,

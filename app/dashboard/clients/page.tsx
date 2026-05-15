@@ -89,11 +89,26 @@ export default async function ClientsPage({
         },
     }))
 
+    // Derive paid invoice revenue per client (source of truth, replaces totalSpent)
+    const allClientIds = [...new Set([
+        ...(clients as any[]).map((c: any) => c.id),
+        ...(allClients as any[]).map((c: any) => c.id),
+    ])]
+    const revenueRows = await prisma.invoice.groupBy({
+        by: ["clientId"],
+        where: { userId, clientId: { in: allClientIds }, paidAt: { not: null }, type: "CUSTOMER" },
+        _sum: { total: true },
+    })
+    const revenueMap = new Map(revenueRows.map(r => [r.clientId, Number(r._sum.total) || 0]))
+
+    const clientsWithRevenue = (clients as any[]).map(c => ({ ...c, invoiceRevenue: revenueMap.get(c.id) ?? 0 }))
+    const allClientsWithRevenue = (allClients as any[]).map(c => ({ ...c, invoiceRevenue: revenueMap.get(c.id) ?? 0 }))
+
     return (
         <div className="space-y-6">
             <ClientsView
-                initialClients={clients as any}
-                allClientsBase={allClients as any}
+                initialClients={clientsWithRevenue as any}
+                allClientsBase={allClientsWithRevenue as any}
                 serverNow={new Date().toISOString()}
                 currentFilters={{
                     status: searchParams.status || "all",

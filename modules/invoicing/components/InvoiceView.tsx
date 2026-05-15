@@ -145,7 +145,8 @@ export function InvoiceView() {
   const [forceOpenRectificativaModal, setForceOpenRectificativaModal] = useState(false)
   const [modalImportar, setModalImportar] = useState(false)
   const [verifactuTestMode, setVerifactuTestMode] = useState<boolean | null>(null)
-  const [verifactuEnabled, setVerifactuEnabled] = useState<boolean | null>(null)
+  // TODO: re-enable gate (set back to null) when verifactu is ready for prod
+  const [verifactuEnabled, setVerifactuEnabled] = useState<boolean | null>(true)
   const [showActivationModal, setShowActivationModal] = useState(false)
   const skipInitialFetch = useRef(false)
 

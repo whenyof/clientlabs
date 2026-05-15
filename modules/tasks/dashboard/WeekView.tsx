@@ -157,10 +157,10 @@ export function WeekView({ tasks, onTaskClick, onCellClick }: WeekViewProps) {
       <div style={{ display: "grid", gridTemplateColumns: "52px repeat(7,1fr)", borderBottom: "0.5px solid var(--border-subtle)", minHeight: 36 }}>
         <div style={{ fontSize: 10, color: "var(--text-secondary)", padding: "8px 4px", textAlign: "right" }}>Todo el día</div>
         {days.map((day, i) => (
-          <div key={i} style={{ borderLeft: "0.5px solid var(--border-subtle)", padding: "3px 4px", display: "flex", flexDirection: "column", gap: 2, background: (i === 5 || i === 6) ? "#f8fafc" : "transparent" }}>
+          <div key={i} style={{ borderLeft: "0.5px solid var(--border-subtle)", padding: "3px 4px", display: "flex", flexDirection: "column", gap: 2, background: (i === 5 || i === 6) ? "#f8fafc" : "transparent", overflow: "hidden", minWidth: 0 }}>
             {allDayTasks(day).slice(0, 3).map(t => {
               const cfg = PRIORITY_CONFIG[t.priority]
-              return <div key={t.id} onClick={() => onTaskClick(t)} draggable onDragStart={e => handleDragStart(e, t)} style={{ fontSize: 10, fontWeight: 500, padding: "2px 6px", borderRadius: 4, background: cfg.bg, color: cfg.color, border: `0.5px solid ${cfg.border}`, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", cursor: "pointer" }}>{t.title}</div>
+              return <div key={t.id} title={t.title} onClick={() => onTaskClick(t)} draggable onDragStart={e => handleDragStart(e, t)} style={{ fontSize: 10, fontWeight: 500, padding: "2px 6px", borderRadius: 4, background: cfg.bg, color: cfg.color, border: `0.5px solid ${cfg.border}`, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", cursor: "pointer" }}>{t.title}</div>
             })}
           </div>
         ))}

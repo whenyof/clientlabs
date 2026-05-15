@@ -87,7 +87,7 @@ function isValidEventItem(ev: unknown, now: number): ev is IngestEventItem {
 
 export async function OPTIONS(request: NextRequest) {
   const origin = request.headers.get("origin")
-  const corsHeaders = buildCorsHeaders("*", origin)
+  const corsHeaders = buildCorsHeaders(origin ?? null, origin)
   return new NextResponse(null, { status: 204, headers: corsHeaders })
 }
 

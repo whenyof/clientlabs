@@ -156,7 +156,7 @@ function ClientsTableComponent({ clients }: ClientsTableProps) {
                     {isMounted ? (
                       <div className="flex flex-col">
                         <span className="font-semibold text-neutral-900">
-                          {formatRevenueStrong(client.totalSpent ?? 0, client.currency ?? "EUR")}
+                          {formatRevenueStrong((client as any).invoiceRevenue ?? client.totalSpent ?? 0, client.currency ?? "EUR")}
                         </span>
                         {typeof (client as ClientWithLead & { revenueTrendPercent?: number }).revenueTrendPercent === "number" && (
                           <span className="text-xs text-neutral-500">

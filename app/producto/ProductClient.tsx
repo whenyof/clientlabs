@@ -131,11 +131,6 @@ function HeroSection() {
       <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "linear-gradient(#1FA97A 1px, transparent 1px), linear-gradient(90deg, #1FA97A 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
 
       <div className="relative z-10 mx-auto max-w-5xl w-full text-center space-y-8">
-        <div className="hero-badge inline-flex items-center gap-2 rounded-full border border-[#1FA97A]/30 bg-[#1FA97A]/10 px-4 py-1.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#1FA97A] animate-pulse" />
-          <span className="text-xs font-medium tracking-widest text-[#1FA97A] uppercase">Sistema operativo para tu negocio</span>
-        </div>
-
         <h1 className="perspective-[1000px] text-5xl md:text-7xl font-bold leading-[1.05] tracking-tight text-[#E6F1F5]">
           {["Todo", "lo", "que", "necesita", "tu", "operación"].map((w, i) => (
             <span key={i} className="hero-word inline-block mr-[0.25em]">{w} </span>

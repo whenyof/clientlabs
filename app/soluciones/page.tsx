@@ -2,13 +2,12 @@ import type { Metadata } from "next"
 import SolucionesClient from "./SolucionesClient"
 
 export const metadata: Metadata = {
-  title: "Soluciones por Sector — ClientLabs | CRM para tu Tipo de Negocio",
-  description:
-    "ClientLabs se adapta a clínicas, gimnasios, agencias, freelancers, consultorías y más. Descubre cómo gestionar tu sector con un solo sistema.",
-  keywords: ["crm clínicas", "crm gimnasios", "crm agencias", "crm freelancers", "gestión por sector", "crm pymes españa"],
+  title: "CRM para autónomos y pymes por sector — ClientLabs",
+  description: "ClientLabs se adapta a tu sector: agencias, freelancers, clínicas, consultorías, gimnasios y más. CRM, facturación con Verifactu y gestión de clientes adaptados a tu negocio.",
+  keywords: ["crm autónomos españa", "crm pymes sector", "crm agencias digitales", "crm freelancers", "crm consultorías", "gestión clientes autónomos", "software crm y facturación"],
   openGraph: {
-    title: "Soluciones por Sector — ClientLabs | CRM para tu Tipo de Negocio",
-    description: "ClientLabs se adapta a clínicas, gimnasios, agencias, freelancers y más.",
+    title: "CRM para autónomos y pymes por sector — ClientLabs",
+    description: "CRM y facturación con Verifactu adaptados a tu sector. Agencias, freelancers, consultorías y más.",
     type: "website",
     url: "https://clientlabs.io/soluciones",
     siteName: "ClientLabs",

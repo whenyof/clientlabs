@@ -120,11 +120,6 @@ function HeroSection() {
           </span>
         </div>
 
-        <div className="hero-word inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#1FA97A]/30 bg-[#1FA97A]/10 mb-4 sm:mb-8">
-          <div className="w-1.5 h-1.5 rounded-full bg-[#1FA97A]" />
-          <span className="text-[11px] font-medium text-[#1FA97A] uppercase tracking-widest">Pre-lanzamiento</span>
-        </div>
-
         <h1
           className="text-[32px] sm:text-[48px] md:text-[58px] lg:text-[68px] font-bold leading-[1.08] text-white mb-3 sm:mb-6"
           style={{ fontFamily: "var(--font-geist-sans), system-ui" }}

@@ -1,13 +1,12 @@
-// Future-ready hooks for Integrations management
-// These will be used when we implement real API calls
+"use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from "react"
 
 interface Integration {
   id: string
   name: string
   provider: string
-  status: 'connected' | 'disconnected' | 'error' | 'pending'
+  status: "connected" | "disconnected" | "error" | "pending"
   lastSync?: string
   errorMessage?: string
 }
@@ -19,7 +18,7 @@ export function useIntegrations() {
 
   useEffect(() => {
     let cancelled = false
-    fetch('/api/integrations')
+    fetch("/api/integrations")
       .then(res => res.ok ? res.json() : { data: [] })
       .then((json: { data?: Array<{ id: string; name: string; provider: string; status: string; lastSync?: string }> }) => {
         if (cancelled) return
@@ -28,7 +27,7 @@ export function useIntegrations() {
           id: i.id,
           name: i.name,
           provider: i.provider,
-          status: (i.status === 'CONNECTED' ? 'connected' : i.status === 'ERROR' ? 'error' : i.status === 'PENDING' ? 'pending' : 'disconnected') as Integration['status'],
+          status: (i.status === "CONNECTED" ? "connected" : i.status === "ERROR" ? "error" : i.status === "PENDING" ? "pending" : "disconnected") as Integration["status"],
           lastSync: i.lastSync,
         })))
       })
@@ -37,178 +36,71 @@ export function useIntegrations() {
     return () => { cancelled = true }
   }, [])
 
-  const connectIntegration = async (integrationId: string, config: any) => {
+  const connectIntegration = async (provider: string, type: string, config?: Record<string, unknown>) => {
     try {
       setLoading(true)
-      // TODO: Implement real API call
-      console.log('Connecting integration:', integrationId, config)
-
-      // Mock success
+      const res = await fetch("/api/integrations/connect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type, provider, config: config ?? {} }),
+      })
+      if (!res.ok) throw new Error("Failed to connect")
       setIntegrations(prev =>
-        prev.map(int =>
-          int.id === integrationId
-            ? { ...int, status: 'connected', lastSync: new Date().toISOString() }
-            : int
-        )
+        prev.map(int => int.provider === provider ? { ...int, status: "connected", lastSync: new Date().toISOString() } : int)
       )
-    } catch (err) {
-      setError('Failed to connect integration')
+    } catch {
+      setError("No se pudo conectar la integración")
     } finally {
       setLoading(false)
     }
   }
 
-  const disconnectIntegration = async (integrationId: string) => {
+  const disconnectIntegration = async (provider: string, type: string) => {
     try {
       setLoading(true)
-      // TODO: Implement real API call
-      console.log('Disconnecting integration:', integrationId)
-
+      const res = await fetch("/api/integrations/disconnect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type, provider }),
+      })
+      if (!res.ok) throw new Error("Failed to disconnect")
       setIntegrations(prev =>
-        prev.map(int =>
-          int.id === integrationId
-            ? { ...int, status: 'disconnected' }
-            : int
-        )
+        prev.map(int => int.provider === provider ? { ...int, status: "disconnected" } : int)
       )
-    } catch (err) {
-      setError('Failed to disconnect integration')
+    } catch {
+      setError("No se pudo desconectar la integración")
     } finally {
       setLoading(false)
     }
   }
 
-  const syncIntegration = async (integrationId: string) => {
-    try {
-      // TODO: Implement real API call
-      console.log('Syncing integration:', integrationId)
-
-      setIntegrations(prev =>
-        prev.map(int =>
-          int.id === integrationId
-            ? { ...int, lastSync: new Date().toISOString() }
-            : int
-        )
-      )
-    } catch (err) {
-      setError('Failed to sync integration')
-    }
-  }
-
-  return {
-    integrations,
-    loading,
-    error,
-    connectIntegration,
-    disconnectIntegration,
-    syncIntegration
-  }
+  return { integrations, loading, error, connectIntegration, disconnectIntegration }
 }
 
 export function useIntegrationLogs(integrationId?: string) {
-  const [logs, setLogs] = useState([])
+  const [logs, setLogs] = useState<unknown[]>([])
   const [loading, setLoading] = useState(false)
 
   const fetchLogs = async (id?: string) => {
+    const target = id ?? integrationId
+    if (!target) return
     setLoading(true)
     try {
-      // TODO: Implement real API call
-      console.log('Fetching logs for integration:', id || integrationId)
-      // Mock logs will be returned
-    } catch (err) {
-      console.error('Failed to fetch logs')
+      const res = await fetch(`/api/integrations/logs?integrationId=${target}`)
+      if (res.ok) {
+        const json = await res.json()
+        setLogs(json.logs ?? [])
+      }
+    } catch {
+      // silently fail
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    if (integrationId) {
-      fetchLogs(integrationId)
-    }
+    if (integrationId) fetchLogs(integrationId)
   }, [integrationId])
 
-  return {
-    logs,
-    loading,
-    fetchLogs
-  }
-}
-
-export function useWorkflows() {
-  const [workflows, setWorkflows] = useState([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    // TODO: Load workflows from API
-    setTimeout(() => {
-      setWorkflows([])
-      setLoading(false)
-    }, 1000)
-  }, [])
-
-  const createWorkflow = async (workflow: any) => {
-    try {
-      // TODO: Implement real API call
-      console.log('Creating workflow:', workflow)
-      // Mock success
-      return { id: 'new-workflow-id', ...workflow }
-    } catch (err) {
-      throw new Error('Failed to create workflow')
-    }
-  }
-
-  const updateWorkflow = async (id: string, updates: any) => {
-    try {
-      // TODO: Implement real API call
-      console.log('Updating workflow:', id, updates)
-    } catch (err) {
-      throw new Error('Failed to update workflow')
-    }
-  }
-
-  const deleteWorkflow = async (id: string) => {
-    try {
-      // TODO: Implement real API call
-      console.log('Deleting workflow:', id)
-    } catch (err) {
-      throw new Error('Failed to delete workflow')
-    }
-  }
-
-  return {
-    workflows,
-    loading,
-    createWorkflow,
-    updateWorkflow,
-    deleteWorkflow
-  }
-}
-
-export function useAIRecommendations() {
-  const [recommendations, setRecommendations] = useState([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    // TODO: Load AI recommendations from API
-    setTimeout(() => {
-      setRecommendations([])
-      setLoading(false)
-    }, 1500)
-  }, [])
-
-  const implementRecommendation = async (recommendationId: string) => {
-    try {
-      // TODO: Implement real API call
-      console.log('Implementing recommendation:', recommendationId)
-    } catch (err) {
-      throw new Error('Failed to implement recommendation')
-    }
-  }
-
-  return {
-    recommendations,
-    loading,
-    implementRecommendation
-  }
+  return { logs, loading, fetchLogs }
 }

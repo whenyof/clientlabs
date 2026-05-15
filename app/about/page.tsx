@@ -1,4 +1,16 @@
+import type { Metadata } from "next"
 import { Navbar } from "../ui/chrome"
+
+export const metadata: Metadata = {
+  title: "Sobre ClientLabs — El CRM español para autónomos y pymes",
+  description: "Conoce ClientLabs, el software de gestión todo-en-uno diseñado para autónomos y pymes en España. Facturación legal con Verifactu, CRM y captación de leads.",
+  openGraph: {
+    title: "Sobre ClientLabs — El CRM español para autónomos y pymes",
+    description: "Conoce ClientLabs, el software de gestión todo-en-uno para autónomos y pymes en España.",
+    url: "https://clientlabs.io/about",
+  },
+  alternates: { canonical: "https://clientlabs.io/about" },
+}
 
 export default function AboutPage() {
  return (

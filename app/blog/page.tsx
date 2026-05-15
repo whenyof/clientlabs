@@ -6,20 +6,19 @@ import { ARTICLES } from "./data"
 export const revalidate = 3600
 
 export const metadata: Metadata = {
-  title: "Blog — ClientLabs | Guías para Autónomos y Pymes",
-  description:
-    "Artículos sobre facturación, Verifactu, fiscalidad, CRM y gestión de clientes para autónomos y pymes españolas.",
+  title: "Blog ClientLabs — Guías de facturación, CRM y gestión para autónomos",
+  description: "Artículos, guías y tutoriales sobre facturación electrónica, Verifactu, CRM, gestión de leads, fiscalidad y normativa para autónomos y pymes en España.",
   keywords: [
-    "blog autónomos",
-    "facturación electrónica",
-    "verifactu",
-    "guías pymes",
-    "fiscalidad autónomos españa",
+    "blog autónomos españa",
+    "guías facturación electrónica",
+    "verifactu guía",
+    "crm autónomos guía",
+    "fiscalidad autónomos 2026",
+    "software facturación autónomos guía",
   ],
   openGraph: {
-    title: "Blog — ClientLabs | Guías para Autónomos y Pymes",
-    description:
-      "Artículos, guías y recursos para autónomos y pymes españolas.",
+    title: "Blog ClientLabs — Guías de facturación, CRM y gestión para autónomos",
+    description: "Artículos, guías y tutoriales sobre Verifactu, facturación electrónica, CRM y gestión para autónomos y pymes en España.",
     type: "website",
     url: "https://clientlabs.io/blog",
     siteName: "ClientLabs",

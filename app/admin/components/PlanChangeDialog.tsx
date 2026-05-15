@@ -32,8 +32,8 @@ type PlanChangeDialogProps = {
 const PLANS = [
   {
     value: "STARTER",
-    label: "Starter",
-    description: "Para autónomos que empiezan — 12,99€/mes",
+    label: "Básico",
+    description: "Para autónomos que empiezan — 14,99€/mes",
     color: "bg-sky-500/20 text-sky-400 border-sky-500/30",
   },
   {
@@ -44,7 +44,7 @@ const PLANS = [
   },
   {
     value: "BUSINESS",
-    label: "Business",
+    label: "Negocio",
     description: "Para empresas en crecimiento — 39,99€/mes",
     color: "bg-amber-500/20 text-amber-400 border-amber-500/30",
   },

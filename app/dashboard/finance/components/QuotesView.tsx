@@ -3,23 +3,17 @@
 import { useState, useEffect, useCallback } from "react"
 import {
   FileText, Send, CheckCircle, XCircle, Clock,
-  Receipt, Truck, Trash2, Search, ClipboardList, Upload, X
+  Trash2, Search, Upload, X, Plus
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { BannerLegal } from "@/components/finance/BannerLegal"
 import { ImportarDocumento } from "@/components/finance/ImportarDocumento"
 import { NewQuoteModal } from "./NewQuoteModal"
+import { GenerateDocumentsModal } from "./GenerateDocumentsModal"
 
 type QuoteStatus = "DRAFT" | "SENT" | "ACCEPTED" | "REJECTED" | "EXPIRED" | "CONVERTED"
 
-type QuoteItem = {
-  id: string
-  description: string
-  quantity: number
-  unitPrice: number
-  taxRate: number
-  subtotal: number
-}
+type DocRef = { id: string; number: string; status?: string } | null
 
 type Quote = {
   id: string
@@ -28,8 +22,12 @@ type Quote = {
   issueDate: string
   validUntil: string
   total: number
+  convertedToInvoiceId: string | null
   client: { id: string; name: string | null; email: string | null }
-  items: QuoteItem[]
+  items: { id: string; description: string; quantity: number; unitPrice: number; taxRate: number; subtotal: number }[]
+  purchaseOrder: DocRef
+  deliveryNote: DocRef
+  invoice: DocRef
 }
 
 const STATUS_FILTERS: Array<{ key: string; label: string }> = [
@@ -83,7 +81,7 @@ export function QuotesView({ clientId, onNavigateToInvoices, onNavigateToPurchas
   const [createOpen, setCreateOpen] = useState(false)
   const [modalImportar, setModalImportar] = useState(false)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
-  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [generateModalQuote, setGenerateModalQuote] = useState<Quote | null>(null)
 
   const fetchQuotes = useCallback(async () => {
     setLoading(true)
@@ -110,16 +108,6 @@ export function QuotesView({ clientId, onNavigateToInvoices, onNavigateToPurchas
         onSuccess?.()
         fetchQuotes()
       }
-    } finally {
-      setActionLoading(null)
-    }
-  }
-
-  const convertToPO = async (quoteId: string) => {
-    setActionLoading(quoteId + "po")
-    try {
-      const res = await fetch(`/api/quotes/${quoteId}/convert-purchase-order`, { method: "POST" })
-      if (res.ok) { onNavigateToPurchaseOrders?.(); fetchQuotes() }
     } finally {
       setActionLoading(null)
     }
@@ -171,10 +159,17 @@ export function QuotesView({ clientId, onNavigateToInvoices, onNavigateToPurchas
           </div>
           <button
             onClick={() => setModalImportar(true)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#1FA97A] text-white rounded-xl text-[13px] font-semibold hover:bg-[#1a9068] transition-colors"
+            className="flex items-center gap-2 px-3 py-2 border border-slate-200 text-slate-600 rounded-lg text-[13px] font-medium hover:bg-slate-50 transition-colors"
           >
-            <Upload className="h-4 w-4" />
-            Importar documento
+            <Upload className="h-3.5 w-3.5" />
+            Importar
+          </button>
+          <button
+            onClick={() => setCreateOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-[#1FA97A] text-white rounded-lg text-[13px] font-semibold hover:bg-[#1a9068] transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            Nuevo presupuesto
           </button>
         </div>
       </div>
@@ -189,13 +184,21 @@ export function QuotesView({ clientId, onNavigateToInvoices, onNavigateToPurchas
               <FileText className="h-5 w-5 text-slate-400" />
             </div>
             <p className="text-[14px] font-medium text-slate-700 mb-1">No hay presupuestos</p>
-            <p className="text-[12px] text-slate-400 mb-4">Importa tus presupuestos desde tu software habitual</p>
-            <button
-              onClick={() => setModalImportar(true)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-[#1FA97A] text-white rounded-xl text-[13px] font-semibold hover:bg-[#1a9068] transition-colors"
-            >
-              <Upload className="h-4 w-4" /> Importar documento
-            </button>
+            <p className="text-[12px] text-slate-400 mb-4">Crea tu primer presupuesto o importa uno existente</p>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCreateOpen(true)}
+                className="flex items-center gap-2 px-4 py-2.5 bg-[#1FA97A] text-white rounded-lg text-[13px] font-semibold hover:bg-[#1a9068] transition-colors"
+              >
+                <Plus className="h-4 w-4" /> Nuevo presupuesto
+              </button>
+              <button
+                onClick={() => setModalImportar(true)}
+                className="flex items-center gap-2 px-4 py-2.5 border border-slate-200 text-slate-600 rounded-lg text-[13px] font-medium hover:bg-slate-50 transition-colors"
+              >
+                <Upload className="h-4 w-4" /> Importar
+              </button>
+            </div>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -214,10 +217,7 @@ export function QuotesView({ clientId, onNavigateToInvoices, onNavigateToPurchas
                   <>
                     <tr
                       key={q.id}
-                      className={cn(
-                        "border-b border-slate-100 hover:bg-slate-50/50 transition-colors",
-                        expandedId === q.id && "bg-slate-50/50"
-                      )}
+                      className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors"
                     >
                       <td className="py-3.5 px-4 font-mono text-[12px] text-slate-700 font-medium">{q.number}</td>
                       <td className="py-3.5 px-4 text-[13px] text-slate-900">{q.client.name ?? q.client.email ?? "—"}</td>
@@ -303,59 +303,16 @@ export function QuotesView({ clientId, onNavigateToInvoices, onNavigateToPurchas
                           )}
                           {q.status === "ACCEPTED" && (
                             <button
-                              onClick={() => setExpandedId(expandedId === q.id ? null : q.id)}
-                              className={cn(
-                                "px-2 py-1 rounded-md text-[11px] font-medium transition-colors",
-                                expandedId === q.id
-                                  ? "bg-[#1FA97A] text-white"
-                                  : "bg-[#E1F5EE] text-[#0F6E56] hover:bg-[#1FA97A] hover:text-white"
-                              )}
+                              onClick={() => setGenerateModalQuote(q)}
+                              className="px-2 py-1 rounded-md text-[11px] font-medium transition-colors bg-[#E1F5EE] text-[#0F6E56] hover:bg-[#1FA97A] hover:text-white"
                             >
-                              Generar documento
+                              Generar documentos
                             </button>
                           )}
                         </div>
                       </td>
                     </tr>
 
-                    {/* Expanded actions panel for ACCEPTED quotes */}
-                    {expandedId === q.id && q.status === "ACCEPTED" && (
-                      <tr key={q.id + "-expand"} className="border-b border-slate-100">
-                        <td colSpan={7} className="px-4 pb-4 pt-1">
-                          <div className="border border-slate-200 rounded-xl p-4 bg-[#F8FAFB]">
-                            <p className="text-[11px] font-medium text-slate-500 mb-3 uppercase tracking-wider">
-                              Presupuesto aceptado — generar documento
-                            </p>
-                            <div className="flex gap-2 flex-wrap">
-                              <button
-                                onClick={() => action(q.id, "convert-invoice", onNavigateToInvoices)}
-                                disabled={actionLoading === q.id + "convert-invoice"}
-                                className="flex items-center gap-2 px-4 py-2 bg-[#1FA97A] text-white rounded-lg text-[12px] font-medium hover:bg-[#178f68] disabled:opacity-50 transition-colors"
-                              >
-                                <Receipt className="h-3.5 w-3.5" />
-                                Generar Factura
-                              </button>
-                              <button
-                                onClick={() => convertToPO(q.id)}
-                                disabled={actionLoading === q.id + "po"}
-                                className="flex items-center gap-2 px-4 py-2 border border-slate-200 text-slate-700 rounded-lg text-[12px] font-medium hover:bg-white disabled:opacity-50 transition-colors"
-                              >
-                                <ClipboardList className="h-3.5 w-3.5" />
-                                Generar Hoja de Pedido
-                              </button>
-                              <button
-                                onClick={() => action(q.id, "convert-delivery", onNavigateToDelivery)}
-                                disabled={actionLoading === q.id + "convert-delivery"}
-                                className="flex items-center gap-2 px-4 py-2 border border-slate-200 text-slate-700 rounded-lg text-[12px] font-medium hover:bg-white disabled:opacity-50 transition-colors"
-                              >
-                                <Truck className="h-3.5 w-3.5" />
-                                Generar Albarán
-                              </button>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
                   </>
                 ))}
               </tbody>
@@ -370,6 +327,20 @@ export function QuotesView({ clientId, onNavigateToInvoices, onNavigateToPurchas
         onSuccess={() => { setCreateOpen(false); fetchQuotes() }}
         defaultClientId={clientId}
       />
+
+      {generateModalQuote && (
+        <GenerateDocumentsModal
+          quoteId={generateModalQuote.id}
+          quoteNumber={generateModalQuote.number}
+          existing={{
+            order: generateModalQuote.purchaseOrder ?? null,
+            deliveryNote: generateModalQuote.deliveryNote ?? null,
+            invoice: generateModalQuote.invoice ?? null,
+          }}
+          onClose={() => setGenerateModalQuote(null)}
+          onDone={() => { setGenerateModalQuote(null); fetchQuotes() }}
+        />
+      )}
 
       {modalImportar && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

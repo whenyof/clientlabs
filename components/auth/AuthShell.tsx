@@ -81,9 +81,6 @@ export default function AuthShell({ defaultRegister = false }: { defaultRegister
         {/* Center content */}
         <div className="relative z-10 space-y-8" style={{ animation: "fadeSlideUp .7s .1s ease both" }}>
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold tracking-wide" style={{ background: "rgba(31,169,122,0.15)", color: "#1FA97A", border: "1px solid rgba(31,169,122,0.25)" }}>
-              ✦ El CRM para autónomos y PYMEs
-            </div>
             <h2 className="text-[30px] font-bold leading-[1.2] text-white">
               Gestiona tu negocio<br />
               <span style={{ color: "#1FA97A" }}>desde un solo lugar.</span>

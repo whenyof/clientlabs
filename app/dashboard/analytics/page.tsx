@@ -32,7 +32,7 @@ export default function AnalyticsPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [analyticsData] = useState<ExportData | null>(null)
 
-  if (!can("advancedReports")) return <UpgradeWall feature="Informes avanzados" requiredPlan="Business" />
+  if (!can("advancedReports")) return <UpgradeWall feature="Informes avanzados" requiredPlan="Negocio" />
 
   const handleRangeChange = async (range: string) => {
     setIsLoading(true)

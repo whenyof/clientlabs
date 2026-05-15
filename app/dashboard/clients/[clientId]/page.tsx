@@ -83,12 +83,11 @@ export default async function Client360Page({ params: paramsPromise }: { params:
             <ClientProfitabilityCard profitability={profitability} />
           </div>
 
-          {/* Historial: ventas, facturas y pagos */}
+          {/* Historial: pedidos, facturas y pagos */}
           <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-subtle)] overflow-hidden">
             <ClientTransactionsTabs
               clientId={clientId}
               invoices={invoices}
-              salesData={salesData}
               paymentsData={paymentsData}
             />
           </div>

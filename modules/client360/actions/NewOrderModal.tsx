@@ -1,10 +1,9 @@
 "use client"
-import { getBaseUrl } from "@/lib/api/baseUrl"
-
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { X } from "lucide-react"
+import { toast } from "sonner"
 
 import {
   Dialog,
@@ -35,192 +34,116 @@ export function NewOrderModal({
   clientId,
   clientName,
 }: NewOrderModalProps) {
-
   const router = useRouter()
 
   const [items, setItems] = useState<OrderItem[]>([
     { product: "", quantity: "", price: "", taxRate: 21 },
   ])
-
-  const [discountPercent, setDiscountPercent] = useState("0")
   const [notes, setNotes] = useState("")
-  const [generateInvoice, setGenerateInvoice] = useState(true)
-  const [registerPayment, setRegisterPayment] = useState(false)
+  const [createQuote, setCreateQuote] = useState(false)
+  const [createDeliveryNote, setCreateDeliveryNote] = useState(false)
+  const [createInvoice, setCreateInvoice] = useState(false)
+  const [invoiceDocType, setInvoiceDocType] = useState<"F1" | "F2">("F1")
+  const [irpfRate, setIrpfRate] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // ---------------------------------------------------------
-  // Item management
-  // ---------------------------------------------------------
-
-  const handleItemChange = (
-    index: number,
-    field: keyof OrderItem,
-    value: string,
-  ) => {
-
+  const handleItemChange = (index: number, field: keyof OrderItem, value: string) => {
     setItems((prev) =>
       prev.map((item, i) =>
-        i === index
-          ? {
-              ...item,
-              [field]: field === "taxRate" ? Number(value) : value,
-            }
-          : item,
+        i === index ? { ...item, [field]: field === "taxRate" ? Number(value) : value } : item,
       ),
     )
-
   }
 
   const addLine = () => {
-
-    setItems((prev) => [
-      ...prev,
-      { product: "", quantity: "1", price: "0", taxRate: 21 },
-    ])
-
+    setItems((prev) => [...prev, { product: "", quantity: "", price: "", taxRate: 21 }])
   }
 
   const removeItem = (index: number) => {
-
     if (items.length <= 1) return
-
     setItems((prev) => prev.filter((_, i) => i !== index))
-
   }
-
-  // ---------------------------------------------------------
-  // Calculations
-  // ---------------------------------------------------------
 
   const computeLineTotal = (item: OrderItem) => {
-
     const q = Number(item.quantity) || 0
     const p = Number(item.price) || 0
-
     return q * p
-
   }
 
-  const subtotal = items.reduce(
-    (acc, item) => acc + computeLineTotal(item),
-    0,
-  )
-
-  const discountPct = Number(discountPercent) || 0
-  const discountAmount = (subtotal * discountPct) / 100
-
+  const subtotal = items.reduce((acc, item) => acc + computeLineTotal(item), 0)
   const taxAmount = items.reduce((acc, item) => {
-
     const base = computeLineTotal(item)
-    const rate = Number(item.taxRate) || 0
-
-    return acc + (base * rate) / 100
-
+    return acc + (base * (Number(item.taxRate) || 0)) / 100
   }, 0)
-
-  const total = subtotal - discountAmount + taxAmount
-
-  // ---------------------------------------------------------
-  // Submit
-  // ---------------------------------------------------------
+  const irpfAmount = subtotal * (irpfRate / 100)
+  const total = subtotal + taxAmount - irpfAmount
 
   const handleSubmit = async (e: React.FormEvent) => {
-
     e.preventDefault()
-
     if (isSubmitting) return
     setIsSubmitting(true)
 
     try {
-
       const payload = {
         clientId,
+        notes,
+        createQuote,
+        createOrder: true,
+        createDeliveryNote,
+        createInvoice,
+        invoiceDocType,
+        irpfRate,
         items: items.map((item) => ({
-          product: item.product,
-          quantity: Number(item.quantity),
-          price: Number(item.price),
+          description: item.product,
+          quantity: Number(item.quantity) || 1,
+          unitPrice: Number(item.price) || 0,
           taxRate: item.taxRate,
         })),
-        discountPercent: discountPct,
-        notes,
-        generateInvoice,
-        registerPayment,
       }
 
-      const res = await fetch(getBaseUrl() + "/api/orders/create-flow", {
+      const res = await fetch("/api/purchase-orders", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       })
 
       if (!res.ok) {
-
-        const txt = await res.text()
-        console.error(txt)
-
-        alert("Error creando pedido")
-        setIsSubmitting(false)
+        const data = await res.json().catch(() => ({}))
+        toast.error(data.error ?? "Error creando pedido")
         return
-
       }
 
+      const data = await res.json()
+      const names: string[] = [data.order?.number].filter(Boolean)
+      if (data.quote) names.push(data.quote.number)
+      if (data.deliveryNote) names.push(data.deliveryNote.number)
+      if (data.invoice) names.push(data.invoice.number)
+      toast.success(`Pedido creado: ${names.join(", ")}`)
       onClose()
       router.refresh()
-
-    } catch (error) {
-
-      console.error(error)
-      alert("Error inesperado")
-
+    } catch {
+      toast.error("Error inesperado")
     } finally {
-
       setIsSubmitting(false)
-
     }
-
   }
 
   return (
-
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-
       <DialogContent className="w-full max-w-6xl">
-
-        {/* HEADER */}
-
         <DialogHeader>
-
-          <DialogTitle>
-            Nuevo pedido
-          </DialogTitle>
-
+          <DialogTitle>Nuevo pedido</DialogTitle>
           <p className="text-sm text-[var(--text-secondary)]">
-
-            {clientName
-              ? `Cliente: ${clientName}`
-              : "Añade productos al pedido"}
-
+            {clientName ? `Cliente: ${clientName}` : "Añade productos al pedido"}
           </p>
-
         </DialogHeader>
 
         <DialogBody>
-
-          <form
-            id="new-order-form"
-            onSubmit={handleSubmit}
-            className="space-y-8"
-          >
-
-            {/* PRODUCTS — single grid for header and rows */}
-
+          <form id="new-order-form" onSubmit={handleSubmit} className="space-y-8">
+            {/* PRODUCTS */}
             <section>
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-sm font-semibold text-neutral-900">
-                  Productos
-                </h3>
+                <h3 className="text-sm font-semibold text-neutral-900">Productos</h3>
                 <button
                   type="button"
                   onClick={addLine}
@@ -242,21 +165,11 @@ export function NewOrderModal({
                   </colgroup>
                   <thead>
                     <tr>
-                      <th className="pb-3 text-left text-xs uppercase text-neutral-500 border-b border-neutral-200">
-                        Producto
-                      </th>
-                      <th className="pb-3 text-center text-xs uppercase text-neutral-500 border-b border-neutral-200">
-                        Cantidad
-                      </th>
-                      <th className="pb-3 text-center text-xs uppercase text-neutral-500 border-b border-neutral-200">
-                        Precio
-                      </th>
-                      <th className="pb-3 text-center text-xs uppercase text-neutral-500 border-b border-neutral-200">
-                        IVA
-                      </th>
-                      <th className="pb-3 text-right text-xs uppercase text-neutral-500 border-b border-neutral-200">
-                        Total
-                      </th>
+                      <th className="pb-3 text-left text-xs uppercase text-neutral-500 border-b border-neutral-200">Producto</th>
+                      <th className="pb-3 text-center text-xs uppercase text-neutral-500 border-b border-neutral-200">Cantidad</th>
+                      <th className="pb-3 text-center text-xs uppercase text-neutral-500 border-b border-neutral-200">Precio</th>
+                      <th className="pb-3 text-center text-xs uppercase text-neutral-500 border-b border-neutral-200">IVA</th>
+                      <th className="pb-3 text-right text-xs uppercase text-neutral-500 border-b border-neutral-200">Total</th>
                       <th className="pb-3 text-xs uppercase text-neutral-500 border-b border-neutral-200" />
                     </tr>
                   </thead>
@@ -268,9 +181,7 @@ export function NewOrderModal({
                           <td className="py-3 pr-4 align-middle">
                             <input
                               value={item.product}
-                              onChange={(e) =>
-                                handleItemChange(index, "product", e.target.value)
-                              }
+                              onChange={(e) => handleItemChange(index, "product", e.target.value)}
                               placeholder="Producto o servicio"
                               className="h-10 w-full rounded-md border border-neutral-200 px-3 text-sm bg-white"
                             />
@@ -279,11 +190,10 @@ export function NewOrderModal({
                             <input
                               type="number"
                               min={1}
+                              placeholder="1"
                               value={item.quantity}
-                              onChange={(e) =>
-                                handleItemChange(index, "quantity", e.target.value)
-                              }
-                              className="h-10 w-full rounded-md border border-neutral-200 px-2 text-center text-sm bg-white"
+                              onChange={(e) => handleItemChange(index, "quantity", e.target.value)}
+                              className="h-10 w-full rounded-md border border-neutral-200 px-2 text-center text-sm bg-white placeholder-neutral-400"
                             />
                           </td>
                           <td className="py-3 pr-4 align-middle">
@@ -291,25 +201,20 @@ export function NewOrderModal({
                               type="number"
                               step="0.01"
                               min={0}
+                              placeholder="0"
                               value={item.price}
-                              onChange={(e) =>
-                                handleItemChange(index, "price", e.target.value)
-                              }
-                              className="h-10 w-full rounded-md border border-neutral-200 px-2 text-center text-sm bg-white"
+                              onChange={(e) => handleItemChange(index, "price", e.target.value)}
+                              className="h-10 w-full rounded-md border border-neutral-200 px-2 text-center text-sm bg-white placeholder-neutral-400"
                             />
                           </td>
                           <td className="py-3 pr-4 align-middle">
                             <select
                               value={item.taxRate}
-                              onChange={(e) =>
-                                handleItemChange(index, "taxRate", e.target.value)
-                              }
+                              onChange={(e) => handleItemChange(index, "taxRate", e.target.value)}
                               className="h-10 w-full rounded-md border border-neutral-200 px-2 text-center text-sm bg-white appearance-none"
                             >
                               {[0, 10, 21].map((rate) => (
-                                <option key={rate} value={rate}>
-                                  {rate}%
-                                </option>
+                                <option key={rate} value={rate}>{rate}%</option>
                               ))}
                             </select>
                           </td>
@@ -335,13 +240,10 @@ export function NewOrderModal({
               </div>
             </section>
 
-            {/* BOTTOM LAYOUT — 2 columns: Notes | Financial summary */}
-
-            <section className="grid grid-cols-[1fr_340px] gap-8">
+            {/* BOTTOM LAYOUT */}
+            <section className="grid grid-cols-[1fr_320px] gap-8">
               <div className="space-y-2 min-w-0">
-                <label className="text-sm font-medium text-neutral-700">
-                  Notas
-                </label>
+                <label className="text-sm font-medium text-neutral-700">Notas</label>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
@@ -357,13 +259,15 @@ export function NewOrderModal({
                     <span className="tabular-nums">€{subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Descuento</span>
-                    <span className="tabular-nums">-€{discountAmount.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
                     <span>IVA</span>
                     <span className="tabular-nums">€{taxAmount.toFixed(2)}</span>
                   </div>
+                  {irpfRate > 0 && (
+                    <div className="flex justify-between text-red-600">
+                      <span>IRPF -{irpfRate}%</span>
+                      <span className="tabular-nums">-€{irpfAmount.toFixed(2)}</span>
+                    </div>
+                  )}
                   <div className="border-t border-neutral-200 pt-2 mt-2">
                     <div className="flex justify-between font-semibold text-neutral-900">
                       <span>TOTAL</span>
@@ -371,47 +275,84 @@ export function NewOrderModal({
                     </div>
                   </div>
                 </div>
+
                 <div className="pt-4 border-t border-neutral-200 space-y-3">
-                  <p className="text-xs font-medium uppercase text-neutral-500">
-                    Automatización
-                  </p>
+                  <p className="text-xs font-medium uppercase text-neutral-500">Retención IRPF</p>
+                  <div className="relative">
+                    <select
+                      value={irpfRate}
+                      onChange={(e) => setIrpfRate(Number(e.target.value))}
+                      className="w-full appearance-none text-sm border border-neutral-200 rounded-md px-3 py-2 bg-white text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A] pr-8"
+                    >
+                      <option value={0}>Sin retención (0%)</option>
+                      <option value={7}>7% — primeros 2 años</option>
+                      <option value={15}>15% — retención estándar</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-neutral-200 space-y-3">
+                  <p className="text-xs font-medium uppercase text-neutral-500">Documentos adicionales</p>
                   <label className="flex items-center gap-2 text-sm text-neutral-700 cursor-pointer">
                     <input
                       type="checkbox"
-                      checked={generateInvoice}
-                      onChange={(e) => {
-                        const v = e.target.checked
-                        setGenerateInvoice(v)
-                        if (!v) setRegisterPayment(false)
-                      }}
-                      className="h-4 w-4 rounded border-neutral-300"
+                      checked={createQuote}
+                      onChange={(e) => setCreateQuote(e.target.checked)}
+                      className="h-4 w-4 rounded border-neutral-300 accent-[#1FA97A]"
                     />
-                    Generar factura automáticamente
+                    Presupuesto (borrador)
                   </label>
                   <label className="flex items-center gap-2 text-sm text-neutral-700 cursor-pointer">
                     <input
                       type="checkbox"
-                      disabled={!generateInvoice}
-                      checked={registerPayment}
-                      onChange={(e) =>
-                        setRegisterPayment(e.target.checked)
-                      }
-                      className="h-4 w-4 rounded border-neutral-300 disabled:opacity-50"
+                      checked={createDeliveryNote}
+                      onChange={(e) => setCreateDeliveryNote(e.target.checked)}
+                      className="h-4 w-4 rounded border-neutral-300 accent-[#1FA97A]"
                     />
-                    Registrar pago automáticamente
+                    Albarán de entrega (borrador)
                   </label>
+                  <label className="flex items-center gap-2 text-sm text-neutral-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={createInvoice}
+                      onChange={(e) => setCreateInvoice(e.target.checked)}
+                      className="h-4 w-4 rounded border-neutral-300 accent-[#1FA97A]"
+                    />
+                    Factura (borrador)
+                  </label>
+                  {createInvoice && (
+                    <div className="ml-6 space-y-1.5">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="invoiceDocType"
+                          value="F1"
+                          checked={invoiceDocType === "F1"}
+                          onChange={() => setInvoiceDocType("F1")}
+                          className="accent-[#1FA97A]"
+                        />
+                        <span className="text-xs text-neutral-600">F1 — Completa <span className="text-neutral-400">(con NIF del cliente)</span></span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="invoiceDocType"
+                          value="F2"
+                          checked={invoiceDocType === "F2"}
+                          onChange={() => setInvoiceDocType("F2")}
+                          className="accent-[#1FA97A]"
+                        />
+                        <span className="text-xs text-neutral-600">F2 — Simplificada <span className="text-neutral-400">(sin NIF, máx. 3.000€)</span></span>
+                      </label>
+                    </div>
+                  )}
                 </div>
               </div>
             </section>
-
           </form>
-
         </DialogBody>
 
-        {/* FOOTER */}
-
         <DialogFooter>
-
           <button
             type="button"
             onClick={onClose}
@@ -427,13 +368,8 @@ export function NewOrderModal({
           >
             {isSubmitting ? "Creando..." : "Crear pedido"}
           </button>
-
         </DialogFooter>
-
       </DialogContent>
-
     </Dialog>
-
   )
-
 }

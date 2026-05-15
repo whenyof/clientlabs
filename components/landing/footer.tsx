@@ -2,11 +2,6 @@ import Link from "next/link"
 import Image from "next/image"
 import { footerContent } from "@/components/landing/content"
 
-const FOOTER_LINK_HREFS: Record<string, string> = {
-  "Seguridad": "/seguridad",
-  "Declaración responsable": "/legal/declaracion-responsable",
-}
-
 export function Footer() {
   return (
     <footer className="border-t border-line-dark bg-navy pb-8 pt-20 text-[#c6d0d6]">
@@ -16,7 +11,13 @@ export function Footer() {
           {/* Brand column */}
           <div>
             <div className="flex items-center gap-1 font-display text-lg font-extrabold tracking-[-0.02em] text-white">
-              <Image src="/logo-trimmed.webp" alt="ClientLabs" width={28} height={28} className="object-contain" />
+              <Image
+                src="/logo-trimmed.webp"
+                alt="ClientLabs — CRM y facturación para autónomos"
+                width={28}
+                height={28}
+                className="object-contain"
+              />
               <span className="leading-none">{footerContent.brand.name}</span>
             </div>
             <p className="mb-[22px] mt-3 max-w-[280px] text-[14.5px] leading-[1.5] text-[#8fa0aa]">
@@ -32,22 +33,13 @@ export function Footer() {
               </h5>
               <ul className="m-0 grid list-none gap-2.5 p-0">
                 {col.links.map((link) => (
-                  <li key={link}>
-                    {FOOTER_LINK_HREFS[link] ? (
-                      <Link
-                        href={FOOTER_LINK_HREFS[link]}
-                        className="text-sm text-[#a8b5bc] transition-colors hover:text-white"
-                      >
-                        {link}
-                      </Link>
-                    ) : (
-                      <a
-                        href="#"
-                        className="text-sm text-[#a8b5bc] transition-colors hover:text-white"
-                      >
-                        {link}
-                      </a>
-                    )}
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-[#a8b5bc] transition-colors hover:text-white"
+                    >
+                      {link.label}
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -63,7 +55,7 @@ export function Footer() {
           <div className="flex gap-2">
             <a
               href="#"
-              aria-label="LinkedIn"
+              aria-label="LinkedIn de ClientLabs"
               className="grid h-9 w-9 place-items-center rounded-[10px] border border-line-dark-2 text-[#c6d0d6] transition-all hover:border-emerald hover:bg-emerald/10 hover:text-white"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -72,7 +64,7 @@ export function Footer() {
             </a>
             <a
               href="#"
-              aria-label="Twitter"
+              aria-label="Twitter de ClientLabs"
               className="grid h-9 w-9 place-items-center rounded-[10px] border border-line-dark-2 text-[#c6d0d6] transition-all hover:border-emerald hover:bg-emerald/10 hover:text-white"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -81,7 +73,7 @@ export function Footer() {
             </a>
             <a
               href="#"
-              aria-label="Instagram"
+              aria-label="Instagram de ClientLabs"
               className="grid h-9 w-9 place-items-center rounded-[10px] border border-line-dark-2 text-[#c6d0d6] transition-all hover:border-emerald hover:bg-emerald/10 hover:text-white"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
@@ -91,7 +83,6 @@ export function Footer() {
               </svg>
             </a>
           </div>
-
         </div>
       </div>
     </footer>

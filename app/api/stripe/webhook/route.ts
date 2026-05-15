@@ -111,9 +111,6 @@ export async function POST(req: NextRequest) {
         }
 
         await upsertSubscription(userId, sub)
-
-        // ── Actualizar referido si el usuario fue referido ───────────────────
-        await convertReferral(userId)
         break
       }
 
@@ -224,41 +221,6 @@ export async function POST(req: NextRequest) {
 }
 
 // ── Helper: marca el referido como suscrito y recalcula nivel del referrer ───
-async function convertReferral(userId: string) {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { referredByCode: true },
-  })
-  if (!user?.referredByCode) return
-
-  await safePrismaQuery(() =>
-    prisma.referral.updateMany({
-      where: { code: user.referredByCode!, referredId: userId },
-      data: { status: "subscribed", convertedAt: new Date() },
-    })
-  )
-
-  const referrer = await prisma.user.findFirst({
-    where: { referralCode: user.referredByCode },
-    select: { id: true },
-  })
-  if (!referrer) return
-
-  const subscribedCount = await prisma.referral.count({
-    where: { referrerId: referrer.id, status: "subscribed" },
-  })
-
-  const { getLevelForReferrals } = await import("@/lib/referral-rewards")
-  const newLevel = getLevelForReferrals(subscribedCount)
-
-  await safePrismaQuery(() =>
-    prisma.user.update({
-      where: { id: referrer.id },
-      data: { referralLevel: newLevel.level, referralPoints: subscribedCount },
-    })
-  )
-}
-
 // ── Helper: persiste suscripción activa o en trial en la DB ──────────────────
 async function upsertSubscription(userId: string, sub: Stripe.Subscription) {
   const item = sub.items.data[0]

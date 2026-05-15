@@ -23,7 +23,7 @@ export const ARTICLES_11_15: Record<string, React.ReactNode> = {
 
       <h3>1. ClientLabs — CRM + facturación para autónomos españoles</h3>
       <p>ClientLabs es la solución más completa del mercado para autónomos que quieren gestionar tanto la parte comercial como la administrativa en un solo lugar. No es solo un programa de facturas: incluye un pipeline de leads para captar y convertir clientes, facturación con cumplimiento Verifactu y herramientas de seguimiento comercial.</p>
-      <p><strong>Precio:</strong> 14 días gratis (sin tarjeta). Starter desde 12,99 euros/mes. Pro a 24,99 euros/mes. Business a 39,99 euros/mes.</p>
+      <p><strong>Precio:</strong> 14 días gratis (sin tarjeta). Básico desde 14,99 euros/mes. Pro a 24,99 euros/mes. Negocio a 39,99 euros/mes.</p>
       <p><strong>Verifactu:</strong> incluido en todos los planes.</p>
       <p><strong>Pros:</strong> diseñado específicamente para autónomos españoles, interfaz muy sencilla, CRM integrado con la facturación, soporte en español, precio muy competitivo para lo que ofrece.</p>
       <p><strong>Contras:</strong> menos funcionalidad contable avanzada que herramientas como Holded o Anfix para quien necesite contabilidad de doble entrada completa.</p>
@@ -116,7 +116,7 @@ export const ARTICLES_11_15: Record<string, React.ReactNode> = {
         <tbody>
           <tr>
             <td>ClientLabs</td>
-            <td>Desde 12,99 €/mes</td>
+            <td>Desde 14,99 €/mes</td>
             <td>Si</td>
             <td>Si</td>
             <td>Si</td>
@@ -199,7 +199,7 @@ export const ARTICLES_11_15: Record<string, React.ReactNode> = {
 
       <h2>Nuestra recomendacion final</h2>
       <p>Si eres un autonomo o freelance que quiere simplificar su gestion al maximo, la eleccion mas inteligente en 2026 es un software que combine CRM y facturacion en un solo lugar. No tiene sentido pagar por un programa de facturas, otro para gestionar clientes y otro para hacer seguimiento comercial cuando puedes tenerlo todo integrado.</p>
-      <p>ClientLabs es la unica solucion del mercado espanol que combina pipeline de ventas, gestion de clientes y facturacion con cumplimiento Verifactu a un precio accesible para un autonomo. El trial gratuito de 14 dias permite probar todas las funciones sin riesgo, y el plan Starter a 12,99 euros al mes (o Pro a 24,99) cubre todo lo que un negocio en crecimiento necesita.</p>
+      <p>ClientLabs es la unica solucion del mercado espanol que combina pipeline de ventas, gestion de clientes y facturacion con cumplimiento Verifactu a un precio accesible para un autonomo. El trial gratuito de 14 dias permite probar todas las funciones sin riesgo, y el plan Básico a 14,99 euros al mes (o Pro a 24,99) cubre todo lo que un negocio en crecimiento necesita.</p>
       <p>Para pymes con equipos y necesidades contables avanzadas, Holded o Anfix pueden ser mejores opciones pese a su mayor coste y complejidad. Para quien solo necesita emitir facturas de forma basica, FacturaDirecta o Contasimple son alternativas economicas.</p>
       <p>Pero si tu objetivo es crecer como autonomo gestionando mejor tu cartera de clientes y tu facturacion al mismo tiempo, <Link href="/register">empieza gratis con ClientLabs</Link> y comprueba la diferencia que supone tenerlo todo en un mismo lugar. Si quieres comparar los planes en detalle, puedes <Link href="/precios">ver precios aqui</Link>.</p>
     </div>
@@ -236,7 +236,7 @@ export const ARTICLES_11_15: Record<string, React.ReactNode> = {
       <h2>Que es ClientLabs y para quien esta pensado</h2>
       <p>ClientLabs es una plataforma diseñada especificamente para autonomos y pymes pequeñas en España que quieren gestionar su proceso comercial completo, desde la captacion de leads hasta la facturacion, sin necesidad de multiples herramientas separadas.</p>
       <p>A diferencia de Holded, ClientLabs no intenta ser un ERP completo. Se enfoca en lo que mas necesita un autonomo: un pipeline de ventas para no perder clientes potenciales, gestion de clientes activos, facturacion con cumplimiento Verifactu y automatizaciones para el seguimiento comercial.</p>
-      <p><strong>Precio de ClientLabs:</strong> 14 dias de prueba gratuita (sin tarjeta). Starter desde 12,99 euros al mes. Plan Pro a 24,99 euros al mes. Plan Business a 39,99 euros al mes, con un perfil de funciones completamente diferente y mas adecuado para autonomos que Holded.</p>
+      <p><strong>Precio de ClientLabs:</strong> 14 dias de prueba gratuita (sin tarjeta). Básico desde 14,99 euros al mes. Plan Pro a 24,99 euros al mes. Plan Negocio a 39,99 euros al mes, con un perfil de funciones completamente diferente y mas adecuado para autonomos que Holded.</p>
 
       <h3>Ventajas de ClientLabs</h3>
       <ul>
@@ -269,7 +269,7 @@ export const ARTICLES_11_15: Record<string, React.ReactNode> = {
       <p><strong>Ganador:</strong> ClientLabs claramente.</p>
 
       <h3>Precio y relacion valor/coste</h3>
-      <p>Para un autonomo individual, ClientLabs es significativamente mas economico y ofrece mas funciones relevantes para su dia a dia. El plan Starter de ClientLabs a 12,99 euros al mes cubre lo esencial: facturacion, Verifactu y CRM. El plan Pro a 24,99 euros al mes añade automatizaciones y analytics avanzados.</p>
+      <p>Para un autonomo individual, ClientLabs es significativamente mas economico y ofrece mas funciones relevantes para su dia a dia. El plan Básico de ClientLabs a 14,99 euros al mes cubre lo esencial: facturacion, Verifactu y CRM. El plan Pro a 24,99 euros al mes añade proyectos, automatizaciones y analytics avanzados.</p>
       <p>Holded a 29 euros al mes en el plan basico ofrece mas potencia contable pero a un coste que solo se justifica cuando esa potencia contable se utiliza realmente, lo que generalmente requiere tener equipo o necesidades contables complejas.</p>
       <p><strong>Ganador:</strong> ClientLabs para autonomos.</p>
 
@@ -298,7 +298,7 @@ export const ARTICLES_11_15: Record<string, React.ReactNode> = {
         <tbody>
           <tr>
             <td>Precio de entrada</td>
-            <td>Desde 12,99 €/mes</td>
+            <td>Desde 14,99 €/mes</td>
             <td>29 €/mes</td>
           </tr>
           <tr>
@@ -399,7 +399,7 @@ export const ARTICLES_11_15: Record<string, React.ReactNode> = {
       <h2>Que es ClientLabs</h2>
       <p>ClientLabs es una plataforma de gestion para autonomos espanoles que integra CRM, pipeline de ventas y facturacion en un solo lugar. Su filosofia es que la parte comercial y la parte administrativa no deberian estar en herramientas separadas: cuando cierras un lead, deberia poder convertirse en cliente y generar una factura en el mismo sistema sin exportar datos ni cambiar de aplicacion.</p>
       <p>Mientras Quipu resuelve el problema de "como llevo mis cuentas y preparo mis declaraciones", ClientLabs resuelve el problema de "como capto mas clientes, hago seguimiento de mis oportunidades y facturo todo desde un solo lugar".</p>
-      <p><strong>Precio de ClientLabs:</strong> 14 dias gratis para empezar sin coste ni tarjeta. Plan Starter a 12,99 euros al mes con CRM y facturacion Verifactu. Plan Pro a 24,99 euros al mes con automatizaciones y email marketing. Plan Business a 39,99 euros al mes para necesidades avanzadas.</p>
+      <p><strong>Precio de ClientLabs:</strong> 14 dias gratis para empezar sin coste ni tarjeta. Plan Básico a 14,99 euros al mes con CRM y facturacion Verifactu. Plan Pro a 24,99 euros al mes con proyectos y automatizaciones. Plan Negocio a 39,99 euros al mes con email marketing para necesidades avanzadas.</p>
 
       <h2>Comparativa detallada por areas</h2>
 
@@ -433,7 +433,7 @@ export const ARTICLES_11_15: Record<string, React.ReactNode> = {
       <p><strong>Resultado:</strong> empate para la mayoria de autonomos; Quipu gana para quienes necesitan contabilidad muy completa.</p>
 
       <h3>Precio</h3>
-      <p>Los precios son comparables en gama media: Quipu desde 14 euros al mes, ClientLabs desde 12,99 euros al mes. ClientLabs incluye 14 dias de prueba gratuita sin tarjeta para evaluar la herramienta sin compromiso.</p>
+      <p>Los precios son comparables en gama media: Quipu desde 14 euros al mes, ClientLabs desde 14,99 euros al mes. ClientLabs incluye 14 dias de prueba gratuita sin tarjeta para evaluar la herramienta sin compromiso.</p>
       <p><strong>Resultado:</strong> similares, con ventaja para ClientLabs por precio base menor y prueba gratuita.</p>
 
       <h2>Tabla comparativa</h2>
@@ -448,7 +448,7 @@ export const ARTICLES_11_15: Record<string, React.ReactNode> = {
         <tbody>
           <tr>
             <td>Precio de entrada</td>
-            <td>Desde 12,99 €/mes</td>
+            <td>Desde 14,99 €/mes</td>
             <td>14 €/mes</td>
           </tr>
           <tr>
@@ -547,7 +547,7 @@ export const ARTICLES_11_15: Record<string, React.ReactNode> = {
       <h3>1. ClientLabs — La alternativa mas completa para autonomos</h3>
       <p>ClientLabs no solo replica lo que hace FacturaPlus sino que va mucho mas alla. Ademas de la facturacion con cumplimiento Verifactu, incluye un CRM completo para gestionar leads y clientes, pipeline de ventas, automatizaciones de seguimiento y acceso desde cualquier dispositivo.</p>
       <p>Si llevas anos usando FacturaPlus solo para facturar y gestionando tus clientes potenciales en una libreta o en Excel, ClientLabs te permite centralizar todo en un solo lugar. La migracion es sencilla: puedes importar tu base de clientes y tus datos historicos sin perder informacion.</p>
-      <p><strong>Precio:</strong> prueba gratuita de 14 dias sin tarjeta. Plan Starter desde 12,99 euros al mes. Todo en la nube, sin instalacion.</p>
+      <p><strong>Precio:</strong> prueba gratuita de 14 dias sin tarjeta. Plan Básico desde 14,99 euros al mes. Todo en la nube, sin instalacion.</p>
       <p><strong>Mejor que FacturaPlus en:</strong> CRM y gestion comercial integrados, acceso desde movil, colaboracion con asesor, precio total, automatizaciones.</p>
 
       <h3>2. Holded — Para quien necesita contabilidad avanzada</h3>
@@ -595,7 +595,7 @@ export const ARTICLES_11_15: Record<string, React.ReactNode> = {
         <tbody>
           <tr>
             <td>ClientLabs</td>
-            <td>Desde 12,99 €/mes</td>
+            <td>Desde 14,99 €/mes</td>
             <td>Si</td>
             <td>Si</td>
             <td>Si</td>
@@ -704,7 +704,7 @@ export const ARTICLES_11_15: Record<string, React.ReactNode> = {
         <li>Acceso desde cualquier dispositivo.</li>
         <li>Interfaz completamente en espanol.</li>
       </ul>
-      <p><strong>Despues del trial:</strong> planes desde 12,99 euros al mes (Starter) con Verifactu incluido, o 24,99 euros al mes (Pro) para leads ilimitados y automatizaciones.</p>
+      <p><strong>Despues del trial:</strong> planes desde 14,99 euros al mes (Básico) con Verifactu incluido, o 24,99 euros al mes (Pro) para más leads, clientes y proyectos.</p>
       <p><strong>Cuando elegir ClientLabs:</strong> si necesitas un CRM nativo para autonomos espanoles con facturacion y Verifactu integrados desde el primer dia.</p>
 
       <h3>2. HubSpot CRM — El mas conocido, pero quizas demasiado para un autonomo</h3>
@@ -829,11 +829,11 @@ export const ARTICLES_11_15: Record<string, React.ReactNode> = {
       <p>No tienes que aprender una herramienta en ingles. No tienes que configurar un sistema de plantillas en Notion. No tienes que usar Trello como si fuera un CRM. Tienes un sistema hecho para gestionar leads y clientes que habla tu idioma, cumple con la normativa espanola y te permite crecer sin cambiar de herramienta.</p>
       <p>La integracion de CRM y facturacion en el mismo sistema es especialmente valiosa para autonomos: cuando cierras un lead, puedes generar la primera factura sin salir de la aplicacion. Cuando un cliente te encarga otro proyecto, ya tienes todo su historial disponible.</p>
 
-      <h2>Cuando actualizar al plan Pro o Business</h2>
+      <h2>Cuando actualizar al plan Pro o Negocio</h2>
       <p>El trial de 14 dias es el punto de partida. Estas son las senales que indican que ha llegado el momento de pasar a un plan de pago:</p>
       <ul>
         <li><strong>Llevas el seguimiento manual y te olvidas de leads:</strong> cuando el volumen de oportunidades crece, el seguimiento manual falla. Si has perdido un cliente porque no hiciste seguimiento a tiempo, necesitas automatizaciones. El Plan Pro incluye alertas automaticas para leads inactivos.</li>
-        <li><strong>Tienes mas clientes activos de los que permite el Starter:</strong> el Plan Pro desbloquea leads y clientes ilimitados. Es un buen problema que tiene una solucion sencilla.</li>
+        <li><strong>Tienes mas clientes activos de los que permite el Básico:</strong> el Plan Pro desbloquea más leads y clientes. Es un buen problema que tiene una solucion sencilla.</li>
         <li><strong>Quieres informes sobre tu rendimiento comercial:</strong> tasa de conversion de leads, tiempo medio de cierre, valor medio de cada cliente. Estos datos estan disponibles en el Plan Pro.</li>
         <li><strong>Tus clientes te pagan con recurrencia y quieres automatizarlo:</strong> si tienes clientes con contrato mensual o trimestral, la facturacion recurrente automatica te ahorra tiempo cada mes.</li>
       </ul>

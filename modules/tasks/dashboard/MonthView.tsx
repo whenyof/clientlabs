@@ -155,6 +155,8 @@ export function MonthView({ tasks, onDayClick, onTaskClick }: MonthViewProps) {
                 cursor: "pointer",
                 background: cellBg,
                 position: "relative",
+                overflow: "hidden",
+                minWidth: 0,
                 outline: isDrop ? "1.5px dashed #1FA97A" : undefined,
                 outlineOffset: isDrop ? -1 : undefined,
                 transition: "background 0.1s",
@@ -177,13 +179,14 @@ export function MonthView({ tasks, onDayClick, onTaskClick }: MonthViewProps) {
               </div>
 
               {/* Task pills */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 2, overflow: "hidden", minWidth: 0 }}>
                 {visible.map((t) => {
                   const cfg = PRIORITY_CONFIG[t.priority]
                   return (
                     <div
                       key={t.id}
                       draggable
+                      title={t.title}
                       onDragStart={e => { e.stopPropagation(); handleDragStart(e, t) }}
                       onClick={e => { e.stopPropagation(); onTaskClick(t) }}
                       style={{

@@ -93,12 +93,14 @@ export async function getClientFinancialKPIs(
       )
 
  SELECT
- -- 1) Total Revenue (historical)
- COALESCE(SUM(inv."total"), 0)::FLOAT AS "totalRevenue",
-
- -- 2) Revenue YTD
+ -- 1) Total Revenue (only PAID invoices)
  COALESCE(SUM(
- CASE WHEN inv."issueDate" >= DATE_TRUNC('year', NOW())
+ CASE WHEN inv."status" = 'PAID' THEN inv."total" ELSE 0 END
+ ), 0)::FLOAT AS "totalRevenue",
+
+ -- 2) Revenue YTD (only PAID invoices issued this year)
+ COALESCE(SUM(
+ CASE WHEN inv."status" = 'PAID' AND inv."issueDate" >= DATE_TRUNC('year', NOW())
  THEN inv."total" ELSE 0 END
  ), 0)::FLOAT AS "revenueYTD",
 

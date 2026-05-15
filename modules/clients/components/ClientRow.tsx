@@ -155,7 +155,7 @@ export const ClientRow = memo(function ClientRow({
  {/* Valor */}
  <td className="p-4">
  <p className="text-[var(--text-primary)] font-semibold transition-all duration-200 group-hover:text-[var(--accent)] group-hover:scale-105 inline-block">
- {safeFormatCurrency(client.totalSpent || 0)}
+ {safeFormatCurrency((client as any).invoiceRevenue ?? client.totalSpent ?? 0)}
  </p>
  </td>
 

@@ -6,6 +6,32 @@
 import type { InvoiceDocumentModel } from "./invoice-template"
 import { PDF_LAYOUT, getPdfColors } from "./styles"
 
+function getImageDimensions(dataUrl: string): { width: number; height: number } {
+  try {
+    const raw = dataUrl.includes(",") ? dataUrl.split(",")[1] : dataUrl
+    const buffer = Buffer.from(raw, "base64")
+    // PNG: 0x89 0x50 = PNG magic, width at bytes 16-19, height at bytes 20-23
+    if (buffer[0] === 0x89 && buffer[1] === 0x50) {
+      return { width: buffer.readUInt32BE(16), height: buffer.readUInt32BE(20) }
+    }
+  } catch { /* ignore */ }
+  return { width: 200, height: 200 }
+}
+
+function calcLogoDimensions(dataUrl: string, maxW: number, maxH: number): { logoW: number; logoH: number } {
+  const dims = getImageDimensions(dataUrl)
+  const ratio = dims.width / dims.height
+  let logoW: number, logoH: number
+  if (ratio >= 1) {
+    logoW = maxW; logoH = logoW / ratio
+    if (logoH > maxH) { logoH = maxH; logoW = logoH * ratio }
+  } else {
+    logoH = maxH; logoW = logoH * ratio
+    if (logoW > maxW) { logoW = maxW; logoH = logoW / ratio }
+  }
+  return { logoW, logoH }
+}
+
 function hexToRgb(hex: string): [number, number, number] {
   const m = hex.replace(/^#/, "").match(/^([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i)
   if (!m) return [0, 0, 0]
@@ -156,8 +182,6 @@ export async function renderInvoiceToBuffer(
   // LEFT COLUMN — logo above company info (stacked)
   // =========================================================
   let y = TOP
-  const LOGO_W = 40
-  const LOGO_H = 20
   const HAS_LOGO = !!options.logoDataUrl
   const textAreaW = RIGHT_COL_X - M - 4
 
@@ -166,11 +190,12 @@ export async function renderInvoiceToBuffer(
       const imgFmt = /data:image\/jpe?g/i.test(options.logoDataUrl!) ? "JPEG"
         : /data:image\/webp/i.test(options.logoDataUrl!) ? "WEBP"
         : "PNG"
-      pdf.addImage(options.logoDataUrl!, imgFmt, M, y, LOGO_W, LOGO_H)
+      const { logoW, logoH } = calcLogoDimensions(options.logoDataUrl!, 40, 20)
+      pdf.addImage(options.logoDataUrl!, imgFmt, M, y, logoW, logoH)
+      y += logoH + 5
     } catch {
       // ignore invalid logo
     }
-    y += LOGO_H + 5
   }
 
   pdf.setFontSize(13)

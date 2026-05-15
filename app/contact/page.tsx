@@ -1,3 +1,16 @@
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Contacto — ClientLabs | Soporte para autónomos y pymes",
+  description: "¿Tienes dudas sobre ClientLabs? Contacta con nuestro equipo en español. Te ayudamos a elegir el plan de CRM y facturación que mejor se adapta a tu negocio.",
+  openGraph: {
+    title: "Contacto — ClientLabs | Soporte para autónomos y pymes",
+    description: "Contacta con el equipo de ClientLabs. Soporte en español para autónomos y pymes.",
+    url: "https://clientlabs.io/contact",
+  },
+  alternates: { canonical: "https://clientlabs.io/contact" },
+}
+
 export default function ContactPage() {
  return (
  <div className="min-h-screen flex items-center justify-center">

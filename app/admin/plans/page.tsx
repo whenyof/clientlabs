@@ -17,15 +17,15 @@ async function getPlanStats() {
       plans: [
         {
           name: "STARTER",
-          label: "Starter",
-          description: "Para autónomos que empiezan — 12,99€/mes",
+          label: "Básico",
+          description: "Para autónomos que empiezan — 14,99€/mes",
           userCount: starterCount,
           color: "bg-sky-500/20 text-sky-400 border-sky-500/30",
           features: [
-            "Facturas ilimitadas",
+            "1 usuario · 100 leads · 50 clientes",
+            "20 facturas al mes",
             "Verifactu incluido",
-            "CRM hasta 200 leads",
-            "1 usuario",
+            "3 automatizaciones activas",
             "Soporte por email",
           ]
         },
@@ -36,25 +36,25 @@ async function getPlanStats() {
           userCount: proCount,
           color: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
           features: [
-            "Todo lo de Starter",
-            "Leads y clientes ilimitados",
-            "Hasta 5 usuarios",
-            "Automatizaciones (10 reglas)",
-            "Email marketing (1.000/mes)",
+            "3 usuarios · 500 leads · 200 clientes",
+            "100 facturas al mes",
+            "Proyectos",
+            "15 automatizaciones activas",
+            "Soporte prioritario",
           ]
         },
         {
           name: "BUSINESS",
-          label: "Business",
+          label: "Negocio",
           description: "Para empresas en crecimiento — 39,99€/mes",
           userCount: businessCount,
           color: "bg-amber-500/20 text-amber-400 border-amber-500/30",
           features: [
-            "Todo lo de Pro",
-            "Usuarios ilimitados",
+            "5 usuarios · Todo ilimitado",
+            "Proyectos",
             "Automatizaciones ilimitadas",
-            "Email marketing ilimitado",
-            "API completa",
+            "Email marketing",
+            "Soporte WhatsApp directo",
           ]
         }
       ],
@@ -178,8 +178,8 @@ export default async function AdminPlansPage() {
                 <tr>
                   <td className="py-3 px-4 text-white/60">User Seats</td>
                   <td className="text-center py-3 px-4 text-white/40">1</td>
+                  <td className="text-center py-3 px-4 text-white/40">3</td>
                   <td className="text-center py-3 px-4 text-white/40">5</td>
-                  <td className="text-center py-3 px-4 text-white/40">Unlimited</td>
                 </tr>
               </tbody>
             </table>

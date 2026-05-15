@@ -20,18 +20,21 @@ function getStatus(current: number, limit: number) {
 
 function planLabel(plan: string) {
   if (plan === "TRIAL") return "Prueba (Pro)"
-  if (plan === "FREE" || plan === "STARTER") return "Starter"
+  if (plan === "FREE" || plan === "STARTER") return "Básico"
   if (plan === "PRO") return "Pro"
-  if (plan === "BUSINESS") return "Business"
+  if (plan === "BUSINESS") return "Negocio"
   return plan
 }
 
 const DEFAULT_USAGE: UsageItem[] = [
-  { label: "Leads", current: 0, limit: 50, unit: "" },
-  { label: "Clientes", current: 0, limit: 20, unit: "" },
+  { label: "Leads", current: 0, limit: 100, unit: "" },
+  { label: "Clientes activos", current: 0, limit: 50, unit: "" },
+  { label: "Proveedores", current: 0, limit: 10, unit: "" },
+  { label: "Facturas este mes", current: 0, limit: 20, unit: "" },
+  { label: "Tareas", current: 0, limit: 50, unit: "" },
   { label: "Miembros del equipo", current: 0, limit: 1, unit: "" },
-  { label: "Automatizaciones activas", current: 0, limit: 0, unit: "" },
-  { label: "Almacenamiento", current: 0, limit: 0.5, unit: "GB" },
+  { label: "Automatizaciones activas", current: 0, limit: 3, unit: "" },
+  { label: "Plantillas de documento", current: 0, limit: 1, unit: "" },
 ]
 
 export function UsageLimits() {

@@ -9,6 +9,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
+import { gateLimit } from '@/lib/api-gate'
 
 /* ── GET /api/automations ───────────────────────────── */
 export async function GET() {
@@ -58,6 +59,11 @@ export async function GET() {
 /* ── POST /api/automations ──────────────────────────── */
 export async function POST(request: NextRequest) {
     try {
+        const limitGate = await gateLimit("maxActiveAutomations", (uid) =>
+            prisma.automation.count({ where: { userId: uid, active: true } })
+        )
+        if (!limitGate.allowed) return limitGate.error!
+
         const session = await getServerSession(authOptions)
         if (!session?.user?.id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

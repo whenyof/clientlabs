@@ -220,14 +220,6 @@ function HeroSection() {
 
       <div className="w-full max-w-[1100px] mx-auto px-8 pt-20 pb-16 relative z-10">
         <div className="max-w-3xl mx-auto text-center">
-          <div className="sol-badge inline-flex items-center gap-2 bg-[#1FA97A]/10 border border-[#1FA97A]/20 text-[#1FA97A] text-[11px] px-3 py-1.5 rounded-full mb-6">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#1FA97A] opacity-75" />
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#1FA97A]" />
-            </span>
-            Plataforma adaptable a tu industria
-          </div>
-
           <h1 className="text-[52px] md:text-[64px] font-bold text-[#E6F1F5] leading-[1.06] tracking-[-0.03em] mb-6">
             <span className="sol-word inline-block">Soluciones</span>{" "}
             <span className="sol-word inline-block">para</span>{" "}

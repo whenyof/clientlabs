@@ -40,6 +40,9 @@ export async function POST(req: NextRequest) {
       await prisma.user.update({ where: { id: session.user.id }, data: { stripeCustomerId: customerId } })
     }
 
+    const priceId = process.env.STRIPE_TEMPLATE_SINGLE_PRICE_ID
+    if (!priceId) return NextResponse.json({ error: "Precio no configurado" }, { status: 500 })
+
     const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000"
 
     const checkoutSession = await stripe.checkout.sessions.create({
@@ -49,14 +52,7 @@ export async function POST(req: NextRequest) {
       payment_method_types: ["card"],
       client_reference_id: session.user.id,
       metadata: { userId: session.user.id, type: "template", templateId: template.id },
-      line_items: [{
-        price_data: {
-          currency: "eur",
-          product_data: { name: `Plantilla: ${template.name}`, description: template.description ?? undefined },
-          unit_amount: Math.round(template.price * 100),
-        },
-        quantity: 1,
-      }],
+      line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${baseUrl}/dashboard/settings?section=invoicing&template_purchased=1`,
       cancel_url: `${baseUrl}/dashboard/settings?section=invoicing`,
     })

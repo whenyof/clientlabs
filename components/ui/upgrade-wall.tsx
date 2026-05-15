@@ -5,7 +5,7 @@ import { Lock } from "lucide-react"
 
 interface UpgradeWallProps {
   feature: string
-  requiredPlan: "Pro" | "Business"
+  requiredPlan: "Pro" | "Negocio"
   children?: React.ReactNode
 }
 

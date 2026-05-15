@@ -13,7 +13,6 @@ const registerSchema = z.object({
     .string()
     .min(8, "La contraseña debe tener al menos 8 caracteres")
     .max(128, "Contraseña demasiado larga"),
-  ref: z.string().max(30).optional(),
 })
 
 export async function POST(req: NextRequest) {
@@ -59,13 +58,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "JSON no válido" }, { status: 400 })
   }
 
-  const { name, email, password, ref: refCode } = parsed
+  const { name, email, password } = parsed
   const normalizedEmail = email.toLowerCase().trim()
-
-  // Generate unique referral code for the new user
-  const firstName = name?.split(" ")[0]?.toUpperCase().slice(0, 8) ?? "REF"
-  const rand = Math.random().toString(36).substring(2, 8).toUpperCase()
-  const newReferralCode = `CL-${firstName}-${rand}`
 
   try {
     // safePrismaQuery reintenta en P1001 (Neon cold start)
@@ -94,8 +88,6 @@ export async function POST(req: NextRequest) {
           planExpiresAt: trialEndsAt,
           onboardingCompleted: false,
           selectedSector: null,
-          referralCode: newReferralCode,
-          referredByCode: refCode ?? null,
         },
       }),
       2,
@@ -114,24 +106,6 @@ export async function POST(req: NextRequest) {
         },
       })
     )
-
-    // Create referral record if referred by someone
-    if (refCode) {
-      const referrer = await prisma.user.findUnique({ where: { referralCode: refCode }, select: { id: true } })
-      if (referrer) {
-        await safePrismaQuery(() =>
-          prisma.referral.create({
-            data: {
-              referrerId: referrer.id,
-              referredId: newUser.id,
-              referredEmail: normalizedEmail,
-              code: refCode,
-              status: "registered",
-            },
-          })
-        ).catch(() => null)
-      }
-    }
 
     // Send welcome email non-blocking
     sendWelcomeEmail(normalizedEmail, name ?? "Usuario").catch(console.error)

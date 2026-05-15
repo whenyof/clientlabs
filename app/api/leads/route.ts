@@ -43,8 +43,7 @@ function withCors(response: NextResponse, origin: string | null): NextResponse {
     if (origin) {
         response.headers.set('Access-Control-Allow-Origin', origin)
         response.headers.set('Access-Control-Allow-Credentials', 'true')
-    } else {
-        response.headers.set('Access-Control-Allow-Origin', '*')
+        response.headers.set('Vary', 'Origin')
     }
     response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
     response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
@@ -61,18 +60,15 @@ export async function OPTIONS(request: NextRequest) {
     if (origin) {
         headers['Access-Control-Allow-Origin'] = origin
         headers['Access-Control-Allow-Credentials'] = 'true'
-    } else {
-        headers['Access-Control-Allow-Origin'] = '*'
+        headers['Vary'] = 'Origin'
     }
     return new NextResponse(null, { status: 204, headers })
 }
 
 export async function GET(request: NextRequest) {
   const origin = request.headers.get('origin')
-  console.warn("[api/leads] handler invoked")
   try {
     const session = await getServerSession(authOptions)
-    console.warn("[api/leads] userId:", session?.user?.id ?? "NULL")
 
     if (!session?.user?.id) {
       return withCors(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }), origin)

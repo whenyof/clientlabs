@@ -2,37 +2,30 @@
 
 import { useState } from "react"
 import type { ClientInvoiceRow } from "../services/getClientInvoices"
-import type { ClientSalesData } from "../services/getClientSales"
 import type { ClientPaymentsData } from "../services/getClientPayments"
 import { ClientInvoiceList } from "./ClientInvoiceList"
-import { ClientSalesList } from "./ClientSalesList"
 import { ClientPaymentsList } from "./ClientPaymentsList"
 import { ClientDocumentsList } from "./ClientDocumentsList"
-import { ClientQuickSalesTab } from "./ClientQuickSalesTab"
 
-type TabId = "ventas" | "ventas-rapidas" | "facturas" | "pagos" | "documentos"
+type TabId = "pedidos" | "facturas" | "pagos"
 
 interface ClientTransactionsTabsProps {
   clientId: string
   invoices: ClientInvoiceRow[]
-  salesData: ClientSalesData
   paymentsData: ClientPaymentsData
 }
 
 export function ClientTransactionsTabs({
   clientId,
   invoices,
-  salesData,
   paymentsData,
 }: ClientTransactionsTabsProps) {
-  const [activeTab, setActiveTab] = useState<TabId>("ventas")
+  const [activeTab, setActiveTab] = useState<TabId>("pedidos")
 
   const TABS: { id: TabId; label: string; count: number }[] = [
-    { id: "ventas",         label: "Ventas",          count: salesData.sales.length       },
-    { id: "ventas-rapidas", label: "Ventas rápidas",  count: 0                            },
-    { id: "facturas",       label: "Facturas",        count: invoices.length              },
-    { id: "pagos",          label: "Pagos",           count: paymentsData.payments.length },
-    { id: "documentos",     label: "Documentos",      count: 0                            },
+    { id: "pedidos",  label: "Pedidos",   count: 0                            },
+    { id: "facturas", label: "Facturas",  count: invoices.length              },
+    { id: "pagos",    label: "Pagos",     count: paymentsData.payments.length },
   ]
 
   return (
@@ -73,13 +66,10 @@ export function ClientTransactionsTabs({
 
       {/* Content */}
       <div className="min-h-[180px]">
-        {activeTab === "ventas" && (
-          <div className="p-5">
-            <ClientSalesList sales={salesData.sales} kpis={salesData.kpis} clientId={clientId} />
+        {activeTab === "pedidos" && (
+          <div className="p-3">
+            <ClientDocumentsList clientId={clientId} />
           </div>
-        )}
-        {activeTab === "ventas-rapidas" && (
-          <ClientQuickSalesTab clientId={clientId} />
         )}
         {activeTab === "facturas" && (
           <div className="p-5">
@@ -89,11 +79,6 @@ export function ClientTransactionsTabs({
         {activeTab === "pagos" && (
           <div className="p-5">
             <ClientPaymentsList payments={paymentsData.payments} kpis={paymentsData.kpis} />
-          </div>
-        )}
-        {activeTab === "documentos" && (
-          <div className="p-5">
-            <ClientDocumentsList clientId={clientId} />
           </div>
         )}
       </div>

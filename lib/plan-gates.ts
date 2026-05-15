@@ -1,61 +1,67 @@
 import { PlanType } from "@prisma/client"
 
+// -1 = ilimitado
 export const PLAN_LIMITS = {
   FREE: {
     // Legacy — mismos límites que STARTER
-    maxLeadsTotal: 200,
-    maxClients: Infinity,
-    maxInvoicesPerMonth: Infinity,
+    maxLeadsTotal: 100,
+    maxClients: 50,
+    maxProviders: 10,
+    maxInvoicesPerMonth: 20,
+    maxTasks: 50,
+    maxTemplates: 1,
+    maxActiveAutomations: 3,
     maxUsers: 1,
-    maxForms: Infinity,
-    maxActiveAutomations: 0,
-    maxProviders: Infinity,
-    maxTasksPerMonth: Infinity,
+    maxForms: -1,
     storageGB: 1,
   },
   TRIAL: {
     // 14 días con acceso nivel Pro
-    maxLeadsTotal: Infinity,
-    maxClients: Infinity,
-    maxInvoicesPerMonth: Infinity,
-    maxUsers: 5,
-    maxForms: Infinity,
-    maxActiveAutomations: 10,
-    maxProviders: Infinity,
-    maxTasksPerMonth: Infinity,
+    maxLeadsTotal: 500,
+    maxClients: 200,
+    maxProviders: 50,
+    maxInvoicesPerMonth: 100,
+    maxTasks: -1,
+    maxTemplates: 5,
+    maxActiveAutomations: 15,
+    maxUsers: 3,
+    maxForms: -1,
     storageGB: 10,
   },
   STARTER: {
-    maxLeadsTotal: 200,
-    maxClients: Infinity,
-    maxInvoicesPerMonth: Infinity,
+    maxLeadsTotal: 100,
+    maxClients: 50,
+    maxProviders: 10,
+    maxInvoicesPerMonth: 20,
+    maxTasks: 50,
+    maxTemplates: 1,
+    maxActiveAutomations: 3,
     maxUsers: 1,
-    maxForms: Infinity,
-    maxActiveAutomations: 0,
-    maxProviders: Infinity,
-    maxTasksPerMonth: Infinity,
+    maxForms: -1,
     storageGB: 1,
   },
   PRO: {
-    maxLeadsTotal: Infinity,
-    maxClients: Infinity,
-    maxInvoicesPerMonth: Infinity,
-    maxUsers: 5,
-    maxForms: Infinity,
-    maxActiveAutomations: 10,
-    maxProviders: Infinity,
-    maxTasksPerMonth: Infinity,
+    maxLeadsTotal: 500,
+    maxClients: 200,
+    maxProviders: 50,
+    maxInvoicesPerMonth: 100,
+    maxTasks: -1,
+    maxTemplates: 5,
+    maxActiveAutomations: 15,
+    maxUsers: 3,
+    maxForms: -1,
     storageGB: 10,
   },
   BUSINESS: {
-    maxLeadsTotal: Infinity,
-    maxClients: Infinity,
-    maxInvoicesPerMonth: Infinity,
-    maxUsers: Infinity,
-    maxForms: Infinity,
-    maxActiveAutomations: Infinity,
-    maxProviders: Infinity,
-    maxTasksPerMonth: Infinity,
+    maxLeadsTotal: -1,
+    maxClients: -1,
+    maxProviders: -1,
+    maxInvoicesPerMonth: -1,
+    maxTasks: -1,
+    maxTemplates: -1,
+    maxActiveAutomations: -1,
+    maxUsers: 5,
+    maxForms: -1,
     storageGB: 50,
   },
 } as const
@@ -75,7 +81,8 @@ export const PLAN_FEATURES = {
     ai: false,
     aiScoring: false,
     aiPredictions: false,
-    automations: false,
+    automations: true,
+    projects: false,
     customDashboards: false,
     calendarSync: false,
     notifications: false,
@@ -85,6 +92,9 @@ export const PLAN_FEATURES = {
     teamRoles: false,
     verifactu: true,
     advancedReports: false,
+    exportPdf: false,
+    exportExcel: false,
+    activityFull: false,
     prioritySupport: false,
     dedicatedSupport: false,
     emailMarketing: false,
@@ -104,6 +114,7 @@ export const PLAN_FEATURES = {
     aiScoring: true,
     aiPredictions: false,
     automations: true,
+    projects: true,
     customDashboards: true,
     calendarSync: true,
     notifications: true,
@@ -113,9 +124,12 @@ export const PLAN_FEATURES = {
     teamRoles: false,
     verifactu: true,
     advancedReports: false,
+    exportPdf: true,
+    exportExcel: false,
+    activityFull: true,
     prioritySupport: true,
     dedicatedSupport: false,
-    emailMarketing: true,
+    emailMarketing: false,
   },
   STARTER: {
     leads: true,
@@ -130,7 +144,8 @@ export const PLAN_FEATURES = {
     ai: false,
     aiScoring: false,
     aiPredictions: false,
-    automations: false,
+    automations: true,
+    projects: false,
     customDashboards: false,
     calendarSync: false,
     notifications: false,
@@ -140,6 +155,9 @@ export const PLAN_FEATURES = {
     teamRoles: false,
     verifactu: true,
     advancedReports: false,
+    exportPdf: false,
+    exportExcel: false,
+    activityFull: false,
     prioritySupport: false,
     dedicatedSupport: false,
     emailMarketing: false,
@@ -158,6 +176,7 @@ export const PLAN_FEATURES = {
     aiScoring: true,
     aiPredictions: false,
     automations: true,
+    projects: true,
     customDashboards: true,
     calendarSync: true,
     notifications: true,
@@ -167,9 +186,12 @@ export const PLAN_FEATURES = {
     teamRoles: false,
     verifactu: true,
     advancedReports: false,
+    exportPdf: true,
+    exportExcel: false,
+    activityFull: true,
     prioritySupport: true,
     dedicatedSupport: false,
-    emailMarketing: true,
+    emailMarketing: false,
   },
   BUSINESS: {
     leads: true,
@@ -185,6 +207,7 @@ export const PLAN_FEATURES = {
     aiScoring: true,
     aiPredictions: true,
     automations: true,
+    projects: true,
     customDashboards: true,
     calendarSync: true,
     notifications: true,
@@ -194,6 +217,9 @@ export const PLAN_FEATURES = {
     teamRoles: true,
     verifactu: true,
     advancedReports: true,
+    exportPdf: true,
+    exportExcel: true,
+    activityFull: true,
     prioritySupport: true,
     dedicatedSupport: true,
     emailMarketing: true,
@@ -208,11 +234,15 @@ export function hasFeature(plan: PlanType, feature: FeatureKey): boolean {
 }
 
 export function getLimit(plan: PlanType, limit: LimitKey): number {
-  return PLAN_LIMITS[plan]?.[limit] ?? 0
+  const val = PLAN_LIMITS[plan]?.[limit]
+  if (val === undefined) return 0
+  if ((val as number) === Infinity) return -1
+  return val as number
 }
 
 export function isAtLimit(plan: PlanType, limit: LimitKey, currentCount: number): boolean {
   const max = getLimit(plan, limit)
+  if (max === -1) return false
   return currentCount >= max
 }
 
@@ -227,21 +257,48 @@ export function planAtLeast(userPlan: PlanType, requiredPlan: PlanType): boolean
   return hierarchy[userPlan] >= hierarchy[requiredPlan]
 }
 
+export function planDisplayName(plan: PlanType | string): string {
+  const names: Record<string, string> = {
+    FREE: "Básico",
+    STARTER: "Básico",
+    TRIAL: "Prueba (Pro)",
+    PRO: "Pro",
+    BUSINESS: "Negocio",
+  }
+  return names[plan] ?? plan
+}
+
 export function upgradeMessage(feature: FeatureKey): string {
   const required = requiredPlanFor(feature)
   const messages: Partial<Record<FeatureKey, string>> = {
     ai: "La inteligencia artificial está disponible desde el plan Pro.",
     aiScoring: "El scoring de leads con IA está disponible desde el plan Pro.",
-    aiPredictions: "Las predicciones de IA están disponibles en el plan Business.",
-    automations: "Las automatizaciones están disponibles desde el plan Pro.",
+    aiPredictions: "Las predicciones de IA están disponibles en el plan Negocio.",
+    automations: "Las automatizaciones están disponibles desde el plan Básico.",
+    projects: "Los proyectos están disponibles desde el plan Pro.",
     customDashboards: "Los dashboards personalizables están disponibles desde el plan Pro.",
     calendarSync: "La sincronización con calendario está disponible desde el plan Pro.",
-    webhooks: "Los webhooks están disponibles en el plan Business.",
-    api: "El acceso API está disponible en el plan Business.",
-    teamRoles: "Los roles de equipo están disponibles en el plan Business.",
-    advancedReports: "Los informes avanzados están disponibles en el plan Business.",
-    advancedSegmentation: "La segmentación avanzada está disponible en el plan Business.",
-    emailMarketing: "El email marketing está disponible desde el plan Pro.",
+    webhooks: "Los webhooks están disponibles en el plan Negocio.",
+    api: "El acceso API está disponible en el plan Negocio.",
+    teamRoles: "Los roles de equipo están disponibles en el plan Negocio.",
+    advancedReports: "Los informes avanzados están disponibles en el plan Negocio.",
+    advancedSegmentation: "La segmentación avanzada está disponible en el plan Negocio.",
+    emailMarketing: "El email marketing está disponible en el plan Negocio.",
+    exportPdf: "La exportación en PDF está disponible desde el plan Pro.",
+    exportExcel: "La exportación en Excel está disponible en el plan Negocio.",
   }
-  return messages[feature] ?? `Esta función requiere el plan ${required}.`
+  return messages[feature] ?? `Esta función requiere el plan ${planDisplayName(required)}.`
 }
+
+// Trial config
+export const TRIAL_CONFIG = {
+  days: 14,
+  graceDays: 3,
+  level: "PRO" as PlanType,
+  readOnlyAfterGrace: true,
+} as const
+
+// Add-ons
+export const ADDONS = {
+  EXTRA_SEAT: { price: 2.99, name: "Usuario adicional" },
+} as const

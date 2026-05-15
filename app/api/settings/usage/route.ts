@@ -23,12 +23,22 @@ export async function GET() {
   const plan = user?.plan ?? "STARTER"
   const limits = PLAN_LIMITS[plan as keyof typeof PLAN_LIMITS] ?? PLAN_LIMITS.STARTER
 
-  const [leadsCount, clientsCount, teamCount, automationsCount] = await safePrismaQuery(() =>
+  const startOfMonth = new Date()
+  startOfMonth.setDate(1)
+  startOfMonth.setHours(0, 0, 0, 0)
+
+  const [leadsCount, clientsCount, providersCount, invoicesThisMonth, tasksCount, teamCount, automationsCount, templatesCount] = await safePrismaQuery(() =>
     Promise.all([
       prisma.lead.count({ where: { userId } }),
       prisma.client.count({ where: { userId } }),
+      prisma.provider.count({ where: { userId } }),
+      prisma.invoice.count({
+        where: { userId, createdAt: { gte: startOfMonth } },
+      }),
+      prisma.task.count({ where: { userId } }),
       prisma.teamMember.count({ where: { userId } }),
       prisma.automation.count({ where: { userId, active: true } }),
+      prisma.userTemplate.count({ where: { userId } }),
     ])
   )
 
@@ -36,13 +46,31 @@ export async function GET() {
     {
       label: "Leads",
       current: leadsCount,
-      limit: limits.maxLeadsTotal === Infinity ? -1 : limits.maxLeadsTotal,
+      limit: limits.maxLeadsTotal,
       unit: "",
     },
     {
-      label: "Clientes",
+      label: "Clientes activos",
       current: clientsCount,
-      limit: limits.maxClients === Infinity ? -1 : limits.maxClients,
+      limit: limits.maxClients,
+      unit: "",
+    },
+    {
+      label: "Proveedores",
+      current: providersCount,
+      limit: limits.maxProviders,
+      unit: "",
+    },
+    {
+      label: "Facturas este mes",
+      current: invoicesThisMonth,
+      limit: limits.maxInvoicesPerMonth,
+      unit: "",
+    },
+    {
+      label: "Tareas",
+      current: tasksCount,
+      limit: limits.maxTasks,
       unit: "",
     },
     {
@@ -54,14 +82,14 @@ export async function GET() {
     {
       label: "Automatizaciones activas",
       current: automationsCount,
-      limit: limits.maxActiveAutomations === Infinity ? -1 : limits.maxActiveAutomations,
+      limit: limits.maxActiveAutomations,
       unit: "",
     },
     {
-      label: "Almacenamiento",
-      current: 0,
-      limit: limits.storageGB,
-      unit: "GB",
+      label: "Plantillas de documento",
+      current: templatesCount,
+      limit: limits.maxTemplates,
+      unit: "",
     },
   ]
 

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 export const dynamic = "force-dynamic"
 export const maxDuration = 30
 import { prisma } from "@/lib/prisma"
+import { gateLimit } from "@/lib/api-gate"
 import { invalidateCache } from "@/lib/cache"
 import {
  getSessionUserId,
@@ -92,6 +93,9 @@ export type CreateTaskBody = {
 export async function POST(request: NextRequest) {
  console.warn("[api/tasks] POST handler invoked")
  try {
+ const limitGate = await gateLimit("maxTasks", (uid) => prisma.task.count({ where: { userId: uid } }))
+ if (!limitGate.allowed) return limitGate.error!
+
  const userId = await getSessionUserId()
  console.warn("[api/tasks] POST userId:", userId ?? "NULL")
  if (!userId) {

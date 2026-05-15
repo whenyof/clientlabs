@@ -1,4 +1,5 @@
 export const maxDuration = 10
+export const dynamic = "force-dynamic"
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
@@ -21,39 +22,49 @@ function buildUrls(token: string) {
 }
 
 export async function GET() {
-  const session = await getServerSession(authOptions)
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "No autorizado" }, { status: 401 })
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 })
+    }
+
+    let user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { calendarFeedToken: true },
+    })
+
+    if (!user?.calendarFeedToken) {
+      const token = randomBytes(32).toString("hex")
+      await prisma.user.update({
+        where: { id: session.user.id },
+        data: { calendarFeedToken: token },
+      })
+      user = { calendarFeedToken: token }
+    }
+
+    return NextResponse.json(buildUrls(user.calendarFeedToken!))
+  } catch (error) {
+    console.error("[Calendar Token] GET error:", error)
+    return NextResponse.json({ error: "Error interno" }, { status: 500 })
   }
+}
 
-  let user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { calendarFeedToken: true },
-  })
+export async function POST() {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 })
+    }
 
-  if (!user?.calendarFeedToken) {
     const token = randomBytes(32).toString("hex")
     await prisma.user.update({
       where: { id: session.user.id },
       data: { calendarFeedToken: token },
     })
-    user = { calendarFeedToken: token }
+
+    return NextResponse.json({ success: true, ...buildUrls(token) })
+  } catch (error) {
+    console.error("[Calendar Token] POST error:", error)
+    return NextResponse.json({ error: "Error interno" }, { status: 500 })
   }
-
-  return NextResponse.json(buildUrls(user.calendarFeedToken!))
-}
-
-export async function POST() {
-  const session = await getServerSession(authOptions)
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "No autorizado" }, { status: 401 })
-  }
-
-  const token = randomBytes(32).toString("hex")
-  await prisma.user.update({
-    where: { id: session.user.id },
-    data: { calendarFeedToken: token },
-  })
-
-  return NextResponse.json({ success: true, ...buildUrls(token) })
 }

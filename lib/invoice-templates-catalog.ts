@@ -670,7 +670,7 @@ export const INVOICE_TEMPLATES: InvoiceTemplateCatalog[] = [
   },
 ]
 
-export const PREMIUM_PACK_PRICE = 14.99
+export const PREMIUM_PACK_PRICE = 7.99
 export const PREMIUM_TEMPLATES = INVOICE_TEMPLATES.filter(t => t.category === "premium")
 export const FREE_TEMPLATES = INVOICE_TEMPLATES.filter(t => t.category === "free")
 export const DEFAULT_TEMPLATE = INVOICE_TEMPLATES.find(t => t.isDefault) ?? INVOICE_TEMPLATES[0]

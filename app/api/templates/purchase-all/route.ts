@@ -4,13 +4,14 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { stripe } from "@/lib/stripe"
-import { PREMIUM_PACK_PRICE } from "@/lib/invoice-templates-catalog"
-
 export async function POST() {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 })
   }
+
+  const priceId = process.env.STRIPE_TEMPLATE_PACK_PRICE_ID
+  if (!priceId) return NextResponse.json({ error: "Precio no configurado" }, { status: 500 })
 
   try {
     const user = await prisma.user.findUnique({ where: { id: session.user.id }, select: { email: true, name: true, stripeCustomerId: true } })
@@ -32,14 +33,7 @@ export async function POST() {
       payment_method_types: ["card"],
       client_reference_id: session.user.id,
       metadata: { userId: session.user.id, type: "template_pack_all" },
-      line_items: [{
-        price_data: {
-          currency: "eur",
-          product_data: { name: "Pack completo — 10 plantillas premium", description: "Acceso a todas las plantillas premium de ClientLabs" },
-          unit_amount: Math.round(PREMIUM_PACK_PRICE * 100),
-        },
-        quantity: 1,
-      }],
+      line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${baseUrl}/dashboard/settings?section=invoicing&template_purchased=1`,
       cancel_url: `${baseUrl}/dashboard/settings?section=invoicing`,
     })

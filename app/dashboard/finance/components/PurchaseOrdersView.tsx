@@ -1,12 +1,18 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { FileText, ClipboardList, Truck, Receipt, Trash2, Search, ChevronRight, Upload, X } from "lucide-react"
+import {
+  FileText, ClipboardList, Package, Receipt, Trash2,
+  Search, ChevronRight, Upload, X, Plus, CheckCircle,
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 import { BannerLegal } from "@/components/finance/BannerLegal"
 import { ImportarDocumento } from "@/components/finance/ImportarDocumento"
+import { toast } from "sonner"
 
 type POStatus = "DRAFT" | "CONFIRMED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED"
+
+type DocRef = { id: string; number: string; status: string } | null
 
 type PurchaseOrder = {
   id: string
@@ -15,7 +21,9 @@ type PurchaseOrder = {
   issueDate: string
   total: number
   client: { id: string; name: string | null; email: string | null }
-  quote: { number: string } | null
+  quote: { id: string; number: string } | null
+  deliveryNote: DocRef
+  invoice: DocRef
 }
 
 const STATUS_FILTERS: Array<{ key: string; label: string }> = [
@@ -57,14 +65,173 @@ function fmtDate(d: string) {
   return new Intl.DateTimeFormat("es-ES", { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(d))
 }
 
+function GenerateDocModal({
+  order, onClose, onDone,
+}: {
+  order: PurchaseOrder
+  onClose: () => void
+  onDone: () => void
+}) {
+  const [docType, setDocType] = useState<"deliveryNote" | "invoice" | null>(
+    !order.deliveryNote ? "deliveryNote" : !order.invoice ? "invoice" : null
+  )
+  const [invoiceDocType, setInvoiceDocType] = useState<"F1" | "F2">("F1")
+  const [loading, setLoading] = useState(false)
+
+  async function generate() {
+    if (!docType) return
+    setLoading(true)
+    try {
+      const res = await fetch(`/api/purchase-orders/${order.id}/generate-doc`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ docType, invoiceDocType }),
+      })
+      const data = await res.json()
+      if (!res.ok) { toast.error(data.error ?? "Error al generar"); return }
+      toast.success(`${data.number} creado como borrador`)
+      onDone()
+    } catch { toast.error("Error de conexión") }
+    finally { setLoading(false) }
+  }
+
+  const canGenerate = docType !== null && (docType === "deliveryNote" ? !order.deliveryNote : !order.invoice)
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+          <div>
+            <h2 className="text-[15px] font-bold text-slate-900">Generar documentos</h2>
+            <p className="text-[12px] text-slate-400 mt-0.5">Desde pedido {order.number}</p>
+          </div>
+          <button onClick={onClose} className="p-2 rounded-lg hover:bg-slate-100 transition-colors">
+            <X className="h-4 w-4 text-slate-400" />
+          </button>
+        </div>
+
+        <div className="p-5 space-y-2.5">
+          {/* Albarán */}
+          {order.deliveryNote ? (
+            <div className="flex items-start gap-3 p-3.5 rounded-xl border border-[#9FE1CB] bg-[#F0FDF9]">
+              <CheckCircle className="h-4 w-4 text-[#1FA97A] mt-0.5 shrink-0" />
+              <div>
+                <div className="flex items-center gap-2">
+                  <Package className="h-4 w-4 text-amber-500" />
+                  <span className="text-[13px] font-medium text-slate-900">Albarán de entrega</span>
+                  <span className="font-mono text-[11px] text-[#1FA97A] font-semibold">{order.deliveryNote.number}</span>
+                </div>
+                <p className="text-[11px] text-slate-400 mt-0.5">Ya creado</p>
+              </div>
+            </div>
+          ) : (
+            <div
+              onClick={() => setDocType("deliveryNote")}
+              className={cn(
+                "rounded-xl border p-3.5 cursor-pointer transition-colors",
+                docType === "deliveryNote" ? "border-[#1FA97A] bg-[#F0FDF9]" : "border-slate-200 hover:bg-slate-50"
+              )}
+            >
+              <label className="flex items-start gap-3 cursor-pointer select-none">
+                <input
+                  type="radio"
+                  checked={docType === "deliveryNote"}
+                  onChange={() => setDocType("deliveryNote")}
+                  className="mt-0.5 accent-[#1FA97A]"
+                />
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Package className="h-4 w-4 text-amber-500" />
+                    <span className="text-[13px] font-medium text-slate-900">Albarán de entrega</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Documento de entrega. Serie ALB-{new Date().getFullYear()}-</p>
+                </div>
+              </label>
+            </div>
+          )}
+
+          {/* Factura */}
+          {order.invoice ? (
+            <div className="flex items-start gap-3 p-3.5 rounded-xl border border-[#9FE1CB] bg-[#F0FDF9]">
+              <CheckCircle className="h-4 w-4 text-[#1FA97A] mt-0.5 shrink-0" />
+              <div>
+                <div className="flex items-center gap-2">
+                  <Receipt className="h-4 w-4 text-[#1FA97A]" />
+                  <span className="text-[13px] font-medium text-slate-900">Factura</span>
+                  <span className="font-mono text-[11px] text-[#1FA97A] font-semibold">{order.invoice.number}</span>
+                </div>
+                <p className="text-[11px] text-slate-400 mt-0.5">Ya creada</p>
+              </div>
+            </div>
+          ) : (
+            <div
+              onClick={() => setDocType("invoice")}
+              className={cn(
+                "rounded-xl border p-3.5 cursor-pointer transition-colors",
+                docType === "invoice" ? "border-[#1FA97A] bg-[#F0FDF9]" : "border-slate-200 hover:bg-slate-50"
+              )}
+            >
+              <label className="flex items-start gap-3 cursor-pointer select-none">
+                <input
+                  type="radio"
+                  checked={docType === "invoice"}
+                  onChange={() => setDocType("invoice")}
+                  className="mt-0.5 accent-[#1FA97A]"
+                />
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Receipt className="h-4 w-4 text-[#1FA97A]" />
+                    <span className="text-[13px] font-medium text-slate-900">Factura</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Se creará como borrador. Emítela desde Facturación.</p>
+                  {docType === "invoice" && (
+                    <div className="mt-2.5 space-y-1.5 pl-1">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="invDocType" value="F1" checked={invoiceDocType === "F1"} onChange={() => setInvoiceDocType("F1")} className="accent-[#1FA97A]" />
+                        <span className="text-[12px] text-slate-700">F1 — Completa <span className="text-slate-400">(con NIF del cliente)</span></span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="invDocType" value="F2" checked={invoiceDocType === "F2"} onChange={() => setInvoiceDocType("F2")} className="accent-[#1FA97A]" />
+                        <span className="text-[12px] text-slate-700">F2 — Simplificada <span className="text-slate-400">(sin NIF, máx. 3.000€)</span></span>
+                      </label>
+                    </div>
+                  )}
+                </div>
+              </label>
+            </div>
+          )}
+        </div>
+
+        <div className="px-5 pb-5 flex justify-end gap-2">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded-lg border border-slate-200 text-[13px] text-slate-600 hover:bg-slate-50 transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={generate}
+            disabled={loading || !canGenerate}
+            className="px-5 py-2 rounded-lg bg-[#1FA97A] text-white text-[13px] font-medium hover:bg-[#178f68] disabled:opacity-50 transition-colors"
+          >
+            {loading ? "Generando..." : "Generar"}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 type Props = { clientId?: string; onNavigateToInvoices?: () => void; onNavigateToDelivery?: () => void }
 
-export function PurchaseOrdersView({ clientId, onNavigateToInvoices, onNavigateToDelivery }: Props) {
+export function PurchaseOrdersView({ clientId, onNavigateToInvoices: _ni, onNavigateToDelivery: _nd }: Props) {
   const [orders, setOrders] = useState<PurchaseOrder[]>([])
   const [loading, setLoading] = useState(true)
   const [activeFilter, setActiveFilter] = useState("")
   const [search, setSearch] = useState("")
   const [modalImportar, setModalImportar] = useState(false)
+  const [generateOrder, setGenerateOrder] = useState<PurchaseOrder | null>(null)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
 
   const fetchOrders = useCallback(async () => {
@@ -94,26 +261,6 @@ export function PurchaseOrdersView({ clientId, onNavigateToInvoices, onNavigateT
     }
   }
 
-  const convertDelivery = async (orderId: string) => {
-    setActionLoading(orderId + "delivery")
-    try {
-      const res = await fetch(`/api/purchase-orders/${orderId}/convert-delivery`, { method: "POST" })
-      if (res.ok) { onNavigateToDelivery?.(); fetchOrders() }
-    } finally {
-      setActionLoading(null)
-    }
-  }
-
-  const convertInvoice = async (orderId: string) => {
-    setActionLoading(orderId + "invoice")
-    try {
-      const res = await fetch(`/api/purchase-orders/${orderId}/convert-invoice`, { method: "POST" })
-      if (res.ok) { onNavigateToInvoices?.(); fetchOrders() }
-    } finally {
-      setActionLoading(null)
-    }
-  }
-
   const deleteOrder = async (orderId: string) => {
     if (!confirm("¿Eliminar esta hoja de pedido?")) return
     await fetch(`/api/purchase-orders/${orderId}`, { method: "DELETE" })
@@ -126,7 +273,7 @@ export function PurchaseOrdersView({ clientId, onNavigateToInvoices, onNavigateT
 
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
-          <h3 className="text-[14px] font-semibold text-slate-900">Hojas de pedido</h3>
+          <h3 className="text-[14px] font-semibold text-slate-900">Pedidos</h3>
           {!loading && (
             <span className="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
               {orders.length}
@@ -159,10 +306,10 @@ export function PurchaseOrdersView({ clientId, onNavigateToInvoices, onNavigateT
           </div>
           <button
             onClick={() => setModalImportar(true)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#1FA97A] text-white rounded-xl text-[13px] font-semibold hover:bg-[#1a9068] transition-colors"
+            className="flex items-center gap-2 px-3 py-2 border border-slate-200 text-slate-600 rounded-lg text-[13px] font-medium hover:bg-slate-50 transition-colors"
           >
-            <Upload className="h-4 w-4" />
-            Importar documento
+            <Upload className="h-3.5 w-3.5" />
+            Importar
           </button>
         </div>
       </div>
@@ -175,15 +322,15 @@ export function PurchaseOrdersView({ clientId, onNavigateToInvoices, onNavigateT
             <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center mb-4">
               <ClipboardList className="h-5 w-5 text-slate-400" />
             </div>
-            <p className="text-[14px] font-medium text-slate-700 mb-1">No hay hojas de pedido</p>
-            <p className="text-[12px] text-slate-400">Convierte un presupuesto aceptado para crear una hoja de pedido</p>
+            <p className="text-[14px] font-medium text-slate-700 mb-1">No hay pedidos</p>
+            <p className="text-[12px] text-slate-400 mb-4">Los pedidos se generan desde presupuestos aceptados</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[800px]">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50">
-                  {["Número", "Cliente", "Fecha", "Presupuesto", "Importe", "Estado", "Acciones"].map((h) => (
+                  {["Número", "Cliente", "Fecha", "Presupuesto", "Albarán", "Factura", "Importe", "Estado", "Acciones"].map((h) => (
                     <th key={h} className="py-3 px-4 text-left text-[10px] font-medium text-slate-400 uppercase tracking-wider">
                       {h}
                     </th>
@@ -197,6 +344,18 @@ export function PurchaseOrdersView({ clientId, onNavigateToInvoices, onNavigateT
                     <td className="py-3.5 px-4 text-[13px] text-slate-900">{o.client.name ?? o.client.email ?? "—"}</td>
                     <td className="py-3.5 px-4 text-[12px] text-slate-500">{fmtDate(o.issueDate)}</td>
                     <td className="py-3.5 px-4 text-[12px] text-slate-400 font-mono">{o.quote?.number ?? "—"}</td>
+                    <td className="py-3.5 px-4">
+                      {o.deliveryNote
+                        ? <span className="font-mono text-[11px] text-[#0F6E56] font-semibold">{o.deliveryNote.number}</span>
+                        : <span className="text-[11px] text-slate-300">—</span>
+                      }
+                    </td>
+                    <td className="py-3.5 px-4">
+                      {o.invoice
+                        ? <span className="font-mono text-[11px] text-[#0F6E56] font-semibold">{o.invoice.number}</span>
+                        : <span className="text-[11px] text-slate-300">—</span>
+                      }
+                    </td>
                     <td className="py-3.5 px-4 text-[13px] font-semibold text-slate-900 text-right">{fmt(o.total)}</td>
                     <td className="py-3.5 px-4">
                       <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium", STATUS_BADGE[o.status])}>
@@ -222,25 +381,13 @@ export function PurchaseOrdersView({ clientId, onNavigateToInvoices, onNavigateT
                             <ChevronRight className="h-3.5 w-3.5" />
                           </button>
                         )}
-                        {(o.status === "CONFIRMED" || o.status === "IN_PROGRESS" || o.status === "COMPLETED") && (
-                          <>
-                            <button
-                              onClick={() => convertDelivery(o.id)}
-                              disabled={actionLoading === o.id + "delivery"}
-                              className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-purple-600 transition-colors disabled:opacity-50"
-                              title="Generar Albarán"
-                            >
-                              <Truck className="h-3.5 w-3.5" />
-                            </button>
-                            <button
-                              onClick={() => convertInvoice(o.id)}
-                              disabled={actionLoading === o.id + "invoice"}
-                              className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-blue-600 transition-colors disabled:opacity-50"
-                              title="Generar Factura"
-                            >
-                              <Receipt className="h-3.5 w-3.5" />
-                            </button>
-                          </>
+                        {(!o.deliveryNote || !o.invoice) && (
+                          <button
+                            onClick={() => setGenerateOrder(o)}
+                            className="px-2 py-1 rounded-md text-[11px] font-medium transition-colors bg-[#E1F5EE] text-[#0F6E56] hover:bg-[#1FA97A] hover:text-white"
+                          >
+                            Generar
+                          </button>
                         )}
                         {o.status === "DRAFT" && (
                           <button
@@ -261,13 +408,21 @@ export function PurchaseOrdersView({ clientId, onNavigateToInvoices, onNavigateT
         )}
       </div>
 
+      {generateOrder && (
+        <GenerateDocModal
+          order={generateOrder}
+          onClose={() => setGenerateOrder(null)}
+          onDone={() => { setGenerateOrder(null); fetchOrders() }}
+        />
+      )}
+
       {modalImportar && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
             className="absolute inset-0 bg-black/30 backdrop-blur-sm"
             onClick={() => setModalImportar(false)}
           />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+          <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden">
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
               <div>
                 <h2 className="text-[16px] font-bold text-slate-900">Importar documento</h2>
@@ -275,7 +430,7 @@ export function PurchaseOrdersView({ clientId, onNavigateToInvoices, onNavigateT
                   Sube el PDF de tu hoja de pedido u otro documento
                 </p>
               </div>
-              <button onClick={() => setModalImportar(false)} className="p-2 rounded-xl hover:bg-slate-100">
+              <button onClick={() => setModalImportar(false)} className="p-2 rounded-lg hover:bg-slate-100">
                 <X className="h-5 w-5 text-slate-400" />
               </button>
             </div>

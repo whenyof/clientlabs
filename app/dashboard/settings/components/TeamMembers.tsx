@@ -10,9 +10,11 @@ import { PermissionsModal } from "./PermissionsModal"
 import type { TeamRole } from "@prisma/client"
 
 const PLAN_LABELS: Record<string, string> = {
-  FREE: "Gratis",
+  FREE: "Básico",
+  STARTER: "Básico",
+  TRIAL: "Prueba (Pro)",
   PRO: "Pro",
-  BUSINESS: "Business",
+  BUSINESS: "Negocio",
 }
 
 function getRoleBadge(role: TeamRole) {

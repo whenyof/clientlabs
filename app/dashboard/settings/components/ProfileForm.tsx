@@ -90,9 +90,9 @@ export function ProfileForm() {
 
   const planLabel = (plan: string) => {
     if (plan === "TRIAL") return "Prueba (Pro)"
-    if (plan === "FREE" || plan === "STARTER") return "Starter"
+    if (plan === "FREE" || plan === "STARTER") return "Básico"
     if (plan === "PRO") return "Pro"
-    if (plan === "BUSINESS") return "Business"
+    if (plan === "BUSINESS") return "Negocio"
     return plan
   }
 

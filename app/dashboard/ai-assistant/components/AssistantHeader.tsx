@@ -64,10 +64,6 @@ export function AssistantHeader() {
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-emerald-200 bg-clip-text text-transparent">
                   Asistente IA Avanzado
                 </h1>
-                <div className="flex items-center gap-2 px-3 py-1 bg-green-500/20 rounded-full border border-green-500/30">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                  <span className="text-sm text-green-400 font-medium">IA Activa</span>
-                </div>
               </div>
 
               <p className="text-[var(--text-secondary)] text-lg max-w-2xl">

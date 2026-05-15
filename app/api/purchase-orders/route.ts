@@ -1,19 +1,64 @@
-export const maxDuration = 10
+export const maxDuration = 15
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
+import { z } from "zod"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import * as invoiceService from "@/modules/invoicing/services/invoice.service"
+
+const poLineSchema = z.object({
+  productId: z.string().optional(),
+  description: z.string().min(1).max(500),
+  quantity: z.number().positive().max(99999),
+  unitPrice: z.number().min(0).max(9999999),
+  taxRate: z.number().min(0).max(100).optional(),
+})
+
+const createPurchaseOrderSchema = z.object({
+  clientId: z.string().min(1),
+  notes: z.string().max(5000).optional().nullable(),
+  items: z.array(poLineSchema).max(200).default([]),
+  createQuote: z.boolean().optional().default(false),
+  createOrder: z.boolean().optional().default(true),
+  createDeliveryNote: z.boolean().optional().default(false),
+  createInvoice: z.boolean().optional().default(false),
+  invoiceDocType: z.enum(["F1", "F2"]).optional().default("F1"),
+  irpfRate: z.number().min(0).max(100).optional().default(0),
+})
 
 async function nextPONumber(userId: string): Promise<string> {
   const year = new Date().getFullYear()
   const last = await prisma.purchaseOrder.findFirst({
-    where: { userId, number: { startsWith: `HP-${year}-` } },
+    where: { userId, number: { startsWith: `PED-${year}-` } },
     orderBy: { createdAt: "desc" },
     select: { number: true },
   })
   const seq = last ? parseInt(last.number.split("-")[2] ?? "0") + 1 : 1
-  return `HP-${year}-${String(seq).padStart(3, "0")}`
+  return `PED-${year}-${String(seq).padStart(3, "0")}`
 }
+
+async function nextQuoteNumber(userId: string): Promise<string> {
+  const year = new Date().getFullYear()
+  const last = await prisma.quote.findFirst({
+    where: { userId, number: { startsWith: `P-${year}-` } },
+    orderBy: { createdAt: "desc" },
+    select: { number: true },
+  })
+  const seq = last ? parseInt(last.number.split("-")[2] ?? "0") + 1 : 1
+  return `P-${year}-${String(seq).padStart(3, "0")}`
+}
+
+async function nextDNNumber(userId: string): Promise<string> {
+  const year = new Date().getFullYear()
+  const last = await prisma.deliveryNote.findFirst({
+    where: { userId, number: { startsWith: `ALB-${year}-` } },
+    orderBy: { createdAt: "desc" },
+    select: { number: true },
+  })
+  const seq = last ? parseInt(last.number.split("-")[2] ?? "0") + 1 : 1
+  return `ALB-${year}-${String(seq).padStart(3, "0")}`
+}
+
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions)
@@ -37,37 +82,57 @@ export async function GET(req: NextRequest) {
         ],
       }),
     },
-    include: {
+    select: {
+      id: true, number: true, status: true, issueDate: true, total: true, notes: true,
+      convertedToDeliveryNoteId: true, convertedToInvoiceId: true,
       client: { select: { id: true, name: true, email: true } },
       quote: { select: { id: true, number: true } },
-      items: true,
     },
     orderBy: { createdAt: "desc" },
   })
-  return NextResponse.json({ success: true, orders })
+
+  // Enrich with linked delivery note and invoice numbers
+  const dnIds = orders.map(o => o.convertedToDeliveryNoteId).filter(Boolean) as string[]
+  const invIds = orders.map(o => o.convertedToInvoiceId).filter(Boolean) as string[]
+  const [dns, invs] = await Promise.all([
+    dnIds.length ? prisma.deliveryNote.findMany({ where: { id: { in: dnIds } }, select: { id: true, number: true, status: true } }) : [],
+    invIds.length ? prisma.invoice.findMany({ where: { id: { in: invIds } }, select: { id: true, number: true, status: true } }) : [],
+  ])
+  const dnMap = new Map(dns.map(d => [d.id, d]))
+  const invMap = new Map(invs.map(i => [i.id, i]))
+
+  const enriched = orders.map(o => ({
+    ...o,
+    deliveryNote: o.convertedToDeliveryNoteId ? (dnMap.get(o.convertedToDeliveryNoteId) ?? null) : null,
+    invoice: o.convertedToInvoiceId ? (invMap.get(o.convertedToInvoiceId) ?? null) : null,
+  }))
+
+  return NextResponse.json({ success: true, orders: enriched })
 }
 
-export async function POST(_req: NextRequest) {
-  return NextResponse.json(
-    { error: "Creación deshabilitada hasta implementación Verifactu", code: "VERIFACTU_PENDING" },
-    { status: 503 }
-  )
-}
-
-async function _POST_disabled(req: NextRequest) {
+export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   try {
     const body = await req.json()
-    const { clientId, notes, items = [] } = body
-    if (!clientId) return NextResponse.json({ error: "clientId required" }, { status: 400 })
+    const parsed = createPurchaseOrderSchema.safeParse(body)
+    if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Datos inválidos" }, { status: 400 })
+    const {
+      clientId, notes, items,
+      createQuote,
+      createOrder,
+      createDeliveryNote,
+      createInvoice,
+      invoiceDocType,
+      irpfRate,
+    } = parsed.data
 
     type ItemInput = { productId?: string; description: string; quantity: number; unitPrice: number; taxRate?: number }
     const lineItems: ItemInput[] = items
     let subtotal = 0
     let taxTotal = 0
-    const computed = lineItems.map((item) => {
+    const computed = lineItems.map((item: ItemInput) => {
       const taxRate = item.taxRate ?? 21
       const qty = Number(item.quantity) || 1
       const price = Number(item.unitPrice) || 0
@@ -76,31 +141,127 @@ async function _POST_disabled(req: NextRequest) {
       taxTotal += lineSub * (taxRate / 100)
       return { ...item, quantity: qty, unitPrice: price, taxRate, subtotal: lineSub }
     })
+    const irpfAmount = subtotal * (irpfRate / 100)
+    const total = subtotal + taxTotal - irpfAmount
 
-    const number = await nextPONumber(session.user.id)
-    const order = await prisma.purchaseOrder.create({
-      data: {
-        userId: session.user.id,
-        clientId,
-        number,
-        subtotal,
-        taxTotal,
-        total: subtotal + taxTotal,
-        notes: notes ?? null,
-        items: {
-          create: computed.map(i => ({
-            productId: i.productId ?? null,
-            description: i.description,
-            quantity: i.quantity,
-            unitPrice: i.unitPrice,
-            taxRate: i.taxRate,
-            subtotal: i.subtotal,
-          })),
+    // Optionally create quote first so PO and other docs can link to it
+    let quoteId: string | null = null
+    let quoteRef: { id: string; number: string } | null = null
+    if (createQuote) {
+      const qNumber = await nextQuoteNumber(session.user.id)
+      const issueDate = new Date()
+      const validUntil = new Date(issueDate)
+      validUntil.setDate(validUntil.getDate() + 30)
+      const q = await prisma.quote.create({
+        data: {
+          userId: session.user.id, clientId, number: qNumber,
+          validUntil, subtotal, taxTotal, total,
+          irpfRate: irpfRate > 0 ? irpfRate : 0,
+          irpfAmount: irpfRate > 0 ? irpfAmount : 0,
+          notes: notes ?? null,
+          items: {
+            create: computed.map(i => ({
+              productId: i.productId ?? null, description: i.description,
+              quantity: i.quantity, unitPrice: i.unitPrice, taxRate: i.taxRate, subtotal: i.subtotal,
+            })),
+          },
         },
-      },
-      include: { client: { select: { id: true, name: true, email: true } }, items: true },
-    })
-    return NextResponse.json({ success: true, order }, { status: 201 })
+        select: { id: true, number: true },
+      })
+      quoteId = q.id
+      quoteRef = q
+    }
+
+    // Create the PurchaseOrder (optional)
+    let order: { id: string; number: string } | null = null
+    if (createOrder) {
+      const poNumber = await nextPONumber(session.user.id)
+      order = await prisma.purchaseOrder.create({
+        data: {
+          userId: session.user.id, clientId,
+          ...(quoteId && { quoteId }),
+          number: poNumber, subtotal, taxTotal, total,
+          notes: notes ?? null,
+          items: {
+            create: computed.map(i => ({
+              productId: i.productId ?? null, description: i.description,
+              quantity: i.quantity, unitPrice: i.unitPrice, taxRate: i.taxRate, subtotal: i.subtotal,
+            })),
+          },
+        },
+        select: { id: true, number: true },
+      })
+    }
+
+    // Optionally create DeliveryNote
+    let dnRef: { id: string; number: string } | null = null
+    if (createDeliveryNote) {
+      const dnNumber = await nextDNNumber(session.user.id)
+      const dn = await prisma.deliveryNote.create({
+        data: {
+          userId: session.user.id, clientId,
+          ...(quoteId && { quoteId }),
+          number: dnNumber, notes: notes ?? null,
+          items: {
+            create: computed.map(i => ({
+              productId: i.productId ?? null, description: i.description,
+              quantity: i.quantity, unitPrice: i.unitPrice, delivered: true,
+            })),
+          },
+        },
+        select: { id: true, number: true },
+      })
+      dnRef = dn
+      if (quoteId) {
+        await prisma.quote.update({ where: { id: quoteId }, data: { convertedToDeliveryNoteId: dn.id } })
+      }
+    }
+
+    // Optionally create Invoice as draft via service (sets BORRADOR number, invoiceDocType, client snapshot)
+    let invoiceRef: { id: string; number: string } | null = null
+    if (createInvoice) {
+      const client = await prisma.client.findUnique({
+        where: { id: clientId },
+        select: { name: true, legalName: true, taxId: true, email: true, address: true, city: true, postalCode: true, country: true },
+      })
+      const issueDate = new Date()
+      const dueDate = new Date(issueDate)
+      dueDate.setDate(dueDate.getDate() + 30)
+      const created = await invoiceService.createInvoice({
+        userId: session.user.id, clientId, series: "INV",
+        issueDate, dueDate, currency: "EUR",
+        notes: notes ?? null,
+        invoiceDocType: invoiceDocType === "F2" ? "F2" : "F1",
+        clientSnapshot: client ? {
+          name: client.name ?? null, legalName: client.legalName ?? null, taxId: client.taxId ?? null,
+          email: client.email ?? null, address: client.address ?? null, city: client.city ?? null,
+          postalCode: client.postalCode ?? null, country: client.country ?? null,
+        } : null,
+        lines: computed.map(i => ({
+          description: i.description, quantity: i.quantity, unitPrice: i.unitPrice, taxPercent: i.taxRate,
+        })),
+      })
+      if (created) {
+        invoiceRef = created
+        if (irpfRate > 0) {
+          await prisma.invoice.update({
+            where: { id: created.id },
+            data: { irpfRate, irpfAmount },
+          })
+        }
+        if (quoteId) {
+          await prisma.quote.update({ where: { id: quoteId }, data: { convertedToInvoiceId: created.id } })
+        }
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      order,
+      quote: quoteRef,
+      deliveryNote: dnRef,
+      invoice: invoiceRef,
+    }, { status: 201 })
   } catch (e) {
     console.error("POST /api/purchase-orders", e)
     return NextResponse.json({ error: "Failed to create purchase order" }, { status: 500 })

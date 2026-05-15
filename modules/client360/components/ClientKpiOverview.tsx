@@ -53,7 +53,7 @@ export function ClientKpiOverview({ kpis, salesKpis }: ClientKpiOverviewProps) {
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
       <KpiCard
         label="Ingresos totales"
-        value={loading || !salesKpis ? "—" : formatCurrency(salesKpis.totalPurchased)}
+        value={loading ? "—" : formatCurrency(kpis!.totalRevenue)}
         accent
       />
       <KpiCard

@@ -6,20 +6,16 @@ import { exec } from 'child_process'
 import { promisify } from 'util'
 import fs from 'fs'
 import path from 'path'
+import { prisma } from '@/lib/prisma'
 
 const execAsync = promisify(exec)
 
-// Only allow admin users
 async function checkAdminAccess() {
  const session = await getServerSession(authOptions)
+ if (!session?.user?.id) return { error: 'Unauthorized', status: 401 }
 
- if (!session?.user?.id) {
- return { error: 'Unauthorized', status: 401 }
- }
-
- // TODO: Check if user has admin role
- // For now, allow all authenticated users
- // In production, check: session.user.role === 'ADMIN'
+ const u = await prisma.user.findUnique({ where: { id: session.user.id }, select: { role: true } })
+ if (!u || u.role !== 'ADMIN') return { error: 'Acceso restringido a administradores', status: 403 }
 
  return { user: session.user }
 }

@@ -47,3 +47,10 @@ next-env.d.ts
 /docs/landing-ref
 # Protected uploads (served via /api/files/ with auth)
 /uploads/
+
+# Backup files
+*.backup
+*.backup2
+*.bak
+*.old.ts
+*.old.tsx

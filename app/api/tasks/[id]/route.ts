@@ -43,7 +43,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
  }
 }
 
-/** PATCH body: allow editing title, description, dueDate, startAt, endAt, priority, assignedToId, status, completedAt, estimatedMinutes, latitude, longitude, routeOrder, projectId, assigneeIds */
+/** PATCH body: allow editing title, description, dueDate, startAt, endAt, priority, assignedToId, status, completedAt, estimatedMinutes, latitude, longitude, routeOrder, projectId, assigneeIds, meetingUrl, meetingType, meetingNotes */
 export type UpdateTaskBody = {
  title?: string
  description?: string | null
@@ -61,6 +61,9 @@ export type UpdateTaskBody = {
  routeOrder?: number | null
  projectId?: string | null
  assigneeIds?: string[] | null
+ meetingUrl?: string | null
+ meetingType?: string | null
+ meetingNotes?: string | null
 }
 
 /**
@@ -104,6 +107,9 @@ export async function PATCH(
  longitude?: number | null
  routeOrder?: number | null
  projectId?: string | null
+ meetingUrl?: string | null
+ meetingType?: string | null
+ meetingNotes?: string | null
  updatedAt: Date
  } = { updatedAt: new Date() }
 
@@ -130,6 +136,9 @@ export async function PATCH(
  if (body.longitude !== undefined) data.longitude = body.longitude ?? null
  if (body.routeOrder !== undefined) data.routeOrder = body.routeOrder ?? null
  if (body.projectId !== undefined) data.projectId = body.projectId ?? null
+ if (body.meetingUrl !== undefined) data.meetingUrl = body.meetingUrl ?? null
+ if (body.meetingType !== undefined) data.meetingType = body.meetingType ?? null
+ if (body.meetingNotes !== undefined) data.meetingNotes = body.meetingNotes ?? null
 
  // Handle multi-assignee update
  if (body.assigneeIds !== undefined) {

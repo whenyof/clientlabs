@@ -20,7 +20,7 @@ import {
  SelectTrigger,
  SelectValue,
 } from "@/components/ui/select"
-import { Loader2 } from "lucide-react"
+import { Loader2, Video } from "lucide-react"
 import { toast } from "sonner"
 import type { MissionControlCalendarItem } from "./types"
 
@@ -300,7 +300,17 @@ export function MissionTaskPanel({
  )}
  </div>
 
- <SheetFooter className="border-t border-zinc-800">
+ <SheetFooter className="border-t border-zinc-800 flex-col gap-2">
+ {!isReminder && task.meetingUrl && (
+   <Button
+     type="button"
+     className="w-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-2"
+     onClick={() => window.open(`/meeting/${task.id}`, "_blank")}
+   >
+     <Video className="w-4 h-4" />
+     Iniciar reunión
+   </Button>
+ )}
  {isReminder ? (
  <Button
  type="button"

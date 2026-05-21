@@ -3,7 +3,7 @@
 import { useState, memo, useEffect } from "react"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
-import { MoreHorizontal, Calendar, Users, FileText, Phone, Mail } from "lucide-react"
+import { MoreHorizontal, Calendar, Users, FileText, Phone, Mail, Video } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -36,6 +36,8 @@ export type Task = {
  leadId?: string | null
  leadName?: string | null
  createdAt: Date | string
+ meetingUrl?: string | null
+ meetingType?: string | null
 }
 
 type TaskCardProps = {
@@ -182,6 +184,18 @@ export const TaskCard = memo(function TaskCard({ task, onUpdate, onDelete }: Tas
  )}
  </div>
  </div>
+
+ {/* Botón reunión */}
+ {task.meetingUrl && (
+   <button
+     onClick={e => { e.stopPropagation(); window.open(`/meeting/${task.id}`, "_blank") }}
+     className="flex-shrink-0 flex items-center gap-1 px-2 py-1 rounded-md bg-emerald-600/10 border border-emerald-600/20 text-emerald-400 text-[11px] font-medium hover:bg-emerald-600/20 transition-colors"
+     title="Iniciar reunión"
+   >
+     <Video className="h-3 w-3" />
+     <span className="hidden sm:inline">Reunión</span>
+   </button>
+ )}
 
  {/* Actions */}
  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">

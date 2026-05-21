@@ -24,6 +24,7 @@ export type CalendarTask = {
  /** Overlap index when multiple tasks overlap (0 = first column) */
  overlapIndex?: number
  overlapTotal?: number
+ meetingUrl?: string | null
 }
 
 /** Raw task from API (GET /api/tasks). */
@@ -43,6 +44,8 @@ export type ApiTaskRaw = {
  completedAt?: string | null
  Client?: { id: string; name: string } | null
  Lead?: { id: string; name: string } | null
+ meetingUrl?: string | null
+ meetingType?: string | null
 }
 
 const DEFAULT_DURATION_MIN = 30
@@ -84,6 +87,7 @@ export function mapApiTaskToCalendarTask(raw: ApiTaskRaw, dayKey: string): Calen
  assignedTo: raw.assignedTo ?? null,
  clientName: raw.Client?.name ?? null,
  leadName: raw.Lead?.name ?? null,
+ meetingUrl: raw.meetingUrl ?? null,
  }
 }
 

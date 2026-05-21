@@ -1569,6 +1569,9 @@ model Task {
   startAt                DateTime?
   endAt                  DateTime?
   slaMinutes             Int?
+  meetingUrl             String?
+  meetingType            String?
+  meetingNotes           String?            @db.Text
   Client                 Client?            @relation(fields: [clientId], references: [id])
   Lead                   Lead?              @relation(fields: [leadId], references: [id])
   parentTask             Task?              @relation("TaskSubtasks", fields: [parentTaskId], references: [id])

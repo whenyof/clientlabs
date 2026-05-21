@@ -34,6 +34,8 @@ export type CalendarEvent = {
  assignedTo?: string
  clientName?: string | null
  leadName?: string | null
+ meetingUrl?: string | null
+ meetingType?: string | null
 }
 
 const DEFAULT_DURATION_MINUTES = 30
@@ -82,5 +84,7 @@ export function mapTaskToCalendarEvent(task: TaskForCalendar): CalendarEvent {
  : {}),
  ...(task.Client != null ? { clientName: task.Client.name } : {}),
  ...(task.Lead != null ? { leadName: task.Lead.name } : {}),
+ ...(task.meetingUrl != null ? { meetingUrl: task.meetingUrl } : {}),
+ ...(task.meetingType != null ? { meetingType: task.meetingType } : {}),
  }
 }

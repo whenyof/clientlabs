@@ -16,6 +16,8 @@ export type MissionControlTask = {
  assignedTo: string | null
  clientName?: string | null
  leadName?: string | null
+ meetingUrl?: string | null
+ meetingType?: string | null
 }
 
 /** Tipo de ítem en el calendario unificado. */

@@ -2,6 +2,7 @@
 
 import { memo } from "react"
 import { cn } from "@/lib/utils"
+import { Video } from "lucide-react"
 import type { CalendarTask } from "./types"
 
 type TaskBlockProps = {
@@ -68,7 +69,8 @@ export const TaskBlock = memo(function TaskBlock({
  }}
  >
  <div className="px-2 py-1 h-full overflow-hidden flex flex-col justify-center">
- <span className="text-xs font-medium text-[var(--text-primary)] truncate block">
+ <span className="text-xs font-medium text-[var(--text-primary)] truncate flex items-center gap-1">
+ {task.meetingUrl && <Video className="w-2.5 h-2.5 shrink-0 opacity-80" />}
  {task.title}
  </span>
  {(task.clientName || task.leadName) && (

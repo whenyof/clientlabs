@@ -27,6 +27,9 @@ export interface DashboardTask {
   Lead: { id: string; name: string } | null
   project: { id: string; name: string; color: string } | null
   assignees: { userId: string; user: TaskAssigneeUser }[]
+  meetingUrl: string | null
+  meetingType: string | null
+  meetingNotes: string | null
 }
 
 export interface TasksKPIsData {

@@ -28,4 +28,6 @@ export type CalendarItem = {
  estimatedMinutes?: number | null
  dueDate?: string | null
  startAt?: string | null
+ meetingUrl?: string | null
+ meetingType?: string | null
 }

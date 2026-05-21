@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef } from "react"
-import { X, Loader2, CheckSquare, ChevronDown, Trash2, RotateCcw, User, Users } from "lucide-react"
+import { X, Loader2, CheckSquare, ChevronDown, Trash2, RotateCcw, User, Users, Video, ChevronRight } from "lucide-react"
 import { DatePickerField } from "./DatePickerField"
 import { TimePickerField } from "./TimePickerField"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -104,7 +104,15 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
       if (editTask.clientId) { setEntityType("CLIENT"); setEntityId(editTask.clientId) }
       else if (editTask.leadId) { setEntityType("LEAD"); setEntityId(editTask.leadId) }
       else { setEntityType(""); setEntityId("") }
-      // Note: PROVIDER tasks use sourceModule/sourceId — no direct field to restore
+      if (editTask.meetingUrl) {
+        setShowMeeting(true)
+        setMeetingUrl(editTask.meetingUrl)
+        setMeetingType(editTask.meetingType ?? "google_meet")
+      } else {
+        setShowMeeting(false)
+        setMeetingUrl("")
+        setMeetingType("google_meet")
+      }
     } else {
       setTitle("")
       setDescription("")
@@ -113,6 +121,9 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
       setDueTime(defaultDueTime ?? "")
       setEntityType(defaultEntityType ?? "")
       setEntityId(defaultEntityId ?? "")
+      setShowMeeting(false)
+      setMeetingUrl("")
+      setMeetingType("google_meet")
     }
   }, [open, editTask, defaultPriority, defaultDueDate, defaultDueTime])
 
@@ -191,11 +202,16 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
     return fetchEntities(entityType)
   }, [open, entityType, fetchEntities])
 
+  const [showMeeting, setShowMeeting] = useState(false)
+  const [meetingUrl, setMeetingUrl] = useState("")
+  const [meetingType, setMeetingType] = useState("google_meet")
+
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
   const handleClose = () => {
     setTitle(""); setDescription(""); setEntityType(""); setEntityId(""); setAssignedToId(""); setProjectId(""); setSelectedAssignees([])
+    setShowMeeting(false); setMeetingUrl(""); setMeetingType("google_meet")
     setShowDeleteConfirm(false)
     onClose()
   }
@@ -251,6 +267,8 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
         assignedToId: assignedToId || null,
         projectId: projectId || null,
         assigneeIds: selectedAssignees.length > 0 ? selectedAssignees : null,
+        meetingUrl: showMeeting && meetingUrl.trim() ? meetingUrl.trim() : null,
+        meetingType: showMeeting && meetingUrl.trim() ? meetingType : null,
       }
       const url = editTask ? `/api/tasks/${editTask.id}` : "/api/tasks"
       const method = editTask ? "PATCH" : "POST"
@@ -474,6 +492,61 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
                 )
               )}
             </div>
+          </div>
+          {/* Meeting section */}
+          <div>
+            <button
+              type="button"
+              onClick={() => setShowMeeting(prev => !prev)}
+              style={{ display: "flex", alignItems: "center", gap: 8, background: "none", border: "none", cursor: "pointer", padding: "6px 0", color: showMeeting ? "#1FA97A" : "var(--text-secondary)", fontSize: 13, fontWeight: showMeeting ? 600 : 400 }}
+            >
+              <Video style={{ width: 14, height: 14 }} />
+              {showMeeting ? "Quitar reunión" : "Añadir link de reunión"}
+              <ChevronRight style={{ width: 12, height: 12, transform: showMeeting ? "rotate(90deg)" : "none", transition: "transform 0.15s" }} />
+            </button>
+
+            {showMeeting && (
+              <div style={{ marginTop: 10, padding: "12px 14px", background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", borderRadius: 10, display: "flex", flexDirection: "column", gap: 10 }}>
+                {/* Tipo */}
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                  {[
+                    { id: "google_meet", label: "Google Meet", dot: "#1FA97A" },
+                    { id: "zoom", label: "Zoom", dot: "#2D8CFF" },
+                    { id: "teams", label: "Teams", dot: "#7B5EA7" },
+                    { id: "other", label: "Otro", dot: "#94A3B8" },
+                  ].map(t => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setMeetingType(t.id)}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 6,
+                        padding: "5px 10px", borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: "pointer",
+                        border: meetingType === t.id ? `1.5px solid ${t.dot}` : "1px solid var(--border-subtle)",
+                        background: meetingType === t.id ? `${t.dot}12` : "var(--bg-card)",
+                        color: meetingType === t.id ? t.dot : "var(--text-secondary)",
+                        transition: "all 0.12s",
+                      }}
+                    >
+                      <span style={{ width: 8, height: 8, borderRadius: "50%", background: t.dot, flexShrink: 0 }} />
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+                {/* URL */}
+                <input
+                  value={meetingUrl}
+                  onChange={e => setMeetingUrl(e.target.value)}
+                  placeholder={
+                    meetingType === "google_meet" ? "https://meet.google.com/xxx-xxxx-xxx" :
+                    meetingType === "zoom" ? "https://zoom.us/j/xxxxxxxxx" :
+                    meetingType === "teams" ? "https://teams.microsoft.com/l/meetup-join/..." :
+                    "https://..."
+                  }
+                  style={{ ...inputStyle, fontSize: 12 }}
+                />
+              </div>
+            )}
           </div>
         </div>
 

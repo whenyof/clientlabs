@@ -17,7 +17,7 @@ import {
  type DragStartEvent,
  type DragOverEvent,
 } from "@dnd-kit/core"
-import { MoreHorizontal, Calendar, Loader2 } from "lucide-react"
+import { MoreHorizontal, Calendar, Loader2, Video } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { TaskDialog } from "@/components/tasks/TaskDialog"
 import { MissionTaskPanel } from "./MissionTaskPanel"
@@ -76,6 +76,8 @@ function calendarItemToDisplayItem(ev: CalendarItem): MissionControlCalendarItem
  assignedTo: ev.assignedTo ?? null,
  clientName: ev.clientName ?? null,
  leadName: ev.leadName ?? null,
+ meetingUrl: ev.meetingUrl ?? null,
+ meetingType: ev.meetingType ?? null,
  }
  return { ...base, kind: ev.kind }
 }
@@ -277,7 +279,8 @@ function DraggableTaskCard({
  if (!isSaving) onOpenPanel(task)
  }}
  >
- <p className="text-sm font-medium truncate" title={task.title}>
+ <p className="text-sm font-medium truncate flex items-center gap-1" title={task.title}>
+ {task.meetingUrl && <Video className="w-3 h-3 shrink-0 opacity-80" />}
  {task.title}
  </p>
  {task.startAt && (

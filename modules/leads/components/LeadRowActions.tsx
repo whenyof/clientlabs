@@ -85,6 +85,7 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
    }
    queryClient.invalidateQueries({ queryKey: ["leads"] })
    queryClient.invalidateQueries({ queryKey: ["leads-kpis"] })
+   queryClient.invalidateQueries({ queryKey: ["leads-kanban"] })
  } catch {
    queryClient.invalidateQueries({ queryKey: ["leads"] })
    toast.error(ui.toastErrorStatus)
@@ -143,6 +144,7 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
    toast.success(ui.toastMarkedLost)
    queryClient.invalidateQueries({ queryKey: ["leads"] })
    queryClient.invalidateQueries({ queryKey: ["leads-kpis"] })
+   queryClient.invalidateQueries({ queryKey: ["leads-kanban"] })
  } catch (error) {
    console.error(error)
    queryClient.invalidateQueries({ queryKey: ["leads"] })
@@ -176,6 +178,10 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
    toast.success(result.clientCreated ? ui.toastConverted : ui.toastConvertedLinked)
    queryClient.invalidateQueries({ queryKey: ["leads"] })
    queryClient.invalidateQueries({ queryKey: ["leads-kpis"] })
+   queryClient.invalidateQueries({ queryKey: ["leads-kanban"] })
+   queryClient.invalidateQueries({ queryKey: ["clients"] })
+   queryClient.invalidateQueries({ queryKey: ["clients-kpis"] })
+   queryClient.invalidateQueries({ queryKey: ["activation-checklist"] })
  } catch (error) {
    console.error(error)
    queryClient.invalidateQueries({ queryKey: ["leads"] })

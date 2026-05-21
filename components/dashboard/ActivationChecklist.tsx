@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useQuery } from "@tanstack/react-query"
 import { cn } from "@/lib/utils"
-import { Users, Target, FileText, Building2, Zap, Check, ChevronRight } from "lucide-react"
+import { Users, Target, FileText, Building2, Zap, Check, ChevronRight, Rocket } from "lucide-react"
 
 const STEPS = [
   { key: "addedClient",       label: "Añade tu primer cliente",          description: "Tarda 1 minuto",                    href: "/dashboard/clients",                      Icon: Users },
@@ -23,12 +23,12 @@ export function ActivationChecklist() {
     queryKey: ["activation-checklist"],
     queryFn: () => fetch("/api/onboarding/checklist").then((r) => r.json()),
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    refetchOnMount: true,
     retry: 0,
-    staleTime: 60_000,
+    staleTime: 30_000,
   })
 
-  if (isLoading || !data || data.onboardingCompleted) return null
+  if (isLoading || !data) return null
 
   const checklist = data.checklist
   const completed = STEPS.filter((s) => checklist[s.key]).length
@@ -39,15 +39,18 @@ export function ActivationChecklist() {
   const percent = (completed / STEPS.length) * 100
 
   return (
-    <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-5 mb-4">
-      <div className="flex items-center justify-between mb-3">
-        <div>
-          <h2 className="text-[15px] font-semibold text-slate-900">Primeros pasos</h2>
-          <p className="text-[12px] text-slate-500 mt-0.5">Completa los 5 pasos para sacarle el máximo partido</p>
+    <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 mb-4">
+      {/* Header */}
+      <div className="flex items-start gap-3 mb-4">
+        <div className="w-9 h-9 rounded-xl bg-emerald-500 flex items-center justify-center shrink-0">
+          <Rocket className="h-4.5 w-4.5 text-white" strokeWidth={2} />
         </div>
-        <div className="text-right">
-          <span className="text-xl font-bold text-emerald-600">{completed}/5</span>
-          <p className="text-[10px] text-slate-400">completados</p>
+        <div className="flex-1 min-w-0">
+          <h2 className="text-[14px] font-semibold text-slate-900 leading-tight">Primeros pasos</h2>
+          <p className="text-[11.5px] text-slate-400 mt-0.5">Completa la configuración inicial de tu cuenta</p>
+        </div>
+        <div className="text-right shrink-0">
+          <span className="text-[18px] font-bold text-emerald-600 leading-none">{completed}/5</span>
         </div>
       </div>
 
@@ -101,8 +104,8 @@ export function ActivationChecklist() {
       </div>
 
       {completed > 0 && (
-        <p className="text-[11px] text-emerald-600 text-center mt-3">
-          Vas genial — faltan {5 - completed} pasos para completar la configuración.
+        <p className="text-[11px] text-emerald-600 font-medium mt-3 pl-1">
+          ¡Vas genial! {5 - completed} {5 - completed === 1 ? "paso" : "pasos"} más para terminar.
         </p>
       )}
     </div>

@@ -11,7 +11,7 @@ export const getDbUserForSession = cache(async (userId: string) => {
   return safePrismaQuery(
     () => prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, onboardingCompleted: true },
+      select: { id: true, onboardingCompleted: true, stripeSubscriptionId: true },
     }),
     3,   // up to 3 retries
     800  // 800ms initial delay, doubles each retry

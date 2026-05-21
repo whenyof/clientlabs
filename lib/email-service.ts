@@ -35,16 +35,33 @@ interface TaskItem {
   time?: string | null
 }
 
+function stripHtml(html: string): string {
+  return html
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&#847;/g, "")
+    .replace(/\s{2,}/g, " ")
+    .trim()
+}
+
 export async function sendWelcomeEmail(to: string, name: string) {
   const tpl = onboardingWelcomeEmail(name)
-  return sendEmail(to, tpl.subject, tpl.html, tpl.from)
+  return sendEmail(to, tpl.subject, tpl.html, tpl.from, stripHtml(tpl.html), "errepe@clientlabs.io")
 }
 
 export async function sendOnboardingEmail(
   to: string,
   template: { subject: string; html: string; from: string }
 ) {
-  return sendEmail(to, template.subject, template.html, template.from)
+  return sendEmail(
+    to,
+    template.subject,
+    template.html,
+    template.from,
+    stripHtml(template.html),
+    "errepe@clientlabs.io"
+  )
 }
 
 export async function sendVerificationEmail(to: string, name: string, verifyUrl: string) {

@@ -3,6 +3,7 @@ import { getBaseUrl } from "@/lib/api/baseUrl"
 
 
 import { useState, useCallback, useEffect, useRef, useMemo } from "react"
+import { useQueryClient } from "@tanstack/react-query"
 import { Plus, ChevronDown, X, Shield } from "lucide-react"
 import { BannerLegal } from "@/components/finance/BannerLegal"
 import { ImportarDocumento } from "@/components/finance/ImportarDocumento"
@@ -97,6 +98,7 @@ function computeHeaderTotals(invoices: InvoiceListItem[]) {
 }
 
 export function InvoiceView() {
+  const queryClient = useQueryClient()
   const [invoices, setInvoices] = useState<InvoiceListItem[]>([])
   const [clients, setClients] = useState<ClientOption[]>([])
   const [filters, setFilters] = useState<InvoiceFiltersState>(defaultFilters)
@@ -416,13 +418,17 @@ export function InvoiceView() {
   const handleCreateSuccess = useCallback(
     (id: string, number: string) => {
       refresh()
+      queryClient.invalidateQueries({ queryKey: ["activation-checklist"] })
+      queryClient.invalidateQueries({ queryKey: ["billing-kpis"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard-kpis"] })
+      queryClient.invalidateQueries({ queryKey: ["clients-kpis"] })
       setCreateOpen(false)
       setEditInvoiceId(null)
       setEditInvoiceStatus(null)
       setEditInvoice(null)
       setSelectedId(id)
     },
-    [refresh]
+    [refresh, queryClient]
   )
 
   const handleCloseCreate = useCallback(() => {

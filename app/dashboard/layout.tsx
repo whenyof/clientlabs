@@ -10,7 +10,8 @@ import DashboardShell from "@/components/layout/DashboardShell"
  * Single source of truth for dashboard access (SERVER ONLY).
  * - No auth → /auth
  * - No DB user → /auth
- * - Onboarding incomplete → /onboarding/sector (DB-backed; no JWT here to avoid loops)
+ * - No Stripe subscription + onboarding incomplete → /plan (pick a plan first)
+ * - Has Stripe subscription + onboarding incomplete → /onboarding
  */
 export default async function DashboardLayout({
   children,
@@ -30,6 +31,10 @@ export default async function DashboardLayout({
   }
 
   if (!dbUser.onboardingCompleted) {
+    // No Stripe subscription yet → must pick a plan before onboarding
+    if (!dbUser.stripeSubscriptionId) {
+      redirect("/plan")
+    }
     redirect("/onboarding")
   }
 

@@ -12,7 +12,9 @@ export async function sendEmail(
   to: string,
   subject: string,
   html: string,
-  from?: string
+  from?: string,
+  text?: string,
+  replyTo?: string
 ): Promise<{ success: boolean; id?: string; mock?: boolean; error?: unknown }> {
   const resend = getResend()
   if (!resend) {
@@ -20,12 +22,15 @@ export async function sendEmail(
   }
   try {
     const fromAddress = from || process.env.RESEND_FROM_EMAIL || process.env.EMAIL_FROM || "ClientLabs <onboarding@resend.dev>"
-    const { data, error } = await resend.emails.send({
+    const payload: Parameters<typeof resend.emails.send>[0] = {
       from: fromAddress,
       to,
       subject,
       html,
-    })
+      ...(text    && { text }),
+      ...(replyTo && { reply_to: replyTo }),
+    }
+    const { data, error } = await resend.emails.send(payload)
     if (error) {
       console.error("[EMAIL] Error:", error)
       return { success: false, error }

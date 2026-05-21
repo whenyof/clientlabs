@@ -41,30 +41,25 @@ export async function GET() {
   const configuredTax  = Boolean(businessProfile?.taxId && businessProfile?.address)
   const createdAutomation = automationCount > 0
 
-  const updates: Record<string, Date> = {}
-  if (addedClient && !user?.firstClientAt)     updates.firstClientAt     = new Date()
-  if (addedLead && !user?.firstLeadAt)         updates.firstLeadAt       = new Date()
-  if (createdInvoice && !user?.firstInvoiceAt) updates.firstInvoiceAt    = new Date()
-  if (createdAutomation && !user?.firstAutomationAt) updates.firstAutomationAt = new Date()
-  if (configuredTax && !user?.taxConfiguredAt)  updates.taxConfiguredAt  = new Date()
-
   const allDone = addedClient && addedLead && createdInvoice && configuredTax && createdAutomation
-  if (allDone && !user?.onboardingCompleted) {
-    updates.onboardingCompleted = new Date() as unknown as Date
-  }
 
-  if (Object.keys(updates).length > 0) {
+  const milestoneUpdates: Record<string, Date> = {}
+  if (addedClient && !user?.firstClientAt)           milestoneUpdates.firstClientAt     = new Date()
+  if (addedLead && !user?.firstLeadAt)               milestoneUpdates.firstLeadAt       = new Date()
+  if (createdInvoice && !user?.firstInvoiceAt)       milestoneUpdates.firstInvoiceAt    = new Date()
+  if (createdAutomation && !user?.firstAutomationAt) milestoneUpdates.firstAutomationAt = new Date()
+  if (configuredTax && !user?.taxConfiguredAt)       milestoneUpdates.taxConfiguredAt   = new Date()
+
+  if (Object.keys(milestoneUpdates).length > 0) {
     await prisma.user.update({
       where: { id: userId },
-      data: {
-        ...updates,
-        ...(allDone ? { onboardingCompleted: true } : {}),
-      },
+      data: milestoneUpdates,
     })
   }
 
   return NextResponse.json({
     checklist: { addedClient, addedLead, createdInvoice, configuredTax, createdAutomation },
-    onboardingCompleted: allDone || Boolean(user?.onboardingCompleted),
+    // onboardingCompleted reflects activation steps only, not the setup wizard flag
+    onboardingCompleted: allDone,
   })
 }

@@ -78,17 +78,14 @@ export async function POST(req: NextRequest) {
       mode: "subscription",
       locale: "es",
       payment_method_types: ["card"],
-      // Collect payment method only if required — allows 14-day trial without entering a card
-      payment_method_collection: "if_required",
+      // Always collect card upfront — stored but not charged during the 14-day trial
+      payment_method_collection: "always",
       // client_reference_id = userId como fallback extra en el webhook
       client_reference_id: session.user.id,
       metadata: { userId: session.user.id, plan, period },
       line_items: [{ price: priceId, quantity: 1 }],
       subscription_data: {
         trial_period_days: 14,
-        trial_settings: {
-          end_behavior: { missing_payment_method: "cancel" },
-        },
         metadata: { userId: session.user.id, plan, period },
       },
       success_url: successUrl,

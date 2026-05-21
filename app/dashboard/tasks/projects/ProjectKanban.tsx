@@ -82,7 +82,10 @@ function TaskCard({ task, projectId, memberColors }: { task: ProjectTask; projec
       if (ctx?.prev) qc.setQueryData(["project-tasks", projectId], ctx.prev)
       toast.error("Error al actualizar")
     },
-    onSettled: () => qc.invalidateQueries({ queryKey: ["project-tasks", projectId] }),
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ["project-tasks", projectId] })
+      qc.invalidateQueries({ queryKey: ["projects"] })
+    },
   })
 
   return (

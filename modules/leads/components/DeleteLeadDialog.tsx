@@ -39,6 +39,7 @@ export function DeleteLeadDialog({ open, onClose, leadId, leadName, onDeleted }:
  removeLead(leadId)
  queryClient.invalidateQueries({ queryKey: ["leads"] })
  queryClient.invalidateQueries({ queryKey: ["leads-kpis"] })
+ queryClient.invalidateQueries({ queryKey: ["leads-kanban"] })
  toast.success(ui.toastDeleted)
  onClose()
  if (onDeleted) {

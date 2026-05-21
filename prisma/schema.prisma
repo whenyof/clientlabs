@@ -1023,6 +1023,8 @@ model User {
   referredBy             Referral[]              @relation("UserReferred")
   userTemplates          UserTemplate[]
   recurringInvoices      RecurringInvoice[]
+  emailCampaigns         EmailCampaign[]
+  publicForms            PublicForm[]
   calendarFeedToken      String?                 @unique
 }
 
@@ -3266,4 +3268,45 @@ model RecurringInvoiceItem {
 
   @@index([recurringInvoiceId])
   @@map("recurring_invoice_items")
+}
+
+model EmailCampaign {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  nombre          String
+  asunto          String
+  contenido       String    @db.Text
+  recipientFilter Json
+  estado          String    @default("borrador")
+  scheduledAt     DateTime?
+  sentAt          DateTime?
+  totalEnviados   Int       @default(0)
+  totalAbiertos   Int       @default(0)
+  totalClicks     Int       @default(0)
+  totalErrores    Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("email_campaigns")
+}
+
+model PublicForm {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token          String   @unique @default(cuid())
+  nombre         String
+  descripcion    String?
+  fields         Json
+  successMessage String?  @default("Gracias, te contactaremos pronto.")
+  redirectUrl    String?
+  active         Boolean  @default(true)
+  submissions    Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId])
+  @@map("public_forms")
 }

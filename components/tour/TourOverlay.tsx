@@ -26,6 +26,7 @@ export function TourOverlay() {
   function handleNext() {
     if (isLast) {
       stop()
+      router.push("/dashboard")
     } else {
       router.push(TOUR_STEPS[step + 1].href) // navigate first — instant
       next()                                   // then update step state

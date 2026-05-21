@@ -96,6 +96,7 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
       if (!res.ok) throw new Error("Failed")
       toast.success("Proyecto creado")
       qc.invalidateQueries({ queryKey: ["projects"] })
+      qc.invalidateQueries({ queryKey: ["tasks"] })
       handleClose()
     } catch {
       toast.error("Error al crear el proyecto")

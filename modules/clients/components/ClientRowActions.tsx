@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { useQueryClient } from "@tanstack/react-query"
 import type { Client } from "@prisma/client"
 import { Button } from "@/components/ui/button"
 import {
@@ -28,6 +29,7 @@ import { toast } from "sonner"
 export function ClientRowActions({ client }: { client: Client }) {
  const { labels } = useSectorConfig()
  const router = useRouter()
+ const queryClient = useQueryClient()
  const [loading, setLoading] = useState(false)
  const [editDialog, setEditDialog] = useState(false)
  const [noteDialog, setNoteDialog] = useState(false)
@@ -51,6 +53,8 @@ export function ClientRowActions({ client }: { client: Client }) {
  return
  }
  setEditDialog(false)
+ queryClient.invalidateQueries({ queryKey: ["clients"] })
+ queryClient.invalidateQueries({ queryKey: ["clients-kpis"] })
  router.refresh()
  toast.success(labels.clients.singular + " actualizado correctamente")
  } catch (error) {
@@ -94,6 +98,8 @@ export function ClientRowActions({ client }: { client: Client }) {
      })
      if (!res.ok) throw new Error()
      toast.success(isCurrentlyVip ? "Cliente ya no es VIP" : "Cliente marcado como VIP")
+     queryClient.invalidateQueries({ queryKey: ["clients"] })
+     queryClient.invalidateQueries({ queryKey: ["clients-kpis"] })
      router.refresh()
    } catch {
      toast.error("Error al actualizar")

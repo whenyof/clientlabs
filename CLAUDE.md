@@ -309,3 +309,43 @@ semgrep --config p/owasp-top-ten --config p/nextjs .
 gitleaks detect --source . --log-level warn
 npm audit
 ```
+
+---
+
+## Knowledge base — Obsidian vault
+
+El vault está en `/Users/iyanrp_/Desktop/ClientLabs-Vault/`. El MCP `obsidian-vault` puede no apuntar a él si la sesión arrancó incorrectamente — en ese caso usar Bash con rutas absolutas.
+
+**Al terminar cada sesión de trabajo** (o al alcanzar un hito significativo dentro de ella), actualiza el vault:
+
+1. **Features tocadas** — edita la nota correspondiente en `02-Features/` y actualiza el campo `updated:` del frontmatter.
+2. **Problemas descubiertos** — crea nota en `04-Problemas/ABIERTOS/` con frontmatter completo (`severidad`, `area`, `descubierto`).
+3. **Problemas resueltos** — mueve el archivo de `ABIERTOS/` a `RESUELTOS/` y cambia `status: resuelto`.
+4. **Decisiones técnicas importantes** — crea un ADR nuevo en `04-Problemas/ADRs/` numerado secuencialmente (`ADR-004 Título.md`).
+5. **Log de sesión** — crea o actualiza `07-Logs/YYYY-MM-DD.md` con lo trabajado, decisiones y próximos pasos.
+6. **Estado general** — si cambia el panorama (features completadas, bugs críticos, hitos alcanzados), actualiza `00-Index/Estado actual.md`.
+
+### Reglas de escritura (del vault CLAUDE.md)
+
+- Nota atómica: un concepto = una nota. No mezclar temas.
+- Frontmatter YAML obligatorio en cada nota (`type`, `status`, `area`, `updated`).
+- Wikilinks `[[Nombre de nota]]` para enlazar conceptos relacionados.
+- Diagramas en Mermaid cuando aporten claridad.
+- Atemporal: escribir como documentación válida en 6 meses, no como log de chat.
+- No pegar código largo: explicar decisiones y referenciar rutas del repo.
+
+### Estructura de carpetas del vault
+
+```
+00-Index/        → Dashboard, estado actual, roadmap
+01-Infraestructura/
+02-Features/
+03-Arquitectura/
+04-Problemas/
+  ABIERTOS/
+  RESUELTOS/
+  ADRs/
+05-Negocio/
+06-Legal/
+07-Logs/
+```

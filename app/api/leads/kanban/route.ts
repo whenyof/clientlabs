@@ -50,6 +50,7 @@ export async function GET() {
         temperature: true,
         stageId: true,
         createdAt: true,
+        tags: true,
       },
       orderBy: { createdAt: "desc" },
       take: 200,

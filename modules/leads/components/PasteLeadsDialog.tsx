@@ -174,10 +174,11 @@ export function PasteLeadsDialog({
   onOpenChange: (open: boolean) => void
 }) {
   const queryClient = useQueryClient()
-  const [step, setStep] = useState<"paste" | "preview" | "importing">("paste")
+  const [step, setStep] = useState<"paste" | "preview" | "importing" | "result">("paste")
   const [pastedText, setPastedText] = useState("")
   const [leads, setLeads] = useState<ParsedLead[]>([])
   const [loading, setLoading] = useState(false)
+  const [importResult, setImportResult] = useState<{ created: number; skipped: number; invalid: number } | null>(null)
 
   const handleAnalyze = () => {
     if (!pastedText.trim()) return
@@ -216,13 +217,12 @@ export function PasteLeadsDialog({
     try {
       const result = await importLeads(leadsToImport, "csv")
       if (result.success) {
-        toast.success("Importación completada", {
-          description: `${result.created} leads creados · ${result.skipped} duplicados omitidos · ${result.invalid} inválidos omitidos`,
-        })
+        setImportResult({ created: result.created ?? 0, skipped: result.skipped ?? 0, invalid: result.invalid ?? 0 })
         queryClient.invalidateQueries({ queryKey: ["leads"] })
         queryClient.invalidateQueries({ queryKey: ["leads-kpis"] })
-        onOpenChange(false)
-        resetDialog()
+        queryClient.invalidateQueries({ queryKey: ["leads-kanban"] })
+        queryClient.invalidateQueries({ queryKey: ["activation-checklist"] })
+        setStep("result")
       } else {
         toast.error(`Error: ${result.error}`)
         setStep("preview")
@@ -240,6 +240,12 @@ export function PasteLeadsDialog({
     setPastedText("")
     setLeads([])
     setLoading(false)
+    setImportResult(null)
+  }
+
+  const handleCloseResult = () => {
+    onOpenChange(false)
+    resetDialog()
   }
 
   const validCount = leads.filter((l) => !l.excluded).length
@@ -263,6 +269,7 @@ export function PasteLeadsDialog({
             {step === "paste" && "Pega emails, teléfonos y nombres — formato CSV o texto libre"}
             {step === "preview" && "Revisa y edita los leads detectados antes de importar"}
             {step === "importing" && "Importando leads..."}
+            {step === "result" && "Importación completada"}
           </DialogDescription>
         </DialogHeader>
 
@@ -426,6 +433,33 @@ export function PasteLeadsDialog({
               <p className="text-slate-700">Importando {validCount} leads...</p>
             </div>
           )}
+
+          {/* STEP 4: Result */}
+          {step === "result" && importResult && (
+            <div className="flex flex-col items-center justify-center py-10 px-6 space-y-6">
+              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-[#F0FDF8] border border-[#1FA97A]/20">
+                <CheckCircle className="h-8 w-8 text-[#1FA97A]" />
+              </div>
+              <div>
+                <h3 className="text-center text-slate-900 font-semibold text-base">Importación completada</h3>
+                <p className="text-center text-slate-500 text-sm mt-1">Los datos se han procesado correctamente</p>
+              </div>
+              <div className="grid grid-cols-3 gap-4 w-full max-w-sm">
+                <div className="bg-[#F0FDF8] rounded-xl p-4 border border-[#1FA97A]/20 text-center">
+                  <p className="text-2xl font-bold text-[#1FA97A]">{importResult.created}</p>
+                  <p className="text-xs text-slate-500 mt-1">Creados</p>
+                </div>
+                <div className="bg-amber-50 rounded-xl p-4 border border-amber-100 text-center">
+                  <p className="text-2xl font-bold text-amber-600">{importResult.skipped}</p>
+                  <p className="text-xs text-slate-500 mt-1">Duplicados omitidos</p>
+                </div>
+                <div className="bg-red-50 rounded-xl p-4 border border-red-100 text-center">
+                  <p className="text-2xl font-bold text-red-500">{importResult.invalid}</p>
+                  <p className="text-xs text-slate-500 mt-1">Inválidos omitidos</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <DialogFooter>
@@ -463,6 +497,14 @@ export function PasteLeadsDialog({
                 Importar {validCount} lead{validCount !== 1 ? "s" : ""}
               </button>
             </>
+          )}
+          {step === "result" && (
+            <button
+              onClick={handleCloseResult}
+              className="bg-[#1FA97A] text-white rounded-xl px-6 py-2.5 hover:bg-[#178f68] transition-colors text-sm font-medium"
+            >
+              Cerrar
+            </button>
           )}
         </DialogFooter>
       </DialogContent>

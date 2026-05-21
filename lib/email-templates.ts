@@ -25,7 +25,7 @@ const C = {
 }
 
 const FONT     = "'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif"
-const LOGO_URL = "https://clientlabs.io/logo-trimmed.png"
+const LOGO_URL = "https://cdn.jsdelivr.net/gh/whenyof/clientlabs@main/public/logo-trimmed.png"
 const APP_URL  = "https://app.clientlabs.io"
 
 // ── Primitive helpers ──────────────────────────────────────────────────────────
@@ -128,23 +128,21 @@ function outerWrap(inner: string): string {
 function clShell(headerBadge: string, content: string): string {
   return outerWrap(`
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
-      style="background:${C.navy};padding:20px 32px">
+      style="background:${C.navy};padding:28px 32px 22px">
       <tr>
-        <td style="vertical-align:middle">
-          <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+        <td align="center">
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 auto 10px">
             <tr>
-              <td style="vertical-align:middle;padding-right:8px">
-                <img src="${LOGO_URL}" width="28" height="28" border="0" alt="ClientLabs"
-                  style="display:block;border-radius:6px;width:28px;height:28px">
+              <td style="vertical-align:middle;padding-right:10px">
+                <img src="${LOGO_URL}" width="38" height="38" border="0" alt="ClientLabs"
+                  style="display:block;border-radius:8px;width:38px;height:38px">
               </td>
               <td style="vertical-align:middle">
-                <span style="font-size:16px;font-weight:700;color:#fff;font-family:${FONT};letter-spacing:-0.02em">ClientLabs</span>
+                <span style="font-size:20px;font-weight:700;color:#fff;font-family:${FONT};letter-spacing:-0.02em">ClientLabs</span>
               </td>
             </tr>
           </table>
-        </td>
-        <td style="vertical-align:middle;text-align:right">
-          <span style="font-size:11px;color:${C.grayLight};font-family:${FONT};background:#162936;border-radius:999px;padding:4px 12px;white-space:nowrap;display:inline-block">
+          <span style="font-size:11px;color:${C.grayLight};font-family:${FONT};background:#162936;border-radius:999px;padding:4px 14px;white-space:nowrap;display:inline-block">
             ${headerBadge}
           </span>
         </td>
@@ -156,14 +154,14 @@ function clShell(headerBadge: string, content: string): string {
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
       style="background:${C.grayBg};border-top:1px solid ${C.border};padding:24px 32px;text-align:center">
       <tr><td>
-        <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 auto 10px">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 auto 12px">
           <tr>
-            <td style="vertical-align:middle;padding-right:6px">
-              <img src="${LOGO_URL}" width="18" height="18" border="0" alt=""
-                style="display:block;border-radius:4px;width:18px;height:18px">
+            <td style="vertical-align:middle;padding-right:8px">
+              <img src="${LOGO_URL}" width="22" height="22" border="0" alt="ClientLabs"
+                style="display:block;border-radius:5px;width:22px;height:22px">
             </td>
             <td style="vertical-align:middle">
-              <span style="font-size:13px;font-weight:700;color:${C.navy};font-family:${FONT}">ClientLabs</span>
+              <span style="font-size:14px;font-weight:700;color:${C.navy};font-family:${FONT}">ClientLabs</span>
             </td>
           </tr>
         </table>
@@ -832,12 +830,35 @@ export function teamInviteEmail(
 // ── Onboarding emails (tono personal, desde errepe@clientlabs.io) ─────────────
 // NO se modifican — mantienen formato simple sin diseño pesado
 
-const ERREPE_FROM = "Errepe — ClientLabs <errepe@clientlabs.io>"
+const ERREPE_FROM = "Errepe <errepe@clientlabs.io>"
 const ERREPE_WA   = "https://wa.me/34622738109"
 const ERREPE_NUM  = "622 738 109"
 
-function erepeHtml(body: string): string {
-  return `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1E293B;max-width:560px;line-height:1.6;font-size:15px">${body}</div>`
+function erepeHtml(body: string, preheader = ""): string {
+  const preheaderHtml = preheader
+    ? `<div style="display:none;max-height:0;overflow:hidden;color:transparent;font-size:1px;line-height:1px;max-width:0;opacity:0">${preheader}&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;</div>`
+    : ""
+  return `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta name="x-apple-disable-message-reformatting">
+  <title>ClientLabs</title>
+</head>
+<body style="margin:0;padding:0;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif">
+  ${preheaderHtml}
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+    <tr><td style="padding:32px 24px">
+      <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="max-width:540px;margin:0 auto">
+        <tr><td style="color:#1E293B;font-size:15px;line-height:1.7">
+          ${body}
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`
 }
 
 export function onboardingWelcomeEmail(name: string): { subject: string; html: string; from: string } {
@@ -863,7 +884,7 @@ export function onboardingWelcomeEmail(name: string): { subject: string; html: s
         <span style="color:#64748B;font-size:13px">WhatsApp: <a href="${ERREPE_WA}" style="color:#1FA97A">${ERREPE_NUM}</a></span>
       </p>
       <p style="color:#94A3B8;font-size:12px;margin-top:24px">P.D. Puedes responderme directamente aqui — lo leo yo personalmente.</p>
-    `),
+    `, "Soy el founder — respondo personalmente a cada email"),
   }
 }
 
@@ -881,7 +902,7 @@ export function onboardingDay3Email(name: string, completedSteps: number): { sub
         <strong>Errepe</strong><br>
         <span style="color:#64748B;font-size:13px">${ERREPE_NUM}</span>
       </p>
-    `),
+    `, "Te ayudo en 10 minutos si me dices donde te atascaste"),
   }
 }
 
@@ -919,7 +940,7 @@ export function onboardingDay7Email(name: string, stats: Day7Stats): { subject: 
       ${followUp}
       <p>¿Quieres que te explique como usar las automatizaciones para que esto no se te escape? Respondeme aqui o por <a href="${ERREPE_WA}" style="color:#1FA97A">WhatsApp</a>.</p>
       <p><strong>Errepe</strong></p>
-    `),
+    `, "Resumen de tu primera semana — responde si tienes preguntas"),
   }
 }
 
@@ -936,7 +957,7 @@ export function onboardingDay10Email(name: string): { subject: string; html: str
       <p>Dimelo por aqui o por <a href="${ERREPE_WA}" style="color:#1FA97A">WhatsApp (${ERREPE_NUM})</a> y lo cuadramos.</p>
       <p><strong>Errepe</strong></p>
       <p style="color:#94A3B8;font-size:12px;margin-top:20px">P.D. Si ya tienes claro que quieres continuar — <a href="https://clientlabs.io/plan" style="color:#1FA97A">elige tu plan aqui</a>.</p>
-    `),
+    `, "Faltan 4 dias — te hago una llamada si quieres"),
   }
 }
 
@@ -955,6 +976,6 @@ export function onboardingDay14Email(name: string): { subject: string; html: str
         <strong>Errepe</strong><br>
         <span style="color:#64748B;font-size:13px">WhatsApp: <a href="${ERREPE_WA}" style="color:#1FA97A">${ERREPE_NUM}</a></span>
       </p>
-    `),
+    `, "Hoy termina — puedo darte 7 dias mas si todavia no lo viste bien"),
   }
 }

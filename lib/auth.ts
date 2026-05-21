@@ -154,8 +154,30 @@ export const authOptions: NextAuthOptions = {
  },
  },
 
+ // ─────────────────────────────────────────────
+ // EVENTS
+ // createUser fires only for new OAuth users (PrismaAdapter).
+ // Email users are created manually in /api/register with plan=TRIAL already set.
+ // ─────────────────────────────────────────────
+ events: {
+ async createUser({ user }) {
+ if (!user?.id) return
+ const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
+ await prisma.user.update({
+ where: { id: user.id },
+ data: {
+ plan: "TRIAL",
+ isTrial: true,
+ planExpiresAt: trialEndsAt,
+ onboardingCompleted: false,
+ },
+ })
+ },
+ },
+
  pages: {
  signIn: "/auth",
+ newUser: "/plan",
  },
 
  secret: process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET,

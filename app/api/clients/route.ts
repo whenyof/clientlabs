@@ -103,6 +103,14 @@ export async function POST(req: Request) {
     )
 
     notifyClientCreated(session.user.id, client.name ?? "Cliente", client.id).catch(() => {})
+
+    const { runAutomation } = await import("@/lib/automations/engine")
+    runAutomation(session.user.id, "BIENVENIDA_CLIENTE", {
+      clientId: client.id,
+      nombre: client.name ?? "",
+      email: client.email ?? "",
+    }).catch(() => {})
+
     return NextResponse.json(client)
   } catch (err) {
     console.error("POST /api/clients error:", err)

@@ -4,49 +4,37 @@ export class PipelineService {
  /**
  * Update lead stage
  */
- static async updateLeadStage(leadId: string, stageId: string, userId: string) {
+ static async updateLeadStage(leadId: string, stageId: string | null, userId: string) {
  try {
- // Verify stage belongs to user
- const stage = await prisma.pipelineStage.findFirst({
- where: {
- id: stageId,
- userId
- }
- })
+   let stageName = "Sin etapa"
 
- if (!stage) {
- throw new Error('Stage not found or access denied')
- }
+   if (stageId !== null) {
+     const stage = await prisma.pipelineStage.findFirst({ where: { id: stageId, userId } })
+     if (!stage) throw new Error('Stage not found or access denied')
+     stageName = stage.name
+   }
 
- // Update lead stage
- const updatedLead = await prisma.lead.update({
- where: { id: leadId },
- data: { stageId },
- include: {
- stage: true
- }
- })
+   const updatedLead = await prisma.lead.update({
+     where: { id: leadId },
+     data: { stageId },
+     include: { stage: true },
+   })
 
- // Log activity
- await prisma.activity.create({
- data: {
- userId,
- leadId,
- type: 'stage_change',
- title: `Stage updated to ${stage.name}`,
- description: `Lead moved to ${stage.name} stage`,
- metadata: {
- oldStage: updatedLead.stage?.name,
- newStage: stage.name,
- stageId
- }
- }
- })
+   await prisma.activity.create({
+     data: {
+       userId,
+       leadId,
+       type: 'stage_change',
+       title: `Stage updated to ${stageName}`,
+       description: `Lead moved to ${stageName} stage`,
+       metadata: { newStage: stageName, stageId },
+     },
+   })
 
- return updatedLead
+   return updatedLead
  } catch (error) {
- console.error('Error updating lead stage:', error)
- throw error
+   console.error('Error updating lead stage:', error)
+   throw error
  }
  }
 

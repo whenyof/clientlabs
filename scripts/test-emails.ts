@@ -42,15 +42,20 @@ import {
   paymentFailedEmail,
   subscriptionCancelledEmail,
   weeklyBusinessSummaryEmail,
+  onboardingWelcomeEmail,
+  onboardingDay3Email,
+  onboardingDay7Email,
+  onboardingDay10Email,
+  onboardingDay14Email,
 } from "../lib/email-templates"
 
 const TEST_EMAIL = "iyanrimada@gmail.com"
 const TEST_NAME  = "Iyan"
 const MOCK_MODE  = !process.env.RESEND_API_KEY
 
-// ─── Definición de los 19 emails de test ────────────────────────────────────
+// ─── Definición de los 24 emails de test ────────────────────────────────────
 
-const emails: Array<{ name: string; subject: string; html: string }> = [
+const emails: Array<{ name: string; subject: string; html: string; from?: string }> = [
   {
     name: "1. Bienvenida",
     subject: "¡Bienvenido/a a ClientLabs! 🎉",
@@ -74,7 +79,15 @@ const emails: Array<{ name: string; subject: string; html: string }> = [
   {
     name: "5. Nuevo lead capturado",
     subject: "🎯 Nuevo lead: María García — ClientLabs",
-    html: newLeadEmail(TEST_NAME, "María García", "maria@ejemplo.com", "Formulario web"),
+    html: newLeadEmail({
+      userName: TEST_NAME,
+      leadName: "María García",
+      leadEmail: "maria@ejemplo.com",
+      source: "WEB",
+      pageUrl: "https://ejemplo.com/contacto",
+      utmSource: "google",
+      utmMedium: "cpc",
+    }),
   },
   {
     name: "6. Factura enviada al cliente (SIN branding CL)",
@@ -157,6 +170,15 @@ const emails: Array<{ name: string; subject: string; html: string }> = [
       weekLabel: "21 – 27 abril 2026",
     }),
   },
+  // ── Secuencia de onboarding (de Errepe, tono personal) ──────────────────────
+  (() => { const t = onboardingWelcomeEmail(TEST_NAME); return { name: "20. Onboarding — Bienvenida (Día 0, de Errepe)", ...t } })(),
+  (() => { const t = onboardingDay3Email(TEST_NAME, 2); return { name: "21. Onboarding — Día 3 (seguimiento)", ...t } })(),
+  (() => {
+    const t = onboardingDay7Email(TEST_NAME, { clients: 3, leads: 5, invoices: 2, pendingQuotes: 1, pendingAmount: 850 })
+    return { name: "22. Onboarding — Día 7 (resumen de primera semana)", ...t }
+  })(),
+  (() => { const t = onboardingDay10Email(TEST_NAME); return { name: "23. Onboarding — Día 10 (faltan 4 días)", ...t } })(),
+  (() => { const t = onboardingDay14Email(TEST_NAME); return { name: "24. Onboarding — Día 14 (último día trial)", ...t } })(),
 ]
 
 // ─── Envío ───────────────────────────────────────────────────────────────────
@@ -164,7 +186,7 @@ const emails: Array<{ name: string; subject: string; html: string }> = [
 async function run() {
   console.log("")
   console.log("╔══════════════════════════════════════════════════╗")
-  console.log("║       ClientLabs — Test de emails                ║")
+  console.log("║    ClientLabs — Test de emails (24 templates)    ║")
   console.log("╚══════════════════════════════════════════════════╝")
   console.log("")
 
@@ -187,7 +209,7 @@ async function run() {
     process.stdout.write(`  📧 ${email.name} ... `)
 
     try {
-      const result = await sendEmail(TEST_EMAIL, email.subject, email.html)
+      const result = await sendEmail(TEST_EMAIL, email.subject, email.html, email.from)
 
       if (result.success) {
         const tag = result.mock ? "🟡 mock" : `✅ id:${result.id}`

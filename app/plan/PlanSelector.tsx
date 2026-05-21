@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import Image from "next/image"
 import { Check, Loader2, Zap } from "lucide-react"
 
 type PlanId = "STARTER" | "PRO" | "BUSINESS"
@@ -33,8 +32,7 @@ const PLANS: PlanConfig[] = [
     cta: "Empezar 14 días gratis",
     features: [
       "1 usuario incluido",
-      "100 leads",
-      "50 clientes activos",
+      "100 leads · 50 clientes",
       "20 facturas al mes",
       "Verifactu incluido",
       "3 automatizaciones activas",
@@ -54,8 +52,7 @@ const PLANS: PlanConfig[] = [
     highlight: true,
     features: [
       "3 usuarios incluidos",
-      "500 leads",
-      "200 clientes activos",
+      "500 leads · 200 clientes",
       "100 facturas al mes",
       "Proyectos",
       "15 automatizaciones activas",
@@ -74,8 +71,7 @@ const PLANS: PlanConfig[] = [
     cta: "Empezar 14 días gratis",
     features: [
       "5 usuarios incluidos",
-      "Leads ilimitados",
-      "Clientes ilimitados",
+      "Leads y clientes ilimitados",
       "Facturas ilimitadas",
       "Proyectos",
       "Automatizaciones ilimitadas",
@@ -114,7 +110,7 @@ export default function PlanSelector() {
 
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center px-6 py-16 relative overflow-hidden"
+      className="h-screen overflow-hidden flex flex-col items-center relative"
       style={{ background: "#080F14" }}
     >
       {/* Grid sutil */}
@@ -128,42 +124,32 @@ export default function PlanSelector() {
       />
 
       {/* Orbs */}
-      <div className="absolute pointer-events-none" style={{ width: 480, height: 480, borderRadius: "50%", background: "radial-gradient(circle, rgba(31,169,122,0.18) 0%, transparent 70%)", filter: "blur(70px)", top: "-15%", left: "-10%", animation: "orbFloat1 12s ease-in-out infinite" }} />
-      <div className="absolute pointer-events-none" style={{ width: 360, height: 360, borderRadius: "50%", background: "radial-gradient(circle, rgba(31,169,122,0.1) 0%, transparent 70%)", filter: "blur(80px)", bottom: "-10%", right: "-10%", animation: "orbFloat2 16s ease-in-out infinite" }} />
+      <div className="absolute pointer-events-none" style={{ width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(31,169,122,0.15) 0%, transparent 70%)", filter: "blur(80px)", top: "-20%", left: "-8%", animation: "orbFloat1 12s ease-in-out infinite" }} />
+      <div className="absolute pointer-events-none" style={{ width: 380, height: 380, borderRadius: "50%", background: "radial-gradient(circle, rgba(31,169,122,0.08) 0%, transparent 70%)", filter: "blur(80px)", bottom: "-10%", right: "-8%", animation: "orbFloat2 16s ease-in-out infinite" }} />
 
       <style>{`
         @keyframes orbFloat1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(30px,-25px)} }
         @keyframes orbFloat2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-25px,20px)} }
-        @keyframes fadeSlideUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
       `}</style>
 
-      {/* Logo */}
-      <div className="relative z-10 flex items-center gap-2.5 mb-10" style={{ animation: "fadeSlideUp .5s ease both" }}>
-        <Image src="/logo-trimmed.webp" width={28} height={28} alt="ClientLabs" className="rounded-lg object-contain" />
-        <span className="font-bold text-[22px] tracking-tight leading-none text-white">
-          Client<span style={{ color: "#1FA97A" }}>Labs</span>
-        </span>
-      </div>
-
-      {/* Título */}
-      <div className="relative z-10 text-center mb-8" style={{ animation: "fadeSlideUp .6s .05s ease both" }}>
-        <h1 className="text-[32px] font-bold text-white leading-tight mb-2">Elige tu plan</h1>
-        <p className="text-[14px]" style={{ color: "rgba(255,255,255,0.45)" }}>
-          14 días gratis en todos los planes · Sin tarjeta
+      {/* Header */}
+      <div className="relative z-10 flex flex-col items-center pt-8 pb-4 shrink-0" style={{ animation: "fadeUp .5s ease both" }}>
+        <h1 className="text-[26px] font-bold text-white leading-tight tracking-tight">Elige tu plan</h1>
+        <p className="text-[13px] mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>
+          14 días gratis en todos los planes · Sin cargo hoy
         </p>
-      </div>
 
-      {/* Toggle mensual / anual */}
-      <div className="relative z-10 mb-10" style={{ animation: "fadeSlideUp .6s .08s ease both" }}>
+        {/* Toggle mensual / anual */}
         <div
-          className="flex items-center gap-1 rounded-full p-1"
+          className="flex items-center gap-1 rounded-full p-1 mt-4"
           style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.09)" }}
         >
           {(["monthly", "yearly"] as Period[]).map((p) => (
             <button
               key={p}
               onClick={() => setPeriod(p)}
-              className="relative px-5 py-1.5 rounded-full text-[13px] font-medium transition-all duration-200"
+              className="relative px-4 py-1.5 rounded-full text-[12.5px] font-medium transition-all duration-200"
               style={{
                 background: period === p ? "#1FA97A" : "transparent",
                 color: period === p ? "#fff" : "rgba(255,255,255,0.45)",
@@ -183,10 +169,10 @@ export default function PlanSelector() {
         </div>
       </div>
 
-      {/* Tarjetas */}
+      {/* Tarjetas — ocupan el espacio restante */}
       <div
-        className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-5 w-full max-w-4xl"
-        style={{ animation: "fadeSlideUp .6s .1s ease both" }}
+        className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-[900px] flex-1 min-h-0 px-6 pb-5"
+        style={{ animation: "fadeUp .55s .06s ease both" }}
       >
         {PLANS.map((plan) => {
           const price = period === "monthly" ? plan.monthly : plan.yearly
@@ -194,67 +180,68 @@ export default function PlanSelector() {
           return (
             <div
               key={plan.id}
-              className="flex flex-col rounded-2xl p-6 transition-all duration-200"
+              className="flex flex-col rounded-2xl h-full transition-all duration-200"
               style={{
                 background: plan.highlight ? "rgba(31,169,122,0.08)" : "rgba(255,255,255,0.04)",
-                border: plan.highlight ? "1.5px solid rgba(31,169,122,0.55)" : "1px solid rgba(255,255,255,0.08)",
-                boxShadow: plan.highlight ? "0 0 32px rgba(31,169,122,0.12)" : "none",
+                border: plan.highlight ? "1.5px solid rgba(31,169,122,0.5)" : "1px solid rgba(255,255,255,0.08)",
+                boxShadow: plan.highlight ? "0 0 28px rgba(31,169,122,0.1)" : "none",
+                padding: "18px 20px",
               }}
             >
               {/* Badge */}
-              <div className="mb-4 min-h-[24px] flex items-center gap-2">
-                {plan.badge && (
+              <div className="min-h-[20px] mb-2 flex items-center">
+                {plan.badge ? (
                   <span
-                    className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10.5px] font-semibold tracking-wide"
+                    className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide"
                     style={{ background: "rgba(31,169,122,0.18)", color: "#1FA97A", border: "1px solid rgba(31,169,122,0.3)" }}
                   >
                     {plan.badge}
                   </span>
-                )}
+                ) : null}
               </div>
 
               {/* Nombre y precio */}
-              <div className="mb-3">
-                <p className="text-[13px] font-semibold tracking-widest uppercase mb-1" style={{ color: "rgba(255,255,255,0.5)" }}>
+              <div className="mb-2">
+                <p className="text-[11px] font-semibold tracking-widest uppercase mb-1" style={{ color: "rgba(255,255,255,0.45)" }}>
                   {plan.name}
                 </p>
-                <div className="flex items-baseline gap-1 mb-1">
-                  <span className="text-[36px] font-bold text-white leading-none">{price}</span>
-                  <span className="text-[13px]" style={{ color: "rgba(255,255,255,0.35)" }}>/mes</span>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-[30px] font-bold text-white leading-none">{price}</span>
+                  <span className="text-[12px]" style={{ color: "rgba(255,255,255,0.3)" }}>/mes</span>
                 </div>
                 {period === "yearly" && (
-                  <p className="text-[11px]" style={{ color: "#F59E0B" }}>
+                  <p className="text-[10.5px] mt-0.5" style={{ color: "#F59E0B" }}>
                     {plan.yearlyBilled} · {plan.yearlySaving}
                   </p>
                 )}
-                <p className="text-[12px] mt-1.5" style={{ color: "rgba(255,255,255,0.35)" }}>
+                <p className="text-[11.5px] mt-1" style={{ color: "rgba(255,255,255,0.3)" }}>
                   {plan.description}
                 </p>
               </div>
 
               {/* Trial badge */}
               <div
-                className="flex items-center gap-1.5 rounded-lg px-3 py-2 mb-5 text-[11.5px] font-semibold"
-                style={{ background: "rgba(31,169,122,0.12)", border: "1px solid rgba(31,169,122,0.25)", color: "#1FA97A" }}
+                className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 mb-3 text-[11px] font-semibold shrink-0"
+                style={{ background: "rgba(31,169,122,0.1)", border: "1px solid rgba(31,169,122,0.22)", color: "#1FA97A" }}
               >
                 <Zap className="w-3 h-3 shrink-0" />
-                14 días gratis · Sin tarjeta
+                14 días gratis · Sin cargo hoy
               </div>
 
               {/* Features */}
-              <ul className="space-y-2.5 mb-8 flex-1">
+              <ul className="space-y-1.5 flex-1 min-h-0">
                 {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-center gap-2.5">
+                  <li key={feature} className="flex items-center gap-2">
                     <div
-                      className="w-4 h-4 rounded-full flex items-center justify-center shrink-0"
+                      className="w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0"
                       style={{
                         background: plan.highlight ? "rgba(31,169,122,0.2)" : "rgba(255,255,255,0.06)",
                         border: plan.highlight ? "1px solid rgba(31,169,122,0.35)" : "1px solid rgba(255,255,255,0.1)",
                       }}
                     >
-                      <Check className="w-2.5 h-2.5" style={{ color: plan.highlight ? "#1FA97A" : "rgba(255,255,255,0.45)" }} strokeWidth={3} />
+                      <Check className="w-2 h-2" style={{ color: plan.highlight ? "#1FA97A" : "rgba(255,255,255,0.4)" }} strokeWidth={3} />
                     </div>
-                    <span className="text-[13px]" style={{ color: "rgba(255,255,255,0.65)" }}>
+                    <span className="text-[12px]" style={{ color: "rgba(255,255,255,0.6)" }}>
                       {feature}
                     </span>
                   </li>
@@ -265,16 +252,16 @@ export default function PlanSelector() {
               <button
                 onClick={() => startCheckout(plan.id)}
                 disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-[13.5px] font-semibold transition-all duration-150 disabled:opacity-60 hover:opacity-90 active:scale-[.99]"
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-semibold transition-all duration-150 disabled:opacity-60 hover:opacity-90 active:scale-[.99] mt-4 shrink-0"
                 style={
                   plan.highlight
-                    ? { background: "linear-gradient(135deg, #1FA97A 0%, #178a64 100%)", color: "#fff", boxShadow: "0 4px 14px rgba(31,169,122,0.35)" }
+                    ? { background: "linear-gradient(135deg, #1FA97A 0%, #178a64 100%)", color: "#fff", boxShadow: "0 4px 12px rgba(31,169,122,0.3)" }
                     : { background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.8)", border: "1px solid rgba(255,255,255,0.1)" }
                 }
               >
                 {loading === plan.id ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
                     Abriendo pago...
                   </>
                 ) : (
@@ -287,8 +274,11 @@ export default function PlanSelector() {
       </div>
 
       {/* Nota inferior */}
-      <p className="relative z-10 text-center text-[12px] mt-8" style={{ color: "rgba(255,255,255,0.25)", animation: "fadeSlideUp .6s .15s ease both" }}>
-        14 días de prueba sin coste en todos los planes. Puedes cancelar en cualquier momento.
+      <p
+        className="relative z-10 text-center text-[11px] pb-3 shrink-0"
+        style={{ color: "rgba(255,255,255,0.2)" }}
+      >
+        Tu tarjeta se guarda pero no se cobra nada durante los 14 días. Cancela cuando quieras.
       </p>
     </div>
   )

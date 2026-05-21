@@ -501,6 +501,14 @@ export async function createLead(data: {
         source: data.source?.trim() || "manual",
     })
 
+    const { runAutomation } = await import("@/lib/automations/engine")
+    runAutomation(session.user.id, "LEAD_NUEVO", {
+        leadId: lead.id,
+        nombre: lead.name ?? "",
+        email: lead.email ?? "",
+        fuente: lead.source ?? "manual",
+    }).catch(() => {})
+
     return { success: true, leadId: lead.id }
 }
 

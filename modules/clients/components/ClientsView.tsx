@@ -2,12 +2,12 @@
 
 import { useState, useMemo, useCallback, useEffect } from "react"
 import { ClientsHeader } from "@domains/clients/components/ClientsHeader"
-import { ClientsKPIs } from "@domains/clients/components/ClientsKPIs"
 import { ClientsTable } from "@domains/clients/components/ClientsTable"
 import type { ClientWithLead as TableClientWithLead } from "@domains/clients/components/ClientsTable"
-import { ClientsCharts } from "@domains/clients/components/ClientsCharts"
 import { ClientsFilters } from "./ClientsFilters"
+import { ClientsKanbanView } from "./ClientsKanbanView"
 import { deriveClientStatus, isClientForgotten } from "@/lib/logic/client-status"
+import { List, LayoutGrid } from "lucide-react"
 
 type ClientWithLead = TableClientWithLead & {
     Task?: { id: string, status?: string }[]
@@ -35,11 +35,16 @@ type ClientsViewProps = {
     }
 }
 
-const KPI_LABEL: Record<string, string> = {
-    active: "Activos",
-    inactive: "En riesgo",
-    vip: "VIP",
-}
+const viewBtnStyle = (active: boolean): React.CSSProperties => ({
+    display: "flex", alignItems: "center", gap: 6,
+    padding: "5px 10px", borderRadius: 6,
+    fontSize: 12, fontWeight: 500,
+    border: active ? "0.5px solid var(--border-subtle)" : "0.5px solid transparent",
+    cursor: "pointer",
+    background: active ? "var(--bg-card)" : "transparent",
+    color: active ? "var(--text-primary)" : "var(--text-secondary)",
+    transition: "all 150ms",
+})
 
 export function ClientsView({ initialClients, allClientsBase, currentFilters, serverNow }: ClientsViewProps & { serverNow?: string }) {
     // 1. Unified Reference Date for Hydration Consistency
@@ -47,7 +52,7 @@ export function ClientsView({ initialClients, allClientsBase, currentFilters, se
 
     // Filter / sort state — all client-side
     const [searchTerm, setSearchTerm] = useState(currentFilters.search)
-    const [activeKpi, setActiveKpi] = useState<string | null>(null)
+    const [viewMode, setViewMode] = useState<"list" | "kanban">("list")
     const [sortBy, setSortBy] = useState(currentFilters.sortBy || "createdAt")
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">((currentFilters.sortOrder as "asc" | "desc") || "desc")
     const [statusFilter, setStatusFilter] = useState(currentFilters.status || "all")
@@ -92,20 +97,7 @@ export function ClientsView({ initialClients, allClientsBase, currentFilters, se
             result = result.filter(c => c.effectiveStatus === statusFilter)
         }
 
-        // 2 — KPI filter
-        if (activeKpi === "active") {
-            result = result.filter(c => c.effectiveStatus === "ACTIVE" && !c.isForgotten)
-        } else if (activeKpi === "inactive") {
-            result = result.filter(c =>
-                c.effectiveStatus === "INACTIVE" ||
-                c.effectiveStatus === "FOLLOW_UP" ||
-                c.isForgotten
-            )
-        } else if (activeKpi === "vip") {
-            result = result.filter(c => c.effectiveStatus === "VIP")
-        }
-
-        // 3 — Text search
+        // 2 — Text search
         if (searchTerm.trim()) {
             const term = searchTerm.toLowerCase().trim()
             result = result.filter(c =>
@@ -140,7 +132,7 @@ export function ClientsView({ initialClients, allClientsBase, currentFilters, se
         })
 
         return result
-    }, [clientsWithDerivedStatus, statusFilter, activeKpi, searchTerm, sortBy, sortOrder])
+    }, [clientsWithDerivedStatus, statusFilter, searchTerm, sortBy, sortOrder])
 
     // KPI counts always from full dataset
     const kpis = useMemo(() => {
@@ -162,48 +154,47 @@ export function ClientsView({ initialClients, allClientsBase, currentFilters, se
 
     return (
         <div className="space-y-6">
-            <ClientsHeader />
-
-            <ClientsKPIs
-                kpis={kpis}
-                activeKpi={activeKpi}
-                onKpiClick={(id) => setActiveKpi(activeKpi === id ? null : id)}
-            />
-
-            <ClientsCharts clients={kpiClients as any} />
-
-            <div className="rounded-xl border border-slate-200 bg-white py-3 px-4 shadow-sm">
-                <ClientsFilters
-                    currentFilters={currentFilters}
-                    searchValue={searchTerm}
-                    onSearchChange={setSearchTerm}
-                    statusValue={statusFilter}
-                    onStatusChange={setStatusFilter}
-                    sortValue={`${sortBy}-${sortOrder}`}
-                    onSortChange={handleSortChange}
-                />
-            </div>
-
-            {activeKpi && (
-                <div className="flex items-center justify-between px-4 py-2.5 bg-[#E1F5EE] border border-[#1FA97A]/20 rounded-xl">
-                    <span className="text-[12px] font-medium text-[#0F6E56] flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-[#1FA97A]" />
-                        {clientesProcesados.length} clientes · {KPI_LABEL[activeKpi] ?? activeKpi}
-                    </span>
-                    <button
-                        type="button"
-                        onClick={() => setActiveKpi(null)}
-                        className="text-[11px] text-[#1FA97A] font-medium hover:underline"
-                    >
-                        Ver todos
+            <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                    <ClientsHeader />
+                </div>
+                <div style={{ display: "flex", background: "var(--bg-surface)", border: "0.5px solid var(--border-subtle)", borderRadius: 8, padding: 3, gap: 2, flexShrink: 0, marginTop: 4 }}>
+                    <button type="button" onClick={() => setViewMode("list")} style={viewBtnStyle(viewMode === "list")}>
+                        <List size={13} />
+                        Lista
+                    </button>
+                    <button type="button" onClick={() => setViewMode("kanban")} style={viewBtnStyle(viewMode === "kanban")}>
+                        <LayoutGrid size={13} />
+                        Tablero
                     </button>
                 </div>
-            )}
+            </div>
 
-            <ClientsTable
-                clients={clientesProcesados}
-                onClientUpdate={handleClientUpdate}
-            />
+            {viewMode === "kanban" ? (
+                <ClientsKanbanView
+                    clients={clientsWithDerivedStatus as any}
+                    onClientUpdate={handleClientUpdate as any}
+                />
+            ) : (
+                <>
+                    <div className="rounded-xl border border-slate-200 bg-white py-3 px-4 shadow-sm">
+                        <ClientsFilters
+                            currentFilters={currentFilters}
+                            searchValue={searchTerm}
+                            onSearchChange={setSearchTerm}
+                            statusValue={statusFilter}
+                            onStatusChange={setStatusFilter}
+                            sortValue={`${sortBy}-${sortOrder}`}
+                            onSortChange={handleSortChange}
+                        />
+                    </div>
+
+                    <ClientsTable
+                        clients={clientesProcesados}
+                        onClientUpdate={handleClientUpdate}
+                    />
+                </>
+            )}
         </div>
     )
 }

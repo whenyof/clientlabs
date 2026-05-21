@@ -3,14 +3,13 @@
 import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useQueryClient } from "@tanstack/react-query"
-import { Plus, X, User, Building2, Mail, Phone, MapPin, FileText, ChevronDown, ChevronUp, Euro } from "lucide-react"
+import { Plus, X, User, Building2, Mail, Phone, MapPin, FileText, ChevronDown, ChevronUp } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 
 const EMPTY_FORM = {
   name: "", email: "", phone: "",
-  estimatedValue: "",
-  legalType: "", taxId: "",
+  taxId: "",
   companyName: "", legalName: "",
   address: "", city: "",
   postalCode: "", country: "España",
@@ -52,7 +51,6 @@ export function CreateClientButton() {
           name: form.name,
           email: form.email || undefined,
           phone: form.phone || undefined,
-          totalSpent: form.estimatedValue ? parseFloat(form.estimatedValue) : 0,
           taxId: form.taxId || undefined,
           companyName: form.companyName || undefined,
           address: form.address || undefined,
@@ -72,6 +70,10 @@ export function CreateClientButton() {
       toast.success("Cliente creado correctamente")
       handleClose()
       await queryClient.invalidateQueries({ queryKey: ["clients"] })
+      queryClient.invalidateQueries({ queryKey: ["clients-kpis"] })
+      queryClient.invalidateQueries({ queryKey: ["clients-list"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard-kpis"] })
+      queryClient.invalidateQueries({ queryKey: ["activation-checklist"] })
       router.refresh()
     } catch (err: any) {
       toast.error(err.message || "Error al crear cliente")
@@ -156,49 +158,15 @@ export function CreateClientButton() {
                 </div>
               </div>
 
-              {/* Valor Estimado */}
+              {/* NIF/CIF */}
               <div>
-                <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">
-                  Valor Estimado (€)
-                </label>
-                <div className="relative">
-                  <Euro className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300" />
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={form.estimatedValue}
-                    onChange={e => set("estimatedValue", e.target.value)}
-                    placeholder="0.00"
-                    className={cn(inputClass, "pl-9 pr-4")}
-                  />
-                </div>
-              </div>
-
-              {/* Tipo + NIF */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">Tipo</label>
-                  <select
-                    value={form.legalType}
-                    onChange={e => set("legalType", e.target.value)}
-                    className={cn(inputClass, "px-3 bg-white")}
-                  >
-                    <option value="">Seleccionar...</option>
-                    <option value="AUTONOMO">Autónomo</option>
-                    <option value="EMPRESA">Empresa</option>
-                    <option value="PARTICULAR">Particular</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">NIF/CIF</label>
-                  <input
-                    value={form.taxId}
-                    onChange={e => set("taxId", e.target.value)}
-                    placeholder="12345678A"
-                    className={cn(inputClass, "px-4")}
-                  />
-                </div>
+                <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">NIF/CIF</label>
+                <input
+                  value={form.taxId}
+                  onChange={e => set("taxId", e.target.value)}
+                  placeholder="12345678A"
+                  className={cn(inputClass, "px-4")}
+                />
               </div>
 
               {/* Toggle datos extra */}
@@ -256,6 +224,27 @@ export function CreateClientButton() {
                         className={cn(inputClass, "px-4")}
                       />
                     </div>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">País</label>
+                    <select
+                      value={form.country}
+                      onChange={e => set("country", e.target.value)}
+                      className={cn(inputClass, "px-4 bg-white cursor-pointer")}
+                    >
+                      <option value="España">España</option>
+                      <option value="Portugal">Portugal</option>
+                      <option value="Francia">Francia</option>
+                      <option value="Alemania">Alemania</option>
+                      <option value="Italia">Italia</option>
+                      <option value="Reino Unido">Reino Unido</option>
+                      <option value="Estados Unidos">Estados Unidos</option>
+                      <option value="México">México</option>
+                      <option value="Colombia">Colombia</option>
+                      <option value="Argentina">Argentina</option>
+                      <option value="Chile">Chile</option>
+                      <option value="Otro">Otro</option>
+                    </select>
                   </div>
                 </div>
               )}

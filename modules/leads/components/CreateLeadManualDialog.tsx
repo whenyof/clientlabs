@@ -83,6 +83,8 @@ export function CreateLeadManualDialog({ open, onOpenChange }: { open: boolean; 
  // Background sync
  queryClient.invalidateQueries({ queryKey: ["leads"] })
  queryClient.invalidateQueries({ queryKey: ["leads-kpis"] })
+ queryClient.invalidateQueries({ queryKey: ["leads-kanban"] })
+ queryClient.invalidateQueries({ queryKey: ["activation-checklist"] })
  setFormData({ name: "", email: "", phone: "", source: "", leadStatus: "NEW" })
  onOpenChange(false)
  toast.success("Lead creado correctamente")

@@ -10,7 +10,6 @@ import { useSectorConfig } from "@/hooks/useSectorConfig"
 import { usePlan } from "@/hooks/use-plan"
 import { useTour } from "@/components/tour/TourContext"
 import { cn } from "@/lib/utils"
-import { ProfileCompletionBar } from "@/components/dashboard/ProfileCompletionBar"
 import {
   LayoutDashboard,
   Users,
@@ -522,8 +521,6 @@ export default function Sidebar({
               <LogOut size={15} />
             </button>
           </div>
-
-          {!isCollapsed && <ProfileCompletionBar />}
 
           {/* PLAN */}
           {!isCollapsed && session?.user?.plan && (() => {

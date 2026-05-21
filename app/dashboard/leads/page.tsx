@@ -11,8 +11,6 @@ import { Suspense } from "react"
 import { format, subDays, eachDayOfInterval } from "date-fns"
 import { es } from "date-fns/locale"
 import type { Lead } from "@prisma/client"
-import Link from "next/link"
-import { LayoutGrid } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 0
@@ -167,25 +165,12 @@ export default async function LeadsPage({
   return (
     <LeadsClientShell>
       <div className="space-y-6">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex-1 min-w-0">
-            <LeadsHeader />
-          </div>
-          <Link
-            href="/dashboard/leads/kanban"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium border border-neutral-200 text-neutral-600 hover:border-neutral-300 hover:text-neutral-800 transition-colors flex-shrink-0"
-          >
-            <LayoutGrid size={14} />
-            Kanban
-          </Link>
-        </div>
+        <LeadsHeader />
         <LeadsKpisClient
-          initial={kpis}
           initialLeads={initialLeadsData as Lead[]}
           initialTotal={initialLeadsCount}
         >
           <LeadsFilters sources={sources} />
-          <LeadsCharts initialData={chartInitial} />
         </LeadsKpisClient>
       </div>
     </LeadsClientShell>

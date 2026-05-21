@@ -16,13 +16,14 @@ export async function GET() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { plan: true, planExpiresAt: true },
+    select: { plan: true, planExpiresAt: true, isTrial: true },
   })
 
   const plan = (user?.plan ?? "STARTER") as PlanType
   const expiresAt = user?.planExpiresAt ?? null
   const now = new Date()
 
+  // Pre-Stripe trial: user registered but hasn't chosen a plan via Stripe yet
   if (plan === "TRIAL" && expiresAt) {
     if (expiresAt > now) {
       const daysLeft = Math.ceil((expiresAt.getTime() - now.getTime()) / 86400000)
@@ -36,6 +37,22 @@ export async function GET() {
     }
 
     return NextResponse.json({ status: "expired" })
+  }
+
+  // Stripe-based trial: user chose a plan, went through checkout, isTrial=true
+  if (user?.isTrial && expiresAt && plan !== "TRIAL") {
+    if (expiresAt > now) {
+      const daysLeft = Math.ceil((expiresAt.getTime() - now.getTime()) / 86400000)
+      return NextResponse.json({
+        status: "trial_active",
+        daysLeft,
+        planName: planDisplayName(plan),
+        trialEndsAt: expiresAt.toISOString(),
+        isStripeTrial: true,
+      })
+    }
+    // Trial ended — Stripe renewed as active
+    return NextResponse.json({ status: "active", plan: planDisplayName(plan) })
   }
 
   return NextResponse.json({ status: "active", plan: planDisplayName(plan) })

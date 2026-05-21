@@ -1,8 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 import { usePlan } from "@/hooks/use-plan"
+import { toast } from "sonner"
 import { UpgradeWall } from "@/components/ui/upgrade-wall"
 import {
   Megaphone, Filter, Plus,
@@ -538,11 +540,41 @@ const CAMPANAS_LISTA = [
 
 const COLS = "2fr 1fr 110px 80px 130px 80px 100px"
 
+type Campaign = {
+  id: string; nombre: string; asunto: string
+  recipientFilter: { type: string; value?: string }
+  estado: string; scheduledAt: string | null; sentAt: string | null
+  totalEnviados: number; totalAbiertos: number; totalClicks: number; totalErrores: number
+  createdAt: string
+}
+
 function TabCampanas({ onNuevaCampana }: { onNuevaCampana: () => void }) {
+  const qc = useQueryClient()
   const [busqueda, setBusqueda] = useState("")
   const [filtroEstado, setFiltroEstado] = useState("todos")
 
-  const filtradas = CAMPANAS_LISTA.filter((c) => {
+  const { data: campanas = [], isLoading } = useQuery<Campaign[]>({
+    queryKey: ["campaigns"],
+    queryFn: () => fetch("/api/campaigns").then(r => r.json()),
+    staleTime: 60_000, refetchOnWindowFocus: false, retry: 0,
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => fetch(`/api/campaigns/${id}`, { method: "DELETE" }).then(r => { if (!r.ok) throw new Error() }),
+    onSuccess: () => { toast.success("Campaña eliminada"); qc.invalidateQueries({ queryKey: ["campaigns"] }) },
+    onError: () => toast.error("Error al eliminar"),
+  })
+
+  const sendMutation = useMutation({
+    mutationFn: (id: string) => fetch(`/api/campaigns/${id}/send`, { method: "POST" }).then(r => r.json()),
+    onSuccess: (data) => {
+      toast.success(`Enviada a ${data.enviados} destinatarios`)
+      qc.invalidateQueries({ queryKey: ["campaigns"] })
+    },
+    onError: () => toast.error("Error al enviar"),
+  })
+
+  const filtradas = campanas.filter((c) => {
     const matchBusqueda = c.nombre.toLowerCase().includes(busqueda.toLowerCase())
     const matchEstado = filtroEstado === "todos" || c.estado === filtroEstado
     return matchBusqueda && matchEstado
@@ -612,144 +644,95 @@ function TabCampanas({ onNuevaCampana }: { onNuevaCampana: () => void }) {
         </div>
 
         {/* Filas */}
-        {filtradas.length === 0 ? (
-          <div className="text-center py-16 text-slate-400 text-[13px]">No hay campañas que coincidan</div>
+        {isLoading ? (
+          <div className="text-center py-16 text-slate-400 text-[13px]">Cargando campañas...</div>
+        ) : filtradas.length === 0 ? (
+          <div className="text-center py-16 text-slate-400 text-[13px]">
+            {campanas.length === 0 ? "Aún no tienes campañas. Crea la primera." : "No hay campañas que coincidan."}
+          </div>
         ) : (
-          filtradas.map((c, i) => (
-            <div
-              key={i}
-              className="grid items-center px-5 py-4 border-b border-slate-100 last:border-0 hover:bg-slate-50/50 transition-colors cursor-pointer group"
-              style={{ gridTemplateColumns: COLS }}
-            >
-              {/* Campaña */}
-              <div className="flex items-center gap-3 min-w-0">
-                <div className={cn(
-                  "w-2 h-2 rounded-full flex-shrink-0",
-                  c.estado === "activa"     ? "bg-[#1FA97A]" :
-                  c.estado === "automatica" ? "bg-blue-400 animate-pulse" :
-                  c.estado === "programada" ? "bg-amber-400" :
-                  c.estado === "enviada"    ? "bg-slate-300" :
-                  "bg-slate-200"
-                )} />
-                <div className="min-w-0">
-                  <div className="text-[13px] font-semibold text-slate-800 truncate group-hover:text-[#1FA97A] transition-colors">
-                    {c.nombre}
+          filtradas.map((c) => {
+            const aperturaRate = c.totalEnviados > 0 ? Math.round((c.totalAbiertos / c.totalEnviados) * 100) : null
+            const ESTADO_LABELS: Record<string, string> = { borrador: "Borrador", programada: "Programada", enviada: "Enviada", error: "Error" }
+            return (
+              <div
+                key={c.id}
+                className="grid items-center px-5 py-4 border-b border-slate-100 last:border-0 hover:bg-slate-50/50 transition-colors cursor-pointer group"
+                style={{ gridTemplateColumns: COLS }}
+              >
+                {/* Campaña */}
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className={cn(
+                    "w-2 h-2 rounded-full flex-shrink-0",
+                    c.estado === "programada" ? "bg-amber-400" :
+                    c.estado === "enviada"    ? "bg-slate-300" :
+                    c.estado === "error"      ? "bg-red-400" :
+                    "bg-slate-200"
+                  )} />
+                  <div className="min-w-0">
+                    <div className="text-[13px] font-semibold text-slate-800 truncate group-hover:text-[#1FA97A] transition-colors">{c.nombre}</div>
+                    <div className="text-[11px] text-slate-400 truncate">{c.asunto}</div>
                   </div>
-                  <div className="text-[11px] text-slate-400 truncate">{c.descripcion}</div>
                 </div>
-              </div>
-
-              {/* Audiencia */}
-              <div>
-                <div className="text-[12px] text-slate-600 font-medium">{c.audiencia}</div>
-                <div className="flex items-center gap-1 mt-0.5">
-                  <Mail className="h-3 w-3 text-slate-300" />
-                  <span className="text-[10px] text-slate-400">{c.canal}</span>
+                {/* Audiencia */}
+                <div>
+                  <div className="text-[12px] text-slate-600 font-medium capitalize">{(c.recipientFilter as any)?.type === "all" ? "Todos los clientes" : (c.recipientFilter as any)?.type === "leads" ? "Leads" : (c.recipientFilter as any)?.type ?? "—"}</div>
+                  <div className="flex items-center gap-1 mt-0.5"><Mail className="h-3 w-3 text-slate-300" /><span className="text-[10px] text-slate-400">Email</span></div>
                 </div>
-              </div>
-
-              {/* Estado */}
-              <div>
-                <span className={cn(
-                  "px-2.5 py-1 rounded-full text-[10px] font-bold inline-flex items-center gap-1",
-                  c.estado === "activa"     ? "bg-[#E1F5EE] text-[#1FA97A]" :
-                  c.estado === "automatica" ? "bg-blue-50 text-blue-600" :
-                  c.estado === "programada" ? "bg-amber-50 text-amber-600" :
-                  c.estado === "enviada"    ? "bg-slate-100 text-slate-500" :
-                  "bg-slate-100 text-slate-400"
-                )}>
-                  {c.estado === "activa" && (
-                    <span className="w-1 h-1 rounded-full bg-[#1FA97A] inline-block" />
+                {/* Estado */}
+                <div>
+                  <span className={cn(
+                    "px-2.5 py-1 rounded-full text-[10px] font-bold inline-flex items-center gap-1",
+                    c.estado === "programada" ? "bg-amber-50 text-amber-600" :
+                    c.estado === "enviada"    ? "bg-slate-100 text-slate-500" :
+                    c.estado === "error"      ? "bg-red-50 text-red-600" :
+                    "bg-slate-100 text-slate-400"
+                  )}>
+                    {ESTADO_LABELS[c.estado] ?? c.estado}
+                  </span>
+                  {c.sentAt && <div className="text-[10px] text-slate-400 mt-1">{new Date(c.sentAt).toLocaleDateString("es-ES")}</div>}
+                </div>
+                {/* Enviados */}
+                <div className="text-center">
+                  {c.totalEnviados > 0 ? <div className="text-[14px] font-bold text-slate-800">{c.totalEnviados}</div> : <span className="text-[12px] text-slate-300">—</span>}
+                </div>
+                {/* Apertura */}
+                <div className="px-2">
+                  {aperturaRate !== null ? (
+                    <>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[12px] font-bold text-slate-700">{aperturaRate}%</span>
+                      </div>
+                      <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div className={cn("h-full rounded-full", aperturaRate >= 70 ? "bg-[#1FA97A]" : aperturaRate >= 50 ? "bg-amber-400" : "bg-red-400")} style={{ width: `${aperturaRate}%` }} />
+                      </div>
+                    </>
+                  ) : <span className="text-[12px] text-slate-300 block text-center">—</span>}
+                </div>
+                {/* Clicks */}
+                <div className="text-center">
+                  {c.totalClicks > 0 ? <div className="text-[14px] font-bold text-slate-800">{c.totalClicks}</div> : <span className="text-[12px] text-slate-300">—</span>}
+                </div>
+                {/* Acciones */}
+                <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {c.estado !== "enviada" && (
+                    <button onClick={e => { e.stopPropagation(); sendMutation.mutate(c.id) }} className="p-1.5 rounded-lg hover:bg-[#E1F5EE] transition-colors" title="Enviar ahora">
+                      <Send className="h-3.5 w-3.5 text-[#1FA97A]" />
+                    </button>
                   )}
-                  {c.estadoLabel}
-                </span>
-                <div className="text-[10px] text-slate-400 mt-1">{c.fecha}</div>
+                  <button onClick={e => { e.stopPropagation(); if (confirm("¿Eliminar esta campaña?")) deleteMutation.mutate(c.id) }} className="p-1.5 rounded-lg hover:bg-red-50 transition-colors group/del" title="Eliminar">
+                    <Trash2 className="h-3.5 w-3.5 text-slate-400 group-hover/del:text-red-500 transition-colors" />
+                  </button>
+                </div>
               </div>
-
-              {/* Enviados */}
-              <div className="text-center">
-                {c.enviados > 0 ? (
-                  <>
-                    <div className="text-[14px] font-bold text-slate-800">{c.enviados}</div>
-                    {c.total !== null && (
-                      <div className="text-[10px] text-slate-400">de {c.total}</div>
-                    )}
-                  </>
-                ) : (
-                  <span className="text-[12px] text-slate-300">—</span>
-                )}
-              </div>
-
-              {/* Apertura con mini barra */}
-              <div className="px-2">
-                {c.apertura !== null ? (
-                  <>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[12px] font-bold text-slate-700">{c.apertura}%</span>
-                      <span className={cn(
-                        "text-[9px] font-bold",
-                        c.apertura >= 70 ? "text-[#1FA97A]" :
-                        c.apertura >= 50 ? "text-amber-500" :
-                        "text-red-400"
-                      )}>
-                        {c.apertura >= 70 ? "Excelente" : c.apertura >= 50 ? "Buena" : "Baja"}
-                      </span>
-                    </div>
-                    <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                      <div
-                        className={cn(
-                          "h-full rounded-full",
-                          c.apertura >= 70 ? "bg-[#1FA97A]" :
-                          c.apertura >= 50 ? "bg-amber-400" :
-                          "bg-red-400"
-                        )}
-                        style={{ width: `${c.apertura}%` }}
-                      />
-                    </div>
-                  </>
-                ) : (
-                  <span className="text-[12px] text-slate-300 block text-center">—</span>
-                )}
-              </div>
-
-              {/* Clicks */}
-              <div className="text-center">
-                {c.clicks !== null ? (
-                  <>
-                    <div className="text-[14px] font-bold text-slate-800">{c.clicks}</div>
-                    <div className="text-[10px] text-slate-400">
-                      {c.enviados > 0 ? `${Math.round(c.clicks / c.enviados * 100)}% CTR` : ""}
-                    </div>
-                  </>
-                ) : (
-                  <span className="text-[12px] text-slate-300">—</span>
-                )}
-              </div>
-
-              {/* Acciones */}
-              <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button className="p-1.5 rounded-lg hover:bg-slate-100 transition-colors" title="Ver estadísticas">
-                  <BarChart3 className="h-3.5 w-3.5 text-slate-400" />
-                </button>
-                <button className="p-1.5 rounded-lg hover:bg-slate-100 transition-colors" title="Editar">
-                  <Edit3 className="h-3.5 w-3.5 text-slate-400" />
-                </button>
-                <button className="p-1.5 rounded-lg hover:bg-slate-100 transition-colors" title="Duplicar">
-                  <Copy className="h-3.5 w-3.5 text-slate-400" />
-                </button>
-                <button className="p-1.5 rounded-lg hover:bg-red-50 transition-colors group/del" title="Eliminar">
-                  <Trash2 className="h-3.5 w-3.5 text-slate-400 group-hover/del:text-red-500 transition-colors" />
-                </button>
-              </div>
-
-            </div>
-          ))
+            )
+          })
         )}
 
         {/* Footer */}
         <div className="px-5 py-3 bg-slate-50 border-t border-slate-100">
           <span className="text-[12px] text-slate-400">
-            {filtradas.length} campaña{filtradas.length !== 1 ? "s" : ""} · {filtradas.filter(c => c.estado === "activa" || c.estado === "automatica").length} activas
+            {filtradas.length} campaña{filtradas.length !== 1 ? "s" : ""} · {filtradas.filter(c => c.estado === "enviada").length} enviadas
           </span>
         </div>
       </div>
@@ -2142,8 +2125,10 @@ const SECUENCIAS: Record<string, Array<{ dia: number; asunto: string; mensaje: s
 
 export default function MarketingPage() {
   const { can } = usePlan()
+  const qc = useQueryClient()
   const [activeTab, setActiveTab] = useState("resumen")
   const [modalCampana, setModalCampana] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const [pasoModal, setPasoModal] = useState<1|2|3|4|5>(1)
   const [tipoCampana, setTipoCampana] = useState<CampanaTipo | null>(null)
   const [audienciaSeleccionada, setAudienciaSeleccionada] = useState<string | null>(null)
@@ -2176,6 +2161,60 @@ export default function MarketingPage() {
   function handleNuevaCampana() {
     setActiveTab("campanas")
     setModalCampana(true)
+  }
+
+  async function handleGuardarCampana() {
+    if (!campanaForm.asunto.trim() || !campanaForm.mensaje.trim()) {
+      toast.error("Escribe el asunto y el contenido antes de guardar")
+      return
+    }
+    setIsSaving(true)
+    try {
+      const isAhora = tipoCampana === "puntual" && campanaForm.fechaEnvio === "ahora"
+      const scheduledAt = campanaForm.fechaEnvio === "programado" && campanaForm.fechaProgramada
+        ? new Date(`${campanaForm.fechaProgramada}T${campanaForm.horaProgramada}:00`).toISOString()
+        : null
+
+      const recipientFilter = {
+        type: audienciaSeleccionada === "todos-contactos" ? "all" :
+              audienciaSeleccionada?.startsWith("solo-leads") ? "leads" :
+              "all",
+      }
+
+      const res = await fetch("/api/campaigns", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nombre: campanaForm.nombre || campanaForm.asunto,
+          asunto: campanaForm.asunto,
+          contenido: campanaForm.mensaje,
+          recipientFilter,
+          estado: scheduledAt ? "programada" : "borrador",
+          scheduledAt,
+        }),
+      })
+      if (!res.ok) throw new Error()
+      const campaign = await res.json()
+
+      if (isAhora) {
+        const sendRes = await fetch(`/api/campaigns/${campaign.id}/send`, { method: "POST" })
+        const sendData = await sendRes.json()
+        if (sendRes.ok) {
+          toast.success(`Campaña enviada a ${sendData.enviados} destinatarios`)
+        } else {
+          toast.error(sendData.error ?? "Error al enviar")
+        }
+      } else {
+        toast.success(scheduledAt ? "Campaña programada correctamente" : "Campaña guardada como borrador")
+      }
+
+      qc.invalidateQueries({ queryKey: ["campaigns"] })
+      resetModal()
+    } catch {
+      toast.error("Error al guardar la campaña")
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   function resetModal() {
@@ -3064,11 +3103,12 @@ export default function MarketingPage() {
                 </button>
               ) : (
                 <button
-                  onClick={resetModal}
-                  className="flex-1 py-2.5 bg-[#1FA97A] text-white rounded-xl text-[13px] font-semibold hover:bg-[#1a9068] transition-colors flex items-center justify-center gap-2 shadow-lg shadow-[#1FA97A]/25"
+                  onClick={handleGuardarCampana}
+                  disabled={isSaving}
+                  className="flex-1 py-2.5 bg-[#1FA97A] text-white rounded-xl text-[13px] font-semibold hover:bg-[#1a9068] transition-colors flex items-center justify-center gap-2 shadow-lg shadow-[#1FA97A]/25 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  {tipoCampana === "puntual" && campanaForm.fechaEnvio === "ahora" ? "Enviar campaña ahora" : "Guardar campaña"}
-                  <Check className="h-4 w-4" />
+                  {isSaving ? "Guardando..." : tipoCampana === "puntual" && campanaForm.fechaEnvio === "ahora" ? "Enviar campaña ahora" : "Guardar campaña"}
+                  {!isSaving && <Check className="h-4 w-4" />}
                 </button>
               )}
             </div>

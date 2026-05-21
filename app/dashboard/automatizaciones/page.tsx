@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import { useQueryClient } from "@tanstack/react-query"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import {
@@ -117,6 +118,7 @@ const VARS_CONTACTOS = [
 
 export default function AutomatizacionesPage() {
   const { can } = usePlan()
+  const queryClient = useQueryClient()
   const [automatizaciones, setAutomatizaciones] = useState<DbAuto[]>([])
   const [actividad, setActividad] = useState<LogEntry[]>([])
   const [loading, setLoading] = useState(true)
@@ -127,9 +129,10 @@ export default function AutomatizacionesPage() {
   const [drawerMensaje, setDrawerMensaje] = useState("")
   const [drawerDias, setDrawerDias] = useState(1)
 
-  if (!can("automations")) return <UpgradeWall feature="Automatizaciones" requiredPlan="Pro" />
+  const canUse = can("automations")
 
   useEffect(() => {
+    if (!canUse) return
     fetch("/api/automatizaciones")
       .then((r) => r.json())
       .then((data) => {
@@ -138,7 +141,9 @@ export default function AutomatizacionesPage() {
       })
       .catch(() => toast.error("Error cargando automatizaciones"))
       .finally(() => setLoading(false))
-  }, [])
+  }, [canUse])
+
+  if (!canUse) return <UpgradeWall feature="Automatizaciones" requiredPlan="Pro" />
 
   const totalActivas = automatizaciones.filter((a) => a.activa).length
   const pct = automatizaciones.length > 0
@@ -150,11 +155,15 @@ export default function AutomatizacionesPage() {
     setAutomatizaciones((prev) => prev.map((a) => a.id === id ? { ...a, activa: !activa } : a))
     try {
       const res = await fetch(`/api/automatizaciones/${id}/toggle`, { method: "PATCH" })
-      if (!res.ok) throw new Error()
-    } catch {
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.error || "Error al actualizar")
+      }
+      queryClient.invalidateQueries({ queryKey: ["activation-checklist"] })
+    } catch (e) {
       // Revert
       setAutomatizaciones((prev) => prev.map((a) => a.id === id ? { ...a, activa } : a))
-      toast.error("Error al actualizar")
+      toast.error(e instanceof Error ? e.message : "Error al actualizar")
     }
   }
 
@@ -506,6 +515,7 @@ function AutoRow({ auto, onToggle, onOpen }: { auto: DbAuto; onToggle: () => voi
   const Icon = meta.icon
   const modulo = tipoToModulo(auto.tipo)
   const { tieneConfig } = getCfg(auto)
+  const ultimoError = auto.logs[0]?.resultado === "ERROR" ? auto.logs[0].detalle : null
 
   return (
     <div
@@ -543,6 +553,12 @@ function AutoRow({ auto, onToggle, onOpen }: { auto: DbAuto; onToggle: () => voi
           )}
           {!auto.vecesEjecutada && !auto.ultimaEjecucion && (
             <span className="text-[10px] text-[var(--text-secondary)]">Sin ejecuciones</span>
+          )}
+          {ultimoError && (
+            <span className="text-[10px] text-red-500 font-medium flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-400 inline-block flex-shrink-0" />
+              Error: {ultimoError}
+            </span>
           )}
         </div>
       </div>
@@ -705,6 +721,46 @@ function Drawer({ auto, activa, asunto, mensaje, diasVal, vars, onClose, onSave,
           {dias === undefined && hasAsunto === undefined && hasMensaje === undefined && (
             <div className="text-center py-6 text-[13px] text-slate-400">
               Esta automatización no tiene configuración adicional.
+            </div>
+          )}
+
+          {/* Preview del email */}
+          {(asunto || mensaje) && (
+            <div>
+              <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Vista previa</p>
+              <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
+                <div className="px-4 py-2 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
+                  <div className="flex gap-1">
+                    <div className="w-2.5 h-2.5 rounded-full bg-red-300" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-amber-300" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-green-300" />
+                  </div>
+                  <span className="text-[10px] text-slate-400 flex-1 text-center">Preview</span>
+                </div>
+                <div className="p-3">
+                  {asunto && (
+                    <div className="text-[11px] text-slate-400 mb-2 pb-2 border-b border-slate-100">
+                      Asunto: <span className="font-semibold text-slate-700">
+                        {asunto.replace(/{{lead\.nombre}}/g, "María García").replace(/{{cliente\.nombre}}/g, "Carlos López").replace(/{{usuario\.nombre}}/g, "Tu nombre")}
+                      </span>
+                    </div>
+                  )}
+                  {mensaje && (
+                    <div className="text-[11px] text-slate-600 leading-relaxed whitespace-pre-wrap">
+                      {mensaje
+                        .replace(/{{lead\.nombre}}/g, "María García")
+                        .replace(/{{cliente\.nombre}}/g, "Carlos López")
+                        .replace(/{{usuario\.nombre}}/g, "Tu nombre")
+                        .replace(/{{lead\.email}}/g, "maria@ejemplo.com")
+                        .replace(/{{factura\.total}}/g, "1.200 €")
+                        .replace(/{{factura\.numero}}/g, "FAC-2026-001")
+                        .replace(/{{factura\.vencimiento}}/g, "30/06/2026")
+                        .replace(/{{dias}}/g, String(diasVal))
+                        .replace(/{{[^}]+}}/g, "...")}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           )}
         </div>

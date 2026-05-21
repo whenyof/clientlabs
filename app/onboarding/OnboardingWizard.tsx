@@ -4,25 +4,9 @@ import { useState } from "react"
 import Image from "next/image"
 import { AnimatePresence, motion } from "framer-motion"
 import {
-  Check, ChevronLeft, ArrowRight, ChevronDown,
-  Briefcase, Heart, Activity, Megaphone, TrendingUp,
-  ShoppingBag, UtensilsCrossed, Users, MoreHorizontal,
+  Check, ChevronLeft, ArrowRight,
   Building2, MapPin, Palette, Sparkles,
-  LayoutDashboard, Map,
 } from "lucide-react"
-
-// ─── Sector data ────────────────────────────────────────────────────────────
-const SECTORS = [
-  { label: "Freelance",    icon: Briefcase,       value: "freelance" },
-  { label: "Clínica",      icon: Heart,           value: "clinica" },
-  { label: "Gimnasio",     icon: Activity,        value: "gimnasio" },
-  { label: "Agencia",      icon: Megaphone,       value: "agencia" },
-  { label: "Consultoría",  icon: TrendingUp,      value: "consultoria" },
-  { label: "Tienda",       icon: ShoppingBag,     value: "tienda" },
-  { label: "Restaurante",  icon: UtensilsCrossed, value: "restaurante" },
-  { label: "Coaching",     icon: Users,           value: "coaching" },
-  { label: "Otro",         icon: MoreHorizontal,  value: "otro" },
-]
 
 // ─── Steps metadata ──────────────────────────────────────────────────────────
 const STEPS = [
@@ -58,7 +42,7 @@ export default function OnboardingWizard() {
   const [done, setDone]       = useState(false)   // completion screen
   const [saving, setSaving]   = useState(false)
   const [form, setForm]       = useState<FormData>({
-    businessName: "", sector: "freelance", taxId: "",
+    businessName: "", sector: "otro", taxId: "",
     address: "", postalCode: "", city: "", province: "",
     logoFile: null, accentColor: "#1FA97A",
   })
@@ -144,30 +128,6 @@ export default function OnboardingWizard() {
           value={form.businessName}
           onChange={e => set("businessName", e.target.value)}
         />
-      </div>
-
-      <div>
-        <label className={labelCls}>Sector</label>
-        <div className="grid grid-cols-3 gap-2">
-          {SECTORS.map(({ label, icon: Icon, value }) => {
-            const active = form.sector === value
-            return (
-              <button
-                key={value}
-                type="button"
-                onClick={() => set("sector", value)}
-                className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border text-center transition-all duration-150 ${
-                  active
-                    ? "border-[#1FA97A] bg-[#1FA97A]/5 text-[#1FA97A]"
-                    : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-700"
-                }`}
-              >
-                <Icon size={18} strokeWidth={1.8} />
-                <span className="text-[11px] font-medium leading-tight">{label}</span>
-              </button>
-            )
-          })}
-        </div>
       </div>
 
       <div>
@@ -286,29 +246,34 @@ export default function OnboardingWizard() {
 
       {/* Step indicator */}
       <div className="w-full max-w-lg mb-8">
-        <div className="flex items-center gap-0 mb-3">
+        <div className="relative flex items-start justify-between w-full">
+          {/* Connecting line behind circles */}
+          <div className="absolute left-4 right-4 top-4 flex pointer-events-none" aria-hidden>
+            {STEPS.slice(0, -1).map((_, i) => (
+              <div
+                key={i}
+                className={`flex-1 h-px transition-all duration-300 ${i < step ? "bg-[#1FA97A]" : "bg-slate-200"}`}
+              />
+            ))}
+          </div>
+          {/* Circles + labels */}
           {STEPS.map((s, i) => {
-            const done = i < step
-            const active = i === step
+            const isDone   = i < step
+            const isActive = i === step
             return (
-              <div key={i} className="flex items-center flex-1">
-                <div className="flex flex-col items-center gap-1">
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold border-2 transition-all duration-300 ${
-                      done    ? "bg-[#1FA97A] border-[#1FA97A] text-white"
-                      : active ? "border-[#1FA97A] bg-white text-[#1FA97A]"
-                      : "border-slate-200 bg-white text-slate-400"
-                    }`}
-                  >
-                    {done ? <Check size={13} strokeWidth={3} /> : i + 1}
-                  </div>
-                  <span className={`text-[10px] font-medium hidden sm:block ${active ? "text-[#1FA97A]" : "text-slate-400"}`}>
-                    {s.label}
-                  </span>
+              <div key={i} className="relative z-10 flex flex-col items-center gap-1">
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold border-2 transition-all duration-300 ${
+                    isDone   ? "bg-[#1FA97A] border-[#1FA97A] text-white"
+                    : isActive ? "border-[#1FA97A] bg-white text-[#1FA97A]"
+                    : "border-slate-200 bg-white text-slate-400"
+                  }`}
+                >
+                  {isDone ? <Check size={13} strokeWidth={3} /> : i + 1}
                 </div>
-                {i < STEPS.length - 1 && (
-                  <div className={`flex-1 h-px mx-2 mb-4 transition-all duration-300 ${i < step ? "bg-[#1FA97A]" : "bg-slate-200"}`} />
-                )}
+                <span className={`text-[10px] font-medium hidden sm:block ${isActive ? "text-[#1FA97A]" : "text-slate-400"}`}>
+                  {s.label}
+                </span>
               </div>
             )
           })}

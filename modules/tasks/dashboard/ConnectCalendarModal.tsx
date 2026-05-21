@@ -1,42 +1,78 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { X, ArrowLeft, ChevronRight, RefreshCw } from "lucide-react"
+import { X, ArrowLeft, ChevronRight, RefreshCw, Copy, Check, AlertTriangle, ExternalLink } from "lucide-react"
 
 type CalendarApp = "google" | "apple" | "outlook"
 type Step = "choose" | CalendarApp | "connected"
 
-interface CalendarData { googleCalendarUrl: string; appleCalendarUrl: string; outlookUrl: string }
+interface CalendarData {
+  token: string
+  feedUrl: string
+  webcalUrl: string
+  googleCalendarUrl: string
+  appleCalendarUrl: string
+  outlookUrl: string
+}
+
 interface Props { onClose: () => void }
 
-const GIcon = () => <svg width="20" height="20" viewBox="0 0 48 48" fill="none"><rect x="4" y="6" width="40" height="38" rx="4" fill="#4285F4"/><rect x="4" y="6" width="40" height="13" rx="4" fill="#1967D2"/><rect x="4" y="13" width="40" height="6" fill="#1967D2"/><text x="24" y="36" textAnchor="middle" fill="white" fontSize="16" fontWeight="bold" fontFamily="Arial">31</text></svg>
-const AIcon = () => <svg width="20" height="20" viewBox="0 0 48 48" fill="none"><rect x="4" y="6" width="40" height="38" rx="4" fill="#FF3B30"/><rect x="4" y="6" width="40" height="13" rx="4" fill="#C62828"/><rect x="4" y="13" width="40" height="6" fill="#C62828"/><text x="24" y="36" textAnchor="middle" fill="white" fontSize="16" fontWeight="bold" fontFamily="Arial">31</text></svg>
-const OIcon = () => <svg width="20" height="20" viewBox="0 0 48 48" fill="none"><rect x="4" y="6" width="40" height="38" rx="4" fill="#0078D4"/><text x="24" y="33" textAnchor="middle" fill="white" fontSize="22" fontWeight="bold" fontFamily="Arial">O</text></svg>
-
-const APPS: { key: CalendarApp; label: string; updateLabel: string; updateNote: string; steps: string[]; iconBg: string; icon: React.ReactNode }[] = [
-  {
-    key: "google", label: "Google Calendar", updateLabel: "Actualiza periódicamente", updateNote: "Puede tardar hasta 24 h en sincronizar",
-    steps: ["Pulsa \"Abrir en Google Calendar\" abajo", "Google pedirá confirmación — acepta", "Las tareas aparecerán en \"Otros calendarios\""],
-    iconBg: "#EBF2FF", icon: <GIcon />,
-  },
-  {
-    key: "apple", label: "Apple Calendar", updateLabel: "Actualiza cada 15 min", updateNote: "Sincronización frecuente cada 15 minutos",
-    steps: ["Pulsa \"Abrir en Apple Calendar\" abajo", "La app Calendario pedirá confirmación — acepta", "Las tareas aparecerán como un calendario nuevo"],
-    iconBg: "#FFF0EF", icon: <AIcon />,
-  },
-  {
-    key: "outlook", label: "Outlook Calendar", updateLabel: "Actualiza cada 3 horas", updateNote: "Sincronización cada 3 horas",
-    steps: ["Pulsa \"Abrir en Outlook\" abajo", "Outlook Web abrirá — haz clic en \"Importar\"", "Las tareas aparecerán en \"Otros calendarios\""],
-    iconBg: "#E8F3FC", icon: <OIcon />,
-  },
-]
+const GIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 48 48" fill="none">
+    <rect x="4" y="6" width="40" height="38" rx="4" fill="#4285F4"/>
+    <rect x="4" y="6" width="40" height="13" rx="4" fill="#1967D2"/>
+    <rect x="4" y="13" width="40" height="6" fill="#1967D2"/>
+    <text x="24" y="36" textAnchor="middle" fill="white" fontSize="16" fontWeight="bold" fontFamily="Arial">31</text>
+  </svg>
+)
+const AIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 48 48" fill="none">
+    <rect x="4" y="6" width="40" height="38" rx="4" fill="#FF3B30"/>
+    <rect x="4" y="6" width="40" height="13" rx="4" fill="#C62828"/>
+    <rect x="4" y="13" width="40" height="6" fill="#C62828"/>
+    <text x="24" y="36" textAnchor="middle" fill="white" fontSize="16" fontWeight="bold" fontFamily="Arial">31</text>
+  </svg>
+)
+const OIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 48 48" fill="none">
+    <rect x="4" y="6" width="40" height="38" rx="4" fill="#0078D4"/>
+    <text x="24" y="33" textAnchor="middle" fill="white" fontSize="22" fontWeight="bold" fontFamily="Arial">O</text>
+  </svg>
+)
 
 const SYNCED_ITEMS = [
   "Tareas con fecha límite",
   "Prefijo [Proyecto] en el título",
-  "Tareas completadas aparecen tachadas",
   "Solo lectura — los cambios se hacen en ClientLabs",
 ]
+
+function CopyButton({ text, label = "Copiar URL" }: { text: string; label?: string }) {
+  const [copied, setCopied] = useState(false)
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // fallback — select text
+    }
+  }
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      style={{
+        display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+        padding: "9px", borderRadius: 8, border: "1.5px solid #e2e8f0",
+        background: copied ? "#f0fdf9" : "white", color: copied ? "#1FA97A" : "#334155",
+        fontSize: 12, fontWeight: 600, cursor: "pointer", width: "100%", transition: "all 0.15s",
+      }}
+    >
+      {copied ? <Check style={{ width: 13, height: 13 }} /> : <Copy style={{ width: 13, height: 13 }} />}
+      {copied ? "Copiado" : label}
+    </button>
+  )
+}
 
 export function ConnectCalendarModal({ onClose }: Props) {
   const [step, setStep] = useState<Step>("choose")
@@ -52,9 +88,13 @@ export function ConnectCalendarModal({ onClose }: Props) {
       .catch(() => { setError(true); setLoading(false) })
   }, [])
 
+  const isLocalhost = data ? data.feedUrl.includes("localhost") : false
+
   const getHref = (app: CalendarApp) => {
     if (!data) return "#"
-    return app === "google" ? data.googleCalendarUrl : app === "apple" ? data.appleCalendarUrl : data.outlookUrl
+    if (app === "google") return data.googleCalendarUrl
+    if (app === "apple") return data.appleCalendarUrl
+    return data.outlookUrl
   }
 
   const handleRegenerate = async () => {
@@ -66,6 +106,45 @@ export function ConnectCalendarModal({ onClose }: Props) {
     } finally { setRegenerating(false) }
   }
 
+  const APPS: { key: CalendarApp; label: string; updateLabel: string; iconBg: string; icon: React.ReactNode; steps: React.ReactNode[] }[] = [
+    {
+      key: "google",
+      label: "Google Calendar",
+      updateLabel: "Se actualiza cada 24 h (límite de Google)",
+      iconBg: "#EBF2FF",
+      icon: <GIcon />,
+      steps: [
+        "Pulsa «Abrir en Google Calendar» abajo",
+        "Google pedirá confirmación — acepta",
+        <>Las tareas aparecerán en <strong>«Otros calendarios»</strong></>,
+      ],
+    },
+    {
+      key: "apple",
+      label: "Apple Calendar",
+      updateLabel: "Se actualiza cada 15 min",
+      iconBg: "#FFF0EF",
+      icon: <AIcon />,
+      steps: [
+        <>Pulsa «Abrir en Apple Calendar» abajo <em>(requiere producción — ver nota)</em></>,
+        <>O copia el enlace y ve a <strong>Fichero › Nueva suscripción a calendario</strong></>,
+        "Pega la URL y acepta — las tareas aparecerán como calendario nuevo",
+      ],
+    },
+    {
+      key: "outlook",
+      label: "Outlook Calendar",
+      updateLabel: "Se actualiza cada 3 h",
+      iconBg: "#E8F3FC",
+      icon: <OIcon />,
+      steps: [
+        "Pulsa «Abrir en Outlook» abajo",
+        "Outlook Web abrirá — haz clic en «Importar»",
+        <>Las tareas aparecerán en <strong>«Otros calendarios»</strong></>,
+      ],
+    },
+  ]
+
   const currentApp = APPS.find((a) => a.key === step)
   const isAppStep = step === "google" || step === "apple" || step === "outlook"
 
@@ -74,10 +153,12 @@ export function ConnectCalendarModal({ onClose }: Props) {
       style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
       onClick={onClose}
     >
-      <div style={{ background: "white", borderRadius: 14, width: "100%", maxWidth: 400, boxShadow: "0 4px 24px rgba(0,0,0,0.12)" }} onClick={(e) => e.stopPropagation()}>
-
+      <div
+        style={{ background: "white", borderRadius: 14, width: "100%", maxWidth: 420, boxShadow: "0 4px 24px rgba(0,0,0,0.12)", maxHeight: "90vh", overflowY: "auto" }}
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "16px 16px 0" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "16px 16px 0", position: "sticky", top: 0, background: "white", zIndex: 1, borderRadius: "14px 14px 0 0" }}>
           {isAppStep && (
             <button type="button" onClick={() => setStep("choose")} style={{ padding: 4, border: "none", background: "none", cursor: "pointer", color: "#94a3b8", display: "flex", flexShrink: 0 }}>
               <ArrowLeft style={{ width: 15, height: 15 }} />
@@ -102,10 +183,9 @@ export function ConnectCalendarModal({ onClose }: Props) {
               </button>
             </div>
           ) : step === "choose" ? (
-            /* Step 1 – choose app */
             <div>
               <p style={{ fontSize: 12, color: "#64748b", margin: "0 0 12px", lineHeight: 1.4 }}>
-                Elige tu app de calendario. Tus tareas con fecha aparecerán como eventos.
+                Elige tu app de calendario. Tus tareas con fecha aparecerán como eventos de solo lectura.
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {APPS.map((a) => (
@@ -123,12 +203,28 @@ export function ConnectCalendarModal({ onClose }: Props) {
                   </button>
                 ))}
               </div>
+
+              {/* Feed URL for manual copy */}
+              {data && (
+                <div style={{ marginTop: 16, padding: "12px 14px", background: "#f8fafc", borderRadius: 10, border: "1px solid #e2e8f0" }}>
+                  <p style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 8px" }}>
+                    URL del feed (para suscripción manual)
+                  </p>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, background: "white", border: "1px solid #e2e8f0", borderRadius: 6, padding: "7px 10px", marginBottom: 8 }}>
+                    <code style={{ flex: 1, fontSize: 10, color: "#334155", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {data.feedUrl}
+                    </code>
+                  </div>
+                  <CopyButton text={data.feedUrl} label="Copiar URL del feed" />
+                </div>
+              )}
             </div>
           ) : step === "connected" ? (
-            /* Step 3 – confirmation */
             <div style={{ textAlign: "center" }}>
               <div style={{ width: 44, height: 44, borderRadius: "50%", background: "#f0fdf9", border: "1.5px solid #1FA97A", display: "flex", alignItems: "center", justifyContent: "center", margin: "4px auto 14px" }}>
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10l4 4 8-8" stroke="#1FA97A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M4 10l4 4 8-8" stroke="#1FA97A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </div>
               <p style={{ fontSize: 13, fontWeight: 600, color: "#0f172a", margin: "0 0 14px" }}>Calendario añadido correctamente</p>
               <div style={{ background: "#f8fafc", borderRadius: 8, padding: "12px 14px", textAlign: "left", marginBottom: 16 }}>
@@ -150,11 +246,22 @@ export function ConnectCalendarModal({ onClose }: Props) {
               </button>
             </div>
           ) : currentApp ? (
-            /* Step 2 – tutorial */
             <div>
+              {/* Localhost warning */}
+              {isLocalhost && (
+                <div style={{ display: "flex", gap: 8, background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 8, padding: "10px 12px", marginBottom: 14 }}>
+                  <AlertTriangle style={{ width: 14, height: 14, color: "#d97706", flexShrink: 0, marginTop: 1 }} />
+                  <p style={{ fontSize: 11, color: "#92400e", margin: 0, lineHeight: 1.5 }}>
+                    <strong>Entorno de desarrollo:</strong> Los botones de apertura directa no funcionan en localhost.{" "}
+                    Copia el enlace del feed y suscríbete manualmente en tu app de calendario.
+                  </p>
+                </div>
+              )}
+
               <p style={{ fontSize: 12, color: "#64748b", margin: "0 0 14px", lineHeight: 1.4 }}>
                 Sigue estos pasos para añadirlo a {currentApp.label}:
               </p>
+
               <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 14 }}>
                 {currentApp.steps.map((s, i) => (
                   <div key={i} style={{ display: "flex", gap: 10 }}>
@@ -163,21 +270,59 @@ export function ConnectCalendarModal({ onClose }: Props) {
                   </div>
                 ))}
               </div>
-              <div style={{ background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 8, padding: "9px 12px", marginBottom: 14 }}>
-                <p style={{ fontSize: 11, color: "#92400e", margin: 0, lineHeight: 1.4 }}>
-                  {currentApp.updateNote}. Solo lectura — los cambios se hacen en ClientLabs.
-                </p>
-              </div>
+
+              {/* Feed URL copy — always visible */}
+              {data && (
+                <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 8, padding: "10px 12px", marginBottom: 12 }}>
+                  <p style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 7px" }}>
+                    URL del feed
+                  </p>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, background: "white", border: "1px solid #e2e8f0", borderRadius: 6, padding: "7px 10px", marginBottom: 8 }}>
+                    <code style={{ flex: 1, fontSize: 10, color: "#334155", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {data.feedUrl}
+                    </code>
+                  </div>
+                  <CopyButton text={data.feedUrl} />
+                  {step === "apple" && (
+                    <p style={{ fontSize: 10, color: "#94a3b8", margin: "7px 0 0", lineHeight: 1.4 }}>
+                      En macOS: <strong>Fichero › Nueva suscripción a calendario</strong> → pega la URL
+                    </p>
+                  )}
+                  {step === "apple" && (
+                    <div style={{ marginTop: 8 }}>
+                      <CopyButton text={data.webcalUrl} label="Copiar URL webcal://" />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Primary CTA — open in app */}
               <a
-                href={getHref(step as CalendarApp)}
+                href={isLocalhost ? undefined : getHref(step as CalendarApp)}
                 target={step !== "apple" ? "_blank" : undefined}
                 rel="noopener noreferrer"
-                onClick={() => setTimeout(() => setStep("connected"), 400)}
-                style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "10px", borderRadius: 8, background: "#1FA97A", color: "white", fontSize: 13, fontWeight: 600, textDecoration: "none" }}
+                onClick={isLocalhost ? undefined : () => setTimeout(() => setStep("connected"), 400)}
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                  padding: "10px", borderRadius: 8,
+                  background: isLocalhost ? "#e2e8f0" : "#1FA97A",
+                  color: isLocalhost ? "#94a3b8" : "white",
+                  fontSize: 13, fontWeight: 600, textDecoration: "none",
+                  cursor: isLocalhost ? "not-allowed" : "pointer",
+                  pointerEvents: isLocalhost ? "none" : "auto",
+                }}
+                aria-disabled={isLocalhost}
               >
+                <ExternalLink style={{ width: 13, height: 13 }} />
                 Abrir en {currentApp.label}
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                {isLocalhost && <span style={{ fontSize: 10, fontWeight: 400 }}>(no disponible en localhost)</span>}
               </a>
+
+              {!isLocalhost && (
+                <p style={{ fontSize: 10, color: "#94a3b8", margin: "8px 0 0", textAlign: "center", lineHeight: 1.4 }}>
+                  {currentApp.updateLabel}. Solo lectura.
+                </p>
+              )}
             </div>
           ) : null}
         </div>

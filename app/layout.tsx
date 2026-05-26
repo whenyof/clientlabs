@@ -95,7 +95,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: process.env.GOOGLE_SITE_VERIFICATION ?? "",
+    google: "vbG3vG5z2qxWFaWvYW_HKSGM7-f5HXCzkdDqdkp7TFw",
   },
   category: "Software de gestión empresarial",
   icons: {

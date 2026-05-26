@@ -63,6 +63,15 @@ const sortedArticles = [...ARTICLES].sort(
 
 type PageProps = { searchParams: Promise<{ cat?: string }> }
 
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Inicio", item: "https://clientlabs.io" },
+    { "@type": "ListItem", position: 2, name: "Blog", item: "https://clientlabs.io/blog" },
+  ],
+}
+
 export default async function BlogPage({ searchParams: searchParamsPromise }: PageProps) {
   const searchParams = await searchParamsPromise
   const activeCategory = searchParams.cat ?? "all"
@@ -73,6 +82,8 @@ export default async function BlogPage({ searchParams: searchParamsPromise }: Pa
 
   return (
     <main className="min-h-screen bg-[#0B1F2A] text-white">
+      {/* JSON-LD: hardcoded constant, no user input — XSS-safe */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <Navbar />
 
       {/* Hero */}

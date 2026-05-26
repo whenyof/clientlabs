@@ -2,10 +2,10 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { mockChatHistory } from "../mock"
+import type { ChatMessage } from "../mock"
 
 export function ChatWindow() {
-  const [messages] = useState(mockChatHistory.slice(0, 5))
+  const [messages] = useState<ChatMessage[]>([])
 
   return (
     <motion.div

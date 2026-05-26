@@ -35,13 +35,13 @@ export const metadata: Metadata = {
     url: "https://clientlabs.io",
     siteName: "ClientLabs",
     locale: "es_ES",
-    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "ClientLabs — CRM y facturación para autónomos" }],
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "ClientLabs — CRM y facturación para autónomos" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "ClientLabs — CRM y facturación para autónomos",
     description: "Factura con Verifactu, capta leads y gestiona clientes. Todo en uno desde 14,99€/mes.",
-    images: ["/og-image.png"],
+    images: ["/opengraph-image"],
   },
   alternates: { canonical: "https://clientlabs.io" },
 }

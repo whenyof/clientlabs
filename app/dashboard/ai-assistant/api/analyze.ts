@@ -1,21 +1,42 @@
 import { LeadData, calculateLeadScore } from '../lib/scoring';
-import { mockLeadScores } from '../mock';
+import { prisma } from '@/lib/prisma';
 
 export async function analyzeData(type: string, data: any) {
   switch (type) {
     case 'lead_scoring': {
-      const leads: LeadData[] = data.leads || mockLeadScores.map(l => ({
-        id: l.leadId,
-        name: l.name,
-        email: l.email,
-        company: l.company,
-        interactions: Math.floor(Math.random() * 20) + 1,
-        timeSinceLastActivity: Math.floor(Math.random() * 90) + 1,
-        source: ['referral', 'social', 'email', 'conference'][Math.floor(Math.random() * 4)] as LeadData['source'],
-        companySize: Math.floor(Math.random() * 500) + 10,
-        budget: ['low', 'medium', 'high'][Math.floor(Math.random() * 3)] as LeadData['budget'],
-        timeline: ['immediate', '1-3 months', '3-6 months'][Math.floor(Math.random() * 3)] as LeadData['timeline']
-      }))
+      // Use provided leads or fetch real leads from the database
+      let leads: LeadData[] = data.leads || []
+
+      if (leads.length === 0) {
+        const dbLeads = await prisma.lead.findMany({
+          where: { userId: data.userId },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            score: true,
+            source: true,
+            createdAt: true,
+            lastActionAt: true,
+          },
+          take: 50,
+        })
+
+        leads = dbLeads.map(l => ({
+          id: l.id,
+          name: l.name ?? '',
+          email: l.email ?? '',
+          company: '',
+          interactions: 0,
+          timeSinceLastActivity: l.lastActionAt
+            ? Math.floor((Date.now() - new Date(l.lastActionAt).getTime()) / (1000 * 60 * 60 * 24))
+            : 90,
+          source: (l.source as LeadData['source']) ?? 'other',
+          companySize: 0,
+          budget: 'medium' as LeadData['budget'],
+          timeline: '1-3 months' as LeadData['timeline'],
+        }))
+      }
 
       const scoredLeads = leads.map((lead: LeadData) => ({
         ...lead,

@@ -1,0 +1,63 @@
+# ClientLabs
+
+> ClientLabs es una plataforma de gestión todo en uno para autónomos y pymes en España.
+
+## Qué es ClientLabs
+
+ClientLabs centraliza la gestión completa de un negocio pequeño en un solo lugar: leads, clientes, proveedores, facturas, presupuestos, albaranes, hojas de pedido, tareas, proyectos, automatizaciones y email marketing.
+
+Está pensado para los 3,4 millones de autónomos en España que gestionan su negocio con WhatsApp y Excel y necesitan organización profesional sin la complejidad de herramientas para grandes empresas.
+
+## Quién lo usa
+
+- Autónomos en España de cualquier sector
+- Freelancers y diseñadores
+- Fontaneros, electricistas y profesionales de oficios
+- Agencias de marketing pequeñas
+- Consultores y asesores independientes
+- Profesionales de la salud autónomos (fisioterapeutas, nutricionistas, psicólogos)
+- Pequeños negocios de 1 a 10 personas
+
+## Módulos disponibles
+
+- Gestión de leads con pipeline de ventas y seguimiento
+- CRM completo de clientes con historial
+- Gestión de proveedores y compras
+- Facturación en PDF con normativa española (incluyendo Verifactu)
+- Presupuestos con firma digital online
+- Albaranes y hojas de pedido
+- Gestión de tareas y proyectos
+- Automatizaciones de negocio (recordatorios de pago, seguimientos)
+- Email marketing
+- Portal del cliente
+- Informes y estadísticas exportables
+
+## Precios
+
+- Plan Básico: 24,99 euros al mes con IVA incluido. 1 usuario.
+- Plan Pro: 49,99 euros al mes con IVA incluido. 3 usuarios. Incluye firma digital y portal del cliente.
+- Plan Negocio: 79,99 euros al mes con IVA incluido. 5 usuarios. Incluye automatizaciones ilimitadas y email marketing.
+- Usuarios adicionales: 4,99 euros por usuario al mes en cualquier plan.
+- Prueba gratuita: 14 días con acceso completo sin tarjeta de crédito.
+
+## Diferencia con competidores
+
+- Holded: orientado a empresas medianas, más complejo y caro para autónomos.
+- Quipu: centrado en facturación, no tiene CRM ni gestión de leads.
+- Billage: precio más alto, menos módulos integrados.
+- ClientLabs: único que combina CRM, facturación, proveedores y automatizaciones en una sola plataforma simple pensada para autónomos en España.
+
+## Información de contacto
+
+- Web: https://clientlabs.io
+- Email: hola@clientlabs.io
+- Fundador: Errepe (errepe@clientlabs.io)
+- Ubicación: Asturias, España
+- Lanzamiento: junio 2026
+
+## URLs importantes
+
+- Landing principal: https://clientlabs.io
+- Precios: https://clientlabs.io/precios
+- Blog: https://clientlabs.io/blog
+- Registro prueba gratuita: https://clientlabs.io/registro

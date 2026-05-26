@@ -38,151 +38,6 @@ function cn(...classes: (string | boolean | undefined | null)[]): string {
   return classes.filter(Boolean).join(" ")
 }
 
-// ── Mock data ────────────────────────────────────────────────────────────────
-
-const KPIS = [
-  {
-    label: "Contactos totales",
-    valor: "374",
-    sublabel: "vs mes anterior: +12",
-    sublabelClass: "text-[#1FA97A]",
-    icon: Users,
-  },
-  {
-    label: "Emails enviados",
-    valor: "2.722",
-    sublabel: "vs mes anterior: +8.4%",
-    sublabelClass: "text-[#1FA97A]",
-    icon: AtSign,
-  },
-  {
-    label: "Tasa de apertura",
-    valor: "68.4%",
-    sublabel: "vs mes anterior: -1.2%",
-    sublabelClass: "text-red-500",
-    icon: Eye,
-  },
-  {
-    label: "Leads generados",
-    valor: "47",
-    sublabel: "vs mes anterior: +6",
-    sublabelClass: "text-[#1FA97A]",
-    icon: TrendingUp,
-  },
-]
-
-const CAMPANAS_RESUMEN = [
-  {
-    nombre: "Clientes inactivos Mayo",
-    audiencia: "23 clientes",
-    enviados: 23,
-    apertura: 89,
-    clicks: 14,
-    estado: "activa",
-    estadoLabel: "Activa",
-  },
-  {
-    nombre: "Bienvenida nuevos clientes",
-    audiencia: "Automática",
-    enviados: 31,
-    apertura: 76,
-    clicks: 8,
-    estado: "automatica",
-    estadoLabel: "Automática",
-  },
-  {
-    nombre: "Newsletter Mayo 2026",
-    audiencia: "156 suscriptores",
-    enviados: 156,
-    apertura: 71,
-    clicks: 34,
-    estado: "enviada",
-    estadoLabel: "Enviada",
-  },
-]
-
-const FUENTES = [
-  { nombre: "Web / Formulario", cantidad: 21, porcentaje: 45, color: "bg-[#1FA97A]", barColor: "bg-[#1FA97A]" },
-  { nombre: "LinkedIn",         cantidad: 13, porcentaje: 28, color: "bg-blue-500",  barColor: "bg-blue-500"  },
-  { nombre: "Referidos",        cantidad: 9,  porcentaje: 19, color: "bg-amber-400", barColor: "bg-amber-400" },
-  { nombre: "Manual",           cantidad: 4,  porcentaje: 8,  color: "bg-slate-300", barColor: "bg-slate-300" },
-]
-
-const ACTIVIDAD = [
-  { icon: Eye,         bg: "bg-blue-50",      iconColor: "text-blue-500",    texto: "Juan Pérez abrió 'Clientes inactivos Mayo'",        tiempo: "Hace 2 horas"  },
-  { icon: MousePointer,bg: "bg-[#E1F5EE]",    iconColor: "text-[#1FA97A]",   texto: "María García hizo click en tu CTA",                 tiempo: "Hace 5 horas"  },
-  { icon: Send,        bg: "bg-purple-50",    iconColor: "text-purple-500",  texto: "Newsletter Mayo enviada a 156 contactos",           tiempo: "Ayer a las 9:00"},
-  { icon: UserPlus,    bg: "bg-amber-50",     iconColor: "text-amber-500",   texto: "3 nuevos suscriptores a tu newsletter",             tiempo: "Ayer"          },
-  { icon: Zap,         bg: "bg-[#E1F5EE]",    iconColor: "text-[#1FA97A]",   texto: "Campaña automática activada para nuevos clientes",  tiempo: "Lunes"         },
-]
-
-const CAMPANAS_TABLA = [
-  {
-    nombre: "Clientes inactivos Mayo",
-    audiencia: "23 clientes",
-    estado: "activa",
-    estadoLabel: "Activa",
-    alcance: 23,
-    apertura: 89,
-    clics: 34,
-    enviados: 23,
-  },
-  {
-    nombre: "Bienvenida nuevos clientes",
-    audiencia: "Automática",
-    estado: "automatica",
-    estadoLabel: "Automática",
-    alcance: 31,
-    apertura: 76,
-    clics: 22,
-    enviados: 31,
-  },
-  {
-    nombre: "Newsletter Mayo 2026",
-    audiencia: "156 suscriptores",
-    estado: "enviada",
-    estadoLabel: "Enviada",
-    alcance: 156,
-    apertura: 71,
-    clics: 18,
-    enviados: 156,
-  },
-  {
-    nombre: "Oferta servicios diseño",
-    audiencia: "Clientes PRO",
-    estado: "programada",
-    estadoLabel: "Programada",
-    alcance: 0,
-    apertura: 0,
-    clics: 0,
-    enviados: 0,
-  },
-  {
-    nombre: "Black Friday 2025",
-    audiencia: "Todos los contactos",
-    estado: "enviada",
-    estadoLabel: "Enviada",
-    alcance: 312,
-    apertura: 54,
-    clics: 28,
-    enviados: 312,
-  },
-]
-
-const NEWSLETTERS_DATA = [
-  { nombre: "Newsletter Mayo 2026", suscriptores: 156, abiertos: 111, fecha: "1 May 2026", estado: "enviada" },
-  { nombre: "Newsletter Abril 2026", suscriptores: 148, abiertos: 105, fecha: "1 Abr 2026", estado: "enviada" },
-  { nombre: "Newsletter Junio 2026", suscriptores: 163, abiertos: 0, fecha: "1 Jun 2026", estado: "programada" },
-]
-
-const SEGMENTOS_DATA = [
-  { nombre: "Leads calientes",        desc: "Score > 70, sin convertir",     count: 34, color: "text-red-500",      bg: "bg-red-50"        },
-  { nombre: "Clientes activos",       desc: "Con factura en últimos 90d",    count: 87, color: "text-[#1FA97A]",   bg: "bg-[#E1F5EE]"     },
-  { nombre: "Sin contactar +14d",     desc: "Leads sin acción reciente",     count: 21, color: "text-amber-600",   bg: "bg-amber-50"      },
-  { nombre: "Inactivos >6 meses",     desc: "Para reactivación",             count: 56, color: "text-indigo-600",  bg: "bg-indigo-50"     },
-  { nombre: "Clientes PRO / Negocio", desc: "Plan PRO o Negocio",           count: 12, color: "text-sky-600",     bg: "bg-sky-50"        },
-]
-
 // ── Sub-components ────────────────────────────────────────────────────────────
 
 function EstadoBadge({ estado, label }: { estado: string; label: string }) {
@@ -203,11 +58,70 @@ function EstadoBadge({ estado, label }: { estado: string; label: string }) {
 // ── Tab: Resumen ──────────────────────────────────────────────────────────────
 
 function TabResumen({ setActiveTab, onNuevaCampana }: { setActiveTab: (t: string) => void; onNuevaCampana: () => void }) {
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ["marketing-stats"],
+    queryFn: () => fetch("/api/marketing/stats").then(r => r.json()),
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
+    retry: 0,
+  })
+
+  const kpis = [
+    {
+      label: "Contactos totales",
+      valor: isLoading ? "..." : (stats?.kpis?.totalContactos ?? 0).toLocaleString("es-ES"),
+      sublabel: stats?.kpis?.totalContactosDiff != null
+        ? `vs mes anterior: ${stats.kpis.totalContactosDiff > 0 ? "+" : ""}${stats.kpis.totalContactosDiff}`
+        : "Acumulado total",
+      sublabelClass: (stats?.kpis?.totalContactosDiff ?? 0) >= 0 ? "text-[#1FA97A]" : "text-red-500",
+      icon: Users,
+    },
+    {
+      label: "Emails enviados",
+      valor: isLoading ? "..." : (stats?.kpis?.emailsEnviados ?? 0).toLocaleString("es-ES"),
+      sublabel: "Total acumulado",
+      sublabelClass: "text-slate-400",
+      icon: AtSign,
+    },
+    {
+      label: "Tasa de apertura",
+      valor: isLoading ? "..." : (stats?.kpis?.emailsEnviados ?? 0) > 0 ? `${stats!.kpis.tasaApertura}%` : "—",
+      sublabel: "Media de todas las campañas",
+      sublabelClass: "text-slate-400",
+      icon: Eye,
+    },
+    {
+      label: "Leads generados",
+      valor: isLoading ? "..." : (stats?.kpis?.leadsGenerados ?? 0).toLocaleString("es-ES"),
+      sublabel: stats?.kpis?.leadsGeneradosDiff != null
+        ? `vs mes anterior: ${stats.kpis.leadsGeneradosDiff > 0 ? "+" : ""}${stats.kpis.leadsGeneradosDiff}`
+        : "Este mes",
+      sublabelClass: (stats?.kpis?.leadsGeneradosDiff ?? 0) >= 0 ? "text-[#1FA97A]" : "text-red-500",
+      icon: TrendingUp,
+    },
+  ]
+
+  const campanas: { id: string; nombre: string; estado: string; totalEnviados: number; totalAbiertos: number; totalClicks: number; aperturaPct: number | null }[] = stats?.campanasRecientes ?? []
+  const fuentes: { nombre: string; cantidad: number; porcentaje: number }[] = stats?.fuentes ?? []
+
+  const rendimiento = [
+    { label: "Tasa de apertura",    valor: (stats?.kpis?.emailsEnviados ?? 0) > 0 ? `${stats!.kpis.tasaApertura}%` : "—", barra: stats?.kpis?.tasaApertura ?? 0, positivo: true },
+    { label: "Click-through rate",  valor: (stats?.kpis?.emailsEnviados ?? 0) > 0 ? `${stats!.kpis.ctr}%` : "—",          barra: stats?.kpis?.ctr ?? 0,          positivo: true },
+  ]
+
+  const estadoLabel: Record<string, string> = { borrador: "Borrador", programada: "Programada", enviada: "Enviada", error: "Error" }
+  const estadoClass: Record<string, string> = {
+    programada: "bg-amber-50 text-amber-600",
+    enviada: "bg-purple-50 text-purple-600",
+    error: "bg-red-50 text-red-500",
+    borrador: "bg-slate-100 text-slate-500",
+  }
+
   return (
     <div className="space-y-5">
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {KPIS.map((kpi) => {
+        {kpis.map((kpi) => {
           const Icon = kpi.icon
           return (
             <div
@@ -233,16 +147,18 @@ function TabResumen({ setActiveTab, onNuevaCampana }: { setActiveTab: (t: string
         })}
       </div>
 
-      {/* Fila 2: Campañas (2col) + Fuentes+Próxima (1col) */}
+      {/* Fila 2: Campañas + Fuentes */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-        {/* Campañas activas — 2/3 ancho */}
+        {/* Campañas recientes — 2/3 ancho */}
         <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-[#1FA97A] animate-pulse" />
-              <span className="text-[13px] font-bold text-slate-800">Campañas activas</span>
-              <span className="px-2 py-0.5 bg-[#E1F5EE] text-[#1FA97A] text-[10px] font-bold rounded-full">3</span>
+              <div className="w-2 h-2 rounded-full bg-[#1FA97A]" />
+              <span className="text-[13px] font-bold text-slate-800">Campañas recientes</span>
+              {campanas.length > 0 && (
+                <span className="px-2 py-0.5 bg-[#E1F5EE] text-[#1FA97A] text-[10px] font-bold rounded-full">{campanas.length}</span>
+              )}
             </div>
             <button
               onClick={() => setActiveTab("campanas")}
@@ -252,63 +168,55 @@ function TabResumen({ setActiveTab, onNuevaCampana }: { setActiveTab: (t: string
             </button>
           </div>
 
-          <div className="divide-y divide-slate-50">
-            {CAMPANAS_RESUMEN.map((c, i) => (
-              <div
-                key={i}
-                className="px-5 py-4 hover:bg-slate-50/50 transition-colors cursor-pointer group"
-              >
-                <div className="flex items-center justify-between">
-                  {/* Info */}
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className={cn(
-                      "w-2 h-2 rounded-full flex-shrink-0",
-                      c.estado === "activa" ? "bg-[#1FA97A]" :
-                      c.estado === "automatica" ? "bg-blue-400 animate-pulse" :
-                      "bg-slate-300"
-                    )} />
-                    <div className="min-w-0">
-                      <div className="text-[13px] font-semibold text-slate-800 truncate group-hover:text-[#1FA97A] transition-colors">
-                        {c.nombre}
-                      </div>
-                      <div className="text-[11px] text-slate-400">{c.audiencia}</div>
-                    </div>
-                  </div>
-
-                  {/* Métricas inline */}
-                  <div className="flex items-center gap-6 flex-shrink-0 ml-4">
-                    {/* Enviados */}
-                    <div className="text-center">
-                      <div className="text-[14px] font-bold text-slate-800">{c.enviados}</div>
-                      <div className="text-[10px] text-slate-400">enviados</div>
-                    </div>
-
-                    {/* Apertura con mini barra */}
-                    <div className="w-28">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-[11px] text-slate-400">Apertura</span>
-                        <span className="text-[12px] font-bold text-slate-700">{c.apertura}%</span>
-                      </div>
-                      <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-gradient-to-r from-[#1FA97A] to-[#0B8A5E]"
-                          style={{ width: `${c.apertura}%` }}
-                        />
+          {campanas.length === 0 ? (
+            <div className="px-5 py-10 text-center">
+              <Send className="h-8 w-8 text-slate-200 mx-auto mb-3" />
+              <p className="text-[13px] font-medium text-slate-500 mb-1">Sin campañas aún</p>
+              <p className="text-[12px] text-slate-400">Crea tu primera campaña para ver el rendimiento aquí.</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-50">
+              {campanas.map((c) => (
+                <div
+                  key={c.id}
+                  className="px-5 py-4 hover:bg-slate-50/50 transition-colors cursor-pointer group"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className={cn(
+                        "w-2 h-2 rounded-full flex-shrink-0",
+                        c.estado === "programada" ? "bg-amber-400" : c.estado === "enviada" ? "bg-slate-300" : "bg-slate-200"
+                      )} />
+                      <div className="min-w-0">
+                        <div className="text-[13px] font-semibold text-slate-800 truncate group-hover:text-[#1FA97A] transition-colors">{c.nombre}</div>
+                        <div className="text-[11px] text-slate-400">{estadoLabel[c.estado] ?? c.estado}</div>
                       </div>
                     </div>
-
-                    {/* Clicks */}
-                    <div className="text-center">
-                      <div className="text-[14px] font-bold text-slate-800">{c.clicks}</div>
-                      <div className="text-[10px] text-slate-400">clicks</div>
+                    <div className="flex items-center gap-6 flex-shrink-0 ml-4">
+                      <div className="text-center">
+                        <div className="text-[14px] font-bold text-slate-800">{c.totalEnviados > 0 ? c.totalEnviados : "—"}</div>
+                        <div className="text-[10px] text-slate-400">enviados</div>
+                      </div>
+                      {c.aperturaPct !== null && (
+                        <div className="w-28">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-[11px] text-slate-400">Apertura</span>
+                            <span className="text-[12px] font-bold text-slate-700">{c.aperturaPct}%</span>
+                          </div>
+                          <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div className="h-full rounded-full bg-gradient-to-r from-[#1FA97A] to-[#0B8A5E]" style={{ width: `${c.aperturaPct}%` }} />
+                          </div>
+                        </div>
+                      )}
+                      <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0", estadoClass[c.estado] ?? "bg-slate-100 text-slate-500")}>
+                        {estadoLabel[c.estado] ?? c.estado}
+                      </span>
                     </div>
-
-                    <EstadoBadge estado={c.estado} label={c.estadoLabel} />
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           <div className="px-5 py-3 border-t border-slate-100 bg-slate-50/50">
             <button
@@ -321,127 +229,61 @@ function TabResumen({ setActiveTab, onNuevaCampana }: { setActiveTab: (t: string
           </div>
         </div>
 
-        {/* Fuentes + Próxima campaña — 1/3 ancho */}
+        {/* Fuentes — 1/3 ancho */}
         <div className="space-y-4">
-
-          {/* Fuentes de leads */}
           <div className="bg-white rounded-2xl border border-slate-200 p-5">
             <div className="flex items-center justify-between mb-4">
               <span className="text-[13px] font-bold text-slate-800">Fuentes de leads</span>
               <span className="text-[11px] text-slate-400">Este mes</span>
             </div>
-            <div className="space-y-3">
-              {FUENTES.map((f, i) => (
-                <div key={i}>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className="flex items-center gap-2">
-                      <div className={cn("w-2 h-2 rounded-full", f.color)} />
+            {fuentes.length === 0 ? (
+              <div className="py-6 text-center">
+                <p className="text-[12px] text-slate-400">Sin leads este mes</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {fuentes.map((f, i) => (
+                  <div key={i}>
+                    <div className="flex items-center justify-between mb-1.5">
                       <span className="text-[12px] font-medium text-slate-600">{f.nombre}</span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-[12px] font-bold text-slate-800">{f.cantidad}</span>
+                        <span className="text-[10px] text-slate-400">({f.porcentaje}%)</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <span className="text-[12px] font-bold text-slate-800">{f.cantidad}</span>
-                      <span className="text-[10px] text-slate-400">({f.porcentaje}%)</span>
+                    <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-full rounded-full bg-[#1FA97A] transition-all duration-700" style={{ width: `${f.porcentaje}%` }} />
                     </div>
                   </div>
-                  <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                    <div
-                      className={cn("h-full rounded-full transition-all duration-700", f.barColor)}
-                      style={{ width: `${f.porcentaje}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Próxima campaña programada */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-5">
-            <span className="text-[13px] font-bold text-slate-800 block mb-3">Próxima campaña</span>
-            <div className="flex items-center gap-3 p-3 bg-amber-50 border border-amber-200/50 rounded-xl mb-3">
-              <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
-                <Clock className="h-4 w-4 text-amber-600" />
+                ))}
               </div>
-              <div>
-                <div className="text-[12px] font-semibold text-slate-800">Leads sin respuesta — 7 días</div>
-                <div className="text-[11px] text-amber-600 font-medium">Programada · Mañana 9:00</div>
-              </div>
-            </div>
-            <p className="text-[11px] text-slate-500 leading-relaxed">
-              Llegará a{" "}
-              <span className="font-bold text-slate-700">8 leads</span>
-              {" "}que no han respondido en los últimos 7 días.
-            </p>
+            )}
           </div>
-
         </div>
       </div>
 
-      {/* Fila 3: Actividad + Rendimiento */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-
-        {/* Actividad reciente */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-5">
-          <span className="text-[13px] font-bold text-slate-800 block mb-4">Actividad reciente</span>
-          <div className="space-y-3">
-            {ACTIVIDAD.map((a, i) => {
-              const Icon = a.icon
-              return (
-                <div key={i} className="flex items-start gap-3">
-                  <div className={cn("w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0", a.bg)}>
-                    <Icon className={cn("h-3.5 w-3.5", a.iconColor)} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[12px] text-slate-700 leading-relaxed">{a.texto}</p>
-                    <span className="text-[10px] text-slate-400">{a.tiempo}</span>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* Rendimiento últimos 30 días */}
+      {/* Fila 3: Rendimiento */}
+      {(stats?.kpis?.emailsEnviados ?? 0) > 0 && (
         <div className="bg-white rounded-2xl border border-slate-200 p-5">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-[13px] font-bold text-slate-800">Rendimiento · 30 días</span>
-            <span className="text-[11px] text-slate-400">vs mes anterior</span>
+            <span className="text-[13px] font-bold text-slate-800">Rendimiento de campañas</span>
+            <span className="text-[11px] text-slate-400">Acumulado total</span>
           </div>
           <div className="space-y-3">
-            {[
-              { label: "Tasa de apertura",   valor: "68.4%", vs: "+8.2%",  positivo: true,  barra: 68   },
-              { label: "Click-through rate", valor: "12.3%", vs: "+2.1%",  positivo: true,  barra: 37   },
-              { label: "Tasa de conversión", valor: "4.7%",  vs: "-0.3%",  positivo: false, barra: 14   },
-              { label: "Baja de suscripción",valor: "0.8%",  vs: "-0.2%",  positivo: true,  barra: 2.4  },
-            ].map((m, i) => (
+            {rendimiento.map((m, i) => (
               <div key={i}>
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-[12px] text-slate-600">{m.label}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[12px] font-bold text-slate-800">{m.valor}</span>
-                    <span className={cn("text-[10px] font-semibold", m.positivo ? "text-[#1FA97A]" : "text-red-500")}>
-                      {m.vs}
-                    </span>
-                  </div>
+                  <span className="text-[12px] font-bold text-slate-800">{m.valor}</span>
                 </div>
                 <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                  <div
-                    className={cn("h-full rounded-full", m.positivo ? "bg-[#1FA97A]" : "bg-red-400")}
-                    style={{ width: `${m.barra}%` }}
-                  />
+                  <div className="h-full rounded-full bg-[#1FA97A]" style={{ width: `${Math.min(m.barra, 100)}%` }} />
                 </div>
               </div>
             ))}
           </div>
-          <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
-            <div>
-              <span className="text-[11px] text-slate-400 block">Mejor campaña del mes</span>
-              <span className="text-[12px] font-semibold text-slate-700">Clientes inactivos Mayo</span>
-            </div>
-            <span className="text-[13px] font-bold text-[#1FA97A]">89% apertura</span>
-          </div>
         </div>
-
-      </div>
+      )}
 
       {/* Banner IA */}
       <div className="bg-gradient-to-r from-[#0B1F2A] to-[#1a3040] rounded-2xl p-5 flex items-center justify-between">
@@ -450,9 +292,9 @@ function TabResumen({ setActiveTab, onNuevaCampana }: { setActiveTab: (t: string
             <Sparkles className="h-5 w-5 text-[#1FA97A]" />
           </div>
           <div>
-            <div className="text-[14px] font-bold text-white mb-0.5">Genera contenido para hoy</div>
+            <div className="text-[14px] font-bold text-white mb-0.5">Genera contenido para tu próxima campaña</div>
             <p className="text-[12px] text-slate-400">
-              Tienes 3 proyectos cerrados este mes — crea un post de LinkedIn con ellos
+              Crea emails, posts y contenido personalizado para tus contactos
             </p>
           </div>
         </div>
@@ -469,74 +311,6 @@ function TabResumen({ setActiveTab, onNuevaCampana }: { setActiveTab: (t: string
 }
 
 // ── Tab: Campañas ─────────────────────────────────────────────────────────────
-
-const CAMPANAS_LISTA = [
-  {
-    nombre: "Clientes inactivos Mayo",
-    descripcion: "Sin compra en 90 días",
-    audiencia: "23 clientes",
-    canal: "Email",
-    estado: "activa",
-    estadoLabel: "Activa",
-    enviados: 23,
-    total: 23,
-    apertura: 89,
-    clicks: 14,
-    fecha: "Activa desde 2 días",
-  },
-  {
-    nombre: "Bienvenida nuevos clientes",
-    descripcion: "Automática al crear cliente",
-    audiencia: "Nuevos clientes",
-    canal: "Email",
-    estado: "automatica",
-    estadoLabel: "Automática",
-    enviados: 31,
-    total: null as number | null,
-    apertura: 76,
-    clicks: 8,
-    fecha: "Siempre activa",
-  },
-  {
-    nombre: "Newsletter Mayo 2026",
-    descripcion: "Suscriptores activos",
-    audiencia: "156 suscriptores",
-    canal: "Email",
-    estado: "enviada",
-    estadoLabel: "Enviada",
-    enviados: 156,
-    total: 156,
-    apertura: 71,
-    clicks: 34,
-    fecha: "Enviada hace 5 días",
-  },
-  {
-    nombre: "Leads sin respuesta — 7d",
-    descripcion: "Seguimiento automático",
-    audiencia: "8 leads",
-    canal: "Email",
-    estado: "programada",
-    estadoLabel: "Mañana 9:00",
-    enviados: 0,
-    total: 8,
-    apertura: null as number | null,
-    clicks: null as number | null,
-    fecha: "Programada",
-  },
-  {
-    nombre: "Oferta servicios diseño",
-    descripcion: "Todos los clientes",
-    audiencia: "47 contactos",
-    canal: "Email",
-    estado: "borrador",
-    estadoLabel: "Borrador",
-    enviados: 0,
-    total: 47,
-    apertura: null as number | null,
-    clicks: null as number | null,
-    fecha: "Sin enviar",
-  },
-]
 
 const COLS = "2fr 1fr 110px 80px 130px 80px 100px"
 
@@ -1793,35 +1567,20 @@ function TabAudiencias() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-[13px] text-slate-500">{SEGMENTOS_DATA.length} segmentos definidos</p>
+        <p className="text-[13px] text-slate-500">Segmentos de contactos</p>
         <button className="flex items-center gap-2 px-4 py-2 bg-[#1FA97A] text-white rounded-xl text-[13px] font-semibold hover:bg-[#1a9068] transition-colors shadow-lg shadow-[#1FA97A]/25">
           <Plus className="h-4 w-4" />
           Nuevo segmento
         </button>
       </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        {SEGMENTOS_DATA.map((s) => (
-          <div key={s.nombre} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <p className="text-[14px] font-bold text-slate-800 mb-1">{s.nombre}</p>
-                <p className="text-[12px] text-slate-500">{s.desc}</p>
-              </div>
-              <span className={cn("text-[28px] font-black px-3 py-1 rounded-xl", s.color, s.bg)}>
-                {s.count}
-              </span>
-            </div>
-            <div className="flex gap-2">
-              <button className="flex-1 py-2 rounded-lg text-[12px] font-semibold bg-[#1FA97A] text-white hover:bg-[#1a9068] transition-colors">
-                Enviar campaña
-              </button>
-              <button className="flex-1 py-2 rounded-lg text-[12px] font-semibold bg-slate-50 border border-slate-200 text-slate-600 hover:border-slate-300 transition-colors">
-                Ver contactos
-              </button>
-            </div>
-          </div>
-        ))}
+      <div className="bg-white rounded-2xl border border-slate-200 p-10 text-center">
+        <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <Users2 className="h-6 w-6 text-slate-300" />
+        </div>
+        <h4 className="text-[15px] font-bold text-slate-800 mb-2">Sin segmentos definidos</h4>
+        <p className="text-[13px] text-slate-400">
+          Los segmentos se crearán aquí cuando configures filtros de audiencia.
+        </p>
       </div>
     </div>
   )
@@ -1830,45 +1589,18 @@ function TabAudiencias() {
 // ── Tab: Analítica ────────────────────────────────────────────────────────────
 
 function TabAnalitica() {
-  const meses = ["Oct", "Nov", "Dic", "Ene", "Feb", "Mar", "Abr"]
-  const enviados = [380, 610, 520, 720, 840, 970, 1240]
-  const abiertos = [142, 256, 198, 302, 361, 421, 512]
-  const maxVal = Math.max(...enviados)
+  const { data: campanas = [], isLoading } = useQuery<{ id: string; nombre: string; estado: string; totalEnviados: number; totalAbiertos: number; totalClicks: number; sentAt: string | null }[]>({
+    queryKey: ["campaigns"],
+    queryFn: () => fetch("/api/campaigns").then(r => r.json()),
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
+    retry: 0,
+  })
+
+  const enviadas = campanas.filter(c => c.totalEnviados > 0)
 
   return (
     <div className="space-y-5">
-      {/* Gráfico */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-6">
-          <p className="text-[14px] font-bold text-slate-800">Emails últimos 7 meses</p>
-          <div className="flex items-center gap-4">
-            {[{ label: "Enviados", color: "bg-[#1FA97A]" }, { label: "Abiertos", color: "bg-[#86efac]" }].map((l) => (
-              <div key={l.label} className="flex items-center gap-1.5">
-                <div className={cn("w-2.5 h-2.5 rounded-sm", l.color)} />
-                <span className="text-[12px] text-slate-500">{l.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="flex items-end gap-3" style={{ height: 120 }}>
-          {meses.map((mes, i) => (
-            <div key={mes} className="flex-1 flex flex-col items-center gap-1">
-              <div className="w-full flex flex-col justify-end gap-1" style={{ height: 100 }}>
-                <div
-                  className="w-full bg-[#1FA97A] rounded-t-md transition-all duration-700"
-                  style={{ height: `${(enviados[i] / maxVal) * 80}%`, minHeight: 4 }}
-                />
-                <div
-                  className="w-full bg-[#86efac] rounded-t-md transition-all duration-700"
-                  style={{ height: `${(abiertos[i] / maxVal) * 80}%`, minHeight: 4 }}
-                />
-              </div>
-              <span className="text-[11px] text-slate-400">{mes}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* Tabla */}
       <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
         <div className="px-5 py-4 border-b border-slate-100">
@@ -1879,21 +1611,37 @@ function TabAnalitica() {
             <span key={h} className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{h}</span>
           ))}
         </div>
-        {CAMPANAS_TABLA.filter((c) => c.enviados > 0).map((c, i, arr) => (
-          <div
-            key={c.nombre}
-            className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] items-center px-5 py-4 border-b border-slate-50 hover:bg-slate-50/50 transition-colors last:border-0"
-          >
-            <div>
-              <p className="text-[13px] font-semibold text-slate-800">{c.nombre}</p>
-              <EstadoBadge estado={c.estado} label={c.estadoLabel} />
-            </div>
-            <span className="text-[13px] text-slate-700">{c.enviados.toLocaleString("es-ES")}</span>
-            <span className="text-[13px] font-semibold text-slate-700">{c.apertura}%</span>
-            <span className="text-[13px] text-slate-700">{c.clics}%</span>
-            <span className="text-[13px] font-black text-[#1FA97A]">{(c.apertura * 0.04).toFixed(1)}%</span>
+        {isLoading ? (
+          <div className="px-5 py-10 text-center text-[13px] text-slate-400">Cargando...</div>
+        ) : enviadas.length === 0 ? (
+          <div className="px-5 py-10 text-center">
+            <BarChart3 className="h-8 w-8 text-slate-200 mx-auto mb-3" />
+            <p className="text-[13px] text-slate-400">Sin campañas enviadas aún</p>
           </div>
-        ))}
+        ) : (
+          enviadas.map((c) => {
+            const apertura = c.totalEnviados > 0 ? Math.round((c.totalAbiertos / c.totalEnviados) * 100) : 0
+            const ESTADO_LABELS: Record<string, string> = { borrador: "Borrador", programada: "Programada", enviada: "Enviada", error: "Error" }
+            const ESTADO_STYLES: Record<string, string> = { enviada: "bg-purple-50 text-purple-600", programada: "bg-amber-50 text-amber-600", borrador: "bg-slate-100 text-slate-500" }
+            return (
+              <div
+                key={c.id}
+                className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] items-center px-5 py-4 border-b border-slate-50 hover:bg-slate-50/50 transition-colors last:border-0"
+              >
+                <div>
+                  <p className="text-[13px] font-semibold text-slate-800">{c.nombre}</p>
+                  <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full", ESTADO_STYLES[c.estado] ?? "bg-slate-100 text-slate-500")}>
+                    {ESTADO_LABELS[c.estado] ?? c.estado}
+                  </span>
+                </div>
+                <span className="text-[13px] text-slate-700">{c.totalEnviados.toLocaleString("es-ES")}</span>
+                <span className="text-[13px] font-semibold text-slate-700">{apertura}%</span>
+                <span className="text-[13px] text-slate-700">{c.totalClicks}</span>
+                <span className="text-[13px] font-black text-[#1FA97A]">{(apertura * 0.04).toFixed(1)}%</span>
+              </div>
+            )
+          })
+        )}
       </div>
     </div>
   )
@@ -1902,58 +1650,15 @@ function TabAnalitica() {
 // ── Tab: Landing Pages ────────────────────────────────────────────────────────
 
 function TabLandings() {
-  const landings = [
-    { nombre: "Servicios de diseño web", url: "clientlabs.io/p/diseno-web", visitas: 312, leads: 18, conversion: 5.8, estado: "activa" },
-    { nombre: "Consultoría gratuita 30min", url: "clientlabs.io/p/consultoria", visitas: 189, leads: 34, conversion: 18.0, estado: "activa" },
-    { nombre: "Pack mantenimiento web", url: "clientlabs.io/p/mantenimiento", visitas: 0, leads: 0, conversion: 0, estado: "borrador" },
-  ]
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-[13px] text-slate-500">2 landings publicadas</p>
+        <p className="text-[13px] text-slate-500">Landing pages</p>
         <button className="flex items-center gap-2 px-4 py-2 bg-[#1FA97A] text-white rounded-xl text-[13px] font-semibold hover:bg-[#1a9068] transition-colors shadow-lg shadow-[#1FA97A]/25">
           <Plus className="h-4 w-4" />
           Nueva landing
         </button>
       </div>
-
-      <div className="space-y-3">
-        {landings.map((l) => (
-          <div key={l.nombre} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex items-center gap-5">
-            <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center flex-shrink-0">
-              <Globe className="h-6 w-6 text-slate-400" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-0.5">
-                <p className="text-[14px] font-bold text-slate-800">{l.nombre}</p>
-                <EstadoBadge estado={l.estado} label={l.estado === "activa" ? "Activa" : "Borrador"} />
-              </div>
-              <p className="text-[12px] text-slate-400">{l.url}</p>
-            </div>
-            {l.visitas > 0 && (
-              <div className="flex items-center gap-6 flex-shrink-0">
-                {[
-                  { label: "Visitas", valor: l.visitas.toLocaleString("es-ES") },
-                  { label: "Leads", valor: l.leads.toString() },
-                  { label: "Conversión", valor: `${l.conversion}%`, bold: true },
-                ].map((stat) => (
-                  <div key={stat.label} className="text-center">
-                    <p className={cn("text-[16px]", stat.bold ? "font-black text-[#1FA97A]" : "font-bold text-slate-800")}>
-                      {stat.valor}
-                    </p>
-                    <p className="text-[10px] text-slate-400 uppercase tracking-wide">{stat.label}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-            <button className="w-8 h-8 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-center hover:border-slate-300 transition-colors flex-shrink-0">
-              <ChevronRight className="h-4 w-4 text-slate-400" />
-            </button>
-          </div>
-        ))}
-      </div>
-
       <div className="bg-gradient-to-r from-[#0B1F2A] to-[#1a3040] rounded-2xl p-5 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 rounded-xl bg-[#1FA97A]/20 flex items-center justify-center">

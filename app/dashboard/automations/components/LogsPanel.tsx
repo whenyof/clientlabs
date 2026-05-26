@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { XMarkIcon, MagnifyingGlassIcon, FunnelIcon } from "@heroicons/react/24/outline"
 import { motion, AnimatePresence } from "framer-motion"
-import { mockAutomationLogs, getAutomationLogs } from "../mock"
+import type { AutomationLog } from "../mock"
 
 interface LogsPanelProps {
   onClose: () => void
@@ -14,7 +14,7 @@ export function LogsPanel({ onClose }: LogsPanelProps) {
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [automationFilter, setAutomationFilter] = useState<string>("all")
 
-  const logs = getAutomationLogs()
+  const logs: AutomationLog[] = []
 
   const filteredLogs = logs.filter(log => {
     const matchesSearch = log.automationId.toLowerCase().includes(searchTerm.toLowerCase()) ||

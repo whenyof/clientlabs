@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { AnimatedCard } from "../../analytics/components/AnimatedCard"
-import { mockChatHistory, ChatMessage } from "../mock"
+import type { ChatMessage } from "../mock"
 import {
   PaperAirplaneIcon,
   MicrophoneIcon,
@@ -13,7 +13,7 @@ import {
 } from "@heroicons/react/24/outline"
 
 export function AssistantChat() {
-  const [messages, setMessages] = useState<ChatMessage[]>(mockChatHistory)
+  const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputMessage, setInputMessage] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)

@@ -1,7 +1,6 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { mockAIRecommendations } from "../mock"
 import {
   SparklesIcon,
   ArrowRightIcon,
@@ -49,68 +48,14 @@ export function AIRecommendations() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {mockAIRecommendations.map((rec, index) => {
-          const ImpactIcon = getImpactIcon(rec.impact)
-          const impactColor = getImpactColor(rec.impact)
-
-          return (
-            <motion.div
-              key={rec.id}
-              className="bg-[var(--bg-main)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)] p-6 hover:border-[var(--border-subtle)] transition-all duration-300 group"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 + (index * 0.1), duration: 0.5 }}
-              whileHover={{ y: -4, scale: 1.02 }}
-            >
-              <div className="flex items-start gap-4 mb-4">
-                <div className={`p-3 rounded-xl ${impactColor}`}>
-                  <ImpactIcon className="w-6 h-6" />
-                </div>
-
-                <div className="flex-1">
-                  <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mb-2 ${
-                    rec.impact === 'high'
-                      ? 'bg-green-500/20 text-green-400'
-                      : rec.impact === 'medium'
-                      ? 'bg-yellow-500/20 text-yellow-400'
-                      : 'bg-blue-500/20 text-blue-400'
-                  }`}>
-                    {rec.impact === 'high' ? 'Alto Impacto' :
-                     rec.impact === 'medium' ? 'Medio Impacto' : 'Bajo Impacto'}
-                  </div>
-
-                  <h4 className="text-lg font-bold text-[var(--text-primary)] mb-2">
-                    {rec.title}
-                  </h4>
-                </div>
-              </div>
-
-              <p className="text-[var(--text-secondary)] text-sm mb-4 leading-relaxed">
-                {rec.description}
-              </p>
-
-              <div className="flex gap-3">
-                <motion.button
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-600 text-[var(--text-primary)] text-sm font-medium rounded-lg transition-colors"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Implementar
-                  <ArrowRightIcon className="w-4 h-4" />
-                </motion.button>
-
-                <motion.button
-                  className="px-4 py-2 bg-[var(--bg-surface)] hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-sm rounded-lg transition-colors"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Más tarde
-                </motion.button>
-              </div>
-            </motion.div>
-          )
-        })}
+      <div className="bg-[var(--bg-main)] rounded-xl border border-[var(--border-subtle)] p-12 text-center">
+        <LightBulbIcon className="w-12 h-12 text-[var(--text-secondary)] mx-auto mb-4" />
+        <h4 className="text-lg font-medium text-[var(--text-secondary)] mb-2">
+          Sin recomendaciones disponibles
+        </h4>
+        <p className="text-[var(--text-secondary)] text-sm max-w-sm mx-auto">
+          Conecta integraciones para que el sistema analice tus datos y genere recomendaciones personalizadas.
+        </p>
       </div>
 
       {/* AI Insights Summary */}

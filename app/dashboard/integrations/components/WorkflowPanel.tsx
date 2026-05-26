@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { mockWorkflows } from "../mock"
+import type { Workflow } from "../mock"
 import {
   ArrowRightIcon,
   PlayIcon,
@@ -13,7 +13,7 @@ import {
 } from "@heroicons/react/24/outline"
 
 export function WorkflowPanel() {
-  const [workflows, setWorkflows] = useState(mockWorkflows)
+  const [workflows, setWorkflows] = useState<Workflow[]>([])
 
   const handleToggleWorkflow = (workflowId: string) => {
     setWorkflows(prev =>

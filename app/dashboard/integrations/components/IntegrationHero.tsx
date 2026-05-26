@@ -2,7 +2,9 @@
 
 import { motion } from "framer-motion"
 import { PlusIcon, CogIcon, CheckCircleIcon, SparklesIcon } from "@heroicons/react/24/outline"
-import { mockIntegrationStats, formatNumber, formatCurrency } from "../mock"
+import { formatNumber, formatCurrency } from "../mock"
+
+const integrationStats = { totalRevenue: 0, totalRequests: 0, avgSuccessRate: 0, topIntegration: "—" }
 
 interface IntegrationHeroProps {
   onAddIntegration: () => void
@@ -74,7 +76,7 @@ export function IntegrationHero({ onAddIntegration }: IntegrationHeroProps) {
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 px-3 py-2 bg-green-500/10 border border-green-500/20 rounded-lg">
                 <CheckCircleIcon className="w-4 h-4 text-green-400" />
-                <span className="text-sm text-green-400 font-medium">6 Activas</span>
+                <span className="text-sm text-green-400 font-medium">Integraciones</span>
               </div>
               <div className="flex items-center gap-2 px-3 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
                 <SparklesIcon className="w-4 h-4 text-emerald-400" />
@@ -116,25 +118,25 @@ export function IntegrationHero({ onAddIntegration }: IntegrationHeroProps) {
         >
           <div className="bg-[var(--bg-main)] rounded-xl p-4 text-center">
             <div className="text-2xl font-bold text-green-400 mb-1">
-              {formatCurrency(mockIntegrationStats.totalRevenue)}
+              {formatCurrency(integrationStats.totalRevenue)}
             </div>
             <div className="text-sm text-[var(--text-secondary)]">Ingresos generados</div>
           </div>
           <div className="bg-[var(--bg-main)] rounded-xl p-4 text-center">
             <div className="text-2xl font-bold text-blue-400 mb-1">
-              {formatNumber(mockIntegrationStats.totalRequests)}
+              {formatNumber(integrationStats.totalRequests)}
             </div>
             <div className="text-sm text-[var(--text-secondary)]">Total requests</div>
           </div>
           <div className="bg-[var(--bg-main)] rounded-xl p-4 text-center">
             <div className="text-2xl font-bold text-emerald-400 mb-1">
-              {mockIntegrationStats.avgSuccessRate}%
+              {integrationStats.avgSuccessRate}%
             </div>
             <div className="text-sm text-[var(--text-secondary)]">Tasa éxito</div>
           </div>
           <div className="bg-[var(--bg-main)] rounded-xl p-4 text-center">
             <div className="text-2xl font-bold text-orange-400 mb-1">
-              {mockIntegrationStats.topIntegration}
+              {integrationStats.topIntegration}
             </div>
             <div className="text-sm text-[var(--text-secondary)]">Top integración</div>
           </div>

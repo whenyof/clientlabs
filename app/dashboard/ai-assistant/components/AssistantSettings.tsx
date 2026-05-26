@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { mockAiSettings } from "../mock"
 import {
   CogIcon,
   BellIcon,
@@ -13,8 +12,30 @@ import {
   AdjustmentsHorizontalIcon
 } from "@heroicons/react/24/outline"
 
+const defaultSettings = {
+  aggressiveness: 5,
+  notifications: {
+    urgentRecommendations: true,
+    dailySummary: true,
+    weeklyReport: false,
+    riskAlerts: true
+  },
+  automations: {
+    autoEmailGeneration: false,
+    autoLeadScoring: true,
+    autoRiskDetection: true,
+    smartScheduling: false
+  },
+  integrations: {
+    crm: false,
+    email: false,
+    calendar: false,
+    slack: false
+  }
+}
+
 export function AssistantSettings() {
-  const [settings, setSettings] = useState(mockAiSettings)
+  const [settings, setSettings] = useState(defaultSettings)
 
   const handleSettingChange = (key: string, value: boolean | number) => {
     setSettings(prev => ({

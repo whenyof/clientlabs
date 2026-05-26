@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { getInsightIcon, mockAiInsights, getPriorityColor } from "../mock"
+import { getInsightIcon, getPriorityColor } from "../mock"
 import {
   ExclamationTriangleIcon,
   FireIcon,
@@ -75,102 +75,12 @@ export function InsightCards() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {mockAiInsights.map((insight, index) => {
-          const style = getInsightStyle(insight.type)
-          const Icon = style.icon
-
-          return (
-            <motion.div
-              key={insight.id}
-              className={`relative overflow-hidden rounded-xl ${style.bg} backdrop-blur-sm border ${style.border} hover:shadow-[var(--shadow-card)] ${style.glow} transition-all duration-300 group`}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1, duration: 0.5 }}
-              whileHover={{ y: -2, scale: 1.01 }}
-            >
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg bg-[var(--bg-main)]`}>
-                      <Icon className={`w-5 h-5 ${style.color}`} />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="text-lg font-semibold text-[var(--text-primary)] mb-1">
-                        {insight.title}
-                      </h4>
-                      <div className="flex items-center gap-2">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                          insight.impact === 'high' ? 'bg-red-500/20 text-red-400' :
-                          insight.impact === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
-                          'bg-[var(--bg-main)]0/20 text-[var(--text-secondary)]'
-                        }`}>
-                          {insight.impact.toUpperCase()}
-                        </span>
-                        <span className="text-xs text-[var(--text-secondary)]">
-                          {insight.confidence}% confianza
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <span className="text-2xl">
-                    {getInsightIcon(insight.type)}
-                  </span>
-                </div>
-
-                <p className="text-[var(--text-secondary)] text-sm leading-relaxed mb-4">
-                  {insight.description}
-                </p>
-
-                <div className="flex items-center justify-between">
-                  <div className="text-xs text-[var(--text-secondary)]">
-                    {new Date(insight.createdAt).toLocaleString('es-ES', {
-                      day: '2-digit',
-                      month: 'short',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <motion.button
-                      onClick={() => handleViewDetail(insight.id)}
-                      className="flex items-center gap-1 px-3 py-1 text-xs bg-[var(--bg-surface)] hover:bg-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-lg transition-colors"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <EyeIcon className="w-3 h-3" />
-                      Ver detalle
-                    </motion.button>
-
-                    <motion.button
-                      onClick={() => handleExecuteAction(insight.id)}
-                      className="flex items-center gap-1 px-3 py-1 text-xs bg-emerald-600/20 hover:bg-emerald-500/30 text-emerald-400 hover:text-emerald-300 rounded-lg transition-colors"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      Ejecutar
-                      <ArrowRightIcon className="w-3 h-3" />
-                    </motion.button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Animated border */}
-              <motion.div
-                className="absolute inset-0 rounded-xl border-2 border-transparent bg-gradient-to-r from-emerald-500/20 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                initial={false}
-                animate={{ backgroundPosition: ['0% 50%', '100% 50%'] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                style={{
-                  backgroundSize: '200% 200%',
-                  backgroundImage: 'linear-gradient(90deg, transparent, rgba(147, 51, 234, 0.3), transparent)'
-                }}
-              />
-            </motion.div>
-          )
-        })}
+      <div className="bg-[var(--bg-main)] rounded-xl border border-[var(--border-subtle)] p-12 text-center">
+        <LightBulbIcon className="w-12 h-12 text-[var(--text-secondary)] mx-auto mb-3" />
+        <p className="text-[var(--text-secondary)] font-medium">Sin insights disponibles</p>
+        <p className="text-[var(--text-secondary)] text-sm mt-1">
+          Los insights se generarán automáticamente al analizar tus leads y clientes.
+        </p>
       </div>
 
       {/* Summary */}
@@ -182,20 +92,8 @@ export function InsightCards() {
       >
         <div className="flex items-center justify-between text-sm">
           <span className="text-[var(--text-secondary)]">
-            Total insights generados: <span className="text-[var(--text-primary)] font-semibold">{mockAiInsights.length}</span>
+            Total insights generados: <span className="text-[var(--text-primary)] font-semibold">0</span>
           </span>
-          <div className="flex items-center gap-4">
-            <span className="text-[var(--text-secondary)]">
-              Prioridad alta: <span className="text-red-400 font-semibold">
-                {mockAiInsights.filter(i => i.impact === 'high').length}
-              </span>
-            </span>
-            <span className="text-[var(--text-secondary)]">
-              Confianza promedio: <span className="text-green-400 font-semibold">
-                {Math.round(mockAiInsights.reduce((sum, i) => sum + i.confidence, 0) / mockAiInsights.length)}%
-              </span>
-            </span>
-          </div>
         </div>
       </motion.div>
     </div>

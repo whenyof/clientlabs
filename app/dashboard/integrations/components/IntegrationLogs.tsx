@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { mockIntegrationLogs } from "../mock"
+import type { IntegrationLog } from "../mock"
 import {
   CheckCircleIcon,
   XCircleIcon,
@@ -14,6 +14,8 @@ import {
 
 export function IntegrationLogs() {
   const [filter, setFilter] = useState<'all' | 'success' | 'error'>('all')
+
+  const allLogs: IntegrationLog[] = []
 
   const getLogIcon = (type: string, success: boolean) => {
     if (!success) return XCircleIcon
@@ -50,8 +52,8 @@ export function IntegrationLogs() {
   }
 
   const filteredLogs = filter === 'all'
-    ? mockIntegrationLogs
-    : mockIntegrationLogs.filter(log =>
+    ? allLogs
+    : allLogs.filter(log =>
         filter === 'success' ? log.success : !log.success
       )
 
@@ -83,60 +85,70 @@ export function IntegrationLogs() {
 
       <div className="bg-[var(--bg-main)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)] overflow-hidden">
         <div className="p-6 space-y-4">
-          {filteredLogs.map((log, index) => {
-            const LogIcon = getLogIcon(log.type, log.success)
-            const colorClass = getLogColor(log.type, log.success)
+          {filteredLogs.length === 0 ? (
+            <div className="py-12 text-center">
+              <FunnelIcon className="w-10 h-10 text-[var(--text-secondary)] mx-auto mb-3" />
+              <p className="text-[var(--text-secondary)] font-medium">Sin logs disponibles</p>
+              <p className="text-[var(--text-secondary)] text-sm mt-1">
+                Los registros de actividad aparecerán aquí cuando conectes integraciones.
+              </p>
+            </div>
+          ) : (
+            filteredLogs.map((log, index) => {
+              const LogIcon = getLogIcon(log.type, log.success)
+              const colorClass = getLogColor(log.type, log.success)
 
-            return (
-              <motion.div
-                key={log.id}
-                className={`p-4 rounded-xl border ${colorClass} transition-all duration-300`}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05, duration: 0.3 }}
-              >
-                <div className="flex items-start gap-4">
-                  <div className="p-2 bg-[var(--bg-card)] rounded-lg">
-                    <LogIcon className="w-5 h-5" />
-                  </div>
-
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-1">
-                      <h4 className="text-[var(--text-primary)] font-medium">{log.action}</h4>
-                      <span className="text-xs text-[var(--text-secondary)]">
-                        {new Date(log.timestamp).toLocaleString('es-ES')}
-                      </span>
+              return (
+                <motion.div
+                  key={log.id}
+                  className={`p-4 rounded-xl border ${colorClass} transition-all duration-300`}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05, duration: 0.3 }}
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="p-2 bg-[var(--bg-card)] rounded-lg">
+                      <LogIcon className="w-5 h-5" />
                     </div>
 
-                    {log.data && (
-                      <div className="text-sm text-[var(--text-secondary)] mb-2">
-                        {typeof log.data === 'string' ? log.data : JSON.stringify(log.data)}
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-1">
+                        <h4 className="text-[var(--text-primary)] font-medium">{log.action}</h4>
+                        <span className="text-xs text-[var(--text-secondary)]">
+                          {new Date(log.timestamp).toLocaleString('es-ES')}
+                        </span>
                       </div>
-                    )}
 
-                    {log.error && (
-                      <div className="text-sm text-red-400 bg-red-500/10 p-2 rounded border border-red-500/20">
-                        {log.error}
+                      {log.data && (
+                        <div className="text-sm text-[var(--text-secondary)] mb-2">
+                          {typeof log.data === 'string' ? log.data : JSON.stringify(log.data)}
+                        </div>
+                      )}
+
+                      {log.error && (
+                        <div className="text-sm text-red-400 bg-red-500/10 p-2 rounded border border-red-500/20">
+                          {log.error}
+                        </div>
+                      )}
+
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          log.success
+                            ? 'bg-green-500/20 text-green-400'
+                            : 'bg-red-500/20 text-red-400'
+                        }`}>
+                          {log.type.toUpperCase()}
+                        </span>
+                        <span className="text-xs text-[var(--text-secondary)]">
+                          ID: {log.id}
+                        </span>
                       </div>
-                    )}
-
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        log.success
-                          ? 'bg-green-500/20 text-green-400'
-                          : 'bg-red-500/20 text-red-400'
-                      }`}>
-                        {log.type.toUpperCase()}
-                      </span>
-                      <span className="text-xs text-[var(--text-secondary)]">
-                        ID: {log.id}
-                      </span>
                     </div>
                   </div>
-                </div>
-              </motion.div>
-            )
-          })}
+                </motion.div>
+              )
+            })
+          )}
         </div>
       </div>
     </motion.div>

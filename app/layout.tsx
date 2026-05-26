@@ -34,29 +34,31 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://clientlabs.io"),
   title: {
-    default: "ClientLabs — CRM y software de facturación para autónomos y pymes en España",
+    default: "ClientLabs — Gestión todo en uno para autónomos y pymes en España",
     template: "%s | ClientLabs",
   },
-  description: "El CRM todo-en-uno para autónomos y pymes en España. Facturación legal con Verifactu, captación de leads, gestión de clientes, presupuestos, automatizaciones y email marketing. Desde 14,99€/mes.",
+  description: "La plataforma de gestión para autónomos y pymes en España. Leads, clientes, facturas, proveedores y automatizaciones en un solo lugar. Prueba gratis 14 días.",
   keywords: [
-    "crm autónomos",
-    "crm para autónomos",
-    "software facturación autónomos",
-    "facturación electrónica españa",
+    "CRM autónomos España",
+    "software gestión pymes España",
+    "herramienta facturación autónomos",
+    "gestión clientes autónomo",
+    "CRM pequeña empresa España",
+    "software autónomos España",
+    "gestión leads autónomo",
+    "facturación online autónomos España",
+    "alternativa Holded autónomos",
+    "herramienta gestión freelance España",
+    "ClientLabs",
+    "gestión proveedores autónomo",
+    "automatizaciones negocio pequeño",
+    "presupuestos firma digital autónomo",
     "verifactu software",
-    "software facturación verifactu",
-    "gestión clientes autónomos",
-    "programa facturación pymes",
-    "crm españa",
-    "facturar online autónomos",
-    "alternativa holded",
-    "alternativa quipu",
-    "captar leads autónomos",
-    "presupuestos online",
-    "facturación legal españa",
+    "crm autónomos",
+    "facturación electrónica españa",
     "mejor crm españa",
   ],
-  authors: [{ name: "ClientLabs" }],
+  authors: [{ name: "Errepe", url: "https://clientlabs.io" }],
   creator: "ClientLabs",
   publisher: "ClientLabs",
   robots: {
@@ -75,25 +77,33 @@ export const metadata: Metadata = {
     locale: "es_ES",
     url: "https://clientlabs.io",
     siteName: "ClientLabs",
-    title: "ClientLabs — CRM y facturación para autónomos",
-    description: "Factura legalmente con Verifactu, capta leads desde tu web y gestiona tu negocio. Todo en uno desde 14,99€/mes.",
-    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "ClientLabs — CRM y facturación para autónomos" }],
+    title: "ClientLabs — Gestión todo en uno para autónomos y pymes en España",
+    description: "La plataforma de gestión para autónomos y pymes en España. Leads, clientes, facturas, proveedores y automatizaciones en un solo lugar.",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "ClientLabs — Gestión para autónomos y pymes en España" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "ClientLabs — CRM y facturación para autónomos",
-    description: "Factura legalmente con Verifactu, capta leads y gestiona clientes. Todo en uno.",
-    images: ["/og-image.png"],
+    title: "ClientLabs — Gestión todo en uno para autónomos y pymes en España",
+    description: "La plataforma de gestión para autónomos y pymes en España. Prueba gratis 14 días.",
+    images: ["/opengraph-image"],
+    creator: "@clientlabs",
   },
   alternates: {
     canonical: "https://clientlabs.io",
+    languages: {
+      "es-ES": "https://clientlabs.io",
+    },
   },
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION ?? "",
+  },
+  category: "Software de gestión empresarial",
   icons: {
     icon: [
       { url: '/icon.svg', type: 'image/svg+xml' },
       { url: '/icon.png', sizes: '32x32', type: 'image/png' },
     ],
-    apple: '/apple-icon.png',
+    apple: '/apple-touch-icon.png',
   },
 }
 
@@ -114,42 +124,88 @@ const themeScript = `
    Structured Data
 ================================ */
 
-const jsonLd = {
+const softwareApplicationSchema = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   name: "ClientLabs",
+  alternateName: ["CRM autónomos España", "Software gestión pymes España", "Herramienta facturación autónomos"],
   applicationCategory: "BusinessApplication",
-  operatingSystem: "Web",
+  applicationSubCategory: "CRM, Facturación, Gestión empresarial",
+  operatingSystem: "Web, iOS, Android",
   url: "https://clientlabs.io",
-  description: "CRM y software de facturación para autónomos y pymes en España con Verifactu integrado",
+  description: "Plataforma de gestión todo en uno para autónomos y pymes en España. Centraliza leads, clientes, proveedores, facturas, presupuestos, albaranes, tareas, proyectos y automatizaciones en un solo lugar. Pensada para los 3,4 millones de autónomos en España.",
   offers: {
     "@type": "AggregateOffer",
-    lowPrice: "14.99",
-    highPrice: "39.99",
+    lowPrice: "24.99",
+    highPrice: "79.99",
     priceCurrency: "EUR",
-    offerCount: 3,
-  },
-  aggregateRating: {
-    "@type": "AggregateRating",
-    ratingValue: "4.8",
-    ratingCount: "200",
-  },
-  author: {
-    "@type": "Organization",
-    name: "ClientLabs",
-    url: "https://clientlabs.io",
+    offerCount: "3",
   },
   featureList: [
-    "Facturación electrónica con Verifactu",
-    "CRM para gestión de clientes",
-    "Captación automática de leads",
-    "Presupuestos y albaranes",
-    "Pedidos de venta",
+    "Gestión de leads y pipeline de ventas",
+    "CRM de clientes",
+    "Gestión de proveedores",
+    "Facturación en PDF",
+    "Presupuestos con firma digital",
+    "Albaranes y hojas de pedido",
+    "Gestión de tareas y proyectos",
     "Automatizaciones de negocio",
     "Email marketing",
-    "QR verificable de la AEAT",
-    "Asistente IA integrado",
+    "Portal del cliente",
+    "Recordatorios automáticos de pago",
+    "Informes y estadísticas",
   ],
+  audience: {
+    "@type": "Audience",
+    audienceType: "Autónomos y pymes en España",
+    geographicArea: { "@type": "Country", name: "España" },
+  },
+  inLanguage: "es-ES",
+  availableOnDevice: "Desktop, Mobile, Tablet",
+  screenshot: "https://clientlabs.io/opengraph-image",
+  softwareVersion: "1.0",
+  releaseNotes: "Lanzamiento oficial junio 2026",
+  sameAs: [
+    "https://www.linkedin.com/company/clientlabs",
+    "https://www.instagram.com/clientlabs",
+    "https://www.tiktok.com/@clientlabs",
+  ],
+}
+
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "ClientLabs",
+  url: "https://clientlabs.io",
+  logo: "https://clientlabs.io/logo.png",
+  description: "Empresa tecnológica española que desarrolla software de gestión para autónomos y pymes.",
+  foundingDate: "2025",
+  foundingLocation: { "@type": "Place", name: "Asturias, España" },
+  contactPoint: {
+    "@type": "ContactPoint",
+    email: "hola@clientlabs.io",
+    contactType: "customer service",
+    availableLanguage: "Spanish",
+    areaServed: "ES",
+  },
+  sameAs: [
+    "https://www.linkedin.com/company/clientlabs",
+    "https://www.instagram.com/clientlabs",
+  ],
+}
+
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "ClientLabs",
+  url: "https://clientlabs.io",
+  description: "CRM y software de gestión para autónomos y pymes en España",
+  inLanguage: "es-ES",
+  potentialAction: {
+    "@type": "SearchAction",
+    target: "https://clientlabs.io/blog?q={search_term_string}",
+    "query-input": "required name=search_term_string",
+  },
 }
 
 /* ================================
@@ -181,9 +237,18 @@ export default function RootLayout({
           transition-colors duration-300
         `}
       >
+        {/* JSON-LD: hardcoded constants, no user input — XSS-safe */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
         <QueryProvider>
           <ThemeProvider>

@@ -4,46 +4,17 @@ export const maxDuration = 10
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { mockIntegrationLogs } from '@/app/dashboard/integrations/mock'
-
 export async function GET(request: NextRequest) {
  const session = await getServerSession(authOptions)
  if (!session?.user?.id) {
    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
  }
  try {
- const { searchParams } = new URL(request.url)
- const integrationId = searchParams.get('integrationId')
- const type = searchParams.get('type')
- const limit = parseInt(searchParams.get('limit') || '50')
-
- // TODO: Get real logs from database
- // const logs = await prisma.integrationLog.findMany({
- // where: {
- // ...(integrationId && { integrationId }),
- // ...(type && { type })
- // },
- // orderBy: { createdAt: 'desc' },
- // take: limit
- // })
-
- // Mock response for now
- let logs = mockIntegrationLogs
-
- if (integrationId) {
- logs = logs.filter(log => log.integrationId === integrationId)
- }
-
- if (type) {
- logs = logs.filter(log => log.type === type)
- }
-
- logs = logs.slice(0, limit)
-
+ // TODO: Query real integration logs from the database once the model is available
  return NextResponse.json({
  success: true,
- data: logs,
- total: logs.length
+ data: [],
+ total: 0
  })
  } catch (error) {
  console.error('Error fetching integration logs:', error)

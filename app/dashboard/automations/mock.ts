@@ -347,113 +347,6 @@ export const automationTemplates: AutomationTemplate[] = [
   }
 ]
 
-// Mock Automations Data
-export const mockAutomations: Automation[] = [
-  {
-    id: '1',
-    name: 'Lead → WhatsApp Automático',
-    description: 'Envía WhatsApp inmediato a nuevos leads',
-    status: 'active',
-    triggerType: 'new_lead',
-    triggerConfig: { source: 'website' },
-    actions: [
-      {
-        id: '1',
-        type: 'whatsapp_message',
-        config: { message: '¡Hola! Gracias por tu interés. Te contactaremos pronto.' },
-        order: 1
-      }
-    ],
-    runs: 245,
-    successRate: 98.5,
-    revenueGenerated: 12500,
-    timeSaved: 120,
-    createdAt: '2024-01-15T10:00:00Z',
-    lastRun: '2024-01-20T14:30:00Z',
-    isPremium: true,
-    category: 'sales'
-  },
-  {
-    id: '2',
-    name: 'Cliente Nuevo → Factura Automática',
-    description: 'Genera facturas automáticamente para nuevos clientes',
-    status: 'active',
-    triggerType: 'client_won',
-    triggerConfig: {},
-    actions: [
-      {
-        id: '2',
-        type: 'generate_invoice',
-        config: { template: 'standard', dueDays: 30 },
-        order: 1
-      },
-      {
-        id: '3',
-        type: 'email_send',
-        config: { template: 'invoice_sent' },
-        order: 2
-      }
-    ],
-    runs: 89,
-    successRate: 95.2,
-    revenueGenerated: 8900,
-    timeSaved: 200,
-    createdAt: '2024-01-12T09:15:00Z',
-    lastRun: '2024-01-19T11:20:00Z',
-    isPremium: true,
-    category: 'sales'
-  },
-  {
-    id: '3',
-    name: 'Ticket → Notificación Slack',
-    description: 'Notifica nuevos tickets al equipo de soporte',
-    status: 'paused',
-    triggerType: 'new_ticket',
-    triggerConfig: { priority: 'high' },
-    actions: [
-      {
-        id: '4',
-        type: 'slack_notification',
-        config: { channel: 'support', message: 'Nuevo ticket urgente: {{ticket.title}}' },
-        order: 1
-      }
-    ],
-    runs: 156,
-    successRate: 87.3,
-    revenueGenerated: 0,
-    timeSaved: 80,
-    createdAt: '2024-01-10T14:45:00Z',
-    lastRun: '2024-01-18T16:10:00Z',
-    isPremium: false,
-    category: 'operations'
-  }
-]
-
-// Mock Logs
-export const mockAutomationLogs: AutomationLog[] = Array.from({ length: 50 }, (_, i) => ({
-  id: `log-${i + 1}`,
-  automationId: mockAutomations[Math.floor(Math.random() * mockAutomations.length)].id,
-  status: ['success', 'error', 'running'][Math.floor(Math.random() * 3)] as 'success' | 'error' | 'running',
-  executionTime: Math.floor(Math.random() * 5000) + 1000,
-  result: Math.random() > 0.1 ? {
-    sent: true,
-    recipient: 'user@example.com',
-    timestamp: new Date().toISOString()
-  } : undefined,
-  error: Math.random() > 0.9 ? 'Connection timeout' : undefined,
-  createdAt: new Date(Date.now() - (Math.random() * 7 * 24 * 60 * 60 * 1000)).toISOString()
-}))
-
-// KPIs
-export const mockAutomationKPIs: AutomationKPIs = {
-  totalAutomations: mockAutomations.length,
-  activeAutomations: mockAutomations.filter(a => a.status === 'active').length,
-  totalRuns: mockAutomations.reduce((sum, a) => sum + a.runs, 0),
-  successRate: 94.2,
-  revenueGenerated: mockAutomations.reduce((sum, a) => sum + a.revenueGenerated, 0),
-  timeSaved: mockAutomations.reduce((sum, a) => sum + a.timeSaved, 0)
-}
-
 export const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat('es-ES', {
     style: 'currency',
@@ -463,18 +356,6 @@ export const formatCurrency = (amount: number): string => {
 }
 
 // Helper functions
-export const getAutomationById = (id: string): Automation | undefined => {
-  return mockAutomations.find(automation => automation.id === id)
-}
-
-export const getAutomationsByStatus = (status: Automation['status']): Automation[] => {
-  return mockAutomations.filter(automation => automation.status === status)
-}
-
-export const getAutomationsByCategory = (category: string): Automation[] => {
-  return mockAutomations.filter(automation => automation.category === category)
-}
-
 export const getTemplatesByCategory = (category: string): AutomationTemplate[] => {
   return automationTemplates.filter(template => template.category === category)
 }
@@ -485,14 +366,4 @@ export const calculateAutomationROI = (automation: Automation): number => {
   const hourlyRate = 50
   const annualSavings = automation.timeSaved * hourlyRate
   return annualSavings > 0 ? (automation.revenueGenerated / annualSavings) * 100 : 0
-}
-
-export const getAutomationLogs = (automationId?: string, limit = 20): AutomationLog[] => {
-  let logs = mockAutomationLogs
-  if (automationId) {
-    logs = logs.filter(log => log.automationId === automationId)
-  }
-  return logs
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, limit)
 }

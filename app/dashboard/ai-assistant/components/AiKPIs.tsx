@@ -9,13 +9,13 @@ import {
   PhoneIcon
 } from "@heroicons/react/24/outline"
 import { motion } from "framer-motion"
-import { mockAiKPIs, formatCurrency, formatPercentage } from "../mock"
+import { formatCurrency, formatPercentage } from "../mock"
 
 export function AiKPIs() {
   const kpis = [
     {
       title: "Insights Generados",
-      value: mockAiKPIs.totalInsights.toString(),
+      value: "0",
       subtitle: "esta semana",
       icon: LightBulbIcon,
       color: "from-blue-500 to-cyan-600",
@@ -23,7 +23,7 @@ export function AiKPIs() {
     },
     {
       title: "Leads Calientes",
-      value: mockAiKPIs.hotLeads.toString(),
+      value: "0",
       subtitle: "requieren atención",
       icon: UserGroupIcon,
       color: "from-red-500 to-pink-600",
@@ -31,7 +31,7 @@ export function AiKPIs() {
     },
     {
       title: "Precisión Predicciones",
-      value: formatPercentage(mockAiKPIs.predictionsAccuracy),
+      value: "—",
       subtitle: "tasa de acierto",
       icon: ChartBarIcon,
       color: "from-green-500 to-emerald-600",
@@ -39,7 +39,7 @@ export function AiKPIs() {
     },
     {
       title: "Ingresos Predichos",
-      value: formatCurrency(mockAiKPIs.revenuePredicted),
+      value: formatCurrency(0),
       subtitle: "este mes",
       icon: SparklesIcon,
       color: "from-emerald-500 to-indigo-600",
@@ -47,7 +47,7 @@ export function AiKPIs() {
     },
     {
       title: "Emails Generados",
-      value: mockAiKPIs.emailsGenerated.toString(),
+      value: "0",
       subtitle: "automatizados",
       icon: EnvelopeIcon,
       color: "from-orange-500 to-amber-600",
@@ -55,7 +55,7 @@ export function AiKPIs() {
     },
     {
       title: "Llamadas Sugeridas",
-      value: mockAiKPIs.callsSuggested.toString(),
+      value: "0",
       subtitle: "prioridad alta",
       icon: PhoneIcon,
       color: "from-cyan-500 to-teal-600",

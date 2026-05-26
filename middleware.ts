@@ -3,20 +3,21 @@ import type { NextRequest } from "next/server"
 import { getToken } from "next-auth/jwt"
 
 /**
- * Next.js 16 Proxy (antes: middleware).
+ * Next.js Middleware: Auth + Rate Limiting.
  * - API routes → rate limit 60 req/min por IP (solo si Upstash está configurado)
- * - Unauthenticated → /auth
+ * - Rutas públicas → pasan sin autenticación
+ * - Unauthenticated en rutas privadas → /auth
  * - Admin routes → require ADMIN role
  */
-export async function proxy(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
 
-  // ── Stripe webhook — bypass rate limiting (Stripe sends raw body; must reach route untouched) ──
+  // ── Stripe webhook — bypass rate limiting ──
   if (pathname === "/api/stripe/webhook") {
     return NextResponse.next()
   }
 
-  // ── Rate Limiting — solo si Upstash está configurado (no aplica en local sin Redis) ──
+  // ── Rate Limiting — solo si Upstash está configurado ──
   if (
     pathname.startsWith("/api/") &&
     process.env.UPSTASH_REDIS_REST_URL &&
@@ -67,35 +68,69 @@ export async function proxy(req: NextRequest) {
 
   // ── Rutas públicas (sin autenticación) ──
   if (
+    // Raíz y variantes de landing
     pathname === "/" ||
-    pathname.startsWith("/scan") ||
-    pathname.startsWith("/auth") ||
-    pathname.startsWith("/plan") ||
-    pathname.startsWith("/login") ||
-    pathname.startsWith("/register") ||
-    pathname.startsWith("/verify") ||
-    pathname.startsWith("/api/auth") ||
-    pathname.startsWith("/api/waitlist") ||
-    pathname.startsWith("/api/register") ||
     pathname.startsWith("/whitelist") ||
     pathname.startsWith("/preview") ||
+    pathname.startsWith("/demo") ||
+
+    // SEO técnico — crítico para indexación
+    pathname === "/sitemap.xml" ||
+    pathname === "/robots.txt" ||
+    pathname === "/llms.txt" ||
+    pathname.startsWith("/opengraph-image") ||
+
+    // Marketing / páginas públicas
     pathname.startsWith("/precios") ||
     pathname.startsWith("/producto") ||
     pathname.startsWith("/soluciones") ||
     pathname.startsWith("/recursos") ||
+    pathname.startsWith("/features") ||
+    pathname.startsWith("/about") ||
     pathname.startsWith("/contacto") ||
-    pathname.startsWith("/blog") ||
+    pathname.startsWith("/contact") ||
     pathname.startsWith("/changelog") ||
-    pathname.startsWith("/demo") ||
+    pathname.startsWith("/blog") ||
+    pathname.startsWith("/seguridad") ||
+    pathname.startsWith("/docs") ||
+    pathname.startsWith("/wordpress-plugin") ||
     pathname.startsWith("/embajadores") ||
+
+    // Legal
     pathname.startsWith("/privacy") ||
     pathname.startsWith("/terms") ||
     pathname.startsWith("/cookies") ||
     pathname.startsWith("/legal") ||
-    pathname.startsWith("/seguridad") ||
+
+    // Auth y registro
+    pathname.startsWith("/auth") ||
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/register") ||
+    pathname.startsWith("/verify") ||
+    pathname.startsWith("/plan") ||
+
+    // Tokens públicos y rutas de acceso directo
+    pathname.startsWith("/f/") ||      // public forms
+    pathname.startsWith("/r/") ||      // redirect shortlinks
+    pathname.startsWith("/scan") ||
+    pathname.startsWith("/newsletter/") ||
+    pathname.startsWith("/invite/") ||
+    pathname.startsWith("/meeting/") ||
+
+    // APIs públicas (SDK, ingest, formularios)
+    pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/api/waitlist") ||
+    pathname.startsWith("/api/register") ||
+    pathname.startsWith("/api/ingest") ||
+    pathname.startsWith("/api/v1/") ||
+    pathname.startsWith("/api/track") ||
+    pathname.startsWith("/api/forms/") ||
+    pathname.startsWith("/api/cron/") ||
+
+    // Assets
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon") ||
-    pathname.match(/\.(png|jpg|jpeg|svg|ico|webp|woff|woff2)$/)
+    pathname.match(/\.(png|jpg|jpeg|svg|ico|webp|woff|woff2|txt|xml|json)$/)
   ) {
     return NextResponse.next()
   }

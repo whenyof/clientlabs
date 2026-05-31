@@ -83,16 +83,7 @@ const NAV: NavGroup[] = [
   {
     title: "Operaciones",
     items: [
-      {
-        id: "tasks",
-        label: "Tareas y proyectos",
-        icon: CheckSquare,
-        badgeHot: true,
-        subs: [
-          { label: "Mis tareas", href: "/dashboard/tasks" },
-          { label: "Proyectos", href: "/dashboard/tasks/projects" },
-        ],
-      },
+      { id: "tasks", label: "Tareas y proyectos", icon: CheckSquare, badgeHot: true, href: "/dashboard/tasks" },
       {
         id: "finance",
         label: "Facturación",

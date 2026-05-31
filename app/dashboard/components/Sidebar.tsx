@@ -1,591 +1,615 @@
 "use client"
 
 import Link from "next/link"
-import Image from "next/image"
-import { useRouter, usePathname } from "next/navigation"
+import { usePathname } from "next/navigation"
 import { useSession, signOut } from "next-auth/react"
-import { motion } from "framer-motion"
-import { useEffect, useState } from "react"
-import { useSectorConfig } from "@/hooks/useSectorConfig"
-import { usePlan } from "@/hooks/use-plan"
-import { useTour } from "@/components/tour/TourContext"
-import { cn } from "@/lib/utils"
+import { useState } from "react"
 import {
   LayoutDashboard,
-  Users,
   Target,
+  Users,
+  Truck,
   CheckSquare,
-  DollarSign,
-  BarChart3,
-  Zap,
-  Settings,
-  ChevronLeft,
-  ChevronRight,
-  ChevronDown,
-  Building2,
-  Sparkles,
-  Crown,
-  Link2,
-  Lock,
   Receipt,
   Megaphone,
+  Zap,
+  BarChart3,
+  Sparkles,
+  Plug2,
+  Settings,
+  ChevronRight,
+  ChevronLeft,
   LogOut,
-  Landmark,
-  ShoppingCart,
-  FileText,
-  Wallet,
-  Banknote,
-  Wrench,
-  UserPlus,
-  Radio,
-  Globe,
-  Code2,
-  Activity,
-  ClipboardList,
-  Truck,
-  Package,
-  FolderKanban,
+  ChevronsUpDown,
 } from "lucide-react"
+
+// ─── Design tokens ─────────────────────────────────────────────────────────
+const C = {
+  bg: "#ffffff",
+  bg2: "#fafafa",
+  bg3: "#f5f5f5",
+  ink: "#0a0a0a",
+  ink2: "#404040",
+  ink3: "#737373",
+  ink4: "#a3a3a3",
+  ink5: "#d4d4d4",
+  line: "#e8e8e8",
+  line2: "#eeeeee",
+  accent: "#16986e",
+  accentSoft: "#ecf6f1",
+  accentInk: "#0d7a56",
+}
+
+// ─── Types ──────────────────────────────────────────────────────────────────
 
 interface SidebarProps {
   isCollapsed?: boolean
   onToggleCollapsed?: () => void
-  /** Called when a nav item is clicked — used to close mobile drawer */
   onNavItemClick?: () => void
 }
 
-interface SubItem {
-  label: string
-  href: string
-  icon?: React.ComponentType<{ className?: string }>
-}
+type Sub = { label: string; href: string }
 
-interface MenuItem {
+type NavItem = {
+  id: string
   label: string
-  icon: React.ComponentType<{ className?: string }>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  icon: React.ComponentType<any>
   href?: string
   badge?: string
-  count?: number
-  children?: SubItem[]
+  badgeHot?: boolean
+  subs?: Sub[]
 }
 
-interface MenuGroup {
-  title: string
-  items: MenuItem[]
-}
+type NavGroup = { title: string; items: NavItem[] }
 
-// ─── NavItem ────────────────────────────────────────────────────────────────
+// ─── Navigation structure ────────────────────────────────────────────────────
 
-function NavItem({
+const NAV: NavGroup[] = [
+  {
+    title: "Core",
+    items: [
+      { id: "dash", label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
+    ],
+  },
+  {
+    title: "Ventas",
+    items: [
+      {
+        id: "leads",
+        label: "Leads",
+        icon: Target,
+        subs: [
+          { label: "Lista", href: "/dashboard/leads" },
+          { label: "Pipeline", href: "/dashboard/leads/kanban" },
+          { label: "Analíticas", href: "/dashboard/leads/analytics" },
+          { label: "Feed de actividad", href: "/dashboard/leads/feed" },
+        ],
+      },
+      {
+        id: "clients",
+        label: "Clientes",
+        icon: Users,
+        subs: [
+          { label: "Lista", href: "/dashboard/clients" },
+          { label: "Analíticas", href: "/dashboard/clients/analytics" },
+        ],
+      },
+      {
+        id: "providers",
+        label: "Proveedores",
+        icon: Truck,
+        subs: [
+          { label: "Lista", href: "/dashboard/providers" },
+          { label: "Analíticas", href: "/dashboard/providers/analytics" },
+        ],
+      },
+    ],
+  },
+  {
+    title: "Operaciones",
+    items: [
+      {
+        id: "tasks",
+        label: "Tareas y proyectos",
+        icon: CheckSquare,
+        badgeHot: true,
+        subs: [
+          { label: "Mis tareas", href: "/dashboard/tasks" },
+          { label: "Proyectos", href: "/dashboard/tasks/projects" },
+        ],
+      },
+      {
+        id: "finance",
+        label: "Facturación",
+        icon: Receipt,
+        subs: [
+          { label: "Resumen", href: "/dashboard/finance" },
+          { label: "Facturas emitidas", href: "/dashboard/finance/facturas" },
+          { label: "Albaranes", href: "/dashboard/finance/albaranes" },
+          { label: "Cobros", href: "/dashboard/finance/cobros" },
+          { label: "Gastos", href: "/dashboard/finance/gastos" },
+          { label: "Pagos", href: "/dashboard/finance/pagos" },
+          { label: "Configuración", href: "/dashboard/finance/configuracion" },
+        ],
+      },
+    ],
+  },
+  {
+    title: "Marketing",
+    items: [
+      { id: "marketing", label: "Email Marketing", icon: Megaphone, href: "/dashboard/marketing" },
+    ],
+  },
+  {
+    title: "Inteligencia",
+    items: [
+      { id: "auto", label: "Automatizaciones", icon: Zap, href: "/dashboard/automations" },
+      { id: "reports", label: "Informes", icon: BarChart3, href: "/dashboard/reporting" },
+      { id: "ai", label: "Asistente IA", icon: Sparkles, href: "/dashboard/ai-assistant" },
+    ],
+  },
+  {
+    title: "Sistema",
+    items: [
+      { id: "team",     label: "Equipo",        icon: Users,     href: "/dashboard/team" },
+      { id: "integ",    label: "Integraciones",  icon: Plug2,     href: "/dashboard/integrations" },
+      { id: "settings", label: "Ajustes",        icon: Settings,  href: "/dashboard/settings" },
+    ],
+  },
+]
+
+// ─── NavItem component ───────────────────────────────────────────────────────
+
+function NavItemRow({
   item,
+  pathname,
   isCollapsed,
-  onNavigate,
-  isTourHighlighted,
+  onNavItemClick,
 }: {
-  item: MenuItem
+  item: NavItem
+  pathname: string
   isCollapsed: boolean
-  onNavigate?: () => void
-  isTourHighlighted?: boolean
+  onNavItemClick?: () => void
 }) {
-  const pathname = usePathname()
-  const hasChildren = !!item.children?.length
+  const hasSubs = !!item.subs?.length
 
-  const isChildActive = hasChildren
-    ? item.children!.some(
-        (c) => pathname === c.href || pathname.startsWith(c.href + "/")
+  const isActive = !hasSubs && item.href
+    ? pathname === item.href ||
+      (item.href !== "/dashboard" && pathname.startsWith(item.href + "/"))
+    : false
+
+  const isChildActive = hasSubs
+    ? item.subs!.some(
+        (s) => pathname === s.href || pathname.startsWith(s.href + "/")
       )
     : false
 
   const [open, setOpen] = useState(isChildActive)
 
-  useEffect(() => {
-    if (isChildActive) setOpen(true)
-  }, [pathname, isChildActive])
-
-  const isActive = item.href
-    ? pathname === item.href ||
-      (item.href !== "/dashboard" && pathname.startsWith(item.href + "/"))
-    : false
-
   const Icon = item.icon
 
-  // ── Dropdown parent ──────────────────────────────────────────────────────
-  if (hasChildren) {
+  const itemBase: React.CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    gap: 9,
+    padding: isCollapsed ? "5px 6px" : "5px 10px",
+    borderRadius: 6,
+    fontSize: 13,
+    letterSpacing: "-0.003em",
+    whiteSpace: "nowrap",
+    cursor: "pointer",
+    width: "100%",
+    justifyContent: isCollapsed ? "center" : "flex-start",
+    transition: "background .1s ease, color .1s ease",
+  }
+
+  const activeStyle: React.CSSProperties = {
+    background: C.bg,
+    color: C.ink,
+    fontWeight: 550,
+    boxShadow: `0 0 0 1px ${C.line} inset, 0 1px 2px rgba(0,0,0,0.02)`,
+  }
+
+  const inactiveStyle: React.CSSProperties = {
+    background: "transparent",
+    color: C.ink2,
+    fontWeight: 450,
+  }
+
+  if (hasSubs) {
+    const isParentActive = isChildActive
     return (
-      <div className="relative">
-        {isTourHighlighted && (
-          <span
-            className="absolute inset-0 rounded-r-md pointer-events-none z-10 animate-[tour-pulse_1.6s_ease-in-out_infinite]"
-            style={{ boxShadow: "0 0 0 2px #1FA97A, 0 0 12px rgba(31,169,122,0.4)" }}
-          />
-        )}
+      <>
         <button
           onClick={() => setOpen((v) => !v)}
-          className={cn(
-            "w-full flex items-center gap-3 px-3 py-2 text-sm rounded-r-md transition-all border-l-[4px]",
-            isChildActive
-              ? "text-[var(--accent)] font-medium border-[var(--accent)] bg-[var(--accent-soft)]"
-              : "text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)] border-transparent",
-            isTourHighlighted ? "bg-[#1FA97A]/8 text-[#1FA97A]" : ""
-          )}
+          style={{
+            ...itemBase,
+            ...( isParentActive ? activeStyle : inactiveStyle),
+            border: "none",
+          }}
+          onMouseEnter={(e) => {
+            if (!isParentActive) {
+              const el = e.currentTarget as HTMLElement
+              el.style.background = C.bg3
+              el.style.color = C.ink
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!isParentActive) {
+              const el = e.currentTarget as HTMLElement
+              el.style.background = "transparent"
+              el.style.color = C.ink2
+            }
+          }}
         >
-          <Icon className="h-[18px] w-[18px] shrink-0" />
+          <span style={{ width: 16, height: 16, display: "grid", placeItems: "center", color: isParentActive ? C.ink : C.ink3, flexShrink: 0 }}>
+            <Icon size={15} strokeWidth={1.7} />
+          </span>
           {!isCollapsed && (
             <>
-              <span className="flex-1 text-left">{item.label}</span>
-              {item.badge && (
-                <span className="text-[9px] font-bold tracking-wider bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded uppercase mr-1">
-                  {item.badge}
-                </span>
+              <span style={{ flex: 1, textAlign: "left", color: "inherit" }}>{item.label}</span>
+              {item.badgeHot && (
+                <span style={{
+                  fontFamily: "ui-monospace, monospace",
+                  fontSize: 10, padding: "1px 5px",
+                  borderRadius: 99, background: C.ink, color: "white", fontWeight: 500,
+                }}>!</span>
               )}
-              <ChevronDown
-                className={cn(
-                  "h-3.5 w-3.5 shrink-0 transition-transform duration-200",
-                  open ? "rotate-0" : "-rotate-90"
-                )}
-              />
+              {item.badge && !item.badgeHot && (
+                <span style={{
+                  fontFamily: "ui-monospace, monospace",
+                  fontSize: 10, padding: "1px 5px",
+                  borderRadius: 99, background: C.bg3, color: C.ink3, fontWeight: 500,
+                }}>{item.badge}</span>
+              )}
+              <span style={{
+                width: 12, height: 12, display: "flex", alignItems: "center",
+                color: C.ink4,
+                transform: open ? "rotate(90deg)" : "rotate(0deg)",
+                transition: "transform .15s ease",
+              }}>
+                <ChevronRight size={11} strokeWidth={2} />
+              </span>
             </>
           )}
         </button>
 
-        {open && !isCollapsed && (
-          <div className="ml-[22px] mt-0.5 mb-1 space-y-0.5 border-l border-white/[0.08] pl-3">
-            {item.children!.map((child) => {
-              const childActive =
-                pathname === child.href ||
-                pathname.startsWith(child.href + "/")
-              const ChildIcon = child.icon
+        {!isCollapsed && open && (
+          <div style={{
+            paddingLeft: 14,
+            marginLeft: 12,
+            borderLeft: `1px solid ${C.line2}`,
+            marginTop: 2,
+            marginBottom: 2,
+          }}>
+            {item.subs!.map((sub) => {
+              const subActive = pathname === sub.href || pathname.startsWith(sub.href + "/")
               return (
                 <Link
-                  key={child.href}
-                  href={child.href}
-                  onClick={onNavigate}
-                  className={cn(
-                    "flex items-center gap-2.5 px-3 py-[7px] rounded-lg text-[13px] transition-colors",
-                    childActive
-                      ? "bg-[#1FA97A]/15 text-[#1FA97A] font-medium"
-                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
-                  )}
+                  key={sub.href}
+                  href={sub.href}
+                  onClick={onNavItemClick}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "4px 8px",
+                    borderRadius: 5,
+                    fontSize: 12.5,
+                    color: subActive ? C.ink : C.ink3,
+                    fontWeight: subActive ? 550 : 450,
+                    background: "transparent",
+                    textDecoration: "none",
+                    transition: "color .1s ease, background .1s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!subActive) {
+                      const el = e.currentTarget as HTMLElement
+                      el.style.color = C.ink
+                      el.style.background = C.bg3
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!subActive) {
+                      const el = e.currentTarget as HTMLElement
+                      el.style.color = C.ink3
+                      el.style.background = "transparent"
+                    }
+                  }}
                 >
-                  {ChildIcon ? (
-                    <ChildIcon className="h-[14px] w-[14px] shrink-0" />
-                  ) : (
-                    <span className="h-1.5 w-1.5 rounded-full bg-current shrink-0" />
-                  )}
-                  <span>{child.label}</span>
+                  <span style={{
+                    width: 4, height: 4, borderRadius: 99,
+                    background: subActive ? C.accent : C.ink5,
+                    marginRight: 9, flexShrink: 0, display: "inline-block",
+                  }} />
+                  {sub.label}
                 </Link>
               )
             })}
           </div>
         )}
-      </div>
+      </>
     )
   }
 
-  // ── Direct link ──────────────────────────────────────────────────────────
+  // Direct link
   return (
-    <div className="relative">
-      {isTourHighlighted && (
-        <span
-          className="absolute inset-0 rounded-r-md pointer-events-none z-10 animate-[tour-pulse_1.6s_ease-in-out_infinite]"
-          style={{ boxShadow: "0 0 0 2px #1FA97A, 0 0 12px rgba(31,169,122,0.4)" }}
-        />
+    <Link
+      href={item.href!}
+      onClick={onNavItemClick}
+      style={{
+        ...itemBase,
+        ...(isActive ? activeStyle : inactiveStyle),
+        textDecoration: "none",
+      }}
+      onMouseEnter={(e) => {
+        if (!isActive) {
+          const el = e.currentTarget as HTMLElement
+          el.style.background = C.bg3
+          el.style.color = C.ink
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!isActive) {
+          const el = e.currentTarget as HTMLElement
+          el.style.background = "transparent"
+          el.style.color = C.ink2
+        }
+      }}
+    >
+      <span style={{ width: 16, height: 16, display: "grid", placeItems: "center", color: isActive ? C.ink : C.ink3, flexShrink: 0 }}>
+        <Icon size={15} strokeWidth={1.7} />
+      </span>
+      {!isCollapsed && (
+        <>
+          <span style={{ flex: 1 }}>{item.label}</span>
+          {item.badge && !item.badgeHot && (
+            <span style={{
+              fontFamily: "ui-monospace, monospace",
+              fontSize: 10, padding: "1px 5px",
+              borderRadius: 99, background: C.bg3, color: C.ink3, fontWeight: 500,
+            }}>{item.badge}</span>
+          )}
+        </>
       )}
-      {isTourHighlighted && (
-        <span className="absolute right-2 top-1/2 -translate-y-1/2 z-20 flex items-center gap-1 bg-[#1FA97A] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full pointer-events-none">
-          <span className="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse" />
-          AQUÍ
-        </span>
-      )}
-      <Link
-        href={item.href!}
-        onClick={onNavigate}
-        className={cn(
-          "w-full flex items-center gap-3 px-3 py-2 text-sm rounded-r-md transition-all border-l-[4px]",
-          isActive
-            ? "bg-[var(--accent-soft)] text-[var(--accent)] font-medium border-[var(--accent)]"
-            : "text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)] border-transparent",
-          isTourHighlighted ? "bg-[#1FA97A]/8 text-[#1FA97A]" : ""
-        )}
-      >
-        <Icon className="h-[18px] w-[18px] shrink-0" />
-        {!isCollapsed && (
-          <div className="flex justify-between w-full items-center">
-            <span>{item.label}</span>
-            <div className="flex items-center gap-1">
-              {item.count !== undefined && item.count > 0 && (
-                <span
-                  className="text-xs px-2 rounded-full font-semibold"
-                  style={{
-                    background:
-                      item.href === "/dashboard/tasks"
-                        ? "#FEF2F2"
-                        : "var(--accent-soft)",
-                    color:
-                      item.href === "/dashboard/tasks"
-                        ? "#EF4444"
-                        : "var(--accent)",
-                  }}
-                >
-                  {item.count}
-                </span>
-              )}
-              {item.badge && (
-                <span className="text-[9px] font-bold tracking-wider bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded uppercase">
-                  {item.badge}
-                </span>
-              )}
-            </div>
-          </div>
-        )}
-      </Link>
-    </div>
+    </Link>
   )
 }
 
-// ─── Sidebar ─────────────────────────────────────────────────────────────────
+// ─── Main Sidebar component ──────────────────────────────────────────────────
 
 export default function Sidebar({
   isCollapsed = false,
   onToggleCollapsed,
   onNavItemClick,
 }: SidebarProps) {
-  const router = useRouter()
   const pathname = usePathname()
   const { data: session, status } = useSession()
-  const { labels } = useSectorConfig()
-  const { active: tourActive, currentStep: tourStep } = useTour()
-  const nav = labels.nav
-  const isAdmin = session?.user?.role === "ADMIN"
-
-  const [urgentCount, setUrgentCount] = useState(0)
-  const [showLogoutModal, setShowLogoutModal] = useState(false)
-
-  useEffect(() => {
-    if (!session?.user?.id) return
-    fetch("/api/tasks/kpis")
-      .then((r) => r.json())
-      .then((d) => setUrgentCount(d?.urgent ?? 0))
-      .catch(() => {})
-  }, [session?.user?.id])
 
   if (status === "loading") {
     return (
-      <div className="w-64 bg-[var(--bg-card)] border-r border-[var(--border-subtle)] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--accent)]" />
+      <div style={{ width: "100%", height: "100%", background: C.bg2, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{
+          width: 20, height: 20, borderRadius: "50%",
+          border: `2px solid ${C.line}`,
+          borderTopColor: C.accent,
+          animation: "spin 0.8s linear infinite",
+        }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg) }}`}</style>
       </div>
     )
   }
 
-  const menu: MenuGroup[] = [
-    {
-      title: "CORE",
-      items: [
-        { label: nav.dashboard, icon: LayoutDashboard, href: "/dashboard" },
-        {
-          label: nav.leads,
-          icon: Target,
-          children: [
-            { label: "Analíticas", href: "/dashboard/leads/analytics", icon: BarChart3 },
-            { label: "Lista", href: "/dashboard/leads", icon: Target },
-          ],
-        },
-        {
-          label: nav.clients,
-          icon: Users,
-          children: [
-            { label: "Analíticas", href: "/dashboard/clients/analytics", icon: BarChart3 },
-            { label: "Lista", href: "/dashboard/clients", icon: Users },
-          ],
-        },
-        {
-          label: nav.providers,
-          icon: Building2,
-          children: [
-            { label: "Analíticas", href: "/dashboard/providers/analytics", icon: BarChart3 },
-            { label: "Lista", href: "/dashboard/providers", icon: Building2 },
-          ],
-        },
-        {
-          label: nav.tasks,
-          icon: CheckSquare,
-          children: [
-            { label: "Mis tareas", href: "/dashboard/tasks", icon: CheckSquare },
-            { label: "Proyectos", href: "/dashboard/tasks/projects", icon: FolderKanban },
-          ],
-        },
-        {
-          label: nav.finance,
-          icon: FileText,
-          children: [
-            { label: "Resumen", href: "/dashboard/finance", icon: BarChart3 },
-            { label: "Informes", href: "/dashboard/finance/informes", icon: BarChart3 },
-            { label: "Facturas", href: "/dashboard/finance/invoicing", icon: Receipt },
-            { label: "Presupuestos", href: "/dashboard/finance/presupuestos", icon: FileText },
-            { label: "Albaranes", href: "/dashboard/finance/albaranes", icon: Package },
-            { label: "Pedidos", href: "/dashboard/finance/pedidos", icon: ClipboardList },
-            { label: "Gastos", href: "/dashboard/finance/gastos", icon: Wallet },
-            { label: "Productos", href: "/dashboard/finance/productos", icon: ShoppingCart },
-            { label: "Configuración", href: "/dashboard/finance/configuracion", icon: Settings },
-          ],
-        },
-      ],
-    },
-    {
-      title: "INTELIGENCIA",
-      items: [
-        {
-          label: "Automatizaciones",
-          icon: Zap,
-          children: [
-            { label: "Analíticas", href: "/dashboard/automatizaciones/analytics", icon: BarChart3 },
-            { label: "Lista", href: "/dashboard/automatizaciones", icon: Zap },
-          ],
-        },
-        {
-          label: "Marketing",
-          icon: Megaphone,
-          children: [
-            { label: "Analíticas", href: "/dashboard/marketing/analytics", icon: BarChart3 },
-            { label: "Campañas", href: "/dashboard/marketing", icon: Megaphone },
-          ],
-        },
-        {
-          label: "Conectar",
-          icon: Link2,
-          children: [
-            { label: "Analíticas", href: "/dashboard/connect/analytics", icon: Activity },
-            { label: "Conexiones", href: "/dashboard/connect", icon: Globe },
-          ],
-        },
-      ],
-    },
-    {
-      title: "SISTEMA",
-      items: [
-        { label: nav.settings, icon: Settings, href: "/dashboard/settings" },
-      ],
-    },
-  ]
+  const userName = session?.user?.name || "Usuario"
+  const userEmail = session?.user?.email || ""
+  const initials = userName
+    .split(" ")
+    .map((w: string) => w[0] ?? "")
+    .slice(0, 2)
+    .join("")
+    .toUpperCase()
 
-  if (isAdmin) {
-    menu.push({
-      title: "ADMIN",
-      items: [{ label: "Admin Panel", icon: Crown, href: "/admin" }],
-    })
-  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const orgName = (session?.user as any)?.organizationName as string | undefined
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const planName = (session?.user as any)?.plan as string | undefined
+
+  const workspaceName = orgName || userName
+  const workspaceInitials = workspaceName
+    .split(" ")
+    .map((w: string) => w[0] ?? "")
+    .slice(0, 2)
+    .join("")
+    .toUpperCase()
 
   return (
-    <>
-      <motion.aside
-        animate={{ width: isCollapsed ? 72 : 240 }}
-        transition={{ duration: 0.25, ease: "easeInOut" }}
-        className="h-screen bg-[var(--bg-card)] border-r border-[var(--border-subtle)] flex flex-col shrink-0"
-      >
-        {/* HEADER */}
-        <div className="h-16 px-4 flex items-center justify-between border-b border-[var(--border-subtle)]">
+    <div style={{
+      background: C.bg2,
+      borderRight: `1px solid ${C.line2}`,
+      display: "flex",
+      flexDirection: "column",
+      overflow: "hidden",
+      width: "100%",
+      height: "100%",
+      fontSize: 13.5,
+      lineHeight: 1.5,
+    }}>
+      {/* ── Brand header ────────────────────────────────── */}
+      <div style={{
+        height: 52,
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        padding: "0 14px",
+        borderBottom: `1px solid ${C.line2}`,
+        flexShrink: 0,
+      }}>
+        <div style={{
+          display: "flex", alignItems: "center", gap: 9,
+          flex: 1, minWidth: 0,
+          fontWeight: 600, letterSpacing: "-0.02em", fontSize: 14.5,
+        }}>
+          <span style={{
+            width: 22, height: 22,
+            background: C.ink, color: "white",
+            display: "grid", placeItems: "center",
+            fontWeight: 700, fontSize: 11,
+            borderRadius: 5, flexShrink: 0,
+          }}>C</span>
           {!isCollapsed && (
-            <span className="text-[var(--text-primary)] font-bold text-lg">
-              Client<span className="text-[var(--accent)]">Labs</span>
+            <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", color: C.ink }}>
+              ClientLabs
             </span>
           )}
-          <div className="flex items-center gap-2">
-            {onToggleCollapsed && (
-              <button
-                onClick={onToggleCollapsed}
-                className="p-2 rounded-lg hover:bg-[var(--border-subtle)]"
-              >
-                {isCollapsed ? (
-                  <ChevronRight size={18} className="text-[var(--text-secondary)]" />
-                ) : (
-                  <ChevronLeft size={18} className="text-[var(--text-secondary)]" />
-                )}
-              </button>
-            )}
-          </div>
         </div>
-
-        {/* NAV */}
-        <nav className="flex-1 px-3 py-4 space-y-6 overflow-y-auto">
-          {menu.map((group, groupIdx) => (
-            <div key={group.title}>
-              {!isCollapsed && (
-                <p className="text-xs uppercase tracking-widest text-[var(--text-secondary)] mb-2 px-2">
-                  {group.title}
-                </p>
-              )}
-              <div className="space-y-1">
-                {group.items.map((item) => {
-                  const itemHref = item.href ?? item.children?.[0]?.href ?? ""
-                  const isTourHighlighted =
-                    tourActive && tourStep.href === itemHref
-                  return (
-                    <NavItem
-                      key={item.label}
-                      item={item}
-                      isCollapsed={isCollapsed}
-                      onNavigate={onNavItemClick}
-                      isTourHighlighted={isTourHighlighted}
-                    />
-                  )
-                })}
-              </div>
-
-              {/* PRÓXIMAMENTE — inserted after the last non-admin group */}
-              {groupIdx === menu.length - (isAdmin ? 2 : 1) && (
-                <div className="mt-3">
-                  {!isCollapsed && (
-                    <p className="text-xs uppercase tracking-widest text-[var(--text-secondary)] mb-2 px-2 opacity-60">
-                      Próximamente
-                    </p>
-                  )}
-                  {[
-                    { icon: Sparkles, label: labels.aiAssistant.title },
-                  ].map(({ icon: Icon, label }) => (
-                    <div
-                      key={label}
-                      title={isCollapsed ? `${label} — Próximamente` : undefined}
-                      className="w-full flex items-center gap-3 px-3 py-2 text-sm rounded-r-md border-l-[4px] border-transparent opacity-45 cursor-not-allowed select-none"
-                      style={{ color: "var(--text-secondary)" }}
-                    >
-                      <Icon size={18} />
-                      {!isCollapsed && (
-                        <div className="flex justify-between w-full items-center">
-                          <span>{label}</span>
-                          <span
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 3,
-                              fontSize: 10,
-                              fontWeight: 600,
-                              letterSpacing: "0.04em",
-                              padding: "2px 6px",
-                              borderRadius: 4,
-                              background: "var(--bg-surface)",
-                              border: "0.5px solid var(--border-subtle)",
-                              color: "var(--text-secondary)",
-                            }}
-                          >
-                            <Lock size={9} />
-                            Pronto
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </nav>
-
-        {/* FOOTER */}
-        <div className="border-t border-[var(--border-subtle)] p-4 space-y-3">
-          {/* USER */}
-          <div className="flex items-center gap-3">
-            <div className="h-9 w-9 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-full flex items-center justify-center text-[var(--accent)] font-bold overflow-hidden shrink-0">
-              {session?.user?.image ? (
-                <Image
-                  src={session.user.image}
-                  alt="Avatar"
-                  width={36}
-                  height={36}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span className="text-sm">
-                  {session?.user?.name?.charAt(0)?.toUpperCase() ||
-                    session?.user?.email?.charAt(0)?.toUpperCase() ||
-                    "U"}
-                </span>
-              )}
-            </div>
-
-            {!isCollapsed && (
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
-                  {session?.user?.name || "Usuario"}
-                </p>
-                <p className="text-xs text-[var(--text-secondary)] truncate">
-                  {session?.user?.email || "user@email.com"}
-                </p>
-              </div>
-            )}
-
-            <button
-              onClick={() => setShowLogoutModal(true)}
-              title="Cerrar sesión"
-              className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-150 shrink-0"
-            >
-              <LogOut size={15} />
-            </button>
-          </div>
-
-          {/* PLAN */}
-          {!isCollapsed && session?.user?.plan && (() => {
-            const plan = session.user.plan.toUpperCase()
-            const isTrial  = plan === "TRIAL"
-            const isStarter = plan === "FREE" || plan === "STARTER"
-            const isPro = plan === "PRO"
-            return (
-              <button
-                onClick={() => router.push(isTrial ? "/plan" : "/dashboard/settings?section=subscription")}
-                className="w-full group flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg border border-[var(--border-subtle)] hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] transition-all"
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <Crown size={14} className={`shrink-0 ${isTrial ? "text-yellow-500" : isStarter ? "text-sky-500" : isPro ? "text-[#1FA97A]" : "text-amber-500"}`} />
-                  <div className="text-left min-w-0">
-                    <p className="text-[11px] font-semibold text-[var(--text-primary)] leading-tight truncate">
-                      {isTrial ? "Prueba gratuita" : isStarter ? "Plan Básico" : isPro ? "Plan Pro" : "Plan Negocio"}
-                    </p>
-                    <p className="text-[10px] text-[var(--accent)] leading-tight">{isTrial ? "Elegir plan" : "Cambiar plan"}</p>
-                  </div>
-                </div>
-                <ChevronRight size={12} className="text-[var(--text-secondary)] group-hover:text-[var(--accent)] shrink-0 transition-colors" />
-              </button>
-            )
-          })()}
-        </div>
-      </motion.aside>
-
-      {/* LOGOUT CONFIRM MODAL */}
-      {showLogoutModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center"
-          style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(4px)" }}
-          onClick={() => setShowLogoutModal(false)}
+        <button
+          onClick={onToggleCollapsed}
+          aria-label={isCollapsed ? "Expandir sidebar" : "Colapsar sidebar"}
+          style={{
+            width: 22, height: 22,
+            border: `1px solid ${C.line}`,
+            borderRadius: 5,
+            display: "grid", placeItems: "center",
+            color: C.ink3, background: C.bg,
+            cursor: "pointer",
+            flexShrink: 0,
+            marginLeft: isCollapsed ? 2 : 0,
+          }}
         >
-          <div
-            className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl p-6 w-full max-w-sm mx-4 shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-50 dark:bg-red-900/20 mx-auto mb-4">
-              <LogOut size={22} className="text-red-500" />
+          {isCollapsed
+            ? <ChevronRight size={11} strokeWidth={2.4} />
+            : <ChevronLeft size={11} strokeWidth={2.4} />}
+        </button>
+      </div>
+
+      {/* ── Workspace selector ──────────────────────────── */}
+      {isCollapsed ? (
+        <div style={{
+          margin: "10px auto 6px",
+          padding: 8,
+          border: `1px solid ${C.line}`,
+          borderRadius: 8,
+          background: C.bg,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          cursor: "pointer", width: 38, flexShrink: 0,
+        }}>
+          <span style={{
+            width: 22, height: 22,
+            background: "linear-gradient(135deg, #0a0a0a 0%, #404040 100%)",
+            color: "white", display: "grid", placeItems: "center",
+            fontWeight: 600, fontSize: 10, borderRadius: 5,
+          }}>
+            {workspaceInitials}
+          </span>
+        </div>
+      ) : (
+        <div style={{
+          margin: "10px 10px 6px",
+          padding: "8px 10px",
+          border: `1px solid ${C.line}`,
+          borderRadius: 8, background: C.bg,
+          display: "flex", alignItems: "center", gap: 9,
+          cursor: "pointer", flexShrink: 0,
+        }}>
+          <span style={{
+            width: 22, height: 22,
+            background: "linear-gradient(135deg, #0a0a0a 0%, #404040 100%)",
+            color: "white", display: "grid", placeItems: "center",
+            fontWeight: 600, fontSize: 10, borderRadius: 5, flexShrink: 0,
+          }}>
+            {workspaceInitials}
+          </span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 550, fontSize: 12.5, letterSpacing: "-0.005em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", color: C.ink }}>
+              {workspaceName}
             </div>
-            <h2 className="text-[16px] font-bold text-[var(--text-primary)] text-center mb-1">
-              ¿Cerrar sesión?
-            </h2>
-            <p className="text-[13px] text-[var(--text-secondary)] text-center mb-6">
-              Se cerrará tu sesión en este dispositivo.
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowLogoutModal(false)}
-                className="flex-1 py-2.5 rounded-xl text-[13.5px] font-medium text-[var(--text-secondary)] border border-[var(--border-subtle)] hover:bg-[var(--bg-surface)] transition-all"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={() => signOut({ callbackUrl: "/auth" })}
-                className="flex-1 py-2.5 rounded-xl text-[13.5px] font-semibold text-white bg-red-500 hover:bg-red-600 transition-all"
-              >
-                Cerrar sesión
-              </button>
+            <div style={{ fontFamily: "ui-monospace, monospace", fontSize: 10, color: C.ink3, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+              Plan {planName || "Starter"}
             </div>
           </div>
+          <ChevronsUpDown size={12} color={C.ink3} strokeWidth={2} />
         </div>
       )}
-    </>
+
+      {/* ── Navigation scroll area ───────────────────────── */}
+      <nav
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: "6px 8px 14px",
+          scrollbarWidth: "thin",
+          scrollbarColor: `${C.line} transparent`,
+        }}
+      >
+        {NAV.map((group) => (
+          <div key={group.title} style={{ marginTop: 14 }}>
+            {/* Group title */}
+            {isCollapsed ? (
+              <div style={{ height: 8, position: "relative", marginBottom: 2 }}>
+                <div style={{ position: "absolute", left: 4, right: 4, top: 4, height: 1, background: C.line2 }} />
+              </div>
+            ) : (
+              <div style={{
+                fontFamily: "ui-monospace, monospace",
+                fontSize: 9.5, letterSpacing: "0.12em",
+                textTransform: "uppercase", color: C.ink4,
+                padding: "0 10px 6px", fontWeight: 500,
+              }}>
+                {group.title}
+              </div>
+            )}
+            {group.items.map((item) => (
+              <NavItemRow
+                key={item.id}
+                item={item}
+                pathname={pathname}
+                isCollapsed={isCollapsed}
+                onNavItemClick={onNavItemClick}
+              />
+            ))}
+          </div>
+        ))}
+      </nav>
+
+      {/* ── User footer ─────────────────────────────────── */}
+      <div style={{ borderTop: `1px solid ${C.line2}`, padding: 8, flexShrink: 0 }}>
+        <button
+          onClick={() => signOut({ callbackUrl: "/auth" })}
+          style={{
+            width: "100%",
+            display: "flex", alignItems: "center", gap: 9,
+            padding: isCollapsed ? 6 : "6px 8px",
+            borderRadius: 6, cursor: "pointer",
+            background: "none", border: "none",
+            justifyContent: isCollapsed ? "center" : "flex-start",
+            transition: "background .1s ease",
+          }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = C.bg3 }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent" }}
+        >
+          <div style={{
+            width: 26, height: 26, borderRadius: 99,
+            background: C.ink, color: "white",
+            display: "grid", placeItems: "center",
+            fontWeight: 600, fontSize: 11, flexShrink: 0,
+          }}>
+            {initials}
+          </div>
+          {!isCollapsed && (
+            <>
+              <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+                <div style={{ fontWeight: 550, fontSize: 12.5, letterSpacing: "-0.005em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", color: C.ink }}>
+                  {userName}
+                </div>
+                <div style={{ fontFamily: "ui-monospace, monospace", fontSize: 10, color: C.ink3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  {userEmail}
+                </div>
+              </div>
+              <LogOut size={14} color={C.ink4} strokeWidth={2} />
+            </>
+          )}
+        </button>
+      </div>
+    </div>
   )
 }

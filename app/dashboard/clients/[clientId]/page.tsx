@@ -46,16 +46,24 @@ export default async function Client360Page({ params: paramsPromise }: { params:
   return (
     <DashboardContainer>
 
-      {/* ── Breadcrumb ─────────────────────────────────────────────────── */}
-      <a
-        href="/dashboard/clients"
-        className="inline-flex items-center gap-1 text-[12px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors mb-5"
-      >
-        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" aria-hidden="true">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-        </svg>
-        Clientes
-      </a>
+      {/* ── Back link — institutional style ────────────────────────────── */}
+      <div style={{ paddingBottom: 14, marginBottom: 16, borderBottom: "1px solid #eeeeee" }}>
+        <a
+          href="/dashboard/clients"
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 5,
+            fontSize: 12.5, color: "#737373", fontWeight: 500, textDecoration: "none",
+            transition: "color .12s ease",
+          }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#0a0a0a" }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#737373" }}
+        >
+          <svg width="13" height="13" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="currentColor" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 18l-6-6 6-6" />
+          </svg>
+          Volver a clientes
+        </a>
+      </div>
 
       {/* ── Header: identidad del cliente ──────────────────────────────── */}
       <div className="mb-4">

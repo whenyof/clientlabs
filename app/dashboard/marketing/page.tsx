@@ -2044,26 +2044,39 @@ export default function MarketingPage() {
   const audienciaLabel = audienciaSeleccionada?.replace(/-/g, " ") ?? ""
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="space-y-5">
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      {/* ── INSTITUTIONAL HEADER ──────────────────────────────── */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 24, paddingBottom: 18, borderBottom: "1px solid #eeeeee" }}>
         <div>
-          <h1 className="text-[22px] font-bold text-slate-900">Marketing</h1>
-          <p className="text-[13px] text-slate-500 mt-0.5">
-            Alcanzaste 2.722 personas este mes · 68.4% de apertura media
-          </p>
+          <h1 style={{ fontWeight: 600, letterSpacing: "-0.022em", fontSize: 26, lineHeight: 1.1, margin: 0, color: "#0a0a0a" }}>Email Marketing</h1>
+          <div style={{ marginTop: 6, display: "flex", alignItems: "center", gap: 14, fontSize: 12.5, color: "#737373", flexWrap: "wrap" }}>
+            <span>18.420 suscriptores</span>
+            <span style={{ color: "#d4d4d4" }}>·</span>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <span style={{ width: 6, height: 6, borderRadius: 99, background: "#16986e", boxShadow: "0 0 0 3px #ecf6f1", display: "inline-block" }} />
+              1 campaña enviando ahora
+            </span>
+            <span style={{ color: "#d4d4d4" }}>·</span>
+            <span>Reputación de dominio <strong style={{ color: "#0d7a56" }}>96 / 100</strong></span>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-[13px] font-medium text-slate-600 hover:border-slate-300 transition-colors shadow-sm">
-            <Filter className="h-4 w-4" />
-            Filtrar
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+          <button className="flex items-center gap-2 px-3 py-[7px] bg-white border border-[#e8e8e8] rounded-md text-[12.5px] font-medium text-[#404040] hover:border-[#a3a3a3] transition-colors">
+            <Search className="h-3 w-3" />
+            Buscar
+          </button>
+          <button className="flex items-center gap-2 px-3 py-[7px] bg-white border border-[#e8e8e8] rounded-md text-[12.5px] font-medium text-[#404040] hover:border-[#a3a3a3] transition-colors">
+            Importar lista
+          </button>
+          <button className="flex items-center gap-2 px-3 py-[7px] bg-white border border-[#e8e8e8] rounded-md text-[12.5px] font-medium text-[#404040] hover:border-[#a3a3a3] transition-colors">
+            Plantillas
           </button>
           <button
             onClick={handleNuevaCampana}
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#1FA97A] text-white rounded-xl text-[13px] font-semibold hover:bg-[#1a9068] transition-colors"
+            style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: "#0a0a0a", color: "white", fontWeight: 550, fontSize: 12.5, border: "none", cursor: "pointer" }}
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-3 w-3" />
             Nueva campaña
           </button>
         </div>

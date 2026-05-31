@@ -34,8 +34,8 @@ export default function DashboardShell({
 
                 {/* ── Desktop Sidebar Column (hidden on mobile) ───────────── */}
                 <div
-                    className="hidden lg:flex flex-shrink-0 transition-all duration-300 z-20 bg-[var(--bg-card)] border-r border-[var(--border-subtle)] h-full overflow-hidden pointer-events-auto"
-                    style={{ width: isCollapsed ? 72 : 240 }}
+                    className="hidden lg:flex flex-shrink-0 transition-all duration-300 z-20 h-full overflow-hidden pointer-events-auto"
+                    style={{ width: isCollapsed ? 56 : 248 }}
                 >
                     <Sidebar
                         isCollapsed={isCollapsed}
@@ -53,7 +53,7 @@ export default function DashboardShell({
                             aria-hidden="true"
                         />
                         {/* Drawer */}
-                        <div className="fixed top-0 left-0 h-full w-64 z-50 bg-[var(--bg-card)] border-r border-[var(--border-subtle)] overflow-hidden lg:hidden shadow-xl">
+                        <div className="fixed top-0 left-0 h-full w-64 z-50 overflow-hidden lg:hidden shadow-xl" style={{ background: "#fafafa" }}>
                             <Sidebar
                                 isCollapsed={false}
                                 onToggleCollapsed={() => setMobileSidebarOpen(false)}
@@ -87,10 +87,11 @@ export default function DashboardShell({
                     </div>
 
                     <main
-                        className="flex-1 overflow-y-auto overflow-x-hidden bg-[var(--bg-main)] text-[var(--text-primary)] relative"
+                        className="flex-1 overflow-y-auto overflow-x-hidden relative"
+                        style={{ background: "#ffffff" }}
                         data-debug="shell-main"
                     >
-                        <div className="mx-auto w-full max-w-[1400px] flex-1 flex flex-col px-4 sm:px-6 py-4 sm:py-8">
+                        <div className="mx-auto w-full max-w-[1400px] flex-1 flex flex-col px-4 sm:px-7 py-4 sm:py-6 pb-20">
                             {children}
                         </div>
                     </main>

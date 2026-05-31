@@ -46,13 +46,5 @@ export default async function ProvidersPage() {
   const providers = await getProviders(session.user.id)
   const kpis = calculateKPIs(providers)
 
-  return (
-    <div className="space-y-4">
-      <div className="pb-2">
-        <h1 className="text-2xl font-semibold text-[var(--text-primary)] tracking-tight">Proveedores</h1>
-        <p className="mt-0.5 text-[14px] text-[var(--text-secondary)]">Control de costes, dependencias y riesgos operativos</p>
-      </div>
-      <ProvidersView initialProviders={providers} initialKPIs={kpis} />
-    </div>
-  )
+  return <ProvidersView initialProviders={providers} initialKPIs={kpis} />
 }

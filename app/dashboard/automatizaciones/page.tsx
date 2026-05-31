@@ -239,33 +239,60 @@ export default function AutomatizacionesPage() {
   return (
     <div className="w-full space-y-6">
 
-      {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <div className="pb-2">
-        <h1 className="text-2xl font-semibold text-[var(--text-primary)] tracking-tight">
-          Automatizaciones
-        </h1>
-        <p className="mt-0.5 text-[14px] text-[var(--text-secondary)]">
-          Configura acciones automáticas para leads, clientes y facturas
-        </p>
-        <div className="mt-3 flex items-center justify-between gap-4 w-full p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)]">
-          <div className="flex items-start gap-2.5">
-            <Sparkles className="h-4 w-4 text-[#1FA97A] shrink-0 mt-0.5" />
-            <div>
-              <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">
-                Los emails se envían desde{" "}
-                <span className="text-[var(--text-primary)] font-medium">hola@clientlabs.io</span>
-                {" "}en tu nombre. Tus contactos verán tu nombre como remitente.
-                Próximamente podrás conectar tu propio dominio.
-              </p>
-            </div>
+      {/* ── INSTITUTIONAL HEADER ────────────────────────────────────────────── */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 24, paddingBottom: 18, borderBottom: "1px solid #eeeeee" }}>
+        <div>
+          <h1 style={{ fontWeight: 600, letterSpacing: "-0.022em", fontSize: 26, lineHeight: 1.1, margin: 0, color: "#0a0a0a" }}>Automatizaciones</h1>
+          <div style={{ marginTop: 6, display: "flex", alignItems: "center", gap: 14, fontSize: 12.5, color: "#737373", flexWrap: "wrap" }}>
+            <span>{totalActivas} workflows activos</span>
+            <span style={{ color: "#d4d4d4" }}>·</span>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <span style={{ width: 6, height: 6, borderRadius: 99, background: "#16986e", boxShadow: "0 0 0 3px #ecf6f1", display: "inline-block" }} />
+              ejecutando en tiempo real
+            </span>
+            <span style={{ color: "#d4d4d4" }}>·</span>
+            <span>{automatizaciones.length} configuradas</span>
           </div>
-          <a
-            href="/dashboard/automatizaciones/email-info"
-            className="shrink-0 text-[11px] font-medium text-[#1FA97A] hover:underline whitespace-nowrap"
-          >
-            Saber más
-          </a>
         </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <button style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: "#ffffff", border: "1px solid #e8e8e8", color: "#404040", fontWeight: 550, fontSize: 12.5, cursor: "pointer" }}>
+            <Zap className="h-3 w-3" />
+            Conectar app
+          </button>
+          <button style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: "#0a0a0a", color: "white", fontWeight: 550, fontSize: 12.5, border: "none", cursor: "pointer" }}>
+            <Sparkles className="h-3 w-3" />
+            Nuevo workflow
+          </button>
+        </div>
+      </div>
+
+      {/* ── KPI ROW ─────────────────────────────────────────────────────────── */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", border: "1px solid #e8e8e8", borderRadius: 10, background: "#ffffff", overflow: "hidden" }}>
+        {[
+          { label: "Workflows activos",  value: String(totalActivas),                                                             sub: `de ${automatizaciones.length} configurados` },
+          { label: "Ejecuciones · 30d",  value: automatizaciones.reduce((s, a) => s + a.vecesEjecutada, 0).toLocaleString("es-ES"), sub: "total acumulado" },
+          { label: "Tasa de activación", value: `${pct}%`,                                                                        sub: "workflows activos" },
+          { label: "Con errores",        value: String(automatizaciones.filter(a => a.logs.some(l => l.resultado === "error")).length), sub: "requieren atención" },
+        ].map((k, i, arr) => (
+          <div key={k.label} style={{ padding: "18px 22px", borderRight: i < arr.length - 1 ? "1px solid #eeeeee" : "none" }}>
+            <div style={{ fontSize: 11.5, color: "#737373", fontWeight: 500, marginBottom: 4 }}>{k.label}</div>
+            <div style={{ fontWeight: 600, letterSpacing: "-0.028em", fontSize: 28, fontVariantNumeric: "tabular-nums", color: "#0a0a0a" }}>{k.value}</div>
+            <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, color: "#737373", marginTop: 8 }}>{k.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── INFO BANNER (email domain) ───────────────────────────────────────── */}
+      <div className="flex items-center justify-between gap-4 w-full p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)]">
+        <div className="flex items-start gap-2.5">
+          <Sparkles className="h-4 w-4 text-[#1FA97A] shrink-0 mt-0.5" />
+          <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">
+            Los emails se envían desde <span className="text-[var(--text-primary)] font-medium">hola@clientlabs.io</span> en tu nombre. Próximamente podrás conectar tu propio dominio.
+          </p>
+        </div>
+        <a href="/dashboard/automatizaciones/email-info" className="shrink-0 text-[11px] font-medium text-[#1FA97A] hover:underline whitespace-nowrap">
+          Saber más
+        </a>
       </div>
 
       {/* ── Layout: lanes + sidebar ─────────────────────────────────────────── */}

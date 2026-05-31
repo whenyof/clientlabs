@@ -77,14 +77,51 @@ export default function AiAssistantPage() {
 
   return (
     <DashboardContainer>
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-[var(--text-primary)]">{labels.aiAssistant.title}</h1>
-        <p className="text-sm text-[var(--text-secondary)]">
-          {labels.aiAssistant.pageSubtitle}
-        </p>
+      {/* ── INSTITUTIONAL HEADER ──────────────────────────────────────────── */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 24, paddingBottom: 18, borderBottom: "1px solid #eeeeee", marginBottom: 20 }}>
+        <div>
+          <h1 style={{ fontWeight: 600, letterSpacing: "-0.022em", fontSize: 26, lineHeight: 1.1, margin: 0, color: "#0a0a0a" }}>Asistente IA</h1>
+          <div style={{ marginTop: 6, display: "flex", alignItems: "center", gap: 14, fontSize: 12.5, color: "#737373", flexWrap: "wrap" }}>
+            <span>Conectado al workspace</span>
+            <span style={{ color: "#d4d4d4" }}>·</span>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <span style={{ width: 6, height: 6, borderRadius: 99, background: "#16986e", boxShadow: "0 0 0 3px #ecf6f1", display: "inline-block" }} />
+              Modelo: Vega-1 · Pro
+            </span>
+            <span style={{ color: "#d4d4d4" }}>·</span>
+            <span style={{ fontFamily: "ui-monospace,monospace" }}>238 / 2.000 mensajes este mes</span>
+          </div>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <button style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: "#ffffff", border: "1px solid #e8e8e8", color: "#404040", fontWeight: 550, fontSize: 12.5, cursor: "pointer" }}>
+            Reentrenar contexto
+          </button>
+          <button style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: "#ffffff", border: "1px solid #e8e8e8", color: "#404040", fontWeight: 550, fontSize: 12.5, cursor: "pointer" }}>
+            Permisos
+          </button>
+          <button style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: "#0a0a0a", color: "white", fontWeight: 550, fontSize: 12.5, border: "none", cursor: "pointer" }}>
+            + Nueva conversación
+          </button>
+        </div>
       </div>
 
-      {/* Header */}
+      {/* ── KPI STRIP ──────────────────────────────────────────────────────── */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", border: "1px solid #e8e8e8", borderRadius: 10, background: "#ffffff", marginBottom: 20, overflow: "hidden" }}>
+        {[
+          { l: "Consultas este mes",   v: "238",    sub: "+34% vs mes anterior" },
+          { l: "Acciones ejecutadas",  v: "186",    sub: "facturas · tareas · emails" },
+          { l: "Tiempo ahorrado",      v: "38h",    sub: "estim. esta semana" },
+          { l: "Precisión · valid.",   v: "96,4%",  sub: "basado en feedback ↑↓" },
+        ].map((k, i, arr) => (
+          <div key={k.l} style={{ padding: "16px 20px", borderRight: i < arr.length - 1 ? "1px solid #eeeeee" : "none" }}>
+            <div style={{ fontSize: 11.5, color: "#737373", fontWeight: 500, marginBottom: 4 }}>{k.l}</div>
+            <div style={{ fontFamily: "ui-monospace,monospace", fontWeight: 600, fontSize: 26, color: "#0a0a0a", letterSpacing: "-0.02em" }}>{k.v}</div>
+            <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, color: "#737373", marginTop: 6 }}>{k.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Header (existing AssistantHeader component) */}
       <AssistantHeader />
 
       {/* Navigation Tabs */}

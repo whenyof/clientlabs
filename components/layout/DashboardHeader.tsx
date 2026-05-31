@@ -1,47 +1,156 @@
 "use client"
 
-import { Sun, Moon, Search } from "lucide-react"
-import { useTheme } from "@/components/ThemeProvider"
+import { usePathname } from "next/navigation"
+import { Search, HelpCircle, Plus } from "lucide-react"
 import { NotificationBell } from "@/components/dashboard/notification-bell"
 
+// Map of paths → breadcrumb labels
+const ROUTE_LABELS: Record<string, string> = {
+  "/dashboard": "Dashboard",
+  "/dashboard/leads": "Leads",
+  "/dashboard/leads/kanban": "Pipeline",
+  "/dashboard/leads/analytics": "Analíticas · Leads",
+  "/dashboard/leads/feed": "Feed de actividad",
+  "/dashboard/clients": "Clientes",
+  "/dashboard/clients/analytics": "Analíticas · Clientes",
+  "/dashboard/providers": "Proveedores",
+  "/dashboard/tasks": "Tareas",
+  "/dashboard/tasks/projects": "Proyectos",
+  "/dashboard/finance": "Facturación",
+  "/dashboard/finance/facturas": "Facturas",
+  "/dashboard/finance/albaranes": "Albaranes",
+  "/dashboard/finance/cobros": "Cobros",
+  "/dashboard/finance/gastos": "Gastos",
+  "/dashboard/finance/pagos": "Pagos",
+  "/dashboard/finance/configuracion": "Configuración",
+  "/dashboard/marketing": "Email Marketing",
+  "/dashboard/automations": "Automatizaciones",
+  "/dashboard/reporting": "Informes",
+  "/dashboard/ai-assistant": "Asistente IA",
+  "/dashboard/integrations": "Integraciones",
+  "/dashboard/settings": "Ajustes",
+  "/dashboard/admin": "Admin",
+}
+
+function getPageLabel(pathname: string): string {
+  if (ROUTE_LABELS[pathname]) return ROUTE_LABELS[pathname]
+  // Try prefix match
+  const sorted = Object.keys(ROUTE_LABELS).sort((a, b) => b.length - a.length)
+  for (const key of sorted) {
+    if (pathname.startsWith(key + "/") || pathname.startsWith(key)) {
+      return ROUTE_LABELS[key]
+    }
+  }
+  // Fallback: capitalize last segment
+  const seg = pathname.split("/").filter(Boolean).pop() || "Dashboard"
+  return seg.charAt(0).toUpperCase() + seg.slice(1)
+}
+
 export function DashboardHeader() {
-    const { theme, toggleTheme } = useTheme()
+  const pathname = usePathname()
+  const pageLabel = getPageLabel(pathname)
 
-    return (
-        <header
-            className="flex items-center justify-between px-6 bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] sticky top-0 z-30 shrink-0 h-16 w-full pointer-events-auto"
+  return (
+    <header
+      style={{
+        height: 52,
+        borderBottom: "1px solid #eeeeee",
+        background: "#ffffff",
+        display: "flex",
+        alignItems: "center",
+        gap: 14,
+        padding: "0 20px",
+        flexShrink: 0,
+        position: "sticky",
+        top: 0,
+        zIndex: 30,
+      }}
+    >
+      {/* Breadcrumbs */}
+      <div style={{
+        display: "flex", alignItems: "center", gap: 7,
+        fontSize: 12.5, color: "#737373",
+      }}>
+        <span style={{ cursor: "pointer" }}>Workspace</span>
+        <span style={{ color: "#d4d4d4" }}>/</span>
+        <span style={{ color: "#0a0a0a", fontWeight: 550 }}>{pageLabel}</span>
+      </div>
+
+      {/* Search */}
+      <div
+        style={{
+          marginLeft: "auto",
+          display: "flex", alignItems: "center", gap: 10,
+          background: "#fafafa",
+          border: "1px solid #e8e8e8",
+          borderRadius: 7,
+          padding: "5px 10px",
+          width: 320,
+          fontSize: 12.5, color: "#737373",
+          cursor: "pointer",
+          transition: "border-color .12s ease, background .12s ease",
+        }}
+        onMouseEnter={(e) => {
+          const el = e.currentTarget as HTMLElement
+          el.style.borderColor = "#a3a3a3"
+          el.style.background = "#ffffff"
+        }}
+        onMouseLeave={(e) => {
+          const el = e.currentTarget as HTMLElement
+          el.style.borderColor = "#e8e8e8"
+          el.style.background = "#fafafa"
+        }}
+      >
+        <Search size={14} color="#737373" strokeWidth={2} />
+        <span style={{ flex: 1 }}>Buscar clientes, facturas, leads…</span>
+        <kbd style={{
+          marginLeft: "auto",
+          fontFamily: "ui-monospace, monospace",
+          fontSize: 10,
+          padding: "1px 5px",
+          background: "white",
+          border: "1px solid #e8e8e8",
+          borderRadius: 3,
+          color: "#737373", fontWeight: 500,
+        }}>⌘K</kbd>
+      </div>
+
+      {/* Actions */}
+      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+        <button
+          style={{
+            width: 30, height: 30, borderRadius: 6,
+            display: "grid", placeItems: "center",
+            color: "#404040", background: "none", border: "none", cursor: "pointer",
+            transition: "background .12s ease",
+          }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#f5f5f5" }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "none" }}
+          aria-label="Centro de ayuda"
         >
-            {/* Izquierda: Buscador */}
-            <div className="flex items-center gap-8 flex-1">
-                <div className="relative w-full max-w-md hidden sm:block">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] h-[14px] w-[14px]" />
-                    <input
-                        type="text"
-                        placeholder="Buscar o ejecutar un comando..."
-                        className="w-full pl-9 pr-4 py-2 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-md text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-accent transition-all shadow-sm"
-                    />
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 hidden md:block">
-                        <kbd className="inline-flex items-center rounded border border-[var(--border-subtle)] px-2 font-mono text-[10px] font-medium text-[var(--text-secondary)]">
-                            <span className="text-xs">⌘</span>K
-                        </kbd>
-                    </div>
-                </div>
-            </div>
+          <HelpCircle size={15} strokeWidth={1.8} />
+        </button>
 
-            {/* Derecha: Acciones globales */}
-            <div className="flex items-center gap-3 flex-shrink-0">
-                <button
-                    onClick={toggleTheme}
-                    className="p-2 rounded-md hover:bg-[var(--bg-card)] border border-transparent hover:border-[var(--border-subtle)] transition-colors text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                    aria-label="Cambiar tema operativo"
-                >
-                    {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
-                </button>
+        <NotificationBell />
 
-                <div className="w-px h-4 bg-[var(--border-subtle)]"></div>
+        <div style={{ width: 1, height: 18, background: "#e8e8e8", margin: "0 4px" }} />
 
-                <NotificationBell />
-            </div>
-        </header>
-    )
+        <button
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 7,
+            padding: "7px 12px", borderRadius: 6,
+            fontWeight: 550, fontSize: 12.5, letterSpacing: "-0.005em",
+            background: "#0a0a0a", color: "white",
+            border: "none", cursor: "pointer",
+            transition: "background .12s ease",
+          }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#1f1f1f" }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "#0a0a0a" }}
+        >
+          <Plus size={12} strokeWidth={2.5} />
+          Nuevo
+        </button>
+      </div>
+    </header>
+  )
 }

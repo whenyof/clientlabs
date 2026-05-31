@@ -20,18 +20,5 @@ export default async function ReportingPage() {
     redirect("/dashboard")
   }
 
-  return (
-    <div className="space-y-6">
-      <div className="min-w-0">
-        <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight truncate">
-          {reportingLabels.title}
-        </h1>
-        <p className="text-sm text-[var(--text-secondary)] mt-0.5 truncate max-w-xl">
-          {reportingLabels.pageSubtitle}
-        </p>
-      </div>
-
-      <ReportingView />
-    </div>
-  )
+  return <ReportingView />
 }

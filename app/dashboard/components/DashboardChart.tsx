@@ -63,7 +63,7 @@ export function DashboardChart() {
         <div>
           <h3 className="text-[13px] font-semibold text-slate-900">Ingresos vs Gastos</h3>
           {!loading && (
-            <p className="mt-0.5 text-[22px] font-semibold tracking-tight text-[#1FA97A]">
+            <p className="mt-0.5 text-[22px] font-semibold tracking-tight text-[#0F766E]">
               {currencyFmt.format(totalIngresos)}
             </p>
           )}
@@ -87,7 +87,7 @@ export function DashboardChart() {
 
       <div className="mb-4 flex items-center gap-4">
         <span className="flex items-center gap-1.5 text-[11px] text-slate-500">
-          <span className="h-2 w-2 rounded-full bg-[#1FA97A]" />
+          <span className="h-2 w-2 rounded-full bg-[#0F766E]" />
           Ingresos
         </span>
         <span className="flex items-center gap-1.5 text-[11px] text-slate-500">
@@ -107,8 +107,8 @@ export function DashboardChart() {
           <AreaChart data={data} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="colorIngresos" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#1FA97A" stopOpacity={0.15} />
-                <stop offset="95%" stopColor="#1FA97A" stopOpacity={0} />
+                <stop offset="5%" stopColor="#0F766E" stopOpacity={0.15} />
+                <stop offset="95%" stopColor="#0F766E" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
@@ -134,7 +134,7 @@ export function DashboardChart() {
             <Area
               type="monotone"
               dataKey="ingresos"
-              stroke="#1FA97A"
+              stroke="#0F766E"
               strokeWidth={2}
               fill="url(#colorIngresos)"
             />

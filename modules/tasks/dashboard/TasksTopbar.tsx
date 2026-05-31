@@ -41,7 +41,7 @@ export function TasksTopbar({ view, onViewChange, search, onSearchChange, onNewT
             alignItems: "center",
             gap: 6,
             padding: "7px 14px",
-            background: "#1FA97A",
+            background: "#0F766E",
             color: "#fff",
             border: "none",
             borderRadius: 8,
@@ -81,7 +81,7 @@ export function TasksTopbar({ view, onViewChange, search, onSearchChange, onNewT
               fontWeight: 500,
               cursor: "pointer",
               transition: "all 0.15s",
-              background: view === id ? "#1FA97A" : "transparent",
+              background: view === id ? "#0F766E" : "transparent",
               color: view === id ? "#fff" : "var(--text-secondary)",
             }}
           >
@@ -133,7 +133,7 @@ export function TasksTopbar({ view, onViewChange, search, onSearchChange, onNewT
           alignItems: "center",
           gap: 6,
           padding: "8px 16px",
-          background: "#1FA97A",
+          background: "#0F766E",
           color: "#fff",
           border: "none",
           borderRadius: 8,

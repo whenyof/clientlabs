@@ -83,13 +83,13 @@ export function CreateClientButton() {
     }
   }
 
-  const inputClass = "w-full py-2.5 border border-slate-200 rounded-xl text-[13px] text-slate-700 outline-none focus:border-[#1FA97A] focus:ring-1 focus:ring-[#1FA97A]/20 placeholder:text-slate-300"
+  const inputClass = "w-full py-2.5 border border-slate-200 rounded-xl text-[13px] text-slate-700 outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E]/20 placeholder:text-slate-300"
 
   return (
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-4 py-2.5 bg-[#1FA97A] text-white text-[13px] font-medium rounded-xl hover:bg-[#1a9068] transition-colors"
+        className="flex items-center gap-2 px-4 py-2.5 bg-[#0F766E] text-white text-[13px] font-medium rounded-xl hover:bg-[#0E665F] transition-colors"
       >
         <Plus className="h-4 w-4" />
         Nuevo Cliente
@@ -173,7 +173,7 @@ export function CreateClientButton() {
               <button
                 type="button"
                 onClick={() => setShowExtra(prev => !prev)}
-                className="flex items-center gap-2 text-[11px] font-medium text-slate-400 hover:text-[#1FA97A] transition-colors w-full pt-1"
+                className="flex items-center gap-2 text-[11px] font-medium text-slate-400 hover:text-[#0F766E] transition-colors w-full pt-1"
               >
                 {showExtra ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
                 {showExtra ? "Ocultar datos adicionales" : "Añadir datos fiscales y dirección"}
@@ -282,7 +282,7 @@ export function CreateClientButton() {
                   "px-6 py-2.5 rounded-xl text-[13px] font-medium text-white transition-all",
                   isLoading || !form.name.trim()
                     ? "bg-slate-300 cursor-not-allowed"
-                    : "bg-[#1FA97A] hover:bg-[#1a9068]"
+                    : "bg-[#0F766E] hover:bg-[#0E665F]"
                 )}
               >
                 {isLoading ? "Creando..." : "Crear Cliente"}

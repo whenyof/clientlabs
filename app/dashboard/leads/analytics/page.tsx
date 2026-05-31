@@ -82,8 +82,8 @@ export default function LeadsAnalyticsPage() {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPICard title="Total leads"       value={loading ? "—" : data?.kpis.total ?? 0}          sparkData={sparkTotal} sparkColor="#1FA97A" trend={data?.kpis.newThisWeek ? Math.round((data.kpis.newThisWeek / Math.max(data.kpis.total - data.kpis.newThisWeek, 1)) * 100) : undefined} trendLabel="vs semana ant." loading={loading} />
-        <KPICard title="Convertidos"       value={loading ? "—" : data?.kpis.converted ?? 0}      badge={`${data?.kpis.conversionRate ?? 0}% tasa`} badgeColor="#1FA97A" sparkData={sparkTotal.map((_, i) => i * 0.3)} sparkColor="#8B5CF6" loading={loading} />
+        <KPICard title="Total leads"       value={loading ? "—" : data?.kpis.total ?? 0}          sparkData={sparkTotal} sparkColor="#0F766E" trend={data?.kpis.newThisWeek ? Math.round((data.kpis.newThisWeek / Math.max(data.kpis.total - data.kpis.newThisWeek, 1)) * 100) : undefined} trendLabel="vs semana ant." loading={loading} />
+        <KPICard title="Convertidos"       value={loading ? "—" : data?.kpis.converted ?? 0}      badge={`${data?.kpis.conversionRate ?? 0}% tasa`} badgeColor="#0F766E" sparkData={sparkTotal.map((_, i) => i * 0.3)} sparkColor="#8B5CF6" loading={loading} />
         <KPICard title="Nuevos esta semana" value={loading ? "—" : data?.kpis.newThisWeek ?? 0}   sparkData={sparkTotal.slice(-6)} sparkColor="#3B82F6" loading={loading} />
         <KPICard title="Estancados"        value={loading ? "—" : data?.kpis.stalled ?? 0}        badge={data?.kpis.stalled ? "+7 días sin actividad" : undefined} badgeColor="#F59E0B" loading={loading} />
       </div>
@@ -104,7 +104,7 @@ export default function LeadsAnalyticsPage() {
                   <RX dataKey="date" tick={ax} axisLine={false} tickLine={false} interval="preserveStartEnd" />
                   <RY allowDecimals={false} tick={ax} axisLine={false} tickLine={false} />
                   <RT contentStyle={tip} />
-                  <RBar dataKey="total" fill="#1FA97A" fillOpacity={0.85} radius={[3, 3, 0, 0]} name="Leads" maxBarSize={20} />
+                  <RBar dataKey="total" fill="#0F766E" fillOpacity={0.85} radius={[3, 3, 0, 0]} name="Leads" maxBarSize={20} />
                   <RLine type="monotone" dataKey="avg" stroke="#3B82F6" strokeWidth={2} dot={false} name="Media 3d" />
                 </CC>
               </RC>
@@ -160,7 +160,7 @@ export default function LeadsAnalyticsPage() {
                   <RX type="number" allowDecimals={false} tick={ax} axisLine={false} tickLine={false} />
                   <RY type="category" dataKey="name" tick={ax} axisLine={false} tickLine={false} width={64} />
                   <RT contentStyle={tip} />
-                  <RBar dataKey="value" fill="#1FA97A" fillOpacity={0.8} radius={[0, 4, 4, 0]} name="Leads" maxBarSize={14} />
+                  <RBar dataKey="value" fill="#0F766E" fillOpacity={0.8} radius={[0, 4, 4, 0]} name="Leads" maxBarSize={14} />
                 </BC>
               </RC>
             </div>

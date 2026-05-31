@@ -68,7 +68,7 @@ export default function DeclaracionResponsable() {
                 },
               ].map(({ title, body }) => (
                 <li key={title} className="flex gap-2">
-                  <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[#1FA97A]" />
+                  <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[#0F766E]" />
                   <span>
                     <strong className="text-slate-900">{title}</strong>{" "}{body}
                   </span>

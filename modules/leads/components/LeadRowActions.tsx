@@ -383,7 +383,7 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
    {/* Header */}
    <div className="flex items-start gap-4 p-6 pb-4">
      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#E6F6F1] border border-[#9FE1CB] flex items-center justify-center">
-       <UserCheck style={{ width: 18, height: 18, color: "#1FA97A" }} />
+       <UserCheck style={{ width: 18, height: 18, color: "#0F766E" }} />
      </div>
      <div className="flex-1 min-w-0">
        <DialogTitle className="text-[15px] font-semibold text-slate-900 leading-snug">
@@ -406,7 +406,7 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
      {[ui.convertBullet1, ui.convertBullet2, ui.convertBullet3].map((bullet, i) => (
        <div key={i} className="flex items-start gap-2.5">
          <div className="flex-shrink-0 w-4 h-4 rounded-full bg-[#E6F6F1] border border-[#9FE1CB] flex items-center justify-center mt-0.5">
-           <Check style={{ width: 9, height: 9, color: "#1FA97A" }} />
+           <Check style={{ width: 9, height: 9, color: "#0F766E" }} />
          </div>
          <p className="text-[12.5px] text-slate-600 leading-relaxed">{bullet}</p>
        </div>
@@ -431,7 +431,7 @@ export function LeadRowActions({ lead }: { lead: Lead }) {
          height: 36, padding: "0 16px",
          fontSize: 13, fontWeight: 500,
          borderRadius: 8,
-         background: loading ? "#9FE1CB" : "#1FA97A",
+         background: loading ? "#9FE1CB" : "#0F766E",
          color: "#fff",
          border: "none",
          cursor: loading ? "not-allowed" : "pointer",

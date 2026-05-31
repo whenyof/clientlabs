@@ -534,12 +534,12 @@ export function InvoiceDrawer({
                 placeholder="Importe (€)"
                 value={paymentAmount}
                 onChange={(e) => setPaymentAmount(e.target.value)}
-                className="w-full h-9 rounded-lg border border-slate-200 bg-white px-3 text-[13px] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+                className="w-full h-9 rounded-lg border border-slate-200 bg-white px-3 text-[13px] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
               />
               <select
                 value={paymentMethod}
                 onChange={(e) => setPaymentMethod(e.target.value)}
-                className="w-full h-9 rounded-lg border border-slate-200 bg-white px-3 text-[13px] text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+                className="w-full h-9 rounded-lg border border-slate-200 bg-white px-3 text-[13px] text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
               >
                 <option value="BANK">Transferencia bancaria</option>
                 <option value="CARD">Tarjeta</option>
@@ -551,14 +551,14 @@ export function InvoiceDrawer({
                 placeholder="Notas (opcional)"
                 value={paymentNotes}
                 onChange={(e) => setPaymentNotes(e.target.value)}
-                className="w-full h-9 rounded-lg border border-slate-200 bg-white px-3 text-[13px] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+                className="w-full h-9 rounded-lg border border-slate-200 bg-white px-3 text-[13px] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
               />
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={handleAddPayment}
                   disabled={actionLoading || !paymentAmount}
-                  className="flex-1 h-9 rounded-lg bg-[#1FA97A] text-white text-[13px] font-medium hover:bg-[#178a64] disabled:opacity-50 transition-colors"
+                  className="flex-1 h-9 rounded-lg bg-[#0F766E] text-white text-[13px] font-medium hover:bg-[#0E665F] disabled:opacity-50 transition-colors"
                 >
                   Registrar
                 </button>
@@ -687,7 +687,7 @@ export function InvoiceDrawer({
                   value={emailTo}
                   onChange={(e) => setEmailTo(e.target.value)}
                   placeholder="cliente@email.com"
-                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-[#1FA97A] focus:ring-2 focus:ring-[#1FA97A]/20"
+                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20"
                 />
               </div>
               <div>
@@ -699,7 +699,7 @@ export function InvoiceDrawer({
                   onChange={(e) => setSendMessage(e.target.value)}
                   placeholder="Adjunto te envío la factura correspondiente..."
                   rows={3}
-                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-[13px] outline-none resize-none focus:border-[#1FA97A] focus:ring-2 focus:ring-[#1FA97A]/20"
+                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-[13px] outline-none resize-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20"
                 />
               </div>
             </div>
@@ -715,7 +715,7 @@ export function InvoiceDrawer({
                 type="button"
                 onClick={handleSendEmail}
                 disabled={!emailTo.trim() || sending}
-                className="flex items-center gap-2 px-6 py-2.5 bg-[#1FA97A] text-white text-[13px] font-medium rounded-xl hover:bg-[#178a64] disabled:opacity-50 transition-colors"
+                className="flex items-center gap-2 px-6 py-2.5 bg-[#0F766E] text-white text-[13px] font-medium rounded-xl hover:bg-[#0E665F] disabled:opacity-50 transition-colors"
               >
                 {sending ? <><ArrowPathIcon className="h-4 w-4 animate-spin" /> Enviando...</> : <><EnvelopeIcon className="h-4 w-4" /> Enviar factura</>}
               </button>
@@ -732,7 +732,7 @@ type ActionBtnVariant = "default" | "primary" | "success" | "warning" | "danger"
 
 const VARIANT_STYLES: Record<ActionBtnVariant, string> = {
   default:  "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300",
-  primary:  "border-[#1FA97A]/30 bg-[#1FA97A]/5 text-[#1FA97A] hover:bg-[#1FA97A]/10",
+  primary:  "border-[#0F766E]/30 bg-[#0F766E]/5 text-[#0F766E] hover:bg-[#0F766E]/10",
   success:  "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
   warning:  "border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100",
   danger:   "border-red-200 bg-red-50 text-red-600 hover:bg-red-100",

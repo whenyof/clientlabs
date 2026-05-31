@@ -32,7 +32,7 @@ const SECTORES = [
     id: "agencias",
     label: "Agencias",
     Icon: Building2,
-    color: "#1FA97A",
+    color: "#0F766E",
     headline: "Escala sin perder el control del cliente.",
     desc: "De 10 a 100 clientes sin romper operaciones. ClientLabs centraliza proyectos, facturación y seguimiento para que crecer no signifique caos.",
     pains: ["Clientes gestionados en emails y hojas", "Facturación manual que se retrasa", "Sin visibilidad de rentabilidad por proyecto", "Onboarding que depende de una sola persona"],
@@ -162,12 +162,12 @@ function SectionDots() {
           </span>
           <span className={`block rounded-full transition-all duration-300 ${
             active === id
-              ? "w-3 h-3 bg-[#1FA97A]"
+              ? "w-3 h-3 bg-[#0F766E]"
               : isDark
                 ? "w-2 h-2 bg-white/25 hover:bg-white/50"
                 : "w-2 h-2 bg-[#0B1F2A]/25 hover:bg-[#0B1F2A]/50"
           }`}
-            style={active === id ? { boxShadow: "0 0 8px rgba(31,169,122,0.8)" } : {}}
+            style={active === id ? { boxShadow: "0 0 8px rgba(15,118,110,0.8)" } : {}}
           />
         </button>
       ))}
@@ -197,7 +197,7 @@ function HeroSection() {
     tl.from(".sol-sector-tag", { opacity: 0, y: 14, duration: 0.35, stagger: 0.07 }, "-=0.5")
 
     gsap.to(".sol-accent", {
-      textShadow: "0 0 40px rgba(31,169,122,0.6), 0 0 80px rgba(31,169,122,0.2)",
+      textShadow: "0 0 40px rgba(15,118,110,0.6), 0 0 80px rgba(15,118,110,0.2)",
       duration: 1.8, repeat: -1, yoyo: true, ease: "sine.inOut", delay: 2,
     })
     gsap.to(".sol-orb", { scale: 1.1, duration: 4, repeat: -1, yoyo: true, ease: "sine.inOut" })
@@ -206,15 +206,15 @@ function HeroSection() {
   return (
     <section ref={ref} id="hero" className="relative min-h-screen flex items-center bg-[#0B1F2A] overflow-hidden"
       style={{
-        backgroundImage: `linear-gradient(rgba(31,169,122,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(31,169,122,0.04) 1px, transparent 1px)`,
+        backgroundImage: `linear-gradient(rgba(15,118,110,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(15,118,110,0.04) 1px, transparent 1px)`,
         backgroundSize: "60px 60px",
       }}>
 
       <div className="sol-scanline absolute inset-x-0 top-0 h-[2px] z-20 pointer-events-none"
-        style={{ background: "linear-gradient(90deg, transparent, #1FA97A 30%, #1FA97A 70%, transparent)", filter: "blur(1px)" }} />
+        style={{ background: "linear-gradient(90deg, transparent, #0F766E 30%, #0F766E 70%, transparent)", filter: "blur(1px)" }} />
 
       <div className="sol-orb absolute top-1/3 left-1/4 w-[600px] h-[600px] rounded-full pointer-events-none"
-        style={{ background: "radial-gradient(circle, rgba(31,169,122,0.06) 0%, transparent 65%)" }} />
+        style={{ background: "radial-gradient(circle, rgba(15,118,110,0.06) 0%, transparent 65%)" }} />
       <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full pointer-events-none"
         style={{ background: "radial-gradient(circle, rgba(59,130,246,0.04) 0%, transparent 65%)" }} />
 
@@ -227,7 +227,7 @@ function HeroSection() {
             <br />
             <span className="sol-word inline-block">tipo</span>{" "}
             <span className="sol-word inline-block">de</span>{" "}
-            <span className="sol-word sol-accent inline-block text-[#1FA97A]">negocio.</span>
+            <span className="sol-word sol-accent inline-block text-[#0F766E]">negocio.</span>
           </h1>
 
           <p className="sol-sub text-[17px] font-light text-[#8FA6B2] leading-relaxed mb-8 max-w-xl mx-auto">
@@ -235,7 +235,7 @@ function HeroSection() {
           </p>
 
           <div className="flex flex-wrap justify-center gap-3 mb-10">
-            <Link href="/auth" className="sol-btn inline-flex items-center gap-2 bg-[#1FA97A] hover:bg-[#178f68] text-white px-7 py-3 rounded-md text-[14px] font-medium transition-colors">
+            <Link href="/auth" className="sol-btn inline-flex items-center gap-2 bg-[#0F766E] hover:bg-[#0E665F] text-white px-7 py-3 rounded-md text-[14px] font-medium transition-colors">
               Empezar gratis
             </Link>
             <Link href="/producto" className="sol-btn inline-flex items-center gap-2 border border-white/15 hover:border-white/30 text-[#8FA6B2] hover:text-white px-7 py-3 rounded-md text-[14px] transition-colors">
@@ -289,7 +289,7 @@ function ProblemaSection() {
         style={{ color: "#ECEDEF", right: 0, top: "50%", transform: "translateY(-50%) translateX(30%)" }}>01</span>
 
       <div className="max-w-[1100px] mx-auto px-8 w-full py-24 relative z-10">
-        <p className="prob-h text-[11px] uppercase tracking-[0.15em] text-[#1FA97A] mb-4">El problema común</p>
+        <p className="prob-h text-[11px] uppercase tracking-[0.15em] text-[#0F766E] mb-4">El problema común</p>
         <h2 className="prob-h text-[46px] md:text-[52px] font-bold text-[#0B1F2A] leading-[1.1] tracking-[-0.025em] mb-4">
           Crecer sin sistema<br />destruye lo que construiste.
         </h2>
@@ -344,12 +344,12 @@ function ProblemaSection() {
           ))}
         </div>
 
-        <div className="prob-bottom rounded-2xl border border-[#1FA97A]/20 bg-[#F0FDF8] p-8 text-center">
+        <div className="prob-bottom rounded-2xl border border-[#0F766E]/20 bg-[#F0FDF8] p-8 text-center">
           <p className="text-[22px] md:text-[28px] font-bold text-[#0B1F2A] mb-2">
             El problema no es tu negocio.
           </p>
           <p className="text-[17px] text-[#5F7280]">
-            Es el <span className="text-[#1FA97A] font-semibold">sistema</span> que lo sostiene — o la ausencia de uno.
+            Es el <span className="text-[#0F766E] font-semibold">sistema</span> que lo sostiene — o la ausencia de uno.
           </p>
         </div>
       </div>
@@ -392,7 +392,7 @@ function SectoresSection() {
         style={{ color: "#F3F4F6", left: 0, top: "50%", transform: "translateY(-50%) translateX(-30%)" }}>02</span>
 
       <div className="max-w-[1180px] mx-auto px-8 w-full py-24 relative z-10">
-        <p className="sec-header text-[11px] uppercase tracking-[0.15em] text-[#1FA97A] mb-4">Por industria</p>
+        <p className="sec-header text-[11px] uppercase tracking-[0.15em] text-[#0F766E] mb-4">Por industria</p>
         <h2 className="sec-header text-[46px] md:text-[52px] font-bold text-[#0B1F2A] leading-[1.1] tracking-[-0.025em] mb-3">
           Tu sector. Tu sistema.
         </h2>
@@ -476,7 +476,7 @@ function SectoresSection() {
               <p className="text-[12px] font-semibold text-[#0B1F2A] mb-4">Módulos incluidos</p>
               <div className="flex flex-wrap gap-2">
                 {[
-                  { l: "CRM", c: "#1FA97A" }, { l: "Tareas", c: "#3B82F6" }, { l: "Facturación", c: "#F59E0B" },
+                  { l: "CRM", c: "#0F766E" }, { l: "Tareas", c: "#3B82F6" }, { l: "Facturación", c: "#F59E0B" },
                   { l: "Auto.", c: "#8B5CF6" }, { l: "IA", c: "#EC4899" }, { l: "Insights", c: "#06B6D4" },
                 ].map((m) => (
                   <span key={m.l} className="rounded-full px-3 py-1 text-[11px] font-medium border"
@@ -528,7 +528,7 @@ function ComoFuncionaSection() {
         style={{ color: "#ECEDEF", right: 0, top: "50%", transform: "translateY(-50%) translateX(30%)" }}>03</span>
 
       <div className="max-w-[1100px] mx-auto px-8 w-full py-24 relative z-10">
-        <p className="como-header text-[11px] uppercase tracking-[0.15em] text-[#1FA97A] mb-4">Cómo funciona</p>
+        <p className="como-header text-[11px] uppercase tracking-[0.15em] text-[#0F766E] mb-4">Cómo funciona</p>
         <h2 className="como-header text-[46px] md:text-[52px] font-bold text-[#0B1F2A] leading-[1.1] tracking-[-0.025em] mb-3">
           Tres pasos.<br />En marcha en 30 minutos.
         </h2>
@@ -538,17 +538,17 @@ function ComoFuncionaSection() {
 
         <div className="como-steps grid grid-cols-1 md:grid-cols-3 gap-6 relative">
           {/* Connector lines */}
-          <div className="hidden md:block absolute top-14 left-[calc(33.33%-8px)] w-[calc(33.33%+16px)] h-px bg-gradient-to-r from-[#1FA97A]/30 to-[#1FA97A]/10" />
-          <div className="hidden md:block absolute top-14 left-[calc(66.66%-8px)] w-[calc(33.33%+16px)] h-px bg-gradient-to-r from-[#1FA97A]/10 to-[#1FA97A]/30" />
+          <div className="hidden md:block absolute top-14 left-[calc(33.33%-8px)] w-[calc(33.33%+16px)] h-px bg-gradient-to-r from-[#0F766E]/30 to-[#0F766E]/10" />
+          <div className="hidden md:block absolute top-14 left-[calc(66.66%-8px)] w-[calc(33.33%+16px)] h-px bg-gradient-to-r from-[#0F766E]/10 to-[#0F766E]/30" />
 
           {STEPS.map((step, i) => (
-            <div key={step.num} className="como-step relative bg-white rounded-xl border border-[#E5E7EB] p-8 hover:border-[#1FA97A]/30 transition-colors">
+            <div key={step.num} className="como-step relative bg-white rounded-xl border border-[#E5E7EB] p-8 hover:border-[#0F766E]/30 transition-colors">
               <span className="absolute top-5 right-5 text-[72px] font-black leading-none select-none text-[#F3F4F6]">{i + 1}</span>
 
-              <div className="h-10 w-10 rounded-lg bg-[#1FA97A]/10 flex items-center justify-center text-[#1FA97A] mb-5">
+              <div className="h-10 w-10 rounded-lg bg-[#0F766E]/10 flex items-center justify-center text-[#0F766E] mb-5">
                 {step.icon}
               </div>
-              <p className="text-[11px] font-mono text-[#1FA97A]/60 mb-2">{step.num}</p>
+              <p className="text-[11px] font-mono text-[#0F766E]/60 mb-2">{step.num}</p>
               <h3 className="text-[16px] font-semibold text-[#0B1F2A] mb-2">{step.title}</h3>
               <p className="text-[14px] text-[#6B7280] leading-relaxed">{step.desc}</p>
             </div>
@@ -605,7 +605,7 @@ function SistemaSection() {
         style={{ color: "#F3F4F6", left: 0, top: "50%", transform: "translateY(-50%) translateX(-30%)" }}>04</span>
 
       <div className="max-w-[1100px] mx-auto px-8 w-full py-24 relative z-10">
-        <p className="sis-header text-[11px] uppercase tracking-[0.15em] text-[#1FA97A] mb-4">Por qué ClientLabs</p>
+        <p className="sis-header text-[11px] uppercase tracking-[0.15em] text-[#0F766E] mb-4">Por qué ClientLabs</p>
         <h2 className="sis-header text-[46px] md:text-[52px] font-bold text-[#0B1F2A] leading-[1.1] tracking-[-0.025em] mb-3">
           Un sistema operativo.<br />No otra herramienta más.
         </h2>
@@ -618,7 +618,7 @@ function SistemaSection() {
           <div className="grid grid-cols-[2fr_1fr_1fr] bg-[#F8FAFB] border-b border-[#E5E7EB]">
             <div className="px-6 py-3 text-[11px] font-semibold uppercase tracking-widest text-[#9CA3AF]">Capacidad</div>
             <div className="px-6 py-3 text-[11px] font-semibold uppercase tracking-widest text-[#9CA3AF] border-l border-[#E5E7EB] text-center">Herramientas sueltas</div>
-            <div className="px-6 py-3 text-[11px] font-semibold uppercase tracking-widest text-[#1FA97A] border-l border-[#E5E7EB] text-center">ClientLabs</div>
+            <div className="px-6 py-3 text-[11px] font-semibold uppercase tracking-widest text-[#0F766E] border-l border-[#E5E7EB] text-center">ClientLabs</div>
           </div>
           {[
             "CRM + pipeline de ventas",
@@ -637,8 +637,8 @@ function SistemaSection() {
                 </span>
               </div>
               <div className="px-6 py-4 border-l border-[#F3F4F6] flex items-center justify-center bg-[#F0FDF8]/40">
-                <span className="h-5 w-5 rounded-full bg-[#1FA97A]/10 flex items-center justify-center">
-                  <Check className="w-3 h-3 text-[#1FA97A]" />
+                <span className="h-5 w-5 rounded-full bg-[#0F766E]/10 flex items-center justify-center">
+                  <Check className="w-3 h-3 text-[#0F766E]" />
                 </span>
               </div>
             </div>
@@ -647,12 +647,12 @@ function SistemaSection() {
 
         <div className="sis-grid grid md:grid-cols-3 gap-5">
           {[
-            { icon: <Shield className="w-5 h-5 text-[#1FA97A]" />, t: "Datos centralizados", d: "Todo en un solo lugar, sincronizado en tiempo real. Sin silos ni exportaciones manuales." },
-            { icon: <Zap className="w-5 h-5 text-[#1FA97A]" />, t: "Automatización real", d: "No son integraciones frágiles. Son flujos nativos que funcionan aunque cambies de plan." },
-            { icon: <Bot className="w-5 h-5 text-[#1FA97A]" />, t: "IA sobre datos reales", d: "El asistente trabaja con tus datos actuales, no con demos. Respuestas aplicables desde el primer día." },
+            { icon: <Shield className="w-5 h-5 text-[#0F766E]" />, t: "Datos centralizados", d: "Todo en un solo lugar, sincronizado en tiempo real. Sin silos ni exportaciones manuales." },
+            { icon: <Zap className="w-5 h-5 text-[#0F766E]" />, t: "Automatización real", d: "No son integraciones frágiles. Son flujos nativos que funcionan aunque cambies de plan." },
+            { icon: <Bot className="w-5 h-5 text-[#0F766E]" />, t: "IA sobre datos reales", d: "El asistente trabaja con tus datos actuales, no con demos. Respuestas aplicables desde el primer día." },
           ].map((f) => (
             <div key={f.t} className="sis-card rounded-xl border border-[#E5E7EB] bg-[#F8FAFB] p-5">
-              <div className="h-9 w-9 rounded-lg bg-[#1FA97A]/10 flex items-center justify-center mb-4">
+              <div className="h-9 w-9 rounded-lg bg-[#0F766E]/10 flex items-center justify-center mb-4">
                 {f.icon}
               </div>
               <h4 className="text-[14px] font-semibold text-[#0B1F2A] mb-1">{f.t}</h4>
@@ -690,7 +690,7 @@ function CtaSection() {
       scrollTrigger: { trigger: ".cta-sol-h2", start: "top 74%", once: true },
     })
     gsap.to(".cta-sol-btn-primary", {
-      boxShadow: "0 0 35px rgba(31,169,122,0.5), 0 0 70px rgba(31,169,122,0.2)",
+      boxShadow: "0 0 35px rgba(15,118,110,0.5), 0 0 70px rgba(15,118,110,0.2)",
       duration: 1.4, repeat: -1, yoyo: true, ease: "sine.inOut",
       scrollTrigger: { trigger: ".cta-sol-btn-primary", start: "top 90%", once: false },
     })
@@ -700,13 +700,13 @@ function CtaSection() {
   return (
     <section ref={ref} id="cta" className="relative min-h-screen flex flex-col bg-[#0B1F2A] overflow-hidden border-t border-white/[0.06]"
       style={{
-        backgroundImage: `linear-gradient(rgba(31,169,122,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(31,169,122,0.04) 1px, transparent 1px)`,
+        backgroundImage: `linear-gradient(rgba(15,118,110,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(15,118,110,0.04) 1px, transparent 1px)`,
         backgroundSize: "60px 60px",
       }}>
 
       <div className="cta-sol-orb absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="w-[700px] h-[350px] rounded-full"
-          style={{ background: "radial-gradient(ellipse, rgba(31,169,122,0.07) 0%, transparent 70%)" }} />
+          style={{ background: "radial-gradient(ellipse, rgba(15,118,110,0.07) 0%, transparent 70%)" }} />
       </div>
 
       <div className="flex-1 flex items-center justify-center px-8 py-24">
@@ -714,10 +714,10 @@ function CtaSection() {
           <h2 className="cta-sol-h2 text-[54px] md:text-[64px] font-bold text-white leading-[1.0] tracking-[-0.03em] mb-6">
             <span className="cta-sol-word inline-block">Opera</span>{" "}
             <span className="cta-sol-word inline-block">con</span>{" "}
-            <span className="cta-sol-word inline-block text-[#1FA97A]">control.</span>
+            <span className="cta-sol-word inline-block text-[#0F766E]">control.</span>
             <br />
             <span className="cta-sol-word inline-block">Desde</span>{" "}
-            <span className="cta-sol-word inline-block text-[#1FA97A]">hoy.</span>
+            <span className="cta-sol-word inline-block text-[#0F766E]">hoy.</span>
           </h2>
 
           <p className="cta-sol-sub text-[16px] text-[#8FA6B2] font-light leading-relaxed max-w-md mx-auto mb-8">
@@ -734,7 +734,7 @@ function CtaSection() {
           </div>
 
           <div className="flex flex-wrap justify-center gap-3 mb-6">
-            <Link href="/auth" className="cta-sol-btn cta-sol-btn-primary inline-flex items-center gap-2 bg-[#1FA97A] hover:bg-[#178f68] text-white px-8 py-3.5 rounded-md text-[15px] font-medium transition-colors">
+            <Link href="/auth" className="cta-sol-btn cta-sol-btn-primary inline-flex items-center gap-2 bg-[#0F766E] hover:bg-[#0E665F] text-white px-8 py-3.5 rounded-md text-[15px] font-medium transition-colors">
               Empezar gratis — 14 días
             </Link>
             <Link href="/precios" className="cta-sol-btn inline-flex items-center gap-2 border border-white/15 hover:border-white/30 text-[#8FA6B2] hover:text-white px-8 py-3.5 rounded-md text-[15px] transition-colors">

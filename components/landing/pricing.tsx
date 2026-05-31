@@ -103,7 +103,7 @@ export function Pricing() {
                 className={[
                   "relative flex flex-col p-[32px_28px_36px]",
                   plan.featured
-                    ? "border-[1.5px] border-[rgba(31,169,122,.55)] bg-[#14384a] shadow-[0_20px_50px_rgba(31,169,122,.15)]"
+                    ? "border-[1.5px] border-[rgba(15,118,110,.55)] bg-[#14384a] shadow-[0_20px_50px_rgba(15,118,110,.15)]"
                     : "border border-line-dark bg-navy-2",
                 ].join(" ")}
               >

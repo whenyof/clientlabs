@@ -82,7 +82,7 @@ const VERSIONS: Version[] = [
 ]
 
 const TYPE_CONFIG = {
-  new:      { label: "Nuevo",     Icon: Plus,   bg: "bg-[#E1F5EE]", text: "text-[#1FA97A]",  dot: "bg-[#1FA97A]" },
+  new:      { label: "Nuevo",     Icon: Plus,   bg: "bg-[#E1F5EE]", text: "text-[#0F766E]",  dot: "bg-[#0F766E]" },
   improved: { label: "Mejorado",  Icon: Wrench, bg: "bg-blue-50",   text: "text-blue-600",   dot: "bg-blue-500" },
   fixed:    { label: "Arreglado", Icon: Bug,    bg: "bg-orange-50", text: "text-orange-600", dot: "bg-orange-500" },
 }
@@ -102,15 +102,15 @@ export default function ChangelogPage() {
 
       {/* Timeline */}
       <div className="max-w-3xl mx-auto px-6 pb-16">
-        <div className="relative border-l-2 border-[#1FA97A] ml-4">
+        <div className="relative border-l-2 border-[#0F766E] ml-4">
           {VERSIONS.map((version, index) => (
             <div key={index} className="relative mb-12 pl-8">
               {/* Dot on timeline */}
-              <div className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-[#1FA97A] border-2 border-white" />
+              <div className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-[#0F766E] border-2 border-white" />
 
               {/* Version header */}
               <div className="flex items-center gap-3 mb-4">
-                <span className="text-sm font-bold px-3 py-1 rounded-full bg-[#E1F5EE] text-[#1FA97A]">
+                <span className="text-sm font-bold px-3 py-1 rounded-full bg-[#E1F5EE] text-[#0F766E]">
                   v{version.version}
                 </span>
                 <span className="text-sm text-slate-400">{version.date}</span>
@@ -143,7 +143,7 @@ export default function ChangelogPage() {
         <p className="text-slate-300 text-[14px] mb-6">14 días gratis, sin tarjeta de crédito.</p>
         <Link
           href="/register"
-          className="inline-block px-7 py-3 bg-[#1FA97A] text-white text-[14px] font-semibold rounded-lg hover:bg-[#1a9068] transition-colors"
+          className="inline-block px-7 py-3 bg-[#0F766E] text-white text-[14px] font-semibold rounded-lg hover:bg-[#0E665F] transition-colors"
         >
           Empezar ahora →
         </Link>

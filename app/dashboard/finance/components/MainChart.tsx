@@ -82,7 +82,7 @@ export function MainChart() {
                 {formatCurrency(totalIncome)}
               </span>
               {incomeGrowth !== 0 && (
-                <span className={`text-[11px] font-semibold ${incomeGrowth >= 0 ? "text-[#1FA97A]" : "text-red-500"}`}>
+                <span className={`text-[11px] font-semibold ${incomeGrowth >= 0 ? "text-[#0F766E]" : "text-red-500"}`}>
                   {incomeGrowth >= 0 ? "+" : ""}{incomeGrowth.toFixed(1)}%
                 </span>
               )}
@@ -93,11 +93,11 @@ export function MainChart() {
               Beneficio neto
             </p>
             <div className="flex items-baseline gap-2">
-              <span className={`text-[18px] sm:text-[22px] font-bold tracking-tight leading-none tabular-nums ${totalProfit >= 0 ? "text-[#1FA97A]" : "text-red-500"}`}>
+              <span className={`text-[18px] sm:text-[22px] font-bold tracking-tight leading-none tabular-nums ${totalProfit >= 0 ? "text-[#0F766E]" : "text-red-500"}`}>
                 {formatCurrency(totalProfit)}
               </span>
               {profitGrowth !== 0 && (
-                <span className={`text-[11px] font-semibold ${profitGrowth >= 0 ? "text-[#1FA97A]" : "text-red-500"}`}>
+                <span className={`text-[11px] font-semibold ${profitGrowth >= 0 ? "text-[#0F766E]" : "text-red-500"}`}>
                   {profitGrowth >= 0 ? "+" : ""}{profitGrowth.toFixed(1)}%
                 </span>
               )}
@@ -134,8 +134,8 @@ export function MainChart() {
         >
           <defs>
             <linearGradient id="incomeGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#1FA97A" stopOpacity={0.75} />
-              <stop offset="100%" stopColor="#1FA97A" stopOpacity={1} />
+              <stop offset="0%" stopColor="#0F766E" stopOpacity={0.75} />
+              <stop offset="100%" stopColor="#0F766E" stopOpacity={1} />
             </linearGradient>
             <linearGradient id="expenseGrad" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#FCA5A5" stopOpacity={0.4} />
@@ -180,7 +180,7 @@ export function MainChart() {
       {/* ── Legend ──────────────────────────────────────────────── */}
       <div className="flex items-center gap-5 mt-3 pt-3 border-t border-slate-100">
         {[
-          { swatch: "bg-[#1FA97A]",                              label: "Ingresos"  },
+          { swatch: "bg-[#0F766E]",                              label: "Ingresos"  },
           { swatch: "bg-red-100 border border-red-200",          label: "Gastos"    },
           { swatch: "rounded-full bg-indigo-500",                label: "Beneficio" },
         ].map((l) => (
@@ -215,10 +215,10 @@ function ChartTooltip({
       <div className="space-y-1.5">
         <div className="flex items-center justify-between gap-8">
           <div className="flex items-center gap-1.5">
-            <div className="h-2 w-2 rounded-[2px] bg-[#1FA97A]" />
+            <div className="h-2 w-2 rounded-[2px] bg-[#0F766E]" />
             <span className="text-[11px] text-slate-500">Ingresos</span>
           </div>
-          <span className="text-[12px] font-bold tabular-nums text-[#1FA97A]">{formatCurrency(income)}</span>
+          <span className="text-[12px] font-bold tabular-nums text-[#0F766E]">{formatCurrency(income)}</span>
         </div>
         <div className="flex items-center justify-between gap-8">
           <div className="flex items-center gap-1.5">

@@ -178,7 +178,7 @@ const SECTIONS = [
 function Tick() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="shrink-0">
-      <path d="M2.5 7.5L5.5 10.5L11.5 3.5" stroke="#1FA97A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M2.5 7.5L5.5 10.5L11.5 3.5" stroke="#0F766E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
@@ -208,7 +208,7 @@ function HeroSection() {
     tl.from(".ph-micro", { opacity: 0, duration: 0.4 }, "-=0.1")
 
     gsap.to(".ph-accent", {
-      textShadow: "0 0 40px rgba(31,169,122,0.7), 0 0 80px rgba(31,169,122,0.25)",
+      textShadow: "0 0 40px rgba(15,118,110,0.7), 0 0 80px rgba(15,118,110,0.25)",
       duration: 1.8, repeat: -1, yoyo: true, ease: "sine.inOut", delay: 2,
     })
     gsap.to(".ph-orb-a", { y: -22, duration: 4, repeat: -1, yoyo: true, ease: "sine.inOut" })
@@ -220,17 +220,17 @@ function HeroSection() {
     <section id="hero" ref={ref}
       className="h-screen flex flex-col items-center justify-center px-8 bg-[#0B1F2A] relative"
       style={{
-        backgroundImage: "linear-gradient(rgba(31,169,122,0.045) 1px,transparent 1px),linear-gradient(90deg,rgba(31,169,122,0.045) 1px,transparent 1px)",
+        backgroundImage: "linear-gradient(rgba(15,118,110,0.045) 1px,transparent 1px),linear-gradient(90deg,rgba(15,118,110,0.045) 1px,transparent 1px)",
         backgroundSize: "60px 60px",
       }}>
 
       <div className="ph-scan absolute inset-x-0 top-0 h-[2px] z-20 pointer-events-none"
-        style={{ background: "linear-gradient(90deg,transparent,#1FA97A,transparent)", filter: "blur(1px)" }} />
+        style={{ background: "linear-gradient(90deg,transparent,#0F766E,transparent)", filter: "blur(1px)" }} />
 
       <div className="ph-orb-a absolute -left-32 top-1/4 w-[600px] h-[600px] rounded-full pointer-events-none"
-        style={{ background: "radial-gradient(circle,rgba(31,169,122,0.08) 0%,transparent 65%)" }} />
+        style={{ background: "radial-gradient(circle,rgba(15,118,110,0.08) 0%,transparent 65%)" }} />
       <div className="ph-orb-b absolute -right-20 bottom-1/4 w-[400px] h-[400px] rounded-full pointer-events-none"
-        style={{ background: "radial-gradient(circle,rgba(31,169,122,0.05) 0%,transparent 65%)" }} />
+        style={{ background: "radial-gradient(circle,rgba(15,118,110,0.05) 0%,transparent 65%)" }} />
 
       <div className="relative z-10 text-center max-w-4xl mx-auto">
         <h1 className="text-[58px] md:text-[72px] font-bold leading-[1.04] tracking-[-0.03em] mb-6">
@@ -238,7 +238,7 @@ function HeroSection() {
           <span className="ph-word inline-block text-[#E6F1F5]">que</span>{" "}
           <span className="ph-word inline-block text-[#E6F1F5]">no</span>
           <br />
-          <span className="ph-word inline-block ph-accent text-[#1FA97A]">esconden</span>{" "}
+          <span className="ph-word inline-block ph-accent text-[#0F766E]">esconden</span>{" "}
           <span className="ph-word inline-block text-[#E6F1F5]">nada.</span>
         </h1>
 
@@ -247,8 +247,8 @@ function HeroSection() {
         </p>
 
         <Link href="/auth"
-          className="ph-cta inline-flex items-center justify-center bg-[#1FA97A] hover:bg-[#178f68] text-white px-10 py-3.5 rounded-md text-[15px] font-medium transition-colors"
-          style={{ boxShadow: "0 0 30px rgba(31,169,122,0.35)" }}>
+          className="ph-cta inline-flex items-center justify-center bg-[#0F766E] hover:bg-[#0E665F] text-white px-10 py-3.5 rounded-md text-[15px] font-medium transition-colors"
+          style={{ boxShadow: "0 0 30px rgba(15,118,110,0.35)" }}>
           Empezar 14 días gratis →
         </Link>
 
@@ -315,7 +315,7 @@ function PlanesSection({ billing, setBilling }: { billing: "monthly" | "annual";
 
       <div className="relative z-10 max-w-5xl mx-auto">
         <div className="text-center mb-12">
-          <p className="ppl-eyebrow text-[11px] uppercase tracking-[0.12em] text-[#1FA97A] mb-3">Planes</p>
+          <p className="ppl-eyebrow text-[11px] uppercase tracking-[0.12em] text-[#0F766E] mb-3">Planes</p>
           <h2 className="ppl-h2 text-[44px] font-bold text-[#0B1F2A] leading-[1.1] tracking-[-0.025em]">
             Elige tu plan. Crece cuando quieras.
           </h2>
@@ -327,7 +327,7 @@ function PlanesSection({ billing, setBilling }: { billing: "monthly" | "annual";
             {(["monthly", "annual"] as const).map((b) => (
               <button key={b} type="button" onClick={() => setBilling(b)}
                 className={`px-5 py-2 rounded-md text-[13px] font-medium transition-all duration-200 ${
-                  billing === b ? "bg-[#1FA97A] text-white shadow-sm" : "text-[#6B7280] hover:text-[#0B1F2A]"
+                  billing === b ? "bg-[#0F766E] text-white shadow-sm" : "text-[#6B7280] hover:text-[#0B1F2A]"
                 }`}>
                 {b === "monthly" ? "Mensual" : "Anual — Ahorra 25%"}
               </button>
@@ -341,14 +341,14 @@ function PlanesSection({ billing, setBilling }: { billing: "monthly" | "annual";
             <div key={plan.id}
               className={`${plan.highlight ? "ppl-card-center" : "ppl-card-side"} rounded-xl border flex flex-col relative ${
                 plan.highlight
-                  ? "bg-[#0B1F2A] border-[#1FA97A]/50"
+                  ? "bg-[#0B1F2A] border-[#0F766E]/50"
                   : "bg-[#FAFAFA] border-[#E5E7EB]"
               }`}
-              style={plan.highlight ? { boxShadow: "0 0 0 1px rgba(31,169,122,0.2), 0 20px 50px rgba(11,31,42,0.3), 0 0 60px rgba(31,169,122,0.06)" } : {}}>
+              style={plan.highlight ? { boxShadow: "0 0 0 1px rgba(15,118,110,0.2), 0 20px 50px rgba(11,31,42,0.3), 0 0 60px rgba(15,118,110,0.06)" } : {}}>
 
               {plan.badge && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <span className="relative overflow-hidden inline-flex bg-[#1FA97A] text-white text-[10px] px-4 py-1.5 rounded-full font-semibold uppercase tracking-[0.1em]">
+                  <span className="relative overflow-hidden inline-flex bg-[#0F766E] text-white text-[10px] px-4 py-1.5 rounded-full font-semibold uppercase tracking-[0.1em]">
                     {plan.badge}
                     <span className="ppl-shine absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full" />
                   </span>
@@ -358,7 +358,7 @@ function PlanesSection({ billing, setBilling }: { billing: "monthly" | "annual";
               <div className="p-8 flex flex-col flex-1">
                 {/* Plan header */}
                 <div className="mb-6">
-                  <span className={`text-[10px] uppercase tracking-[0.12em] font-medium ${plan.highlight ? "text-[#1FA97A]" : "text-[#1FA97A]"}`}>
+                  <span className={`text-[10px] uppercase tracking-[0.12em] font-medium ${plan.highlight ? "text-[#0F766E]" : "text-[#0F766E]"}`}>
                     {plan.tag}
                   </span>
                   <h3 className={`text-[24px] font-bold mt-1 ${plan.highlight ? "text-white" : "text-[#0B1F2A]"}`}>
@@ -377,7 +377,7 @@ function PlanesSection({ billing, setBilling }: { billing: "monthly" | "annual";
                     <span className={`text-[13px] mb-2 ${plan.highlight ? "text-[#8FA6B2]" : "text-[#9CA3AF]"}`}>/mes</span>
                   </div>
                   {billing === "annual" && (
-                    <p className="text-[11px] text-[#1FA97A] mt-1.5">
+                    <p className="text-[11px] text-[#0F766E] mt-1.5">
                       {plan.yearlyBilled.toLocaleString("es-ES", { minimumFractionDigits: 2 })}€/año · ahorras {(plan.monthly * 2).toFixed(2)}€
                     </p>
                   )}
@@ -388,7 +388,7 @@ function PlanesSection({ billing, setBilling }: { billing: "monthly" | "annual";
                   {plan.limits.map((l) => (
                     <span key={l} className={`text-[10px] px-2.5 py-1 rounded-full border ${
                       plan.highlight
-                        ? "border-[#1FA97A]/30 text-[#1FA97A] bg-[#1FA97A]/10"
+                        ? "border-[#0F766E]/30 text-[#0F766E] bg-[#0F766E]/10"
                         : "border-[#E5E7EB] text-[#6B7280] bg-white"
                     }`}>{l}</span>
                   ))}
@@ -416,8 +416,8 @@ function PlanesSection({ billing, setBilling }: { billing: "monthly" | "annual";
                   )}
                   className={`w-full inline-flex items-center justify-center py-3 rounded-md text-[14px] font-semibold transition-colors ${
                     plan.highlight
-                      ? "bg-[#1FA97A] hover:bg-[#178f68] text-white"
-                      : "border border-[#E5E7EB] hover:border-[#1FA97A]/40 hover:text-[#1FA97A] text-[#0B1F2A]"
+                      ? "bg-[#0F766E] hover:bg-[#0E665F] text-white"
+                      : "border border-[#E5E7EB] hover:border-[#0F766E]/40 hover:text-[#0F766E] text-[#0B1F2A]"
                   }`}>
                   Empezar 14 días gratis
                 </button>
@@ -430,8 +430,8 @@ function PlanesSection({ billing, setBilling }: { billing: "monthly" | "annual";
         </div>
 
         <p className="text-center text-[13px] text-[#9CA3AF] mt-10">
-          El <span className="text-[#1FA97A] font-semibold">78%</span> de los equipos eligen{" "}
-          <span className="text-[#1FA97A] font-semibold">Pro</span> ·{" "}
+          El <span className="text-[#0F766E] font-semibold">78%</span> de los equipos eligen{" "}
+          <span className="text-[#0F766E] font-semibold">Pro</span> ·{" "}
           Precios Early Access por tiempo limitado
         </p>
       </div>
@@ -524,13 +524,13 @@ function IncluyeSection() {
   return (
     <section id="incluye" ref={ref} className="py-28 px-8 bg-[#0B1F2A] relative"
       style={{
-        backgroundImage: "linear-gradient(rgba(31,169,122,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(31,169,122,0.04) 1px,transparent 1px)",
+        backgroundImage: "linear-gradient(rgba(15,118,110,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(15,118,110,0.04) 1px,transparent 1px)",
         backgroundSize: "60px 60px",
       }}>
 
       <div className="relative z-10 max-w-6xl mx-auto">
         <div className="text-center mb-16">
-          <p className="inc-eyebrow text-[11px] uppercase tracking-[0.12em] text-[#1FA97A] mb-3">Qué incluye</p>
+          <p className="inc-eyebrow text-[11px] uppercase tracking-[0.12em] text-[#0F766E] mb-3">Qué incluye</p>
           <h2 className="inc-h2 text-[44px] font-bold text-white leading-[1.1] tracking-[-0.025em]">
             Nueve módulos. Un solo sistema.
           </h2>
@@ -541,15 +541,15 @@ function IncluyeSection() {
 
         <div className="inc-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {coreModules.map((mod) => (
-            <div key={mod.num} className="inc-module bg-white/[0.04] border border-white/[0.08] rounded-xl p-6 hover:border-[#1FA97A]/30 transition-colors">
+            <div key={mod.num} className="inc-module bg-white/[0.04] border border-white/[0.08] rounded-xl p-6 hover:border-[#0F766E]/30 transition-colors">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-9 h-9 bg-[#1FA97A]/10 rounded-lg flex items-center justify-center text-[#1FA97A] shrink-0">
+                <div className="w-9 h-9 bg-[#0F766E]/10 rounded-lg flex items-center justify-center text-[#0F766E] shrink-0">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d={mod.icon} />
                   </svg>
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.1em] text-[#1FA97A]/60 font-medium">{mod.num}</p>
+                  <p className="text-[10px] uppercase tracking-[0.1em] text-[#0F766E]/60 font-medium">{mod.num}</p>
                   <p className="text-[16px] font-bold text-white leading-tight">{mod.name}</p>
                 </div>
               </div>
@@ -603,7 +603,7 @@ function ComparativaSection() {
 
       <div className="relative z-10 max-w-4xl mx-auto">
         <div className="text-center mb-14">
-          <p className="cmp-eyebrow text-[11px] uppercase tracking-[0.12em] text-[#1FA97A] mb-3">Comparativa</p>
+          <p className="cmp-eyebrow text-[11px] uppercase tracking-[0.12em] text-[#0F766E] mb-3">Comparativa</p>
           <h2 className="cmp-h2 text-[42px] font-bold text-[#0B1F2A] leading-[1.1] tracking-[-0.025em]">
             Todo en un vistazo.
           </h2>
@@ -615,10 +615,10 @@ function ComparativaSection() {
             <div />
             {["Básico", "Pro", "Negocio"].map((name, i) => (
               <div key={name} className={`cmp-header rounded-lg py-3 text-center ${
-                i === 1 ? "bg-[#0B1F2A] border border-[#1FA97A]/40" : "bg-white border border-[#E5E7EB]"
+                i === 1 ? "bg-[#0B1F2A] border border-[#0F766E]/40" : "bg-white border border-[#E5E7EB]"
               }`}>
                 <p className={`text-[13px] font-bold ${i === 1 ? "text-white" : "text-[#0B1F2A]"}`}>{name}</p>
-                {i === 1 && <p className="text-[9px] text-[#1FA97A] uppercase tracking-[0.08em] mt-0.5">Popular</p>}
+                {i === 1 && <p className="text-[9px] text-[#0F766E] uppercase tracking-[0.08em] mt-0.5">Popular</p>}
               </div>
             ))}
           </div>
@@ -638,7 +638,7 @@ function ComparativaSection() {
                         {(["starter", "pro", "business"] as const).map((col, ci) => (
                           <div key={col} className={`flex justify-center items-center ${ci === 1 ? "font-semibold" : ""}`}>
                             {typeof vals[col] === "string"
-                              ? <span className="text-[13px] font-semibold text-[#1FA97A]">{vals[col] as string}</span>
+                              ? <span className="text-[13px] font-semibold text-[#0F766E]">{vals[col] as string}</span>
                               : vals[col] ? <Tick /> : <Cross />}
                           </div>
                         ))}
@@ -652,7 +652,7 @@ function ComparativaSection() {
         </div>
 
         <div className="mt-10 text-center">
-          <Link href="/auth" className="inline-flex items-center justify-center bg-[#1FA97A] hover:bg-[#178f68] text-white px-8 py-3 rounded-md text-[14px] font-medium transition-colors">
+          <Link href="/auth" className="inline-flex items-center justify-center bg-[#0F766E] hover:bg-[#0E665F] text-white px-8 py-3 rounded-md text-[14px] font-medium transition-colors">
             Ver todos los planes →
           </Link>
         </div>
@@ -700,7 +700,7 @@ function FaqSection() {
 
       <div className="relative z-10 max-w-2xl mx-auto">
         <div className="text-center mb-14">
-          <p className="faq-eyebrow text-[11px] uppercase tracking-[0.12em] text-[#1FA97A] mb-3">FAQ</p>
+          <p className="faq-eyebrow text-[11px] uppercase tracking-[0.12em] text-[#0F766E] mb-3">FAQ</p>
           <h2 className="faq-h2 text-[40px] font-bold text-[#0B1F2A] leading-[1.1] tracking-[-0.025em]">
             Preguntas frecuentes.
           </h2>
@@ -715,7 +715,7 @@ function FaqSection() {
                 className="w-full flex items-center justify-between px-6 py-4 text-left"
               >
                 <span className="text-[15px] font-semibold text-[#0B1F2A] pr-4">{faq.q}</span>
-                <span className={`text-[#1FA97A] text-xl font-light shrink-0 transition-transform duration-300 ${open === i ? "rotate-45" : ""}`}>+</span>
+                <span className={`text-[#0F766E] text-xl font-light shrink-0 transition-transform duration-300 ${open === i ? "rotate-45" : ""}`}>+</span>
               </button>
               <div className="faq-answer overflow-hidden" style={{ height: 0, opacity: 0 }}>
                 <p className="px-6 pb-5 text-[14px] text-[#6B7280] leading-relaxed">{faq.a}</p>
@@ -743,7 +743,7 @@ function CtaSection() {
       scrollTrigger: { trigger: ref.current, start: "top 78%", once: true }, delay: 0.4,
     })
     gsap.to(".pcta-btn", {
-      boxShadow: "0 0 40px rgba(31,169,122,0.5), 0 0 80px rgba(31,169,122,0.2)",
+      boxShadow: "0 0 40px rgba(15,118,110,0.5), 0 0 80px rgba(15,118,110,0.2)",
       duration: 1.4, repeat: -1, yoyo: true, ease: "sine.inOut",
       scrollTrigger: { trigger: ".pcta-btn", start: "top 90%", once: false },
     })
@@ -764,19 +764,19 @@ function CtaSection() {
   return (
     <section id="cta" ref={ref} className="py-32 px-8 bg-[#0B1F2A] relative"
       style={{
-        backgroundImage: "linear-gradient(rgba(31,169,122,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(31,169,122,0.04) 1px,transparent 1px)",
+        backgroundImage: "linear-gradient(rgba(15,118,110,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(15,118,110,0.04) 1px,transparent 1px)",
         backgroundSize: "60px 60px",
       }}>
 
       <div className="pcta-orb absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="w-[700px] h-[400px] rounded-full"
-          style={{ background: "radial-gradient(ellipse,rgba(31,169,122,0.07) 0%,transparent 70%)" }} />
+          style={{ background: "radial-gradient(ellipse,rgba(15,118,110,0.07) 0%,transparent 70%)" }} />
       </div>
 
       <div className="relative z-10 max-w-3xl mx-auto text-center">
         <h2 className="text-[60px] md:text-[72px] font-bold leading-[1.0] tracking-[-0.03em] mb-6">
           <span className="pcta-word inline-block text-white">14 días</span>{" "}
-          <span className="pcta-word inline-block text-[#1FA97A]">gratis.</span>
+          <span className="pcta-word inline-block text-[#0F766E]">gratis.</span>
           <br />
           <span className="pcta-word inline-block text-white">Sin</span>{" "}
           <span className="pcta-word inline-block text-white">excusas.</span>
@@ -796,7 +796,7 @@ function CtaSection() {
             <div key={s.label} className="bg-white/[0.04] border border-white/[0.08] rounded-xl p-4">
               <p className="text-[32px] font-bold text-white leading-none">
                 <span className="pcta-stat" data-val={s.val}>0</span>
-                <span className="text-[#1FA97A]">{s.suffix}</span>
+                <span className="text-[#0F766E]">{s.suffix}</span>
               </p>
               <p className="text-[11px] text-[#8FA6B2] mt-1.5">{s.label}</p>
             </div>
@@ -804,7 +804,7 @@ function CtaSection() {
         </div>
 
         <Link href="/auth"
-          className="pcta-btn inline-flex items-center justify-center bg-[#1FA97A] hover:bg-[#178f68] text-white px-12 py-4 rounded-md text-[16px] font-semibold transition-colors">
+          className="pcta-btn inline-flex items-center justify-center bg-[#0F766E] hover:bg-[#0E665F] text-white px-12 py-4 rounded-md text-[16px] font-semibold transition-colors">
           Crear cuenta gratis →
         </Link>
 
@@ -859,11 +859,11 @@ export default function PricingClient() {
               {label}
             </span>
             <span className={`block rounded-full transition-all duration-300 ${
-              active === id ? "w-3 h-3 bg-[#1FA97A]" :
+              active === id ? "w-3 h-3 bg-[#0F766E]" :
               isDark ? "w-2 h-2 bg-white/25 hover:bg-white/50" :
               "w-2 h-2 bg-[#0B1F2A]/25 hover:bg-[#0B1F2A]/50"
             }`}
-              style={active === id ? { boxShadow: "0 0 8px rgba(31,169,122,0.8)" } : {}} />
+              style={active === id ? { boxShadow: "0 0 8px rgba(15,118,110,0.8)" } : {}} />
           </button>
         ))}
       </nav>
@@ -875,7 +875,7 @@ export default function PricingClient() {
             <p className="text-[13px] font-semibold text-white">14 días gratis</p>
             <p className="text-[11px] text-[#8FA6B2]">Sin tarjeta · Cancela cuando quieras</p>
           </div>
-          <Link href="/auth" className="rounded-md bg-[#1FA97A] hover:bg-[#178f68] px-5 py-2 text-[13px] font-semibold text-white transition">
+          <Link href="/auth" className="rounded-md bg-[#0F766E] hover:bg-[#0E665F] px-5 py-2 text-[13px] font-semibold text-white transition">
             Empezar →
           </Link>
         </div>
@@ -894,7 +894,7 @@ export default function PricingClient() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-3">
               <LogoMark size="sm" />
-              <span className="text-[16px] font-semibold text-white">Client<span className="text-[#1FA97A]">Labs</span></span>
+              <span className="text-[16px] font-semibold text-white">Client<span className="text-[#0F766E]">Labs</span></span>
             </div>
             <div className="flex flex-wrap gap-6 text-[12px] uppercase tracking-[0.1em] text-[#8FA6B2]">
               <Link href="/legal" className="hover:text-white transition-colors">Legal</Link>

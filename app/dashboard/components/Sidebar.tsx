@@ -75,35 +75,9 @@ const NAV: NavGroup[] = [
   {
     title: "Ventas",
     items: [
-      {
-        id: "leads",
-        label: "Leads",
-        icon: Target,
-        subs: [
-          { label: "Lista", href: "/dashboard/leads" },
-          { label: "Pipeline", href: "/dashboard/leads/kanban" },
-          { label: "Analíticas", href: "/dashboard/leads/analytics" },
-          { label: "Feed de actividad", href: "/dashboard/leads/feed" },
-        ],
-      },
-      {
-        id: "clients",
-        label: "Clientes",
-        icon: Users,
-        subs: [
-          { label: "Lista", href: "/dashboard/clients" },
-          { label: "Analíticas", href: "/dashboard/clients/analytics" },
-        ],
-      },
-      {
-        id: "providers",
-        label: "Proveedores",
-        icon: Truck,
-        subs: [
-          { label: "Lista", href: "/dashboard/providers" },
-          { label: "Analíticas", href: "/dashboard/providers/analytics" },
-        ],
-      },
+      { id: "leads", label: "Leads", icon: Target, href: "/dashboard/leads" },
+      { id: "clients",   label: "Clientes",    icon: Users, href: "/dashboard/clients" },
+      { id: "providers", label: "Proveedores", icon: Truck, href: "/dashboard/providers" },
     ],
   },
   {
@@ -124,13 +98,17 @@ const NAV: NavGroup[] = [
         label: "Facturación",
         icon: Receipt,
         subs: [
-          { label: "Resumen", href: "/dashboard/finance" },
-          { label: "Facturas emitidas", href: "/dashboard/finance/facturas" },
-          { label: "Albaranes", href: "/dashboard/finance/albaranes" },
-          { label: "Cobros", href: "/dashboard/finance/cobros" },
-          { label: "Gastos", href: "/dashboard/finance/gastos" },
-          { label: "Pagos", href: "/dashboard/finance/pagos" },
-          { label: "Configuración", href: "/dashboard/finance/configuracion" },
+          { label: "Resumen",                 href: "/dashboard/finance?tab=resumen" },
+          { label: "Facturas emitidas",       href: "/dashboard/finance?tab=facturas" },
+          { label: "Presupuestos",            href: "/dashboard/finance?tab=presupuestos" },
+          { label: "Albaranes",               href: "/dashboard/finance?tab=albaranes" },
+          { label: "Pedidos",                 href: "/dashboard/finance?tab=pedidos" },
+          { label: "Recurrentes",             href: "/dashboard/finance?tab=recurrentes" },
+          { label: "Gastos · compras",        href: "/dashboard/finance?tab=gastos" },
+          { label: "Productos · servicios",   href: "/dashboard/finance?tab=productos" },
+          { label: "Impuestos · IVA/IRPF",    href: "/dashboard/finance?tab=impuestos" },
+          { label: "Verifactu · AEAT",        href: "/dashboard/finance?tab=verifactu" },
+          { label: "Configuración",           href: "/dashboard/finance?tab=configuracion" },
         ],
       },
     ],

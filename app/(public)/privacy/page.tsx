@@ -14,7 +14,7 @@ export default function PrivacyPage() {
       <div className="max-w-2xl mx-auto">
 
         <div className="mb-12">
-          <Link href="/" className="text-[18px] font-bold" style={{ color: "#1FA97A" }}>
+          <Link href="/" className="text-[18px] font-bold" style={{ color: "#0F766E" }}>
             ClientLabs
           </Link>
         </div>
@@ -29,7 +29,7 @@ export default function PrivacyPage() {
             <p>
               El responsable del tratamiento de sus datos personales es <strong className="text-white/80">ClientLabs</strong>,
               con domicilio a efectos de comunicaciones en{" "}
-              <a href="mailto:hola@clientlabs.io" className="text-[#1FA97A] hover:underline">
+              <a href="mailto:hola@clientlabs.io" className="text-[#0F766E] hover:underline">
                 hola@clientlabs.io
               </a>
             </p>
@@ -107,13 +107,13 @@ export default function PrivacyPage() {
             </ul>
             <p className="mt-3">
               Para ejercer sus derechos contacte en:{" "}
-              <a href="mailto:hola@clientlabs.io" className="text-[#1FA97A] hover:underline">
+              <a href="mailto:hola@clientlabs.io" className="text-[#0F766E] hover:underline">
                 hola@clientlabs.io
               </a>
             </p>
             <p className="mt-2">
               También puede reclamar ante la Agencia Española de Protección de Datos (AEPD) en{" "}
-              <a href="https://www.aepd.es" target="_blank" rel="noopener noreferrer" className="text-[#1FA97A] hover:underline">
+              <a href="https://www.aepd.es" target="_blank" rel="noopener noreferrer" className="text-[#0F766E] hover:underline">
                 www.aepd.es
               </a>
             </p>
@@ -132,7 +132,7 @@ export default function PrivacyPage() {
             <h2 className="text-[18px] font-semibold text-white mb-3">9. Cookies</h2>
             <p>
               Utilizamos cookies propias y de terceros. Consulte nuestra{" "}
-              <Link href="/cookies" className="text-[#1FA97A] hover:underline">
+              <Link href="/cookies" className="text-[#0F766E] hover:underline">
                 Política de Cookies
               </Link>
               {" "}para más información.

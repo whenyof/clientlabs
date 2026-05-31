@@ -56,7 +56,7 @@ export function VerifactuSettings() {
     return (
       <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-6">
         <div className="flex items-start gap-4">
-          <div className="grid h-10 w-10 place-items-center rounded-lg bg-[#1FA97A] shrink-0">
+          <div className="grid h-10 w-10 place-items-center rounded-lg bg-[#0F766E] shrink-0">
             <CheckCircle2 className="h-5 w-5 text-white" />
           </div>
           <div className="flex-1">
@@ -86,7 +86,7 @@ export function VerifactuSettings() {
       <div className="rounded-xl border border-slate-200 p-6">
         <div className="flex items-start gap-4">
           <div className="grid h-12 w-12 place-items-center rounded-xl bg-emerald-50 shrink-0">
-            <Shield className="h-6 w-6 text-[#1FA97A]" />
+            <Shield className="h-6 w-6 text-[#0F766E]" />
           </div>
           <div className="flex-1">
             <h3 className="text-base font-semibold text-slate-900">Facturación legal (Verifactu)</h3>
@@ -97,7 +97,7 @@ export function VerifactuSettings() {
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <button
                 onClick={() => setShowModal(true)}
-                className="rounded-lg bg-[#1FA97A] px-4 py-2 text-sm font-medium text-white hover:bg-[#1a9469] transition-colors"
+                className="rounded-lg bg-[#0F766E] px-4 py-2 text-sm font-medium text-white hover:bg-[#1a9469] transition-colors"
               >
                 Activar Verifactu
               </button>

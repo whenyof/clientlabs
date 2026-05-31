@@ -139,7 +139,7 @@ export function WaitlistForm({ source = "whitelist", dark = true }: Props) {
   if (status === "success") {
     return (
       <div ref={successRef} className="max-w-md mx-auto text-center" style={{ opacity: 0 }}>
-        <div className="success-check w-14 h-14 rounded-full bg-[#1FA97A]/15 border-2 border-[#1FA97A]/40 flex items-center justify-center mx-auto mb-4 text-[#1FA97A] text-2xl font-bold">
+        <div className="success-check w-14 h-14 rounded-full bg-[#0F766E]/15 border-2 border-[#0F766E]/40 flex items-center justify-center mx-auto mb-4 text-[#0F766E] text-2xl font-bold">
           ✓
         </div>
         <h3 className={`success-title font-bold text-[18px] mb-2 ${dark ? "text-white" : "text-[#0B1F2A]"}`}>
@@ -148,7 +148,7 @@ export function WaitlistForm({ source = "whitelist", dark = true }: Props) {
         {position && (
           <p className={`success-badge text-[14px] mb-1 ${dark ? "text-white/60" : "text-slate-500"}`}>
             Eres el{" "}
-            <span ref={posNumRef} className="text-[#1FA97A] font-bold text-[16px]">#0</span>
+            <span ref={posNumRef} className="text-[#0F766E] font-bold text-[16px]">#0</span>
             {" "}en la lista
           </p>
         )}
@@ -169,7 +169,7 @@ export function WaitlistForm({ source = "whitelist", dark = true }: Props) {
           onKeyDown={e => { if (e.key === "Enter") handleSubmit() }}
           placeholder="tu@email.com"
           disabled={status === "loading"}
-          className={`w-full sm:flex-1 px-5 py-3.5 rounded-xl text-[14px] transition-colors focus:outline-none focus:border-[#1FA97A] disabled:opacity-50 ${
+          className={`w-full sm:flex-1 px-5 py-3.5 rounded-xl text-[14px] transition-colors focus:outline-none focus:border-[#0F766E] disabled:opacity-50 ${
             dark
               ? "bg-white/10 border border-white/20 text-white placeholder:text-white/40"
               : "bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400"
@@ -178,7 +178,7 @@ export function WaitlistForm({ source = "whitelist", dark = true }: Props) {
         <button
           onClick={handleSubmit}
           disabled={status === "loading" || !email}
-          className="w-full sm:w-auto min-h-[44px] px-6 py-3.5 bg-[#1FA97A] text-white font-semibold rounded-xl text-[14px] hover:bg-[#178f68] transition-colors disabled:opacity-50 whitespace-nowrap flex items-center justify-center gap-2 min-w-[140px]"
+          className="w-full sm:w-auto min-h-[44px] px-6 py-3.5 bg-[#0F766E] text-white font-semibold rounded-xl text-[14px] hover:bg-[#0E665F] transition-colors disabled:opacity-50 whitespace-nowrap flex items-center justify-center gap-2 min-w-[140px]"
         >
           {status === "loading" ? (
             <>

@@ -11,7 +11,7 @@ interface TeamMember { id: string; name: string | null; email: string; image: st
 interface Client { id: string; name: string }
 
 const PROJECT_COLORS = [
-  "#1FA97A", "#3B82F6", "#8B5CF6", "#F59E0B",
+  "#0F766E", "#3B82F6", "#8B5CF6", "#F59E0B",
   "#EF4444", "#EC4899", "#06B6D4", "#84CC16",
 ]
 
@@ -51,7 +51,7 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
   const qc = useQueryClient()
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
-  const [color, setColor] = useState("#1FA97A")
+  const [color, setColor] = useState("#0F766E")
   const [clientId, setClientId] = useState("")
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
@@ -67,7 +67,7 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
   }, [open])
 
   const handleClose = () => {
-    setName(""); setDescription(""); setColor("#1FA97A"); setClientId("")
+    setName(""); setDescription(""); setColor("#0F766E"); setClientId("")
     setStartDate(""); setEndDate(""); setSelectedMembers([])
     onClose()
   }
@@ -111,8 +111,8 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
         <div>
           {/* Header */}
           <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "20px 24px", borderBottom: "1px solid var(--border-subtle)" }}>
-            <div style={{ width: 36, height: 36, borderRadius: 10, background: "#1FA97A15", border: "1px solid #1FA97A25", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <FolderKanban style={{ width: 16, height: 16, color: "#1FA97A" }} />
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: "#0F766E15", border: "1px solid #0F766E25", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <FolderKanban style={{ width: 16, height: 16, color: "#0F766E" }} />
             </div>
             <div style={{ flex: 1 }}>
               <DialogTitle style={{ fontSize: 15, fontWeight: 600, margin: 0, color: "var(--text-primary)", lineHeight: 1.2 }}>
@@ -207,14 +207,14 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
                         style={{
                           display: "flex", alignItems: "center", gap: 10, padding: "8px 10px",
                           borderRadius: 8, cursor: "pointer",
-                          border: isSelected ? `1px solid #1FA97A` : "1px solid var(--border-subtle)",
-                          background: isSelected ? "#1FA97A10" : "var(--bg-card)",
+                          border: isSelected ? `1px solid #0F766E` : "1px solid var(--border-subtle)",
+                          background: isSelected ? "#0F766E10" : "var(--bg-card)",
                           transition: "all 0.12s",
                         }}
                       >
                         <input
                           type="checkbox" checked={isSelected} onChange={() => toggleMember(m.id)}
-                          style={{ width: 14, height: 14, accentColor: "#1FA97A", cursor: "pointer" }}
+                          style={{ width: 14, height: 14, accentColor: "#0F766E", cursor: "pointer" }}
                         />
                         <div style={{
                           width: 24, height: 24, borderRadius: "50%", flexShrink: 0,
@@ -242,7 +242,7 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
               Cancelar
             </button>
             <button type="button" onClick={handleCreate} disabled={!name.trim() || isSubmitting}
-              style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "9px 22px", background: "#1FA97A", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, color: "#fff", cursor: "pointer", opacity: (!name.trim() || isSubmitting) ? 0.45 : 1 }}>
+              style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "9px 22px", background: "#0F766E", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, color: "#fff", cursor: "pointer", opacity: (!name.trim() || isSubmitting) ? 0.45 : 1 }}>
               {isSubmitting && <Loader2 style={{ width: 14, height: 14 }} className="animate-spin" />}
               Crear proyecto
             </button>

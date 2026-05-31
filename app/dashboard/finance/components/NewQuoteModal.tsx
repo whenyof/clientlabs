@@ -161,14 +161,14 @@ export function NewQuoteModal({ open, onClose, onSuccess, defaultClientId }: Pro
               <button
                 type="button"
                 onClick={() => setQuoteType("quote")}
-                className={`px-3 py-1 transition-colors ${quoteType === "quote" ? "bg-[#1FA97A] text-white font-medium" : "text-slate-500 hover:bg-slate-50"}`}
+                className={`px-3 py-1 transition-colors ${quoteType === "quote" ? "bg-[#0F766E] text-white font-medium" : "text-slate-500 hover:bg-slate-50"}`}
               >
                 Presupuesto
               </button>
               <button
                 type="button"
                 onClick={() => setQuoteType("proforma")}
-                className={`px-3 py-1 border-l border-slate-200 transition-colors ${quoteType === "proforma" ? "bg-[#1FA97A] text-white font-medium" : "text-slate-500 hover:bg-slate-50"}`}
+                className={`px-3 py-1 border-l border-slate-200 transition-colors ${quoteType === "proforma" ? "bg-[#0F766E] text-white font-medium" : "text-slate-500 hover:bg-slate-50"}`}
               >
                 Proforma
               </button>
@@ -188,7 +188,7 @@ export function NewQuoteModal({ open, onClose, onSuccess, defaultClientId }: Pro
                 <select
                   value={clientId}
                   onChange={e => setClientId(e.target.value)}
-                  className="w-full appearance-none text-[13px] border border-slate-200 rounded-lg px-3 py-2.5 text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A] pr-8"
+                  className="w-full appearance-none text-[13px] border border-slate-200 rounded-lg px-3 py-2.5 text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30 focus:border-[#0F766E] pr-8"
                 >
                   <option value="">Seleccionar cliente</option>
                   {clients.map(c => (
@@ -203,7 +203,7 @@ export function NewQuoteModal({ open, onClose, onSuccess, defaultClientId }: Pro
               <input
                 type="date"
                 defaultValue={new Date().toISOString().slice(0, 10)}
-                className="w-full text-[13px] border border-slate-200 rounded-lg px-3 py-2.5 text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+                className="w-full text-[13px] border border-slate-200 rounded-lg px-3 py-2.5 text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
               />
             </div>
             <div>
@@ -212,7 +212,7 @@ export function NewQuoteModal({ open, onClose, onSuccess, defaultClientId }: Pro
                 type="date"
                 value={validUntil}
                 onChange={e => setValidUntil(e.target.value)}
-                className="w-full text-[13px] border border-slate-200 rounded-lg px-3 py-2.5 text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+                className="w-full text-[13px] border border-slate-200 rounded-lg px-3 py-2.5 text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
               />
             </div>
           </div>
@@ -252,7 +252,7 @@ export function NewQuoteModal({ open, onClose, onSuccess, defaultClientId }: Pro
                           onFocus={() => setAutocomplete({ idx, query: item.description, open: true })}
                           onBlur={() => setTimeout(() => setAutocomplete(prev => ({ ...prev, open: false })), 150)}
                           placeholder="Descripción del servicio o producto"
-                          className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+                          className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
                         />
                         {isAuto && suggestions.length > 0 && (
                           <div className="absolute left-0 top-full mt-1 w-72 bg-white border border-slate-200 rounded-lg shadow-lg z-20 overflow-hidden">
@@ -280,7 +280,7 @@ export function NewQuoteModal({ open, onClose, onSuccess, defaultClientId }: Pro
                         placeholder="1"
                         value={item.quantity || ""}
                         onChange={e => updateItem(item._key, { quantity: Math.max(0, Number(e.target.value)) })}
-                        className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 placeholder-slate-300 text-center focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+                        className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 placeholder-slate-300 text-center focus:outline-none focus:ring-1 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
                       />
                       <input
                         type="number"
@@ -289,7 +289,7 @@ export function NewQuoteModal({ open, onClose, onSuccess, defaultClientId }: Pro
                         placeholder="0"
                         value={item.unitPrice || ""}
                         onChange={e => updateItem(item._key, { unitPrice: Math.max(0, Number(e.target.value)) })}
-                        className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 placeholder-slate-300 text-right focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+                        className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 placeholder-slate-300 text-right focus:outline-none focus:ring-1 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
                       />
                       <input
                         type="number"
@@ -298,7 +298,7 @@ export function NewQuoteModal({ open, onClose, onSuccess, defaultClientId }: Pro
                         step={1}
                         value={item.taxRate}
                         onChange={e => updateItem(item._key, { taxRate: Math.max(0, Number(e.target.value)) })}
-                        className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 text-center focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+                        className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 text-center focus:outline-none focus:ring-1 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
                       />
                       <span className="text-[12px] font-medium text-slate-900 text-right tabular-nums pr-1">{fmt(lineTotal)}</span>
                       <button
@@ -319,7 +319,7 @@ export function NewQuoteModal({ open, onClose, onSuccess, defaultClientId }: Pro
                 <button
                   type="button"
                   onClick={addItem}
-                  className="flex items-center gap-1.5 text-[12px] text-[#1FA97A] hover:text-[#178f68] font-medium transition-colors"
+                  className="flex items-center gap-1.5 text-[12px] text-[#0F766E] hover:text-[#0E665F] font-medium transition-colors"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   Añadir línea
@@ -362,7 +362,7 @@ export function NewQuoteModal({ open, onClose, onSuccess, defaultClientId }: Pro
                 <select
                   value={irpfRate}
                   onChange={e => setIrpfRate(Number(e.target.value))}
-                  className="w-full appearance-none text-[13px] border border-slate-200 rounded-lg px-3 py-2.5 text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A] pr-8"
+                  className="w-full appearance-none text-[13px] border border-slate-200 rounded-lg px-3 py-2.5 text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30 focus:border-[#0F766E] pr-8"
                 >
                   <option value={0}>Sin retención (0%)</option>
                   <option value={7}>7% — primeros 2 años de autónomo</option>
@@ -381,7 +381,7 @@ export function NewQuoteModal({ open, onClose, onSuccess, defaultClientId }: Pro
                   onChange={e => setNotes(e.target.value)}
                   placeholder="Notas visibles en el PDF..."
                   rows={3}
-                  className="w-full text-[12px] border border-slate-200 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+                  className="w-full text-[12px] border border-slate-200 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
                 />
               </div>
               <div>
@@ -391,7 +391,7 @@ export function NewQuoteModal({ open, onClose, onSuccess, defaultClientId }: Pro
                   onChange={e => setTerms(e.target.value)}
                   placeholder="Términos y condiciones del presupuesto..."
                   rows={3}
-                  className="w-full text-[12px] border border-slate-200 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+                  className="w-full text-[12px] border border-slate-200 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
                 />
               </div>
             </div>
@@ -423,7 +423,7 @@ export function NewQuoteModal({ open, onClose, onSuccess, defaultClientId }: Pro
             onClick={() => handleSave(true)}
             disabled={saving || !clientId || !validUntil}
             className={cn(
-              "px-4 py-2 text-[13px] font-medium rounded-lg bg-[#1FA97A] text-white hover:bg-[#178f68] transition-colors",
+              "px-4 py-2 text-[13px] font-medium rounded-lg bg-[#0F766E] text-white hover:bg-[#0E665F] transition-colors",
               "disabled:opacity-50 disabled:cursor-not-allowed"
             )}
           >

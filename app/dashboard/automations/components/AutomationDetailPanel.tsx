@@ -56,7 +56,7 @@ interface Execution {
 const border = "#E2E8F0"
 const textPrimary = "#0B1F2A"
 const textSecondary = "#8FA6B2"
-const green = "#1FA97A"
+const green = "#0F766E"
 const greenBg = "#F0FFF4"
 const redBg = "#FFF5F5"
 

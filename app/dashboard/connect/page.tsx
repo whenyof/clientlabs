@@ -110,7 +110,7 @@ function QRModal({ form, onClose }: { form: PublicForm; onClose: () => void }) {
           <button onClick={onClose} className="flex-1 py-2.5 text-sm font-medium text-[#5F7280] border border-[#E2E8ED] rounded-lg hover:bg-[#F4F7F9] transition-colors">
             Cerrar
           </button>
-          <button onClick={downloadSVG} className="flex-1 py-2.5 text-sm font-semibold text-white bg-[#1FA97A] hover:bg-[#178a64] rounded-lg transition-colors flex items-center justify-center gap-2">
+          <button onClick={downloadSVG} className="flex-1 py-2.5 text-sm font-semibold text-white bg-[#0F766E] hover:bg-[#0E665F] rounded-lg transition-colors flex items-center justify-center gap-2">
             <Download className="w-3.5 h-3.5" />
             Descargar SVG
           </button>
@@ -185,7 +185,7 @@ function CreateFormModal({ onClose, onCreate }: { onClose: () => void; onCreate:
               value={nombre}
               onChange={e => setNombre(e.target.value)}
               placeholder="Ej: Formulario de contacto"
-              className="w-full px-3 py-2 text-sm rounded-lg border border-[#E2E8ED] focus:outline-none focus:border-[#1FA97A] transition-colors"
+              className="w-full px-3 py-2 text-sm rounded-lg border border-[#E2E8ED] focus:outline-none focus:border-[#0F766E] transition-colors"
             />
           </div>
           <div>
@@ -194,14 +194,14 @@ function CreateFormModal({ onClose, onCreate }: { onClose: () => void; onCreate:
               value={descripcion}
               onChange={e => setDescripcion(e.target.value)}
               placeholder="Breve descripción visible en el formulario"
-              className="w-full px-3 py-2 text-sm rounded-lg border border-[#E2E8ED] focus:outline-none focus:border-[#1FA97A] transition-colors"
+              className="w-full px-3 py-2 text-sm rounded-lg border border-[#E2E8ED] focus:outline-none focus:border-[#0F766E] transition-colors"
             />
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-xs font-medium text-[#374151]">Campos</label>
-              <button onClick={addField} className="inline-flex items-center gap-1 text-xs text-[#1FA97A] font-medium hover:underline">
+              <button onClick={addField} className="inline-flex items-center gap-1 text-xs text-[#0F766E] font-medium hover:underline">
                 <Plus className="w-3 h-3" /> Añadir campo
               </button>
             </div>
@@ -213,12 +213,12 @@ function CreateFormModal({ onClose, onCreate }: { onClose: () => void; onCreate:
                       value={f.label}
                       onChange={e => updateField(i, { label: e.target.value, key: e.target.value.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "") || f.key })}
                       placeholder="Etiqueta"
-                      className="px-2 py-1.5 text-xs rounded border border-[#E2E8ED] bg-white focus:outline-none focus:border-[#1FA97A] transition-colors"
+                      className="px-2 py-1.5 text-xs rounded border border-[#E2E8ED] bg-white focus:outline-none focus:border-[#0F766E] transition-colors"
                     />
                     <select
                       value={f.type}
                       onChange={e => updateField(i, { type: e.target.value as FormField["type"] })}
-                      className="px-2 py-1.5 text-xs rounded border border-[#E2E8ED] bg-white focus:outline-none focus:border-[#1FA97A] transition-colors"
+                      className="px-2 py-1.5 text-xs rounded border border-[#E2E8ED] bg-white focus:outline-none focus:border-[#0F766E] transition-colors"
                     >
                       <option value="text">Texto</option>
                       <option value="email">Email</option>
@@ -243,7 +243,7 @@ function CreateFormModal({ onClose, onCreate }: { onClose: () => void; onCreate:
             <input
               value={successMessage}
               onChange={e => setSuccessMessage(e.target.value)}
-              className="w-full px-3 py-2 text-sm rounded-lg border border-[#E2E8ED] focus:outline-none focus:border-[#1FA97A] transition-colors"
+              className="w-full px-3 py-2 text-sm rounded-lg border border-[#E2E8ED] focus:outline-none focus:border-[#0F766E] transition-colors"
             />
           </div>
         </div>
@@ -252,7 +252,7 @@ function CreateFormModal({ onClose, onCreate }: { onClose: () => void; onCreate:
           <button onClick={onClose} className="flex-1 py-2.5 text-sm font-medium text-[#5F7280] border border-[#E2E8ED] rounded-lg hover:bg-[#F4F7F9] transition-colors">
             Cancelar
           </button>
-          <button onClick={handleSave} disabled={saving} className="flex-1 py-2.5 text-sm font-semibold text-white bg-[#1FA97A] hover:bg-[#178a64] rounded-lg transition-colors disabled:opacity-60">
+          <button onClick={handleSave} disabled={saving} className="flex-1 py-2.5 text-sm font-semibold text-white bg-[#0F766E] hover:bg-[#0E665F] rounded-lg transition-colors disabled:opacity-60">
             {saving ? "Guardando..." : "Crear formulario"}
           </button>
         </div>
@@ -298,7 +298,7 @@ function TabFormularios() {
         </p>
         <button
           onClick={() => setShowCreate(true)}
-          className="inline-flex items-center gap-1.5 text-sm font-semibold px-3.5 py-2 rounded-lg text-white bg-[#1FA97A] hover:bg-[#178a64] transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-semibold px-3.5 py-2 rounded-lg text-white bg-[#0F766E] hover:bg-[#0E665F] transition-colors"
         >
           <Plus className="w-3.5 h-3.5" />
           Nuevo formulario
@@ -318,7 +318,7 @@ function TabFormularios() {
             <p className="text-sm font-medium text-[#0B1F2A] mb-1">Sin formularios aún</p>
             <p className="text-xs text-[#8FA6B2] max-w-xs">Crea un formulario público para capturar leads desde tu web, redes sociales o un QR.</p>
           </div>
-          <button onClick={() => setShowCreate(true)} className="mt-1 inline-flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-lg text-white bg-[#1FA97A] hover:bg-[#178a64] transition-colors">
+          <button onClick={() => setShowCreate(true)} className="mt-1 inline-flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-lg text-white bg-[#0F766E] hover:bg-[#0E665F] transition-colors">
             <Plus className="w-3.5 h-3.5" /> Crear primer formulario
           </button>
         </div>
@@ -337,8 +337,8 @@ function TabFormularios() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-sm font-semibold text-[#0B1F2A]">{form.nombre}</p>
                     {form.active ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#1FA97A] bg-[#E8F5EF] px-2 py-0.5 rounded-full">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#1FA97A]" /> Activo
+                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#0F766E] bg-[#E8F5EF] px-2 py-0.5 rounded-full">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#0F766E]" /> Activo
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#8FA6B2] bg-[#F4F7F9] px-2 py-0.5 rounded-full">
@@ -348,7 +348,7 @@ function TabFormularios() {
                   </div>
                   <div className="flex items-center gap-3 mt-0.5 flex-wrap">
                     <p className="text-[11px] text-[#8FA6B2]">{form.submissions} envíos · {form.fields.length} campos</p>
-                    <a href={publicUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[11px] text-[#1FA97A] hover:underline">
+                    <a href={publicUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[11px] text-[#0F766E] hover:underline">
                       Ver formulario <ExternalLink className="w-2.5 h-2.5" />
                     </a>
                   </div>
@@ -371,7 +371,7 @@ function TabFormularios() {
                   <button
                     onClick={() => toggleMutation.mutate({ id: form.id, active: !form.active })}
                     title={form.active ? "Desactivar" : "Activar"}
-                    className={`px-2.5 py-1.5 text-[11px] font-medium rounded-lg border transition-colors ${form.active ? "border-[#E2E8ED] text-[#5F7280] hover:bg-[#F4F7F9]" : "border-[#1FA97A]/40 text-[#1FA97A] hover:bg-[#E8F5EF]"}`}
+                    className={`px-2.5 py-1.5 text-[11px] font-medium rounded-lg border transition-colors ${form.active ? "border-[#E2E8ED] text-[#5F7280] hover:bg-[#F4F7F9]" : "border-[#0F766E]/40 text-[#0F766E] hover:bg-[#E8F5EF]"}`}
                   >
                     {form.active ? "Desactivar" : "Activar"}
                   </button>
@@ -501,7 +501,7 @@ function ConnectModal({
         {/* Body */}
         <div className="p-5 space-y-4">
           <div className="rounded-lg bg-[#F4F7F9] border border-[#E2E8ED] p-3 flex gap-3">
-            <CheckCircle2 className="w-4 h-4 text-[#1FA97A] flex-shrink-0 mt-0.5" />
+            <CheckCircle2 className="w-4 h-4 text-[#0F766E] flex-shrink-0 mt-0.5" />
             <p className="text-xs text-[#374151] leading-relaxed">{integration.benefit}</p>
           </div>
 
@@ -543,7 +543,7 @@ function ConnectModal({
                     value={apiKey}
                     onChange={(e) => setApiKey(e.target.value)}
                     placeholder="sk-xxxxxxxxxxxxxxxx"
-                    className="w-full pl-9 pr-4 py-2.5 text-sm rounded-lg border border-[#E2E8ED] bg-white text-[#0B1F2A] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#1FA97A] transition-colors"
+                    className="w-full pl-9 pr-4 py-2.5 text-sm rounded-lg border border-[#E2E8ED] bg-white text-[#0B1F2A] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#0F766E] transition-colors"
                   />
                 </div>
               </div>
@@ -587,7 +587,7 @@ function ConnectModal({
             <button
               onClick={handleConnect}
               disabled={loading}
-              className="flex-1 py-2.5 text-sm font-semibold text-white bg-[#1FA97A] hover:bg-[#178a64] rounded-lg transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+              className="flex-1 py-2.5 text-sm font-semibold text-white bg-[#0F766E] hover:bg-[#0E665F] rounded-lg transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
             >
               {loading ? "Conectando..." : integration.connectType === "oauth" ? "Autorizar acceso" : "Conectar"}
               {!loading && <ExternalLink className="w-3.5 h-3.5" />}
@@ -615,7 +615,7 @@ function IntegrationCard({
     <div
       className={`bg-white rounded-xl border transition-all flex flex-col gap-4 p-5 ${
         isConnected
-          ? "border-[#1FA97A]/30"
+          ? "border-[#0F766E]/30"
           : isError
           ? "border-amber-200"
           : "border-[#E2E8ED] hover:border-[#C8D6E0]"
@@ -633,8 +633,8 @@ function IntegrationCard({
         </div>
 
         {isConnected && (
-          <span className="flex-shrink-0 inline-flex items-center gap-1 text-[10px] font-semibold text-[#1FA97A] bg-[#E8F5EF] px-2 py-0.5 rounded-full">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#1FA97A]" />
+          <span className="flex-shrink-0 inline-flex items-center gap-1 text-[10px] font-semibold text-[#0F766E] bg-[#E8F5EF] px-2 py-0.5 rounded-full">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#0F766E]" />
             Activo
           </span>
         )}
@@ -676,7 +676,7 @@ function IntegrationCard({
               ? "text-[#5F7280] border border-[#E2E8ED] hover:bg-[#F4F7F9]"
               : isComingSoon
               ? "text-[#8FA6B2] border border-[#E2E8ED] cursor-default"
-              : "text-white bg-[#1FA97A] hover:bg-[#178a64]"
+              : "text-white bg-[#0F766E] hover:bg-[#0E665F]"
           }`}
         >
           {isConnected ? "Gestionar" : isComingSoon ? "Ver" : "Conectar"}
@@ -811,7 +811,7 @@ export default function ConnectPage() {
   const tabCls = (tab: ActiveTab) =>
     `px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
       activeTab === tab
-        ? "border-[#1FA97A] text-[#1FA97A]"
+        ? "border-[#0F766E] text-[#0F766E]"
         : "border-transparent text-[#5F7280] hover:text-[#0B1F2A]"
     }`
 
@@ -827,7 +827,7 @@ export default function ConnectPage() {
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border border-[#1FA97A]/30 bg-[#E8F5EF] text-[#1FA97A]">
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border border-[#0F766E]/30 bg-[#E8F5EF] text-[#0F766E]">
             <ShieldCheck className="w-3.5 h-3.5" />
             SSL activo
           </span>
@@ -865,7 +865,7 @@ export default function ConnectPage() {
                 placeholder="Buscar integración..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 text-sm rounded-lg border border-[#E2E8ED] bg-white text-[#0B1F2A] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#1FA97A] transition-colors"
+                className="w-full pl-9 pr-4 py-2 text-sm rounded-lg border border-[#E2E8ED] bg-white text-[#0B1F2A] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#0F766E] transition-colors"
               />
             </div>
 
@@ -876,7 +876,7 @@ export default function ConnectPage() {
                   onClick={() => setActiveCategory(cat.id)}
                   className={`inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg border transition-colors ${
                     activeCategory === cat.id
-                      ? "bg-[#0B1F2A] text-white border-[#0B1F2A]"
+                      ? "bg-[#0a0a0a] text-white border-[#0B1F2A]"
                       : "bg-white text-[#5F7280] border-[#E2E8ED] hover:border-[#C8D6E0] hover:text-[#0B1F2A]"
                   }`}
                 >

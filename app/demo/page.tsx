@@ -17,7 +17,7 @@ export default function DemoPage() {
       <section className="pb-20 pt-40 text-white">
         <div className="mx-auto max-w-[1240px] px-7 text-center">
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-            <span className="font-mono text-[11px] uppercase tracking-[0.14em]" style={{ color: "#1FA97A" }}>Demo</span>
+            <span className="font-mono text-[11px] uppercase tracking-[0.14em]" style={{ color: "#0F766E" }}>Demo</span>
             <h1 className="mt-4 font-display text-[clamp(40px,5vw,68px)] font-extrabold leading-[1.02] tracking-[-0.035em]">
               Ve ClientLabs<br />en acción
             </h1>
@@ -32,8 +32,8 @@ export default function DemoPage() {
       <section className="pb-24 text-white" style={{ background: "#071A2C" }}>
         <div className="mx-auto max-w-[900px] px-7">
           <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5, delay: 0.2 }}>
-            <div className="group relative flex aspect-video cursor-pointer items-center justify-center overflow-hidden rounded-2xl" style={{ background: "linear-gradient(135deg, #0f2d20, #0a2218)", border: "1px solid rgba(31,169,122,0.2)" }}>
-              <div className="flex h-20 w-20 items-center justify-center rounded-full transition-transform group-hover:scale-110" style={{ background: "#1FA97A" }}>
+            <div className="group relative flex aspect-video cursor-pointer items-center justify-center overflow-hidden rounded-2xl" style={{ background: "linear-gradient(135deg, #0f2d20, #0a2218)", border: "1px solid rgba(15,118,110,0.2)" }}>
+              <div className="flex h-20 w-20 items-center justify-center rounded-full transition-transform group-hover:scale-110" style={{ background: "#0F766E" }}>
                 <Play className="ml-1 h-8 w-8 text-white" fill="white" />
               </div>
               <span className="absolute bottom-6 left-6 font-mono text-[12px]" style={{ color: "rgba(255,255,255,0.4)" }}>Demo · 4:32 min</span>
@@ -51,7 +51,7 @@ export default function DemoPage() {
               <p className="mt-3 text-[16px]" style={{ color: "#6B7280" }}>30 minutos con un especialista. Te mostramos cómo adaptar ClientLabs a tu negocio concreto.</p>
               {sent ? (
                 <div className="mt-8 rounded-2xl bg-white p-8 text-center" style={{ border: "1px solid #E3E8EF" }}>
-                  <p className="font-display text-[20px] font-bold" style={{ color: "#1FA97A" }}>¡Solicitud enviada!</p>
+                  <p className="font-display text-[20px] font-bold" style={{ color: "#0F766E" }}>¡Solicitud enviada!</p>
                   <p className="mt-2 text-[15px]" style={{ color: "#6B7280" }}>Te contactaremos en las próximas 24h para agendar.</p>
                 </div>
               ) : (
@@ -65,7 +65,7 @@ export default function DemoPage() {
                   <input value={form.empresa} onChange={e => setForm(f => ({ ...f, empresa: e.target.value }))}
                     placeholder="Nombre de tu empresa (opcional)" className="w-full rounded-xl border px-4 py-3.5 text-[15px] outline-none"
                     style={{ borderColor: "#E3E8EF", color: "#111827", background: "#fff" }} />
-                  <button type="submit" className="rounded-full py-3.5 font-display text-[15px] font-semibold text-white transition-all hover:-translate-y-px" style={{ background: "#1FA97A" }}>
+                  <button type="submit" className="rounded-full py-3.5 font-display text-[15px] font-semibold text-white transition-all hover:-translate-y-px" style={{ background: "#0F766E" }}>
                     Solicitar demo en vivo →
                   </button>
                 </form>
@@ -81,8 +81,8 @@ export default function DemoPage() {
                 const Icon = item.icon
                 return (
                   <div key={item.title} className="flex items-start gap-4 rounded-2xl bg-white p-5" style={{ border: "1px solid #E3E8EF" }}>
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: "#1FA97A18" }}>
-                      <Icon className="h-5 w-5" style={{ color: "#1FA97A" }} />
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: "#0F766E18" }}>
+                      <Icon className="h-5 w-5" style={{ color: "#0F766E" }} />
                     </div>
                     <div>
                       <h4 className="font-display text-[16px] font-semibold" style={{ color: "#111827" }}>{item.title}</h4>

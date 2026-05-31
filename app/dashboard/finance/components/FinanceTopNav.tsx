@@ -136,7 +136,7 @@ export function FinanceTopNav() {
                 "relative flex items-center gap-2 shrink-0 h-11 px-4 text-[13px] font-medium",
                 "transition-all duration-150 -mb-px border-b-2",
                 active
-                  ? "text-[#1FA97A] border-[#1FA97A]"
+                  ? "text-[#0F766E] border-[#0F766E]"
                   : "text-slate-500 border-transparent hover:text-slate-800 hover:border-slate-300"
               )}
               aria-current={active ? "page" : undefined}
@@ -144,7 +144,7 @@ export function FinanceTopNav() {
               <Icon
                 className={cn(
                   "h-[15px] w-[15px] shrink-0 transition-colors",
-                  active ? "text-[#1FA97A]" : "text-slate-400"
+                  active ? "text-[#0F766E]" : "text-slate-400"
                 )}
                 aria-hidden
               />
@@ -192,7 +192,7 @@ export function FinanceTopNav() {
                 className={cn(
                   "shrink-0 h-6 px-3 rounded-md text-[11px] font-medium transition-all duration-150",
                   childActive
-                    ? "bg-white text-[#1FA97A] border border-slate-200 shadow-sm"
+                    ? "bg-white text-[#0F766E] border border-slate-200 shadow-sm"
                     : "text-slate-500 hover:text-slate-700 hover:bg-white/60"
                 )}
                 aria-current={childActive ? "page" : undefined}

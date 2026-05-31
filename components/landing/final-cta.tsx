@@ -15,7 +15,7 @@ export function FinalCTA() {
         className="pointer-events-none absolute left-1/2 top-[10%] h-[700px] w-[900px] -translate-x-1/2 rounded-full"
         style={{
           background:
-            "radial-gradient(circle, rgba(31,169,122,.18), transparent 60%)",
+            "radial-gradient(circle, rgba(15,118,110,.18), transparent 60%)",
         }}
       />
       <NoiseOverlay opacity={0.04} className="mix-blend-overlay" />
@@ -42,7 +42,7 @@ export function FinalCTA() {
         <div className="flex flex-wrap justify-center gap-3">
           <Link
             href={finalCtaContent.ctas.primary.href}
-            className="inline-flex items-center gap-2 rounded-full bg-emerald px-6 py-4 font-display text-base font-semibold tracking-[-0.01em] text-white shadow-[0_1px_0_rgba(255,255,255,.2)_inset,0_8px_20px_rgba(31,169,122,.28)] transition-all hover:-translate-y-px hover:bg-emerald-2"
+            className="inline-flex items-center gap-2 rounded-full bg-emerald px-6 py-4 font-display text-base font-semibold tracking-[-0.01em] text-white shadow-[0_1px_0_rgba(255,255,255,.2)_inset,0_8px_20px_rgba(15,118,110,.28)] transition-all hover:-translate-y-px hover:bg-emerald-2"
           >
             {finalCtaContent.ctas.primary.label}
             <LandingIcons.arrow className="h-4 w-4" />

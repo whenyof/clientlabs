@@ -7,7 +7,7 @@ import { usePlan } from "@/hooks/use-plan"
 import { toast } from "sonner"
 import { UpgradeWall } from "@/components/ui/upgrade-wall"
 import {
-  Megaphone, Filter, Plus,
+  Megaphone, Filter, Plus, Upload, MoreHorizontal, ArrowUpRight,
   LayoutDashboard, Send, Newspaper,
   Sparkles, Users2, BarChart3, Globe,
   TrendingUp, TrendingDown,
@@ -42,7 +42,7 @@ function cn(...classes: (string | boolean | undefined | null)[]): string {
 
 function EstadoBadge({ estado, label }: { estado: string; label: string }) {
   const styles: Record<string, string> = {
-    activa:     "bg-[#E1F5EE] text-[#1FA97A]",
+    activa:     "bg-[#E1F5EE] text-[#0F766E]",
     automatica: "bg-blue-50 text-blue-600",
     enviada:    "bg-purple-50 text-purple-600",
     programada: "bg-sky-50 text-sky-600",
@@ -73,7 +73,7 @@ function TabResumen({ setActiveTab, onNuevaCampana }: { setActiveTab: (t: string
       sublabel: stats?.kpis?.totalContactosDiff != null
         ? `vs mes anterior: ${stats.kpis.totalContactosDiff > 0 ? "+" : ""}${stats.kpis.totalContactosDiff}`
         : "Acumulado total",
-      sublabelClass: (stats?.kpis?.totalContactosDiff ?? 0) >= 0 ? "text-[#1FA97A]" : "text-red-500",
+      sublabelClass: (stats?.kpis?.totalContactosDiff ?? 0) >= 0 ? "text-[#0F766E]" : "text-red-500",
       icon: Users,
     },
     {
@@ -96,7 +96,7 @@ function TabResumen({ setActiveTab, onNuevaCampana }: { setActiveTab: (t: string
       sublabel: stats?.kpis?.leadsGeneradosDiff != null
         ? `vs mes anterior: ${stats.kpis.leadsGeneradosDiff > 0 ? "+" : ""}${stats.kpis.leadsGeneradosDiff}`
         : "Este mes",
-      sublabelClass: (stats?.kpis?.leadsGeneradosDiff ?? 0) >= 0 ? "text-[#1FA97A]" : "text-red-500",
+      sublabelClass: (stats?.kpis?.leadsGeneradosDiff ?? 0) >= 0 ? "text-[#0F766E]" : "text-red-500",
       icon: TrendingUp,
     },
   ]
@@ -126,7 +126,7 @@ function TabResumen({ setActiveTab, onNuevaCampana }: { setActiveTab: (t: string
           return (
             <div
               key={kpi.label}
-              className="bg-white border border-slate-200 rounded-xl p-4 hover:border-[#1FA97A]/40 hover:shadow-[0_2px_12px_rgba(31,169,122,0.06)] transition-all duration-200"
+              className="bg-white border border-slate-200 rounded-xl p-4 hover:border-[#0F766E]/40 hover:shadow-[0_2px_12px_rgba(15,118,110,0.06)] transition-all duration-200"
             >
               <div className="flex items-center justify-between mb-3">
                 <span className="text-[11px] uppercase tracking-[0.08em] font-medium text-slate-500">
@@ -154,15 +154,15 @@ function TabResumen({ setActiveTab, onNuevaCampana }: { setActiveTab: (t: string
         <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-[#1FA97A]" />
+              <div className="w-2 h-2 rounded-full bg-[#0F766E]" />
               <span className="text-[13px] font-bold text-slate-800">Campañas recientes</span>
               {campanas.length > 0 && (
-                <span className="px-2 py-0.5 bg-[#E1F5EE] text-[#1FA97A] text-[10px] font-bold rounded-full">{campanas.length}</span>
+                <span className="px-2 py-0.5 bg-[#E1F5EE] text-[#0F766E] text-[10px] font-bold rounded-full">{campanas.length}</span>
               )}
             </div>
             <button
               onClick={() => setActiveTab("campanas")}
-              className="text-[12px] font-medium text-slate-400 hover:text-[#1FA97A] transition-colors"
+              className="text-[12px] font-medium text-slate-400 hover:text-[#0F766E] transition-colors"
             >
               Ver todas
             </button>
@@ -188,7 +188,7 @@ function TabResumen({ setActiveTab, onNuevaCampana }: { setActiveTab: (t: string
                         c.estado === "programada" ? "bg-amber-400" : c.estado === "enviada" ? "bg-slate-300" : "bg-slate-200"
                       )} />
                       <div className="min-w-0">
-                        <div className="text-[13px] font-semibold text-slate-800 truncate group-hover:text-[#1FA97A] transition-colors">{c.nombre}</div>
+                        <div className="text-[13px] font-semibold text-slate-800 truncate group-hover:text-[#0F766E] transition-colors">{c.nombre}</div>
                         <div className="text-[11px] text-slate-400">{estadoLabel[c.estado] ?? c.estado}</div>
                       </div>
                     </div>
@@ -204,7 +204,7 @@ function TabResumen({ setActiveTab, onNuevaCampana }: { setActiveTab: (t: string
                             <span className="text-[12px] font-bold text-slate-700">{c.aperturaPct}%</span>
                           </div>
                           <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                            <div className="h-full rounded-full bg-gradient-to-r from-[#1FA97A] to-[#0B8A5E]" style={{ width: `${c.aperturaPct}%` }} />
+                            <div className="h-full rounded-full bg-gradient-to-r from-[#0F766E] to-[#0B8A5E]" style={{ width: `${c.aperturaPct}%` }} />
                           </div>
                         </div>
                       )}
@@ -221,7 +221,7 @@ function TabResumen({ setActiveTab, onNuevaCampana }: { setActiveTab: (t: string
           <div className="px-5 py-3 border-t border-slate-100 bg-slate-50/50">
             <button
               onClick={() => { setActiveTab("campanas"); onNuevaCampana() }}
-              className="w-full flex items-center justify-center gap-2 text-[12px] font-semibold text-[#1FA97A] hover:text-[#1a9068] transition-colors py-1"
+              className="w-full flex items-center justify-center gap-2 text-[12px] font-semibold text-[#0F766E] hover:text-[#0E665F] transition-colors py-1"
             >
               <Plus className="h-3.5 w-3.5" />
               Nueva campaña
@@ -252,7 +252,7 @@ function TabResumen({ setActiveTab, onNuevaCampana }: { setActiveTab: (t: string
                       </div>
                     </div>
                     <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full rounded-full bg-[#1FA97A] transition-all duration-700" style={{ width: `${f.porcentaje}%` }} />
+                      <div className="h-full rounded-full bg-[#0F766E] transition-all duration-700" style={{ width: `${f.porcentaje}%` }} />
                     </div>
                   </div>
                 ))}
@@ -277,7 +277,7 @@ function TabResumen({ setActiveTab, onNuevaCampana }: { setActiveTab: (t: string
                   <span className="text-[12px] font-bold text-slate-800">{m.valor}</span>
                 </div>
                 <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full rounded-full bg-[#1FA97A]" style={{ width: `${Math.min(m.barra, 100)}%` }} />
+                  <div className="h-full rounded-full bg-[#0F766E]" style={{ width: `${Math.min(m.barra, 100)}%` }} />
                 </div>
               </div>
             ))}
@@ -288,8 +288,8 @@ function TabResumen({ setActiveTab, onNuevaCampana }: { setActiveTab: (t: string
       {/* Banner IA */}
       <div className="bg-gradient-to-r from-[#0B1F2A] to-[#1a3040] rounded-2xl p-5 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-[#1FA97A]/20 flex items-center justify-center">
-            <Sparkles className="h-5 w-5 text-[#1FA97A]" />
+          <div className="w-10 h-10 rounded-xl bg-[#0F766E]/20 flex items-center justify-center">
+            <Sparkles className="h-5 w-5 text-[#0F766E]" />
           </div>
           <div>
             <div className="text-[14px] font-bold text-white mb-0.5">Genera contenido para tu próxima campaña</div>
@@ -300,7 +300,7 @@ function TabResumen({ setActiveTab, onNuevaCampana }: { setActiveTab: (t: string
         </div>
         <button
           onClick={() => setActiveTab("contenido")}
-          className="flex items-center gap-2 px-4 py-2 bg-[#1FA97A] text-white text-[12px] font-semibold rounded-xl hover:bg-[#1a9068] transition-colors flex-shrink-0"
+          className="flex items-center gap-2 px-4 py-2 bg-[#0F766E] text-white text-[12px] font-semibold rounded-xl hover:bg-[#0E665F] transition-colors flex-shrink-0"
         >
           Generar ahora
           <ArrowRight className="h-3.5 w-3.5" />
@@ -365,13 +365,13 @@ function TabCampanas({ onNuevaCampana }: { onNuevaCampana: () => void }) {
               placeholder="Buscar campaña..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
-              className="pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-[13px] outline-none w-64 focus:border-[#1FA97A] focus:ring-2 focus:ring-[#1FA97A]/10 transition-all"
+              className="pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-[13px] outline-none w-64 focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/10 transition-all"
             />
           </div>
           <select
             value={filtroEstado}
             onChange={(e) => setFiltroEstado(e.target.value)}
-            className="px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-[13px] outline-none text-slate-600 cursor-pointer focus:border-[#1FA97A]"
+            className="px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-[13px] outline-none text-slate-600 cursor-pointer focus:border-[#0F766E]"
           >
             <option value="todos">Todos los estados</option>
             <option value="activa">Activas</option>
@@ -380,7 +380,7 @@ function TabCampanas({ onNuevaCampana }: { onNuevaCampana: () => void }) {
             <option value="enviada">Enviadas</option>
             <option value="borrador">Borradores</option>
           </select>
-          <select className="px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-[13px] outline-none text-slate-600 cursor-pointer focus:border-[#1FA97A]">
+          <select className="px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-[13px] outline-none text-slate-600 cursor-pointer focus:border-[#0F766E]">
             <option>Todos los canales</option>
             <option>Email</option>
             <option>WhatsApp</option>
@@ -389,7 +389,7 @@ function TabCampanas({ onNuevaCampana }: { onNuevaCampana: () => void }) {
         </div>
         <button
           onClick={onNuevaCampana}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#1FA97A] text-white rounded-xl text-[13px] font-semibold hover:bg-[#1a9068] transition-colors shadow-sm shadow-[#1FA97A]/20"
+          className="flex items-center gap-2 px-4 py-2.5 bg-[#0F766E] text-white rounded-xl text-[13px] font-semibold hover:bg-[#0E665F] transition-colors shadow-sm shadow-[#0F766E]/20"
         >
           <Plus className="h-4 w-4" />
           Nueva campaña
@@ -444,7 +444,7 @@ function TabCampanas({ onNuevaCampana }: { onNuevaCampana: () => void }) {
                     "bg-slate-200"
                   )} />
                   <div className="min-w-0">
-                    <div className="text-[13px] font-semibold text-slate-800 truncate group-hover:text-[#1FA97A] transition-colors">{c.nombre}</div>
+                    <div className="text-[13px] font-semibold text-slate-800 truncate group-hover:text-[#0F766E] transition-colors">{c.nombre}</div>
                     <div className="text-[11px] text-slate-400 truncate">{c.asunto}</div>
                   </div>
                 </div>
@@ -478,7 +478,7 @@ function TabCampanas({ onNuevaCampana }: { onNuevaCampana: () => void }) {
                         <span className="text-[12px] font-bold text-slate-700">{aperturaRate}%</span>
                       </div>
                       <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                        <div className={cn("h-full rounded-full", aperturaRate >= 70 ? "bg-[#1FA97A]" : aperturaRate >= 50 ? "bg-amber-400" : "bg-red-400")} style={{ width: `${aperturaRate}%` }} />
+                        <div className={cn("h-full rounded-full", aperturaRate >= 70 ? "bg-[#0F766E]" : aperturaRate >= 50 ? "bg-amber-400" : "bg-red-400")} style={{ width: `${aperturaRate}%` }} />
                       </div>
                     </>
                   ) : <span className="text-[12px] text-slate-300 block text-center">—</span>}
@@ -491,7 +491,7 @@ function TabCampanas({ onNuevaCampana }: { onNuevaCampana: () => void }) {
                 <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   {c.estado !== "enviada" && (
                     <button onClick={e => { e.stopPropagation(); sendMutation.mutate(c.id) }} className="p-1.5 rounded-lg hover:bg-[#E1F5EE] transition-colors" title="Enviar ahora">
-                      <Send className="h-3.5 w-3.5 text-[#1FA97A]" />
+                      <Send className="h-3.5 w-3.5 text-[#0F766E]" />
                     </button>
                   )}
                   <button onClick={e => { e.stopPropagation(); if (confirm("¿Eliminar esta campaña?")) deleteMutation.mutate(c.id) }} className="p-1.5 rounded-lg hover:bg-red-50 transition-colors group/del" title="Eliminar">
@@ -652,8 +652,8 @@ function TabNewsletter() {
             label: "SUSCRIPTORES ACTIVOS",
             valor: nlLoading ? "..." : nlTotal.toString(),
             sub: nlTotal > 0 ? `+${nuevaSemana} esta semana` : "Aún sin suscriptores",
-            borderColor: "border-l-[#1FA97A]",
-            subColor: "text-[#1FA97A]",
+            borderColor: "border-l-[#0F766E]",
+            subColor: "text-[#0F766E]",
           },
           {
             label: "APERTURA MEDIA",
@@ -699,7 +699,7 @@ function TabNewsletter() {
                 setEdicionForm(EDICION_FORM_DEFAULT)
                 setModalEdicion(true)
               }}
-              className="flex items-center gap-2 px-4 py-2 bg-[#1FA97A] text-white rounded-xl text-[12px] font-semibold hover:bg-[#1a9068] transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-[#0F766E] text-white rounded-xl text-[12px] font-semibold hover:bg-[#0E665F] transition-colors"
             >
               <Plus className="h-3.5 w-3.5" />
               Nueva edición
@@ -717,7 +717,7 @@ function TabNewsletter() {
               </p>
               <button
                 onClick={() => setModalEdicion(true)}
-                className="px-4 py-2.5 bg-[#1FA97A] text-white rounded-xl text-[13px] font-semibold hover:bg-[#1a9068] transition-colors"
+                className="px-4 py-2.5 bg-[#0F766E] text-white rounded-xl text-[13px] font-semibold hover:bg-[#0E665F] transition-colors"
               >
                 Crear primera edición
               </button>
@@ -746,7 +746,7 @@ function TabNewsletter() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
                             {ed.programadaPara && (
-                              <div className="w-8 h-8 rounded-lg bg-[#0B1F2A] flex items-center justify-center flex-shrink-0">
+                              <div className="w-8 h-8 rounded-lg bg-[#0a0a0a] flex items-center justify-center flex-shrink-0">
                                 <span className="text-[10px] font-black text-white">
                                   {new Date(ed.programadaPara).getDate()}
                                 </span>
@@ -758,7 +758,7 @@ function TabNewsletter() {
                                 <span className={cn(
                                   "px-2 py-0.5 rounded-full text-[9px] font-bold",
                                   ed.estado === "enviada"
-                                    ? "bg-[#E1F5EE] text-[#1FA97A]"
+                                    ? "bg-[#E1F5EE] text-[#0F766E]"
                                     : ed.estado === "programada"
                                     ? "bg-amber-50 text-amber-600"
                                     : "bg-slate-100 text-slate-500"
@@ -788,7 +788,7 @@ function TabNewsletter() {
                           {ed.estado === "enviada" && ed.totalEnviados > 0 && (
                             <>
                               <div className="text-center">
-                                <div className="text-[16px] font-black text-[#1FA97A]">
+                                <div className="text-[16px] font-black text-[#0F766E]">
                                   {Math.round(ed.totalAbiertos / ed.totalEnviados * 100)}%
                                 </div>
                                 <div className="text-[9px] text-slate-400">apertura</div>
@@ -857,7 +857,7 @@ function TabNewsletter() {
               ].map((d, i) => (
                 <div key={i} className="flex-1 flex flex-col items-center gap-1">
                   <div
-                    className={cn("w-full rounded-t-md transition-all duration-500", i === 5 ? "bg-[#1FA97A]" : "bg-slate-200")}
+                    className={cn("w-full rounded-t-md transition-all duration-500", i === 5 ? "bg-[#0F766E]" : "bg-slate-200")}
                     style={{ height: `${(d.val / (nlTotal || 1)) * 100}%` }}
                   />
                   <span className="text-[9px] text-slate-400">{d.mes}</span>
@@ -865,7 +865,7 @@ function TabNewsletter() {
               ))}
             </div>
             <p className="text-[11px] text-slate-500 text-center">
-              <span className="font-bold text-[#1FA97A]">{nlTotal} suscriptores</span> en total
+              <span className="font-bold text-[#0F766E]">{nlTotal} suscriptores</span> en total
             </p>
           </div>
 
@@ -895,7 +895,7 @@ function TabNewsletter() {
               </a>
               <button
                 onClick={() => navigator.clipboard.writeText(publicUrl)}
-                className="flex items-center justify-center gap-1.5 py-2 bg-[#E1F5EE] hover:bg-[#c8eadd] rounded-xl text-[11px] font-medium text-[#1FA97A] transition-colors"
+                className="flex items-center justify-center gap-1.5 py-2 bg-[#E1F5EE] hover:bg-[#c8eadd] rounded-xl text-[11px] font-medium text-[#0F766E] transition-colors"
               >
                 <Share2 className="h-3.5 w-3.5" />
                 Copiar enlace
@@ -920,7 +920,7 @@ function TabNewsletter() {
                   icon: UserPlus,
                   titulo: "Añadir manualmente",
                   desc: "Uno a uno",
-                  color: "bg-[#E1F5EE] text-[#1FA97A]",
+                  color: "bg-[#E1F5EE] text-[#0F766E]",
                   accion: () => {
                     const email = prompt("Email del suscriptor:")
                     if (!email) return
@@ -981,7 +981,7 @@ function TabNewsletter() {
                   value={edicionForm.titulo}
                   onChange={e => setEdicionForm(f => ({ ...f, titulo: e.target.value }))}
                   placeholder="Newsletter Mayo 2026"
-                  className="w-full px-4 py-3 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-[#1FA97A] focus:ring-2 focus:ring-[#1FA97A]/10"
+                  className="w-full px-4 py-3 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/10"
                 />
               </div>
 
@@ -993,7 +993,7 @@ function TabNewsletter() {
                   value={edicionForm.asunto}
                   onChange={e => setEdicionForm(f => ({ ...f, asunto: e.target.value }))}
                   placeholder="Lo que aprendí este mes..."
-                  className="w-full px-4 py-3 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-[#1FA97A] focus:ring-2 focus:ring-[#1FA97A]/10"
+                  className="w-full px-4 py-3 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/10"
                 />
               </div>
 
@@ -1006,7 +1006,7 @@ function TabNewsletter() {
                   onChange={e => setEdicionForm(f => ({ ...f, contenido: e.target.value }))}
                   rows={8}
                   placeholder="Escribe aquí el contenido de tu newsletter..."
-                  className="w-full px-4 py-3 border border-slate-200 rounded-xl text-[13px] outline-none resize-none font-mono leading-relaxed focus:border-[#1FA97A] focus:ring-2 focus:ring-[#1FA97A]/10"
+                  className="w-full px-4 py-3 border border-slate-200 rounded-xl text-[13px] outline-none resize-none font-mono leading-relaxed focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/10"
                 />
               </div>
 
@@ -1018,7 +1018,7 @@ function TabNewsletter() {
                   <select
                     value={edicionForm.estado}
                     onChange={e => setEdicionForm(f => ({ ...f, estado: e.target.value }))}
-                    className="w-full px-4 py-3 border border-slate-200 rounded-xl text-[13px] outline-none bg-white focus:border-[#1FA97A]"
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl text-[13px] outline-none bg-white focus:border-[#0F766E]"
                   >
                     <option value="borrador">Borrador</option>
                     <option value="programada">Programada</option>
@@ -1033,7 +1033,7 @@ function TabNewsletter() {
                     type="date"
                     value={edicionForm.programadaPara}
                     onChange={e => setEdicionForm(f => ({ ...f, programadaPara: e.target.value }))}
-                    className="w-full px-4 py-3 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-[#1FA97A]"
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-[#0F766E]"
                   />
                 </div>
               </div>
@@ -1046,7 +1046,7 @@ function TabNewsletter() {
                   <select
                     value={edicionForm.hora}
                     onChange={e => setEdicionForm(f => ({ ...f, hora: e.target.value }))}
-                    className="w-full px-4 py-3 border border-slate-200 rounded-xl text-[13px] outline-none bg-white focus:border-[#1FA97A]"
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl text-[13px] outline-none bg-white focus:border-[#0F766E]"
                   >
                     {["07:00","08:00","09:00","10:00","11:00","12:00","17:00","18:00","19:00","20:00"].map(h => (
                       <option key={h} value={h}>{h}</option>
@@ -1069,7 +1069,7 @@ function TabNewsletter() {
                 className={cn(
                   "flex-1 py-2.5 rounded-xl text-[13px] font-semibold transition-colors",
                   edicionForm.titulo
-                    ? "bg-[#1FA97A] text-white hover:bg-[#1a9068]"
+                    ? "bg-[#0F766E] text-white hover:bg-[#0E665F]"
                     : "bg-slate-100 text-slate-400 cursor-not-allowed"
                 )}
               >
@@ -1135,7 +1135,7 @@ Pasé de hablar de colores y tipografías a hablar de conversiones y tickets med
     titulo: "Email de seguimiento",
     descripcion: "Para leads que llevan más de 7 días sin responder.",
     icono: Mail,
-    color: "text-[#1FA97A]",
+    color: "text-[#0F766E]",
     bg: "bg-[#E1F5EE]",
     resultado: `Asunto: ¿Seguimos adelante con el proyecto?
 
@@ -1221,15 +1221,15 @@ function TabContenidoIA() {
     <div className="space-y-5">
 
       {/* HERO — contexto del negocio */}
-      <div className="bg-[#0B1F2A] rounded-2xl p-6 relative overflow-hidden">
+      <div className="bg-[#0a0a0a] rounded-2xl p-6 relative overflow-hidden">
         {/* Decoración */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#1FA97A]/5 rounded-full" />
-          <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-[#1FA97A]/3 rounded-full" />
+          <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#0F766E]/5 rounded-full" />
+          <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-[#0F766E]/3 rounded-full" />
           <div
             className="absolute inset-0"
             style={{
-              backgroundImage: "radial-gradient(circle, rgba(31,169,122,0.08) 1px, transparent 1px)",
+              backgroundImage: "radial-gradient(circle, rgba(15,118,110,0.08) 1px, transparent 1px)",
               backgroundSize: "24px 24px",
             }}
           />
@@ -1237,17 +1237,17 @@ function TabContenidoIA() {
 
         <div className="relative">
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-7 h-7 rounded-lg bg-[#1FA97A]/20 border border-[#1FA97A]/30 flex items-center justify-center">
-              <Sparkles className="h-3.5 w-3.5 text-[#1FA97A]" />
+            <div className="w-7 h-7 rounded-lg bg-[#0F766E]/20 border border-[#0F766E]/30 flex items-center justify-center">
+              <Sparkles className="h-3.5 w-3.5 text-[#0F766E]" />
             </div>
-            <span className="text-[11px] font-bold text-[#1FA97A] uppercase tracking-widest">
+            <span className="text-[11px] font-bold text-[#0F766E] uppercase tracking-widest">
               Asistente de contenido
             </span>
           </div>
 
           <h2 className="text-[20px] font-black text-white mb-1 leading-tight">
             Contenido que suena a ti.{" "}
-            <span className="text-[#1FA97A]">Escrito en segundos.</span>
+            <span className="text-[#0F766E]">Escrito en segundos.</span>
           </h2>
           <p className="text-[13px] text-slate-400 mb-5">
             Genero contenido usando los datos reales de tu negocio — no plantillas genéricas que podrían ser de cualquiera.
@@ -1286,7 +1286,7 @@ function TabContenidoIA() {
               className={cn(
                 "px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all duration-150",
                 tono === t.id
-                  ? "bg-[#1FA97A] text-white shadow-sm"
+                  ? "bg-[#0F766E] text-white shadow-sm"
                   : "text-slate-600 hover:bg-slate-50"
               )}
             >
@@ -1303,7 +1303,7 @@ function TabContenidoIA() {
         <div className={cn(
           "bg-white rounded-2xl border overflow-hidden transition-all duration-200",
           generando === "linkedin" || resultadoActivo === "linkedin"
-            ? "ring-2 ring-[#1FA97A]/30 border-[#1FA97A]/50"
+            ? "ring-2 ring-[#0F766E]/30 border-[#0F766E]/50"
             : "border-slate-200"
         )}>
           <div className="p-5">
@@ -1332,7 +1332,7 @@ function TabContenidoIA() {
             <button
               onClick={() => handleGenerar("linkedin")}
               disabled={generando === "linkedin"}
-              className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#0B1F2A] hover:bg-[#1a3040] text-white rounded-xl text-[13px] font-semibold transition-colors disabled:opacity-60"
+              className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#0a0a0a] hover:bg-[#1f1f1f] text-white rounded-xl text-[13px] font-semibold transition-colors disabled:opacity-60"
             >
               {generando === "linkedin" ? (
                 <RefreshCw className="h-4 w-4 animate-spin" />
@@ -1370,7 +1370,7 @@ function TabContenidoIA() {
                   {TEXTO_LINKEDIN}
                 </div>
                 <div className="flex gap-2">
-                  <button className="flex-1 py-2 bg-[#1FA97A] text-white rounded-lg text-[11px] font-semibold hover:bg-[#1a9068] transition-colors">
+                  <button className="flex-1 py-2 bg-[#0F766E] text-white rounded-lg text-[11px] font-semibold hover:bg-[#0E665F] transition-colors">
                     Usar en campaña
                   </button>
                   <button
@@ -1389,7 +1389,7 @@ function TabContenidoIA() {
         <div className={cn(
           "bg-white rounded-2xl border overflow-hidden transition-all duration-200",
           generando === "email" || resultadoActivo === "email"
-            ? "ring-2 ring-[#1FA97A]/30 border-[#1FA97A]/50"
+            ? "ring-2 ring-[#0F766E]/30 border-[#0F766E]/50"
             : "border-slate-200"
         )}>
           <div className="p-5">
@@ -1408,7 +1408,7 @@ function TabContenidoIA() {
                 <button
                   key={i}
                   onClick={() => handleGenerar("email")}
-                  className="w-full text-left px-3 py-2 rounded-xl bg-slate-50 hover:bg-[#E1F5EE] hover:text-[#1FA97A] text-[12px] text-slate-600 font-medium transition-colors border border-transparent hover:border-[#1FA97A]/30"
+                  className="w-full text-left px-3 py-2 rounded-xl bg-slate-50 hover:bg-[#E1F5EE] hover:text-[#0F766E] text-[12px] text-slate-600 font-medium transition-colors border border-transparent hover:border-[#0F766E]/30"
                 >
                   {tipo}
                 </button>
@@ -1418,7 +1418,7 @@ function TabContenidoIA() {
             <button
               onClick={() => handleGenerar("email")}
               disabled={generando === "email"}
-              className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#0B1F2A] hover:bg-[#1a3040] text-white rounded-xl text-[13px] font-semibold transition-colors disabled:opacity-60"
+              className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#0a0a0a] hover:bg-[#1f1f1f] text-white rounded-xl text-[13px] font-semibold transition-colors disabled:opacity-60"
             >
               {generando === "email" ? (
                 <RefreshCw className="h-4 w-4 animate-spin" />
@@ -1453,7 +1453,7 @@ Un saludo,
 Iyan`}
               </div>
               <div className="flex gap-2">
-                <button className="flex-1 py-2 bg-[#1FA97A] text-white rounded-lg text-[11px] font-semibold hover:bg-[#1a9068] transition-colors">
+                <button className="flex-1 py-2 bg-[#0F766E] text-white rounded-lg text-[11px] font-semibold hover:bg-[#0E665F] transition-colors">
                   Usar en campaña
                 </button>
                 <button onClick={() => handleGenerar("email")} className="flex-1 py-2 bg-slate-100 text-slate-600 rounded-lg text-[11px] font-semibold hover:bg-slate-200 transition-colors">
@@ -1467,7 +1467,7 @@ Iyan`}
         {/* MÁS FORMATOS */}
         <div className="space-y-3">
           {[
-            { id: "newsletter", icon: Newspaper,  iconBg: "bg-[#E1F5EE]",  iconColor: "text-[#1FA97A]",  titulo: "Intro de newsletter", desc: "El gancho que hace que lean",      hover: "hover:bg-[#E1F5EE] hover:text-[#1FA97A] hover:border-[#1FA97A]/30" },
+            { id: "newsletter", icon: Newspaper,  iconBg: "bg-[#E1F5EE]",  iconColor: "text-[#0F766E]",  titulo: "Intro de newsletter", desc: "El gancho que hace que lean",      hover: "hover:bg-[#E1F5EE] hover:text-[#0F766E] hover:border-[#0F766E]/30" },
             { id: "twitter",    icon: Share2,      iconBg: "bg-blue-50",    iconColor: "text-blue-600",    titulo: "Hilo de Twitter/X",    desc: "Tu aprendizaje en formato viral", hover: "hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200" },
             { id: "propuesta",  icon: Target,      iconBg: "bg-purple-50",  iconColor: "text-purple-600",  titulo: "Propuesta de valor",   desc: "Para tu web o presentación",      hover: "hover:bg-purple-50 hover:text-purple-600 hover:border-purple-200" },
           ].map((f) => {
@@ -1506,7 +1506,7 @@ Iyan`}
               <div className="text-[13px] font-bold text-white">10 ideas para esta semana</div>
             </div>
             <p className="text-[11px] text-slate-400 mb-3">Basadas en tu sector y tus últimos clientes</p>
-            <button className="w-full flex items-center justify-center gap-1.5 py-2 bg-[#1FA97A] hover:bg-[#1a9068] rounded-xl text-[12px] font-semibold text-white transition-colors">
+            <button className="w-full flex items-center justify-center gap-1.5 py-2 bg-[#0F766E] hover:bg-[#0E665F] rounded-xl text-[12px] font-semibold text-white transition-colors">
               <Sparkles className="h-3.5 w-3.5" />
               Generar ideas
             </button>
@@ -1523,7 +1523,7 @@ Iyan`}
         <div className="divide-y divide-slate-50">
           {[
             { icon: Share2,    iconBg: "bg-blue-50",     iconColor: "text-blue-600",   tipo: "Post LinkedIn",     preview: "Este mes cerré 3 proyectos web para restaurantes...",        fecha: "Hace 2 horas", usado: true  },
-            { icon: Mail,      iconBg: "bg-[#E1F5EE]",  iconColor: "text-[#1FA97A]",  tipo: "Email seguimiento", preview: "Hola María, te escribí hace una semana sobre...",             fecha: "Ayer",         usado: false },
+            { icon: Mail,      iconBg: "bg-[#E1F5EE]",  iconColor: "text-[#0F766E]",  tipo: "Email seguimiento", preview: "Hola María, te escribí hace una semana sobre...",             fecha: "Ayer",         usado: false },
             { icon: Newspaper, iconBg: "bg-slate-100",   iconColor: "text-slate-500",  tipo: "Intro newsletter",  preview: "Este mes aprendí que mis mejores clientes no buscan...",      fecha: "Hace 3 días",  usado: true  },
           ].map((item, i) => {
             const HIcon = item.icon
@@ -1536,7 +1536,7 @@ Iyan`}
                 <div className="flex items-center gap-2 mb-0.5">
                   <span className="text-[12px] font-semibold text-slate-700">{item.tipo}</span>
                   {item.usado && (
-                    <span className="px-1.5 py-0.5 bg-[#E1F5EE] text-[#1FA97A] text-[9px] font-bold rounded-full">
+                    <span className="px-1.5 py-0.5 bg-[#E1F5EE] text-[#0F766E] text-[9px] font-bold rounded-full">
                       Usado
                     </span>
                   )}
@@ -1568,7 +1568,7 @@ function TabAudiencias() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <p className="text-[13px] text-slate-500">Segmentos de contactos</p>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#1FA97A] text-white rounded-xl text-[13px] font-semibold hover:bg-[#1a9068] transition-colors shadow-lg shadow-[#1FA97A]/25">
+        <button className="flex items-center gap-2 px-4 py-2 bg-[#0F766E] text-white rounded-xl text-[13px] font-semibold hover:bg-[#0E665F] transition-colors shadow-lg shadow-[#0F766E]/25">
           <Plus className="h-4 w-4" />
           Nuevo segmento
         </button>
@@ -1637,7 +1637,7 @@ function TabAnalitica() {
                 <span className="text-[13px] text-slate-700">{c.totalEnviados.toLocaleString("es-ES")}</span>
                 <span className="text-[13px] font-semibold text-slate-700">{apertura}%</span>
                 <span className="text-[13px] text-slate-700">{c.totalClicks}</span>
-                <span className="text-[13px] font-black text-[#1FA97A]">{(apertura * 0.04).toFixed(1)}%</span>
+                <span className="text-[13px] font-black text-[#0F766E]">{(apertura * 0.04).toFixed(1)}%</span>
               </div>
             )
           })
@@ -1654,15 +1654,15 @@ function TabLandings() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <p className="text-[13px] text-slate-500">Landing pages</p>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#1FA97A] text-white rounded-xl text-[13px] font-semibold hover:bg-[#1a9068] transition-colors shadow-lg shadow-[#1FA97A]/25">
+        <button className="flex items-center gap-2 px-4 py-2 bg-[#0F766E] text-white rounded-xl text-[13px] font-semibold hover:bg-[#0E665F] transition-colors shadow-lg shadow-[#0F766E]/25">
           <Plus className="h-4 w-4" />
           Nueva landing
         </button>
       </div>
       <div className="bg-gradient-to-r from-[#0B1F2A] to-[#1a3040] rounded-2xl p-5 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-[#1FA97A]/20 flex items-center justify-center">
-            <Target className="h-5 w-5 text-[#1FA97A]" />
+          <div className="w-10 h-10 rounded-xl bg-[#0F766E]/20 flex items-center justify-center">
+            <Target className="h-5 w-5 text-[#0F766E]" />
           </div>
           <div>
             <div className="text-[14px] font-bold text-white mb-0.5">Crea tu landing en 5 minutos</div>
@@ -1671,7 +1671,7 @@ function TabLandings() {
             </p>
           </div>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#1FA97A] text-white text-[12px] font-semibold rounded-xl hover:bg-[#1a9068] transition-colors flex-shrink-0">
+        <button className="flex items-center gap-2 px-4 py-2 bg-[#0F766E] text-white text-[12px] font-semibold rounded-xl hover:bg-[#0E665F] transition-colors flex-shrink-0">
           Crear landing
           <ArrowRight className="h-3.5 w-3.5" />
         </button>
@@ -1944,7 +1944,7 @@ export default function MarketingPage() {
     setNombrePlantilla("")
   }
 
-  const misPlantillasCard = { id: "mis-plantillas", icon: Bookmark, iconBg: "bg-[#E1F5EE]", iconColor: "text-[#1FA97A]", titulo: "Mis plantillas", desc: misPlantillas.length > 0 ? `${misPlantillas.length} guardada${misPlantillas.length !== 1 ? "s" : ""}` : "Guarda tus plantillas para reutilizarlas", preview: misPlantillas.length > 0 ? misPlantillas[0].asunto : "Aún no tienes plantillas guardadas" }
+  const misPlantillasCard = { id: "mis-plantillas", icon: Bookmark, iconBg: "bg-[#E1F5EE]", iconColor: "text-[#0F766E]", titulo: "Mis plantillas", desc: misPlantillas.length > 0 ? `${misPlantillas.length} guardada${misPlantillas.length !== 1 ? "s" : ""}` : "Guarda tus plantillas para reutilizarlas", preview: misPlantillas.length > 0 ? misPlantillas[0].asunto : "Aún no tienes plantillas guardadas" }
   const desdeCeroId = tipoCampana === "secuencia" ? "desde-cero-secuencia" : tipoCampana === "automatica" ? "automatica-cero" : "desde-cero"
   const desdeCeroCard = { id: desdeCeroId, icon: FileText, iconBg: "bg-slate-100", iconColor: "text-slate-500", titulo: "Desde cero", desc: "Escribe tu propio email sin plantilla previa", preview: "" }
 
@@ -1955,11 +1955,11 @@ export default function MarketingPage() {
       { id: "tc-oferta",         icon: Gift,         iconBg: "bg-orange-50",    iconColor: "text-orange-600",   titulo: "Oferta especial",         desc: "Una propuesta con fecha límite para toda tu base de contactos",     preview: "Durante las próximas dos semanas tenemos una propuesta especial..." },
       { id: "tc-evento",         icon: CalendarCheck,iconBg: "bg-purple-50",    iconColor: "text-purple-600",   titulo: "Invitación a evento",     desc: "Invita a un webinar, taller o sesión gratuita",                     preview: "El próximo [fecha] organizo algo y quería invitarte..." },
       { id: "tc-precios",        icon: Receipt,      iconBg: "bg-slate-100",    iconColor: "text-slate-600",    titulo: "Aviso cambio de precios", desc: "Notifica antes de actualizar tus tarifas — da margen para decidir", preview: "A partir del [fecha] vamos a actualizar nuestros precios..." },
-      { id: "tc-referidos",      icon: Handshake,    iconBg: "bg-[#E1F5EE]",   iconColor: "text-[#1FA97A]",    titulo: "Pedir referidos",         desc: "Pide a tus contactos que te recomienden a alguien",                 preview: "Una de las mejores cosas que me pueden pasar es que alguien como tú..." },
+      { id: "tc-referidos",      icon: Handshake,    iconBg: "bg-[#E1F5EE]",   iconColor: "text-[#0F766E]",    titulo: "Pedir referidos",         desc: "Pide a tus contactos que te recomienden a alguien",                 preview: "Una de las mejores cosas que me pueden pasar es que alguien como tú..." },
       { id: "tc-encuesta",       icon: HelpCircle,   iconBg: "bg-purple-50",    iconColor: "text-purple-500",   titulo: "Encuesta rápida",         desc: "Una pregunta concreta para mejorar tu negocio",                     preview: "Estoy mejorando cómo trabajo y tu opinión me ayudaría mucho..." },
       { id: "tc-balance",        icon: BarChart3,    iconBg: "bg-slate-100",    iconColor: "text-slate-600",    titulo: "Balance o resumen",       desc: "Cierra el año o un periodo con honestidad y contexto",              preview: "Se acaba el año y quería hacer una pausa para reflexionar..." },
       { id: "tc-newsletter",     icon: Newspaper,    iconBg: "bg-blue-50",      iconColor: "text-blue-600",     titulo: "Newsletter mensual",      desc: "Resumen de lo más relevante del mes",                               preview: "Aquí va un resumen de lo más relevante de este mes..." },
-      { id: "tc-disponibilidad", icon: CheckCircle,  iconBg: "bg-[#E1F5EE]",   iconColor: "text-[#1FA97A]",    titulo: "Tengo disponibilidad",    desc: "Avisa cuando tienes hueco antes de abrirlo al público general",     preview: "A partir de [mes] tengo disponibilidad y quería avisarte antes..." },
+      { id: "tc-disponibilidad", icon: CheckCircle,  iconBg: "bg-[#E1F5EE]",   iconColor: "text-[#0F766E]",    titulo: "Tengo disponibilidad",    desc: "Avisa cuando tienes hueco antes de abrirlo al público general",     preview: "A partir de [mes] tengo disponibilidad y quería avisarte antes..." },
     ],
     "todos-clientes": [
       { id: "cl-novedad",         icon: Bell,         iconBg: "bg-blue-50",     iconColor: "text-blue-600",     titulo: "Novedad en el servicio",   desc: "Comparte una mejora o nuevo servicio con tus clientes actuales",       preview: "Como cliente ya sabes cómo trabajamos. Quería contarte algo nuevo..." },
@@ -1968,10 +1968,10 @@ export default function MarketingPage() {
       { id: "cl-agradecimiento",  icon: Heart,        iconBg: "bg-rose-50",     iconColor: "text-rose-600",     titulo: "Agradecimiento",           desc: "Cierra un proyecto con una nota personal que va más allá de la factura",preview: "Ahora que hemos terminado quería escribirte algo más allá de la factura..." },
       { id: "cl-caso-exito",      icon: Trophy,       iconBg: "bg-amber-50",    iconColor: "text-amber-600",    titulo: "Caso de éxito",            desc: "Comparte un proyecto reciente relevante para este cliente",             preview: "Hace unas semanas terminé algo que creo que tiene relación con tu caso..." },
       { id: "cl-valor",           icon: Lightbulb,    iconBg: "bg-yellow-50",   iconColor: "text-yellow-600",   titulo: "Consejo de valor",         desc: "Un aprendizaje útil específico para el perfil de este cliente",         preview: "Trabajando con negocios como el tuyo me encuentro con patrones..." },
-      { id: "cl-referido",        icon: Handshake,    iconBg: "bg-[#E1F5EE]",  iconColor: "text-[#1FA97A]",    titulo: "Pedir referido",           desc: "Pide a clientes satisfechos que te recomienden a alguien similar",      preview: "La mayoría de mis mejores clientes han llegado por recomendación..." },
+      { id: "cl-referido",        icon: Handshake,    iconBg: "bg-[#E1F5EE]",  iconColor: "text-[#0F766E]",    titulo: "Pedir referido",           desc: "Pide a clientes satisfechos que te recomienden a alguien similar",      preview: "La mayoría de mis mejores clientes han llegado por recomendación..." },
       { id: "cl-encuesta",        icon: HelpCircle,   iconBg: "bg-purple-50",   iconColor: "text-purple-500",   titulo: "Encuesta de satisfacción", desc: "Pregunta honestamente qué mejorarían — antes de que se vayan",          preview: "Llevo un tiempo sin preguntarte directamente cómo estás viendo nuestra colaboración..." },
       { id: "cl-upsell",          icon: Rocket,       iconBg: "bg-blue-50",     iconColor: "text-blue-500",     titulo: "Servicio adicional",       desc: "Propón un servicio complementario con contexto real del cliente",        preview: "Trabajar contigo me ha dado contexto suficiente para identificar algo más..." },
-      { id: "cl-disponibilidad",  icon: CheckCircle,  iconBg: "bg-[#E1F5EE]",  iconColor: "text-[#1FA97A]",    titulo: "Tengo disponibilidad",     desc: "Avisa a clientes con los que puedas retomar algo pendiente",            preview: "El próximo mes tengo disponibilidad y pensé en ti..." },
+      { id: "cl-disponibilidad",  icon: CheckCircle,  iconBg: "bg-[#E1F5EE]",  iconColor: "text-[#0F766E]",    titulo: "Tengo disponibilidad",     desc: "Avisa a clientes con los que puedas retomar algo pendiente",            preview: "El próximo mes tengo disponibilidad y pensé en ti..." },
     ],
     "todos-leads": [
       { id: "ld-seguimiento",  icon: Mail,         iconBg: "bg-blue-50",     iconColor: "text-blue-600",   titulo: "Seguimiento de propuesta",  desc: "Para leads que recibieron tu propuesta y no han respondido",     preview: "Han pasado unos días desde que te envié la propuesta y quería saber..." },
@@ -1986,7 +1986,7 @@ export default function MarketingPage() {
       { id: "ld-ultimo",       icon: DoorOpen,     iconBg: "bg-red-50",      iconColor: "text-red-500",    titulo: "Último seguimiento",        desc: "El mensaje final, sin presión, que deja la puerta abierta",       preview: "No quiero molestarte más, así que este es mi último mensaje..." },
     ],
     "clientes-inactivos": [
-      { id: "ci-retoma",          icon: UserCheck,    iconBg: "bg-[#E1F5EE]", iconColor: "text-[#1FA97A]",  titulo: "Retomar contacto",          desc: "Rompe el silencio de forma natural y sin presión",                   preview: "Han pasado meses sin escribirte y no quería que pasara más tiempo..." },
+      { id: "ci-retoma",          icon: UserCheck,    iconBg: "bg-[#E1F5EE]", iconColor: "text-[#0F766E]",  titulo: "Retomar contacto",          desc: "Rompe el silencio de forma natural y sin presión",                   preview: "Han pasado meses sin escribirte y no quería que pasara más tiempo..." },
       { id: "ci-oferta",          icon: Gift,         iconBg: "bg-orange-50",  iconColor: "text-orange-600", titulo: "Oferta de reactivación",    desc: "Una propuesta especial solo para quienes ya trabajaron contigo",     preview: "Para clientes con los que hemos trabajado antes tengo algo especial..." },
       { id: "ci-novedad",         icon: Bell,         iconBg: "bg-blue-50",    iconColor: "text-blue-600",   titulo: "Qué hay de nuevo",          desc: "Comparte lo que ha cambiado desde la última vez que trabajasteis",   preview: "Desde que trabajamos juntos han pasado cosas. Quería contarte..." },
       { id: "ci-nuevo-servicio",  icon: Sparkles,     iconBg: "bg-purple-50",  iconColor: "text-purple-600", titulo: "Nuevo servicio",            desc: "Preséntale algo que ahora ofreces y que puede ser relevante",        preview: "Quería contarte que hemos añadido algo nuevo que pensé en ti..." },
@@ -1994,7 +1994,7 @@ export default function MarketingPage() {
       { id: "ci-descuento",       icon: Receipt,      iconBg: "bg-slate-100",  iconColor: "text-slate-600",  titulo: "Descuento especial",        desc: "Ofrece condiciones preferenciales para clientes que vuelven",        preview: "Para clientes que trabajaron conmigo antes tengo algo exclusivo..." },
       { id: "ci-caso",            icon: Trophy,       iconBg: "bg-amber-50",   iconColor: "text-amber-600",  titulo: "Nuevo caso de éxito",       desc: "Un proyecto reciente relevante que puede hacerle reconsiderar",      preview: "Hace unas semanas terminé algo relacionado con lo que hacíamos juntos..." },
       { id: "ci-feedback",        icon: MessageCircle,iconBg: "bg-blue-50",    iconColor: "text-blue-500",   titulo: "¿Qué pasó?",               desc: "Pregunta honestamente si hubo algo que no salió como esperaban",     preview: "Llevo un tiempo pensando en por qué no hemos vuelto a trabajar juntos..." },
-      { id: "ci-saludo",          icon: MessageSquare,iconBg: "bg-[#E1F5EE]", iconColor: "text-[#1FA97A]",  titulo: "Solo saludar",              desc: "Un contacto sin agenda ni propuesta — solo mantener la relación",    preview: "No tengo ninguna propuesta ni nada que venderte. Solo quería decir hola..." },
+      { id: "ci-saludo",          icon: MessageSquare,iconBg: "bg-[#E1F5EE]", iconColor: "text-[#0F766E]",  titulo: "Solo saludar",              desc: "Un contacto sin agenda ni propuesta — solo mantener la relación",    preview: "No tengo ninguna propuesta ni nada que venderte. Solo quería decir hola..." },
       { id: "ci-directa",         icon: Target,       iconBg: "bg-red-50",     iconColor: "text-red-500",    titulo: "Propuesta directa",         desc: "Pregunta directo si hay algo en lo que puedas ayudar ahora",         preview: "Voy al grano: quería preguntarte si hay algo en marcha en lo que pueda ayudarte..." },
     ],
     "leads-frios": [
@@ -2014,23 +2014,23 @@ export default function MarketingPage() {
       { id: "vip-oferta",        icon: Star,        iconBg: "bg-purple-50",  iconColor: "text-purple-600", titulo: "Oferta VIP exclusiva",      desc: "Una propuesta que no está en ningún sitio público ni para nadie más", preview: "Hay clientes con los que la relación va más allá de lo transaccional..." },
       { id: "vip-evento",        icon: CalendarCheck,iconBg: "bg-blue-50",   iconColor: "text-blue-600",   titulo: "Invitación privada",        desc: "Invitación a un espacio reducido y selecto solo para tu inner circle",preview: "Organizo algo con un grupo muy reducido y quería invitarte..." },
       { id: "vip-revision",      icon: BarChart3,   iconBg: "bg-slate-100",  iconColor: "text-slate-600",  titulo: "Revisión estratégica",      desc: "Ofrece una sesión de revisión gratuita como servicio de alto valor",   preview: "Quería proponerte una sesión de revisión de lo que hemos construido..." },
-      { id: "vip-expansion",     icon: Rocket,      iconBg: "bg-[#E1F5EE]", iconColor: "text-[#1FA97A]",  titulo: "Propuesta de expansión",    desc: "Propón dar el siguiente paso en la relación hacia algo más ambicioso", preview: "Llevo tiempo pensando en algo que todavía no hemos explorado juntos..." },
+      { id: "vip-expansion",     icon: Rocket,      iconBg: "bg-[#E1F5EE]", iconColor: "text-[#0F766E]",  titulo: "Propuesta de expansión",    desc: "Propón dar el siguiente paso en la relación hacia algo más ambicioso", preview: "Llevo tiempo pensando en algo que todavía no hemos explorado juntos..." },
       { id: "vip-agradecimiento",icon: Heart,       iconBg: "bg-rose-50",    iconColor: "text-rose-600",   titulo: "Agradecimiento especial",   desc: "Reconoce explícitamente su valor como cliente — sin ninguna agenda",   preview: "Quería escribirte sin ningún motivo comercial. Llevamos tiempo juntos y..." },
       { id: "vip-regalo",        icon: Gift,        iconBg: "bg-orange-50",  iconColor: "text-orange-600", titulo: "Regalo o bonus",            desc: "Envía algo de valor sin condiciones como gesto de reciprocidad",       preview: "Quería enviarte algo como agradecimiento por este tiempo juntos..." },
-      { id: "vip-referidos",     icon: Handshake,   iconBg: "bg-[#E1F5EE]", iconColor: "text-[#1FA97A]",  titulo: "Pedir referidos",           desc: "Pide que te recomienden a alguien de su mismo nivel",                 preview: "Los mejores clientes que tengo han llegado por recomendación de clientes como tú..." },
+      { id: "vip-referidos",     icon: Handshake,   iconBg: "bg-[#E1F5EE]", iconColor: "text-[#0F766E]",  titulo: "Pedir referidos",           desc: "Pide que te recomienden a alguien de su mismo nivel",                 preview: "Los mejores clientes que tengo han llegado por recomendación de clientes como tú..." },
       { id: "vip-partnership",   icon: Link2,       iconBg: "bg-blue-50",    iconColor: "text-blue-500",   titulo: "Propuesta de colaboración", desc: "Explora una forma de trabajar juntos que va más allá del cliente-proveedor", preview: "Llevo tiempo dándole vueltas a algo y quería planteártelo directamente..." },
       { id: "vip-exclusivo",     icon: Snowflake,   iconBg: "bg-slate-100",  iconColor: "text-slate-500",  titulo: "Contenido exclusivo",       desc: "Comparte algo que no publicas y que sabes que les va a servir",        preview: "Quería compartir algo que no comparto públicamente..." },
     ],
     "nuevos-clientes": [
-      { id: "nc-bienvenida",    icon: UserCheck,    iconBg: "bg-[#E1F5EE]", iconColor: "text-[#1FA97A]",  titulo: "Bienvenida cálida",        desc: "El primer email que reciben — marca el tono de toda la relación",    preview: "Quería empezar con el pie derecho. Gracias por elegirme..." },
+      { id: "nc-bienvenida",    icon: UserCheck,    iconBg: "bg-[#E1F5EE]", iconColor: "text-[#0F766E]",  titulo: "Bienvenida cálida",        desc: "El primer email que reciben — marca el tono de toda la relación",    preview: "Quería empezar con el pie derecho. Gracias por elegirme..." },
       { id: "nc-primeros-pasos",icon: ArrowRight,   iconBg: "bg-blue-50",   iconColor: "text-blue-600",   titulo: "Primeros pasos",           desc: "Explica qué va a pasar ahora y qué necesitas de ellos",              preview: "Ahora que hemos empezado, quería darte claridad sobre cómo van a ir las cosas..." },
       { id: "nc-recursos",      icon: Bookmark,     iconBg: "bg-blue-50",   iconColor: "text-blue-500",   titulo: "Recursos útiles",          desc: "Comparte materiales para que saquen más partido desde el principio",  preview: "Mientras arrancamos, quería dejarte algunos recursos útiles..." },
       { id: "nc-proceso",       icon: Code2,        iconBg: "bg-slate-100", iconColor: "text-slate-600",  titulo: "Así trabajamos",           desc: "Explica tu forma de trabajar para evitar malentendidos después",      preview: "Antes de que empecemos de lleno, quería explicarte cómo funciono..." },
       { id: "nc-semana1",       icon: CalendarCheck,iconBg: "bg-purple-50", iconColor: "text-purple-500", titulo: "Check-in semana 1",        desc: "Primera revisión rápida para detectar cualquier fricción temprana",   preview: "Ya llevamos una semana trabajando juntos y quería hacer una pausa..." },
-      { id: "nc-mes1",          icon: TrendingUp,   iconBg: "bg-[#E1F5EE]", iconColor: "text-[#1FA97A]",  titulo: "Check-in mes 1",           desc: "Primer balance real de cómo está yendo la colaboración",              preview: "Ya llevamos un mes y quería hacer un check-in real..." },
+      { id: "nc-mes1",          icon: TrendingUp,   iconBg: "bg-[#E1F5EE]", iconColor: "text-[#0F766E]",  titulo: "Check-in mes 1",           desc: "Primer balance real de cómo está yendo la colaboración",              preview: "Ya llevamos un mes y quería hacer un check-in real..." },
       { id: "nc-opinion",       icon: MessageCircle,iconBg: "bg-blue-50",   iconColor: "text-blue-500",   titulo: "Primera opinión",          desc: "Pide feedback honesto mientras todavía pueden cambiarse cosas",       preview: "Quería pedirte algo que para mí tiene mucho valor: tu opinión honesta..." },
-      { id: "nc-ayuda",         icon: Users,        iconBg: "bg-[#E1F5EE]", iconColor: "text-[#1FA97A]",  titulo: "¿Puedo ayudarte más?",     desc: "Identifica si hay otras necesidades más allá de lo que está en marcha",preview: "Más allá de lo que estamos haciendo juntos, quería preguntarte algo más..." },
-      { id: "nc-referidos",     icon: Handshake,    iconBg: "bg-[#E1F5EE]", iconColor: "text-[#1FA97A]",  titulo: "¿Conoces a alguien?",      desc: "Pide un referido una vez que ya están satisfechos con el inicio",     preview: "Sé que llevamos poco tiempo, pero si lo que hacemos te está sirviendo..." },
+      { id: "nc-ayuda",         icon: Users,        iconBg: "bg-[#E1F5EE]", iconColor: "text-[#0F766E]",  titulo: "¿Puedo ayudarte más?",     desc: "Identifica si hay otras necesidades más allá de lo que está en marcha",preview: "Más allá de lo que estamos haciendo juntos, quería preguntarte algo más..." },
+      { id: "nc-referidos",     icon: Handshake,    iconBg: "bg-[#E1F5EE]", iconColor: "text-[#0F766E]",  titulo: "¿Conoces a alguien?",      desc: "Pide un referido una vez que ya están satisfechos con el inicio",     preview: "Sé que llevamos poco tiempo, pero si lo que hacemos te está sirviendo..." },
       { id: "nc-hito",          icon: Trophy,       iconBg: "bg-amber-50",  iconColor: "text-amber-600",  titulo: "Primer resultado",         desc: "Reconoce el primer hito conseguido juntos — por pequeño que sea",     preview: "Quería escribirte para reconocer algo: [primer resultado conseguido]..." },
     ],
   }
@@ -2043,792 +2043,769 @@ export default function MarketingPage() {
 
   const audienciaLabel = audienciaSeleccionada?.replace(/-/g, " ") ?? ""
 
+  // ─── Data ─────────────────────────────────────────────────────────────────
+  const { data: mktStats, isLoading: mktLoading } = useQuery({
+    queryKey: ["marketing-stats"],
+    queryFn: () => fetch("/api/marketing/stats").then(r => r.json()),
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
+    retry: 0,
+  })
+
+  const totalSubs   = mktStats?.kpis?.totalContactos ?? 18420
+  const openRate    = mktStats?.kpis?.tasaApertura   ?? 38.4
+  const ctr         = mktStats?.kpis?.ctr            ?? 14.2
+  const campanasAPI: { id: string; nombre: string; estado: string; totalEnviados: number; totalAbiertos: number; totalClicks: number; aperturaPct: number | null }[] = mktStats?.campanasRecientes ?? []
+
+  const [emTab, setEmTab] = useState("campanas")
+  const [campFilter, setCampFilter] = useState("Todas")
+  const [tmplFilter, setTmplFilter] = useState("Todas")
+  const [showComposer, setShowComposer] = useState(false)
+  const [composerStep, setComposerStep] = useState(0)
+
+  // ─── Design tokens ─────────────────────────────────────────────────────────
+  const D = {
+    bg: "#ffffff", bg2: "#fafafa", bg3: "#f5f5f5",
+    ink: "#0a0a0a", ink2: "#404040", ink3: "#737373", ink4: "#a3a3a3", ink5: "#d4d4d4",
+    line: "#e8e8e8", line2: "#eeeeee", line3: "#f3f3f3",
+    accent: "#16986e", accentSoft: "#ecf6f1", accentInk: "#0d7a56",
+    warn: "#c2410c", warnSoft: "#fef3eb",
+    blue: "#3756a4", violet: "#6d28d9",
+  } as const
+
+  const pRndM = (s: number) => { const x = Math.sin(s * 127.1 + 311.7) * 10000; return x - Math.floor(x) }
+  const fmtN = (n: number) => new Intl.NumberFormat("es-ES").format(Math.round(n))
+
+  // Sparklines
+  const subSpark  = Array.from({ length: 12 }, (_, i) => totalSubs * (0.91 + i * 0.008 + pRndM(i * 3) * 0.005))
+  const openSpark = Array.from({ length: 12 }, (_, i) => openRate * (0.89 + i * 0.01 + pRndM(i * 5) * 0.008))
+  const ctrSpark  = Array.from({ length: 12 }, (_, i) => ctr * (0.87 + i * 0.012 + pRndM(i * 7) * 0.008))
+  const revSpark  = [820,1240,1820,2480,3120,4280,6420,8840,12420,16480,21240,24840]
+
+  // Campaigns static design data (used if no real data)
+  const CAMPAIGNS_DESIGN = [
+    { st: "live",  nm: "Mayo · Lanzamiento colección verano",   sub: "Enviando ahora · A/B en marcha · 5.200 de 8.420",   sent: 5200,  open: 42.6, click: 7.8, conv: 1.4, rev: 4280 },
+    { st: "send",  nm: "Newsletter #18 · Tendencias 2026",      sub: "Enviada el 24 may · segmento general",               sent: 16840, open: 41.2, click: 6.9, conv: 1.1, rev: 3120 },
+    { st: "sched", nm: "Lunes 09:00 · Boletín semanal",         sub: "Programada · 12.420 destinatarios · Send Time AI",   sent: 12420, open: null, click: null, conv: null, rev: null },
+    { st: "ab",    nm: "Promo · 20% descuento PRO",             sub: "A/B test · 2 variantes · gana al alcanzar 1.000",    sent: 1680,  open: 36.8, click: 5.2, conv: 0.9, rev: 1840 },
+    { st: "draft", nm: "Welcome series · paso 2 (día 3)",       sub: "Borrador · audiencia: nuevos suscriptores",          sent: null,  open: null, click: null, conv: null, rev: null },
+    { st: "send",  nm: "Caso de éxito · Hotel Pinsapo",         sub: "Enviada el 18 may · segmento PRO",                   sent: 4280,  open: 48.2, click: 9.4, conv: 2.2, rev: 5840 },
+    { st: "send",  nm: "Reactivación · suscriptores 60d+",      sub: "Enviada el 12 may · 1.840 destinatarios",            sent: 1840,  open: 22.8, click: 3.1, conv: 0.3, rev: 320  },
+    { st: "draft", nm: "Anuncio · nueva app móvil",             sub: "Borrador · plantilla Anuncio producto",              sent: null,  open: null, click: null, conv: null, rev: null },
+  ]
+
+  const SEGMENTS_DESIGN = [
+    { nm: "Suscriptores PRO",        desc: "Plan Pro o Business · último login < 30 d.",     ct: 4280,  open: 48.6, click: 9.4,  churn: 0.8, color: D.blue,   bg: "#eef2fb" },
+    { nm: "Leads calientes",         desc: "Score ≥ 70 · sin compra en los últimos 14 d.",   ct: 1284,  open: 52.4, click: 11.2, churn: 1.4, color: D.violet, bg: "#f3edff" },
+    { nm: "Inactivos 60 d+",         desc: "Sin abrir ningún correo en los últimos 60 días.", ct: 2840,  open: 18.2, click: 2.1,  churn: 4.6, color: D.warn,   bg: D.warnSoft },
+    { nm: "Compradores recurrentes", desc: "≥ 3 facturas pagadas en los últimos 6 meses.",   ct: 1620,  open: 56.8, click: 14.2, churn: 0.4, color: D.accent, bg: D.accentSoft },
+    { nm: "ES + LATAM",              desc: "Idioma ES · zona UTC+1 a UTC-6.",                 ct: 12480, open: 38.2, click: 6.4,  churn: 1.2, color: D.blue,   bg: "#eef2fb" },
+    { nm: "AI · Riesgo de cancelar", desc: "Modelo de churn detecta probabilidad > 60%.",    ct: 184,   open: 31.6, click: 4.2,  churn: 8.4, color: "#0e7490", bg: "#ecfeff" },
+  ]
+
+  const TEMPLATES_DESIGN = [
+    { nm: "Bienvenida Pro",       cat: "Onboarding",     color: D.accent },
+    { nm: "Newsletter semanal",   cat: "Newsletter",     color: D.blue },
+    { nm: "Caso de éxito",        cat: "Marketing",      color: D.violet },
+    { nm: "Recordatorio compra",  cat: "Transaccional",  color: D.warn },
+    { nm: "Promo flash",          cat: "Marketing",      color: D.accent },
+    { nm: "Confirmación pago",    cat: "Transaccional",  color: D.blue },
+    { nm: "Reactivación 60d",     cat: "Re-engagement",  color: D.violet },
+    { nm: "Anuncio producto",     cat: "Marketing",      color: D.warn },
+  ]
+
+  const SCHED_7 = [
+    { d: "Hoy",  date: 27, today: true,  slots: [
+      { tm: "09:00", nm: "Mayo · Colección verano", sub: "8,4k · A/B activa", cl: D.accent },
+      { tm: "14:30", nm: "Flash 20% PRO",           sub: "4,2k · 1 var.",      cl: D.violet },
+    ]},
+    { d: "Mié",  date: 28, today: false, slots: [{ tm: "10:00", nm: "Invitación webinar", sub: "2,8k", cl: D.blue }] },
+    { d: "Jue",  date: 29, today: false, slots: [] },
+    { d: "Vie",  date: 30, today: false, slots: [{ tm: "08:00", nm: "Resumen mensual", sub: "12,4k · auto", cl: D.accent }] },
+    { d: "Sáb",  date: 31, today: false, slots: [] },
+    { d: "Dom",  date: 1,  today: false, slots: [] },
+    { d: "Lun",  date: 2,  today: false, slots: [
+      { tm: "09:00", nm: "Boletín semanal", sub: "12,4k · STO", cl: D.accent },
+      { tm: "15:00", nm: "Reactivación 60d", sub: "2,8k", cl: D.warn },
+    ]},
+  ]
+
+  const STATUS_CFG: Record<string, { lbl: string; tone: string }> = {
+    live: { lbl: "En vivo", tone: "green" }, send: { lbl: "Enviada", tone: "green" },
+    sched: { lbl: "Programada", tone: "blue" }, ab: { lbl: "A/B en curso", tone: "violet" },
+    draft: { lbl: "Borrador", tone: "ink" },
+  }
+
+  const pill = (tone: string, label: string) => {
+    const TONE: Record<string, { bg: string; c: string }> = {
+      green:  { bg: D.accentSoft, c: D.accentInk },
+      blue:   { bg: "#eef2fb",    c: D.blue },
+      violet: { bg: "#f3edff",    c: D.violet },
+      amber:  { bg: D.warnSoft,   c: D.warn },
+      ink:    { bg: D.bg3,        c: D.ink2 },
+    }
+    const t = TONE[tone] ?? TONE.ink
+    return (
+      <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "2px 8px", borderRadius: 99, fontSize: 11, fontWeight: 500, background: t.bg, color: t.c }}>
+        <span style={{ width: 5, height: 5, borderRadius: 99, background: t.c, display: "inline-block" }} />
+        {label}
+      </span>
+    )
+  }
+
+  const sparkSvg = (data: number[], color: string) => {
+    const w = 96, h = 28
+    const min = Math.min(...data), max = Math.max(...data), rng = max - min || 1
+    const step = w / (data.length - 1)
+    const pts = data.map((v, i) => [i * step, h - 4 - ((v - min) / rng) * (h - 8)] as [number, number])
+    const lineD = "M" + pts.map(p => p.join(",")).join(" L")
+    const last = pts[pts.length - 1]
+    return (
+      <svg viewBox={`0 0 ${w} ${h}`} width={w} height={h}>
+        <path d={lineD} fill="none" stroke={color} strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx={last[0]} cy={last[1]} r={2} fill={color} />
+      </svg>
+    )
+  }
+
+  const EM_TABS = ["campanas", "segmentos", "plantillas", "entregabilidad"] as const
+  const EM_LABELS: Record<string, string> = {
+    campanas: "Campañas", segmentos: "Segmentos", plantillas: "Plantillas", entregabilidad: "Entregabilidad"
+  }
+
+  const COMPOSER_STEPS = ["Contenido", "Audiencia", "Test A/B", "Programación", "Seguimiento"]
+
   return (
-    <div className="space-y-5">
+    <div style={{ fontFamily: "var(--font-geist-sans, ui-sans-serif, system-ui, sans-serif)" }}>
 
       {/* ── INSTITUTIONAL HEADER ──────────────────────────────── */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 24, paddingBottom: 18, borderBottom: "1px solid #eeeeee" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 24, paddingBottom: 18, borderBottom: `1px solid ${D.line2}` }}>
         <div>
-          <h1 style={{ fontWeight: 600, letterSpacing: "-0.022em", fontSize: 26, lineHeight: 1.1, margin: 0, color: "#0a0a0a" }}>Email Marketing</h1>
-          <div style={{ marginTop: 6, display: "flex", alignItems: "center", gap: 14, fontSize: 12.5, color: "#737373", flexWrap: "wrap" }}>
-            <span>18.420 suscriptores</span>
-            <span style={{ color: "#d4d4d4" }}>·</span>
+          <h1 style={{ fontWeight: 600, letterSpacing: "-0.022em", fontSize: 26, lineHeight: 1.1, margin: 0, color: D.ink }}>Email Marketing</h1>
+          <div style={{ marginTop: 6, display: "flex", alignItems: "center", gap: 14, fontSize: 12.5, color: D.ink3, flexWrap: "wrap" }}>
+            <span>{fmtN(totalSubs)} suscriptores</span>
+            <span style={{ color: D.ink5 }}>·</span>
             <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-              <span style={{ width: 6, height: 6, borderRadius: 99, background: "#16986e", boxShadow: "0 0 0 3px #ecf6f1", display: "inline-block" }} />
+              <span style={{ width: 6, height: 6, borderRadius: 99, background: D.accent, boxShadow: `0 0 0 3px ${D.accentSoft}`, display: "inline-block" }} />
               1 campaña enviando ahora
             </span>
-            <span style={{ color: "#d4d4d4" }}>·</span>
-            <span>Reputación de dominio <strong style={{ color: "#0d7a56" }}>96 / 100</strong></span>
+            <span style={{ color: D.ink5 }}>·</span>
+            <span>Próximo: Lun 02 jun, 09:00</span>
+            <span style={{ color: D.ink5 }}>·</span>
+            <span>Reputación <strong style={{ color: D.accentInk }}>96 / 100</strong></span>
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-          <button className="flex items-center gap-2 px-3 py-[7px] bg-white border border-[#e8e8e8] rounded-md text-[12.5px] font-medium text-[#404040] hover:border-[#a3a3a3] transition-colors">
-            <Search className="h-3 w-3" />
-            Buscar
+          <button style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 6, background: D.bg, border: `1px solid ${D.line}`, color: D.ink2, fontWeight: 550, fontSize: 12.5, cursor: "pointer" }}>
+            <Upload className="h-3 w-3" />Importar lista
           </button>
-          <button className="flex items-center gap-2 px-3 py-[7px] bg-white border border-[#e8e8e8] rounded-md text-[12.5px] font-medium text-[#404040] hover:border-[#a3a3a3] transition-colors">
-            Importar lista
-          </button>
-          <button className="flex items-center gap-2 px-3 py-[7px] bg-white border border-[#e8e8e8] rounded-md text-[12.5px] font-medium text-[#404040] hover:border-[#a3a3a3] transition-colors">
-            Plantillas
+          <button style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 6, background: D.bg, border: `1px solid ${D.line}`, color: D.ink2, fontWeight: 550, fontSize: 12.5, cursor: "pointer" }}
+            onClick={() => setEmTab("plantillas")}>
+            <FileText className="h-3 w-3" />Plantillas
           </button>
           <button
-            onClick={handleNuevaCampana}
-            style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: "#0a0a0a", color: "white", fontWeight: 550, fontSize: 12.5, border: "none", cursor: "pointer" }}
+            onClick={() => { setEmTab("campanas"); setShowComposer(true); setComposerStep(0) }}
+            style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: D.ink, color: "white", fontWeight: 550, fontSize: 12.5, border: "none", cursor: "pointer" }}
           >
-            <Plus className="h-3 w-3" />
-            Nueva campaña
+            <Plus className="h-3 w-3" />Nueva campaña
           </button>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="border-b border-slate-200 -mt-2">
-        <div className="flex items-center gap-1 overflow-x-auto">
-          {TABS.map((tab) => {
-            const Icon = tab.icon
-            const active = activeTab === tab.id
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  "flex items-center gap-2 px-4 py-3 text-[13px] font-medium whitespace-nowrap relative transition-all duration-150",
-                  active ? "text-[#1FA97A]" : "text-slate-500 hover:text-slate-700"
-                )}
-              >
-                <Icon className="h-3.5 w-3.5" />
-                {tab.label}
-                {"badge" in tab && tab.badge && (
-                  <span className="px-1.5 py-0.5 bg-[#1FA97A] text-white text-[9px] font-bold rounded-full leading-none">
-                    {tab.badge}
-                  </span>
-                )}
-                {active && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#1FA97A] rounded-full" />
-                )}
-              </button>
-            )
-          })}
-        </div>
+      {/* ── KPI ROW ──────────────────────────────────────────────── */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", border: `1px solid ${D.line}`, borderRadius: 10, background: D.bg, overflow: "hidden" }}>
+        {[
+          { l: "Suscriptores activos", tag: "Total", v: fmtN(totalSubs), delta: "+4,2%", vs: `+742 este mes`, spark: subSpark, color: D.ink },
+          { l: "Tasa de apertura",     tag: "30d",   v: `${openRate.toFixed(1).replace(".", ",")}%`, delta: "+2,1%", vs: "vs sector 24%", spark: openSpark, color: D.ink },
+          { l: "CTR · clic/abierto",   tag: "30d",   v: `${ctr.toFixed(1).replace(".", ",")}%`, delta: "+0,6%", vs: "vs sector 8,1%", spark: ctrSpark, color: D.ink },
+          { l: "Ingresos atribuidos",  tag: "MTD",   v: "24.840 €",  delta: "+18,6%", vs: "vs Abr (20.940 €)", spark: revSpark, color: D.accentInk, isLast: true },
+        ].map((k) => (
+          <div key={k.l} style={{ padding: "18px 22px", borderRight: k.isLast ? "none" : `1px solid ${D.line2}`, display: "flex", flexDirection: "column", gap: 4 }}>
+            <div style={{ fontSize: 11.5, color: D.ink3, fontWeight: 500, display: "flex", alignItems: "center", gap: 6 }}>
+              {k.l}
+              <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 9, padding: "1px 5px", borderRadius: 3, background: D.bg3, color: D.ink3, letterSpacing: "0.04em", textTransform: "uppercase" as const }}>{k.tag}</span>
+            </div>
+            <div style={{ fontWeight: 600, letterSpacing: "-0.028em", fontSize: 28, lineHeight: 1.1, marginTop: 4, fontVariantNumeric: "tabular-nums", color: D.ink }}>{k.v}</div>
+            <div style={{ marginTop: 10, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontFamily: "ui-monospace,monospace", fontSize: 11.5, fontWeight: 500, color: D.accentInk }}>
+                <ArrowUpRight className="h-3 w-3" />
+                {k.delta} <span style={{ color: D.ink4, marginLeft: 4, fontWeight: 450 }}>{k.vs}</span>
+              </span>
+              {sparkSvg(k.spark, k.color)}
+            </div>
+          </div>
+        ))}
       </div>
 
-      {/* Tab content */}
-      {activeTab === "resumen"    && <TabResumen setActiveTab={setActiveTab} onNuevaCampana={handleNuevaCampana} />}
-      {activeTab === "campanas"   && <TabCampanas onNuevaCampana={handleNuevaCampana} />}
-      {activeTab === "newsletter" && <TabNewsletter />}
-      {activeTab === "contenido"  && <TabContenidoIA />}
-      {activeTab === "audiencias" && <TabAudiencias />}
-      {activeTab === "analitica"  && <TabAnalitica />}
-      {activeTab === "landings"   && <TabLandings />}
+      {/* ── SUBNAV TABS ──────────────────────────────────────────── */}
+      <div style={{ borderBottom: `1px solid ${D.line2}`, display: "flex", alignItems: "center", gap: 2, overflowX: "auto", scrollbarWidth: "none" }}>
+        {EM_TABS.map(t => {
+          const isActive = emTab === t
+          return (
+            <button key={t} onClick={() => setEmTab(t)} style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "12px 12px 11px", fontSize: 12.5, color: isActive ? D.ink : D.ink3, fontWeight: isActive ? 600 : 500, whiteSpace: "nowrap", borderBottom: `2px solid ${isActive ? D.ink : "transparent"}`, background: "none", border: "0 solid transparent", borderBottomWidth: 2, cursor: "pointer" }}>
+              {EM_LABELS[t]}
+              {t === "campanas" && campanasAPI.length > 0 && (
+                <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 10, padding: "1px 5px", borderRadius: 99, background: isActive ? D.ink : D.bg3, color: isActive ? "white" : D.ink3, fontWeight: 600 }}>{campanasAPI.length}</span>
+              )}
+            </button>
+          )
+        })}
+      </div>
 
-      {/* ── MODAL ÚNICO — Crear campaña (5 pasos) ─────────────────────────── */}
-      {modalCampana && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={resetModal} />
+      {/* ══════════ CAMPAÑAS ══════════ */}
+      {emTab === "campanas" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
-          <div className={cn(
-            "relative bg-white rounded-2xl shadow-2xl w-full overflow-hidden flex flex-col max-h-[90vh]",
-            pasoModal === 3 ? "max-w-5xl" : "max-w-2xl"
-          )}>
-
-            {/* Header fijo */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 flex-shrink-0">
-              <div className="flex items-center gap-3">
-                {pasoModal > 1 && (
-                  <button
-                    onClick={() => setPasoModal(p => (p - 1) as 1|2|3|4|5)}
-                    className="p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
-                  >
-                    <ArrowLeft className="h-4 w-4 text-slate-500" />
-                  </button>
-                )}
-                <div>
-                  <h2 className="text-[16px] font-bold text-slate-900">
-                    {pasoModal === 1 && "Crear campaña"}
-                    {pasoModal === 2 && "¿A quién va dirigida?"}
-                    {pasoModal === 3 && "Elige una plantilla"}
-                    {pasoModal === 4 && "Edita el contenido"}
-                    {pasoModal === 5 && "Revisa y envía"}
-                  </h2>
-                  {tipoCampana && pasoModal > 1 && (
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-[11px] text-[#1FA97A] font-medium">
-                        {tipoCampana === "puntual" ? "Puntual" : tipoCampana === "automatica" ? "Automática" : "Secuencia"}
-                      </span>
-                      {audienciaSeleccionada && pasoModal > 2 && (
-                        <>
-                          <span className="text-slate-300">·</span>
-                          <span className="text-[11px] text-slate-400 capitalize">{audienciaLabel}</span>
-                        </>
-                      )}
-                    </div>
-                  )}
+          {/* COMPOSER */}
+          {showComposer && (
+            <div style={{ background: D.bg, border: `1px solid ${D.line}`, borderRadius: 12, overflow: "hidden" }}>
+              {/* Composer head */}
+              <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 18px", borderBottom: `1px solid ${D.line2}`, background: D.bg2 }}>
+                <div style={{ fontWeight: 600, fontSize: 14, color: D.ink, letterSpacing: "-0.01em" }}>Mayo · Lanzamiento colección verano</div>
+                <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, color: D.ink3 }}>CMP-2026-018</span>
+                <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, color: D.accentInk, display: "inline-flex", alignItems: "center", gap: 5 }}>
+                  <Check className="h-3 w-3" />Guardado hace 12 s
+                </span>
+                <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+                  <button style={{ padding: "5px 10px", borderRadius: 6, background: D.bg, border: `1px solid ${D.line}`, color: D.ink2, fontSize: 11.5, fontWeight: 550, cursor: "pointer" }}>Enviar prueba</button>
+                  <button style={{ padding: "5px 10px", borderRadius: 6, background: D.bg, border: `1px solid ${D.line}`, color: D.ink2, fontSize: 11.5, fontWeight: 550, cursor: "pointer" }}>Guardar borrador</button>
+                  <button style={{ padding: "5px 10px", borderRadius: 6, background: D.accent, color: "white", fontSize: 11.5, fontWeight: 550, border: "none", cursor: "pointer" }}>Programar envío</button>
+                  <button onClick={() => setShowComposer(false)} style={{ width: 30, height: 30, borderRadius: 6, display: "grid", placeItems: "center", background: D.bg, border: `1px solid ${D.line}`, cursor: "pointer", color: D.ink3 }}>✕</button>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                {/* Step indicators */}
-                <div className="flex items-center gap-1">
-                  {([1,2,3,4,5] as const).map(p => (
-                    <div
-                      key={p}
-                      className={cn(
-                        "h-1.5 rounded-full transition-all duration-300",
-                        p === pasoModal ? "w-6 bg-[#1FA97A]" : p < pasoModal ? "w-3 bg-[#1FA97A]/40" : "w-3 bg-slate-200"
-                      )}
-                    />
-                  ))}
-                </div>
-                <button onClick={resetModal} className="p-2 rounded-xl hover:bg-slate-100 transition-colors">
-                  <X className="h-5 w-5 text-slate-400" />
-                </button>
-              </div>
-            </div>
-
-            {/* Contenido scrollable */}
-            <div className="flex-1 overflow-y-auto px-6 py-5">
-
-              {/* PASO 1 — TIPO */}
-              {pasoModal === 1 && (
-                <div className="space-y-3">
-                  {[
-                    { id: "puntual" as const,    iconBg: "bg-[#E1F5EE]", titulo: "Campaña puntual",     color: "hover:border-[#1FA97A] hover:bg-[#E1F5EE]/20",   descripcion: "Un email enviado ahora o programado a una fecha concreta. Ideal para anuncios, ofertas o comunicaciones importantes.", ejemplos: ["Anuncio de subida de precios", "Oferta de temporada", "Novedad en tus servicios"] },
-                    { id: "automatica" as const,  iconBg: "bg-blue-50",   titulo: "Campaña automática",  color: "hover:border-blue-400 hover:bg-blue-50/30",       descripcion: "Se envía sola cuando ocurre algo en tu negocio. Sin que tengas que hacer nada. Trabaja por ti mientras duermes.",    ejemplos: ["Lead sin respuesta 7 días",   "Cliente inactivo 90 días", "Factura vencida sin pagar"] },
-                    { id: "secuencia" as const,   iconBg: "bg-purple-50", titulo: "Secuencia de emails", color: "hover:border-purple-400 hover:bg-purple-50/30",   descripcion: "Serie de emails enviados automáticamente en el tiempo. Email 1 el día 0, Email 2 el día 3, Email 3 el día 7...",   ejemplos: ["Bienvenida a nuevo lead (3 emails)", "Seguimiento de presupuesto", "Onboarding cliente nuevo"] },
-                  ].map(tipo => (
-                    <button
-                      key={tipo.id}
-                      onClick={() => { setTipoCampana(tipo.id); setPasoModal(2) }}
-                      className={cn("w-full text-left p-4 rounded-2xl border-2 border-slate-200 transition-all duration-150 group", tipo.color)}
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0", tipo.iconBg)}>
-                          {tipo.id === "puntual"    && <Megaphone className="h-5 w-5 text-[#1FA97A]" />}
-                          {tipo.id === "automatica" && <Zap className="h-5 w-5 text-blue-600" />}
-                          {tipo.id === "secuencia"  && <ArrowRight className="h-5 w-5 text-purple-600" />}
+              {/* Composer body: stepper | form | preview */}
+              <div style={{ display: "grid", gridTemplateColumns: "200px 1fr 280px", gap: 0 }}>
+                {/* Stepper */}
+                <div style={{ padding: 20, borderRight: `1px solid ${D.line2}`, background: D.bg2, display: "flex", flexDirection: "column", gap: 0 }}>
+                  {COMPOSER_STEPS.map((s, i) => (
+                    <div key={s} onClick={() => setComposerStep(i)} style={{ cursor: "pointer", display: "flex", alignItems: "flex-start", gap: 12, marginBottom: i < COMPOSER_STEPS.length - 1 ? 0 : 0 }}>
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                        <div style={{
+                          width: 24, height: 24, borderRadius: 99, display: "grid", placeItems: "center",
+                          background: i < composerStep ? D.accent : i === composerStep ? D.ink : D.bg3,
+                          color: i <= composerStep ? "white" : D.ink3,
+                          fontSize: 10, fontWeight: 600, flexShrink: 0,
+                        }}>
+                          {i < composerStep ? <Check className="h-3 w-3" /> : i + 1}
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-[15px] font-bold text-slate-900">{tipo.titulo}</span>
-                          </div>
-                          <p className="text-[12px] text-slate-500 mb-2 leading-relaxed">{tipo.descripcion}</p>
-                          <div className="flex flex-wrap gap-1.5">
-                            {tipo.ejemplos.map((ej, j) => (
-                              <span key={j} className="px-2 py-0.5 bg-slate-100 text-slate-500 text-[10px] font-medium rounded-lg">{ej}</span>
-                            ))}
-                          </div>
-                        </div>
-                        <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-slate-600 transition-colors flex-shrink-0 mt-1" />
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* PASO 2 — AUDIENCIA */}
-              {pasoModal === 2 && (
-                <div className="space-y-2">
-                  {[
-                    { id: "todos-contactos",    label: "Todos los contactos",        count: 70,  desc: "Clientes y leads activos",       tag: null },
-                    { id: "todos-clientes",     label: "Todos los clientes",         count: 47,  desc: "Solo clientes activos",          tag: null },
-                    { id: "todos-leads",        label: "Todos los leads",            count: 23,  desc: "Leads en pipeline",              tag: null },
-                    { id: "clientes-inactivos", label: "Clientes sin compra 90d",    count: 11,  desc: "En riesgo de perderlos",         tag: "Recomendado" },
-                    { id: "leads-frios",        label: "Leads sin respuesta 14d",    count: 8,   desc: "Necesitan seguimiento",          tag: null },
-                    { id: "clientes-vip",       label: "Clientes VIP",               count: 8,   desc: "Facturación > 2.000€/año",      tag: null },
-                    { id: "nuevos-clientes",    label: "Nuevos clientes",            count: 5,   desc: "Alta en los últimos 30 días",   tag: null },
-                  ].map(seg => (
-                    <button
-                      key={seg.id}
-                      onClick={() => setAudienciaSeleccionada(seg.id)}
-                      className={cn(
-                        "w-full text-left flex items-center gap-4 p-3.5 rounded-xl border-2 transition-all duration-150",
-                        audienciaSeleccionada === seg.id
-                          ? "border-[#1FA97A] bg-[#E1F5EE]/30"
-                          : "border-slate-200 hover:border-slate-300 hover:bg-slate-50"
-                      )}
-                    >
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[13px] font-semibold text-slate-800">{seg.label}</span>
-                          {seg.tag && (
-                            <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[9px] font-bold rounded-full uppercase tracking-wide">
-                              {seg.tag}
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-[11px] text-slate-400">{seg.desc}</span>
-                      </div>
-                      <div className="flex-shrink-0 text-right">
-                        <div className="text-[20px] font-black text-slate-700">{seg.count}</div>
-                        <div className="text-[9px] text-slate-400 uppercase tracking-wider">contactos</div>
-                      </div>
-                      {audienciaSeleccionada === seg.id && (
-                        <CheckCircle className="h-5 w-5 text-[#1FA97A] flex-shrink-0" />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* PASO 3 — PLANTILLAS */}
-              {pasoModal === 3 && (
-                <div className="space-y-4">
-                  {subMenuSeguimiento ? (
-                    /* Submenu seguimiento de propuesta */
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3">
-                        <button
-                          onClick={() => setSubMenuSeguimiento(false)}
-                          className="p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
-                        >
-                          <ArrowLeft className="h-4 w-4 text-slate-500" />
-                        </button>
-                        <div>
-                          <h3 className="text-[15px] font-bold text-slate-900">Seguimiento de propuesta</h3>
-                          <p className="text-[12px] text-slate-400">Elige el tipo de seguimiento para este lead</p>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-4 gap-3">
-                        {[
-                          { id: "seguimiento-suave",  icon: Mail,         iconBg: "bg-blue-50",    iconColor: "text-blue-600",   titulo: "Seguimiento suave",      desc: "Un toque sin presión para quien no respondió aún" },
-                          { id: "sigue-relevante",    icon: HelpCircle,   iconBg: "bg-purple-50",  iconColor: "text-purple-500", titulo: "¿Sigue siendo relevante?",desc: "Pregunta directa para saber si la necesidad sigue en pie" },
-                          { id: "valor-sin-presion",  icon: Lightbulb,    iconBg: "bg-yellow-50",  iconColor: "text-yellow-600", titulo: "Valor sin presión",       desc: "Aporta algo útil mientras valoran tu propuesta" },
-                          { id: "nuevo-angulo",       icon: RotateCcw,    iconBg: "bg-slate-100",  iconColor: "text-slate-600",  titulo: "Nuevo ángulo",            desc: "Replantea la propuesta desde una perspectiva diferente" },
-                          { id: "cliente-similar",    icon: Trophy,       iconBg: "bg-amber-50",   iconColor: "text-amber-600",  titulo: "Cliente similar",         desc: "Comparte el caso de alguien con un reto parecido" },
-                          { id: "que-te-frena",       icon: AlertCircle,  iconBg: "bg-orange-50",  iconColor: "text-orange-600", titulo: "¿Qué te frena?",          desc: "Pregunta directa para identificar la barrera real" },
-                          { id: "ultima-llamada",     icon: Clock,        iconBg: "bg-red-50",     iconColor: "text-red-500",    titulo: "Última llamada",          desc: "Avisa que la propuesta tiene fecha límite de validez" },
-                          { id: "romper-silencio",    icon: MessageCircle,iconBg: "bg-blue-50",    iconColor: "text-blue-500",   titulo: "Romper el silencio",       desc: "Pregunta si dijiste algo que no encajó bien" },
-                          { id: "resolver-objecion",  icon: CheckCircle,  iconBg: "bg-[#E1F5EE]", iconColor: "text-[#1FA97A]",  titulo: "Resolver objeción",        desc: "Anticipa y responde la duda más frecuente" },
-                          { id: "lo-dejamos-aqui",    icon: DoorOpen,     iconBg: "bg-red-50",     iconColor: "text-red-500",    titulo: "¿Lo dejamos aquí?",        desc: "Da la opción de cerrar o retomar — respeto total" },
-                        ].map(p => {
-                          const SIcon = p.icon
-                          return (
-                            <button
-                              key={p.id}
-                              onClick={() => {
-                                setPlantillaSeleccionada({ id: p.id, titulo: p.titulo })
-                                setCampanaForm(f => ({
-                                  ...f,
-                                  asunto:  CONTENIDOS[p.id]?.asunto  ?? "",
-                                  mensaje: CONTENIDOS[p.id]?.mensaje ?? "",
-                                }))
-                                setSubMenuSeguimiento(false)
-                                setPasoModal(4)
-                              }}
-                              className="relative text-left p-3 rounded-2xl border-2 border-slate-200 hover:border-[#1FA97A]/50 hover:bg-[#E1F5EE]/10 transition-all group"
-                            >
-                              <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center mb-2", p.iconBg)}>
-                                <SIcon className={cn("h-4 w-4", p.iconColor)} />
-                              </div>
-                              <div className="text-[12px] font-bold text-slate-800 mb-1 leading-snug">{p.titulo}</div>
-                              <div className="text-[10px] text-slate-400 leading-relaxed">{p.desc}</div>
-                            </button>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  ) : !viendoMisPlantillas ? (
-                    /* Vista normal — grid de plantillas */
-                    <>
-                      <p className="text-[13px] text-slate-500">
-                        Elige una base para tu campaña. Podrás editar todo el contenido en el siguiente paso.
-                      </p>
-                      <div className="grid grid-cols-4 gap-3">
-                        {plantillasActuales.map(p => (
-                          <button
-                            key={p.id}
-                            onClick={() => {
-                              if (p.id === "mis-plantillas") {
-                                setViendoMisPlantillas(true)
-                                return
-                              }
-                              if (p.id === "ld-seguimiento") {
-                                setSubMenuSeguimiento(true)
-                                return
-                              }
-                              setPlantillaSeleccionada(p)
-                              setCampanaForm(f => ({
-                                ...f,
-                                asunto:  CONTENIDOS[p.id]?.asunto  ?? "",
-                                mensaje: CONTENIDOS[p.id]?.mensaje ?? "",
-                              }))
-                              setPasoModal(4)
-                            }}
-                            className="relative text-left p-3 rounded-2xl border-2 border-slate-200 hover:border-[#1FA97A]/50 hover:bg-[#E1F5EE]/10 transition-all group"
-                          >
-                            {/* Badge contador — solo en card "Mis plantillas" */}
-                            {p.id === "mis-plantillas" && misPlantillas.length > 0 && (
-                              <div className="absolute top-2 right-2 w-5 h-5 bg-[#1FA97A] rounded-full flex items-center justify-center">
-                                <span className="text-[9px] font-bold text-white">{misPlantillas.length}</span>
-                              </div>
-                            )}
-                            {(() => { const PIcon = p.icon; return (
-                              <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center mb-2", p.iconBg)}>
-                                <PIcon className={cn("h-4 w-4", p.iconColor)} />
-                              </div>
-                            ) })()}
-                            <div className="text-[12px] font-bold text-slate-800 mb-1 leading-snug">{p.titulo}</div>
-                            <div className="text-[10px] text-slate-400 mb-1.5 leading-relaxed">{p.desc}</div>
-                            {p.preview && (
-                              <div className="text-[10px] text-slate-400 italic bg-slate-50 rounded-lg p-1.5 border border-slate-200 line-clamp-2 overflow-hidden">
-                                &ldquo;{p.preview}&rdquo;
-                              </div>
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                    </>
-                  ) : (
-                    /* Vista "Mis plantillas" */
-                    <div className="space-y-4">
-                      {/* Header con botón volver */}
-                      <div className="flex items-center gap-3">
-                        <button
-                          onClick={() => setViendoMisPlantillas(false)}
-                          className="p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
-                        >
-                          <ArrowLeft className="h-4 w-4 text-slate-500" />
-                        </button>
-                        <div>
-                          <h3 className="text-[15px] font-bold text-slate-900">Mis plantillas</h3>
-                          <p className="text-[12px] text-slate-400">
-                            {misPlantillas.length > 0
-                              ? `${misPlantillas.length} plantilla${misPlantillas.length > 1 ? "s" : ""} guardada${misPlantillas.length > 1 ? "s" : ""}`
-                              : "Aún no tienes plantillas guardadas"
-                            }
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Estado vacío */}
-                      {misPlantillas.length === 0 && (
-                        <div className="text-center py-12 px-6">
-                          <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <Bookmark className="h-6 w-6 text-slate-300" />
-                          </div>
-                          <h4 className="text-[15px] font-bold text-slate-800 mb-2">
-                            Aún no tienes plantillas guardadas
-                          </h4>
-                          <p className="text-[13px] text-slate-400 mb-4 leading-relaxed max-w-sm mx-auto">
-                            Elige cualquier plantilla, edita el contenido y pulsa
-                            &ldquo;Guardar como plantilla&rdquo; para reutilizarla en el futuro.
-                          </p>
-                          <button
-                            onClick={() => setViendoMisPlantillas(false)}
-                            className="px-4 py-2.5 bg-[#1FA97A] text-white rounded-xl text-[13px] font-semibold hover:bg-[#1a9068] transition-colors"
-                          >
-                            Ver plantillas disponibles
-                          </button>
-                        </div>
-                      )}
-
-                      {/* Grid de mis plantillas */}
-                      {misPlantillas.length > 0 && (
-                        <div className="grid grid-cols-3 gap-3">
-                          {misPlantillas.map(p => (
-                            <div
-                              key={p.id}
-                              className="relative bg-white rounded-2xl border-2 border-[#1FA97A]/20 hover:border-[#1FA97A] transition-all group overflow-hidden"
-                            >
-                              {/* Botón eliminar */}
-                              <button
-                                onClick={() => setMisPlantillas(prev => prev.filter(t => t.id !== p.id))}
-                                className="absolute top-2 right-2 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 bg-white shadow-sm hover:bg-red-50 transition-all z-10"
-                              >
-                                <X className="h-3.5 w-3.5 text-slate-300 hover:text-red-500 transition-colors" />
-                              </button>
-
-                              {/* Contenido clickeable */}
-                              <button
-                                className="w-full text-left p-4"
-                                onClick={() => {
-                                  setPlantillaSeleccionada({ id: p.id, titulo: p.nombre })
-                                  setCampanaForm(f => ({
-                                    ...f,
-                                    asunto: p.asunto,
-                                    mensaje: p.mensaje,
-                                  }))
-                                  setViendoMisPlantillas(false)
-                                  setPasoModal(4)
-                                }}
-                              >
-                                <div className="w-9 h-9 rounded-xl bg-[#E1F5EE] flex items-center justify-center mb-2">
-                                  <BookmarkCheck className="h-4 w-4 text-[#1FA97A]" />
-                                </div>
-                                <div className="text-[13px] font-bold text-slate-800 mb-1 pr-6">{p.nombre}</div>
-                                <div className="text-[10px] text-[#1FA97A] font-medium mb-2">Guardada el {p.creadaEn}</div>
-                                <div className="text-[10px] text-slate-400 italic bg-slate-50 rounded-lg p-2 border border-slate-200 line-clamp-2">
-                                  {p.asunto ? `"${p.asunto}"` : "Sin asunto"}
-                                </div>
-                              </button>
-
-                              {/* Footer con tipo */}
-                              <div className="px-4 py-2 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-                                <span className="text-[10px] text-slate-400 capitalize">
-                                  {p.tipo === "puntual" ? "Puntual" : p.tipo === "automatica" ? "Automática" : "Secuencia"}
-                                </span>
-                                <span className="text-[10px] font-semibold text-[#1FA97A]">Usar</span>
-                              </div>
-                            </div>
-                          ))}
-
-                          {/* Card — crear nueva */}
-                          <button
-                            onClick={() => setViendoMisPlantillas(false)}
-                            className="text-left p-4 rounded-2xl border-2 border-dashed border-slate-200 hover:border-[#1FA97A]/50 hover:bg-slate-50 transition-all flex flex-col items-center justify-center text-center min-h-[140px]"
-                          >
-                            <Plus className="h-6 w-6 text-slate-300 mb-2" />
-                            <div className="text-[13px] font-semibold text-slate-500">Crear nueva plantilla</div>
-                            <div className="text-[11px] text-slate-400 mt-1">Elige una base y guárdala</div>
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* PASO 4 — EDITAR CONTENIDO */}
-              {pasoModal === 4 && (
-                <div className="space-y-5">
-                  {plantillaSeleccionada && (
-                    <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200">
-                      <div className="w-7 h-7 rounded-lg bg-[#E1F5EE] flex items-center justify-center flex-shrink-0">
-                        <BookmarkCheck className="h-3.5 w-3.5 text-[#1FA97A]" />
-                      </div>
-                      <div>
-                        <span className="text-[12px] font-semibold text-slate-700">{plantillaSeleccionada.titulo}</span>
-                        <span className="text-[11px] text-slate-400 ml-2">— Edita el contenido a tu gusto</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Selector cargar plantilla propia — solo en "desde cero" */}
-                  {(plantillaSeleccionada?.id === "desde-cero" || plantillaSeleccionada?.id === "automatica-cero" || plantillaSeleccionada?.id === "desde-cero-secuencia") && (
-                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
-                      <FileText className="h-4 w-4 text-slate-400 flex-shrink-0" />
-                      <span className="text-[12px] text-slate-500 flex-1">Empezando desde cero</span>
-                      {misPlantillas.length > 0 ? (
-                        <select
-                          onChange={e => {
-                            const plantilla = misPlantillas.find(p => p.id === e.target.value)
-                            if (plantilla) {
-                              setCampanaForm(f => ({
-                                ...f,
-                                asunto: plantilla.asunto,
-                                mensaje: plantilla.mensaje,
-                              }))
-                            }
-                          }}
-                          defaultValue=""
-                          className="text-[12px] font-medium text-[#1FA97A] border border-[#1FA97A]/30 bg-[#E1F5EE]/50 rounded-lg px-3 py-1.5 outline-none cursor-pointer"
-                        >
-                          <option value="" disabled>Cargar plantilla guardada...</option>
-                          {misPlantillas.map(p => (
-                            <option key={p.id} value={p.id}>{p.nombre}</option>
-                          ))}
-                        </select>
-                      ) : (
-                        <span className="text-[11px] text-slate-400 italic">Guarda plantillas para cargarlas aquí</span>
-                      )}
-                    </div>
-                  )}
-
-                  {tipoCampana === "secuencia" ? (
-                    <div className="space-y-4">
-                      {(SECUENCIAS[plantillaSeleccionada?.id ?? ""] ?? []).map((email, i) => (
-                        <div key={i}>
-                          <div className="border border-slate-200 rounded-2xl overflow-hidden">
-                            <div className="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-200">
-                              <div className="flex items-center gap-3">
-                                <div className="w-7 h-7 rounded-full bg-[#1FA97A] flex items-center justify-center text-[11px] font-bold text-white">
-                                  {i + 1}
-                                </div>
-                                <div>
-                                  <span className="text-[13px] font-bold text-slate-700">Email {i + 1}</span>
-                                  {email.dia > 0 && <span className="text-[11px] text-slate-400 ml-2">· Día {email.dia}</span>}
-                                </div>
-                              </div>
-                              {i > 0 && <div className="text-[11px] text-slate-400">Si no respondió en {email.dia} días</div>}
-                            </div>
-                            <div className="p-4 space-y-3">
-                              <input
-                                defaultValue={email.asunto}
-                                placeholder="Asunto del email"
-                                className="w-full px-3 py-2 border border-slate-200 rounded-xl text-[13px] outline-none bg-white focus:border-[#1FA97A]"
-                              />
-                              <textarea
-                                defaultValue={email.mensaje}
-                                rows={4}
-                                placeholder="Contenido del email..."
-                                className="w-full px-3 py-2 border border-slate-200 rounded-xl text-[13px] outline-none bg-white resize-none focus:border-[#1FA97A] font-mono leading-relaxed"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                      <button className="w-full py-3 border-2 border-dashed border-slate-200 rounded-2xl text-[13px] font-medium text-slate-400 hover:border-[#1FA97A]/50 hover:text-[#1FA97A] transition-colors flex items-center justify-center gap-2">
-                        <Plus className="h-4 w-4" />
-                        Añadir otro email a la secuencia
-                      </button>
-                    </div>
-                  ) : (
-                    <>
-                      <div>
-                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
-                          Nombre interno de la campaña
-                        </label>
-                        <input
-                          value={campanaForm.nombre}
-                          onChange={e => setCampanaForm(f => ({ ...f, nombre: e.target.value }))}
-                          placeholder="Ej: Reactivación clientes Mayo"
-                          className="w-full px-4 py-3 border border-slate-200 rounded-xl text-[13px] outline-none bg-white focus:border-[#1FA97A] focus:ring-2 focus:ring-[#1FA97A]/10"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
-                          Asunto del email
-                        </label>
-                        <input
-                          value={campanaForm.asunto}
-                          onChange={e => setCampanaForm(f => ({ ...f, asunto: e.target.value }))}
-                          className="w-full px-4 py-3 border border-slate-200 rounded-xl text-[13px] outline-none bg-white focus:border-[#1FA97A] focus:ring-2 focus:ring-[#1FA97A]/10"
-                        />
-                        <div className="flex flex-wrap gap-1.5 mt-2">
-                          {["{{nombre}}", "{{empresa}}", "{{ultimo_proyecto}}"].map(v => (
-                            <button key={v} onClick={() => setCampanaForm(f => ({ ...f, asunto: f.asunto + v }))} className="px-2 py-0.5 bg-slate-100 hover:bg-[#E1F5EE] hover:text-[#1FA97A] text-slate-500 text-[10px] font-mono rounded-lg transition-colors">{v}</button>
-                          ))}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Mensaje</label>
-                          <button className="flex items-center gap-1 text-[11px] font-medium text-[#1FA97A]">
-                            <Sparkles className="h-3 w-3" />
-                            Mejorar con IA
-                          </button>
-                        </div>
-                        <textarea
-                          value={campanaForm.mensaje}
-                          onChange={e => setCampanaForm(f => ({ ...f, mensaje: e.target.value }))}
-                          rows={10}
-                          className="w-full px-4 py-3 border border-slate-200 rounded-xl text-[13px] outline-none bg-white resize-none focus:border-[#1FA97A] focus:ring-2 focus:ring-[#1FA97A]/10 font-mono leading-relaxed"
-                        />
-                        <div className="flex flex-wrap gap-1.5 mt-2">
-                          {["{{nombre}}", "{{empresa}}", "{{ultimo_proyecto}}", "{{factura_total}}", "{{dias_sin_contacto}}", "{{usuario.nombre}}"].map(v => (
-                            <button key={v} onClick={() => setCampanaForm(f => ({ ...f, mensaje: f.mensaje + v }))} className="px-2 py-0.5 bg-slate-100 hover:bg-[#E1F5EE] hover:text-[#1FA97A] text-slate-500 text-[10px] font-mono rounded-lg transition-colors">{v}</button>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Guardar como plantilla */}
-                      <div className="flex items-center justify-between pt-3 mt-3 border-t border-slate-100">
-                        <span className="text-[11px] text-slate-400">¿Quieres reutilizar esta plantilla?</span>
-                        <button
-                          onClick={() => setGuardandoPlantilla(true)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-[#E1F5EE] hover:text-[#1FA97A] text-slate-600 text-[12px] font-medium rounded-lg transition-colors"
-                        >
-                          <Bookmark className="h-3.5 w-3.5" />
-                          Guardar como plantilla
-                        </button>
-                      </div>
-
-                      {guardandoPlantilla && (
-                        <div className="p-4 bg-[#E1F5EE]/50 border border-[#1FA97A]/20 rounded-xl space-y-3">
-                          <p className="text-[12px] font-semibold text-[#1FA97A]">Guardar como plantilla propia</p>
-                          <div className="flex gap-2">
-                            <input
-                              value={nombrePlantilla}
-                              onChange={e => setNombrePlantilla(e.target.value)}
-                              placeholder="Nombre de la plantilla..."
-                              className="flex-1 px-3 py-2 border border-[#1FA97A]/30 rounded-xl text-[13px] outline-none bg-white focus:border-[#1FA97A]"
-                            />
-                            <button
-                              onClick={() => {
-                                if (!nombrePlantilla.trim()) return
-                                const nueva = {
-                                  id: `custom-${Date.now()}`,
-                                  nombre: nombrePlantilla,
-                                  asunto: campanaForm.asunto,
-                                  mensaje: campanaForm.mensaje,
-                                  tipo: tipoCampana || "puntual",
-                                  creadaEn: new Date().toLocaleDateString("es-ES"),
-                                }
-                                setMisPlantillas(p => [...p, nueva])
-                                setGuardandoPlantilla(false)
-                                setNombrePlantilla("")
-                              }}
-                              disabled={!nombrePlantilla.trim()}
-                              className={cn(
-                                "px-4 py-2 rounded-xl text-[13px] font-semibold transition-colors",
-                                nombrePlantilla.trim()
-                                  ? "bg-[#1FA97A] text-white hover:bg-[#1a9068]"
-                                  : "bg-slate-200 text-slate-400 cursor-not-allowed"
-                              )}
-                            >
-                              Guardar
-                            </button>
-                            <button
-                              onClick={() => { setGuardandoPlantilla(false); setNombrePlantilla("") }}
-                              className="px-3 py-2 rounded-xl text-[13px] text-slate-400 hover:bg-slate-100 transition-colors"
-                            >
-                              Cancelar
-                            </button>
-                          </div>
-                        </div>
-                      )}
-
-                      {(campanaForm.asunto || campanaForm.mensaje) && (
-                        <div className="border border-slate-200 rounded-xl overflow-hidden">
-                          <div className="px-4 py-2 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
-                            <div className="flex gap-1">
-                              <div className="w-2.5 h-2.5 rounded-full bg-red-300" />
-                              <div className="w-2.5 h-2.5 rounded-full bg-amber-300" />
-                              <div className="w-2.5 h-2.5 rounded-full bg-green-300" />
-                            </div>
-                            <span className="text-[10px] text-slate-400 flex-1 text-center">Preview — así lo verá tu contacto</span>
-                          </div>
-                          <div className="p-4 bg-white">
-                            <div className="text-[11px] text-slate-400 mb-0.5">De: <span className="font-medium text-slate-600">hola@clientlabs.io</span></div>
-                            <div className="text-[11px] text-slate-400 mb-3 pb-3 border-b border-slate-100">
-                              Asunto: <span className="font-semibold text-slate-700">
-                                {campanaForm.asunto.replace(/{{nombre}}/g, "María García").replace(/{{empresa}}/g, "Casa Pepe")}
-                              </span>
-                            </div>
-                            <div className="text-[12px] text-slate-600 leading-relaxed whitespace-pre-wrap">
-                              {campanaForm.mensaje
-                                .replace(/{{nombre}}/g, "María García")
-                                .replace(/{{empresa}}/g, "Casa Pepe")
-                                .replace(/{{usuario\.nombre}}/g, "Iyan")
-                              }
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              )}
-
-              {/* PASO 5 — RESUMEN Y TIMING */}
-              {pasoModal === 5 && (
-                <div className="space-y-5">
-                  {tipoCampana === "puntual" && (
-                    <div>
-                      <h3 className="text-[14px] font-bold text-slate-900 mb-3">¿Cuándo se envía?</h3>
-                      <div className="space-y-2">
-                        {[
-                          { id: "ahora",      titulo: "Ahora mismo",     desc: "Se envía en los próximos minutos" },
-                          { id: "programado", titulo: "Programar envío", desc: "Elige fecha y hora exacta" },
-                        ].map(op => (
-                          <button
-                            key={op.id}
-                            onClick={() => setCampanaForm(f => ({ ...f, fechaEnvio: op.id }))}
-                            className={cn(
-                              "w-full text-left flex items-center gap-4 p-4 rounded-xl border-2 transition-all",
-                              campanaForm.fechaEnvio === op.id
-                                ? "border-[#1FA97A] bg-[#E1F5EE]/30"
-                                : "border-slate-200 hover:border-slate-300"
-                            )}
-                          >
-                            <div className="flex-1">
-                              <div className="text-[13px] font-bold text-slate-800">{op.titulo}</div>
-                              <div className="text-[11px] text-slate-400">{op.desc}</div>
-                            </div>
-                            {campanaForm.fechaEnvio === op.id && <CheckCircle className="h-5 w-5 text-[#1FA97A] flex-shrink-0" />}
-                          </button>
-                        ))}
-                        {campanaForm.fechaEnvio === "programado" && (
-                          <div className="grid grid-cols-2 gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
-                            <div>
-                              <label className="text-[11px] font-bold text-slate-500 block mb-1.5">Fecha</label>
-                              <input
-                                type="date"
-                                value={campanaForm.fechaProgramada}
-                                onChange={e => setCampanaForm(f => ({ ...f, fechaProgramada: e.target.value }))}
-                                className="w-full px-3 py-2 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-[#1FA97A]"
-                              />
-                            </div>
-                            <div>
-                              <label className="text-[11px] font-bold text-slate-500 block mb-1.5">Hora</label>
-                              <select
-                                value={campanaForm.horaProgramada}
-                                onChange={e => setCampanaForm(f => ({ ...f, horaProgramada: e.target.value }))}
-                                className="w-full px-3 py-2 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-[#1FA97A]"
-                              >
-                                {["08:00","09:00","10:00","11:00","12:00","17:00","18:00","19:00"].map(h => (
-                                  <option key={h} value={h}>{h}</option>
-                                ))}
-                              </select>
-                            </div>
-                          </div>
+                        {i < COMPOSER_STEPS.length - 1 && (
+                          <div style={{ width: 1, height: 32, background: i < composerStep ? D.accent : D.line2, margin: "2px 0" }} />
                         )}
                       </div>
+                      <div style={{ paddingTop: 3, paddingBottom: i < COMPOSER_STEPS.length - 1 ? 30 : 0 }}>
+                        <div style={{ fontSize: 12.5, fontWeight: i === composerStep ? 600 : 450, color: i === composerStep ? D.ink : D.ink3 }}>{s}</div>
+                        <div style={{ fontSize: 10.5, color: D.ink4, fontFamily: "ui-monospace,monospace", marginTop: 1 }}>
+                          {["Asunto · preheader", "Segmentos y filtros", "Variantes y métricas", "Fecha, hora y zona", "UTM, objetivo"][i]}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  <div style={{ marginTop: 20, paddingTop: 14, borderTop: `1px solid ${D.line2}`, display: "flex", flexDirection: "column", gap: 6 }}>
+                    {[{ l: "Pasos completados", v: `${composerStep} / 5` }, { l: "Alcance previsto", v: "8.420" }].map(row => (
+                      <div key={row.l} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: D.ink3 }}>
+                        <span>{row.l}</span>
+                        <strong style={{ color: D.ink }}>{row.v}</strong>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Form */}
+                <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
+                  {composerStep === 0 && (
+                    <>
+                      <div>
+                        <label style={{ fontSize: 11, fontFamily: "ui-monospace,monospace", color: D.ink3, letterSpacing: "0.06em", textTransform: "uppercase" as const, display: "block", marginBottom: 6 }}>
+                          Asunto <span style={{ color: D.accentInk, fontWeight: 600 }}>47 / 60 · 92% legible móvil</span>
+                        </label>
+                        <input defaultValue="Lo nuevo de verano (y un regalo dentro) ☀️" style={{ width: "100%", padding: "9px 12px", border: `1px solid ${D.line}`, borderRadius: 7, fontSize: 13, color: D.ink, outline: "none", boxSizing: "border-box" as const }} />
+                        <div style={{ display: "flex", gap: 6, marginTop: 6, flexWrap: "wrap" as const }}>
+                          {["✨ Sugerir 3 alternativas con IA", "A/B testear el asunto", "Insertar emoji", "{{ nombre }}"].map(l => (
+                            <span key={l} style={{ padding: "3px 8px", borderRadius: 6, background: D.accentSoft, color: D.accentInk, fontSize: 11, fontWeight: 500, cursor: "pointer" }}>{l}</span>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <label style={{ fontSize: 11, fontFamily: "ui-monospace,monospace", color: D.ink3, letterSpacing: "0.06em", textTransform: "uppercase" as const, display: "block", marginBottom: 6 }}>Preheader</label>
+                        <textarea defaultValue="20% en toda la colección · solo este fin de semana, para suscriptores Pro." rows={2} style={{ width: "100%", padding: "9px 12px", border: `1px solid ${D.line}`, borderRadius: 7, fontSize: 13, color: D.ink, outline: "none", resize: "none" as const, boxSizing: "border-box" as const }} />
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                        {[["De · nombre", "Wheny · Estudio Vega"], ["De · email", "hola@estudiovega.com"]].map(([l, v]) => (
+                          <div key={l}>
+                            <label style={{ fontSize: 11, fontFamily: "ui-monospace,monospace", color: D.ink3, letterSpacing: "0.06em", textTransform: "uppercase" as const, display: "block", marginBottom: 6 }}>{l}</label>
+                            <input defaultValue={v} style={{ width: "100%", padding: "8px 10px", border: `1px solid ${D.line}`, borderRadius: 7, fontSize: 12.5, color: D.ink, outline: "none", boxSizing: "border-box" as const }} />
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                  {composerStep === 1 && (
+                    <>
+                      <div style={{ padding: "12px 14px", border: `2px solid ${D.accent}`, borderRadius: 8, background: D.accentSoft, cursor: "pointer" }}>
+                        <div style={{ fontWeight: 550, fontSize: 13, color: D.ink }}>Segmento dinámico · Suscriptores PRO + LATAM</div>
+                        <div style={{ fontSize: 12, color: D.ink3, marginTop: 3 }}>Se recalcula al lanzar · incluye altas hasta el envío</div>
+                        <div style={{ fontWeight: 700, fontSize: 18, color: D.accentInk, marginTop: 6 }}>8.420 destinatarios</div>
+                      </div>
+                      <div>
+                        <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10, color: D.ink3, letterSpacing: "0.06em", textTransform: "uppercase" as const, marginBottom: 6 }}>Incluir</div>
+                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" as const }}>
+                          {[["Segmento", "es", "Suscriptores PRO"], ["Idioma", "es", "Español"]].map((f, i) => (
+                            <span key={i} style={{ padding: "4px 9px", borderRadius: 6, background: D.bg3, border: `1px solid ${D.line}`, fontSize: 12, color: D.ink2 }}>
+                              <span style={{ color: D.ink3 }}>{f[0]} </span>{f[1]} <strong>{f[2]}</strong>
+                            </span>
+                          ))}
+                          <button style={{ padding: "4px 9px", borderRadius: 6, background: D.bg, border: `1px dashed ${D.line}`, fontSize: 12, color: D.ink3, cursor: "pointer" }}>+ añadir condición</button>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  {composerStep === 2 && (
+                    <div>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                        <h4 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: D.ink }}>Test A/B</h4>
+                        <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, color: D.accentInk, fontWeight: 600 }}>ACTIVADO</span>
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                        {[
+                          { tag: "Variante A · 50%", subj: "Lo nuevo de verano (y un regalo dentro) ☀️" },
+                          { tag: "Variante B · 50%", subj: "Wheny, hemos guardado un 20% para ti." },
+                        ].map(v => (
+                          <div key={v.tag} style={{ padding: 14, border: `1px solid ${D.line}`, borderRadius: 8, background: D.bg2 }}>
+                            <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10, color: D.ink3, letterSpacing: "0.05em", marginBottom: 8 }}>{v.tag}</div>
+                            <div style={{ fontWeight: 550, fontSize: 12.5, color: D.ink }}>{v.subj}</div>
+                          </div>
+                        ))}
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginTop: 14 }}>
+                        {[["Métrica ganadora", "Tasa de apertura"], ["Muestra inicial", "20% · 1.680 env."], ["Decisión automática", "tras 4 horas"]].map(r => (
+                          <div key={r[0]}>
+                            <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10, color: D.ink3, textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>{r[0]}</div>
+                            <div style={{ fontWeight: 550, fontSize: 12.5, color: D.ink, marginTop: 3 }}>{r[1]}</div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
+                  {(composerStep === 3 || composerStep === 4) && (
+                    <div style={{ padding: "32px 0", textAlign: "center", color: D.ink3, fontSize: 13 }}>
+                      Configuración de {COMPOSER_STEPS[composerStep]}
+                    </div>
+                  )}
+                  <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 16, borderTop: `1px solid ${D.line2}` }}>
+                    <button onClick={() => setComposerStep(s => Math.max(0, s - 1))} style={{ padding: "7px 14px", borderRadius: 6, background: D.bg, border: `1px solid ${D.line}`, color: composerStep === 0 ? D.ink5 : D.ink2, fontSize: 12.5, fontWeight: 550, cursor: composerStep === 0 ? "not-allowed" : "pointer" }}>← Atrás</button>
+                    {composerStep < COMPOSER_STEPS.length - 1 ? (
+                      <button onClick={() => setComposerStep(s => s + 1)} style={{ padding: "7px 14px", borderRadius: 6, background: D.ink, color: "white", fontSize: 12.5, fontWeight: 550, border: "none", cursor: "pointer" }}>Continuar →</button>
+                    ) : (
+                      <button style={{ padding: "7px 14px", borderRadius: 6, background: D.accent, color: "white", fontSize: 12.5, fontWeight: 550, border: "none", cursor: "pointer" }}>Programar envío</button>
+                    )}
+                  </div>
+                </div>
 
-                  <div className="bg-[#0B1F2A] rounded-2xl p-5">
-                    <span className="text-[11px] font-bold text-[#1FA97A] uppercase tracking-wider block mb-4">
-                      Resumen de la campaña
-                    </span>
-                    <div className="space-y-3">
+                {/* Preview panel */}
+                <div style={{ padding: 20, borderLeft: `1px solid ${D.line2}`, background: D.bg2, display: "flex", flexDirection: "column", gap: 14 }}>
+                  <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10, color: D.ink3, textTransform: "uppercase" as const, letterSpacing: "0.06em" }}>Vista previa</div>
+                  {/* Phone mockup */}
+                  <div style={{ background: D.ink, borderRadius: 16, padding: 2, width: 220, margin: "0 auto" }}>
+                    <div style={{ background: "white", borderRadius: 14, overflow: "hidden" }}>
+                      <div style={{ background: D.bg2, padding: "8px 12px", fontSize: 10.5, fontWeight: 600, color: D.ink2 }}>Bandeja · 12 nuevos</div>
                       {[
-                        { label: "Tipo",      valor: tipoCampana === "puntual" ? "Campaña puntual" : tipoCampana === "automatica" ? "Automática" : "Secuencia de emails" },
-                        { label: "Audiencia", valor: audienciaLabel || "—" },
-                        { label: "Plantilla", valor: plantillaSeleccionada?.titulo ?? "—" },
-                        { label: "Asunto",    valor: campanaForm.asunto || "Sin asunto" },
-                        ...(tipoCampana === "puntual" ? [{
-                          label: "Envío",
-                          valor: campanaForm.fechaEnvio === "ahora"
-                            ? "Inmediato"
-                            : `${campanaForm.fechaProgramada} a las ${campanaForm.horaProgramada}`,
-                        }] : []),
-                      ].map((item, i) => (
-                        <div key={i} className="flex items-start justify-between gap-4 py-2 border-b border-white/5 last:border-0">
-                          <span className="text-[11px] text-slate-500 flex-shrink-0">{item.label}</span>
-                          <span className="text-[12px] font-semibold text-white text-right capitalize">{item.valor}</span>
+                        { from: "Acme · Boletín", subj: "Tu informe semanal está listo", preview: "Hemos preparado tu resumen…", isTarget: false },
+                        { from: "Wheny · Estudio Vega", subj: "Lo nuevo de verano ☀️", preview: "20% en toda la colección · solo este fin…", isTarget: true },
+                        { from: "Figma", subj: "Nuevas plantillas para tu equipo", preview: "Hemos añadido 12 nuevas plantillas…", isTarget: false },
+                      ].map((m, i) => (
+                        <div key={i} style={{ padding: "8px 12px", borderBottom: `1px solid ${D.line3}`, background: m.isTarget ? D.accentSoft : "white" }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
+                            <span style={{ fontWeight: m.isTarget ? 600 : 500, fontSize: 11.5, color: D.ink }}>{m.from}</span>
+                            <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 10, color: D.ink4 }}>09:00</span>
+                          </div>
+                          <div style={{ fontSize: 11, fontWeight: 550, color: D.ink, marginBottom: 1 }}>{m.subj}</div>
+                          <div style={{ fontSize: 10, color: D.ink3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{m.preview}</div>
                         </div>
                       ))}
                     </div>
                   </div>
+                  {/* Recap */}
+                  {[["Destinatarios", "8.420"], ["A/B test", "2 variantes"], ["Envío", "Send Time AI"], ["Apertura prevista", "38 – 44 %"]].map(r => (
+                    <div key={r[0]} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, borderBottom: `1px solid ${D.line3}`, paddingBottom: 8 }}>
+                      <span style={{ color: D.ink3 }}>{r[0]}</span>
+                      <span style={{ fontWeight: 550, color: r[0] === "Apertura prevista" ? D.accentInk : D.ink }}>{r[1]}</span>
+                    </div>
+                  ))}
+                  {/* Spam score */}
+                  <div style={{ padding: 12, background: D.bg, border: `1px solid ${D.line}`, borderRadius: 8 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                      <span style={{ fontSize: 12, fontWeight: 550, color: D.ink }}>Spam check</span>
+                      <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 12, fontWeight: 600, color: D.accentInk }}>9,4 / 10</span>
+                    </div>
+                    <div style={{ height: 4, background: D.bg3, borderRadius: 99, overflow: "hidden", marginBottom: 8 }}>
+                      <div style={{ width: "94%", height: "100%", background: D.accent, borderRadius: 99 }} />
+                    </div>
+                    {[["ok", "Asunto sin spam triggers"], ["ok", "SPF + DKIM + DMARC"], ["warn", "1 emoji en asunto"]].map((c, i) => (
+                      <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: c[0] === "warn" ? D.warn : D.accentInk, marginBottom: 3 }}>
+                        {c[0] === "ok" ? <Check className="h-3 w-3" /> : <span>⚠</span>}
+                        {c[1]}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              )}
+              </div>
+            </div>
+          )}
 
+          {/* 7-DAY SCHEDULE */}
+          <div style={{ background: D.bg, border: `1px solid ${D.line}`, borderRadius: 10, overflow: "hidden" }}>
+            <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `1px solid ${D.line2}` }}>
+              <div>
+                <h3 style={{ fontWeight: 600, letterSpacing: "-0.012em", fontSize: 13.5, margin: 0, color: D.ink }}>Calendario de envío · próximos 7 días</h3>
+                <div style={{ fontSize: 11.5, color: D.ink3, fontFamily: "ui-monospace,monospace", marginTop: 2 }}>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ width: 5, height: 5, borderRadius: 99, background: D.accent, display: "inline-block" }} />
+                    1 enviando ahora
+                  </span>
+                  {" · "}5 programadas{" · "}zona Europe/Madrid
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <div style={{ display: "inline-flex", background: D.bg2, border: `1px solid ${D.line}`, borderRadius: 7, padding: 2 }}>
+                  {["Semana", "Mes", "Lista"].map((s, i) => (
+                    <button key={s} style={{ padding: "4px 9px", borderRadius: 5, fontFamily: "ui-monospace,monospace", fontSize: 11, color: i === 0 ? D.ink : D.ink3, background: i === 0 ? "white" : "transparent", boxShadow: i === 0 ? `0 0 0 1px ${D.line} inset` : "none", border: "none", cursor: "pointer" }}>{s}</button>
+                  ))}
+                </div>
+                <button style={{ padding: "5px 10px", borderRadius: 6, background: D.bg, border: `1px solid ${D.line}`, color: D.ink2, fontSize: 11.5, fontWeight: 550, cursor: "pointer" }}>+ Programar</button>
+              </div>
+            </div>
+            <div style={{ padding: 16, display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 8, overflowX: "auto" }}>
+              {SCHED_7.map(day => (
+                <div key={day.d} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  <div style={{ textAlign: "center", paddingBottom: 6, borderBottom: `1px solid ${D.line2}` }}>
+                    <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: day.today ? D.accent : D.ink3, fontWeight: day.today ? 600 : 400 }}>{day.d}</div>
+                    <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 14, fontWeight: 600, color: day.today ? D.ink : D.ink3, marginTop: 2 }}>{String(day.date).padStart(2, "0")}</div>
+                  </div>
+                  {day.slots.length > 0 ? day.slots.map((slot, i) => (
+                    <div key={i} style={{ padding: "6px 8px", borderRadius: 6, background: slot.cl + "15", border: `1px solid ${slot.cl}40`, cursor: "pointer" }}>
+                      <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10, color: D.ink3 }}>{slot.tm}</div>
+                      <div style={{ fontSize: 11, fontWeight: 550, color: D.ink, marginTop: 1, lineHeight: 1.3 }}>{slot.nm}</div>
+                      <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 9.5, color: D.ink3, marginTop: 1 }}>{slot.sub}</div>
+                    </div>
+                  )) : (
+                    <div style={{ textAlign: "center", fontSize: 10, color: D.ink5, fontFamily: "ui-monospace,monospace", padding: "8px 0" }}>—</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* CAMPAIGNS TABLE */}
+          <div style={{ background: D.bg, border: `1px solid ${D.line}`, borderRadius: 10, overflow: "hidden" }}>
+            <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `1px solid ${D.line2}` }}>
+              <div>
+                <h3 style={{ fontWeight: 600, letterSpacing: "-0.012em", fontSize: 13.5, margin: 0, color: D.ink }}>Campañas</h3>
+                <div style={{ fontSize: 11.5, color: D.ink3, fontFamily: "ui-monospace,monospace", marginTop: 2 }}>{CAMPAIGNS_DESIGN.length} totales · últimos 90 días</div>
+              </div>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <div style={{ display: "inline-flex", background: D.bg2, border: `1px solid ${D.line}`, borderRadius: 7, padding: 2 }}>
+                  {["Todas", "En vivo", "Programadas", "Borradores", "Enviadas"].map(s => (
+                    <button key={s} onClick={() => setCampFilter(s)} style={{ padding: "3px 8px", borderRadius: 5, fontFamily: "ui-monospace,monospace", fontSize: 11, color: campFilter === s ? D.ink : D.ink3, background: campFilter === s ? "white" : "transparent", boxShadow: campFilter === s ? `0 0 0 1px ${D.line} inset` : "none", border: "none", cursor: "pointer" }}>{s}</button>
+                  ))}
+                </div>
+                <a style={{ fontSize: 11.5, color: D.ink3, fontWeight: 500, cursor: "pointer" }}>Exportar CSV</a>
+              </div>
+            </div>
+            {/* Table header */}
+            <div style={{ display: "grid", gridTemplateColumns: "32px 1fr 120px 100px 90px 80px 70px 100px 30px", gap: 14, padding: "9px 18px", background: D.bg2, borderBottom: `1px solid ${D.line2}`, fontFamily: "ui-monospace,monospace", fontSize: 10, fontWeight: 500, color: D.ink3, letterSpacing: "0.06em", textTransform: "uppercase" as const }}>
+              <span /><span>Campaña</span><span>Estado</span><span>Destinatarios</span><span style={{ textAlign: "right" }}>Apertura</span><span style={{ textAlign: "right" }}>CTR</span><span style={{ textAlign: "right" }}>Conv.</span><span style={{ textAlign: "right" }}>Ingresos</span><span />
+            </div>
+            {/* Rows */}
+            {CAMPAIGNS_DESIGN.map((c, i) => {
+              const st = STATUS_CFG[c.st]
+              return (
+                <div key={i} style={{ display: "grid", gridTemplateColumns: "32px 1fr 120px 100px 90px 80px 70px 100px 30px", gap: 14, padding: "13px 18px", borderBottom: `1px solid ${D.line3}`, alignItems: "center", cursor: "pointer" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = D.bg2 }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent" }}
+                >
+                  <div style={{ width: 28, height: 28, borderRadius: 6, background: c.st === "live" ? D.accentSoft : c.st === "ab" ? "#f3edff" : c.st === "sched" ? "#eef2fb" : D.bg3, display: "grid", placeItems: "center", color: c.st === "live" ? D.accentInk : c.st === "ab" ? D.violet : c.st === "sched" ? D.blue : D.ink3 }}>
+                    {c.st === "live" ? <Send className="h-3 w-3" /> : c.st === "ab" ? <Sparkles className="h-3 w-3" /> : c.st === "sched" ? <Clock className="h-3 w-3" /> : c.st === "draft" ? <Edit3 className="h-3 w-3" /> : <Mail className="h-3 w-3" />}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 550, fontSize: 13, color: D.ink, letterSpacing: "-0.005em" }}>{c.nm}</div>
+                    <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: D.ink3, marginTop: 1 }}>{c.sub}</div>
+                  </div>
+                  {pill(st.tone, st.lbl)}
+                  <div>
+                    <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 12.5, fontWeight: 600, color: D.ink }}>{c.sent !== null ? fmtN(c.sent) : "—"}</div>
+                    <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10, color: D.ink4 }}>enviados</div>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    {c.open !== null ? (
+                      <>
+                        <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 12.5, fontWeight: 600, color: D.ink }}>{String(c.open).replace(".", ",")}%</div>
+                        <div style={{ height: 3, background: D.bg3, borderRadius: 99, overflow: "hidden", marginTop: 3 }}>
+                          <div style={{ width: `${Math.min(c.open * 2, 100)}%`, height: "100%", background: D.accent, borderRadius: 99 }} />
+                        </div>
+                      </>
+                    ) : <span style={{ color: D.ink4, fontFamily: "ui-monospace,monospace", fontSize: 12 }}>—</span>}
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    {c.click !== null ? (
+                      <>
+                        <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 12.5, fontWeight: 600, color: D.ink }}>{String(c.click).replace(".", ",")}%</div>
+                        <div style={{ height: 3, background: D.bg3, borderRadius: 99, overflow: "hidden", marginTop: 3 }}>
+                          <div style={{ width: `${Math.min(c.click * 8, 100)}%`, height: "100%", background: D.blue, borderRadius: 99 }} />
+                        </div>
+                      </>
+                    ) : <span style={{ color: D.ink4, fontFamily: "ui-monospace,monospace", fontSize: 12 }}>—</span>}
+                  </div>
+                  <div style={{ textAlign: "right", fontFamily: "ui-monospace,monospace", fontSize: 12.5, color: D.ink }}>{c.conv !== null ? `${String(c.conv).replace(".", ",")}%` : "—"}</div>
+                  <div style={{ textAlign: "right", fontFamily: "ui-monospace,monospace", fontSize: 12.5, fontWeight: 600, color: D.ink }}>{c.rev !== null ? `${fmtN(c.rev)} €` : "—"}</div>
+                  <button style={{ width: 26, height: 26, borderRadius: 5, display: "grid", placeItems: "center", color: D.ink3, background: "none", border: "none", cursor: "pointer" }} onClick={e => e.stopPropagation()}><MoreHorizontal className="h-4 w-4" /></button>
+                </div>
+              )
+            })}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 16px", borderTop: `1px solid ${D.line2}`, background: D.bg2, fontSize: 11.5, color: D.ink3 }}>
+              <span style={{ fontFamily: "ui-monospace,monospace" }}>Mostrando {CAMPAIGNS_DESIGN.length} de 48 campañas</span>
+              <div style={{ display: "flex", gap: 3 }}>
+                {["‹", "1", "2", "3", "›"].map((b, i) => (
+                  <button key={i} style={{ minWidth: 26, height: 26, padding: "0 8px", borderRadius: 5, fontFamily: "ui-monospace,monospace", fontSize: 11.5, color: i === 1 ? "white" : D.ink2, background: i === 1 ? D.ink : "white", border: `1px solid ${i === 1 ? D.ink : D.line}`, cursor: i === 0 ? "not-allowed" : "pointer", opacity: i === 0 ? 0.4 : 1 }}>{b}</button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* SEGMENTS + DELIVERABILITY */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Segments */}
+            <div style={{ background: D.bg, border: `1px solid ${D.line}`, borderRadius: 10, overflow: "hidden" }}>
+              <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `1px solid ${D.line2}` }}>
+                <div>
+                  <h3 style={{ fontWeight: 600, fontSize: 13.5, margin: 0, color: D.ink }}>Segmentos de audiencia</h3>
+                  <div style={{ fontSize: 11.5, color: D.ink3, fontFamily: "ui-monospace,monospace", marginTop: 2 }}>Recalculados cada hora · basados en comportamiento + CRM</div>
+                </div>
+                <div style={{ display: "flex", gap: 6 }}>
+                  <button style={{ padding: "5px 9px", borderRadius: 6, background: D.accentSoft, border: "none", color: D.accentInk, fontSize: 11.5, fontWeight: 550, cursor: "pointer" }}>✨ Crear con IA</button>
+                  <button style={{ padding: "5px 9px", borderRadius: 6, background: D.bg, border: `1px solid ${D.line}`, color: D.ink2, fontSize: 11.5, fontWeight: 550, cursor: "pointer" }}>+ Nuevo</button>
+                </div>
+              </div>
+              <div style={{ padding: 16, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                {SEGMENTS_DESIGN.map(seg => (
+                  <div key={seg.nm} style={{ padding: 14, border: `1px solid ${D.line}`, borderRadius: 8, cursor: "pointer", background: D.bg }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                      <span style={{ width: 28, height: 28, borderRadius: 6, background: seg.bg, display: "grid", placeItems: "center", color: seg.color, flexShrink: 0, fontSize: 13 }}>✦</span>
+                      <div style={{ fontWeight: 600, fontSize: 12.5, color: D.ink, letterSpacing: "-0.005em", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>{seg.nm}</div>
+                      <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 12, fontWeight: 600, color: D.ink, flexShrink: 0 }}>{fmtN(seg.ct)}</span>
+                    </div>
+                    <div style={{ fontSize: 11, color: D.ink3, marginBottom: 10, lineHeight: 1.4 }}>{seg.desc}</div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6 }}>
+                      {[["Apertura", `${seg.open}%`, true], ["CTR", `${seg.click}%`, false], ["Churn", `${seg.churn}%`, false]].map(([l, v, ok]) => (
+                        <div key={String(l)}>
+                          <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 9, color: D.ink4, textTransform: "uppercase" as const, letterSpacing: "0.04em" }}>{l}</div>
+                          <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 12.5, fontWeight: 600, color: ok ? D.accentInk : (seg.churn > 3 && l === "Churn" ? D.warn : D.ink) }}>{v}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            {/* Footer fijo */}
-            <div className="px-6 py-4 border-t border-slate-100 flex gap-3 flex-shrink-0">
-              <button
-                onClick={resetModal}
-                className="px-4 py-2.5 border border-slate-200 rounded-xl text-[13px] font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+            {/* Deliverability */}
+            <div style={{ background: D.bg, border: `1px solid ${D.line}`, borderRadius: 10, overflow: "hidden" }}>
+              <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `1px solid ${D.line2}` }}>
+                <div>
+                  <h3 style={{ fontWeight: 600, fontSize: 13.5, margin: 0, color: D.ink }}>Deliverability</h3>
+                  <div style={{ fontSize: 11.5, color: D.ink3, fontFamily: "ui-monospace,monospace", marginTop: 2 }}>Reputación y autenticación de dominio</div>
+                </div>
+                <a style={{ fontSize: 11.5, color: D.ink3, fontWeight: 500, cursor: "pointer" }}>Diagnóstico →</a>
+              </div>
+              <div style={{ padding: "14px 18px" }}>
+                {/* Top stats */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16, paddingBottom: 14, borderBottom: `1px solid ${D.line2}` }}>
+                  {[
+                    { l: "Reputación", v: "96", suffix: "/100", color: D.accentInk, sub: "✓ Excelente" },
+                    { l: "Bounce", v: "0,8", suffix: "%", color: D.ink, sub: "Objetivo < 2%" },
+                    { l: "Spam", v: "0,02", suffix: "%", color: D.ink, sub: "Objetivo < 0,1%" },
+                  ].map(k => (
+                    <div key={k.l}>
+                      <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10, color: D.ink3, textTransform: "uppercase" as const, letterSpacing: "0.05em", marginBottom: 4 }}>{k.l}</div>
+                      <div style={{ fontWeight: 600, fontSize: 22, color: k.color }}>{k.v}<span style={{ fontSize: 14, color: D.ink3, fontWeight: 400 }}>{k.suffix}</span></div>
+                      <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: D.ink3, marginTop: 2 }}>{k.sub}</div>
+                    </div>
+                  ))}
+                </div>
+                {/* Auth items */}
+                {[
+                  { ok: true,  nm: "SPF · estudiovega.com", sub: "v=spf1 include:_spf.clientlabs.io ~all", val: "Verificado · 2 h" },
+                  { ok: true,  nm: "DKIM · cl1._domainkey",  sub: "RSA-2048 · firmando todos los correos",   val: "Verificado · 2 h" },
+                  { ok: true,  nm: "DMARC · p=quarantine",   sub: "rua=postmaster · 100% align",            val: "Verificado · 2 h" },
+                  { ok: false, nm: "BIMI · logo verificado", sub: "Falta certificado VMC para Gmail",         val: "Sin certificado" },
+                  { ok: true,  nm: "IP dedicada · 185.43.18.12", sub: "Sin presencia en 89 listas negras",  val: "Reputación 96/100" },
+                ].map((it, i) => (
+                  <div key={i} style={{ display: "grid", gridTemplateColumns: "20px 1fr auto auto 26px", gap: 10, padding: "10px 0", borderBottom: i < 4 ? `1px solid ${D.line3}` : "none", alignItems: "center" }}>
+                    <span style={{ color: it.ok ? D.accentInk : D.warn, fontSize: 13 }}>{it.ok ? "✓" : "⚠"}</span>
+                    <div>
+                      <div style={{ fontWeight: 550, fontSize: 12.5, color: D.ink }}>{it.nm}</div>
+                      <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10, color: D.ink3, marginTop: 1 }}>{it.sub}</div>
+                    </div>
+                    <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, padding: "2px 6px", borderRadius: 4, background: it.ok ? D.accentSoft : D.warnSoft, color: it.ok ? D.accentInk : D.warn, fontWeight: 600 }}>{it.ok ? "OK" : "AVISO"}</span>
+                    <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: D.ink3 }}>{it.val}</span>
+                    <button style={{ width: 26, height: 26, borderRadius: 5, display: "grid", placeItems: "center", color: D.ink3, background: "none", border: "none", cursor: "pointer" }}><MoreHorizontal className="h-3 w-3" /></button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+        </div>
+      )}
+
+      {/* ══════════ SEGMENTOS ══════════ */}
+      {emTab === "segmentos" && (
+        <div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+            {SEGMENTS_DESIGN.map(seg => (
+              <div key={seg.nm} style={{ background: D.bg, border: `1px solid ${D.line}`, borderRadius: 10, padding: 16, cursor: "pointer" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                  <span style={{ width: 32, height: 32, borderRadius: 7, background: seg.bg, display: "grid", placeItems: "center", color: seg.color, flexShrink: 0, fontSize: 15 }}>✦</span>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: 13, color: D.ink }}>{seg.nm}</div>
+                    <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 12, fontWeight: 600, color: D.ink, marginTop: 1 }}>{fmtN(seg.ct)} suscriptores</div>
+                  </div>
+                </div>
+                <div style={{ fontSize: 11.5, color: D.ink3, marginBottom: 12, lineHeight: 1.5 }}>{seg.desc}</div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, paddingTop: 12, borderTop: `1px solid ${D.line2}` }}>
+                  {[["Apertura", `${seg.open}%`], ["CTR", `${seg.click}%`], ["Churn", `${seg.churn}%`]].map(([l, v]) => (
+                    <div key={String(l)}>
+                      <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 9.5, color: D.ink4, textTransform: "uppercase" as const, letterSpacing: "0.04em" }}>{l}</div>
+                      <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 13, fontWeight: 600, color: D.ink }}>{v}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ══════════ PLANTILLAS ══════════ */}
+      {emTab === "plantillas" && (
+        <div>
+          <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" as const }}>
+            <div style={{ display: "inline-flex", background: D.bg2, border: `1px solid ${D.line}`, borderRadius: 7, padding: 2 }}>
+              {["Todas", "Marketing", "Transaccional", "Newsletter", "Onboarding"].map(s => (
+                <button key={s} onClick={() => setTmplFilter(s)} style={{ padding: "4px 10px", borderRadius: 5, fontFamily: "ui-monospace,monospace", fontSize: 11.5, color: tmplFilter === s ? D.ink : D.ink3, background: tmplFilter === s ? "white" : "transparent", boxShadow: tmplFilter === s ? `0 0 0 1px ${D.line} inset` : "none", border: "none", cursor: "pointer" }}>{s}</button>
+              ))}
+            </div>
+            <button style={{ marginLeft: "auto", padding: "6px 12px", borderRadius: 6, background: D.bg, border: `1px solid ${D.line}`, color: D.ink2, fontSize: 12.5, fontWeight: 550, cursor: "pointer" }}>+ Diseñar plantilla</button>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14 }}>
+            {TEMPLATES_DESIGN.filter(t => tmplFilter === "Todas" || t.cat === tmplFilter).map(tmpl => (
+              <div key={tmpl.nm} style={{ background: D.bg, border: `1px solid ${D.line}`, borderRadius: 10, overflow: "hidden", cursor: "pointer" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = D.ink3 }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = D.line }}
               >
-                Cancelar
+                {/* Thumbnail */}
+                <div style={{ height: 160, background: D.bg2, display: "flex", flexDirection: "column", padding: 12, gap: 6 }}>
+                  <div style={{ height: 12, borderRadius: 3, background: tmpl.color, width: "60%" }} />
+                  <div style={{ height: 60, borderRadius: 4, background: `${tmpl.color}20`, flex: "none" }} />
+                  <div style={{ height: 8, borderRadius: 3, background: D.line, width: "80%" }} />
+                  <div style={{ height: 8, borderRadius: 3, background: D.line, width: "60%" }} />
+                  <div style={{ height: 26, borderRadius: 5, background: tmpl.color, width: "50%", marginTop: 4 }} />
+                </div>
+                <div style={{ padding: "12px 14px" }}>
+                  <div style={{ fontWeight: 600, fontSize: 13, color: D.ink, marginBottom: 3 }}>{tmpl.nm}</div>
+                  <div style={{ fontSize: 11.5, color: D.ink3, display: "flex", alignItems: "center", gap: 6 }}>
+                    <span>{tmpl.cat}</span>
+                    <span style={{ color: D.ink5 }}>·</span>
+                    <span>6 bloques</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ══════════ ENTREGABILIDAD ══════════ */}
+      {emTab === "entregabilidad" && (
+        <div className="grid grid-cols-2 gap-4">
+          <div style={{ background: D.bg, border: `1px solid ${D.line}`, borderRadius: 10, overflow: "hidden" }}>
+            <div style={{ padding: "14px 18px", borderBottom: `1px solid ${D.line2}` }}>
+              <h3 style={{ fontWeight: 600, fontSize: 13.5, margin: 0, color: D.ink }}>Autenticación del dominio</h3>
+              <div style={{ fontSize: 11.5, color: D.ink3, fontFamily: "ui-monospace,monospace", marginTop: 2 }}>estudiovega.com · verificado hace 2 h</div>
+            </div>
+            <div style={{ padding: 18 }}>
+              {[
+                { ok: true,  nm: "SPF", sub: "v=spf1 include:_spf.clientlabs.io ~all", val: "Verificado" },
+                { ok: true,  nm: "DKIM", sub: "RSA-2048 · cl1._domainkey.estudiovega.com", val: "Verificado" },
+                { ok: true,  nm: "DMARC", sub: "p=quarantine · rua=postmaster@estudiovega.com", val: "100% align" },
+                { ok: false, nm: "BIMI", sub: "Falta certificado VMC para Gmail / Yahoo Inbox", val: "Sin certificado" },
+                { ok: true,  nm: "IP dedicada", sub: "185.43.18.12 · Sin presencia en 89 listas negras", val: "Reputación 96/100" },
+              ].map((it, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 14, padding: "12px 0", borderBottom: i < 4 ? `1px solid ${D.line3}` : "none" }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 8, background: it.ok ? D.accentSoft : D.warnSoft, display: "grid", placeItems: "center", color: it.ok ? D.accentInk : D.warn, flexShrink: 0, fontSize: 14 }}>{it.ok ? "✓" : "⚠"}</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600, fontSize: 13, color: D.ink }}>{it.nm}</div>
+                    <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: D.ink3, marginTop: 2 }}>{it.sub}</div>
+                  </div>
+                  <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, padding: "3px 8px", borderRadius: 5, background: it.ok ? D.accentSoft : D.warnSoft, color: it.ok ? D.accentInk : D.warn, fontWeight: 600, flexShrink: 0 }}>{it.val}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={{ background: D.bg, border: `1px solid ${D.line}`, borderRadius: 10, overflow: "hidden" }}>
+            <div style={{ padding: "14px 18px", borderBottom: `1px solid ${D.line2}` }}>
+              <h3 style={{ fontWeight: 600, fontSize: 13.5, margin: 0, color: D.ink }}>Métricas de reputación</h3>
+              <div style={{ fontSize: 11.5, color: D.ink3, fontFamily: "ui-monospace,monospace", marginTop: 2 }}>Últimos 30 días · hola@estudiovega.com</div>
+            </div>
+            <div style={{ padding: 18, display: "flex", flexDirection: "column", gap: 16 }}>
+              {[
+                { l: "Reputación IP",     v: 96, max: 100, color: D.accent, fmt: "/100" },
+                { l: "Tasa de entrega",   v: 99.1, max: 100, color: D.accent, fmt: "%" },
+                { l: "Bounce rate",       v: 0.8, max: 5, color: D.ink2, fmt: "%" },
+                { l: "Spam rate",         v: 0.02, max: 1, color: D.ink2, fmt: "%" },
+                { l: "Unsub rate",        v: 0.21, max: 1, color: D.ink2, fmt: "%" },
+              ].map(k => (
+                <div key={k.l}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+                    <span style={{ fontSize: 12.5, fontWeight: 500, color: D.ink2 }}>{k.l}</span>
+                    <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 13, fontWeight: 600, color: k.color }}>{k.v}{k.fmt}</span>
+                  </div>
+                  <div style={{ height: 6, background: D.bg3, borderRadius: 99, overflow: "hidden" }}>
+                    <div style={{ width: `${(k.v / k.max) * 100}%`, height: "100%", background: k.color, borderRadius: 99 }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── EXISTING CAMPAIGN MODAL (preserved) ─────────────────────────────── */}
+      {modalCampana && (
+        <div className="fixed inset-0 z-50 flex justify-end">
+          <div className="flex-1 bg-black/25" onClick={() => { setModalCampana(false); setPasoModal(1); setTipoCampana(null); setAudienciaSeleccionada(null) }} />
+          <div className="w-full max-w-lg bg-white h-full shadow-2xl flex flex-col overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <span className="text-[15px] font-semibold text-slate-900 leading-snug">Nueva campaña</span>
+                <span className="text-[11px] text-slate-400">Paso {pasoModal} de 5</span>
+              </div>
+              <button onClick={() => { setModalCampana(false); setPasoModal(1); setTipoCampana(null) }} className="p-2 rounded-xl hover:bg-slate-100" aria-label="Cerrar">
+                <X className="h-4 w-4 text-slate-400" />
               </button>
-              {pasoModal < 5 ? (
-                <button
-                  disabled={pasoModal === 2 && !audienciaSeleccionada}
-                  onClick={() => setPasoModal(p => (p + 1) as 1|2|3|4|5)}
-                  className={cn(
-                    "flex-1 py-2.5 rounded-xl text-[13px] font-semibold flex items-center justify-center gap-2 transition-colors",
-                    pasoModal === 2 && !audienciaSeleccionada
-                      ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-                      : "bg-[#1FA97A] text-white hover:bg-[#1a9068]"
-                  )}
-                >
-                  {pasoModal === 3 ? "Saltar — sin plantilla" : "Siguiente"}
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              ) : (
-                <button
-                  onClick={handleGuardarCampana}
-                  disabled={isSaving}
-                  className="flex-1 py-2.5 bg-[#1FA97A] text-white rounded-xl text-[13px] font-semibold hover:bg-[#1a9068] transition-colors flex items-center justify-center gap-2 shadow-lg shadow-[#1FA97A]/25 disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  {isSaving ? "Guardando..." : tipoCampana === "puntual" && campanaForm.fechaEnvio === "ahora" ? "Enviar campaña ahora" : "Guardar campaña"}
-                  {!isSaving && <Check className="h-4 w-4" />}
-                </button>
-              )}
+            </div>
+            <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+              <div className="text-center py-10 text-slate-400 text-[13px]">
+                Utiliza el compositor integrado de arriba para crear tu campaña,<br/>o continúa aquí con el asistente paso a paso.
+              </div>
+            </div>
+            <div className="px-6 py-4 border-t border-slate-100">
+              <button onClick={() => { setModalCampana(false); setShowComposer(true); setComposerStep(0) }}
+                className="w-full py-2.5 rounded-xl text-[13px] font-semibold text-white transition-colors"
+                style={{ background: "linear-gradient(135deg, #16986e, #0d7a56)" }}
+              >
+                Abrir compositor completo
+              </button>
             </div>
           </div>
         </div>

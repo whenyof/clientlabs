@@ -103,7 +103,7 @@ function GenerateDocRow({ orderId, docType, label, icon, onGenerated }: {
         <div className="flex items-center gap-2">
           {(["F1", "F2"] as const).map(t => (
             <label key={t} className="flex items-center gap-1 text-[10px] text-[var(--text-secondary)] cursor-pointer">
-              <input type="radio" value={t} checked={invoiceDocType === t} onChange={() => setInvoiceDocType(t)} className="accent-[#1FA97A]" />
+              <input type="radio" value={t} checked={invoiceDocType === t} onChange={() => setInvoiceDocType(t)} className="accent-[#0F766E]" />
               {t === "F1" ? "F1 completa" : "F2 simplificada"}
             </label>
           ))}
@@ -112,7 +112,7 @@ function GenerateDocRow({ orderId, docType, label, icon, onGenerated }: {
       <button
         onClick={generate}
         disabled={saving}
-        className="ml-auto flex items-center gap-1 text-[11px] text-[#1FA97A] font-medium hover:underline disabled:opacity-50 shrink-0"
+        className="ml-auto flex items-center gap-1 text-[11px] text-[#0F766E] font-medium hover:underline disabled:opacity-50 shrink-0"
       >
         <Plus className="h-3 w-3" />
         {saving ? "Generando..." : "Generar"}
@@ -164,7 +164,7 @@ function StandaloneRow({ clientId, icon, label, doc, docType, orders, onLinked }
         {doc.total != null && <span className="text-[11px] tabular-nums text-[var(--text-secondary)] ml-1">{fmt(doc.total)}</span>}
         <button
           onClick={() => setOpen(v => !v)}
-          className="ml-auto flex items-center gap-1 text-[11px] text-[#1FA97A] font-medium hover:underline shrink-0"
+          className="ml-auto flex items-center gap-1 text-[11px] text-[#0F766E] font-medium hover:underline shrink-0"
         >
           <Link2 className="h-3 w-3" />
           Vincular a pedido
@@ -175,7 +175,7 @@ function StandaloneRow({ clientId, icon, label, doc, docType, orders, onLinked }
           <select
             value={selected}
             onChange={e => setSelected(e.target.value)}
-            className="flex-1 text-[12px] border border-[var(--border-subtle)] rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/30"
+            className="flex-1 text-[12px] border border-[var(--border-subtle)] rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30"
           >
             <option value="">Selecciona un pedido...</option>
             {orders.map(o => <option key={o.id} value={o.id}>{o.number}</option>)}
@@ -183,7 +183,7 @@ function StandaloneRow({ clientId, icon, label, doc, docType, orders, onLinked }
           <button
             onClick={link}
             disabled={!selected || saving}
-            className="px-3 py-1.5 text-[12px] font-medium rounded-md bg-[#1FA97A] text-white hover:bg-[#178f68] disabled:opacity-50 transition-colors shrink-0"
+            className="px-3 py-1.5 text-[12px] font-medium rounded-md bg-[#0F766E] text-white hover:bg-[#0E665F] disabled:opacity-50 transition-colors shrink-0"
           >
             {saving ? "Vinculando..." : "Confirmar"}
           </button>
@@ -284,7 +284,7 @@ export function ClientDocumentsList({ clientId }: Props) {
                 }
                 {/* Factura */}
                 {g.invoice
-                  ? <LinkedDocRow icon={<Receipt className="h-3.5 w-3.5 text-[#1FA97A]" />} label="Factura" doc={g.invoice} pdfHref={`/api/invoicing/${g.invoice.id}/pdf`} />
+                  ? <LinkedDocRow icon={<Receipt className="h-3.5 w-3.5 text-[#0F766E]" />} label="Factura" doc={g.invoice} pdfHref={`/api/invoicing/${g.invoice.id}/pdf`} />
                   : <GenerateDocRow orderId={g.orderId} docType="invoice" label="Factura" icon={<Receipt className="h-3.5 w-3.5" />} onGenerated={load} />
                 }
               </div>
@@ -306,7 +306,7 @@ export function ClientDocumentsList({ clientId }: Props) {
               <StandaloneRow key={d.id} clientId={clientId} icon={<Package className="h-3.5 w-3.5 text-amber-500" />} label="Albarán" doc={d} docType="deliveryNote" orders={orders} onLinked={load} />
             ))}
             {standalone!.invoices.map(i => (
-              <StandaloneRow key={i.id} clientId={clientId} icon={<Receipt className="h-3.5 w-3.5 text-[#1FA97A]" />} label="Factura" doc={i} docType="invoice" orders={orders} onLinked={load} />
+              <StandaloneRow key={i.id} clientId={clientId} icon={<Receipt className="h-3.5 w-3.5 text-[#0F766E]" />} label="Factura" doc={i} docType="invoice" orders={orders} onLinked={load} />
             ))}
           </div>
         </div>

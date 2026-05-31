@@ -17,9 +17,9 @@ const config: Config = {
         },
         // Overrides Tailwind's built-in emerald — safe: no emerald-{n} classes used in codebase
         emerald: {
-          DEFAULT: "#1FA97A",
-          2: "#17c088",
-          ink: "#0d7a56",
+          DEFAULT: "#0F766E",
+          2: "#34D399",
+          ink: "#0E665F",
         },
         ink: {
           DEFAULT: "#0B1F2A",

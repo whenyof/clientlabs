@@ -85,9 +85,9 @@ export function ClientsKPIs({ kpis, activeKpi, onKpiClick }: ClientsKPIsProps) {
               "bg-white border rounded-xl p-4 transition-all duration-200",
               card.clickable ? "cursor-pointer" : "cursor-default",
               isActive
-                ? "border-[#1FA97A] bg-[#E1F5EE]/30 ring-1 ring-[#1FA97A]/20"
+                ? "border-[#0F766E] bg-[#E1F5EE]/30 ring-1 ring-[#0F766E]/20"
                 : card.clickable
-                  ? "border-slate-200 hover:border-[#1FA97A]/40 hover:shadow-[0_2px_12px_rgba(31,169,122,0.08)]"
+                  ? "border-slate-200 hover:border-[#0F766E]/40 hover:shadow-[0_2px_12px_rgba(15,118,110,0.08)]"
                   : "border-slate-200"
             )}
           >

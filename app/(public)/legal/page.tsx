@@ -15,7 +15,7 @@ export default function LegalPage() {
       <div className="max-w-2xl mx-auto">
 
         <div className="mb-12">
-          <Link href="/" className="text-[18px] font-bold" style={{ color: "#1FA97A" }}>
+          <Link href="/" className="text-[18px] font-bold" style={{ color: "#0F766E" }}>
             ClientLabs
           </Link>
         </div>
@@ -29,13 +29,13 @@ export default function LegalPage() {
 
           <Link
             href="/terms"
-            className="flex items-start gap-4 p-5 border border-white/10 rounded-xl hover:border-[#1FA97A]/50 hover:bg-white/[0.03] transition-all group"
+            className="flex items-start gap-4 p-5 border border-white/10 rounded-xl hover:border-[#0F766E]/50 hover:bg-white/[0.03] transition-all group"
           >
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(31,169,122,0.12)" }}>
-              <FileText className="h-5 w-5" style={{ color: "#1FA97A" }} />
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(15,118,110,0.12)" }}>
+              <FileText className="h-5 w-5" style={{ color: "#0F766E" }} />
             </div>
             <div>
-              <div className="font-semibold text-white mb-1 group-hover:text-[#1FA97A] transition-colors text-[15px]">
+              <div className="font-semibold text-white mb-1 group-hover:text-[#0F766E] transition-colors text-[15px]">
                 Términos y Condiciones
               </div>
               <div className="text-[13px] text-white/40">
@@ -46,13 +46,13 @@ export default function LegalPage() {
 
           <Link
             href="/privacy"
-            className="flex items-start gap-4 p-5 border border-white/10 rounded-xl hover:border-[#1FA97A]/50 hover:bg-white/[0.03] transition-all group"
+            className="flex items-start gap-4 p-5 border border-white/10 rounded-xl hover:border-[#0F766E]/50 hover:bg-white/[0.03] transition-all group"
           >
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(31,169,122,0.12)" }}>
-              <Shield className="h-5 w-5" style={{ color: "#1FA97A" }} />
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(15,118,110,0.12)" }}>
+              <Shield className="h-5 w-5" style={{ color: "#0F766E" }} />
             </div>
             <div>
-              <div className="font-semibold text-white mb-1 group-hover:text-[#1FA97A] transition-colors text-[15px]">
+              <div className="font-semibold text-white mb-1 group-hover:text-[#0F766E] transition-colors text-[15px]">
                 Política de Privacidad
               </div>
               <div className="text-[13px] text-white/40">
@@ -63,13 +63,13 @@ export default function LegalPage() {
 
           <Link
             href="/cookies"
-            className="flex items-start gap-4 p-5 border border-white/10 rounded-xl hover:border-[#1FA97A]/50 hover:bg-white/[0.03] transition-all group"
+            className="flex items-start gap-4 p-5 border border-white/10 rounded-xl hover:border-[#0F766E]/50 hover:bg-white/[0.03] transition-all group"
           >
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(31,169,122,0.12)" }}>
-              <Cookie className="h-5 w-5" style={{ color: "#1FA97A" }} />
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(15,118,110,0.12)" }}>
+              <Cookie className="h-5 w-5" style={{ color: "#0F766E" }} />
             </div>
             <div>
-              <div className="font-semibold text-white mb-1 group-hover:text-[#1FA97A] transition-colors text-[15px]">
+              <div className="font-semibold text-white mb-1 group-hover:text-[#0F766E] transition-colors text-[15px]">
                 Política de Cookies
               </div>
               <div className="text-[13px] text-white/40">
@@ -83,7 +83,7 @@ export default function LegalPage() {
         <div className="mt-10 p-5 border border-white/10 rounded-xl" style={{ background: "rgba(255,255,255,0.02)" }}>
           <p className="text-[13px] text-white/40 leading-relaxed">
             ¿Tienes preguntas sobre alguno de estos documentos? Escríbenos a{" "}
-            <a href="mailto:hola@clientlabs.io" className="text-[#1FA97A] hover:underline font-medium">
+            <a href="mailto:hola@clientlabs.io" className="text-[#0F766E] hover:underline font-medium">
               hola@clientlabs.io
             </a>
             {" "}y te respondemos en menos de 24 horas.

@@ -54,7 +54,7 @@ export default function ProvidersAnalyticsPage() {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPICard title="Total proveedores" value={data?.kpis.total ?? 0}    badge={`${data?.kpis.active ?? 0} activos`} badgeColor="#1FA97A" loading={loading} />
+        <KPICard title="Total proveedores" value={data?.kpis.total ?? 0}    badge={`${data?.kpis.active ?? 0} activos`} badgeColor="#0F766E" loading={loading} />
         <KPICard title="Coste mensual"     value={loading ? "—" : eur(data?.kpis.totalMonthlyCost ?? 0)} loading={loading} sparkColor="#F59E0B" />
         <KPICard title="Críticos"          value={data?.kpis.critical ?? 0} badge={criticalPct ? `${criticalPct}% del total` : undefined} badgeColor="#EF4444" loading={loading} />
         <KPICard title="En riesgo"         value={data?.kpis.atRisk ?? 0}   badge={data?.kpis.atRisk ? "requieren atención" : undefined} badgeColor="#F59E0B" loading={loading} />

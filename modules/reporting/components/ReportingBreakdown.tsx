@@ -33,10 +33,10 @@ export function ReportingBreakdown({ topClients, revenueByType }: Props) {
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-5 backdrop-blur">
-                <h3 className="text-sm font-medium text-[var(--text-secondary)] mb-4">{b.topClients}</h3>
+            <div className="rounded-xl p-5" style={{ border: "1px solid #e8e8e8", background: "#ffffff" }}>
+                <h3 className="text-sm font-medium mb-4" style={{ color: "#0a0a0a" }}>{b.topClients}</h3>
                 {clientData.length === 0 ? (
-                    <p className="text-[var(--text-secondary)] text-sm">Sin datos</p>
+                    <p className="text-sm" style={{ color: "#737373" }}>Sin datos</p>
                 ) : (
                     <div className="h-[200px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
@@ -46,10 +46,12 @@ export function ReportingBreakdown({ topClients, revenueByType }: Props) {
                                     type="category"
                                     dataKey="name"
                                     width={100}
-                                    tick={{ fill: "rgba(255,255,255,0.7)", fontSize: 11 }}
+                                    tick={{ fill: "#737373", fontSize: 11 }}
                                     axisLine={false}
                                 />
                                 <Tooltip
+                                    contentStyle={{ backgroundColor: "#ffffff", border: "1px solid #e8e8e8", borderRadius: "8px" }}
+                                    labelStyle={{ color: "#0a0a0a" }}
                                     formatter={(value: unknown, _name: unknown, props?: { payload?: { fullName?: string; count: number } }) => [
                                         formatReportingCurrency(typeof value === "number" ? value : Number(value) || 0),
                                         props?.payload?.fullName ?? "",
@@ -67,25 +69,27 @@ export function ReportingBreakdown({ topClients, revenueByType }: Props) {
                 )}
             </div>
 
-            <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-5 backdrop-blur">
-                <h3 className="text-sm font-medium text-[var(--text-secondary)] mb-4">{b.revenueByType}</h3>
+            <div className="rounded-xl p-5" style={{ border: "1px solid #e8e8e8", background: "#ffffff" }}>
+                <h3 className="text-sm font-medium mb-4" style={{ color: "#0a0a0a" }}>{b.revenueByType}</h3>
                 {typeData.length === 0 ? (
-                    <p className="text-[var(--text-secondary)] text-sm">Sin datos</p>
+                    <p className="text-sm" style={{ color: "#737373" }}>Sin datos</p>
                 ) : (
                     <div className="h-[200px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={typeData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                                 <XAxis
                                     dataKey="name"
-                                    tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 10 }}
-                                    axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
+                                    tick={{ fill: "#737373", fontSize: 10 }}
+                                    axisLine={{ stroke: "#e8e8e8" }}
                                 />
                                 <YAxis
-                                    tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 11 }}
+                                    tick={{ fill: "#737373", fontSize: 11 }}
                                     axisLine={false}
                                     tickFormatter={(v) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v))}
                                 />
                                 <Tooltip
+                                    contentStyle={{ backgroundColor: "#ffffff", border: "1px solid #e8e8e8", borderRadius: "8px" }}
+                                    labelStyle={{ color: "#0a0a0a" }}
                                     formatter={(value: unknown) => [formatReportingCurrency(typeof value === "number" ? value : Number(value) || 0), revenueLabel]}
                                 />
                                 <Bar dataKey="value" radius={[4, 4, 0, 0]}>

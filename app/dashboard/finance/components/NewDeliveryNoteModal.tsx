@@ -160,7 +160,7 @@ export function NewDeliveryNoteModal({ open, onClose, onSuccess, defaultClientId
                 <select
                   value={clientId}
                   onChange={e => { setClientId(e.target.value); setQuoteId("") }}
-                  className="w-full appearance-none text-[13px] border border-slate-200 rounded-lg px-3 py-2.5 text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A] pr-8"
+                  className="w-full appearance-none text-[13px] border border-slate-200 rounded-lg px-3 py-2.5 text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30 focus:border-[#0F766E] pr-8"
                 >
                   <option value="">Seleccionar</option>
                   {clients.map(c => (
@@ -177,7 +177,7 @@ export function NewDeliveryNoteModal({ open, onClose, onSuccess, defaultClientId
                   value={quoteId}
                   onChange={e => { setQuoteId(e.target.value); loadFromQuote(e.target.value) }}
                   disabled={!clientId || quotes.length === 0}
-                  className="w-full appearance-none text-[13px] border border-slate-200 rounded-lg px-3 py-2.5 text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A] pr-8 disabled:bg-slate-50 disabled:text-slate-400"
+                  className="w-full appearance-none text-[13px] border border-slate-200 rounded-lg px-3 py-2.5 text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30 focus:border-[#0F766E] pr-8 disabled:bg-slate-50 disabled:text-slate-400"
                 >
                   <option value="">Ninguno</option>
                   {quotes.map(q => (
@@ -193,7 +193,7 @@ export function NewDeliveryNoteModal({ open, onClose, onSuccess, defaultClientId
                 type="date"
                 value={deliveryDate}
                 onChange={e => setDeliveryDate(e.target.value)}
-                className="w-full text-[13px] border border-slate-200 rounded-lg px-3 py-2.5 text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+                className="w-full text-[13px] border border-slate-200 rounded-lg px-3 py-2.5 text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
               />
             </div>
           </div>
@@ -223,7 +223,7 @@ export function NewDeliveryNoteModal({ open, onClose, onSuccess, defaultClientId
                         value={item.description}
                         onChange={e => updateItem(item._key, { description: e.target.value })}
                         placeholder="Descripción del artículo"
-                        className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A] mr-2"
+                        className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#0F766E]/30 focus:border-[#0F766E] mr-2"
                       />
                       <input
                         type="number"
@@ -232,20 +232,20 @@ export function NewDeliveryNoteModal({ open, onClose, onSuccess, defaultClientId
                         placeholder="1"
                         value={item.quantity || ""}
                         onChange={e => updateItem(item._key, { quantity: Math.max(0, Number(e.target.value)) })}
-                        className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 placeholder-slate-300 text-center focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+                        className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 placeholder-slate-300 text-center focus:outline-none focus:ring-1 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
                       />
                       <input
                         value={item.unit}
                         onChange={e => updateItem(item._key, { unit: e.target.value })}
                         placeholder="uds."
-                        className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+                        className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
                       />
                       <div className="flex justify-center">
                         <input
                           type="checkbox"
                           checked={item.delivered}
                           onChange={e => updateItem(item._key, { delivered: e.target.checked })}
-                          className="h-4 w-4 rounded border-slate-300 text-[#1FA97A] focus:ring-[#1FA97A]/30 accent-[#1FA97A]"
+                          className="h-4 w-4 rounded border-slate-300 text-[#0F766E] focus:ring-[#0F766E]/30 accent-[#0F766E]"
                         />
                       </div>
                       <button
@@ -265,7 +265,7 @@ export function NewDeliveryNoteModal({ open, onClose, onSuccess, defaultClientId
                             value={item.lotNumber ?? ""}
                             onChange={e => updateItem(item._key, { lotNumber: e.target.value })}
                             placeholder="Nº lote"
-                            className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+                            className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-1 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
                           />
                         </div>
                         {enableExpiry && (
@@ -275,7 +275,7 @@ export function NewDeliveryNoteModal({ open, onClose, onSuccess, defaultClientId
                               type="date"
                               value={item.expiryDate ?? ""}
                               onChange={e => updateItem(item._key, { expiryDate: e.target.value })}
-                              className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+                              className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
                             />
                           </div>
                         )}
@@ -290,7 +290,7 @@ export function NewDeliveryNoteModal({ open, onClose, onSuccess, defaultClientId
                 <button
                   type="button"
                   onClick={addItem}
-                  className="flex items-center gap-1.5 text-[12px] text-[#1FA97A] hover:text-[#178f68] font-medium transition-colors"
+                  className="flex items-center gap-1.5 text-[12px] text-[#0F766E] hover:text-[#0E665F] font-medium transition-colors"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   Añadir artículo
@@ -307,7 +307,7 @@ export function NewDeliveryNoteModal({ open, onClose, onSuccess, defaultClientId
               onChange={e => setNotes(e.target.value)}
               placeholder="Observaciones, instrucciones de entrega..."
               rows={2}
-              className="w-full text-[12px] border border-slate-200 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+              className="w-full text-[12px] border border-slate-200 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
             />
           </div>
         </div>
@@ -326,7 +326,7 @@ export function NewDeliveryNoteModal({ open, onClose, onSuccess, defaultClientId
             onClick={handleSave}
             disabled={saving || !clientId}
             className={cn(
-              "px-4 py-2 text-[13px] font-medium rounded-lg bg-[#1FA97A] text-white hover:bg-[#178f68] transition-colors",
+              "px-4 py-2 text-[13px] font-medium rounded-lg bg-[#0F766E] text-white hover:bg-[#0E665F] transition-colors",
               "disabled:opacity-50 disabled:cursor-not-allowed"
             )}
           >

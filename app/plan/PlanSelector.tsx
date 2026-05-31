@@ -124,8 +124,8 @@ export default function PlanSelector() {
       />
 
       {/* Orbs */}
-      <div className="absolute pointer-events-none" style={{ width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(31,169,122,0.15) 0%, transparent 70%)", filter: "blur(80px)", top: "-20%", left: "-8%", animation: "orbFloat1 12s ease-in-out infinite" }} />
-      <div className="absolute pointer-events-none" style={{ width: 380, height: 380, borderRadius: "50%", background: "radial-gradient(circle, rgba(31,169,122,0.08) 0%, transparent 70%)", filter: "blur(80px)", bottom: "-10%", right: "-8%", animation: "orbFloat2 16s ease-in-out infinite" }} />
+      <div className="absolute pointer-events-none" style={{ width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(15,118,110,0.15) 0%, transparent 70%)", filter: "blur(80px)", top: "-20%", left: "-8%", animation: "orbFloat1 12s ease-in-out infinite" }} />
+      <div className="absolute pointer-events-none" style={{ width: 380, height: 380, borderRadius: "50%", background: "radial-gradient(circle, rgba(15,118,110,0.08) 0%, transparent 70%)", filter: "blur(80px)", bottom: "-10%", right: "-8%", animation: "orbFloat2 16s ease-in-out infinite" }} />
 
       <style>{`
         @keyframes orbFloat1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(30px,-25px)} }
@@ -151,7 +151,7 @@ export default function PlanSelector() {
               onClick={() => setPeriod(p)}
               className="relative px-4 py-1.5 rounded-full text-[12.5px] font-medium transition-all duration-200"
               style={{
-                background: period === p ? "#1FA97A" : "transparent",
+                background: period === p ? "#0F766E" : "transparent",
                 color: period === p ? "#fff" : "rgba(255,255,255,0.45)",
               }}
             >
@@ -182,9 +182,9 @@ export default function PlanSelector() {
               key={plan.id}
               className="flex flex-col rounded-2xl h-full transition-all duration-200"
               style={{
-                background: plan.highlight ? "rgba(31,169,122,0.08)" : "rgba(255,255,255,0.04)",
-                border: plan.highlight ? "1.5px solid rgba(31,169,122,0.5)" : "1px solid rgba(255,255,255,0.08)",
-                boxShadow: plan.highlight ? "0 0 28px rgba(31,169,122,0.1)" : "none",
+                background: plan.highlight ? "rgba(15,118,110,0.08)" : "rgba(255,255,255,0.04)",
+                border: plan.highlight ? "1.5px solid rgba(15,118,110,0.5)" : "1px solid rgba(255,255,255,0.08)",
+                boxShadow: plan.highlight ? "0 0 28px rgba(15,118,110,0.1)" : "none",
                 padding: "18px 20px",
               }}
             >
@@ -193,7 +193,7 @@ export default function PlanSelector() {
                 {plan.badge ? (
                   <span
                     className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide"
-                    style={{ background: "rgba(31,169,122,0.18)", color: "#1FA97A", border: "1px solid rgba(31,169,122,0.3)" }}
+                    style={{ background: "rgba(15,118,110,0.18)", color: "#0F766E", border: "1px solid rgba(15,118,110,0.3)" }}
                   >
                     {plan.badge}
                   </span>
@@ -222,7 +222,7 @@ export default function PlanSelector() {
               {/* Trial badge */}
               <div
                 className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 mb-3 text-[11px] font-semibold shrink-0"
-                style={{ background: "rgba(31,169,122,0.1)", border: "1px solid rgba(31,169,122,0.22)", color: "#1FA97A" }}
+                style={{ background: "rgba(15,118,110,0.1)", border: "1px solid rgba(15,118,110,0.22)", color: "#0F766E" }}
               >
                 <Zap className="w-3 h-3 shrink-0" />
                 14 días gratis · Sin cargo hoy
@@ -235,11 +235,11 @@ export default function PlanSelector() {
                     <div
                       className="w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0"
                       style={{
-                        background: plan.highlight ? "rgba(31,169,122,0.2)" : "rgba(255,255,255,0.06)",
-                        border: plan.highlight ? "1px solid rgba(31,169,122,0.35)" : "1px solid rgba(255,255,255,0.1)",
+                        background: plan.highlight ? "rgba(15,118,110,0.2)" : "rgba(255,255,255,0.06)",
+                        border: plan.highlight ? "1px solid rgba(15,118,110,0.35)" : "1px solid rgba(255,255,255,0.1)",
                       }}
                     >
-                      <Check className="w-2 h-2" style={{ color: plan.highlight ? "#1FA97A" : "rgba(255,255,255,0.4)" }} strokeWidth={3} />
+                      <Check className="w-2 h-2" style={{ color: plan.highlight ? "#0F766E" : "rgba(255,255,255,0.4)" }} strokeWidth={3} />
                     </div>
                     <span className="text-[12px]" style={{ color: "rgba(255,255,255,0.6)" }}>
                       {feature}
@@ -255,7 +255,7 @@ export default function PlanSelector() {
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-semibold transition-all duration-150 disabled:opacity-60 hover:opacity-90 active:scale-[.99] mt-4 shrink-0"
                 style={
                   plan.highlight
-                    ? { background: "linear-gradient(135deg, #1FA97A 0%, #178a64 100%)", color: "#fff", boxShadow: "0 4px 12px rgba(31,169,122,0.3)" }
+                    ? { background: "linear-gradient(135deg, #0F766E 0%, #0E665F 100%)", color: "#fff", boxShadow: "0 4px 12px rgba(15,118,110,0.3)" }
                     : { background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.8)", border: "1px solid rgba(255,255,255,0.1)" }
                 }
               >

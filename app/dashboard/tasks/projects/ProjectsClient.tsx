@@ -64,7 +64,7 @@ function ProjectSidebar({
 
   const nextAction: { label: string; status: ProjectStatus; color: string } | null =
     project.status === "ACTIVE" ? { label: "Pausar", status: "PAUSED", color: "#F59E0B" } :
-    project.status === "PAUSED" ? { label: "Reanudar", status: "ACTIVE", color: "#1FA97A" } : null
+    project.status === "PAUSED" ? { label: "Reanudar", status: "ACTIVE", color: "#0F766E" } : null
 
   const tabs = [
     { id: "resumen" as const, label: "Resumen" },
@@ -115,7 +115,7 @@ function ProjectSidebar({
             </div>
             <div style={{ display: "flex", gap: 6 }}>
               {[
-                { count: project.completedTasks, label: "Hechas", color: "#1FA97A" },
+                { count: project.completedTasks, label: "Hechas", color: "#0F766E" },
                 { count: project.totalTasks - project.completedTasks, label: "Pendientes", color: "#F59E0B" },
                 { count: project.totalTasks, label: "Total", color: "var(--text-secondary)" },
               ].map(({ count, label, color }) => (
@@ -183,7 +183,7 @@ function ProjectSidebar({
                   <div style={{ fontSize: 12, fontWeight: 500, color: "var(--text-primary)" }}>{m.user.name ?? m.user.email}</div>
                   {m.user.name && <div style={{ fontSize: 10, color: "var(--text-secondary)" }}>{m.user.email}</div>}
                 </div>
-                <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 6px", borderRadius: 20, background: m.role === "owner" ? "#1FA97A15" : "var(--bg-surface)", color: m.role === "owner" ? "#1FA97A" : "var(--text-secondary)" }}>
+                <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 6px", borderRadius: 20, background: m.role === "owner" ? "#0F766E15" : "var(--bg-surface)", color: m.role === "owner" ? "#0F766E" : "var(--text-secondary)" }}>
                   {m.role === "owner" ? "Owner" : m.role === "admin" ? "Admin" : "Miembro"}
                 </span>
               </div>
@@ -202,7 +202,7 @@ function ProjectSidebar({
         )}
         {project.status !== "COMPLETED" && (
           <button type="button" onClick={() => onStatusChange("COMPLETED")} disabled={isLoading}
-            style={{ flex: 1, padding: "7px 8px", borderRadius: 7, border: "1px solid #1FA97A30", background: "#1FA97A10", color: "#1FA97A", fontSize: 11, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
+            style={{ flex: 1, padding: "7px 8px", borderRadius: 7, border: "1px solid #0F766E30", background: "#0F766E10", color: "#0F766E", fontSize: 11, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
             <CheckCircle2 style={{ width: 12, height: 12 }} />
             Completar
           </button>
@@ -263,8 +263,8 @@ export function ProjectsClient() {
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 38, height: 38, borderRadius: 10, background: "#1FA97A15", border: "1px solid #1FA97A25", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <FolderKanban style={{ width: 18, height: 18, color: "#1FA97A" }} />
+          <div style={{ width: 38, height: 38, borderRadius: 10, background: "#0F766E15", border: "1px solid #0F766E25", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <FolderKanban style={{ width: 18, height: 18, color: "#0F766E" }} />
           </div>
           <div>
             <h1 style={{ fontSize: 18, fontWeight: 700, color: "var(--text-primary)", margin: 0, lineHeight: 1.2 }}>Proyectos</h1>
@@ -272,7 +272,7 @@ export function ProjectsClient() {
           </div>
         </div>
         <button type="button" onClick={() => setCreateOpen(true)}
-          style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "9px 16px", background: "#1FA97A", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, color: "#fff", cursor: "pointer" }}>
+          style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "9px 16px", background: "#0F766E", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, color: "#fff", cursor: "pointer" }}>
           <Plus style={{ width: 14, height: 14 }} />
           Nuevo proyecto
         </button>
@@ -310,7 +310,7 @@ export function ProjectsClient() {
           <p style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)", margin: "0 0 4px" }}>Sin proyectos aún</p>
           <p style={{ fontSize: 12, color: "var(--text-secondary)", margin: "0 0 20px" }}>Crea tu primer proyecto para organizar las tareas del equipo.</p>
           <button type="button" onClick={() => setCreateOpen(true)}
-            style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "9px 18px", background: "#1FA97A", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, color: "#fff", cursor: "pointer" }}>
+            style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "9px 18px", background: "#0F766E", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, color: "#fff", cursor: "pointer" }}>
             <Plus style={{ width: 14, height: 14 }} />Crear proyecto
           </button>
         </div>

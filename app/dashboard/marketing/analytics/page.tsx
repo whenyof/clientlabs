@@ -64,16 +64,16 @@ export default function MarketingAnalyticsPage() {
           <p className="text-sm text-[var(--text-secondary)] mt-0.5">Rendimiento de newsletters, alcance y engagement por campaña</p>
         </div>
         <div className="flex items-center gap-6 text-right">
-          <div><p className="text-xs text-[var(--text-secondary)]">Apertura media</p><p className="text-2xl font-bold text-[#1FA97A]">{data?.kpis.avgOpenRate ?? 0}%</p></div>
+          <div><p className="text-xs text-[var(--text-secondary)]">Apertura media</p><p className="text-2xl font-bold text-[#0F766E]">{data?.kpis.avgOpenRate ?? 0}%</p></div>
           <div><p className="text-xs text-[var(--text-secondary)]">Clicks medio</p><p className="text-2xl font-bold text-[#3B82F6]">{data?.kpis.avgClickRate ?? 0}%</p></div>
         </div>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <KPICard title="Newsletters"   value={data?.kpis.total ?? 0}   loading={loading} />
-        <KPICard title="Enviadas"      value={data?.kpis.sent ?? 0}    badge={data?.kpis.total ? `${Math.round(((data.kpis.sent) / data.kpis.total) * 100)}% del total` : undefined} badgeColor="#1FA97A" loading={loading} />
+        <KPICard title="Enviadas"      value={data?.kpis.sent ?? 0}    badge={data?.kpis.total ? `${Math.round(((data.kpis.sent) / data.kpis.total) * 100)}% del total` : undefined} badgeColor="#0F766E" loading={loading} />
         <KPICard title="Destinatarios" value={(totalSent).toLocaleString("es-ES")} badge="envíos totales" badgeColor="#8B5CF6" loading={loading} />
-        <KPICard title="Tasa apertura" value={`${data?.kpis.avgOpenRate ?? 0}%`}  sparkColor="#1FA97A" loading={loading} />
+        <KPICard title="Tasa apertura" value={`${data?.kpis.avgOpenRate ?? 0}%`}  sparkColor="#0F766E" loading={loading} />
         <KPICard title="Tasa clicks"   value={`${data?.kpis.avgClickRate ?? 0}%`} sparkColor="#3B82F6" loading={loading} />
       </div>
 
@@ -94,7 +94,7 @@ export default function MarketingAnalyticsPage() {
                   <RY tick={ax} axisLine={false} tickLine={false} unit="%" domain={[0, 100]} />
                   <RT contentStyle={tip} formatter={(v) => [`${v}%`]} />
                   <RL wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
-                  <RBar dataKey="apertura" fill="#1FA97A" fillOpacity={0.85} radius={[4, 4, 0, 0]} name="Apertura" maxBarSize={24} />
+                  <RBar dataKey="apertura" fill="#0F766E" fillOpacity={0.85} radius={[4, 4, 0, 0]} name="Apertura" maxBarSize={24} />
                   <RBar dataKey="clicks"   fill="#3B82F6" fillOpacity={0.85} radius={[4, 4, 0, 0]} name="Clicks"   maxBarSize={24} />
                 </BC>
               </RC>
@@ -111,7 +111,7 @@ export default function MarketingAnalyticsPage() {
             : (
               <div className="space-y-4">
                 <EngagementBar label="Enviados"  value={totalSent} max={totalSent} color="#06B6D4" />
-                <EngagementBar label="Abiertos"  value={opened}    max={totalSent} color="#1FA97A" />
+                <EngagementBar label="Abiertos"  value={opened}    max={totalSent} color="#0F766E" />
                 <EngagementBar label="Clicks"    value={clicked}   max={totalSent} color="#3B82F6" />
               </div>
             )}

@@ -3,7 +3,7 @@
 import { useState, useRef } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
-import Image from "next/image"
+import { Logo } from "@/components/Logo"
 import { LayoutDashboard, Sparkles, ShieldCheck, CheckCircle } from "lucide-react"
 // Note: ?registered=true param is no longer generated — registration redirects to /verify
 import Login from "./Login"
@@ -61,8 +61,8 @@ export default function AuthShell({ defaultRegister = false }: { defaultRegister
         }} />
 
         {/* Orbs */}
-        <div className="orb absolute pointer-events-none" style={{ width: 480, height: 480, borderRadius: "50%", background: "radial-gradient(circle, rgba(31,169,122,0.18) 0%, transparent 70%)", filter: "blur(70px)", top: "-15%", left: "-20%", animation: "orbFloat1 12s ease-in-out infinite" }} />
-        <div className="orb absolute pointer-events-none" style={{ width: 360, height: 360, borderRadius: "50%", background: "radial-gradient(circle, rgba(31,169,122,0.1) 0%, transparent 70%)", filter: "blur(80px)", bottom: "-10%", right: "-15%", animation: "orbFloat2 16s ease-in-out infinite" }} />
+        <div className="orb absolute pointer-events-none" style={{ width: 480, height: 480, borderRadius: "50%", background: "radial-gradient(circle, rgba(15,118,110,0.18) 0%, transparent 70%)", filter: "blur(70px)", top: "-15%", left: "-20%", animation: "orbFloat1 12s ease-in-out infinite" }} />
+        <div className="orb absolute pointer-events-none" style={{ width: 360, height: 360, borderRadius: "50%", background: "radial-gradient(circle, rgba(15,118,110,0.1) 0%, transparent 70%)", filter: "blur(80px)", bottom: "-10%", right: "-15%", animation: "orbFloat2 16s ease-in-out infinite" }} />
 
         <style>{`
           @keyframes orbFloat1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(30px,-25px)} }
@@ -72,9 +72,9 @@ export default function AuthShell({ defaultRegister = false }: { defaultRegister
 
         {/* Logo */}
         <Link href="/" className="relative z-10 flex items-center gap-2.5" style={{ animation: "fadeSlideUp .6s ease both" }}>
-          <Image src="/logo-trimmed.webp" width={26} height={26} alt="ClientLabs" className="rounded-lg object-contain" priority />
+          <Logo variant="icon-solid-green" width={26} height={26} className="rounded-lg" priority />
           <span className="font-bold text-[22px] tracking-tight leading-none text-white">
-            Client<span style={{ color: "#1FA97A" }}>Labs</span>
+            Client<span style={{ color: "#0F766E" }}>Labs</span>
           </span>
         </Link>
 
@@ -83,7 +83,7 @@ export default function AuthShell({ defaultRegister = false }: { defaultRegister
           <div className="space-y-3">
             <h2 className="text-[30px] font-bold leading-[1.2] text-white">
               Gestiona tu negocio<br />
-              <span style={{ color: "#1FA97A" }}>desde un solo lugar.</span>
+              <span style={{ color: "#0F766E" }}>desde un solo lugar.</span>
             </h2>
             <p className="text-[13.5px] leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
               Lleva tus leads, clientes, facturas y tareas sin hojas de Excel, sin caos y sin perder tiempo.
@@ -93,8 +93,8 @@ export default function AuthShell({ defaultRegister = false }: { defaultRegister
           <div className="space-y-4">
             {FEATURES.map(({ Icon, title, desc }, i) => (
               <div key={i} className="flex items-start gap-3.5" style={{ animation: `fadeSlideUp .6s ${.2 + i * .08}s ease both` }}>
-                <div className="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center" style={{ background: "rgba(31,169,122,0.12)", border: "1px solid rgba(31,169,122,0.2)" }}>
-                  <Icon className="w-4 h-4" style={{ color: "#1FA97A" }} />
+                <div className="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center" style={{ background: "rgba(15,118,110,0.12)", border: "1px solid rgba(15,118,110,0.2)" }}>
+                  <Icon className="w-4 h-4" style={{ color: "#0F766E" }} />
                 </div>
                 <div>
                   <p className="text-[13px] font-semibold text-white">{title}</p>
@@ -121,9 +121,9 @@ export default function AuthShell({ defaultRegister = false }: { defaultRegister
 
         {/* Mobile logo */}
         <Link href="/" className="lg:hidden flex items-center gap-2 mb-8">
-          <Image src="/logo-trimmed.webp" width={28} height={28} alt="ClientLabs" className="rounded-lg" />
+          <Logo variant="icon-solid-green" width={28} height={28} className="rounded-lg" />
           <span className="font-bold text-[16px] tracking-tight text-slate-900">
-            Client<span style={{ color: "#1FA97A" }}>Labs</span>
+            Client<span style={{ color: "#0F766E" }}>Labs</span>
           </span>
         </Link>
 
@@ -138,7 +138,7 @@ export default function AuthShell({ defaultRegister = false }: { defaultRegister
 
         {/* Email verified success banner (fallback when auto-login failed after /verify) */}
         {justVerified && !isRegister && (
-          <div className="w-full max-w-[420px] mb-4 flex items-center gap-3 rounded-xl px-4 py-3 text-[13px] font-medium" style={{ background: "rgba(31,169,122,0.08)", border: "1px solid rgba(31,169,122,0.25)", color: "#1FA97A" }}>
+          <div className="w-full max-w-[420px] mb-4 flex items-center gap-3 rounded-xl px-4 py-3 text-[13px] font-medium" style={{ background: "rgba(15,118,110,0.08)", border: "1px solid rgba(15,118,110,0.25)", color: "#0F766E" }}>
             <CheckCircle size={16} className="shrink-0" />
             ¡Email verificado! Inicia sesión para continuar.
           </div>

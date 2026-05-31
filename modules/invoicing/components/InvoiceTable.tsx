@@ -137,7 +137,7 @@ function InvoiceTableComponent({
             <button
               type="button"
               onClick={onCreateClick}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[#1FA97A] text-white rounded-lg text-[12px] font-medium hover:bg-[#178f68] transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#0F766E] text-white rounded-lg text-[12px] font-medium hover:bg-[#0E665F] transition-colors"
             >
               Nueva factura
             </button>

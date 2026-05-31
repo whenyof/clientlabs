@@ -28,7 +28,7 @@ type KanbanProvider = {
 }
 
 const COLUMNS = [
-  { id: "ACTIVE",  label: "Activos",     color: "#1FA97A", statuses: ["ACTIVE", "OK"] },
+  { id: "ACTIVE",  label: "Activos",     color: "#0F766E", statuses: ["ACTIVE", "OK"] },
   { id: "PENDING", label: "Pendientes",  color: "#F59E0B", statuses: ["PENDING"] },
   { id: "ISSUE",   label: "Incidencias", color: "#EF4444", statuses: ["ISSUE"] },
   { id: "PAUSED",  label: "Pausados",    color: "#94A3B8", statuses: ["PAUSED", "BLOCKED"] },
@@ -61,7 +61,7 @@ function getInitials(name: string): string {
 }
 
 function hashColor(str: string): string {
-  const palette = ["#1FA97A", "#3B82F6", "#8B5CF6", "#F59E0B", "#EC4899", "#14B8A6"]
+  const palette = ["#0F766E", "#3B82F6", "#8B5CF6", "#F59E0B", "#EC4899", "#14B8A6"]
   let hash = 0
   for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash)
   return palette[Math.abs(hash) % palette.length]
@@ -154,8 +154,8 @@ function KanbanColumn({
       ref={setNodeRef}
       style={{
         minWidth: 268, maxWidth: 288, flex: "0 0 268px",
-        background: isOver ? "rgba(31,169,122,0.04)" : "var(--bg-surface)",
-        border: `0.5px solid ${isOver ? "rgba(31,169,122,0.35)" : "var(--border-subtle)"}`,
+        background: isOver ? "rgba(15,118,110,0.04)" : "var(--bg-surface)",
+        border: `0.5px solid ${isOver ? "rgba(15,118,110,0.35)" : "var(--border-subtle)"}`,
         borderRadius: 12,
         overflow: "hidden",
         transition: "background 150ms, border-color 150ms",
@@ -242,7 +242,7 @@ export function ProvidersKanbanView({ providers, onProviderUpdate }: ProvidersKa
         {activeProvider && (
           <div style={{
             background: "var(--bg-card)",
-            border: "0.5px solid #1FA97A",
+            border: "0.5px solid #0F766E",
             borderRadius: 10,
             padding: "10px 12px",
             width: 260,

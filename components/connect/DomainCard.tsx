@@ -70,7 +70,7 @@ export function DomainCard({ currentDomain, onSuccess }: DomainCardProps) {
                     disabled={isSaving}
                     className={cn(
                         "block w-full pl-10 pr-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-[#0B1F2A] placeholder-slate-400",
-                        "focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/20 focus:border-[#1FA97A] transition-all",
+                        "focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 focus:border-[#0F766E] transition-all",
                         isSaving && "opacity-60 cursor-not-allowed"
                     )}
                 />
@@ -80,7 +80,7 @@ export function DomainCard({ currentDomain, onSuccess }: DomainCardProps) {
                 disabled={isSaving || !domain.trim() || domain.trim() === currentDomain}
                 className={cn(
                     "flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium rounded-lg transition-colors whitespace-nowrap",
-                    "bg-[#1FA97A] text-white hover:bg-[#178f68]",
+                    "bg-[#0F766E] text-white hover:bg-[#0E665F]",
                     "disabled:opacity-40 disabled:cursor-not-allowed"
                 )}
             >

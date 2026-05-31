@@ -157,7 +157,7 @@ function CreateModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
           <button
             onClick={handleSave}
             disabled={saving || !clientId || !description.trim()}
-            style={{ padding: "8px 18px", borderRadius: 7, border: "none", background: "#1FA97A", color: "white", fontSize: 13, fontWeight: 600, cursor: "pointer", opacity: saving ? 0.7 : 1 }}
+            style={{ padding: "8px 18px", borderRadius: 7, border: "none", background: "#0F766E", color: "white", fontSize: 13, fontWeight: 600, cursor: "pointer", opacity: saving ? 0.7 : 1 }}
           >
             {saving ? "Guardando..." : "Crear"}
           </button>
@@ -210,7 +210,7 @@ export function RecurringInvoicesView() {
         </div>
         <button
           onClick={() => setShowCreate(true)}
-          style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 8, border: "none", background: "#1FA97A", color: "white", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
+          style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 8, border: "none", background: "#0F766E", color: "white", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
         >
           <Plus style={{ width: 14, height: 14 }} />
           Nueva
@@ -233,10 +233,10 @@ export function RecurringInvoicesView() {
               display: "flex", alignItems: "center", gap: 16, opacity: r.active ? 1 : 0.6,
             }}>
               <div style={{
-                width: 36, height: 36, borderRadius: 8, background: r.active ? "#1FA97A18" : "var(--bg-surface)",
+                width: 36, height: 36, borderRadius: 8, background: r.active ? "#0F766E18" : "var(--bg-surface)",
                 display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
               }}>
-                <RefreshCw style={{ width: 16, height: 16, color: r.active ? "#1FA97A" : "var(--text-secondary)" }} />
+                <RefreshCw style={{ width: 16, height: 16, color: r.active ? "#0F766E" : "var(--text-secondary)" }} />
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
@@ -246,8 +246,8 @@ export function RecurringInvoicesView() {
                   </span>
                   <span style={{
                     fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 20,
-                    background: r.active ? "#1FA97A18" : "var(--bg-surface)",
-                    color: r.active ? "#1FA97A" : "var(--text-secondary)",
+                    background: r.active ? "#0F766E18" : "var(--bg-surface)",
+                    color: r.active ? "#0F766E" : "var(--text-secondary)",
                   }}>
                     {FREQ_LABELS[r.frequency]}
                   </span>
@@ -266,7 +266,7 @@ export function RecurringInvoicesView() {
                   title={r.active ? "Pausar" : "Reanudar"}
                   style={{ padding: "6px", borderRadius: 6, border: "1px solid var(--border-subtle)", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center" }}
                 >
-                  {r.active ? <Pause style={{ width: 13, height: 13, color: "var(--text-secondary)" }} /> : <Play style={{ width: 13, height: 13, color: "#1FA97A" }} />}
+                  {r.active ? <Pause style={{ width: 13, height: 13, color: "var(--text-secondary)" }} /> : <Play style={{ width: 13, height: 13, color: "#0F766E" }} />}
                 </button>
                 <button
                   onClick={() => { if (confirm("¿Eliminar esta factura recurrente?")) deleteMutation.mutate(r.id) }}

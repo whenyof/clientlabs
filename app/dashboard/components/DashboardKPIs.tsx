@@ -50,7 +50,7 @@ export function DashboardKPIs({
       subtitle: "Total emitido este mes",
       subtitleColor: "#94A3B8",
       value: invoicedThisMonth,
-      color: "#1FA97A",
+      color: "#0F766E",
       trackColor: "#E8F8F2",
       barPct: hasData ? 100 : 0,
     },
@@ -66,7 +66,7 @@ export function DashboardKPIs({
     {
       label: "Beneficio neto",
       subtitle: hasData ? `${beneficioPct}% ya cobrado` : "Sin datos este mes",
-      subtitleColor: beneficioPct > 40 ? "#1FA97A" : "#94A3B8",
+      subtitleColor: beneficioPct > 40 ? "#0F766E" : "#94A3B8",
       value: beneficio,
       color: "#2563EB",
       trackColor: "#DBEAFE",
@@ -76,7 +76,7 @@ export function DashboardKPIs({
 
   return (
     <div
-      className="group flex h-full cursor-pointer flex-col justify-between rounded-xl border border-slate-200 bg-white p-4 transition-all duration-200 hover:border-[#1FA97A]/20 hover:shadow-[0_2px_16px_rgba(31,169,122,0.08)]"
+      className="group flex h-full cursor-pointer flex-col justify-between rounded-xl border border-slate-200 bg-white p-4 transition-all duration-200 hover:border-[#0F766E]/20 hover:shadow-[0_2px_16px_rgba(15,118,110,0.08)]"
       onClick={() => router.push("/dashboard/finance")}
     >
       {/* Header */}
@@ -86,14 +86,14 @@ export function DashboardKPIs({
             Resumen financiero · {new Date().toLocaleString("es-ES", { month: "long" })}
           </p>
           <div className="mt-1.5 flex items-baseline gap-2 flex-wrap">
-            <span className="text-[22px] sm:text-[30px] font-bold leading-none tracking-tight text-[#1FA97A]">
+            <span className="text-[22px] sm:text-[30px] font-bold leading-none tracking-tight text-[#0F766E]">
               {currencyFmt.format(invoicedThisMonth)}
             </span>
             {invoicedPrevMonth > 0 && (
               <div
                 className={`flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-semibold ${
                   isUp
-                    ? "bg-[#ECFDF5] text-[#1FA97A]"
+                    ? "bg-[#ECFDF5] text-[#0F766E]"
                     : "bg-red-50 text-red-500"
                 }`}
               >
@@ -103,7 +103,7 @@ export function DashboardKPIs({
             )}
           </div>
         </div>
-        <div className="flex items-center gap-1 rounded-md border border-slate-100 px-2 py-1 text-[9px] font-medium text-slate-400 transition-colors group-hover:border-[#1FA97A]/30 group-hover:text-[#1FA97A]">
+        <div className="flex items-center gap-1 rounded-md border border-slate-100 px-2 py-1 text-[9px] font-medium text-slate-400 transition-colors group-hover:border-[#0F766E]/30 group-hover:text-[#0F766E]">
           <ExternalLink className="h-2.5 w-2.5" />
           Finanzas
         </div>
@@ -144,7 +144,7 @@ export function DashboardKPIs({
             ? `${pendingCobroCount} factura${pendingCobroCount !== 1 ? "s" : ""} pendiente${pendingCobroCount !== 1 ? "s" : ""} de cobro`
             : "Sin facturas pendientes"}
         </span>
-        <span className="text-[9px] font-medium text-[#1FA97A]">Ver finanzas →</span>
+        <span className="text-[9px] font-medium text-[#0F766E]">Ver finanzas →</span>
       </div>
     </div>
   )

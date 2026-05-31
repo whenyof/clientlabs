@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import Image from "next/image"
+import { Logo } from "@/components/Logo"
 import { AnimatePresence, motion } from "framer-motion"
 import {
   Check, ChevronLeft, ArrowRight,
@@ -31,8 +31,8 @@ type FormData = {
 // ─── Shared class helpers ────────────────────────────────────────────────────
 const inputCls =
   "w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-[13.5px] text-[#0B1F2A] " +
-  "placeholder:text-slate-300 focus:outline-none focus:border-[#1FA97A] " +
-  "focus:ring-2 focus:ring-[rgba(31,169,122,0.12)] hover:border-slate-300 transition-all"
+  "placeholder:text-slate-300 focus:outline-none focus:border-[#0F766E] " +
+  "focus:ring-2 focus:ring-[rgba(15,118,110,0.12)] hover:border-slate-300 transition-all"
 
 const labelCls = "block text-[11px] font-semibold text-slate-500 uppercase tracking-widest mb-1.5"
 
@@ -44,7 +44,7 @@ export default function OnboardingWizard() {
   const [form, setForm]       = useState<FormData>({
     businessName: "", sector: "otro", taxId: "",
     address: "", postalCode: "", city: "", province: "",
-    logoFile: null, accentColor: "#1FA97A",
+    logoFile: null, accentColor: "#0F766E",
   })
 
   const set = (k: keyof FormData, v: any) => setForm(f => ({ ...f, [k]: v }))
@@ -80,8 +80,8 @@ export default function OnboardingWizard() {
         >
           {/* Success icon */}
           <div className="flex items-center justify-center mb-6">
-            <div className="w-16 h-16 rounded-full bg-[#1FA97A]/10 border-2 border-[#1FA97A]/20 flex items-center justify-center">
-              <Check className="w-8 h-8 text-[#1FA97A]" strokeWidth={2.5} />
+            <div className="w-16 h-16 rounded-full bg-[#0F766E]/10 border-2 border-[#0F766E]/20 flex items-center justify-center">
+              <Check className="w-8 h-8 text-[#0F766E]" strokeWidth={2.5} />
             </div>
           </div>
 
@@ -95,14 +95,14 @@ export default function OnboardingWizard() {
               onClick={() => finish(false)}
               disabled={saving}
               className="w-full py-3 rounded-xl text-[13.5px] font-semibold text-white transition-all hover:opacity-90 active:scale-[.99] disabled:opacity-50"
-              style={{ background: "linear-gradient(135deg, #1FA97A 0%, #178a64 100%)", boxShadow: "0 4px 14px rgba(31,169,122,0.30)" }}
+              style={{ background: "linear-gradient(135deg, #0F766E 0%, #0E665F 100%)", boxShadow: "0 4px 14px rgba(15,118,110,0.30)" }}
             >
               {saving ? "Cargando..." : "Ir al dashboard →"}
             </button>
             <button
               onClick={() => finish(true)}
               disabled={saving}
-              className="w-full py-3 rounded-xl text-[13.5px] font-semibold text-[#1FA97A] bg-[#1FA97A]/5 border border-[#1FA97A]/20 hover:bg-[#1FA97A]/10 transition-all"
+              className="w-full py-3 rounded-xl text-[13.5px] font-semibold text-[#0F766E] bg-[#0F766E]/5 border border-[#0F766E]/20 hover:bg-[#0F766E]/10 transition-all"
             >
               <span className="flex items-center justify-center gap-2">
                 <Sparkles size={15} />
@@ -238,9 +238,9 @@ export default function OnboardingWizard() {
 
       {/* Logo */}
       <div className="flex items-center gap-2 mb-10">
-        <Image src="/logo-trimmed.webp" alt="ClientLabs" width={24} height={24} className="w-auto object-contain" />
+        <Logo variant="icon-solid-green" width={24} height={24} />
         <span className="text-[20px] font-bold tracking-tight text-[#0B1F2A]">
-          Client<span className="text-[#1FA97A]">Labs</span>
+          Client<span className="text-[#0F766E]">Labs</span>
         </span>
       </div>
 
@@ -252,7 +252,7 @@ export default function OnboardingWizard() {
             {STEPS.slice(0, -1).map((_, i) => (
               <div
                 key={i}
-                className={`flex-1 h-px transition-all duration-300 ${i < step ? "bg-[#1FA97A]" : "bg-slate-200"}`}
+                className={`flex-1 h-px transition-all duration-300 ${i < step ? "bg-[#0F766E]" : "bg-slate-200"}`}
               />
             ))}
           </div>
@@ -264,14 +264,14 @@ export default function OnboardingWizard() {
               <div key={i} className="relative z-10 flex flex-col items-center gap-1">
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold border-2 transition-all duration-300 ${
-                    isDone   ? "bg-[#1FA97A] border-[#1FA97A] text-white"
-                    : isActive ? "border-[#1FA97A] bg-white text-[#1FA97A]"
+                    isDone   ? "bg-[#0F766E] border-[#0F766E] text-white"
+                    : isActive ? "border-[#0F766E] bg-white text-[#0F766E]"
                     : "border-slate-200 bg-white text-slate-400"
                   }`}
                 >
                   {isDone ? <Check size={13} strokeWidth={3} /> : i + 1}
                 </div>
-                <span className={`text-[10px] font-medium hidden sm:block ${isActive ? "text-[#1FA97A]" : "text-slate-400"}`}>
+                <span className={`text-[10px] font-medium hidden sm:block ${isActive ? "text-[#0F766E]" : "text-slate-400"}`}>
                   {s.label}
                 </span>
               </div>
@@ -285,7 +285,7 @@ export default function OnboardingWizard() {
 
         {/* Card header */}
         <div className="px-8 pt-8 pb-6 border-b border-slate-100">
-          <p className="text-[11px] font-semibold text-[#1FA97A] uppercase tracking-widest mb-1">
+          <p className="text-[11px] font-semibold text-[#0F766E] uppercase tracking-widest mb-1">
             Paso {step + 1} de {STEPS.length}
           </p>
           <h2 className="text-[22px] font-bold text-[#0B1F2A]">{STEPS[step].label}</h2>
@@ -347,7 +347,7 @@ export default function OnboardingWizard() {
               <button
                 onClick={() => setDone(true)}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13.5px] font-semibold text-white transition-all hover:opacity-90 active:scale-[.99]"
-                style={{ background: "linear-gradient(135deg, #1FA97A 0%, #178a64 100%)", boxShadow: "0 4px 14px rgba(31,169,122,0.30)" }}
+                style={{ background: "linear-gradient(135deg, #0F766E 0%, #0E665F 100%)", boxShadow: "0 4px 14px rgba(15,118,110,0.30)" }}
               >
                 Finalizar
                 <Check size={14} strokeWidth={3} />
@@ -356,7 +356,7 @@ export default function OnboardingWizard() {
               <button
                 onClick={next}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13.5px] font-semibold text-white transition-all hover:opacity-90 active:scale-[.99]"
-                style={{ background: "linear-gradient(135deg, #1FA97A 0%, #178a64 100%)", boxShadow: "0 4px 14px rgba(31,169,122,0.30)" }}
+                style={{ background: "linear-gradient(135deg, #0F766E 0%, #0E665F 100%)", boxShadow: "0 4px 14px rgba(15,118,110,0.30)" }}
               >
                 Siguiente
                 <ArrowRight size={14} />

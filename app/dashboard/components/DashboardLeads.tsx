@@ -62,7 +62,7 @@ export function DashboardLeads({ leads, leadsActive }: Props) {
         </div>
         <button
           onClick={() => router.push("/dashboard/leads")}
-          className="flex items-center gap-1 text-[11px] font-medium text-slate-400 transition-colors hover:text-[#1FA97A]"
+          className="flex items-center gap-1 text-[11px] font-medium text-slate-400 transition-colors hover:text-[#0F766E]"
         >
           Ver todos
           <ArrowRight className="h-3 w-3" />

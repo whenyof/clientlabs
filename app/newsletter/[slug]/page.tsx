@@ -41,7 +41,7 @@ export default function NewsletterPublicaPage({ params }: Props) {
       <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center p-6">
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-10 max-w-md w-full text-center">
           <div className="w-16 h-16 rounded-full bg-[#E1F5EE] flex items-center justify-center mx-auto mb-4">
-            <CheckCircle className="h-8 w-8 text-[#1FA97A]" />
+            <CheckCircle className="h-8 w-8 text-[#0F766E]" />
           </div>
           <h1 className="text-[22px] font-bold text-slate-900 mb-2">
             ¡Ya estás suscrito!
@@ -61,7 +61,7 @@ export default function NewsletterPublicaPage({ params }: Props) {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="w-14 h-14 rounded-2xl bg-[#0B1F2A] flex items-center justify-center mx-auto mb-4">
-            <Mail className="h-7 w-7 text-[#1FA97A]" />
+            <Mail className="h-7 w-7 text-[#0F766E]" />
           </div>
           <h1 className="text-[26px] font-black text-[#0B1F2A] leading-tight mb-2">
             Suscríbete a la newsletter
@@ -82,7 +82,7 @@ export default function NewsletterPublicaPage({ params }: Props) {
               value={nombre}
               onChange={e => setNombre(e.target.value)}
               placeholder="María García"
-              className="w-full px-4 py-3 border border-slate-200 rounded-xl text-[14px] outline-none bg-white focus:border-[#1FA97A] focus:ring-2 focus:ring-[#1FA97A]/10 transition-all"
+              className="w-full px-4 py-3 border border-slate-200 rounded-xl text-[14px] outline-none bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/10 transition-all"
             />
           </div>
 
@@ -96,7 +96,7 @@ export default function NewsletterPublicaPage({ params }: Props) {
               onChange={e => setEmail(e.target.value)}
               placeholder="maria@empresa.com"
               onKeyDown={e => e.key === "Enter" && suscribirse()}
-              className="w-full px-4 py-3 border border-slate-200 rounded-xl text-[14px] outline-none bg-white focus:border-[#1FA97A] focus:ring-2 focus:ring-[#1FA97A]/10 transition-all"
+              className="w-full px-4 py-3 border border-slate-200 rounded-xl text-[14px] outline-none bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/10 transition-all"
             />
           </div>
 
@@ -107,7 +107,7 @@ export default function NewsletterPublicaPage({ params }: Props) {
           <button
             onClick={suscribirse}
             disabled={!email || estado === "loading"}
-            className="w-full py-3 bg-[#1FA97A] text-white rounded-xl text-[14px] font-semibold hover:bg-[#1a9068] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+            className="w-full py-3 bg-[#0F766E] text-white rounded-xl text-[14px] font-semibold hover:bg-[#0E665F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
           >
             {estado === "loading" ? (
               <>
@@ -127,7 +127,7 @@ export default function NewsletterPublicaPage({ params }: Props) {
         {/* Footer */}
         <p className="text-[11px] text-slate-400 text-center mt-4">
           Powered by{" "}
-          <span className="text-[#1FA97A] font-medium">ClientLabs</span>
+          <span className="text-[#0F766E] font-medium">ClientLabs</span>
         </p>
       </div>
     </div>

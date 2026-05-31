@@ -127,7 +127,7 @@ export function LeadInfoCard({ lead, onUpdate }: LeadInfoCardProps) {
     }
   }
 
-  const inputClass = "w-full px-3 py-1.5 rounded-lg border border-slate-200 text-[13px] text-slate-900 bg-slate-50 focus:bg-white focus:border-[#1FA97A] focus:ring-1 focus:ring-[#1FA97A]/20 outline-none transition-all"
+  const inputClass = "w-full px-3 py-1.5 rounded-lg border border-slate-200 text-[13px] text-slate-900 bg-slate-50 focus:bg-white focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E]/20 outline-none transition-all"
 
   const fields = [
     { key: "name" as const, label: "Nombre", type: "text" },
@@ -162,7 +162,7 @@ export function LeadInfoCard({ lead, onUpdate }: LeadInfoCardProps) {
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#1FA97A] text-white text-[11px] font-medium hover:bg-[#178f68] transition-colors disabled:opacity-50"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#0F766E] text-white text-[11px] font-medium hover:bg-[#0E665F] transition-colors disabled:opacity-50"
             >
               {isSaving && <Loader2 className="h-3 w-3 animate-spin" />}
               Guardar
@@ -250,7 +250,7 @@ export function LeadInfoCard({ lead, onUpdate }: LeadInfoCardProps) {
               onChange={e => setTagInput(e.target.value)}
               onKeyDown={e => e.key === "Enter" && addTag()}
               placeholder="Nueva etiqueta..."
-              className="flex-1 px-2.5 py-1 rounded-lg border border-slate-200 text-[12px] text-slate-900 bg-slate-50 focus:bg-white focus:border-[#1FA97A] focus:ring-1 focus:ring-[#1FA97A]/20 outline-none"
+              className="flex-1 px-2.5 py-1 rounded-lg border border-slate-200 text-[12px] text-slate-900 bg-slate-50 focus:bg-white focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E]/20 outline-none"
             />
             <button
               onClick={addTag}

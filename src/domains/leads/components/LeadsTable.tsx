@@ -117,7 +117,7 @@ export function LeadsTable({ initialLeads, initialTotal, leads: leadsOverride }:
         <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 8 }}>Error al cargar leads</p>
         <button
           onClick={() => window.location.reload()}
-          style={{ fontSize: 12, color: "#1FA97A", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}
+          style={{ fontSize: 12, color: "#0F766E", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}
         >
           Reintentar
         </button>
@@ -227,7 +227,7 @@ export function LeadsTable({ initialLeads, initialTotal, leads: leadsOverride }:
                 width: 6,
                 height: 6,
                 borderRadius: "50%",
-                background: "#1FA97A",
+                background: "#0F766E",
                 animation: "pulse-dot 2s ease-in-out infinite",
               }}
             />

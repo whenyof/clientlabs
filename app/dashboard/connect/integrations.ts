@@ -35,7 +35,7 @@ export const INTEGRATIONS: IntegrationDef[] = [
     benefit: "Los leads del sitio entran directamente al CRM con fuente y metadata.",
     connectType: "web_sdk",
     color: "bg-[#E8F5EF]",
-    textColor: "text-[#1FA97A]",
+    textColor: "text-[#0F766E]",
     initials: "W",
     status: "disconnected",
   },

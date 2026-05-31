@@ -25,7 +25,7 @@ export type InsightBuilderInput = {
 }
 
 const TYPE_STYLES: Record<InsightType, { borderLeft: string; iconBg: string; iconColor: string; badge: string }> = {
-  positive:    { borderLeft: "border-l-[#1FA97A]", iconBg: "bg-[#ECFDF5]",  iconColor: "text-[#1FA97A]", badge: "bg-[#ECFDF5] text-[#1FA97A]" },
+  positive:    { borderLeft: "border-l-[#0F766E]", iconBg: "bg-[#ECFDF5]",  iconColor: "text-[#0F766E]", badge: "bg-[#ECFDF5] text-[#0F766E]" },
   risk:        { borderLeft: "border-l-amber-400",  iconBg: "bg-amber-50",   iconColor: "text-amber-500", badge: "bg-amber-50 text-amber-600"  },
   critical:    { borderLeft: "border-l-red-400",    iconBg: "bg-red-50",     iconColor: "text-red-500",   badge: "bg-red-50 text-red-600"      },
   opportunity: { borderLeft: "border-l-blue-400",   iconBg: "bg-blue-50",    iconColor: "text-blue-500",  badge: "bg-blue-50 text-blue-600"    },

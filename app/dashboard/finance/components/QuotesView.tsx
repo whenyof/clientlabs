@@ -141,7 +141,7 @@ export function QuotesView({ clientId, onNavigateToInvoices, onNavigateToPurchas
               className={cn(
                 "text-[11px] px-3 py-1.5 rounded-lg border transition-colors",
                 activeFilter === f.key
-                  ? "bg-[#1FA97A] text-white border-[#1FA97A]"
+                  ? "bg-[#0F766E] text-white border-[#0F766E]"
                   : "border-slate-200 text-slate-600 hover:bg-slate-50"
               )}
             >
@@ -166,7 +166,7 @@ export function QuotesView({ clientId, onNavigateToInvoices, onNavigateToPurchas
           </button>
           <button
             onClick={() => setCreateOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-[#1FA97A] text-white rounded-lg text-[13px] font-semibold hover:bg-[#1a9068] transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-[#0F766E] text-white rounded-lg text-[13px] font-semibold hover:bg-[#0E665F] transition-colors"
           >
             <Plus className="h-4 w-4" />
             Nuevo presupuesto
@@ -188,7 +188,7 @@ export function QuotesView({ clientId, onNavigateToInvoices, onNavigateToPurchas
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setCreateOpen(true)}
-                className="flex items-center gap-2 px-4 py-2.5 bg-[#1FA97A] text-white rounded-lg text-[13px] font-semibold hover:bg-[#1a9068] transition-colors"
+                className="flex items-center gap-2 px-4 py-2.5 bg-[#0F766E] text-white rounded-lg text-[13px] font-semibold hover:bg-[#0E665F] transition-colors"
               >
                 <Plus className="h-4 w-4" /> Nuevo presupuesto
               </button>
@@ -251,7 +251,7 @@ export function QuotesView({ clientId, onNavigateToInvoices, onNavigateToPurchas
                               <button
                                 onClick={() => action(q.id, "accept")}
                                 disabled={actionLoading === q.id + "accept"}
-                                className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-[#1FA97A] transition-colors disabled:opacity-50"
+                                className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-[#0F766E] transition-colors disabled:opacity-50"
                                 title="Marcar como aceptado"
                               >
                                 <CheckCircle className="h-3.5 w-3.5" />
@@ -278,7 +278,7 @@ export function QuotesView({ clientId, onNavigateToInvoices, onNavigateToPurchas
                               <button
                                 onClick={() => action(q.id, "accept")}
                                 disabled={actionLoading === q.id + "accept"}
-                                className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-[#1FA97A] transition-colors disabled:opacity-50"
+                                className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-[#0F766E] transition-colors disabled:opacity-50"
                                 title="Marcar como aceptado"
                               >
                                 <CheckCircle className="h-3.5 w-3.5" />
@@ -304,7 +304,7 @@ export function QuotesView({ clientId, onNavigateToInvoices, onNavigateToPurchas
                           {q.status === "ACCEPTED" && (
                             <button
                               onClick={() => setGenerateModalQuote(q)}
-                              className="px-2 py-1 rounded-md text-[11px] font-medium transition-colors bg-[#E1F5EE] text-[#0F6E56] hover:bg-[#1FA97A] hover:text-white"
+                              className="px-2 py-1 rounded-md text-[11px] font-medium transition-colors bg-[#E1F5EE] text-[#0F6E56] hover:bg-[#0F766E] hover:text-white"
                             >
                               Generar documentos
                             </button>

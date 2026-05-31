@@ -42,7 +42,7 @@ export function Goals() {
             </span>
           )}
         </div>
-        <button className="flex items-center gap-1.5 text-[11px] text-[#1FA97A] font-medium hover:underline">
+        <button className="flex items-center gap-1.5 text-[11px] text-[#0F766E] font-medium hover:underline">
           <Plus className="h-3.5 w-3.5" />
           Nuevo objetivo
         </button>
@@ -104,7 +104,7 @@ export function Goals() {
 
                 <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-[#1FA97A] rounded-full transition-all"
+                    className="h-full bg-[#0F766E] rounded-full transition-all"
                     style={{ width: `${Math.min(progress, 100)}%` }}
                   />
                 </div>
@@ -121,7 +121,7 @@ export function Goals() {
                     </p>
                   )}
                   {isCompleted && (
-                    <span className="text-[10px] text-[#1FA97A] font-medium flex items-center gap-1 ml-auto">
+                    <span className="text-[10px] text-[#0F766E] font-medium flex items-center gap-1 ml-auto">
                       <Trophy className="h-3 w-3" />
                       Alcanzado
                     </span>
@@ -133,7 +133,7 @@ export function Goals() {
 
           <div className="mt-3 pt-3 border-t border-slate-100 grid grid-cols-4 gap-2 text-center text-[11px]">
             <div>
-              <div className="font-bold text-[#1FA97A]">{completed}</div>
+              <div className="font-bold text-[#0F766E]">{completed}</div>
               <div className="text-slate-400">Completados</div>
             </div>
             <div>

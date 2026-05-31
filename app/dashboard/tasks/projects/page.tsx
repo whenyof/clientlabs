@@ -36,7 +36,7 @@ export default async function ProjectsPage() {
           </p>
           <Link
             href="/plan"
-            className="mt-6 inline-block rounded-lg bg-[#1FA97A] px-5 py-2 text-sm font-medium text-white hover:bg-[#178f68] transition-colors"
+            className="mt-6 inline-block rounded-lg bg-[#0F766E] px-5 py-2 text-sm font-medium text-white hover:bg-[#0E665F] transition-colors"
           >
             Ver planes
           </Link>

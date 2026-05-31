@@ -211,7 +211,7 @@ export function QuarterDetail({ quarter }: Props) {
             className={cn(
               "h-9 px-4 text-[13px] font-medium border-b-2 transition-colors",
               activeTab === tab.id
-                ? "border-[#1FA97A] text-[#1FA97A]"
+                ? "border-[#0F766E] text-[#0F766E]"
                 : "border-transparent text-slate-500 hover:text-slate-800"
             )}
           >
@@ -261,7 +261,7 @@ export function QuarterDetail({ quarter }: Props) {
             <a
               href={`/api/finance/trimestral/${quarter}/export-303`}
               download
-              className="inline-flex items-center gap-2.5 px-4 py-2.5 bg-[#0B1F2A] text-white text-[12px] font-medium rounded-xl hover:bg-[#1a3040] transition-colors"
+              className="inline-flex items-center gap-2.5 px-4 py-2.5 bg-[#0a0a0a] text-white text-[12px] font-medium rounded-xl hover:bg-[#1f1f1f] transition-colors"
             >
               <Download className="h-4 w-4 shrink-0" />
               <div className="text-left">
@@ -274,7 +274,7 @@ export function QuarterDetail({ quarter }: Props) {
             <a
               href={`/api/finance/trimestral/${quarter}/export-130`}
               download
-              className="inline-flex items-center gap-2.5 px-4 py-2.5 border border-slate-200 bg-white text-slate-700 text-[12px] font-medium rounded-xl hover:border-[#1FA97A] hover:text-[#1FA97A] transition-colors"
+              className="inline-flex items-center gap-2.5 px-4 py-2.5 border border-slate-200 bg-white text-slate-700 text-[12px] font-medium rounded-xl hover:border-[#0F766E] hover:text-[#0F766E] transition-colors"
             >
               <Download className="h-4 w-4 shrink-0" />
               <div className="text-left">
@@ -318,8 +318,8 @@ export function QuarterDetail({ quarter }: Props) {
 function StatusChip({ status, daysLeft }: { status: string; daysLeft: number }) {
   if (status === "active") {
     return (
-      <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md bg-[#1FA97A]/10 text-[#1FA97A] uppercase tracking-wide">
-        <span className="h-1.5 w-1.5 rounded-full bg-[#1FA97A] animate-pulse" />
+      <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md bg-[#0F766E]/10 text-[#0F766E] uppercase tracking-wide">
+        <span className="h-1.5 w-1.5 rounded-full bg-[#0F766E] animate-pulse" />
         En curso
       </span>
     )

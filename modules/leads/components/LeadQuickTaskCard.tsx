@@ -21,7 +21,7 @@ export function LeadQuickTaskCard({ leadId, onTaskCreated }: LeadQuickTaskCardPr
         padding: "16px",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-          <CheckSquare style={{ width: 14, height: 14, color: "#1FA97A" }} />
+          <CheckSquare style={{ width: 14, height: 14, color: "#0F766E" }} />
           <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", color: "var(--text-secondary)" }}>
             Tareas
           </span>
@@ -36,12 +36,12 @@ export function LeadQuickTaskCard({ leadId, onTaskCreated }: LeadQuickTaskCardPr
             gap: 6,
             width: "100%",
             padding: "9px 16px",
-            background: "#1FA97A10",
-            border: "0.5px solid #1FA97A30",
+            background: "#0F766E10",
+            border: "0.5px solid #0F766E30",
             borderRadius: 8,
             fontSize: 13,
             fontWeight: 500,
-            color: "#1FA97A",
+            color: "#0F766E",
             cursor: "pointer",
           }}
         >

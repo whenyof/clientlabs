@@ -28,7 +28,7 @@ export function CashflowBlock() {
         </div>
         <span
           className={`text-[10px] font-semibold px-2 py-1 rounded-full ${
-            positive ? "bg-[#ECFDF5] text-[#1FA97A]" : "bg-red-50 text-red-500"
+            positive ? "bg-[#ECFDF5] text-[#0F766E]" : "bg-red-50 text-red-500"
           }`}
         >
           {positive ? "Positivo" : "Negativo"}
@@ -40,11 +40,11 @@ export function CashflowBlock() {
         <div>
           <div className="flex items-center justify-between mb-1">
             <span className="text-[11px] text-slate-500">Entradas</span>
-            <span className="text-[12px] font-semibold tabular-nums text-[#1FA97A]">{formatCurrency(inflow)}</span>
+            <span className="text-[12px] font-semibold tabular-nums text-[#0F766E]">{formatCurrency(inflow)}</span>
           </div>
           <div className="h-[5px] w-full bg-slate-100 rounded-full overflow-hidden">
             <div
-              className="h-full bg-[#1FA97A] rounded-full transition-all duration-700"
+              className="h-full bg-[#0F766E] rounded-full transition-all duration-700"
               style={{ width: `${inflowPct}%` }}
             />
           </div>
@@ -67,7 +67,7 @@ export function CashflowBlock() {
         {/* Net */}
         <div className={`flex items-center justify-between pt-2 border-t border-slate-100`}>
           <span className="text-[11px] font-medium text-slate-600">Neto</span>
-          <span className={`text-[14px] font-bold tabular-nums ${positive ? "text-[#1FA97A]" : "text-red-500"}`}>
+          <span className={`text-[14px] font-bold tabular-nums ${positive ? "text-[#0F766E]" : "text-red-500"}`}>
             {formatCurrency(net)}
           </span>
         </div>

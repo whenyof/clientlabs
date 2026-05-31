@@ -53,11 +53,11 @@ export function ReportingForecast({ forecast }: Props) {
                     <LineChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                         <XAxis
                             dataKey="label"
-                            tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 11 }}
-                            axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
+                            tick={{ fill: "#737373", fontSize: 11 }}
+                            axisLine={{ stroke: "#e8e8e8" }}
                         />
                         <YAxis
-                            tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 11 }}
+                            tick={{ fill: "#737373", fontSize: 11 }}
                             axisLine={false}
                             tickFormatter={(v) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v))}
                         />
@@ -65,14 +65,14 @@ export function ReportingForecast({ forecast }: Props) {
                             formatter={(value: unknown) => (value != null && value !== "" ? [formatReportingCurrency(Number(value)), ""] : [])}
                             labelFormatter={(label) => label}
                         />
-                        <ReferenceLine x={chartData[n - 1]?.label} stroke="rgba(255,255,255,0.2)" strokeDasharray="4 4" />
+                        <ReferenceLine x={chartData[n - 1]?.label} stroke="#e8e8e8" strokeDasharray="4 4" />
                         <Line
                             type="monotone"
                             dataKey="historical"
                             name={f.historical}
-                            stroke="rgba(255,255,255,0.85)"
+                            stroke="#0a0a0a"
                             strokeWidth={2}
-                            dot={{ fill: "rgba(255,255,255,0.6)", r: 3 }}
+                            dot={{ fill: "#0a0a0a", r: 3 }}
                             connectNulls={false}
                         />
                         <Line

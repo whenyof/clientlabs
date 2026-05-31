@@ -29,7 +29,7 @@ export function Hero() {
             <span
               className="text-emerald"
               style={{
-                backgroundImage: "linear-gradient(90deg, #1FA97A 70%, transparent 100%)",
+                backgroundImage: "linear-gradient(90deg, #0F766E 70%, transparent 100%)",
                 backgroundRepeat: "no-repeat",
                 backgroundPosition: "0 100%",
                 backgroundSize: "100% 3px",
@@ -50,7 +50,7 @@ export function Hero() {
           <div className="flex flex-wrap justify-center gap-3 mb-8">
             <Link
               href={heroContent.ctas.primary.href}
-              className="inline-flex items-center gap-2 rounded-full bg-emerald px-7 py-4 font-display text-base font-semibold tracking-[-0.01em] text-white shadow-[0_1px_0_rgba(255,255,255,.2)_inset,0_8px_20px_rgba(31,169,122,.28)] transition-all hover:-translate-y-px hover:bg-emerald-2"
+              className="inline-flex items-center gap-2 rounded-full bg-emerald px-7 py-4 font-display text-base font-semibold tracking-[-0.01em] text-white shadow-[0_1px_0_rgba(255,255,255,.2)_inset,0_8px_20px_rgba(15,118,110,.28)] transition-all hover:-translate-y-px hover:bg-emerald-2"
             >
               {heroContent.ctas.primary.label}
               <LandingIcons.arrow className="h-4 w-4" />

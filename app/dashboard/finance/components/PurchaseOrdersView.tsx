@@ -115,12 +115,12 @@ function GenerateDocModal({
           {/* Albarán */}
           {order.deliveryNote ? (
             <div className="flex items-start gap-3 p-3.5 rounded-xl border border-[#9FE1CB] bg-[#F0FDF9]">
-              <CheckCircle className="h-4 w-4 text-[#1FA97A] mt-0.5 shrink-0" />
+              <CheckCircle className="h-4 w-4 text-[#0F766E] mt-0.5 shrink-0" />
               <div>
                 <div className="flex items-center gap-2">
                   <Package className="h-4 w-4 text-amber-500" />
                   <span className="text-[13px] font-medium text-slate-900">Albarán de entrega</span>
-                  <span className="font-mono text-[11px] text-[#1FA97A] font-semibold">{order.deliveryNote.number}</span>
+                  <span className="font-mono text-[11px] text-[#0F766E] font-semibold">{order.deliveryNote.number}</span>
                 </div>
                 <p className="text-[11px] text-slate-400 mt-0.5">Ya creado</p>
               </div>
@@ -130,7 +130,7 @@ function GenerateDocModal({
               onClick={() => setDocType("deliveryNote")}
               className={cn(
                 "rounded-xl border p-3.5 cursor-pointer transition-colors",
-                docType === "deliveryNote" ? "border-[#1FA97A] bg-[#F0FDF9]" : "border-slate-200 hover:bg-slate-50"
+                docType === "deliveryNote" ? "border-[#0F766E] bg-[#F0FDF9]" : "border-slate-200 hover:bg-slate-50"
               )}
             >
               <label className="flex items-start gap-3 cursor-pointer select-none">
@@ -138,7 +138,7 @@ function GenerateDocModal({
                   type="radio"
                   checked={docType === "deliveryNote"}
                   onChange={() => setDocType("deliveryNote")}
-                  className="mt-0.5 accent-[#1FA97A]"
+                  className="mt-0.5 accent-[#0F766E]"
                 />
                 <div>
                   <div className="flex items-center gap-2">
@@ -154,12 +154,12 @@ function GenerateDocModal({
           {/* Factura */}
           {order.invoice ? (
             <div className="flex items-start gap-3 p-3.5 rounded-xl border border-[#9FE1CB] bg-[#F0FDF9]">
-              <CheckCircle className="h-4 w-4 text-[#1FA97A] mt-0.5 shrink-0" />
+              <CheckCircle className="h-4 w-4 text-[#0F766E] mt-0.5 shrink-0" />
               <div>
                 <div className="flex items-center gap-2">
-                  <Receipt className="h-4 w-4 text-[#1FA97A]" />
+                  <Receipt className="h-4 w-4 text-[#0F766E]" />
                   <span className="text-[13px] font-medium text-slate-900">Factura</span>
-                  <span className="font-mono text-[11px] text-[#1FA97A] font-semibold">{order.invoice.number}</span>
+                  <span className="font-mono text-[11px] text-[#0F766E] font-semibold">{order.invoice.number}</span>
                 </div>
                 <p className="text-[11px] text-slate-400 mt-0.5">Ya creada</p>
               </div>
@@ -169,7 +169,7 @@ function GenerateDocModal({
               onClick={() => setDocType("invoice")}
               className={cn(
                 "rounded-xl border p-3.5 cursor-pointer transition-colors",
-                docType === "invoice" ? "border-[#1FA97A] bg-[#F0FDF9]" : "border-slate-200 hover:bg-slate-50"
+                docType === "invoice" ? "border-[#0F766E] bg-[#F0FDF9]" : "border-slate-200 hover:bg-slate-50"
               )}
             >
               <label className="flex items-start gap-3 cursor-pointer select-none">
@@ -177,22 +177,22 @@ function GenerateDocModal({
                   type="radio"
                   checked={docType === "invoice"}
                   onChange={() => setDocType("invoice")}
-                  className="mt-0.5 accent-[#1FA97A]"
+                  className="mt-0.5 accent-[#0F766E]"
                 />
                 <div>
                   <div className="flex items-center gap-2">
-                    <Receipt className="h-4 w-4 text-[#1FA97A]" />
+                    <Receipt className="h-4 w-4 text-[#0F766E]" />
                     <span className="text-[13px] font-medium text-slate-900">Factura</span>
                   </div>
                   <p className="text-[11px] text-slate-400 mt-0.5">Se creará como borrador. Emítela desde Facturación.</p>
                   {docType === "invoice" && (
                     <div className="mt-2.5 space-y-1.5 pl-1">
                       <label className="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name="invDocType" value="F1" checked={invoiceDocType === "F1"} onChange={() => setInvoiceDocType("F1")} className="accent-[#1FA97A]" />
+                        <input type="radio" name="invDocType" value="F1" checked={invoiceDocType === "F1"} onChange={() => setInvoiceDocType("F1")} className="accent-[#0F766E]" />
                         <span className="text-[12px] text-slate-700">F1 — Completa <span className="text-slate-400">(con NIF del cliente)</span></span>
                       </label>
                       <label className="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name="invDocType" value="F2" checked={invoiceDocType === "F2"} onChange={() => setInvoiceDocType("F2")} className="accent-[#1FA97A]" />
+                        <input type="radio" name="invDocType" value="F2" checked={invoiceDocType === "F2"} onChange={() => setInvoiceDocType("F2")} className="accent-[#0F766E]" />
                         <span className="text-[12px] text-slate-700">F2 — Simplificada <span className="text-slate-400">(sin NIF, máx. 3.000€)</span></span>
                       </label>
                     </div>
@@ -213,7 +213,7 @@ function GenerateDocModal({
           <button
             onClick={generate}
             disabled={loading || !canGenerate}
-            className="px-5 py-2 rounded-lg bg-[#1FA97A] text-white text-[13px] font-medium hover:bg-[#178f68] disabled:opacity-50 transition-colors"
+            className="px-5 py-2 rounded-lg bg-[#0F766E] text-white text-[13px] font-medium hover:bg-[#0E665F] disabled:opacity-50 transition-colors"
           >
             {loading ? "Generando..." : "Generar"}
           </button>
@@ -288,7 +288,7 @@ export function PurchaseOrdersView({ clientId, onNavigateToInvoices: _ni, onNavi
               className={cn(
                 "text-[11px] px-3 py-1.5 rounded-lg border transition-colors",
                 activeFilter === f.key
-                  ? "bg-[#1FA97A] text-white border-[#1FA97A]"
+                  ? "bg-[#0F766E] text-white border-[#0F766E]"
                   : "border-slate-200 text-slate-600 hover:bg-slate-50"
               )}
             >
@@ -375,7 +375,7 @@ export function PurchaseOrdersView({ clientId, onNavigateToInvoices: _ni, onNavi
                           <button
                             onClick={() => advance(o.id)}
                             disabled={actionLoading === o.id + "confirm"}
-                            className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-[#1FA97A] transition-colors disabled:opacity-50"
+                            className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-[#0F766E] transition-colors disabled:opacity-50"
                             title={STATUS_NEXT_LABEL[o.status]}
                           >
                             <ChevronRight className="h-3.5 w-3.5" />
@@ -384,7 +384,7 @@ export function PurchaseOrdersView({ clientId, onNavigateToInvoices: _ni, onNavi
                         {(!o.deliveryNote || !o.invoice) && (
                           <button
                             onClick={() => setGenerateOrder(o)}
-                            className="px-2 py-1 rounded-md text-[11px] font-medium transition-colors bg-[#E1F5EE] text-[#0F6E56] hover:bg-[#1FA97A] hover:text-white"
+                            className="px-2 py-1 rounded-md text-[11px] font-medium transition-colors bg-[#E1F5EE] text-[#0F6E56] hover:bg-[#0F766E] hover:text-white"
                           >
                             Generar
                           </button>

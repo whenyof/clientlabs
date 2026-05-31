@@ -94,10 +94,10 @@ export function ExitIntentPopup() {
           transform: "translate(-50%, -50%)",
           width:     "min(448px, calc(100vw - 24px))",
           background: "#0B1F2A",
-          border:    "1px solid rgba(31,169,122,0.28)",
+          border:    "1px solid rgba(15,118,110,0.28)",
           borderRadius: "14px",
           padding:   "32px",
-          boxShadow: "0 32px 80px rgba(0,0,0,0.55), 0 0 0 1px rgba(31,169,122,0.08)",
+          boxShadow: "0 32px 80px rgba(0,0,0,0.55), 0 0 0 1px rgba(15,118,110,0.08)",
         }}
       >
         {/* Close button */}
@@ -117,7 +117,7 @@ export function ExitIntentPopup() {
           <>
             <span
               className="inline-block text-[10.5px] font-bold uppercase tracking-[0.14em] px-3 py-1 rounded-full mb-5"
-              style={{ background: "rgba(31,169,122,0.14)", color: "#1FA97A", border: "1px solid rgba(31,169,122,0.28)" }}
+              style={{ background: "rgba(15,118,110,0.14)", color: "#0F766E", border: "1px solid rgba(15,118,110,0.28)" }}
             >
               Oferta exclusiva · Solo hoy
             </span>
@@ -141,9 +141,9 @@ export function ExitIntentPopup() {
                 style={{
                   background:  "rgba(255,255,255,0.06)",
                   border:      "1px solid rgba(255,255,255,0.12)",
-                  caretColor:  "#1FA97A",
+                  caretColor:  "#0F766E",
                 }}
-                onFocus={e  => (e.target.style.border = "1px solid rgba(31,169,122,0.6)")}
+                onFocus={e  => (e.target.style.border = "1px solid rgba(15,118,110,0.6)")}
                 onBlur={e   => (e.target.style.border = "1px solid rgba(255,255,255,0.12)")}
               />
 
@@ -155,7 +155,7 @@ export function ExitIntentPopup() {
                 type="submit"
                 disabled={loading}
                 className="w-full py-3 rounded-lg text-[14px] font-semibold text-white transition-opacity disabled:opacity-60"
-                style={{ background: "linear-gradient(135deg, #1FA97A 0%, #178a64 100%)" }}
+                style={{ background: "linear-gradient(135deg, #0F766E 0%, #0E665F 100%)" }}
               >
                 {loading ? "Enviando..." : "Quiero mi 10% de descuento"}
               </button>
@@ -171,9 +171,9 @@ export function ExitIntentPopup() {
             <div className="text-center mb-6">
               <div
                 className="inline-flex items-center justify-center w-11 h-11 rounded-full mb-4"
-                style={{ background: "rgba(31,169,122,0.14)", border: "1px solid rgba(31,169,122,0.3)" }}
+                style={{ background: "rgba(15,118,110,0.14)", border: "1px solid rgba(15,118,110,0.3)" }}
               >
-                <Check className="w-5 h-5" style={{ color: "#1FA97A" }} />
+                <Check className="w-5 h-5" style={{ color: "#0F766E" }} />
               </div>
               <h2 className="text-[20px] font-bold text-white mb-1.5">
                 Tu codigo esta en camino
@@ -187,13 +187,13 @@ export function ExitIntentPopup() {
             <div
               className="flex items-center justify-between gap-3 rounded-xl px-5 py-4 mb-5"
               style={{
-                background:  "rgba(31,169,122,0.07)",
-                border:      "1.5px dashed rgba(31,169,122,0.45)",
+                background:  "rgba(15,118,110,0.07)",
+                border:      "1.5px dashed rgba(15,118,110,0.45)",
               }}
             >
               <span
                 className="text-[23px] font-bold tracking-[0.12em]"
-                style={{ color: "#1FA97A", fontVariantNumeric: "tabular-nums" }}
+                style={{ color: "#0F766E", fontVariantNumeric: "tabular-nums" }}
               >
                 {COUPON}
               </span>
@@ -202,7 +202,7 @@ export function ExitIntentPopup() {
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all"
                 style={
                   copied
-                    ? { background: "rgba(31,169,122,0.2)", color: "#1FA97A", border: "1px solid rgba(31,169,122,0.3)" }
+                    ? { background: "rgba(15,118,110,0.2)", color: "#0F766E", border: "1px solid rgba(15,118,110,0.3)" }
                     : { background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.65)", border: "1px solid rgba(255,255,255,0.1)" }
                 }
               >
@@ -216,7 +216,7 @@ export function ExitIntentPopup() {
             <a
               href="/precios"
               className="block w-full text-center py-3 rounded-lg text-[14px] font-semibold text-white transition-opacity hover:opacity-90"
-              style={{ background: "linear-gradient(135deg, #1FA97A 0%, #178a64 100%)" }}
+              style={{ background: "linear-gradient(135deg, #0F766E 0%, #0E665F 100%)" }}
             >
               Ver planes y aplicar descuento
             </a>

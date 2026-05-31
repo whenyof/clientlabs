@@ -401,7 +401,7 @@ function ComposeArea({ subject, message, onSubjectChange, onMessageChange, aiLoa
               background: "var(--bg-card)", cursor: "pointer", textAlign: "left",
             }}
           >
-            <Mail style={{ width: 16, height: 16, color: "#1FA97A", flexShrink: 0 }} />
+            <Mail style={{ width: 16, height: 16, color: "#0F766E", flexShrink: 0 }} />
             <div>
               <p style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)", margin: 0 }}>Enviar email</p>
               <p style={{ fontSize: 11, color: "var(--text-secondary)", margin: "1px 0 0" }}>Abre tu cliente de email con el mensaje</p>

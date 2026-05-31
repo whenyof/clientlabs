@@ -50,7 +50,7 @@ export async function GET() {
     const statusMap = new Map<string, number>()
     editions.forEach(e => statusMap.set(e.estado, (statusMap.get(e.estado) ?? 0) + 1))
     const STATUS_LABELS: Record<string, string> = { enviada: "Enviada", borrador: "Borrador", programada: "Programada" }
-    const STATUS_COLORS: Record<string, string> = { enviada: "#1FA97A", borrador: "#94A3B8", programada: "#3B82F6" }
+    const STATUS_COLORS: Record<string, string> = { enviada: "#0F766E", borrador: "#94A3B8", programada: "#3B82F6" }
     const byStatus = Array.from(statusMap.entries()).map(([estado, value]) => ({
       name: STATUS_LABELS[estado] ?? estado,
       value,

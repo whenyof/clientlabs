@@ -17,7 +17,7 @@ export default function CookiesPage() {
       <div className="max-w-2xl mx-auto">
         {/* Logo */}
         <div className="mb-12">
-          <Link href="/" className="text-[18px] font-bold" style={{ color: "#1FA97A" }}>
+          <Link href="/" className="text-[18px] font-bold" style={{ color: "#0F766E" }}>
             ClientLabs
           </Link>
         </div>
@@ -111,7 +111,7 @@ export default function CookiesPage() {
             <h2 className="text-[18px] font-semibold text-white mb-3">Contacto</h2>
             <p>
               Si tienes alguna duda sobre el uso de cookies, escríbenos a{" "}
-              <a href="mailto:hola@clientlabs.io" className="text-[#1FA97A] hover:underline">
+              <a href="mailto:hola@clientlabs.io" className="text-[#0F766E] hover:underline">
                 hola@clientlabs.io
               </a>
             </p>

@@ -148,7 +148,7 @@ export function ProductCatalog() {
         </div>
         <button
           onClick={() => { setShowCreate(true); setEditingId(null); setForm(EMPTY_FORM) }}
-          className="flex items-center gap-2 px-4 py-2 bg-[#1FA97A] text-white rounded-lg text-[12px] font-medium hover:bg-[#178f68] transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-[#0F766E] text-white rounded-lg text-[12px] font-medium hover:bg-[#0E665F] transition-colors"
         >
           <Plus className="h-3.5 w-3.5" />
           Nuevo producto
@@ -181,7 +181,7 @@ export function ProductCatalog() {
             <button
               onClick={createProduct}
               disabled={saving || !form.name}
-              className="px-3 py-1.5 text-[12px] bg-[#1FA97A] text-white rounded-lg hover:bg-[#178f68] transition-colors disabled:opacity-50"
+              className="px-3 py-1.5 text-[12px] bg-[#0F766E] text-white rounded-lg hover:bg-[#0E665F] transition-colors disabled:opacity-50"
             >
               {saving ? "Guardando..." : "Guardar"}
             </button>
@@ -226,7 +226,7 @@ export function ProductCatalog() {
                         <button
                           onClick={() => saveEdit(p.id)}
                           disabled={saving}
-                          className="p-1.5 rounded-md hover:bg-[#E1F5EE] text-slate-400 hover:text-[#1FA97A] transition-colors disabled:opacity-50"
+                          className="p-1.5 rounded-md hover:bg-[#E1F5EE] text-slate-400 hover:text-[#0F766E] transition-colors disabled:opacity-50"
                           title="Guardar"
                         >
                           <Check className="h-3.5 w-3.5" />
@@ -291,7 +291,7 @@ function ProductForm({ form, onChange }: { form: FormState; onChange: (f: FormSt
           value={form.name}
           onChange={e => set({ name: e.target.value })}
           placeholder="Nombre del producto"
-          className="w-full text-[12px] border border-slate-200 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+          className="w-full text-[12px] border border-slate-200 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
         />
       </div>
       <div>
@@ -300,7 +300,7 @@ function ProductForm({ form, onChange }: { form: FormState; onChange: (f: FormSt
           value={form.category}
           onChange={e => set({ category: e.target.value })}
           placeholder="Software, Diseño..."
-          className="w-full text-[12px] border border-slate-200 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+          className="w-full text-[12px] border border-slate-200 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
         />
       </div>
       <div>
@@ -311,7 +311,7 @@ function ProductForm({ form, onChange }: { form: FormState; onChange: (f: FormSt
           step={0.01}
           value={form.price}
           onChange={e => set({ price: e.target.value })}
-          className="w-full text-[12px] border border-slate-200 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+          className="w-full text-[12px] border border-slate-200 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
         />
       </div>
       <div>
@@ -323,7 +323,7 @@ function ProductForm({ form, onChange }: { form: FormState; onChange: (f: FormSt
           step={1}
           value={form.taxRate}
           onChange={e => set({ taxRate: e.target.value })}
-          className="w-full text-[12px] border border-slate-200 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+          className="w-full text-[12px] border border-slate-200 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
         />
       </div>
       <div>
@@ -332,7 +332,7 @@ function ProductForm({ form, onChange }: { form: FormState; onChange: (f: FormSt
           value={form.unit}
           onChange={e => set({ unit: e.target.value })}
           placeholder="h, uds., mes..."
-          className="w-full text-[12px] border border-slate-200 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+          className="w-full text-[12px] border border-slate-200 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
         />
       </div>
       <div className="sm:col-span-3">
@@ -341,7 +341,7 @@ function ProductForm({ form, onChange }: { form: FormState; onChange: (f: FormSt
           value={form.description}
           onChange={e => set({ description: e.target.value })}
           placeholder="Descripción opcional"
-          className="w-full text-[12px] border border-slate-200 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A]"
+          className="w-full text-[12px] border border-slate-200 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
         />
       </div>
       <div className="flex items-center gap-2">
@@ -350,7 +350,7 @@ function ProductForm({ form, onChange }: { form: FormState; onChange: (f: FormSt
           id={`isService-${Math.random()}`}
           checked={form.isService}
           onChange={e => set({ isService: e.target.checked })}
-          className="h-4 w-4 rounded border-slate-300 accent-[#1FA97A]"
+          className="h-4 w-4 rounded border-slate-300 accent-[#0F766E]"
         />
         <label className="text-[12px] text-slate-600">Es un servicio</label>
       </div>

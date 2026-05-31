@@ -10,7 +10,7 @@ export default function WordPressPluginPage() {
       {/* Hero */}
       <section className="border-b border-slate-100 py-16 px-6">
         <div className="max-w-3xl mx-auto text-center space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1FA97A]/10 text-[#1FA97A] text-xs font-semibold uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0F766E]/10 text-[#0F766E] text-xs font-semibold uppercase tracking-wider">
             WordPress Plugin
           </div>
           <h1 className="text-4xl font-bold text-slate-900 leading-tight">
@@ -24,7 +24,7 @@ export default function WordPressPluginPage() {
           <a
             href="/api/downloads/wordpress-plugin"
             download="clientlabs-lead-capture.zip"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#1FA97A] text-white font-semibold text-sm hover:bg-[#178f68] transition-colors shadow-md"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#0F766E] text-white font-semibold text-sm hover:bg-[#0E665F] transition-colors shadow-md"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path
@@ -111,7 +111,7 @@ export default function WordPressPluginPage() {
               },
             ].map((s) => (
               <li key={s.step} className="flex gap-5">
-                <div className="w-9 h-9 rounded-full bg-[#1FA97A] text-white flex items-center justify-center font-bold text-sm flex-shrink-0 mt-0.5">
+                <div className="w-9 h-9 rounded-full bg-[#0F766E] text-white flex items-center justify-center font-bold text-sm flex-shrink-0 mt-0.5">
                   {s.step}
                 </div>
                 <div>
@@ -145,7 +145,7 @@ export default function WordPressPluginPage() {
             <a
               href="/api/downloads/wordpress-plugin"
               download="clientlabs-lead-capture.zip"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#1FA97A] text-white text-sm font-medium hover:bg-[#178f68] transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#0F766E] text-white text-sm font-medium hover:bg-[#0E665F] transition-colors"
             >
               Descargar plugin
             </a>

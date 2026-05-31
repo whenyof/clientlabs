@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation"
+import { Suspense } from "react"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { loadFinancePageData } from "@/app/dashboard/finance/lib/server-data"
@@ -6,10 +7,10 @@ import { FinanceView } from "@/app/dashboard/finance/FinanceView"
 import { BillingView } from "@domains/billing"
 
 type PageProps = {
-  searchParams: Promise<{ period?: string; view?: string }>
+  searchParams: Promise<{ period?: string; view?: string; tab?: string }>
 }
 
-export default async function FinancePage({ searchParams }: PageProps) {
+async function FinancePageInner({ searchParams }: PageProps) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
     redirect("/api/auth/signin")
@@ -26,5 +27,13 @@ export default async function FinancePage({ searchParams }: PageProps) {
       billingNode={<BillingView />}
       purchasesNode={null}
     />
+  )
+}
+
+export default function FinancePage(props: PageProps) {
+  return (
+    <Suspense fallback={<div style={{ padding: 24, color: "#737373" }}>Cargando…</div>}>
+      <FinancePageInner {...props} />
+    </Suspense>
   )
 }

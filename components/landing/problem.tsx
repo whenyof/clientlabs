@@ -47,7 +47,7 @@ export function Problem() {
 
             {/* Resolve card */}
             <div
-              className="relative mt-10 flex flex-wrap items-center justify-between gap-6 overflow-hidden rounded-card-lg border border-[rgba(31,169,122,.22)] p-[28px_32px] text-white"
+              className="relative mt-10 flex flex-wrap items-center justify-between gap-6 overflow-hidden rounded-card-lg border border-[rgba(15,118,110,.22)] p-[28px_32px] text-white"
               style={{ background: "linear-gradient(135deg, #133f32, #0B1F2A)" }}
             >
               {/* Left accent bar */}
@@ -69,7 +69,7 @@ export function Problem() {
               {/* CTA */}
               <Link
                 href={resolve.cta.href}
-                className="inline-flex shrink-0 items-center gap-2 rounded-full bg-emerald px-5 py-3 font-display text-sm font-semibold tracking-[-0.01em] text-white shadow-[0_1px_0_rgba(255,255,255,.2)_inset,0_8px_20px_rgba(31,169,122,.28)] transition-all hover:-translate-y-px hover:bg-emerald-2"
+                className="inline-flex shrink-0 items-center gap-2 rounded-full bg-emerald px-5 py-3 font-display text-sm font-semibold tracking-[-0.01em] text-white shadow-[0_1px_0_rgba(255,255,255,.2)_inset,0_8px_20px_rgba(15,118,110,.28)] transition-all hover:-translate-y-px hover:bg-emerald-2"
               >
                 {resolve.cta.label}
                 <LandingIcons.arrow className="h-4 w-4" />

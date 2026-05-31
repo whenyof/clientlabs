@@ -29,7 +29,7 @@ export function ScoreSummary({ score, status, confidence, risks }: ScoreSummaryP
  cy="110"
  r={radius}
  fill="transparent"
- stroke="rgba(255,255,255,0.03)"
+ stroke="rgba(0,0,0,0.03)"
  strokeWidth="8"
  />
  <circle

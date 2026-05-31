@@ -231,8 +231,8 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
                 disabled={!lead.email}
                 style={{
                   display: "flex", alignItems: "center", gap: 6,
-                  borderColor: showEmailChoice ? "#1FA97A" : undefined,
-                  color: showEmailChoice ? "#1FA97A" : undefined,
+                  borderColor: showEmailChoice ? "#0F766E" : undefined,
+                  color: showEmailChoice ? "#0F766E" : undefined,
                 }}
               >
                 <Mail style={{ width: 14, height: 14 }} />
@@ -258,7 +258,7 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
                     </button>
                   </div>
                   {[
-                    { icon: <Mail style={{ width: 15, height: 15, color: "#1FA97A" }} />, label: "Enviar email", sub: "Abre tu cliente de email", action: handleDirectEmail },
+                    { icon: <Mail style={{ width: 15, height: 15, color: "#0F766E" }} />, label: "Enviar email", sub: "Abre tu cliente de email", action: handleDirectEmail },
                     { icon: <ExternalLink style={{ width: 15, height: 15, color: "#4285F4" }} />, label: "Abrir en Gmail", sub: "Abre Gmail en el navegador", action: handleGmail },
                     { icon: <Megaphone style={{ width: 15, height: 15, color: "#8B5CF6" }} />, label: "Email marketing", sub: "Ir a campañas de marketing", action: handleMarketing },
                   ].map((opt) => (
@@ -395,7 +395,7 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
         <DialogContent className="bg-white border-[0.5px] border-slate-200 rounded-xl p-0 overflow-hidden max-w-md shadow-sm">
           <div className="flex items-start gap-4 p-6 pb-4">
             <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#E6F6F1] border border-[#9FE1CB] flex items-center justify-center">
-              <UserCheck style={{ width: 18, height: 18, color: "#1FA97A" }} />
+              <UserCheck style={{ width: 18, height: 18, color: "#0F766E" }} />
             </div>
             <div className="flex-1 min-w-0">
               <DialogTitle className="text-[15px] font-semibold text-slate-900 leading-snug">
@@ -416,7 +416,7 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
             ].map((bullet, i) => (
               <div key={i} className="flex items-start gap-2.5">
                 <div className="flex-shrink-0 w-4 h-4 rounded-full bg-[#E6F6F1] border border-[#9FE1CB] flex items-center justify-center mt-0.5">
-                  <Check style={{ width: 9, height: 9, color: "#1FA97A" }} />
+                  <Check style={{ width: 9, height: 9, color: "#0F766E" }} />
                 </div>
                 <p className="text-[12.5px] text-slate-600 leading-relaxed">{bullet}</p>
               </div>
@@ -439,7 +439,7 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
                 display: "flex", alignItems: "center", gap: 6,
                 height: 36, padding: "0 16px",
                 fontSize: 13, fontWeight: 500, borderRadius: 8,
-                background: converting ? "#9FE1CB" : "#1FA97A",
+                background: converting ? "#9FE1CB" : "#0F766E",
                 color: "#fff", border: "none",
                 cursor: converting ? "not-allowed" : "pointer",
                 transition: "background 0.15s",

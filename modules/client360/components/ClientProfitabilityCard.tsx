@@ -29,7 +29,7 @@ function MiniBarChart({ months }: { months: MonthBucket[] }) {
                 style={{
                   height: `${h}%`,
                   minHeight: m.revenue > 0 ? "2px" : "1px",
-                  background: isLast ? "#1FA97A" : m.revenue > 0 ? "rgba(31,169,122,0.25)" : "rgba(0,0,0,0.05)",
+                  background: isLast ? "#0F766E" : m.revenue > 0 ? "rgba(15,118,110,0.25)" : "rgba(0,0,0,0.05)",
                 }}
               />
             </div>
@@ -38,7 +38,7 @@ function MiniBarChart({ months }: { months: MonthBucket[] }) {
       </div>
       <div className="flex justify-between text-[9px] text-[var(--text-secondary)] opacity-60">
         <span>{months[0]?.label.slice(0, 3)}</span>
-        <span className="text-[#1FA97A] opacity-100 font-medium">{months[months.length - 1]?.label}</span>
+        <span className="text-[#0F766E] opacity-100 font-medium">{months[months.length - 1]?.label}</span>
       </div>
     </div>
   )
@@ -65,7 +65,7 @@ interface ClientProfitabilityCardProps {
 export function ClientProfitabilityCard({ profitability: p }: ClientProfitabilityCardProps) {
   const hasData    = p.totalRevenue > 0
   const marginColor = p.marginPercent === null ? "text-[var(--text-secondary)]"
-    : p.marginPercent >= 20 ? "text-[#1FA97A]"
+    : p.marginPercent >= 20 ? "text-[#0F766E]"
     : p.marginPercent >= 0  ? "text-[var(--text-secondary)]"
     : "text-red-600"
 

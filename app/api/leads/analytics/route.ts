@@ -14,7 +14,7 @@ const FUNNEL: { status: string; label: string; color: string }[] = [
   { status: "CONTACTED",  label: "Contactados",  color: "#3B82F6" },
   { status: "INTERESTED", label: "Interesados",  color: "#F59E0B" },
   { status: "QUALIFIED",  label: "Cualificados", color: "#8B5CF6" },
-  { status: "CONVERTED",  label: "Convertidos",  color: "#1FA97A" },
+  { status: "CONVERTED",  label: "Convertidos",  color: "#0F766E" },
 ]
 const TEMP_META: Record<string, { name: string; color: string }> = {
   HOT:  { name: "Caliente", color: "#EF4444" },

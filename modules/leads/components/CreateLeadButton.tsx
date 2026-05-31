@@ -65,7 +65,7 @@ export function CreateLeadButton() {
  onClick={() => handleModeSelect("paste")}
  >
  <div className="w-10 h-10 rounded-lg bg-[#D1FAE5] flex items-center justify-center">
- <ClipboardList className="h-5 w-5 text-[#1FA97A]" />
+ <ClipboardList className="h-5 w-5 text-[#0F766E]" />
  </div>
  <div>
  <p className="text-sm font-semibold text-slate-900">Pegar datos</p>

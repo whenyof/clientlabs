@@ -26,7 +26,7 @@ export function TimeSavedWidget() {
   return (
     <div
       className="rounded-xl p-4 mb-4 flex items-center gap-3"
-      style={{ background: "linear-gradient(135deg, #1FA97A, #17896a)" }}
+      style={{ background: "linear-gradient(135deg, #0F766E, #17896a)" }}
     >
       <Clock className="h-8 w-8 shrink-0" style={{ color: "rgba(255,255,255,0.7)" }} />
       <div>

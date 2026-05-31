@@ -11,7 +11,7 @@ function formatCurrency(v: number): string {
 }
 
 const LEVEL = {
-  low:    { label: "Bajo",  scoreColor: "#1FA97A", bg: "bg-emerald-50", text: "text-emerald-700" },
+  low:    { label: "Bajo",  scoreColor: "#0F766E", bg: "bg-emerald-50", text: "text-emerald-700" },
   medium: { label: "Medio", scoreColor: "#F59E0B", bg: "bg-amber-50",   text: "text-amber-700"   },
   high:   { label: "Alto",  scoreColor: "#EF4444", bg: "bg-red-50",     text: "text-red-700"     },
 } as const

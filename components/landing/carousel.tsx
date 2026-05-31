@@ -8,7 +8,7 @@ import { LandingIcons } from "@/components/landing/icons"
 
 const TONE_BG: Record<string, string> = {
   "tone-navy":    "#0B1F2A",
-  "tone-emerald": "linear-gradient(135deg, #1FA97A, #0f7a56)",
+  "tone-emerald": "linear-gradient(135deg, #0F766E, #0f7a56)",
   "tone-neutral": "#1b2d36",
 }
 

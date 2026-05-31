@@ -57,7 +57,7 @@ export function QuarterChecklist({ quarter }: Props) {
           <h3 className="text-[14px] font-semibold text-slate-900">Verificacion previa</h3>
           <span className={cn(
             "text-[11px] font-semibold px-2 py-0.5 rounded-md",
-            allDone ? "bg-[#1FA97A]/10 text-[#1FA97A]" : "bg-slate-100 text-slate-500"
+            allDone ? "bg-[#0F766E]/10 text-[#0F766E]" : "bg-slate-100 text-slate-500"
           )}>
             {completedCount}/{CHECKLIST_ITEMS.length}
           </span>
@@ -86,7 +86,7 @@ export function QuarterChecklist({ quarter }: Props) {
               >
                 <span className="shrink-0 mt-0.5">
                   {isChecked ? (
-                    <CheckSquare className="h-4 w-4 text-[#1FA97A]" />
+                    <CheckSquare className="h-4 w-4 text-[#0F766E]" />
                   ) : (
                     <Square className="h-4 w-4 text-slate-300 group-hover:text-slate-400 transition-colors" />
                   )}
@@ -104,8 +104,8 @@ export function QuarterChecklist({ quarter }: Props) {
       </div>
 
       {allDone && mounted && (
-        <div className="px-5 py-3 border-t border-[#1FA97A]/20 bg-emerald-50/50">
-          <p className="text-[11px] font-medium text-[#1FA97A]">
+        <div className="px-5 py-3 border-t border-[#0F766E]/20 bg-emerald-50/50">
+          <p className="text-[11px] font-medium text-[#0F766E]">
             Todo verificado. Puedes presentar la declaracion.
           </p>
         </div>

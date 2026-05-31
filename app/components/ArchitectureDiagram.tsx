@@ -1,7 +1,7 @@
 "use client"
 
 import { memo } from "react"
-import Image from "next/image"
+import { Logo } from "@/components/Logo"
 import { motion, Variants } from "framer-motion"
 
 const fadeUp: Variants = {
@@ -34,14 +34,7 @@ export const ArchitectureDiagram = memo(function ArchitectureDiagram() {
  <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-4 backdrop-blur">
  <div className="flex items-center gap-3">
  <div className="relative h-10 w-10">
- <Image
- src="/logo-trimmed.webp"
- alt="ClientLabs"
- fill
- className="object-contain"
- sizes="40px"
- loading="lazy"
- />
+ <Logo variant="icon-solid-green" width={40} height={40} />
  </div>
  <div>
  <p className="text-sm font-semibold text-[var(--text-secondary)]">ClientLabs</p>
@@ -109,14 +102,7 @@ export const ArchitectureDiagram = memo(function ArchitectureDiagram() {
  <div className="relative rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] px-6 py-5 backdrop-blur shadow-sm shadow-sm">
  <div className="flex items-center gap-3">
  <div className="relative h-10 w-10">
- <Image
- src="/logo-trimmed.webp"
- alt="ClientLabs"
- fill
- className="object-contain"
- sizes="40px"
- loading="lazy"
- />
+ <Logo variant="icon-solid-green" width={40} height={40} />
  </div>
  <div>
  <p className="text-sm font-semibold tracking-wide text-[var(--text-secondary)]">ClientLabs</p>
@@ -156,14 +142,7 @@ export const ArchitectureDiagram = memo(function ArchitectureDiagram() {
  <div className="relative rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] px-6 py-4 backdrop-blur shadow-sm shadow-sm">
  <div className="flex items-center gap-3">
  <div className="relative h-10 w-10">
- <Image
- src="/logo-trimmed.webp"
- alt="ClientLabs"
- fill
- className="object-contain"
- sizes="40px"
- loading="lazy"
- />
+ <Logo variant="icon-solid-green" width={40} height={40} />
  </div>
  <div>
  <p className="text-sm font-semibold tracking-wide text-[var(--text-secondary)]">ClientLabs</p>

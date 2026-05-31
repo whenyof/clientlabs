@@ -142,11 +142,11 @@ export function ReportingYoY({ sales }: Props) {
                         <LineChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                             <XAxis
                                 dataKey="label"
-                                tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 11 }}
-                                axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
+                                tick={{ fill: "#737373", fontSize: 11 }}
+                                axisLine={{ stroke: "#e8e8e8" }}
                             />
                             <YAxis
-                                tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 11 }}
+                                tick={{ fill: "#737373", fontSize: 11 }}
                                 axisLine={false}
                                 tickFormatter={(v) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v))}
                             />
@@ -171,10 +171,10 @@ export function ReportingYoY({ sales }: Props) {
                                 type="monotone"
                                 dataKey="previousYear"
                                 name={`${y.previousYear} (${previousYearLabel})`}
-                                stroke="rgba(255,255,255,0.5)"
+                                stroke="#737373"
                                 strokeWidth={1.5}
                                 strokeDasharray="6 4"
-                                dot={{ fill: "rgba(255,255,255,0.4)", r: 3 }}
+                                dot={{ fill: "#737373", r: 3 }}
                                 activeDot={{ r: 5 }}
                             />
                         </LineChart>

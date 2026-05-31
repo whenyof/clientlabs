@@ -14,7 +14,7 @@ const PLAN_ICONS = {
 
 const PLAN_COLORS = {
   starter:  { accent: "#0EA5E9", bg: "#0EA5E918", border: "#0EA5E930" },
-  pro:      { accent: "#1FA97A", bg: "#1FA97A18", border: "#1FA97A35" },
+  pro:      { accent: "#0F766E", bg: "#0F766E18", border: "#0F766E35" },
   business: { accent: "#F59E0B", bg: "#F59E0B18", border: "#F59E0B35" },
 }
 
@@ -222,7 +222,7 @@ export function PlansSection() {
                   isCurrent
                     ? { background: colors.bg, color: colors.accent, border: `1px solid ${colors.border}` }
                     : canUp
-                    ? { background: "#1FA97A", color: "#fff", opacity: loading && !isLoading ? 0.5 : 1 }
+                    ? { background: "#0F766E", color: "#fff", opacity: loading && !isLoading ? 0.5 : 1 }
                     : { background: "#F8FAFC", color: "#CBD5E1", border: "1px solid #E2E8F0" }
                 }
               >

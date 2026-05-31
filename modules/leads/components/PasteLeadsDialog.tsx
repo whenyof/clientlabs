@@ -262,7 +262,7 @@ export function PasteLeadsDialog({
       <DialogContent className="bg-white border-slate-200 !max-w-[800px] w-full max-h-[90vh] overflow-hidden flex flex-col rounded-2xl">
         <DialogHeader className="bg-white border-b border-slate-100 pb-4">
           <DialogTitle className="text-slate-900 text-xl flex items-center gap-2">
-            <ClipboardPaste className="h-5 w-5 text-[#1FA97A]" />
+            <ClipboardPaste className="h-5 w-5 text-[#0F766E]" />
             Pegar datos masivamente
           </DialogTitle>
           <DialogDescription className="text-slate-500">
@@ -282,7 +282,7 @@ export function PasteLeadsDialog({
                 value={pastedText}
                 onChange={(e) => setPastedText(e.target.value)}
                 placeholder={"CSV (nombre, email, tel, empresa, fuente, estado, notas):\nMaría García,maria@empresa.com,699123456,Empresa SL,Facebook,CUALIFICADO,Diseñadora freelance\n\nTexto libre:\nAna López 612345678 instagram ana@negocio.es INTERESADA Autónoma sector salud"}
-                className="w-full min-h-[260px] border border-slate-200 rounded-xl p-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#1FA97A] focus:ring-2 focus:ring-[#1FA97A]/10 outline-none resize-none font-mono bg-slate-50 focus:bg-white transition-colors"
+                className="w-full min-h-[260px] border border-slate-200 rounded-xl p-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/10 outline-none resize-none font-mono bg-slate-50 focus:bg-white transition-colors"
               />
               <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg border border-blue-100">
                 <Info className="h-3.5 w-3.5 text-blue-400 mt-0.5 flex-shrink-0" />
@@ -370,7 +370,7 @@ export function PasteLeadsDialog({
                                 value={lead.name || ""}
                                 onChange={(e) => updateField(idx, "name", e.target.value)}
                                 placeholder="Nombre"
-                                className={`bg-transparent border border-transparent rounded-md px-2 py-1 hover:border-slate-200 focus:border-[#1FA97A] focus:ring-1 focus:ring-[#1FA97A]/20 outline-none text-sm w-32 ${lead.excluded ? "text-slate-400" : "text-slate-900"}`}
+                                className={`bg-transparent border border-transparent rounded-md px-2 py-1 hover:border-slate-200 focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E]/20 outline-none text-sm w-32 ${lead.excluded ? "text-slate-400" : "text-slate-900"}`}
                               />
                             </td>
 
@@ -381,7 +381,7 @@ export function PasteLeadsDialog({
                                 value={lead.email || ""}
                                 onChange={(e) => updateField(idx, "email", e.target.value)}
                                 placeholder="email@..."
-                                className={`bg-transparent border border-transparent rounded-md px-2 py-1 hover:border-slate-200 focus:border-[#1FA97A] focus:ring-1 focus:ring-[#1FA97A]/20 outline-none text-sm w-40 ${lead.excluded ? "text-slate-400" : "text-slate-500"}`}
+                                className={`bg-transparent border border-transparent rounded-md px-2 py-1 hover:border-slate-200 focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E]/20 outline-none text-sm w-40 ${lead.excluded ? "text-slate-400" : "text-slate-500"}`}
                               />
                             </td>
 
@@ -392,7 +392,7 @@ export function PasteLeadsDialog({
                                 value={lead.phone || ""}
                                 onChange={(e) => updateField(idx, "phone", e.target.value)}
                                 placeholder="+34 6..."
-                                className={`bg-transparent border border-transparent rounded-md px-2 py-1 hover:border-slate-200 focus:border-[#1FA97A] focus:ring-1 focus:ring-[#1FA97A]/20 outline-none text-sm w-28 ${lead.excluded ? "text-slate-400" : "text-slate-500"}`}
+                                className={`bg-transparent border border-transparent rounded-md px-2 py-1 hover:border-slate-200 focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E]/20 outline-none text-sm w-28 ${lead.excluded ? "text-slate-400" : "text-slate-500"}`}
                               />
                             </td>
 
@@ -410,7 +410,7 @@ export function PasteLeadsDialog({
                             <td className="px-3 py-2.5 text-center">
                               <button
                                 onClick={() => toggleExclude(idx)}
-                                className={`p-1 rounded transition-colors ${lead.excluded ? "text-[#1FA97A] hover:bg-[#F0FDF8]" : "text-slate-400 hover:text-red-500"}`}
+                                className={`p-1 rounded transition-colors ${lead.excluded ? "text-[#0F766E] hover:bg-[#F0FDF8]" : "text-slate-400 hover:text-red-500"}`}
                                 title={lead.excluded ? "Incluir" : "Excluir"}
                               >
                                 {lead.excluded ? <Undo2 className="h-4 w-4" /> : <X className="h-4 w-4" />}
@@ -429,7 +429,7 @@ export function PasteLeadsDialog({
           {/* STEP 3: Importing */}
           {step === "importing" && (
             <div className="flex flex-col items-center justify-center py-12 space-y-4">
-              <Loader2 className="h-12 w-12 text-[#1FA97A] animate-spin" />
+              <Loader2 className="h-12 w-12 text-[#0F766E] animate-spin" />
               <p className="text-slate-700">Importando {validCount} leads...</p>
             </div>
           )}
@@ -437,16 +437,16 @@ export function PasteLeadsDialog({
           {/* STEP 4: Result */}
           {step === "result" && importResult && (
             <div className="flex flex-col items-center justify-center py-10 px-6 space-y-6">
-              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-[#F0FDF8] border border-[#1FA97A]/20">
-                <CheckCircle className="h-8 w-8 text-[#1FA97A]" />
+              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-[#F0FDF8] border border-[#0F766E]/20">
+                <CheckCircle className="h-8 w-8 text-[#0F766E]" />
               </div>
               <div>
                 <h3 className="text-center text-slate-900 font-semibold text-base">Importación completada</h3>
                 <p className="text-center text-slate-500 text-sm mt-1">Los datos se han procesado correctamente</p>
               </div>
               <div className="grid grid-cols-3 gap-4 w-full max-w-sm">
-                <div className="bg-[#F0FDF8] rounded-xl p-4 border border-[#1FA97A]/20 text-center">
-                  <p className="text-2xl font-bold text-[#1FA97A]">{importResult.created}</p>
+                <div className="bg-[#F0FDF8] rounded-xl p-4 border border-[#0F766E]/20 text-center">
+                  <p className="text-2xl font-bold text-[#0F766E]">{importResult.created}</p>
                   <p className="text-xs text-slate-500 mt-1">Creados</p>
                 </div>
                 <div className="bg-amber-50 rounded-xl p-4 border border-amber-100 text-center">
@@ -474,7 +474,7 @@ export function PasteLeadsDialog({
               <button
                 onClick={handleAnalyze}
                 disabled={!pastedText.trim()}
-                className="bg-[#1FA97A] text-white rounded-xl px-5 py-2.5 hover:bg-[#178f68] transition-colors text-sm disabled:opacity-50"
+                className="bg-[#0F766E] text-white rounded-xl px-5 py-2.5 hover:bg-[#0E665F] transition-colors text-sm disabled:opacity-50"
               >
                 Analizar texto
               </button>
@@ -491,7 +491,7 @@ export function PasteLeadsDialog({
               <button
                 onClick={handleImport}
                 disabled={validCount === 0}
-                className="bg-[#1FA97A] text-white rounded-xl px-5 py-2.5 hover:bg-[#178f68] transition-colors text-sm disabled:opacity-50 flex items-center gap-2"
+                className="bg-[#0F766E] text-white rounded-xl px-5 py-2.5 hover:bg-[#0E665F] transition-colors text-sm disabled:opacity-50 flex items-center gap-2"
               >
                 <CheckCircle className="h-4 w-4" />
                 Importar {validCount} lead{validCount !== 1 ? "s" : ""}
@@ -501,7 +501,7 @@ export function PasteLeadsDialog({
           {step === "result" && (
             <button
               onClick={handleCloseResult}
-              className="bg-[#1FA97A] text-white rounded-xl px-6 py-2.5 hover:bg-[#178f68] transition-colors text-sm font-medium"
+              className="bg-[#0F766E] text-white rounded-xl px-6 py-2.5 hover:bg-[#0E665F] transition-colors text-sm font-medium"
             >
               Cerrar
             </button>

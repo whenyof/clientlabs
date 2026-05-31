@@ -45,7 +45,7 @@ export function TasksSidebarRight({ tasks }: TasksSidebarRightProps) {
   const weekTotal = weekTasks.length
   const weekPct = weekTotal > 0 ? Math.round((weekDone / weekTotal) * 100) : 0
 
-  const barColor = weekPct < 50 ? "#1FA97A" : weekPct < 80 ? "#D9A441" : "#EF4444"
+  const barColor = weekPct < 50 ? "#0F766E" : weekPct < 80 ? "#D9A441" : "#EF4444"
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
@@ -65,8 +65,8 @@ export function TasksSidebarRight({ tasks }: TasksSidebarRightProps) {
               <div key={t.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <div style={{
                   width: 14, height: 14, borderRadius: "50%", flexShrink: 0,
-                  border: t.status === "DONE" ? "2px solid #1FA97A" : "1.5px solid var(--border-subtle)",
-                  background: t.status === "DONE" ? "#1FA97A" : "transparent",
+                  border: t.status === "DONE" ? "2px solid #0F766E" : "1.5px solid var(--border-subtle)",
+                  background: t.status === "DONE" ? "#0F766E" : "transparent",
                   display: "flex", alignItems: "center", justifyContent: "center",
                 }}>
                   {t.status === "DONE" && <svg width="7" height="5" viewBox="0 0 7 5" fill="none"><path d="M1 2.5l1.5 1.5 3.5-3.5" stroke="#fff" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
@@ -118,14 +118,14 @@ export function TasksSidebarRight({ tasks }: TasksSidebarRightProps) {
             cursor: "pointer", textAlign: "left",
           }}
         >
-          <div style={{ width: 28, height: 28, borderRadius: 7, background: "#1FA97A15", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <CalendarDays style={{ width: 14, height: 14, color: "#1FA97A" }} />
+          <div style={{ width: 28, height: 28, borderRadius: 7, background: "#0F766E15", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <CalendarDays style={{ width: 14, height: 14, color: "#0F766E" }} />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)" }}>Sincronizar calendario</div>
             <div style={{ fontSize: 10, color: "var(--text-secondary)", marginTop: 1 }}>Google, Apple, Outlook…</div>
           </div>
-          <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 20, background: "#1FA97A15", color: "#1FA97A", flexShrink: 0 }}>
+          <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 20, background: "#0F766E15", color: "#0F766E", flexShrink: 0 }}>
             iCal
           </span>
         </button>

@@ -13,7 +13,7 @@ import { sendEmail } from "../lib/email"
 
 const prisma = new PrismaClient()
 
-const GREEN = "#1FA97A"
+const GREEN = "#0F766E"
 const NAVY = "#0B1F2A"
 
 function verifactuEmail(): { subject: string; html: string } {

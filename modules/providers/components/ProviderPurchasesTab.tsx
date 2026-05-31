@@ -256,7 +256,7 @@ function RegisterPurchaseModal({
           <Button variant="outline" onClick={onClose} disabled={loading}>
             Cancelar
           </Button>
-          <Button onClick={handleSubmit} disabled={loading} className="bg-[#1FA97A] hover:bg-[#18916a] text-white">
+          <Button onClick={handleSubmit} disabled={loading} className="bg-[#0F766E] hover:bg-[#18916a] text-white">
             {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
             Registrar compra
           </Button>
@@ -352,7 +352,7 @@ export function ProviderPurchasesTab({ providerId }: Props) {
         <Button
           size="sm"
           onClick={() => setShowModal(true)}
-          className="h-8 gap-1.5 text-xs bg-[#1FA97A] hover:bg-[#18916a] text-white"
+          className="h-8 gap-1.5 text-xs bg-[#0F766E] hover:bg-[#18916a] text-white"
         >
           <Plus className="h-3.5 w-3.5" />
           Registrar compra

@@ -21,7 +21,7 @@ interface KpiCardProps {
 
 function KpiCard({ label, value, subtext, accent, warning }: KpiCardProps) {
   const valueColor = accent
-    ? "text-[#1FA97A]"
+    ? "text-[#0F766E]"
     : warning
     ? "text-amber-600"
     : "text-[var(--text-primary)]"

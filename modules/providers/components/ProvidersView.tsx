@@ -63,12 +63,6 @@ const STATUS_CFG: Record<string, { label: string; tone: string }> = {
   PAUSED:  { label: "Pausado",  tone: "amber" },
   BLOCKED: { label: "Bloqueado",tone: "red"   },
 }
-const DEP_CFG: Record<string, { label: string; color: string }> = {
-  LOW:      { label: "Baja",    color: C.ink3 },
-  MEDIUM:   { label: "Media",   color: C.blue },
-  HIGH:     { label: "Alta",    color: C.warn },
-  CRITICAL: { label: "Crítica", color: C.red  },
-}
 
 // ─── Pill ─────────────────────────────────────────────────────────────────
 const TONE: Record<string, { bg: string; color: string }> = {
@@ -465,20 +459,21 @@ export function ProvidersView({ initialProviders, initialKPIs }: { initialProvid
                   />
                 </div>
                 <FilterPill label="Categoría" value="Todas" />
+                <FilterPill label="País" value="Todos" />
                 <FilterPill label="Estado" value="Activos" />
-                <FilterPill label="Dependencia" value="Cualquiera" />
+                <FilterPill label="Pendiente" value="Cualquiera" />
               </div>
             </div>
 
             <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5, minWidth: 900 }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5, minWidth: 1100 }}>
                 <thead>
                   <tr>
-                    <th style={{ padding: "9px 16px", textAlign: "left", fontFamily: "ui-monospace,monospace", fontSize: 10, fontWeight: 500, color: C.ink3, letterSpacing: "0.06em", textTransform: "uppercase", borderBottom: `1px solid ${C.line2}`, background: C.bg2, width: 26 }}>
+                    <th style={{ padding: "9px 16px", borderBottom: `1px solid ${C.line2}`, background: C.bg2, width: 26 }}>
                       <input type="checkbox" style={{ appearance: "none", width: 14, height: 14, border: `1.5px solid ${C.ink5}`, borderRadius: 3, cursor: "pointer", background: "white" }} />
                     </th>
-                    {["Proveedor", "Categoría", "Coste/mes", "Dependencia", "Estado", "Tareas pend.", "Última acción", ""].map((h, i) => (
-                      <th key={i} style={{ padding: "9px 16px", textAlign: i >= 4 ? "left" : "left", fontFamily: "ui-monospace,monospace", fontSize: 10, fontWeight: 500, color: C.ink3, letterSpacing: "0.06em", textTransform: "uppercase", borderBottom: `1px solid ${C.line2}`, background: C.bg2, whiteSpace: "nowrap" }}>{h}</th>
+                    {["Proveedor", "Categoría", "País", "Gasto YTD", "Por pagar", "Últ. doc.", "Estado", ""].map((h, i) => (
+                      <th key={i} style={{ padding: "9px 16px", textAlign: i >= 3 && i <= 5 ? "right" : "left", fontFamily: "ui-monospace,monospace", fontSize: 10, fontWeight: 500, color: C.ink3, letterSpacing: "0.06em", textTransform: "uppercase", borderBottom: `1px solid ${C.line2}`, background: C.bg2, whiteSpace: "nowrap" }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -488,9 +483,12 @@ export function ProvidersView({ initialProviders, initialKPIs }: { initialProvid
                   ) : filtered.map((p) => {
                     const av = p.name.split(" ").map(w => w[0] ?? "").slice(0, 2).join("").toUpperCase()
                     const stCfg = STATUS_CFG[p.status] ?? { label: p.status, tone: "amber" }
-                    const depCfg = DEP_CFG[p.dependencyLevel] ?? { label: p.dependencyLevel, color: C.ink3 }
                     const lastDate = new Date(p.updatedAt).toLocaleDateString("es-ES", { day: "numeric", month: "short" })
                     const type = TYPE_LABELS[p.type || "OTHER"] || p.type || "Otro"
+                    const spentYTD = (p.monthlyCost || 0) * 12
+                    const pendingAmt = p.tasks.length > 0 ? (p.monthlyCost || 0) : 0
+                    const since = new Date(p.createdAt).getFullYear()
+                    const isActive = p.status === "OK" || p.status === "ACTIVE"
                     return (
                       <tr key={p.id}
                         onClick={() => router.push(`/dashboard/providers/${p.id}`)}
@@ -501,35 +499,44 @@ export function ProvidersView({ initialProviders, initialKPIs }: { initialProvid
                         <td style={{ padding: "11px 16px", borderBottom: `1px solid ${C.line3}` }} onClick={e => e.stopPropagation()}>
                           <input type="checkbox" style={{ appearance: "none", width: 14, height: 14, border: `1.5px solid ${C.ink5}`, borderRadius: 3, cursor: "pointer", background: "white" }} />
                         </td>
+                        {/* Proveedor */}
                         <td style={{ padding: "11px 16px", borderBottom: `1px solid ${C.line3}` }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                             <div style={{ width: 26, height: 26, borderRadius: 5, background: C.bg3, border: `1px solid ${C.line2}`, display: "grid", placeItems: "center", fontWeight: 600, fontSize: 10, color: C.ink, flexShrink: 0 }}>{av}</div>
                             <div>
                               <div style={{ fontWeight: 550, color: C.ink, letterSpacing: "-0.005em" }}>{p.name}</div>
-                              <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: C.ink3 }}>
-                                {p.contactEmail || `Desde ${new Date(p.createdAt).getFullYear()}`}
-                              </div>
+                              <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: C.ink3 }}>Proveedor desde {since}</div>
                             </div>
                           </div>
                         </td>
+                        {/* Categoría */}
                         <td style={{ padding: "11px 16px", borderBottom: `1px solid ${C.line3}` }}>
                           <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "2px 8px", borderRadius: 99, fontSize: 11, fontWeight: 500, background: C.bg3, color: C.ink2, border: `1px solid ${C.line2}` }}>{type}</span>
                         </td>
-                        <td style={{ padding: "11px 16px", borderBottom: `1px solid ${C.line3}` }}>
-                          {p.monthlyCost ? (
-                            <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 12.5, fontWeight: 600, color: C.ink }}>{fmtNum(p.monthlyCost)}<span style={{ color: C.ink3, fontWeight: 500, marginLeft: 2 }}>€</span></span>
-                          ) : <span style={{ color: C.ink4, fontSize: 12 }}>—</span>}
+                        {/* País */}
+                        <td style={{ padding: "11px 16px", borderBottom: `1px solid ${C.line3}`, fontFamily: "ui-monospace,monospace", fontSize: 11, color: C.ink3 }}>
+                          ES
                         </td>
-                        <td style={{ padding: "11px 16px", borderBottom: `1px solid ${C.line3}` }}>
-                          <span style={{ fontSize: 12, fontWeight: 500, color: depCfg.color }}>{depCfg.label}</span>
+                        {/* Gasto YTD */}
+                        <td style={{ padding: "11px 16px", borderBottom: `1px solid ${C.line3}`, textAlign: "right" }}>
+                          <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 12.5, fontWeight: 600, color: C.ink }}>
+                            {spentYTD > 0 ? <>{fmtNum(spentYTD)}<span style={{ color: C.ink3, fontWeight: 500, marginLeft: 2 }}>€</span></> : "—"}
+                          </span>
                         </td>
-                        <td style={{ padding: "11px 16px", borderBottom: `1px solid ${C.line3}` }}>
-                          <Pill tone={stCfg.tone}>{stCfg.label}</Pill>
+                        {/* Por pagar */}
+                        <td style={{ padding: "11px 16px", borderBottom: `1px solid ${C.line3}`, textAlign: "right" }}>
+                          {pendingAmt > 0 ? (
+                            <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 12.5, fontWeight: 600, color: C.warn }}>
+                              {fmtNum(pendingAmt)}<span style={{ color: C.warn, fontWeight: 500, marginLeft: 2 }}>€</span>
+                            </span>
+                          ) : <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 12, color: C.ink4 }}>—</span>}
                         </td>
-                        <td style={{ padding: "11px 16px", borderBottom: `1px solid ${C.line3}`, fontFamily: "ui-monospace,monospace", fontSize: 11.5, color: p.tasks.length > 0 ? C.warn : C.ink3 }}>
-                          {p.tasks.length > 0 ? `${p.tasks.length} pend.` : "—"}
-                        </td>
+                        {/* Últ. doc. */}
                         <td style={{ padding: "11px 16px", borderBottom: `1px solid ${C.line3}`, fontFamily: "ui-monospace,monospace", fontSize: 11, color: C.ink3, textAlign: "right" }}>{lastDate}</td>
+                        {/* Estado */}
+                        <td style={{ padding: "11px 16px", borderBottom: `1px solid ${C.line3}` }}>
+                          <Pill tone={isActive ? "green" : stCfg.tone}>{isActive ? "Activo" : "Pausado"}</Pill>
+                        </td>
                         <td style={{ padding: "11px 16px", borderBottom: `1px solid ${C.line3}` }} onClick={e => e.stopPropagation()}>
                           <button style={{ width: 26, height: 26, borderRadius: 5, display: "grid", placeItems: "center", color: C.ink3, background: "none", border: "none", cursor: "pointer" }}>
                             <MoreVertical size={14} />

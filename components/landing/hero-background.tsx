@@ -40,7 +40,7 @@ export function HeroBackground() {
             height: 700,
             borderRadius: "50%",
             background:
-              "radial-gradient(circle, rgba(31,169,122,0.38) 0%, rgba(31,169,122,0.14) 38%, transparent 68%)",
+              "radial-gradient(circle, rgba(15,118,110,0.38) 0%, rgba(15,118,110,0.14) 38%, transparent 68%)",
             animation: "hl-drift-1 18s ease-in-out infinite",
             willChange: "transform",
           }}
@@ -56,7 +56,7 @@ export function HeroBackground() {
             height: 620,
             borderRadius: "50%",
             background:
-              "radial-gradient(circle, rgba(31,169,122,0.32) 0%, rgba(31,169,122,0.10) 38%, transparent 68%)",
+              "radial-gradient(circle, rgba(15,118,110,0.32) 0%, rgba(15,118,110,0.10) 38%, transparent 68%)",
             animation: "hl-drift-2 24s ease-in-out infinite",
             willChange: "transform",
           }}
@@ -72,7 +72,7 @@ export function HeroBackground() {
             height: 420,
             borderRadius: "50%",
             background:
-              "radial-gradient(circle, rgba(31,169,122,0.24) 0%, rgba(31,169,122,0.07) 45%, transparent 70%)",
+              "radial-gradient(circle, rgba(15,118,110,0.24) 0%, rgba(15,118,110,0.07) 45%, transparent 70%)",
             animation: "hl-drift-3 30s ease-in-out infinite",
             willChange: "transform",
           }}
@@ -88,7 +88,7 @@ export function HeroBackground() {
             height: 480,
             borderRadius: "50%",
             background:
-              "radial-gradient(circle, rgba(31,169,122,0.22) 0%, transparent 65%)",
+              "radial-gradient(circle, rgba(15,118,110,0.22) 0%, transparent 65%)",
             animation: "hl-drift-4 22s ease-in-out infinite 4s",
             willChange: "transform",
           }}

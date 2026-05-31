@@ -69,15 +69,15 @@ function ConvertToInvoiceModal({
           </button>
         </div>
         <div className="p-5 space-y-2.5">
-          <label className={cn("flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-colors", invoiceType === "F1" ? "border-[#1FA97A] bg-[#F0FDF9]" : "border-slate-200 hover:bg-slate-50")}>
-            <input type="radio" checked={invoiceType === "F1"} onChange={() => setInvoiceType("F1")} className="mt-0.5 accent-[#1FA97A]" />
+          <label className={cn("flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-colors", invoiceType === "F1" ? "border-[#0F766E] bg-[#F0FDF9]" : "border-slate-200 hover:bg-slate-50")}>
+            <input type="radio" checked={invoiceType === "F1"} onChange={() => setInvoiceType("F1")} className="mt-0.5 accent-[#0F766E]" />
             <div>
               <span className="text-[13px] font-medium text-slate-900">F1 — Factura completa</span>
               <p className="text-[11px] text-slate-400 mt-0.5">Con NIF del destinatario. Para B2B o importes elevados.</p>
             </div>
           </label>
-          <label className={cn("flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-colors", invoiceType === "F2" ? "border-[#1FA97A] bg-[#F0FDF9]" : "border-slate-200 hover:bg-slate-50")}>
-            <input type="radio" checked={invoiceType === "F2"} onChange={() => setInvoiceType("F2")} className="mt-0.5 accent-[#1FA97A]" />
+          <label className={cn("flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-colors", invoiceType === "F2" ? "border-[#0F766E] bg-[#F0FDF9]" : "border-slate-200 hover:bg-slate-50")}>
+            <input type="radio" checked={invoiceType === "F2"} onChange={() => setInvoiceType("F2")} className="mt-0.5 accent-[#0F766E]" />
             <div>
               <span className="text-[13px] font-medium text-slate-900">F2 — Factura simplificada</span>
               <p className="text-[11px] text-slate-400 mt-0.5">Sin NIF, máximo 3.000 €. Para B2C.</p>
@@ -86,7 +86,7 @@ function ConvertToInvoiceModal({
         </div>
         <div className="px-5 pb-5 flex justify-end gap-2">
           <button onClick={onClose} className="px-4 py-2 rounded-lg border border-slate-200 text-[13px] text-slate-600 hover:bg-slate-50 transition-colors">Cancelar</button>
-          <button onClick={handleConvert} disabled={loading} className="px-5 py-2 rounded-lg bg-[#1FA97A] text-white text-[13px] font-medium hover:bg-[#178f68] disabled:opacity-50 transition-colors">
+          <button onClick={handleConvert} disabled={loading} className="px-5 py-2 rounded-lg bg-[#0F766E] text-white text-[13px] font-medium hover:bg-[#0E665F] disabled:opacity-50 transition-colors">
             {loading ? "Creando..." : "Crear factura (borrador)"}
           </button>
         </div>
@@ -188,7 +188,7 @@ export function DeliveryNotesView({ clientId, onNavigateToInvoices }: Props) {
               className={cn(
                 "text-[11px] px-3 py-1.5 rounded-lg border transition-colors",
                 activeFilter === f.key
-                  ? "bg-[#1FA97A] text-white border-[#1FA97A]"
+                  ? "bg-[#0F766E] text-white border-[#0F766E]"
                   : "border-slate-200 text-slate-600 hover:bg-slate-50"
               )}
             >
@@ -213,7 +213,7 @@ export function DeliveryNotesView({ clientId, onNavigateToInvoices }: Props) {
           </button>
           <button
             onClick={() => setCreateOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-[#1FA97A] text-white rounded-lg text-[13px] font-semibold hover:bg-[#1a9068] transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-[#0F766E] text-white rounded-lg text-[13px] font-semibold hover:bg-[#0E665F] transition-colors"
           >
             <Plus className="h-4 w-4" />
             Nuevo albarán
@@ -235,7 +235,7 @@ export function DeliveryNotesView({ clientId, onNavigateToInvoices }: Props) {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setCreateOpen(true)}
-                className="flex items-center gap-2 px-4 py-2.5 bg-[#1FA97A] text-white rounded-lg text-[13px] font-semibold hover:bg-[#1a9068] transition-colors"
+                className="flex items-center gap-2 px-4 py-2.5 bg-[#0F766E] text-white rounded-lg text-[13px] font-semibold hover:bg-[#0E665F] transition-colors"
               >
                 <Plus className="h-4 w-4" /> Nuevo albarán
               </button>
@@ -299,7 +299,7 @@ export function DeliveryNotesView({ clientId, onNavigateToInvoices }: Props) {
                           <button
                             onClick={() => action(n.id, "deliver")}
                             disabled={actionLoading === n.id + "deliver"}
-                            className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-[#1FA97A] transition-colors disabled:opacity-50"
+                            className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-[#0F766E] transition-colors disabled:opacity-50"
                             title={n.status === "DRAFT" ? "Marcar entregado" : "Marcar firmado"}
                           >
                             {n.status === "DRAFT" ? <Truck className="h-3.5 w-3.5" /> : <CheckCircle className="h-3.5 w-3.5" />}

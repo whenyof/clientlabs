@@ -500,7 +500,7 @@ export default function ApiSettingsPage() {
                                                 setIsModalOpen(false)
                                                 setCreatedKeySecret(null)
                                             }}
-                                            className="w-full py-2.5 text-sm font-medium text-white bg-[#0B1F2A] rounded-lg hover:bg-black transition-colors"
+                                            className="w-full py-2.5 text-sm font-medium text-white bg-[#0a0a0a] rounded-lg hover:bg-black transition-colors"
                                         >
                                             He guardado la clave
                                         </button>
@@ -613,7 +613,7 @@ export default function ApiSettingsPage() {
                                             setRevealedKey(null)
                                             setIsRevealedKeyVisible(false)
                                         }}
-                                        className="px-5 py-2.5 text-sm font-medium text-white bg-[#0B1F2A] rounded-lg hover:opacity-90 transition-colors"
+                                        className="px-5 py-2.5 text-sm font-medium text-white bg-[#0a0a0a] rounded-lg hover:opacity-90 transition-colors"
                                     >
                                         Cerrar
                                     </button>

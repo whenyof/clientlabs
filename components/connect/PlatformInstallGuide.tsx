@@ -21,7 +21,7 @@ interface PlatformDef {
 }
 
 const PLATFORMS: PlatformDef[] = [
-    { id: "html",      label: "HTML / Script",     icon: Code2,       iconColor: "text-[#1FA97A]"  },
+    { id: "html",      label: "HTML / Script",     icon: Code2,       iconColor: "text-[#0F766E]"  },
     { id: "wordpress", label: "WordPress",          icon: FileCode,    iconColor: "text-sky-600"    },
     { id: "shopify",   label: "Shopify",            icon: ShoppingBag, iconColor: "text-lime-600"   },
     { id: "gtm",       label: "Tag Manager",        icon: Tag,         iconColor: "text-orange-500" },
@@ -155,7 +155,7 @@ export function PlatformInstallGuide({ snippetCode, onCopy, copied }: PlatformIn
                     if (step.isSnippet) {
                         return (
                             <div key={idx} className="relative rounded-xl overflow-hidden bg-[#0B1F2A] my-3">
-                                <pre className="text-xs text-[#1FA97A] font-mono whitespace-pre-wrap break-all p-5 pr-14 leading-relaxed">
+                                <pre className="text-xs text-[#0F766E] font-mono whitespace-pre-wrap break-all p-5 pr-14 leading-relaxed">
                                     {snippetCode}
                                 </pre>
                                 <button
@@ -164,7 +164,7 @@ export function PlatformInstallGuide({ snippetCode, onCopy, copied }: PlatformIn
                                     title="Copiar snippet"
                                 >
                                     {copied
-                                        ? <CheckCircle2 className="w-4 h-4 text-[#1FA97A]" />
+                                        ? <CheckCircle2 className="w-4 h-4 text-[#0F766E]" />
                                         : <Copy className="w-4 h-4" />
                                     }
                                 </button>

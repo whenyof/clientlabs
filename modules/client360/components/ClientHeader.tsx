@@ -31,7 +31,7 @@ const SECONDARY_ACTIONS = [
   { id: "task",        label: "Tarea",       icon: CheckSquare,  hover: "hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50/50"          },
   { id: "email",       label: "Email",       icon: Mail,          hover: "hover:text-amber-600 hover:border-amber-200 hover:bg-amber-50/50"       },
   { id: "note",        label: "Nota",        icon: FileText,      hover: "hover:text-slate-700 hover:border-slate-300 hover:bg-slate-50"          },
-  { id: "interaction", label: "Interacción", icon: MessageCircle, hover: "hover:text-[#1FA97A] hover:border-[#1FA97A]/30 hover:bg-[#E1F5EE]/50"  },
+  { id: "interaction", label: "Interacción", icon: MessageCircle, hover: "hover:text-[#0F766E] hover:border-[#0F766E]/30 hover:bg-[#E1F5EE]/50"  },
 ] as const
 
 interface ClientHeaderProps {
@@ -66,7 +66,7 @@ export function ClientHeader({ client, kpis, lastActivityAt }: ClientHeaderProps
             {/* Izquierda: avatar + info */}
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#E1F5EE] to-[#C8EDE1] flex items-center justify-center shrink-0 shadow-sm">
-                <span className="text-[22px] font-bold text-[#1FA97A]">{initial}</span>
+                <span className="text-[22px] font-bold text-[#0F766E]">{initial}</span>
               </div>
 
               <div>
@@ -105,7 +105,7 @@ export function ClientHeader({ client, kpis, lastActivityAt }: ClientHeaderProps
               </div>
               <div className="w-20 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-[#1FA97A] to-[#0B8A5E] transition-all duration-500"
+                  className="h-full rounded-full bg-gradient-to-r from-[#0F766E] to-[#0B8A5E] transition-all duration-500"
                   style={{ width: `${score}%` }}
                 />
               </div>
@@ -117,7 +117,7 @@ export function ClientHeader({ client, kpis, lastActivityAt }: ClientHeaderProps
             <button
               type="button"
               onClick={() => setActive("order")}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1FA97A] text-[12px] font-semibold text-white hover:bg-[#1a9068] active:scale-[.98] transition-all shadow-sm shadow-[#1FA97A]/20"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0F766E] text-[12px] font-semibold text-white hover:bg-[#0E665F] active:scale-[.98] transition-all shadow-sm shadow-[#0F766E]/20"
             >
               <Plus className="h-3.5 w-3.5" />
               Nuevo pedido

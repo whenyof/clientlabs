@@ -234,7 +234,7 @@ export function CreateTransactionModal({ isOpen, onClose, onSuccess }: CreateTra
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 px-4 py-2.5 bg-[#1FA97A] hover:bg-[#1a9068] disabled:opacity-60 text-white rounded-lg transition-colors text-sm font-semibold"
+                className="flex-1 px-4 py-2.5 bg-[#0F766E] hover:bg-[#0E665F] disabled:opacity-60 text-white rounded-lg transition-colors text-sm font-semibold"
               >
                 {loading ? "Guardando..." : "Crear movimiento"}
               </button>

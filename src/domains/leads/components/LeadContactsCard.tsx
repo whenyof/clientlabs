@@ -26,7 +26,7 @@ const EMPTY_FORM: ContactForm = { name: "", email: "", phone: "", role: "" }
 
 interface Props { leadId: string }
 
-const inputCls = "w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-[13px] text-slate-900 bg-slate-50 focus:bg-white focus:border-[#1FA97A] focus:ring-1 focus:ring-[#1FA97A]/20 outline-none transition-all"
+const inputCls = "w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-[13px] text-slate-900 bg-slate-50 focus:bg-white focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E]/20 outline-none transition-all"
 
 function InlineForm({ initial, onSave, onCancel, saving }: {
   initial: ContactForm; onSave: (f: ContactForm) => void; onCancel: () => void; saving: boolean
@@ -44,7 +44,7 @@ function InlineForm({ initial, onSave, onCancel, saving }: {
           <X className="h-3 w-3" /> Cancelar
         </button>
         <button type="button" onClick={() => form.name.trim() && onSave(form)} disabled={!form.name.trim() || saving}
-          className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#1FA97A] text-white text-[12px] font-medium hover:bg-[#178f68] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+          className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#0F766E] text-white text-[12px] font-medium hover:bg-[#0E665F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
           {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />} Guardar
         </button>
       </div>

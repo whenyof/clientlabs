@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" role="img" aria-label="ClientLabs">
+  <rect x="14" y="36" width="22" height="22" rx="4" fill="#FFFFFF" opacity="0.35"/>
+  <rect x="44" y="36" width="22" height="22" rx="4" fill="#FFFFFF" opacity="0.65"/>
+  <rect x="74" y="36" width="22" height="22" rx="4" fill="#FFFFFF"/>
+  <text x="116" y="55" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="32" font-weight="500" letter-spacing="-0.8" fill="#FFFFFF">ClientLabs</text>
+</svg>

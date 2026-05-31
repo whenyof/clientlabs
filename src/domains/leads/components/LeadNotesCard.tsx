@@ -139,14 +139,14 @@ export function LeadNotesCard({ leadId, onActivityCreated }: LeadNotesCardProps)
         value={newNote}
         onChange={(e) => setNewNote(e.target.value)}
         disabled={loading}
-        className="w-full min-h-[80px] p-3 border border-slate-200 rounded-xl text-[13px] text-slate-900 placeholder:text-slate-400 bg-slate-50 focus:bg-white focus:border-[#1FA97A] focus:ring-1 focus:ring-[#1FA97A]/20 outline-none resize-none transition-all"
+        className="w-full min-h-[80px] p-3 border border-slate-200 rounded-xl text-[13px] text-slate-900 placeholder:text-slate-400 bg-slate-50 focus:bg-white focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E]/20 outline-none resize-none transition-all"
       />
       <div className="flex justify-end mt-2">
         <button
           type="button"
           onClick={submitNote}
           disabled={!newNote?.trim() || loading}
-          className="flex items-center gap-1.5 bg-[#1FA97A] text-white rounded-xl px-4 py-2 text-[13px] font-medium hover:bg-[#178f68] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-1.5 bg-[#0F766E] text-white rounded-xl px-4 py-2 text-[13px] font-medium hover:bg-[#0E665F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
           Guardar nota

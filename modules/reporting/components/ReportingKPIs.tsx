@@ -34,14 +34,14 @@ function ReportingKPIsComponent({ kpis }: Props) {
         <div
           key={item.label}
           className={cn(
-            "rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur",
-            "flex flex-col justify-center"
+            "rounded-xl p-4 flex flex-col justify-center"
           )}
+          style={{ background: "#ffffff", border: "1px solid #e8e8e8" }}
         >
-          <p className="text-xs font-medium text-white/50 uppercase tracking-wider truncate">
+          <p className="text-xs font-medium uppercase tracking-wider truncate" style={{ color: "#737373" }}>
             {item.label}
           </p>
-          <p className="text-xl font-bold text-white mt-0.5 truncate">{item.value}</p>
+          <p className="text-xl font-bold mt-0.5 truncate" style={{ color: "#0a0a0a" }}>{item.value}</p>
         </div>
       ))}
     </div>

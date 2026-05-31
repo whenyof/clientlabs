@@ -88,7 +88,7 @@ export default async function BlogPage({ searchParams: searchParamsPromise }: Pa
 
       {/* Hero */}
       <section className="mx-auto max-w-4xl px-6 pt-28 pb-12 text-center">
-        <span className="inline-block text-[11px] font-semibold text-[#1FA97A] uppercase tracking-widest mb-4">
+        <span className="inline-block text-[11px] font-semibold text-[#0F766E] uppercase tracking-widest mb-4">
           Blog ClientLabs
         </span>
         <h1 className="text-[36px] md:text-[48px] font-bold leading-tight text-white">
@@ -113,7 +113,7 @@ export default async function BlogPage({ searchParams: searchParamsPromise }: Pa
                 href={cat.key === "all" ? "/blog" : `/blog?cat=${cat.key}`}
                 className={`px-4 py-1.5 rounded-full text-[13px] font-medium border transition-colors ${
                   isActive
-                    ? "bg-[#1FA97A] text-white border-[#1FA97A]"
+                    ? "bg-[#0F766E] text-white border-[#0F766E]"
                     : "bg-white/5 text-slate-400 border-white/10 hover:border-white/20 hover:text-white"
                 }`}
               >
@@ -156,7 +156,7 @@ export default async function BlogPage({ searchParams: searchParamsPromise }: Pa
 
                 {/* Card body */}
                 <div className="p-4 flex flex-col flex-1">
-                  <h2 className="text-[14px] font-semibold text-white leading-snug mb-2 group-hover:text-[#1FA97A] transition-colors line-clamp-2">
+                  <h2 className="text-[14px] font-semibold text-white leading-snug mb-2 group-hover:text-[#0F766E] transition-colors line-clamp-2">
                     {post.title}
                   </h2>
                   <p className="text-slate-400 text-[12px] leading-relaxed mb-4 flex-1 line-clamp-3">

@@ -1,6 +1,6 @@
 /**
  * Email templates for ClientLabs — v2
- * Design: navy #0B1F2A · green #1FA97A · teal #0F766E
+ * Design: navy #0B1F2A · green #0F766E · teal #0F766E
  * Inline styles only — Gmail, Apple Mail, Outlook web compatible
  */
 
@@ -8,7 +8,7 @@
 
 const C = {
   navy:      "#0B1F2A",
-  green:     "#1FA97A",
+  green:     "#0F766E",
   teal:      "#0F766E",
   greenLight:"#E8F7F0",
   grayText:  "#3F4D58",
@@ -872,16 +872,16 @@ export function onboardingWelcomeEmail(name: string): { subject: string; html: s
       <p>Cree ClientLabs porque yo mismo perdi un cliente por no hacerle seguimiento. Desde ese dia decidi que tenia que existir algo simple, en español y pensado de verdad para autonomos como tu y como yo.</p>
       <p>Tienes 14 dias para probarlo todo sin limites y sin meter tarjeta. Para que le saques el maximo partido desde ya, te recomiendo hacer estas 3 cosas hoy — no tardan mas de 5 minutos:</p>
       <p style="padding-left:16px">
-        → <a href="https://app.clientlabs.io/dashboard/clients" style="color:#1FA97A">Anade tus primeros 3 clientes</a><br>
-        → <a href="https://app.clientlabs.io/dashboard/leads" style="color:#1FA97A">Crea tu primer lead</a><br>
-        → <a href="https://app.clientlabs.io/dashboard/finance/invoicing" style="color:#1FA97A">Genera una factura de prueba</a>
+        → <a href="https://app.clientlabs.io/dashboard/clients" style="color:#0F766E">Anade tus primeros 3 clientes</a><br>
+        → <a href="https://app.clientlabs.io/dashboard/leads" style="color:#0F766E">Crea tu primer lead</a><br>
+        → <a href="https://app.clientlabs.io/dashboard/finance/invoicing" style="color:#0F766E">Genera una factura de prueba</a>
       </p>
       <p>Si en algun momento tienes una duda o algo no va como esperas — respondeme a este email directamente. Lo leo yo.</p>
       <p>Bienvenido.</p>
       <p>
         <strong>Errepe</strong><br>
         <span style="color:#64748B;font-size:13px">Founder de ClientLabs</span><br>
-        <span style="color:#64748B;font-size:13px">WhatsApp: <a href="${ERREPE_WA}" style="color:#1FA97A">${ERREPE_NUM}</a></span>
+        <span style="color:#64748B;font-size:13px">WhatsApp: <a href="${ERREPE_WA}" style="color:#0F766E">${ERREPE_NUM}</a></span>
       </p>
       <p style="color:#94A3B8;font-size:12px;margin-top:24px">P.D. Puedes responderme directamente aqui — lo leo yo personalmente.</p>
     `, "Soy el founder — respondo personalmente a cada email"),
@@ -897,7 +897,7 @@ export function onboardingDay3Email(name: string, completedSteps: number): { sub
       <p>Ey ${first},</p>
       <p>Vi que entraste a ClientLabs pero te quedaste en el paso ${completedSteps} de 5.</p>
       <p>¿Hay algo que no quedo claro o que no encontraste? A veces el primer paso es el mas dificil.</p>
-      <p>Si me dices donde te atascaste te ayudo en 10 minutos — por aqui o por <a href="${ERREPE_WA}" style="color:#1FA97A">WhatsApp</a>.</p>
+      <p>Si me dices donde te atascaste te ayudo en 10 minutos — por aqui o por <a href="${ERREPE_WA}" style="color:#0F766E">WhatsApp</a>.</p>
       <p>
         <strong>Errepe</strong><br>
         <span style="color:#64748B;font-size:13px">${ERREPE_NUM}</span>
@@ -938,7 +938,7 @@ export function onboardingDay7Email(name: string, stats: Day7Stats): { subject: 
         ${pending}${pendingAmt}
       </div>
       ${followUp}
-      <p>¿Quieres que te explique como usar las automatizaciones para que esto no se te escape? Respondeme aqui o por <a href="${ERREPE_WA}" style="color:#1FA97A">WhatsApp</a>.</p>
+      <p>¿Quieres que te explique como usar las automatizaciones para que esto no se te escape? Respondeme aqui o por <a href="${ERREPE_WA}" style="color:#0F766E">WhatsApp</a>.</p>
       <p><strong>Errepe</strong></p>
     `, "Resumen de tu primera semana — responde si tienes preguntas"),
   }
@@ -954,9 +954,9 @@ export function onboardingDay10Email(name: string): { subject: string; html: str
       <p>Tu prueba gratuita termina en 4 dias.</p>
       <p>Antes de que acabe queria preguntarte — ¿has podido probar todo lo que necesitabas? ¿Hay algo que no funcione como esperabas?</p>
       <p>Si quieres te hago una llamada rapida de 10-15 minutos para ensenarte las partes que igual no has visto — las automatizaciones y los informes fiscales son las que mas gustan.</p>
-      <p>Dimelo por aqui o por <a href="${ERREPE_WA}" style="color:#1FA97A">WhatsApp (${ERREPE_NUM})</a> y lo cuadramos.</p>
+      <p>Dimelo por aqui o por <a href="${ERREPE_WA}" style="color:#0F766E">WhatsApp (${ERREPE_NUM})</a> y lo cuadramos.</p>
       <p><strong>Errepe</strong></p>
-      <p style="color:#94A3B8;font-size:12px;margin-top:20px">P.D. Si ya tienes claro que quieres continuar — <a href="https://clientlabs.io/plan" style="color:#1FA97A">elige tu plan aqui</a>.</p>
+      <p style="color:#94A3B8;font-size:12px;margin-top:20px">P.D. Si ya tienes claro que quieres continuar — <a href="https://clientlabs.io/plan" style="color:#0F766E">elige tu plan aqui</a>.</p>
     `, "Faltan 4 dias — te hago una llamada si quieres"),
   }
 }
@@ -969,12 +969,12 @@ export function onboardingDay14Email(name: string): { subject: string; html: str
     html: erepeHtml(`
       <p>Buenas ${first},</p>
       <p>Hoy es el ultimo dia de tu prueba gratuita.</p>
-      <p>Si ClientLabs te ha servido — puedes <a href="https://clientlabs.io/plan" style="color:#1FA97A">elegir tu plan aqui</a>. Todos incluyen IVA y puedes cancelar cuando quieras.</p>
+      <p>Si ClientLabs te ha servido — puedes <a href="https://clientlabs.io/plan" style="color:#0F766E">elegir tu plan aqui</a>. Todos incluyen IVA y puedes cancelar cuando quieras.</p>
       <p>Si todavia no pudiste probarlo bien o tienes dudas — dimelo y <strong>te mantengo el acceso 7 dias mas</strong> para que termines de verlo sin prisas. Sin compromiso.</p>
       <p>Y si ClientLabs no es para ti — tambien me lo puedes decir. Me ayuda saber por que para seguir mejorando.</p>
       <p>
         <strong>Errepe</strong><br>
-        <span style="color:#64748B;font-size:13px">WhatsApp: <a href="${ERREPE_WA}" style="color:#1FA97A">${ERREPE_NUM}</a></span>
+        <span style="color:#64748B;font-size:13px">WhatsApp: <a href="${ERREPE_WA}" style="color:#0F766E">${ERREPE_NUM}</a></span>
       </p>
     `, "Hoy termina — puedo darte 7 dias mas si todavia no lo viste bien"),
   }

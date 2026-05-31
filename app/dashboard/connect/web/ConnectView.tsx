@@ -149,8 +149,8 @@ export function ConnectView({ coreStatus, initialDomain, lastUsed, rawKeyHint, i
     const renderSnippetBlock = () => {
         const snippetCode = getClientlabsSnippet({ key: rawKeyHint || "YOUR_PUBLIC_KEY" })
         return (
-            <div className="relative rounded-xl overflow-hidden bg-[#0B1F2A]">
-                <pre className="text-xs text-[#1FA97A] font-mono whitespace-pre-wrap break-all p-5 pr-14 leading-relaxed">
+            <div className="relative rounded-xl overflow-hidden bg-[#0a0a0a]">
+                <pre className="text-xs text-[#0F766E] font-mono whitespace-pre-wrap break-all p-5 pr-14 leading-relaxed">
                     {snippetCode}
                 </pre>
                 <button
@@ -159,7 +159,7 @@ export function ConnectView({ coreStatus, initialDomain, lastUsed, rawKeyHint, i
                     title="Copiar snippet"
                 >
                     {snippetCopied
-                        ? <CheckCircle2 className="w-4 h-4 text-[#1FA97A]" />
+                        ? <CheckCircle2 className="w-4 h-4 text-[#0F766E]" />
                         : <Copy className="w-4 h-4" />
                     }
                 </button>
@@ -215,7 +215,7 @@ export function ConnectView({ coreStatus, initialDomain, lastUsed, rawKeyHint, i
                     {!isVerified && !isVerifying && (
                         <button
                             onClick={() => handleVerifyProvider(provider)}
-                            className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-[#1FA97A] hover:bg-[#178f68] rounded-lg transition-colors"
+                            className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-[#0F766E] hover:bg-[#0E665F] rounded-lg transition-colors"
                         >
                             <ShieldCheck className="w-4 h-4" />
                             Verificar instalación
@@ -228,7 +228,7 @@ export function ConnectView({ coreStatus, initialDomain, lastUsed, rawKeyHint, i
                         </div>
                     )}
                     {isVerified && (
-                        <div className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-[#1FA97A] bg-[#1FA97A]/8 border border-[#1FA97A]/20 rounded-lg">
+                        <div className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-[#0F766E] bg-[#0F766E]/8 border border-[#0F766E]/20 rounded-lg">
                             <CheckCircle2 className="w-4 h-4" />
                             Script detectado — instalación correcta
                         </div>
@@ -265,7 +265,7 @@ export function ConnectView({ coreStatus, initialDomain, lastUsed, rawKeyHint, i
         return (
             <div key={providerKey} className={cn(
                 "bg-white rounded-xl border p-5 flex flex-col gap-4 transition-all",
-                isVerified ? "border-[#1FA97A]/30" : "border-slate-200",
+                isVerified ? "border-[#0F766E]/30" : "border-slate-200",
                 isBlocked ? "opacity-50 pointer-events-none" : "hover:border-slate-300"
             )}>
                 <div className="flex items-start gap-3">
@@ -276,8 +276,8 @@ export function ConnectView({ coreStatus, initialDomain, lastUsed, rawKeyHint, i
                         <div className="flex items-center justify-between gap-2">
                             <span className="text-sm font-semibold text-[#0B1F2A]">{PROVIDER_LABELS[providerKey]}</span>
                             {isVerified && (
-                                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#1FA97A] bg-[#1FA97A]/10 border border-[#1FA97A]/20 px-2 py-0.5 rounded uppercase">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-[#1FA97A]" />
+                                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#0F766E] bg-[#0F766E]/10 border border-[#0F766E]/20 px-2 py-0.5 rounded uppercase">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#0F766E]" />
                                     Activo
                                 </span>
                             )}
@@ -307,7 +307,7 @@ export function ConnectView({ coreStatus, initialDomain, lastUsed, rawKeyHint, i
                         }
                         className={cn(
                             "flex-1 py-2 text-xs font-medium rounded-lg transition-colors",
-                            isConnected ? "border border-red-200 text-red-600 hover:bg-red-50" : "bg-[#1FA97A] text-white hover:bg-[#178f68]",
+                            isConnected ? "border border-red-200 text-red-600 hover:bg-red-50" : "bg-[#0F766E] text-white hover:bg-[#0E665F]",
                             (isLoading || isBlocked) && "opacity-50 cursor-not-allowed"
                         )}
                     >
@@ -372,7 +372,7 @@ export function ConnectView({ coreStatus, initialDomain, lastUsed, rawKeyHint, i
                                 href="https://es.wordpress.org/plugins/lead-capture-for-clientlabs/"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center justify-between gap-4 p-4 bg-[#0B1F2A] hover:bg-[#0d2535] rounded-xl transition-colors group"
+                                className="flex items-center justify-between gap-4 p-4 bg-[#0a0a0a] hover:bg-[#1f1f1f] rounded-xl transition-colors group"
                             >
                                 <div className="flex items-center gap-3">
                                     <div className="h-9 w-9 rounded-lg bg-sky-500/20 flex items-center justify-center flex-shrink-0">
@@ -526,7 +526,7 @@ export function ConnectView({ coreStatus, initialDomain, lastUsed, rawKeyHint, i
                 <div className="pb-5 border-b border-slate-200">
                     <Link
                         href="/dashboard/connect"
-                        className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#1FA97A] hover:text-[#178f68] transition-colors mb-3"
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#0F766E] hover:text-[#0E665F] transition-colors mb-3"
                     >
                         <ArrowLeft className="w-3.5 h-3.5" />
                         Canales
@@ -540,7 +540,7 @@ export function ConnectView({ coreStatus, initialDomain, lastUsed, rawKeyHint, i
                     <div className="flex items-center gap-3 px-6 py-4 border-b border-slate-100">
                         <div className={cn(
                             "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0",
-                            domain ? "bg-[#1FA97A] text-white" : "bg-[#0B1F2A] text-white"
+                            domain ? "bg-[#0F766E] text-white" : "bg-[#0a0a0a] text-white"
                         )}>
                             {domain ? <CheckCircle2 className="w-3.5 h-3.5" /> : "1"}
                         </div>
@@ -548,7 +548,7 @@ export function ConnectView({ coreStatus, initialDomain, lastUsed, rawKeyHint, i
                             <span className="text-sm font-semibold text-[#0B1F2A]">Dominio autorizado</span>
                             {domain && <span className="ml-2 text-xs text-slate-400 font-mono">{domain}</span>}
                         </div>
-                        {domain && <span className="text-xs text-[#1FA97A] font-medium">Configurado</span>}
+                        {domain && <span className="text-xs text-[#0F766E] font-medium">Configurado</span>}
                     </div>
                     <div className="p-6">
                         <p className="text-sm text-slate-500 mb-4">

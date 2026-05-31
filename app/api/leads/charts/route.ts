@@ -82,7 +82,7 @@ export async function GET() {
   })
 
   const STATUS_COLORS: Record<string, string> = {
-    NEW:       "#1FA97A",
+    NEW:       "#0F766E",
     CONTACTED: "#3B82F6",
     QUALIFIED: "#D9A441",
     CONVERTED: "#8B5CF6",

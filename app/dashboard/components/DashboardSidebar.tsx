@@ -57,7 +57,7 @@ export function DashboardSidebar({ activityFeed, kpis, leadsThisMonth, invoicedT
   const healthScore = healthItems.filter((h) => !h.problem).length
   const healthPct = (healthScore / 4) * 100
   const healthColor =
-    healthScore === 4 ? "#1FA97A" : healthScore === 3 ? "#D97706" : "#DC2626"
+    healthScore === 4 ? "#0F766E" : healthScore === 3 ? "#D97706" : "#DC2626"
   const healthLabel =
     healthScore === 4 ? "Excelente" : healthScore === 3 ? "Buena" : healthScore === 2 ? "Regular" : "Atención"
 
@@ -69,12 +69,12 @@ export function DashboardSidebar({ activityFeed, kpis, leadsThisMonth, invoicedT
         <div
           className="pointer-events-none absolute inset-0"
           style={{
-            backgroundImage: `linear-gradient(rgba(31,169,122,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(31,169,122,0.05) 1px, transparent 1px)`,
+            backgroundImage: `linear-gradient(rgba(15,118,110,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(15,118,110,0.05) 1px, transparent 1px)`,
             backgroundSize: "24px 24px",
           }}
         />
         {/* Top accent line */}
-        <div className="absolute left-0 right-0 top-0 h-[2px] bg-[#1FA97A]/40" />
+        <div className="absolute left-0 right-0 top-0 h-[2px] bg-[#0F766E]/40" />
 
         <div className="relative z-10 p-4">
           {/* Clock */}
@@ -93,11 +93,11 @@ export function DashboardSidebar({ activityFeed, kpis, leadsThisMonth, invoicedT
               <span className="text-[9px] uppercase tracking-[0.08em] text-white/40">
                 {currentMonth} · día {dayOfMonth}/{daysInMonth}
               </span>
-              <span className="text-[11px] font-bold text-[#1FA97A]">{progress}%</span>
+              <span className="text-[11px] font-bold text-[#0F766E]">{progress}%</span>
             </div>
             <div className="h-[3px] overflow-hidden rounded-full bg-white/[0.08]">
               <div
-                className="h-full rounded-full bg-[#1FA97A] transition-all duration-700"
+                className="h-full rounded-full bg-[#0F766E] transition-all duration-700"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -115,7 +115,7 @@ export function DashboardSidebar({ activityFeed, kpis, leadsThisMonth, invoicedT
               <div className="mb-1.5 text-[8px] font-semibold uppercase tracking-[0.1em] text-white/30">
                 Leads este mes
               </div>
-              <div className="text-[24px] font-bold leading-none text-[#1FA97A] tabular-nums">
+              <div className="text-[24px] font-bold leading-none text-[#0F766E] tabular-nums">
                 {leadsThisMonth}
               </div>
             </div>
@@ -163,7 +163,7 @@ export function DashboardSidebar({ activityFeed, kpis, leadsThisMonth, invoicedT
             className="flex items-center justify-between border-b border-slate-100 py-2 last:border-0"
           >
             <div className="flex items-center gap-2">
-              <div className={cn("h-1.5 w-1.5 rounded-full", item.problem ? "bg-red-400" : "bg-[#1FA97A]")} />
+              <div className={cn("h-1.5 w-1.5 rounded-full", item.problem ? "bg-red-400" : "bg-[#0F766E]")} />
               <span className="text-[11px] text-slate-600">{item.label}</span>
             </div>
             <span className={cn("text-[12px] font-semibold", item.problem ? "text-red-500" : "text-slate-900")}>
@@ -180,8 +180,8 @@ export function DashboardSidebar({ activityFeed, kpis, leadsThisMonth, invoicedT
             Actividad
           </h3>
           <span className="relative flex h-1.5 w-1.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#1FA97A] opacity-60" />
-            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#1FA97A]" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#0F766E] opacity-60" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#0F766E]" />
           </span>
           <span className="text-[9px] text-slate-400">En vivo</span>
         </div>

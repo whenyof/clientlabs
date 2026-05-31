@@ -41,7 +41,7 @@ export const INVOICE_TEMPLATES: InvoiceTemplateCatalog[] = [
     style: {
       headerBg: "#0B1F2A",
       headerText: "#FFFFFF",
-      accentColor: "#1FA97A",
+      accentColor: "#0F766E",
       bodyBg: "#FFFFFF",
       bodyText: "#1E293B",
       tableBorderColor: "#E2E8F0",

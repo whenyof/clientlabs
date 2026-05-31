@@ -38,7 +38,7 @@ function getInitials(name: string | null): string {
 }
 
 function hashColor(str: string): string {
-  const palette = ["#1FA97A", "#3B82F6", "#8B5CF6", "#F59E0B", "#EC4899", "#14B8A6", "#F97316"]
+  const palette = ["#0F766E", "#3B82F6", "#8B5CF6", "#F59E0B", "#EC4899", "#14B8A6", "#F97316"]
   let hash = 0
   for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash)
   return palette[Math.abs(hash) % palette.length]
@@ -71,8 +71,8 @@ function TemperatureBadge({ temperature }: { temperature: string | null }) {
 }
 
 function ScoreBadge({ score }: { score: number }) {
-  const bg = score >= 70 ? "#1FA97A20" : score >= 40 ? "#D9A44120" : "#94A3B820"
-  const color = score >= 70 ? "#1FA97A" : score >= 40 ? "#D9A441" : "#64748B"
+  const bg = score >= 70 ? "#0F766E20" : score >= 40 ? "#D9A44120" : "#94A3B820"
+  const color = score >= 70 ? "#0F766E" : score >= 40 ? "#D9A441" : "#64748B"
   return (
     <span style={{ fontSize: 11, fontWeight: 600, padding: "1px 6px", borderRadius: 4, backgroundColor: bg, color }}>
       {score}
@@ -179,8 +179,8 @@ function KanbanColumn({
       ref={setNodeRef}
       style={{
         minWidth: 268, maxWidth: 288, flex: "0 0 268px",
-        background: isOver ? "rgba(31,169,122,0.04)" : "var(--bg-surface)",
-        border: `0.5px solid ${isOver ? "rgba(31,169,122,0.35)" : "var(--border-subtle)"}`,
+        background: isOver ? "rgba(15,118,110,0.04)" : "var(--bg-surface)",
+        border: `0.5px solid ${isOver ? "rgba(15,118,110,0.35)" : "var(--border-subtle)"}`,
         borderRadius: 12,
         overflow: "hidden",
         transition: "background 150ms, border-color 150ms",
@@ -323,7 +323,7 @@ export function LeadsKanbanView() {
         {activeLead && (
           <div style={{
             background: "var(--bg-card)",
-            border: "0.5px solid #1FA97A",
+            border: "0.5px solid #0F766E",
             borderRadius: 10,
             padding: "10px 12px",
             width: 260,

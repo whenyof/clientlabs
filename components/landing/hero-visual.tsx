@@ -142,7 +142,7 @@ export function HeroVisual() {
           style={{
             position: "absolute",
             inset: -52,
-            background: "radial-gradient(circle, rgba(31,169,122,0.32) 0%, transparent 68%)",
+            background: "radial-gradient(circle, rgba(15,118,110,0.32) 0%, transparent 68%)",
             borderRadius: "50%",
             pointerEvents: "none",
             animation: "glow-pulse 3.6s ease-in-out infinite",
@@ -168,9 +168,9 @@ export function HeroVisual() {
           <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 12 }}>
             <div style={{
               width: 32, height: 32, borderRadius: 9,
-              background: "linear-gradient(135deg, #1FA97A 0%, #14866a 100%)",
+              background: "linear-gradient(135deg, #0F766E 0%, #14866a 100%)",
               display: "flex", alignItems: "center", justifyContent: "center",
-              boxShadow: "0 4px 14px rgba(31,169,122,0.45)",
+              boxShadow: "0 4px 14px rgba(15,118,110,0.45)",
               flexShrink: 0,
             }}>
               {/* Inline chart/CL mark */}
@@ -209,7 +209,7 @@ export function HeroVisual() {
                   <span style={{
                     fontSize: 9, fontWeight: 700,
                     color: m.up ? "#34d399" : "#f87171",
-                    background: m.up ? "rgba(31,169,122,0.18)" : "rgba(248,113,113,0.18)",
+                    background: m.up ? "rgba(15,118,110,0.18)" : "rgba(248,113,113,0.18)",
                     padding: "1.5px 5px", borderRadius: 4,
                     letterSpacing: "-0.01em",
                   }}>
@@ -225,8 +225,8 @@ export function HeroVisual() {
             <svg width="100%" height="22" viewBox="0 0 142 22" preserveAspectRatio="none">
               <defs>
                 <linearGradient id="heroSparkGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#1FA97A" stopOpacity="0.45" />
-                  <stop offset="100%" stopColor="#1FA97A" stopOpacity="0" />
+                  <stop offset="0%" stopColor="#0F766E" stopOpacity="0.45" />
+                  <stop offset="100%" stopColor="#0F766E" stopOpacity="0" />
                 </linearGradient>
               </defs>
               <path
@@ -236,12 +236,12 @@ export function HeroVisual() {
               <polyline
                 points="0,19 18,16 36,13 54,15 72,9 90,6 108,10 126,5 142,3"
                 fill="none"
-                stroke="#1FA97A"
+                stroke="#0F766E"
                 strokeWidth="1.6"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
-              <circle cx="142" cy="3" r="2.5" fill="#1FA97A" />
+              <circle cx="142" cy="3" r="2.5" fill="#0F766E" />
             </svg>
           </div>
         </div>

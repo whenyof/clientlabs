@@ -538,7 +538,7 @@ export function InvoiceView() {
         <>
           <div className="flex flex-col items-center justify-center py-24 text-center max-w-lg mx-auto">
             <div className="mb-6 grid h-16 w-16 place-items-center rounded-2xl bg-emerald-50">
-              <Shield className="h-8 w-8 text-[#1FA97A]" />
+              <Shield className="h-8 w-8 text-[#0F766E]" />
             </div>
             <h2 className="text-2xl font-bold text-slate-900">Activa la facturación legal</h2>
             <p className="mt-3 text-slate-500 text-sm leading-relaxed">
@@ -552,7 +552,7 @@ export function InvoiceView() {
             <button
               type="button"
               onClick={() => setShowActivationModal(true)}
-              className="mt-6 rounded-lg bg-[#1FA97A] px-6 py-3 text-sm font-medium text-white hover:bg-[#178a64] shadow-sm transition-colors"
+              className="mt-6 rounded-lg bg-[#0F766E] px-6 py-3 text-sm font-medium text-white hover:bg-[#0E665F] shadow-sm transition-colors"
             >
               Activar Verifactu
             </button>
@@ -599,7 +599,7 @@ export function InvoiceView() {
           <button
             type="button"
             onClick={() => setNewDropdownOpen((v) => !v)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#1FA97A] text-white rounded-lg text-[13px] font-semibold hover:bg-[#178a64] transition-colors shrink-0"
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#0F766E] text-white rounded-lg text-[13px] font-semibold hover:bg-[#0E665F] transition-colors shrink-0"
           >
             <Plus className="h-4 w-4" />
             Nueva factura
@@ -680,7 +680,7 @@ export function InvoiceView() {
               className={cn(
                 "flex items-center gap-1.5 px-3 py-2 text-[12px] font-medium border-b-2 transition-colors -mb-px",
                 quickTab === tab.id
-                  ? "border-[#1FA97A] text-[#1FA97A]"
+                  ? "border-[#0F766E] text-[#0F766E]"
                   : "border-transparent text-slate-500 hover:text-slate-700"
               )}
             >
@@ -688,7 +688,7 @@ export function InvoiceView() {
               {count > 0 && (
                 <span className={cn(
                   "text-[10px] font-semibold px-1.5 py-0.5 rounded-full",
-                  quickTab === tab.id ? "bg-[#1FA97A]/15 text-[#1FA97A]" : "bg-slate-100 text-slate-500"
+                  quickTab === tab.id ? "bg-[#0F766E]/15 text-[#0F766E]" : "bg-slate-100 text-slate-500"
                 )}>
                   {count}
                 </span>

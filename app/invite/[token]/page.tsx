@@ -27,7 +27,7 @@ function ErrorCard({ icon, title, message, sub }: { icon: React.ReactNode; title
         {sub}
         <a
           href="/"
-          className="inline-block mt-2 text-sm font-medium text-[#1FA97A] hover:underline"
+          className="inline-block mt-2 text-sm font-medium text-[#0F766E] hover:underline"
         >
           Volver al inicio
         </a>
@@ -96,7 +96,7 @@ export default async function InvitePage({ params }: { params: { token: string }
           <div className="bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm text-slate-600">
             Para ampliar el límite, el administrador del equipo debe actualizar su plan.
             Contacta con nosotros en{" "}
-            <a href="mailto:info@clientlabs.io" className="text-[#1FA97A] font-medium hover:underline">
+            <a href="mailto:info@clientlabs.io" className="text-[#0F766E] font-medium hover:underline">
               info@clientlabs.io
             </a>
           </div>

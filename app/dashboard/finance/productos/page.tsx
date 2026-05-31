@@ -151,7 +151,7 @@ function ProductModal({
             disabled={!form.name.trim()}
             style={{
               padding: "8px 18px", borderRadius: 7, border: "none",
-              background: "#1FA97A", color: "white", fontSize: 13, fontWeight: 600, cursor: "pointer",
+              background: "#0F766E", color: "white", fontSize: 13, fontWeight: 600, cursor: "pointer",
             }}
           >
             {product ? "Guardar cambios" : "Crear"}
@@ -262,7 +262,7 @@ export default function ProductosPage() {
           style={{
             display: "flex", alignItems: "center", gap: 6,
             padding: "9px 16px", borderRadius: 8, border: "none",
-            background: "#1FA97A", color: "white", fontSize: 13, fontWeight: 600, cursor: "pointer",
+            background: "#0F766E", color: "white", fontSize: 13, fontWeight: 600, cursor: "pointer",
           }}
         >
           <Plus style={{ width: 14, height: 14 }} />

@@ -18,7 +18,7 @@ function Row({ label, value, bold, accent, separator }: {
     "tabular-nums text-right",
     bold ? "font-bold text-[14px]" : "text-[13px]",
     accent === "positive" && "text-red-600",
-    accent === "negative" && "text-[#1FA97A]",
+    accent === "negative" && "text-[#0F766E]",
     accent === "neutral" && "text-slate-900",
     !accent && "text-slate-700"
   )
@@ -62,7 +62,7 @@ export function QuarterModelo303({ data, loading }: Props) {
           {!skeleton && (
             <div className={cn(
               "px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wide",
-              isPositive ? "bg-red-50 text-red-600 border border-red-100" : "bg-emerald-50 text-[#1FA97A] border border-[#1FA97A]/20"
+              isPositive ? "bg-red-50 text-red-600 border border-red-100" : "bg-emerald-50 text-[#0F766E] border border-[#0F766E]/20"
             )}>
               {resultLabel}: {fmt(Math.abs(ivaResult))}
             </div>

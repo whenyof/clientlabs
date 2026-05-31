@@ -8,13 +8,13 @@ import { prisma } from "@/lib/prisma"
 import { getCachedData, setCachedData } from "@/lib/redis-cache"
 
 const DEP_META: Record<string, { label: string; color: string }> = {
-  LOW:      { label: "Bajo",    color: "#1FA97A" },
+  LOW:      { label: "Bajo",    color: "#0F766E" },
   MEDIUM:   { label: "Medio",   color: "#F59E0B" },
   HIGH:     { label: "Alto",    color: "#EF4444" },
   CRITICAL: { label: "Crítico", color: "#7C3AED" },
 }
 const OPS_META: Record<string, { label: string; color: string }> = {
-  OK:        { label: "Operativo",  color: "#1FA97A" },
+  OK:        { label: "Operativo",  color: "#0F766E" },
   ATTENTION: { label: "Atención",   color: "#F59E0B" },
   RISK:      { label: "En riesgo",  color: "#EF4444" },
 }

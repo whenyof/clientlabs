@@ -2,7 +2,11 @@
 
 import { useState, useId } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { Plus, Filter, Zap, List, Calendar, BarChart2, ArrowUpRight, ArrowDownRight, Minus, ExternalLink } from "lucide-react"
+import {
+  Plus, Filter, Zap, List, Calendar, BarChart2, LayoutGrid,
+  ArrowUpRight, ArrowDownRight, Minus, ExternalLink,
+  Phone, Clock, Flag, RefreshCw, Settings,
+} from "lucide-react"
 import type { DashboardTask, TaskPriority, ViewMode } from "./types"
 import { TasksTopbar } from "./TasksTopbar"
 import { PriorityView } from "./PriorityView"
@@ -19,9 +23,9 @@ const C = {
   accent: "#16986e", accentSoft: "#ecf6f1", accentInk: "#0d7a56",
   warn: "#c2410c", warnSoft: "#fef3eb",
   red: "#b91c1c", redSoft: "#fef2f2",
-  blue: "#3756a4", blueSoft: "#eef2fb",
-  violet: "#6d28d9",
+  blue: "#3756a4", blueSoft: "#eef2fb", violet: "#6d28d9",
 }
+const pRnd = (s: number) => { const x = Math.sin(s * 127.1 + 311.7) * 10000; return x - Math.floor(x) }
 
 // ─── Sparkline ─────────────────────────────────────────────────────────────
 function Sparkline({ data, color = C.ink }: { data: number[]; color?: string }) {
@@ -48,11 +52,11 @@ function Sparkline({ data, color = C.ink }: { data: number[]; color?: string }) 
   )
 }
 
-// ─── KPI Card (inline, on top of page) ─────────────────────────────────────
-function TaskKpiCard({ label, tag, value, unit, delta, deltaLabel, trend = "flat", spark, isLast }: {
-  label: string; tag: string; value: string | number; unit?: string
-  delta?: number; deltaLabel?: string; trend?: "up" | "down" | "flat"
-  spark?: number[]; isLast?: boolean
+// ─── KPI Card ─────────────────────────────────────────────────────────────
+type Trend = "up" | "down" | "flat"
+function TaskKpiCard({ label, tag, value, unit, trend = "flat", delta, deltaLabel, spark, isLast }: {
+  label: string; tag: string; value: number; unit?: string; trend?: Trend
+  delta: number; deltaLabel: string; spark: number[]; isLast?: boolean
 }) {
   const dc = trend === "up" ? C.accentInk : trend === "down" ? C.red : C.ink3
   return (
@@ -62,83 +66,172 @@ function TaskKpiCard({ label, tag, value, unit, delta, deltaLabel, trend = "flat
         <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 9, padding: "1px 5px", borderRadius: 3, background: C.bg3, color: C.ink3, letterSpacing: "0.04em", textTransform: "uppercase" }}>{tag}</span>
       </div>
       <div style={{ fontWeight: 600, letterSpacing: "-0.028em", fontSize: 28, lineHeight: 1.1, marginTop: 4, fontVariantNumeric: "tabular-nums", color: C.ink }}>
-        {typeof value === "number" ? new Intl.NumberFormat("es-ES").format(value) : value}
+        {unit === "%" ? value.toFixed(1).replace(".", ",") : value}
         {unit && <span style={{ color: C.ink3, fontWeight: 500, fontSize: 18, marginLeft: 2 }}>{unit}</span>}
       </div>
-      <div style={{ marginTop: 10, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-        {delta !== undefined && (
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontFamily: "ui-monospace,monospace", fontSize: 11.5, fontWeight: 500, color: dc }}>
-            {trend === "up" && <ArrowUpRight size={11} strokeWidth={2.4} />}
-            {trend === "down" && <ArrowDownRight size={11} strokeWidth={2.4} />}
-            {trend === "flat" && <Minus size={11} strokeWidth={2.4} />}
-            {delta > 0 ? "+" : ""}{delta.toFixed(1)}%
-            {deltaLabel && <span style={{ color: C.ink4, marginLeft: 4, fontWeight: 450 }}>{deltaLabel}</span>}
-          </span>
-        )}
-        {spark && <Sparkline data={spark} color={trend === "down" ? C.accentInk : C.ink} />}
+      <div style={{ marginTop: 10, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontFamily: "ui-monospace,monospace", fontSize: 11.5, fontWeight: 500, color: dc }}>
+          {trend === "up" ? <ArrowUpRight size={11} strokeWidth={2.4} /> : trend === "down" ? <ArrowDownRight size={11} strokeWidth={2.4} /> : <Minus size={11} strokeWidth={2.4} />}
+          {delta > 0 ? "+" : ""}{delta.toFixed(1)}%
+          <span style={{ color: C.ink4, marginLeft: 4, fontWeight: 450 }}>{deltaLabel}</span>
+        </span>
+        <Sparkline data={spark} color={trend === "down" ? C.accentInk : C.ink} />
       </div>
     </div>
   )
 }
 
-// ─── Project progress tile ─────────────────────────────────────────────────
-const PROJECT_COLORS = [C.accent, C.blue, C.ink, C.warn, C.violet]
-
+// ─── Project strip ─────────────────────────────────────────────────────────
 function ProjectStrip({ tasks }: { tasks: DashboardTask[] }) {
-  // Group tasks by project (use type as project proxy if no project field)
-  const projectMap: Record<string, { nm: string; color: string; open: number; total: number; tag: string }> = {}
+  const projectMap: Record<string, { nm: string; color: string; open: number; total: number; tag: string; pct: number }> = {}
+  const PROJ_COLORS = [C.accent, C.blue, C.ink, C.warn, C.violet]
   tasks.forEach(t => {
     const key = t.project?.id ?? "sin-proyecto"
     const nm = t.project?.name ?? "Sin proyecto"
     if (!projectMap[key]) {
-      const idx = Object.keys(projectMap).length % PROJECT_COLORS.length
-      const col = t.project?.color || PROJECT_COLORS[idx]
-      projectMap[key] = { nm, color: col, open: 0, total: 0, tag: nm.slice(0, 3).toUpperCase() }
+      const idx = Object.keys(projectMap).length % PROJ_COLORS.length
+      const col = t.project?.color || PROJ_COLORS[idx]
+      projectMap[key] = { nm, color: col, open: 0, total: 0, tag: nm.slice(0, 3).toUpperCase(), pct: 0 }
     }
     projectMap[key].total++
     if (t.status !== "DONE" && t.status !== "CANCELLED") projectMap[key].open++
   })
-  const projects = Object.values(projectMap).slice(0, 5)
-
+  const projects = Object.values(projectMap).slice(0, 5).map(p => ({ ...p, pct: p.total > 0 ? Math.round(((p.total - p.open) / p.total) * 100) : 0 }))
   if (projects.length === 0) return null
-
   return (
     <div style={{ marginBottom: 20 }}>
       <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 12 }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
           <h3 style={{ fontWeight: 600, letterSpacing: "-0.01em", fontSize: 14, margin: 0, color: C.ink }}>Proyectos activos</h3>
-          <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, color: C.ink3 }}>{projects.length} en curso</span>
+          <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, color: C.ink3 }}>{projects.length} en curso · ordenados por urgencia</span>
         </div>
         <a style={{ fontSize: 11.5, color: C.ink3, fontWeight: 500, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4 }}>
-          Todos <ExternalLink size={11} />
+          Todos los proyectos <ExternalLink size={11} />
         </a>
       </div>
       <div style={{ display: "flex", gap: 12, overflowX: "auto", paddingBottom: 4 }}>
-        {projects.map((p, idx) => {
-          const pct = p.total > 0 ? Math.round(((p.total - p.open) / p.total) * 100) : 0
+        {projects.map((p, idx) => (
+          <div key={p.tag} style={{ flexShrink: 0, width: 220, background: C.bg, border: `1px solid ${idx === 0 ? p.color : C.line}`, borderRadius: 10, padding: "14px 16px", cursor: "pointer" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+              <span style={{ width: 8, height: 8, borderRadius: 99, background: p.color, display: "inline-block", flexShrink: 0 }} />
+              <h4 style={{ margin: 0, fontSize: 13, fontWeight: 600, color: C.ink, letterSpacing: "-0.005em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.nm}</h4>
+              <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 9.5, color: C.ink4, letterSpacing: "0.04em", marginLeft: "auto", flexShrink: 0 }}>{p.tag}</span>
+            </div>
+            <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: C.ink3, marginBottom: 10 }}>{p.open}/{p.total} tareas</div>
+            <div style={{ height: 4, background: C.bg3, borderRadius: 99, overflow: "hidden", marginBottom: 8 }}>
+              <div style={{ height: "100%", width: `${p.pct}%`, background: p.color, borderRadius: 99 }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: C.ink3, fontWeight: 600 }}>{p.pct}%</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ─── Kanban board ──────────────────────────────────────────────────────────
+const KANBAN_COLS = [
+  { id: "PENDING_FUTURE", nm: "Backlog",   sw: "#a3a3a3" },
+  { id: "PENDING_TODAY",  nm: "Hoy",       sw: C.warn },
+  { id: "IN_PROGRESS",    nm: "En curso",  sw: C.blue },
+  { id: "PENDING_LATE",   nm: "Revisión",  sw: C.violet },
+  { id: "DONE",           nm: "Hecho",     sw: C.accent },
+]
+
+const PRIO_COLORS: Record<string, string> = {
+  URGENT: C.red, HIGH: C.warn, MEDIUM: C.blue, LOW: C.ink4,
+}
+const LABEL_COLORS: Record<string, { bg: string; color: string }> = {
+  URGENT: { bg: C.redSoft,    color: C.red   },
+  HIGH:   { bg: C.warnSoft,   color: C.warn  },
+  MEDIUM: { bg: C.blueSoft,   color: C.blue  },
+  LOW:    { bg: C.bg3,        color: C.ink3  },
+}
+
+function KanbanBoard({ tasks, onNewTask }: { tasks: DashboardTask[]; onNewTask: () => void }) {
+  const now = new Date()
+  const todayStr = now.toISOString().slice(0, 10)
+  const grouped: Record<string, DashboardTask[]> = { PENDING_FUTURE: [], PENDING_TODAY: [], IN_PROGRESS: [], PENDING_LATE: [], DONE: [] }
+  tasks.forEach(t => {
+    if (t.status === "DONE" || t.status === "CANCELLED") {
+      grouped.DONE.push(t)
+    } else if (t.status === "IN_PROGRESS") {
+      grouped.IN_PROGRESS.push(t)
+    } else {
+      if (!t.dueDate) { grouped.PENDING_FUTURE.push(t); return }
+      const due = t.dueDate.slice(0, 10)
+      if (due < todayStr) grouped.PENDING_LATE.push(t)
+      else if (due === todayStr) grouped.PENDING_TODAY.push(t)
+      else grouped.PENDING_FUTURE.push(t)
+    }
+  })
+
+  return (
+    <div style={{ background: "transparent", marginBottom: 16 }}>
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 10 }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+          <h3 style={{ fontWeight: 600, letterSpacing: "-0.01em", fontSize: 14, margin: 0, color: C.ink }}>Tablero de tareas</h3>
+          <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, color: C.ink3 }}>arrastra entre columnas · ⌘+N para nueva</span>
+        </div>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <button style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 10px", borderRadius: 6, background: C.bg, border: `1px solid ${C.line}`, color: C.ink2, fontSize: 11.5, fontWeight: 550, cursor: "pointer" }}>
+            <Settings size={11} />Configurar tablero
+          </button>
+        </div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: `repeat(${KANBAN_COLS.length}, 1fr)`, gap: 10, overflowX: "auto" }}>
+        {KANBAN_COLS.map(col => {
+          const colTasks = grouped[col.id] ?? []
           return (
-            <div key={p.nm} style={{
-              flexShrink: 0,
-              width: 220,
-              background: C.bg,
-              border: `1px solid ${idx === 0 ? p.color : C.line}`,
-              borderRadius: 10,
-              padding: "14px 16px",
-              cursor: "pointer",
-            }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                <span style={{ width: 8, height: 8, borderRadius: 99, background: p.color, display: "inline-block", flexShrink: 0 }} />
-                <h4 style={{ margin: 0, fontSize: 13, fontWeight: 600, color: C.ink, letterSpacing: "-0.005em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.nm}</h4>
-                <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 9.5, color: C.ink4, letterSpacing: "0.04em", marginLeft: "auto", flexShrink: 0 }}>{p.tag}</span>
+            <div key={col.id} style={{ minWidth: 200, background: C.bg2, borderRadius: 10, overflow: "hidden" }}>
+              {/* Column header */}
+              <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", background: C.bg3, borderBottom: `1px solid ${C.line2}` }}>
+                <span style={{ width: 8, height: 8, borderRadius: 99, background: col.sw, display: "inline-block", flexShrink: 0 }} />
+                <h4 style={{ margin: 0, fontSize: 12.5, fontWeight: 600, color: C.ink, flex: 1 }}>{col.nm}</h4>
+                <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, color: C.ink3, background: C.bg, border: `1px solid ${C.line}`, padding: "1px 6px", borderRadius: 99 }}>{colTasks.length}</span>
+                <button onClick={onNewTask} style={{ width: 18, height: 18, display: "grid", placeItems: "center", background: "none", border: "none", cursor: "pointer", color: C.ink3 }}>
+                  <Plus size={12} strokeWidth={2} />
+                </button>
               </div>
-              <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: C.ink3, marginBottom: 10 }}>
-                {p.open}/{p.total} tareas
-              </div>
-              <div style={{ height: 4, background: C.bg3, borderRadius: 99, overflow: "hidden", marginBottom: 8 }}>
-                <div style={{ height: "100%", width: `${pct}%`, background: p.color, borderRadius: 99, transition: "width .8s ease" }} />
-              </div>
-              <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: C.ink3, fontWeight: 600 }}>{pct}%</span>
+              {/* Cards */}
+              <div style={{ padding: 8, display: "flex", flexDirection: "column", gap: 6, minHeight: 80 }}>
+                {colTasks.slice(0, 5).map(t => {
+                  const prioColor = PRIO_COLORS[t.priority] ?? C.ink4
+                  const isToday = col.id === "PENDING_TODAY"
+                  const isLate = col.id === "PENDING_LATE"
+                  const lblCfg = LABEL_COLORS[t.priority] ?? LABEL_COLORS.LOW
+                  const projName = t.project?.name ?? ""
+                  const dueStr = t.dueDate ? new Date(t.dueDate).toLocaleDateString("es-ES", { day: "numeric", month: "short" }) : ""
+                  return (
+                    <div key={t.id} style={{ background: C.bg, border: `1px solid ${isToday || isLate ? C.warn + "40" : C.line}`, borderRadius: 8, padding: 10, cursor: "pointer" }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = C.bg2 }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = C.bg }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 5 }}>
+                        <span style={{ width: 8, height: 8, borderRadius: 2, background: prioColor, display: "inline-block", flexShrink: 0 }} />
+                        <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 9.5, color: C.ink4, letterSpacing: "0.04em" }}>#{t.id.slice(-4)}</span>
+                        {projName && <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 9.5, color: C.ink4 }}>· {projName.slice(0, 6)}</span>}
+                      </div>
+                      <div style={{ fontWeight: 550, fontSize: 12.5, color: C.ink, letterSpacing: "-0.005em", marginBottom: 3, lineHeight: 1.35 }}>{t.title}</div>
+                      {t.Client && <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: C.ink3, marginBottom: 6 }}>{t.Client.name}</div>}
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <span style={{ fontSize: 11, fontWeight: 500, padding: "1px 6px", borderRadius: 4, background: lblCfg.bg, color: lblCfg.color }}>{t.priority}</span>
+                        {dueStr && <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: isToday || isLate ? C.warn : C.ink3 }}>{dueStr}</span>}
+                      </div>
+                    </div>
+                  )
+                })}
+                {colTasks.length === 0 && (
+                  <div style={{ padding: "16px 4px", textAlign: "center", color: C.ink4, fontSize: 11, fontFamily: "ui-monospace,monospace" }}>Sin tareas</div>
+                )}
+                {colTasks.length > 5 && (
+                  <div style={{ padding: "4px 4px", fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: C.ink4, textAlign: "center" }}>+{colTasks.length - 5} más</div>
+                )}
+                <div onClick={onNewTask} style={{ padding: "6px 4px", fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: C.ink4, cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+                  <Plus size={10} strokeWidth={2} />Añadir tarea…
+                </div>
               </div>
             </div>
           )
@@ -148,41 +241,235 @@ function ProjectStrip({ tasks }: { tasks: DashboardTask[] }) {
   )
 }
 
-// ─── Derived KPI data from tasks ───────────────────────────────────────────
+// ─── Mini calendar ─────────────────────────────────────────────────────────
+function MiniCalendar({ tasks }: { tasks: DashboardTask[] }) {
+  const now = new Date()
+  const year = now.getFullYear(), month = now.getMonth()
+  const firstDay = new Date(year, month, 1).getDay()
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const offset = (firstDay + 6) % 7 // Monday first
+  const today = now.getDate()
+  // Tasks by day
+  const taskDays: Record<number, string[]> = {}
+  tasks.forEach(t => {
+    if (!t.dueDate) return
+    const d = new Date(t.dueDate)
+    if (d.getFullYear() === year && d.getMonth() === month) {
+      const day = d.getDate()
+      if (!taskDays[day]) taskDays[day] = []
+      const color = t.status === "DONE" ? C.accent : (new Date(t.dueDate!) < now) ? C.red : C.warn
+      taskDays[day].push(color)
+    }
+  })
+
+  const DAYS = ["L", "M", "X", "J", "V", "S", "D"]
+  return (
+    <div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2, padding: "10px 14px 6px" }}>
+        {DAYS.map(d => <div key={d} style={{ fontFamily: "ui-monospace,monospace", fontSize: 10, color: C.ink4, textAlign: "center", fontWeight: 500 }}>{d}</div>)}
+        {Array.from({ length: offset }, (_, i) => <div key={`off-${i}`} style={{ height: 28 }} />)}
+        {Array.from({ length: daysInMonth }, (_, i) => {
+          const day = i + 1
+          const isToday = day === today
+          const dots = taskDays[day] || []
+          return (
+            <div key={day} style={{ height: 28, borderRadius: 4, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: isToday ? C.ink : "transparent", cursor: "pointer" }}
+              onMouseEnter={e => { if (!isToday) (e.currentTarget as HTMLElement).style.background = C.bg3 }}
+              onMouseLeave={e => { if (!isToday) (e.currentTarget as HTMLElement).style.background = "transparent" }}
+            >
+              <span style={{ fontSize: 11.5, fontWeight: isToday ? 600 : 400, color: isToday ? "white" : C.ink, lineHeight: 1 }}>{day}</span>
+              {dots.length > 0 && (
+                <div style={{ display: "flex", gap: 2, marginTop: 1 }}>
+                  {dots.slice(0, 3).map((c, i) => <span key={i} style={{ width: 4, height: 4, borderRadius: 99, background: isToday ? "rgba(255,255,255,0.6)" : c, display: "inline-block" }} />)}
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ─── Today agenda ──────────────────────────────────────────────────────────
+function TodayAgenda({ tasks }: { tasks: DashboardTask[] }) {
+  const today = new Date().toISOString().slice(0, 10)
+  const todayTasks = tasks.filter(t => t.dueDate?.slice(0, 10) === today && t.status !== "DONE").slice(0, 5)
+
+  const EVT_ICONS: Record<string, React.ReactNode> = {
+    call:    <Phone size={12} strokeWidth={1.8} />,
+    meet:    <Clock size={12} strokeWidth={1.8} />,
+    renewal: <RefreshCw size={12} strokeWidth={1.8} />,
+    default: <Flag size={12} strokeWidth={1.8} />,
+  }
+  const EVT_COLORS: Record<string, { bg: string; color: string }> = {
+    URGENT: { bg: C.redSoft, color: C.red },
+    HIGH:   { bg: C.warnSoft, color: C.warn },
+    MEDIUM: { bg: C.blueSoft, color: C.blue },
+    LOW:    { bg: C.bg3, color: C.ink3 },
+  }
+
+  return (
+    <div>
+      {todayTasks.length === 0 ? (
+        <div style={{ padding: "32px 18px", textAlign: "center", color: C.ink3, fontSize: 12.5 }}>Sin tareas para hoy</div>
+      ) : todayTasks.map(t => {
+        const evtColor = EVT_COLORS[t.priority] ?? EVT_COLORS.LOW
+        const timeStr = t.dueDate && t.endAt ? new Date(t.endAt).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) : "—"
+        return (
+          <div key={t.id} style={{ display: "grid", gridTemplateColumns: "48px 26px 1fr 24px", gap: 10, alignItems: "center", padding: "9px 14px", borderBottom: `1px solid ${C.line3}` }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: C.ink, fontFeatureSettings: "\"tnum\"" }}>{timeStr}</span>
+            </div>
+            <div style={{ width: 26, height: 26, borderRadius: 6, display: "grid", placeItems: "center", background: evtColor.bg, color: evtColor.color }}>
+              {EVT_ICONS.default}
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 12.5, color: C.ink, fontWeight: 600, letterSpacing: "-0.005em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{t.title}</div>
+              {t.Client && <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: C.ink3, marginTop: 1 }}>{t.Client.name}</div>}
+            </div>
+            <div style={{ width: 24, height: 24, borderRadius: 4, background: C.bg3, display: "grid", placeItems: "center", fontFamily: "ui-monospace,monospace", fontSize: 9, fontWeight: 600, color: C.ink }}>
+              {t.assignees?.[0]?.user?.name?.slice(0, 2).toUpperCase() ?? "—"}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+// ─── Workload chart ─────────────────────────────────────────────────────────
+function WorkloadChart({ tasks }: { tasks: DashboardTask[] }) {
+  // Group by assignee
+  const groups: Record<string, { nm: string; done: number; doing: number; todo: number }> = {}
+  tasks.forEach(t => {
+    const user = t.assignees?.[0]?.user
+    if (!user) return
+    const key = user.id
+    const initials = (user.name || "??").split(" ").map(w => w[0] ?? "").slice(0, 2).join("").toUpperCase()
+    if (!groups[key]) groups[key] = { nm: user.name || initials, done: 0, doing: 0, todo: 0 }
+    if (t.status === "DONE") groups[key].done++
+    else if (t.status === "IN_PROGRESS") groups[key].doing++
+    else groups[key].todo++
+  })
+
+  // Fallback simulated workload if no assignee data
+  const rows = Object.values(groups).slice(0, 4)
+  if (rows.length === 0) {
+    // Generate simulated from tasks count
+    const total = tasks.length
+    const done = tasks.filter(t => t.status === "DONE").length
+    const doing = tasks.filter(t => t.status === "IN_PROGRESS").length
+    const todo = total - done - doing
+    rows.push({ nm: "Equipo", done, doing, todo })
+  }
+
+  return (
+    <div style={{ padding: "12px 0" }}>
+      {rows.map((w, i) => {
+        const total = w.done + w.doing + w.todo || 1
+        const pct = Math.round((w.done / total) * 100)
+        const initials = w.nm.split(" ").map(s => s[0] ?? "").slice(0, 2).join("").toUpperCase()
+        return (
+          <div key={i} style={{ display: "grid", gridTemplateColumns: "100px 1fr 40px 52px", gap: 12, alignItems: "center", padding: "7px 18px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              <span style={{ width: 22, height: 22, borderRadius: 5, background: C.bg3, border: `1px solid ${C.line2}`, display: "grid", placeItems: "center", fontFamily: "ui-monospace,monospace", fontSize: 9, fontWeight: 600, color: C.ink, flexShrink: 0 }}>{initials}</span>
+              <span style={{ fontSize: 12, color: C.ink2, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{w.nm.split(" ")[0]}</span>
+            </div>
+            <div style={{ height: 8, borderRadius: 99, overflow: "hidden", background: C.bg3, display: "flex" }}>
+              <div style={{ width: `${(w.done / total) * 100}%`, background: C.accent, transition: "width .6s ease" }} />
+              <div style={{ width: `${(w.doing / total) * 100}%`, background: C.ink }} />
+              <div style={{ width: `${(w.todo / total) * 100}%`, background: C.ink5 }} />
+            </div>
+            <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 11.5, fontWeight: 600, color: C.ink, textAlign: "right" }}>{pct}%</div>
+            <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: C.ink3, textAlign: "right" }}>{total} t.</div>
+          </div>
+        )
+      })}
+      <div style={{ display: "flex", gap: 14, padding: "8px 18px 0", borderTop: `1px solid ${C.line2}`, marginTop: 6, fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: C.ink3 }}>
+        {[{ color: C.accent, label: "Hecho" }, { color: C.ink, label: "En curso" }, { color: C.ink5, label: "Pendiente" }].map(l => (
+          <span key={l.label} style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+            <span style={{ width: 8, height: 8, borderRadius: 2, background: l.color, display: "inline-block" }} />
+            {l.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ─── Velocity burndown chart ─────────────────────────────────────────────────
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function VelocityChart({ tasks: _t }: { tasks: DashboardTask[] }) {
+  const DAYS_LABELS = ["L", "M", "X", "J", "V", "S", "D", "L", "M", "X", "J", "V", "S", "D"]
+  // Simulate done/open for 14 days
+  const done = DAYS_LABELS.map((_, i) => Math.max(0, Math.round(6 + pRnd(i * 13 + 7) * 8)))
+  const open = DAYS_LABELS.map((_, i) => Math.max(0, Math.round(2 + pRnd(i * 17 + 3) * 4)))
+  const maxH = Math.max(...done.map((d, i) => d + open[i])) || 1
+  const avgDone = done.reduce((s, d) => s + d, 0) / done.length
+
+  return (
+    <div className="card-body" style={{ padding: "14px 18px 12px" }}>
+      <div style={{ display: "flex", alignItems: "flex-end", gap: 4, height: 80, marginBottom: 8 }}>
+        {done.map((d, i) => {
+          const o = open[i]
+          const donePct = (d / maxH) * 100
+          const openPct = (o / maxH) * 100
+          return (
+            <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-end", gap: 2 }}>
+              <div style={{ background: C.accent, borderRadius: "2px 2px 0 0", height: `${openPct}%`, minHeight: 2 }} />
+              <div style={{ background: C.ink, borderRadius: "2px 2px 0 0", height: `${donePct}%`, minHeight: 2 }} />
+            </div>
+          )
+        })}
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: `repeat(${DAYS_LABELS.length}, 1fr)`, gap: 0, marginBottom: 8 }}>
+        {DAYS_LABELS.map((d, i) => (
+          <span key={i} style={{ textAlign: "center", fontFamily: "ui-monospace,monospace", fontSize: 9.5, color: C.ink4 }}>{d}</span>
+        ))}
+      </div>
+      <div style={{ display: "flex", gap: 14, fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: C.ink3 }}>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}><span style={{ width: 8, height: 8, borderRadius: 2, background: C.ink, display: "inline-block" }} />Cerradas</span>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}><span style={{ width: 8, height: 8, borderRadius: 2, background: C.accent, display: "inline-block" }} />Abiertas nuevas</span>
+        <span style={{ marginLeft: "auto" }}>Ø {avgDone.toFixed(1)} cerradas/día</span>
+      </div>
+    </div>
+  )
+}
+
+// ─── Card wrapper ──────────────────────────────────────────────────────────
+function Card({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
+  return <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 10, overflow: "hidden", ...style }}>{children}</div>
+}
+function CardHead({ title, subtitle, actions }: { title: string; subtitle?: string; actions?: React.ReactNode }) {
+  return (
+    <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `1px solid ${C.line2}`, gap: 12 }}>
+      <div>
+        <h3 style={{ fontWeight: 600, letterSpacing: "-0.012em", fontSize: 13.5, margin: 0, color: C.ink }}>{title}</h3>
+        {subtitle && <div style={{ fontSize: 11.5, color: C.ink3, fontFamily: "ui-monospace,monospace", marginTop: 2 }}>{subtitle}</div>}
+      </div>
+      {actions && <div style={{ display: "flex", alignItems: "center", gap: 8 }}>{actions}</div>}
+    </div>
+  )
+}
+
+// ─── KPI derivation ─────────────────────────────────────────────────────────
 function deriveTaskKPIs(tasks: DashboardTask[]) {
-  const open = tasks.filter(t => t.status !== "DONE" && t.status !== "CANCELLED").length
   const now = new Date()
   const weekEnd = new Date(now); weekEnd.setDate(now.getDate() + 7)
-  const dueThisWeek = tasks.filter(t => {
-    if (!t.dueDate) return false
-    const d = new Date(t.dueDate)
-    return d >= now && d <= weekEnd
-  }).length
-  const overdue = tasks.filter(t => {
-    if (!t.dueDate) return false
-    return new Date(t.dueDate) < now && t.status !== "DONE" && t.status !== "CANCELLED"
-  }).length
-  const done30 = tasks.filter(t => {
-    if (t.status !== "DONE") return false
-    if (!t.dueDate) return true
-    const d = new Date(t.dueDate)
-    const thirty = new Date(now); thirty.setDate(now.getDate() - 30)
-    return d >= thirty
-  }).length
-  const total30 = tasks.filter(t => {
-    if (!t.dueDate) return false
-    const d = new Date(t.dueDate)
-    const thirty = new Date(now); thirty.setDate(now.getDate() - 30)
-    return d >= thirty
-  }).length
+  const open = tasks.filter(t => t.status !== "DONE" && t.status !== "CANCELLED").length
+  const dueThisWeek = tasks.filter(t => { if (!t.dueDate) return false; const d = new Date(t.dueDate); return d >= now && d <= weekEnd }).length
+  const overdue = tasks.filter(t => { if (!t.dueDate) return false; return new Date(t.dueDate) < now && t.status !== "DONE" && t.status !== "CANCELLED" }).length
+  const done30 = tasks.filter(t => { if (t.status !== "DONE" || !t.dueDate) return t.status === "DONE"; const d = new Date(t.dueDate); const thirty = new Date(now); thirty.setDate(now.getDate() - 30); return d >= thirty }).length
+  const total30 = tasks.filter(t => { if (!t.dueDate) return false; const d = new Date(t.dueDate); const thirty = new Date(now); thirty.setDate(now.getDate() - 30); return d >= thirty }).length
   const closeRate = total30 > 0 ? (done30 / total30) * 100 : 0
-
   return { open, dueThisWeek, overdue, closeRate }
 }
 
-// ─── Main TasksView ─────────────────────────────────────────────────────────
+// ─── Main TasksView ──────────────────────────────────────────────────────────
 export function TasksView() {
   const [view, setView] = useState<ViewMode>("priority")
+  const [showKanban, setShowKanban] = useState(true)
   const [search, setSearch] = useState("")
   const [modalOpen, setModalOpen] = useState(false)
   const [defaultPriority, setDefaultPriority] = useState<TaskPriority>("MEDIUM")
@@ -207,9 +494,7 @@ export function TasksView() {
   const handleNewTask = () => {
     setDefaultPriority("MEDIUM"); setDefaultDueDate(undefined); setDefaultDueTime(undefined); setModalOpen(true)
   }
-  const handleTaskClick = (task: DashboardTask) => {
-    setEditTask(task); setModalOpen(true)
-  }
+  const handleTaskClick = (task: DashboardTask) => { setEditTask(task); setModalOpen(true) }
   const handleDayClick = (date: Date) => {
     const pad = (n: number) => String(n).padStart(2, "0")
     setDefaultPriority("MEDIUM")
@@ -219,31 +504,24 @@ export function TasksView() {
   }
 
   const kd = deriveTaskKPIs(tasks)
-
-  const VIEW_MODES: { id: ViewMode; label: string; icon: React.ReactNode }[] = [
-    { id: "priority", label: "Lista", icon: <List size={11} /> },
-    { id: "week",     label: "Semana", icon: <BarChart2 size={11} /> },
-    { id: "month",    label: "Mes", icon: <Calendar size={11} /> },
-  ]
+  const now = new Date()
+  const monthName = now.toLocaleString("es-ES", { month: "long", year: "numeric" })
+  const monthCap = monthName.charAt(0).toUpperCase() + monthName.slice(1)
+  const todayCount = tasks.filter(t => t.dueDate?.slice(0, 10) === now.toISOString().slice(0, 10) && t.status !== "DONE").length
 
   return (
     <div style={{ fontFamily: "var(--font-geist-sans, ui-sans-serif, system-ui, sans-serif)" }}>
 
       {/* ── PAGE HEADER ──────────────────────────────────── */}
-      <div style={{
-        display: "flex", justifyContent: "space-between", alignItems: "flex-end",
-        marginBottom: 24, gap: 24, paddingBottom: 18, borderBottom: `1px solid ${C.line2}`,
-      }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 24, gap: 24, paddingBottom: 18, borderBottom: `1px solid ${C.line2}` }}>
         <div>
-          <h1 style={{ fontWeight: 600, letterSpacing: "-0.022em", fontSize: 26, lineHeight: 1.1, margin: 0, color: C.ink }}>
-            Tareas y Proyectos
-          </h1>
+          <h1 style={{ fontWeight: 600, letterSpacing: "-0.022em", fontSize: 26, lineHeight: 1.1, margin: 0, color: C.ink }}>Tareas y Proyectos</h1>
           <div style={{ marginTop: 6, display: "flex", alignItems: "center", gap: 14, fontSize: 12.5, color: C.ink3 }}>
             <span>{kd.open} abiertas</span>
             <span style={{ color: C.ink5 }}>·</span>
             <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-              <span style={{ width: 6, height: 6, borderRadius: 99, background: kd.dueThisWeek > 0 ? C.warn : C.accent, boxShadow: `0 0 0 3px ${kd.dueThisWeek > 0 ? C.warnSoft : C.accentSoft}`, display: "inline-block" }} />
-              {kd.dueThisWeek} vencen esta semana
+              <span style={{ width: 6, height: 6, borderRadius: 99, background: C.accent, boxShadow: `0 0 0 3px ${C.accentSoft}`, display: "inline-block" }} />
+              {todayCount} tareas hoy
             </span>
             <span style={{ color: C.ink5 }}>·</span>
             <span style={{ color: kd.overdue > 0 ? C.red : C.ink3 }}>{kd.overdue} vencidas</span>
@@ -252,30 +530,32 @@ export function TasksView() {
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
           {/* View toggle */}
           <div style={{ display: "inline-flex", background: C.bg2, border: `1px solid ${C.line}`, borderRadius: 7, padding: 2 }}>
-            {VIEW_MODES.map(m => (
-              <button key={m.id} onClick={() => setView(m.id)} style={{
-                display: "flex", alignItems: "center", gap: 6,
-                padding: "4px 10px", borderRadius: 5,
-                fontFamily: "ui-monospace,monospace", fontSize: 11.5,
-                color: view === m.id ? C.ink : C.ink3, fontWeight: 500,
-                background: view === m.id ? "white" : "transparent",
-                boxShadow: view === m.id ? `0 0 0 1px ${C.line} inset, 0 1px 2px rgba(0,0,0,.03)` : "none",
-                border: "none", cursor: "pointer",
-              }}>
-                {m.icon}{m.label}
-              </button>
-            ))}
+            {[
+              { id: "kanban", label: "Kanban", icon: <LayoutGrid size={11} /> },
+              { id: "list",   label: "Lista",  icon: <List size={11} /> },
+              { id: "cal",    label: "Calendario", icon: <Calendar size={11} /> },
+              { id: "gantt",  label: "Gantt",  icon: <BarChart2 size={11} /> },
+            ].map(m => {
+              const isActive = m.id === "kanban" ? showKanban : (!showKanban && (m.id === "list" ? view === "priority" : m.id === "cal" ? view === "week" || view === "month" : false))
+              return (
+                <button key={m.id} onClick={() => {
+                  if (m.id === "kanban") { setShowKanban(true) }
+                  else if (m.id === "list") { setShowKanban(false); setView("priority") }
+                  else if (m.id === "cal") { setShowKanban(false); setView("week") }
+                  else { setShowKanban(false); setView("priority") }
+                }} style={{ display: "flex", alignItems: "center", gap: 5, padding: "4px 10px", borderRadius: 5, fontFamily: "ui-monospace,monospace", fontSize: 11.5, color: isActive ? C.ink : C.ink3, fontWeight: 500, background: isActive ? "white" : "transparent", boxShadow: isActive ? `0 0 0 1px ${C.line} inset, 0 1px 2px rgba(0,0,0,.03)` : "none", border: "none", cursor: "pointer" }}>
+                  {m.icon}{m.label}
+                </button>
+              )
+            })}
           </div>
-          <button style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: C.bg, border: `1px solid ${C.line}`, color: C.ink2, fontWeight: 550, fontSize: 12.5, cursor: "pointer" }}>
+          <button style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 6, background: C.bg, border: `1px solid ${C.line}`, color: C.ink2, fontWeight: 550, fontSize: 12.5, cursor: "pointer" }}>
             <Filter size={12} strokeWidth={2} />Filtrar
           </button>
-          <button style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: C.bg, border: `1px solid ${C.line}`, color: C.ink2, fontWeight: 550, fontSize: 12.5, cursor: "pointer" }}>
+          <button style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 6, background: C.bg, border: `1px solid ${C.line}`, color: C.ink2, fontWeight: 550, fontSize: 12.5, cursor: "pointer" }}>
             <Zap size={12} strokeWidth={2} />Automatizar
           </button>
-          <button
-            onClick={handleNewTask}
-            style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: C.ink, color: "white", fontWeight: 550, fontSize: 12.5, border: "none", cursor: "pointer" }}
-          >
+          <button onClick={handleNewTask} style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: C.ink, color: "white", fontWeight: 550, fontSize: 12.5, border: "none", cursor: "pointer" }}>
             <Plus size={12} strokeWidth={2.5} />Nueva tarea
           </button>
         </div>
@@ -292,41 +572,67 @@ export function TasksView() {
       {/* ── PROJECTS STRIP ───────────────────────────────── */}
       <ProjectStrip tasks={tasks} />
 
-      {/* ── TASKS TOPBAR (search + legacy controls) ───────── */}
-      <TasksTopbar
-        view={view}
-        onViewChange={setView}
-        search={search}
-        onSearchChange={setSearch}
-        onNewTask={handleNewTask}
-      />
+      {showKanban ? (
+        <>
+          {/* ── KANBAN BOARD ─────────────────────────────── */}
+          <KanbanBoard tasks={tasks} onNewTask={handleNewTask} />
 
-      {/* ── MAIN LAYOUT ───────────────────────────────────── */}
-      <div className="flex gap-4 items-start" style={{ marginTop: 16 }}>
-        <div className="flex-1 min-w-0 overflow-x-auto">
-          {view === "priority" && (
-            <PriorityView tasks={tasks} search={search} onAddTask={handleAddTask} />
-          )}
-          {view === "week" && (
-            <WeekView tasks={tasks} onTaskClick={handleTaskClick} onCellClick={handleDayClick} />
-          )}
-          {view === "month" && (
-            <MonthView tasks={tasks} onDayClick={handleDayClick} onTaskClick={handleTaskClick} />
-          )}
-        </div>
+          {/* ── BOTTOM: workload + burndown + calendar + agenda ─ */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* LEFT: workload + velocity */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <Card>
+                <CardHead title="Carga del equipo · esta semana" subtitle="Distribución de tareas por persona"
+                  actions={<a style={{ fontSize: 11.5, color: C.ink3, fontWeight: 500, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4 }}>Equipo <ExternalLink size={11} /></a>}
+                />
+                <WorkloadChart tasks={tasks} />
+              </Card>
+              <Card>
+                <CardHead title="Velocidad · últimos 14 días" subtitle="Tareas cerradas vs abiertas por día" />
+                <VelocityChart tasks={tasks} />
+              </Card>
+            </div>
 
-        {/* Right sidebar — only on large screens */}
-        <div className="hidden lg:block" style={{
-          width: 260, flexShrink: 0,
-          background: C.bg, border: `1px solid ${C.line}`,
-          borderRadius: 10, overflow: "hidden",
-          position: "sticky", top: 24,
-        }}>
-          <TasksSidebarRight tasks={tasks} />
-        </div>
-      </div>
+            {/* RIGHT: calendar + agenda */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <Card>
+                <CardHead title={monthCap} subtitle="Eventos del mes"
+                  actions={
+                    <div style={{ display: "flex", gap: 4 }}>
+                      {["‹", "›"].map(b => (
+                        <button key={b} style={{ width: 26, height: 26, borderRadius: 5, display: "grid", placeItems: "center", background: C.bg2, border: `1px solid ${C.line}`, cursor: "pointer", color: C.ink2, fontSize: 14 }}>{b}</button>
+                      ))}
+                    </div>
+                  }
+                />
+                <MiniCalendar tasks={tasks} />
+              </Card>
+              <Card>
+                <CardHead title={`Hoy · ${now.getDate()} ${now.toLocaleString("es-ES", { month: "long" })}`} subtitle={`${todayCount} tareas pendientes`}
+                  actions={<a style={{ fontSize: 11.5, color: C.ink3, fontWeight: 500, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4 }}>Agenda <ExternalLink size={11} /></a>}
+                />
+                <TodayAgenda tasks={tasks} />
+              </Card>
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          {/* ── LIST/CALENDAR VIEWS ───────────────────────── */}
+          <TasksTopbar view={view} onViewChange={setView} search={search} onSearchChange={setSearch} onNewTask={handleNewTask} />
+          <div className="flex gap-4 items-start" style={{ marginTop: 16 }}>
+            <div className="flex-1 min-w-0 overflow-x-auto">
+              {view === "priority" && <PriorityView tasks={tasks} search={search} onAddTask={handleAddTask} />}
+              {view === "week" && <WeekView tasks={tasks} onTaskClick={handleTaskClick} onCellClick={handleDayClick} />}
+              {view === "month" && <MonthView tasks={tasks} onDayClick={handleDayClick} onTaskClick={handleTaskClick} />}
+            </div>
+            <div className="hidden lg:block" style={{ width: 260, flexShrink: 0, background: C.bg, border: `1px solid ${C.line}`, borderRadius: 10, overflow: "hidden", position: "sticky", top: 24 }}>
+              <TasksSidebarRight tasks={tasks} />
+            </div>
+          </div>
+        </>
+      )}
 
-      {/* New task modal */}
       <NewTaskModal
         open={modalOpen}
         onClose={() => { setModalOpen(false); setEditTask(undefined) }}

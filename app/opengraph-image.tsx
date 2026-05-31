@@ -20,7 +20,7 @@ export default async function Image() {
           padding: "60px",
         }}
       >
-        <div style={{ fontSize: 64, fontWeight: 700, color: "#2d9b83", marginBottom: 20 }}>
+        <div style={{ fontSize: 64, fontWeight: 700, color: "#0f766e", marginBottom: 20 }}>
           ClientLabs
         </div>
         <div
@@ -40,9 +40,9 @@ export default async function Image() {
         <div
           style={{
             fontSize: 18,
-            color: "#2d9b83",
+            color: "#0f766e",
             marginTop: 20,
-            background: "rgba(45,155,131,0.15)",
+            background: "rgba(15,118,110,0.15)",
             padding: "10px 24px",
             borderRadius: 8,
           }}

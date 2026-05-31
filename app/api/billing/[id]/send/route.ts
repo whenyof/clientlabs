@@ -88,7 +88,7 @@ export async function POST(
         : ""
 
     const messageBlock = message?.trim()
-      ? `<div style="background:#f8fafc;border-left:3px solid #1FA97A;border-radius:4px;padding:16px;margin-bottom:24px;">
+      ? `<div style="background:#f8fafc;border-left:3px solid #0F766E;border-radius:4px;padding:16px;margin-bottom:24px;">
           <p style="margin:0;color:#475569;font-size:13px;font-style:italic;">"${message.trim()}"</p>
         </div>`
       : ""
@@ -106,7 +106,7 @@ export async function POST(
 <body style="margin:0;padding:0;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
   <div style="max-width:600px;margin:40px auto;background:#ffffff;border-radius:16px;border:1px solid #e2e8f0;overflow:hidden;">
     <div style="background:#0B1F2A;padding:32px 40px;">
-      <div style="color:#1FA97A;font-size:24px;font-weight:700;letter-spacing:-0.5px;">ClientLabs</div>
+      <div style="color:#0F766E;font-size:24px;font-weight:700;letter-spacing:-0.5px;">ClientLabs</div>
     </div>
     <div style="padding:40px;">
       <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#0f172a;">Tienes una nueva factura</h1>
@@ -140,12 +140,12 @@ export async function POST(
           ${irpfRow}
           <tr style="border-top:2px solid #e2e8f0;">
             <td style="padding:12px 0 6px;font-weight:700;color:#0f172a;font-size:15px;">Total a pagar</td>
-            <td style="padding:12px 0 6px;text-align:right;font-weight:700;color:#1FA97A;font-size:15px;">${fmt(total)}</td>
+            <td style="padding:12px 0 6px;text-align:right;font-weight:700;color:#0F766E;font-size:15px;">${fmt(total)}</td>
           </tr>
         </table>
       </div>
       <div style="text-align:center;margin-bottom:28px;">
-        <a href="${pdfUrl}" style="display:inline-block;background:#1FA97A;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:12px;font-weight:600;font-size:14px;">
+        <a href="${pdfUrl}" style="display:inline-block;background:#0F766E;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:12px;font-weight:600;font-size:14px;">
           Descargar factura PDF
         </a>
       </div>

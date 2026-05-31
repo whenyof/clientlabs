@@ -9,7 +9,7 @@ import { getCachedData, setCachedData } from "@/lib/redis-cache"
 import { format, subMonths, startOfMonth, endOfMonth } from "date-fns"
 import { es } from "date-fns/locale"
 
-const SRC_COLORS = ["#1FA97A", "#3B82F6", "#F59E0B", "#EF4444", "#8B5CF6", "#94A3B8"]
+const SRC_COLORS = ["#0F766E", "#3B82F6", "#F59E0B", "#EF4444", "#8B5CF6", "#94A3B8"]
 
 export async function GET() {
   try {
@@ -66,7 +66,7 @@ export async function GET() {
     const riskMap = new Map<string, number>()
     all.forEach(c => riskMap.set(c.riskLevel ?? "LOW", (riskMap.get(c.riskLevel ?? "LOW") ?? 0) + 1))
     const RISK_META: Record<string, { label: string; color: string }> = {
-      LOW:      { label: "Bajo",    color: "#1FA97A" },
+      LOW:      { label: "Bajo",    color: "#0F766E" },
       MEDIUM:   { label: "Medio",   color: "#F59E0B" },
       HIGH:     { label: "Alto",    color: "#EF4444" },
       CRITICAL: { label: "Crítico", color: "#7C3AED" },

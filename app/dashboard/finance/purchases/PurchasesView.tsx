@@ -59,7 +59,7 @@ export function PurchasesView({ initialSales }: Props) {
               className={cn(
                 "text-[11px] px-3 py-1.5 rounded-lg border transition-colors",
                 activeFilter === f
-                  ? "bg-[#1FA97A] text-white border-[#1FA97A]"
+                  ? "bg-[#0F766E] text-white border-[#0F766E]"
                   : "border-slate-200 text-slate-600 hover:bg-slate-50"
               )}
             >

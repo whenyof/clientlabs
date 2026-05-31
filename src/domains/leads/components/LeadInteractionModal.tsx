@@ -12,7 +12,7 @@ interface LeadInteractionModalProps {
 }
 
 const TYPES = [
-  { value: "CALL",      label: "Llamada",   Icon: Phone,          color: "#1FA97A" },
+  { value: "CALL",      label: "Llamada",   Icon: Phone,          color: "#0F766E" },
   { value: "EMAIL",     label: "Email",     Icon: Mail,           color: "#378ADD" },
   { value: "MEETING",   label: "Reunión",   Icon: Video,          color: "#8B5CF6" },
   { value: "WHATSAPP",  label: "WhatsApp",  Icon: MessageCircle,  color: "#22C55E" },
@@ -81,7 +81,7 @@ export function LeadInteractionModal({ open, onClose, leadId, onSuccess }: LeadI
               background: "#F0FDF8", border: "0.5px solid #BBF7D0",
               display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
             }}>
-              <Phone style={{ width: 16, height: 16, color: "#1FA97A" }} />
+              <Phone style={{ width: 16, height: 16, color: "#0F766E" }} />
             </div>
             <div>
               <h2 style={{ fontSize: 15, fontWeight: 600, color: "var(--text-primary)", margin: 0, lineHeight: 1.3 }}>
@@ -153,7 +153,7 @@ export function LeadInteractionModal({ open, onClose, leadId, onSuccess }: LeadI
                 outline: "none", boxSizing: "border-box",
                 fontFamily: "inherit",
               }}
-              onFocus={(e) => { e.currentTarget.style.borderColor = "#1FA97A" }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = "#0F766E" }}
               onBlur={(e) => { e.currentTarget.style.borderColor = "var(--border-subtle)" }}
             />
           </div>
@@ -183,7 +183,7 @@ export function LeadInteractionModal({ open, onClose, leadId, onSuccess }: LeadI
             style={{
               display: "inline-flex", alignItems: "center", gap: 6,
               padding: "7px 20px", borderRadius: 6, fontSize: 13, fontWeight: 600,
-              background: "#1FA97A", color: "#fff", border: "none", cursor: "pointer",
+              background: "#0F766E", color: "#fff", border: "none", cursor: "pointer",
               opacity: submitting || !type ? 0.45 : 1, transition: "opacity 0.12s",
             }}
           >

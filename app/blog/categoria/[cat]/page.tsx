@@ -93,7 +93,7 @@ export default async function CategoryPage({ params: paramsPromise }: Props) {
         </p>
         <Link
           href="/blog"
-          className="mt-6 inline-block text-[13px] text-[#1FA97A] hover:underline"
+          className="mt-6 inline-block text-[13px] text-[#0F766E] hover:underline"
         >
           Ver todos los artículos
         </Link>
@@ -126,7 +126,7 @@ export default async function CategoryPage({ params: paramsPromise }: Props) {
                   </span>
                 </div>
                 <div className="p-4 flex flex-col flex-1">
-                  <h2 className="text-[14px] font-semibold text-white leading-snug mb-2 group-hover:text-[#1FA97A] transition-colors line-clamp-2">
+                  <h2 className="text-[14px] font-semibold text-white leading-snug mb-2 group-hover:text-[#0F766E] transition-colors line-clamp-2">
                     {post.title}
                   </h2>
                   <p className="text-slate-400 text-[12px] leading-relaxed mb-4 flex-1 line-clamp-3">

@@ -320,8 +320,8 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
 
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "20px 24px", borderBottom: "1px solid var(--border-subtle)" }}>
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: "#1FA97A15", border: "1px solid #1FA97A25", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <CheckSquare style={{ width: 16, height: 16, color: "#1FA97A" }} />
+          <div style={{ width: 36, height: 36, borderRadius: 10, background: "#0F766E15", border: "1px solid #0F766E25", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <CheckSquare style={{ width: 16, height: 16, color: "#0F766E" }} />
           </div>
           <div style={{ flex: 1 }}>
             <DialogTitle style={{ fontSize: 15, fontWeight: 600, margin: 0, color: "var(--text-primary)", lineHeight: 1.2 }}>
@@ -409,13 +409,13 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
                     <label key={m.id} style={{
                       display: "flex", alignItems: "center", gap: 10, padding: "8px 10px",
                       borderRadius: 8, cursor: "pointer",
-                      border: isSelected ? "1px solid #1FA97A" : "1px solid var(--border-subtle)",
-                      background: isSelected ? "#1FA97A10" : "var(--bg-card)",
+                      border: isSelected ? "1px solid #0F766E" : "1px solid var(--border-subtle)",
+                      background: isSelected ? "#0F766E10" : "var(--bg-card)",
                       transition: "all 0.12s",
                     }}>
                       <input
                         type="checkbox" checked={isSelected} onChange={() => toggleAssignee(m.id)}
-                        style={{ width: 14, height: 14, accentColor: "#1FA97A", cursor: "pointer", flexShrink: 0 }}
+                        style={{ width: 14, height: 14, accentColor: "#0F766E", cursor: "pointer", flexShrink: 0 }}
                       />
                       <div style={{
                         width: 24, height: 24, borderRadius: "50%", flexShrink: 0,
@@ -498,7 +498,7 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
             <button
               type="button"
               onClick={() => setShowMeeting(prev => !prev)}
-              style={{ display: "flex", alignItems: "center", gap: 8, background: "none", border: "none", cursor: "pointer", padding: "6px 0", color: showMeeting ? "#1FA97A" : "var(--text-secondary)", fontSize: 13, fontWeight: showMeeting ? 600 : 400 }}
+              style={{ display: "flex", alignItems: "center", gap: 8, background: "none", border: "none", cursor: "pointer", padding: "6px 0", color: showMeeting ? "#0F766E" : "var(--text-secondary)", fontSize: 13, fontWeight: showMeeting ? 600 : 400 }}
             >
               <Video style={{ width: 14, height: 14 }} />
               {showMeeting ? "Quitar reunión" : "Añadir link de reunión"}
@@ -510,7 +510,7 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
                 {/* Tipo */}
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                   {[
-                    { id: "google_meet", label: "Google Meet", dot: "#1FA97A" },
+                    { id: "google_meet", label: "Google Meet", dot: "#0F766E" },
                     { id: "zoom", label: "Zoom", dot: "#2D8CFF" },
                     { id: "teams", label: "Teams", dot: "#7B5EA7" },
                     { id: "other", label: "Otro", dot: "#94A3B8" },
@@ -589,7 +589,7 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
                 Cancelar
               </button>
               <button type="button" onClick={() => createMutation.mutate()} disabled={!title.trim() || createMutation.isPending}
-                style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "9px 22px", background: "#1FA97A", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, color: "#fff", cursor: "pointer", opacity: !title.trim() || createMutation.isPending ? 0.45 : 1, transition: "opacity 0.12s" }}>
+                style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "9px 22px", background: "#0F766E", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, color: "#fff", cursor: "pointer", opacity: !title.trim() || createMutation.isPending ? 0.45 : 1, transition: "opacity 0.12s" }}>
                 {createMutation.isPending && <Loader2 style={{ width: 14, height: 14 }} className="animate-spin" />}
                 {editTask ? "Guardar cambios" : "Crear tarea"}
               </button>

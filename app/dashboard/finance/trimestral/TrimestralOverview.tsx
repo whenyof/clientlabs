@@ -82,8 +82,8 @@ function StatusBadge({ status, daysLeft }: { status: QuarterStatus; daysLeft: nu
   }
   if (status === "active") {
     return (
-      <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md bg-[#1FA97A]/10 text-[#1FA97A] uppercase tracking-wide">
-        <span className="h-1.5 w-1.5 rounded-full bg-[#1FA97A] animate-pulse inline-block" />
+      <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md bg-[#0F766E]/10 text-[#0F766E] uppercase tracking-wide">
+        <span className="h-1.5 w-1.5 rounded-full bg-[#0F766E] animate-pulse inline-block" />
         En curso
       </span>
     )
@@ -165,7 +165,7 @@ export function TrimestralOverview({ userId }: Props) {
           const isDisabled = status === "pending"
           const cardClass = cn(
             "rounded-xl border bg-white p-5 flex flex-col gap-4 transition-shadow",
-            status === "active" && "border-[#1FA97A]/30 shadow-[0_0_0_1px_#1FA97A20]",
+            status === "active" && "border-[#0F766E]/30 shadow-[0_0_0_1px_#0F766E20]",
             status === "deadline-soon" && "border-amber-200",
             status === "closed" && "border-slate-100 bg-slate-50/50",
             status === "pending" && "border-slate-100 bg-slate-50/30 opacity-60",
@@ -197,7 +197,7 @@ export function TrimestralOverview({ userId }: Props) {
                   ) : ivaResult !== null ? (
                     <span className={cn(
                       "text-[13px] font-semibold tabular-nums",
-                      ivaResult > 0 ? "text-red-600" : ivaResult < 0 ? "text-[#1FA97A]" : "text-slate-400"
+                      ivaResult > 0 ? "text-red-600" : ivaResult < 0 ? "text-[#0F766E]" : "text-slate-400"
                     )}>
                       {fmt(ivaResult)}
                     </span>
@@ -237,7 +237,7 @@ export function TrimestralOverview({ userId }: Props) {
                   className={cn(
                     "mt-auto flex items-center justify-center gap-1.5 text-[12px] font-semibold h-8 rounded-lg transition-colors",
                     status === "active" || status === "deadline-soon"
-                      ? "bg-[#1FA97A] hover:bg-[#178a64] text-white"
+                      ? "bg-[#0F766E] hover:bg-[#0E665F] text-white"
                       : "border border-slate-200 text-slate-600 hover:bg-slate-50"
                   )}
                 >
@@ -251,8 +251,8 @@ export function TrimestralOverview({ userId }: Props) {
       </div>
 
       {/* Info box */}
-      <div className="rounded-xl border border-[#1FA97A]/20 bg-emerald-50/50 p-4 flex items-start gap-3">
-        <Clock className="h-4 w-4 text-[#1FA97A] shrink-0 mt-0.5" aria-hidden />
+      <div className="rounded-xl border border-[#0F766E]/20 bg-emerald-50/50 p-4 flex items-start gap-3">
+        <Clock className="h-4 w-4 text-[#0F766E] shrink-0 mt-0.5" aria-hidden />
         <div>
           <p className="text-[12px] font-medium text-slate-700 mb-0.5">Plazos de presentacion</p>
           <p className="text-[12px] text-slate-500">

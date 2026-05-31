@@ -12,7 +12,7 @@ import { toast } from "sonner"
 /* ── Status badges ── */
 
 const STATUS_CONFIG: Record<string, { label: string; bg: string; color: string; border: string; dot: string }> = {
-  NEW: { label: "Nuevo", bg: "#E1F5EE", color: "#0F6E56", border: "#9FE1CB", dot: "#1FA97A" },
+  NEW: { label: "Nuevo", bg: "#E1F5EE", color: "#0F6E56", border: "#9FE1CB", dot: "#0F766E" },
   CONTACTED: { label: "Contactado", bg: "#E6F1FB", color: "#185FA5", border: "#B5D4F4", dot: "#378ADD" },
   QUALIFIED: { label: "Cualificado", bg: "#FAEEDA", color: "#854F0B", border: "#FAC775", dot: "#EF9F27" },
   INTERESTED: { label: "Interesado", bg: "#FAEEDA", color: "#854F0B", border: "#FAC775", dot: "#EF9F27" },
@@ -72,7 +72,7 @@ function ScoreBar({ score }: { score: number }) {
   let barColor: string
   let numColor: string
   if (score >= 60) {
-    barColor = "#1FA97A"; numColor = "#0F6E56"
+    barColor = "#0F766E"; numColor = "#0F6E56"
   } else if (score >= 30) {
     barColor = "#EF9F27"; numColor = "#854F0B"
   } else {

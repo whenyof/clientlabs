@@ -77,13 +77,13 @@ function EventIcon({ type }: { type: string }) {
     case "page_view":
       return <Eye style={{ width: 14, height: 14, color: "#378ADD", flexShrink: 0 }} />
     case "cta_click":
-      return <MousePointer2 style={{ width: 14, height: 14, color: "#1FA97A", flexShrink: 0 }} />
+      return <MousePointer2 style={{ width: 14, height: 14, color: "#0F766E", flexShrink: 0 }} />
     case "add_to_cart":
       return <ShoppingCart style={{ width: 14, height: 14, color: "#EF9F27", flexShrink: 0 }} />
     case "payment_completed":
-      return <CreditCard style={{ width: 14, height: 14, color: "#1FA97A", flexShrink: 0 }} />
+      return <CreditCard style={{ width: 14, height: 14, color: "#0F766E", flexShrink: 0 }} />
     case "demo_request":
-      return <Zap style={{ width: 14, height: 14, color: "#1FA97A", flexShrink: 0 }} />
+      return <Zap style={{ width: 14, height: 14, color: "#0F766E", flexShrink: 0 }} />
     case "form_submit":
     case "email_capture":
     case "EMAIL":
@@ -91,7 +91,7 @@ function EventIcon({ type }: { type: string }) {
     case "NOTE":
       return <StickyNote style={{ width: 14, height: 14, color: "#EF9F27", flexShrink: 0 }} />
     case "CALL":
-      return <Phone style={{ width: 14, height: 14, color: "#1FA97A", flexShrink: 0 }} />
+      return <Phone style={{ width: 14, height: 14, color: "#0F766E", flexShrink: 0 }} />
     case "MEETING":
       return <Video style={{ width: 14, height: 14, color: "#8B5CF6", flexShrink: 0 }} />
     case "WHATSAPP":
@@ -247,7 +247,7 @@ export function LeadTimeline({ leadId, createdAt, refreshTrigger = 0 }: LeadTime
                 <div style={{ display: "flex", gap: 10, alignItems: "flex-start", padding: "10px 0" }}>
                   <div style={{
                     width: 8, height: 8, borderRadius: "50%", flexShrink: 0, marginTop: 4,
-                    background: POSITIVE_EVENTS.has(event.type) ? "#1FA97A" : "var(--border-main)",
+                    background: POSITIVE_EVENTS.has(event.type) ? "#0F766E" : "var(--border-main)",
                   }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
@@ -282,7 +282,7 @@ export function LeadTimeline({ leadId, createdAt, refreshTrigger = 0 }: LeadTime
                     display: "flex", alignItems: "center", gap: 6,
                     width: "100%", padding: "10px 0",
                     background: "none", border: "none", cursor: "pointer",
-                    fontSize: 12, fontWeight: 500, color: "#1FA97A",
+                    fontSize: 12, fontWeight: 500, color: "#0F766E",
                   }}
                 >
                   {expanded

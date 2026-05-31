@@ -30,7 +30,7 @@ export function UpgradeWall({ feature, requiredPlan, children }: UpgradeWallProp
         </p>
         <Link
           href="/precios"
-          className="inline-flex items-center gap-2 rounded-full bg-[#1FA97A] px-6 py-3 text-sm font-semibold text-white shadow-lg hover:bg-[#178f68] transition-colors"
+          className="inline-flex items-center gap-2 rounded-full bg-[#0F766E] px-6 py-3 text-sm font-semibold text-white shadow-lg hover:bg-[#0E665F] transition-colors"
         >
           Ver planes y precios
         </Link>

@@ -21,7 +21,7 @@ export function InvoiceKPIs({ kpis, loading }: InvoiceKPIsProps) {
       label: "Cobrado en el mes",
       Icon: CheckCircle,
       value: kpis ? formatCurrency(kpis.paidThisMonth) : "—",
-      valueClass: "text-[#1FA97A]",
+      valueClass: "text-[#0F766E]",
     },
     {
       label: "Vencidas",
@@ -47,7 +47,7 @@ export function InvoiceKPIs({ kpis, loading }: InvoiceKPIsProps) {
         return (
           <div
             key={item.label}
-            className="bg-white border border-slate-200 rounded-xl p-4 hover:border-[#1FA97A]/40 hover:shadow-[0_2px_12px_rgba(31,169,122,0.06)] transition-all duration-200"
+            className="bg-white border border-slate-200 rounded-xl p-4 hover:border-[#0F766E]/40 hover:shadow-[0_2px_12px_rgba(15,118,110,0.06)] transition-all duration-200"
           >
             <div className="flex items-center justify-between mb-3">
               <span className="text-[11px] uppercase tracking-[0.08em] font-medium text-slate-500">

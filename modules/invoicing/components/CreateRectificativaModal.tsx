@@ -202,7 +202,7 @@ export function CreateRectificativaModal({
                 <label htmlFor="rect-reason" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Motivo <span className="text-red-500">*</span></label>
                 <textarea id="rect-reason" value={reason} onChange={(e) => setReason(e.target.value)} required rows={3}
                   placeholder="Ej.: Error en importe de IVA, devolución total..."
-                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-[#1FA97A] focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/20 transition-colors" />
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-colors" />
               </div>
             </>
           ) : (
@@ -238,10 +238,10 @@ export function CreateRectificativaModal({
                     const { total } = computeLine(line)
                     return (
                       <div key={i} className="grid grid-cols-12 gap-1.5 items-center">
-                        <input className="col-span-4 rounded-lg border border-slate-200 px-2 py-1.5 text-sm focus:border-[#1FA97A] focus:outline-none" placeholder="Concepto" value={line.description} onChange={(e) => updateLine(i, "description", e.target.value)} />
-                        <input type="number" step="0.01" className="col-span-2 rounded-lg border border-slate-200 px-2 py-1.5 text-sm text-right placeholder-slate-300 focus:border-[#1FA97A] focus:outline-none" placeholder="0" value={line.unitPrice || ""} onChange={(e) => updateLine(i, "unitPrice", e.target.value)} />
-                        <input type="number" step="1" min="0" max="100" className="col-span-2 rounded-lg border border-slate-200 px-2 py-1.5 text-sm text-right focus:border-[#1FA97A] focus:outline-none" placeholder="IVA %" value={line.taxPercent} onChange={(e) => updateLine(i, "taxPercent", e.target.value)} />
-                        <input type="number" step="1" min="0.01" className="col-span-2 rounded-lg border border-slate-200 px-2 py-1.5 text-sm text-right placeholder-slate-300 focus:border-[#1FA97A] focus:outline-none" placeholder="1" value={line.quantity || ""} onChange={(e) => updateLine(i, "quantity", e.target.value)} />
+                        <input className="col-span-4 rounded-lg border border-slate-200 px-2 py-1.5 text-sm focus:border-[#0F766E] focus:outline-none" placeholder="Concepto" value={line.description} onChange={(e) => updateLine(i, "description", e.target.value)} />
+                        <input type="number" step="0.01" className="col-span-2 rounded-lg border border-slate-200 px-2 py-1.5 text-sm text-right placeholder-slate-300 focus:border-[#0F766E] focus:outline-none" placeholder="0" value={line.unitPrice || ""} onChange={(e) => updateLine(i, "unitPrice", e.target.value)} />
+                        <input type="number" step="1" min="0" max="100" className="col-span-2 rounded-lg border border-slate-200 px-2 py-1.5 text-sm text-right focus:border-[#0F766E] focus:outline-none" placeholder="IVA %" value={line.taxPercent} onChange={(e) => updateLine(i, "taxPercent", e.target.value)} />
+                        <input type="number" step="1" min="0.01" className="col-span-2 rounded-lg border border-slate-200 px-2 py-1.5 text-sm text-right placeholder-slate-300 focus:border-[#0F766E] focus:outline-none" placeholder="1" value={line.quantity || ""} onChange={(e) => updateLine(i, "quantity", e.target.value)} />
                         <div className="col-span-1 text-right text-sm font-medium text-slate-700">{fmt(total, currency)}</div>
                         {rectLines.length > 1 && (
                           <button type="button" onClick={() => setRectLines((p) => p.filter((_, idx) => idx !== i))} className="col-span-1 flex justify-center text-slate-300 hover:text-red-500 transition-colors">
@@ -253,7 +253,7 @@ export function CreateRectificativaModal({
                   })}
                 </div>
                 <button type="button" onClick={() => setRectLines((p) => [...p, { description: "", quantity: 0, unitPrice: 0, taxPercent: 21 }])}
-                  className="mt-2 inline-flex items-center gap-1 text-xs text-[#1FA97A] hover:text-[#178a64] transition-colors">
+                  className="mt-2 inline-flex items-center gap-1 text-xs text-[#0F766E] hover:text-[#0E665F] transition-colors">
                   <PlusIcon className="h-3.5 w-3.5" /> Añadir línea
                 </button>
               </div>

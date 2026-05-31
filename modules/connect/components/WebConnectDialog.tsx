@@ -381,7 +381,7 @@ export function WebConnectDialog({ open, onOpenChange }: WebConnectDialogProps) 
                                                 ? "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
                                                 : isError
                                                     ? "bg-amber-100 text-amber-700 hover:bg-amber-200"
-                                                    : "bg-[#1FA97A] text-white hover:bg-[#178f68]"
+                                                    : "bg-[#0F766E] text-white hover:bg-[#0E665F]"
                                         )}
                                     >
                                         {isConnected ? 'Gestionar' : isError ? 'Revisar' : 'Conectar'}
@@ -492,7 +492,7 @@ export function WebConnectDialog({ open, onOpenChange }: WebConnectDialogProps) 
                                         <Button
                                             size="sm"
                                             onClick={() => { setSelectedKey(key); setStep("script"); }}
-                                            className="text-xs h-8 rounded-lg px-4 bg-[#1FA97A] text-white hover:bg-[#157A5C] border-0"
+                                            className="text-xs h-8 rounded-lg px-4 bg-[#0F766E] text-white hover:bg-[#157A5C] border-0"
                                         >
                                             <Code className="h-3 w-3 mr-2" /> Script
                                         </Button>
@@ -644,7 +644,7 @@ export function WebConnectDialog({ open, onOpenChange }: WebConnectDialogProps) 
                                             "flex-1 h-12 rounded-xl text-sm font-bold transition-all shadow-md active:scale-[0.98]",
                                             copied
                                                 ? "bg-emerald-500 text-white"
-                                                : "bg-[#0B1F2A] text-white hover:bg-slate-800 disabled:opacity-50 disabled:pointer-events-none"
+                                                : "bg-[#0a0a0a] text-white hover:bg-slate-800 disabled:opacity-50 disabled:pointer-events-none"
                                         )}
                                     >
                                         {copied ? <><Check className="h-4 w-4 mr-2" /> Copiado</> : <><Copy className="h-4 w-4 mr-2" /> Copiar Script</>}
@@ -778,7 +778,7 @@ export function WebConnectDialog({ open, onOpenChange }: WebConnectDialogProps) 
                             <p className="text-xs text-slate-500 mb-3">Aún no tienes ninguna API Key generada</p>
                             <button
                                 onClick={() => setStep("manage")}
-                                className="text-xs font-medium text-[#1FA97A] hover:underline"
+                                className="text-xs font-medium text-[#0F766E] hover:underline"
                             >
                                 Generar API Key →
                             </button>

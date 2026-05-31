@@ -16,7 +16,7 @@ const SOURCE_LABEL: Record<string, string> = {
   GOOGLE_ADS: "Google Ads", LINKEDIN: "LinkedIn", TIKTOK: "TikTok",
   ZAPIER: "Zapier", FORM: "Formulario", STRIPE: "Stripe", WEB_FORM: "Formulario web",
 }
-const PALETTE = ["#1FA97A","#3B82F6","#F59E0B","#EF4444","#8B5CF6","#06B6D4","#EC4899","#14B8A6","#F97316","#84CC16"]
+const PALETTE = ["#0F766E","#3B82F6","#F59E0B","#EF4444","#8B5CF6","#06B6D4","#EC4899","#14B8A6","#F97316","#84CC16"]
 const srcLabel = (s: string) => SOURCE_LABEL[s.toUpperCase()] ?? s
 const srcColor = (i: number) => PALETTE[i % PALETTE.length]
 
@@ -144,7 +144,7 @@ export function AnalyticsView({
 
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KpiCard label="Leads captados" value={totalLeads30d} sub="últimos 30 días" icon={Users} accent="#1FA97A" />
+        <KpiCard label="Leads captados" value={totalLeads30d} sub="últimos 30 días" icon={Users} accent="#0F766E" />
         <KpiCard label="Sesiones web" value={sessions.toLocaleString("es-ES")} sub="script de seguimiento" icon={MousePointerClick} accent="#3B82F6" />
         <KpiCard label="Convertidos" value={convertedCount} sub={`${conversionRate}% tasa conversión`} icon={TrendingUp} accent="#F59E0B" />
         <KpiCard label="Eventos SDK" value={totalEvents.toLocaleString("es-ES")} sub={`${sdkInstallations.length} dominio${sdkInstallations.length !== 1 ? "s" : ""}`} icon={Globe} accent="#8B5CF6" />
@@ -262,7 +262,7 @@ export function AnalyticsView({
             <div key={ch.key} className="flex items-center justify-between px-5 py-3 hover:bg-[#FAFCFD] transition-colors">
               <div className="flex items-center gap-3">
                 {ch.connected
-                  ? <CheckCircle2 className="w-4 h-4 text-[#1FA97A] flex-shrink-0" />
+                  ? <CheckCircle2 className="w-4 h-4 text-[#0F766E] flex-shrink-0" />
                   : <XCircle className="w-4 h-4 text-[#C8D6E0] flex-shrink-0" />}
                 <div>
                   <p className="text-sm font-medium text-[#0B1F2A]">{ch.label}</p>
@@ -271,8 +271,8 @@ export function AnalyticsView({
               </div>
               <div className="flex items-center gap-3">
                 {ch.connected ? (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#1FA97A] bg-[#E8F5EF] px-2 py-0.5 rounded-full">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#1FA97A]" /> Activo
+                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#0F766E] bg-[#E8F5EF] px-2 py-0.5 rounded-full">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#0F766E]" /> Activo
                   </span>
                 ) : (
                   <span className="text-[10px] font-semibold text-[#8FA6B2] bg-[#F4F7F9] px-2 py-0.5 rounded-full">Sin conectar</span>

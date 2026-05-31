@@ -66,7 +66,7 @@ export function ImportarDocumento({ tipo, onImportado }: Props) {
     return (
       <div className="flex flex-col items-center justify-center py-10 gap-3">
         <div className="w-12 h-12 rounded-full bg-[#E1F5EE] flex items-center justify-center">
-          <CheckCircle className="h-6 w-6 text-[#1FA97A]" />
+          <CheckCircle className="h-6 w-6 text-[#0F766E]" />
         </div>
         <p className="text-[14px] font-semibold text-slate-800">Documento importado</p>
         <p className="text-[12px] text-slate-400">Ya aparece en tu registro</p>
@@ -85,9 +85,9 @@ export function ImportarDocumento({ tipo, onImportado }: Props) {
         className={cn(
           "border-2 border-dashed rounded-2xl p-8 text-center transition-all cursor-pointer",
           dragOver
-            ? "border-[#1FA97A] bg-[#E1F5EE]/30"
+            ? "border-[#0F766E] bg-[#E1F5EE]/30"
             : archivo
-            ? "border-[#1FA97A]/50 bg-[#E1F5EE]/10"
+            ? "border-[#0F766E]/50 bg-[#E1F5EE]/10"
             : "border-slate-200 hover:border-slate-300 hover:bg-slate-50"
         )}
       >
@@ -102,7 +102,7 @@ export function ImportarDocumento({ tipo, onImportado }: Props) {
         {archivo ? (
           <div className="flex flex-col items-center gap-2">
             <div className="w-12 h-12 rounded-xl bg-[#E1F5EE] flex items-center justify-center">
-              <FileText className="h-6 w-6 text-[#1FA97A]" />
+              <FileText className="h-6 w-6 text-[#0F766E]" />
             </div>
             <p className="text-[13px] font-semibold text-slate-800">{archivo.name}</p>
             <p className="text-[11px] text-slate-400">{(archivo.size / 1024).toFixed(0)} KB</p>
@@ -136,7 +136,7 @@ export function ImportarDocumento({ tipo, onImportado }: Props) {
             value={form.numero}
             onChange={(e) => setForm((f) => ({ ...f, numero: e.target.value }))}
             placeholder="FAC-2026-001"
-            className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-[#1FA97A]"
+            className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-[#0F766E]"
           />
         </div>
         <div>
@@ -147,7 +147,7 @@ export function ImportarDocumento({ tipo, onImportado }: Props) {
             type="date"
             value={form.fecha}
             onChange={(e) => setForm((f) => ({ ...f, fecha: e.target.value }))}
-            className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-[#1FA97A]"
+            className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-[#0F766E]"
           />
         </div>
         <div>
@@ -158,7 +158,7 @@ export function ImportarDocumento({ tipo, onImportado }: Props) {
             value={form.clienteProveedor}
             onChange={(e) => setForm((f) => ({ ...f, clienteProveedor: e.target.value }))}
             placeholder="Nombre empresa"
-            className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-[#1FA97A]"
+            className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-[#0F766E]"
           />
         </div>
         <div>
@@ -170,7 +170,7 @@ export function ImportarDocumento({ tipo, onImportado }: Props) {
             value={form.importe}
             onChange={(e) => setForm((f) => ({ ...f, importe: e.target.value }))}
             placeholder="0.00"
-            className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-[#1FA97A]"
+            className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-[#0F766E]"
           />
         </div>
         <div>
@@ -181,7 +181,7 @@ export function ImportarDocumento({ tipo, onImportado }: Props) {
             value={form.concepto}
             onChange={(e) => setForm((f) => ({ ...f, concepto: e.target.value }))}
             placeholder="Descripción breve"
-            className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-[#1FA97A]"
+            className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-[#0F766E]"
           />
         </div>
         <div>
@@ -191,7 +191,7 @@ export function ImportarDocumento({ tipo, onImportado }: Props) {
           <select
             value={form.estadoPago}
             onChange={(e) => setForm((f) => ({ ...f, estadoPago: e.target.value }))}
-            className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-[13px] outline-none bg-white focus:border-[#1FA97A]"
+            className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-[13px] outline-none bg-white focus:border-[#0F766E]"
           >
             <option value="pendiente">Pendiente</option>
             <option value="pagada">Pagada / Cobrada</option>
@@ -214,7 +214,7 @@ export function ImportarDocumento({ tipo, onImportado }: Props) {
         className={cn(
           "w-full py-3 rounded-xl text-[13px] font-semibold flex items-center justify-center gap-2 transition-colors",
           archivo && estado !== "loading"
-            ? "bg-[#1FA97A] text-white hover:bg-[#1a9068]"
+            ? "bg-[#0F766E] text-white hover:bg-[#0E665F]"
             : "bg-slate-100 text-slate-400 cursor-not-allowed"
         )}
       >

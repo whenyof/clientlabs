@@ -84,13 +84,13 @@ export function DatePickerField({ value, onChange }: DatePickerFieldProps) {
       <button ref={btnRef} type="button" onClick={handleOpen} style={{
         display: "flex", alignItems: "center", gap: 8, width: "100%",
         padding: "9px 12px", background: "var(--bg-card)",
-        border: `1px solid ${open ? "#1FA97A" : "var(--border-subtle)"}`,
+        border: `1px solid ${open ? "#0F766E" : "var(--border-subtle)"}`,
         borderRadius: 8, cursor: "pointer", textAlign: "left",
         color: selected ? "var(--text-primary)" : "var(--text-secondary)",
         fontSize: 13, transition: "border-color 0.15s",
         boxSizing: "border-box",
       }}>
-        <Calendar style={{ width: 14, height: 14, flexShrink: 0, color: selected ? "#1FA97A" : "var(--text-secondary)" }} />
+        <Calendar style={{ width: 14, height: 14, flexShrink: 0, color: selected ? "#0F766E" : "var(--text-secondary)" }} />
         <span style={{ flex: 1 }}>{displayText}</span>
         {selected && (
           <X style={{ width: 12, height: 12, color: "var(--text-secondary)", flexShrink: 0 }}
@@ -140,9 +140,9 @@ export function DatePickerField({ value, onChange }: DatePickerFieldProps) {
               const isWeekend = i % 7 >= 5
               return (
                 <button key={i} type="button" onClick={() => handleSelect(day)} style={{
-                  height: 28, borderRadius: 6, border: isSel ? "none" : isToday ? "1px solid #1FA97A40" : "1px solid transparent",
-                  background: isSel ? "#1FA97A" : isToday ? "#1FA97A0D" : "transparent",
-                  color: isSel ? "#fff" : isToday ? "#1FA97A" : isWeekend && isCurrent ? "#94a3b8" : isCurrent ? "var(--text-primary)" : "#cbd5e1",
+                  height: 28, borderRadius: 6, border: isSel ? "none" : isToday ? "1px solid #0F766E40" : "1px solid transparent",
+                  background: isSel ? "#0F766E" : isToday ? "#0F766E0D" : "transparent",
+                  color: isSel ? "#fff" : isToday ? "#0F766E" : isWeekend && isCurrent ? "#94a3b8" : isCurrent ? "var(--text-primary)" : "#cbd5e1",
                   fontSize: 12, fontWeight: isSel || isToday ? 600 : 400,
                   cursor: "pointer", transition: "background 0.1s",
                 }}>
@@ -155,7 +155,7 @@ export function DatePickerField({ value, onChange }: DatePickerFieldProps) {
           {/* Footer */}
           <div style={{ marginTop: 8, paddingTop: 8, borderTop: "1px solid var(--border-subtle)", display: "flex", justifyContent: "space-between" }}>
             <button type="button" onClick={() => handleSelect(new Date())} style={{
-              fontSize: 12, color: "#1FA97A", background: "none", border: "none", cursor: "pointer", fontWeight: 500, padding: 0
+              fontSize: 12, color: "#0F766E", background: "none", border: "none", cursor: "pointer", fontWeight: 500, padding: 0
             }}>
               Hoy
             </button>

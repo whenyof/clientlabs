@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma"
 export const dynamic = "force-dynamic"
 
 const DEFAULT_STAGES = [
-  { name: "Nuevo", order: 0, color: "#1FA97A" },
+  { name: "Nuevo", order: 0, color: "#0F766E" },
   { name: "Contactado", order: 1, color: "#3B82F6" },
   { name: "Calificado", order: 2, color: "#D9A441" },
   { name: "Negociando", order: 3, color: "#8B5CF6" },

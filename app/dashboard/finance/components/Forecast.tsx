@@ -43,11 +43,11 @@ export function Forecast() {
         <div className="rounded-lg bg-slate-50 border border-slate-100 px-3 py-2.5">
           <div className="flex items-center gap-1 mb-1">
             {profitPositive
-              ? <TrendingUp className="h-3 w-3 text-[#1FA97A]" />
+              ? <TrendingUp className="h-3 w-3 text-[#0F766E]" />
               : <TrendingDown className="h-3 w-3 text-red-500" />}
             <span className="text-[9px] font-semibold uppercase tracking-[0.08em] text-slate-400">Este mes</span>
           </div>
-          <p className={`text-[15px] font-bold tabular-nums leading-none ${profitPositive ? "text-[#1FA97A]" : "text-red-500"}`}>
+          <p className={`text-[15px] font-bold tabular-nums leading-none ${profitPositive ? "text-[#0F766E]" : "text-red-500"}`}>
             {formatCurrency(netProfit)}
           </p>
           <p className="text-[9px] text-slate-400 mt-0.5">beneficio neto</p>
@@ -58,11 +58,11 @@ export function Forecast() {
             <>
               <div className="flex items-center gap-1 mb-1">
                 {nextPositive
-                  ? <TrendingUp className="h-3 w-3 text-[#1FA97A]" />
+                  ? <TrendingUp className="h-3 w-3 text-[#0F766E]" />
                   : <TrendingDown className="h-3 w-3 text-red-500" />}
                 <span className="text-[9px] font-semibold uppercase tracking-[0.08em] text-slate-400">Próximo</span>
               </div>
-              <p className={`text-[15px] font-bold tabular-nums leading-none ${nextPositive ? "text-[#1FA97A]" : "text-red-500"}`}>
+              <p className={`text-[15px] font-bold tabular-nums leading-none ${nextPositive ? "text-[#0F766E]" : "text-red-500"}`}>
                 {formatCurrency(nextCashFlow)}
               </p>
               <p className="text-[9px] text-slate-400 mt-0.5">flujo previsto</p>
@@ -87,7 +87,7 @@ export function Forecast() {
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <span className="text-[11px] text-slate-400">Ingresos previstos</span>
-            <span className="text-[11px] font-semibold tabular-nums text-[#1FA97A]">{formatCurrency(nextRevenue)}</span>
+            <span className="text-[11px] font-semibold tabular-nums text-[#0F766E]">{formatCurrency(nextRevenue)}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-[11px] text-slate-400">Gastos previstos</span>

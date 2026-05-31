@@ -71,7 +71,7 @@ export function priorityColor(level: PriorityLevel): string {
     case 3:
       return "#D9A441" // warm amber
     case 2:
-      return "#1FA97A" // accent green
+      return "#0F766E" // accent green
     case 1:
       return "#5B7280" // neutral gray
   }

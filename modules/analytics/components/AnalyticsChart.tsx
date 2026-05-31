@@ -163,11 +163,11 @@ export function AnalyticsChart({ data, loading = false }: AnalyticsChartProps) {
  <stop offset="100%" stopColor="#10b981" stopOpacity={0.02} />
  </linearGradient>
  </defs>
- <CartesianGrid strokeDasharray="2 2" stroke="rgba(255,255,255,0.04)" vertical={false} />
- <XAxis dataKey="label" stroke="rgba(255,255,255,0.35)" fontSize={10} tickLine={false} axisLine={false} tickMargin={6} />
- <YAxis stroke="rgba(255,255,255,0.35)" fontSize={10} tickLine={false} axisLine={false} width={40} domain={yDomain} tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : `${v}`} />
- <Tooltip content={<ChartTooltip />} cursor={{ stroke: "rgba(255,255,255,0.18)", strokeWidth: 1 }} isAnimationActive={false} />
- <Area type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={3} fill="url(#analyticsRevGrad)" dot={false} activeDot={{ r: 5, fill: "#10b981", stroke: "rgba(255,255,255,0.4)", strokeWidth: 2 }} name="Ingresos" />
+ <CartesianGrid strokeDasharray="2 2" stroke="rgba(0,0,0,0.04)" vertical={false} />
+ <XAxis dataKey="label" stroke="#a3a3a3" fontSize={10} tickLine={false} axisLine={false} tickMargin={6} />
+ <YAxis stroke="#a3a3a3" fontSize={10} tickLine={false} axisLine={false} width={40} domain={yDomain} tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : `${v}`} />
+ <Tooltip content={<ChartTooltip />} cursor={{ stroke: "#e8e8e8", strokeWidth: 1 }} isAnimationActive={false} />
+ <Area type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={3} fill="url(#analyticsRevGrad)" dot={false} activeDot={{ r: 5, fill: "#10b981", stroke: "#d4d4d4", strokeWidth: 2 }} name="Ingresos" />
  <Bar dataKey="leads" fill="#818CF8" opacity={0.5} name="Leads" />
  </AreaChart>
  ) : viewMode === "revenue" ? (
@@ -178,18 +178,18 @@ export function AnalyticsChart({ data, loading = false }: AnalyticsChartProps) {
  <stop offset="100%" stopColor="#10b981" stopOpacity={0.02} />
  </linearGradient>
  </defs>
- <CartesianGrid strokeDasharray="2 2" stroke="rgba(255,255,255,0.04)" vertical={false} />
- <XAxis dataKey="label" stroke="rgba(255,255,255,0.35)" fontSize={10} tickLine={false} axisLine={false} tickMargin={6} />
- <YAxis stroke="rgba(255,255,255,0.35)" fontSize={10} tickLine={false} axisLine={false} width={40} tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}k€` : `${v}€`} />
- <Tooltip content={<ChartTooltip />} cursor={{ stroke: "rgba(255,255,255,0.18)", strokeWidth: 1 }} isAnimationActive={false} />
- <Area type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={3} fill="url(#analyticsRevGrad2)" dot={false} activeDot={{ r: 5, fill: "#10b981", stroke: "rgba(255,255,255,0.4)", strokeWidth: 2 }} name="Ingresos" />
+ <CartesianGrid strokeDasharray="2 2" stroke="rgba(0,0,0,0.04)" vertical={false} />
+ <XAxis dataKey="label" stroke="#a3a3a3" fontSize={10} tickLine={false} axisLine={false} tickMargin={6} />
+ <YAxis stroke="#a3a3a3" fontSize={10} tickLine={false} axisLine={false} width={40} tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}k€` : `${v}€`} />
+ <Tooltip content={<ChartTooltip />} cursor={{ stroke: "#e8e8e8", strokeWidth: 1 }} isAnimationActive={false} />
+ <Area type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={3} fill="url(#analyticsRevGrad2)" dot={false} activeDot={{ r: 5, fill: "#10b981", stroke: "#d4d4d4", strokeWidth: 2 }} name="Ingresos" />
  </AreaChart>
  ) : (
  <BarChart data={chartData} margin={{ top: 12, right: 12, left: 4, bottom: 12 }}>
- <CartesianGrid strokeDasharray="2 2" stroke="rgba(255,255,255,0.04)" vertical={false} />
- <XAxis dataKey="label" stroke="rgba(255,255,255,0.35)" fontSize={10} tickLine={false} axisLine={false} tickMargin={6} />
- <YAxis stroke="rgba(255,255,255,0.35)" fontSize={10} tickLine={false} axisLine={false} width={40} />
- <Tooltip content={<ChartTooltip />} cursor={{ stroke: "rgba(255,255,255,0.18)", strokeWidth: 1 }} isAnimationActive={false} />
+ <CartesianGrid strokeDasharray="2 2" stroke="rgba(0,0,0,0.04)" vertical={false} />
+ <XAxis dataKey="label" stroke="#a3a3a3" fontSize={10} tickLine={false} axisLine={false} tickMargin={6} />
+ <YAxis stroke="#a3a3a3" fontSize={10} tickLine={false} axisLine={false} width={40} />
+ <Tooltip content={<ChartTooltip />} cursor={{ stroke: "#e8e8e8", strokeWidth: 1 }} isAnimationActive={false} />
  <Bar dataKey="leads" fill="#818CF8" radius={[4, 4, 0, 0]} name="Leads" />
  </BarChart>
  )}

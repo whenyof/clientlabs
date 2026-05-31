@@ -14,12 +14,12 @@ const EVENT_CONFIG: Record<TimelineEventType, {
   color: string
   label: string
 }> = {
-  creation:           { Icon: UserPlus,      color: "#1FA97A", label: "Alta"        },
-  sale:               { Icon: ShoppingCart,  color: "#1FA97A", label: "Venta"       },
+  creation:           { Icon: UserPlus,      color: "#0F766E", label: "Alta"        },
+  sale:               { Icon: ShoppingCart,  color: "#0F766E", label: "Venta"       },
   invoice_issued:     { Icon: FileText,      color: "#3B82F6", label: "Factura"     },
-  invoice_paid:       { Icon: CheckCircle2,  color: "#1FA97A", label: "Cobrada"     },
+  invoice_paid:       { Icon: CheckCircle2,  color: "#0F766E", label: "Cobrada"     },
   invoice_overdue:    { Icon: AlertTriangle, color: "#EF4444", label: "Vencida"     },
-  payment:            { Icon: Banknote,      color: "#1FA97A", label: "Pago"        },
+  payment:            { Icon: Banknote,      color: "#0F766E", label: "Pago"        },
   task_created:       { Icon: ClipboardList, color: "#F59E0B", label: "Tarea"       },
   note_added:         { Icon: MessageSquare, color: "#6B7280", label: "Nota"        },
   interaction_logged: { Icon: Phone,         color: "#3B82F6", label: "Interacción" },
@@ -57,7 +57,7 @@ function TimelineItem({ event, isLast }: { event: TimelineEvent; isLast: boolean
   const url  = getUrl(event)
 
   const amountColor =
-    event.type === "payment" || event.type === "invoice_paid" ? "#1FA97A"
+    event.type === "payment" || event.type === "invoice_paid" ? "#0F766E"
     : event.type === "invoice_overdue" ? "#EF4444"
     : "var(--text-primary)"
 
@@ -81,7 +81,7 @@ function TimelineItem({ event, isLast }: { event: TimelineEvent; isLast: boolean
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             {url ? (
-              <a href={url} className="text-[13px] font-medium text-[var(--text-primary)] hover:text-[#1FA97A] transition-colors leading-snug line-clamp-1">
+              <a href={url} className="text-[13px] font-medium text-[var(--text-primary)] hover:text-[#0F766E] transition-colors leading-snug line-clamp-1">
                 {event.title}
               </a>
             ) : (

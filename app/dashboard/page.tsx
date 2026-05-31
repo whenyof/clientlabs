@@ -110,7 +110,7 @@ function UpgradeToast() {
   return (
     <div
       className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-xl px-5 py-4 shadow-lg text-[13px] font-medium text-white"
-      style={{ background: "#1FA97A", maxWidth: 360 }}
+      style={{ background: "#0F766E", maxWidth: 360 }}
     >
       <span className="text-lg">🎉</span>
       <span>

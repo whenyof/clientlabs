@@ -58,7 +58,7 @@ interface MeetingViewProps {
 
 function getMeetingMeta(url: string | null) {
   if (!url) return { label: "Videollamada", color: "#94A3B8", dot: "#94A3B8" }
-  if (url.includes("meet.google")) return { label: "Google Meet", color: "#1FA97A", dot: "#1FA97A" }
+  if (url.includes("meet.google")) return { label: "Google Meet", color: "#0F766E", dot: "#0F766E" }
   if (url.includes("zoom")) return { label: "Zoom", color: "#2D8CFF", dot: "#2D8CFF" }
   if (url.includes("teams")) return { label: "Microsoft Teams", color: "#7B5EA7", dot: "#7B5EA7" }
   return { label: "Videollamada", color: "#64748B", dot: "#64748B" }
@@ -221,7 +221,7 @@ export function MeetingView({ task, entityData, entityType }: MeetingViewProps) 
               <h3 style={{ fontSize: 13, fontWeight: 600, color: "#0F172A", margin: 0 }}>Notas de la reunión</h3>
               <button
                 onClick={() => saveNotes(true)}
-                style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: "#1FA97A", background: "none", border: "none", cursor: "pointer" }}
+                style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: "#0F766E", background: "none", border: "none", cursor: "pointer" }}
               >
                 <Save style={{ width: 11, height: 11 }} /> Guardar ahora
               </button>
@@ -245,7 +245,7 @@ export function MeetingView({ task, entityData, entityType }: MeetingViewProps) 
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               {[
                 { icon: FileText, label: "Crear presupuesto", color: "#3B82F6", href: "/dashboard/finance/presupuestos" },
-                { icon: Plus, label: "Crear tarea", color: "#1FA97A", href: "/dashboard/tasks" },
+                { icon: Plus, label: "Crear tarea", color: "#0F766E", href: "/dashboard/tasks" },
                 { icon: Mail, label: "Enviar email", color: "#F59E0B", href: entity?.email ? `mailto:${entity.email}` : undefined },
                 { icon: Phone, label: "Registrar llamada", color: "#8B5CF6", href: entity?.phone ? `tel:${entity.phone}` : undefined },
               ].map(({ icon: Icon, label, color, href }) => (
@@ -271,7 +271,7 @@ export function MeetingView({ task, entityData, entityType }: MeetingViewProps) 
 
               {/* Avatar + nombre */}
               <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
-                <div style={{ width: 44, height: 44, borderRadius: 12, background: "#E8F5EF", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: 700, color: "#1FA97A", flexShrink: 0 }}>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: "#E8F5EF", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: 700, color: "#0F766E", flexShrink: 0 }}>
                   {String(entity.name ?? "??").slice(0, 2).toUpperCase()}
                 </div>
                 <div>
@@ -279,7 +279,7 @@ export function MeetingView({ task, entityData, entityType }: MeetingViewProps) 
                   {(entity.company || entity.companyName) && (
                     <p style={{ fontSize: 11, color: "#94A3B8", margin: "2px 0 0" }}>{String(entity.company ?? entity.companyName ?? "")}</p>
                   )}
-                  <span style={{ fontSize: 10, padding: "1px 7px", borderRadius: 10, background: "#E8F5EF", color: "#1FA97A", fontWeight: 600 }}>
+                  <span style={{ fontSize: 10, padding: "1px 7px", borderRadius: 10, background: "#E8F5EF", color: "#0F766E", fontWeight: 600 }}>
                     {entityType === "client" ? "Cliente" : "Lead"}
                   </span>
                 </div>

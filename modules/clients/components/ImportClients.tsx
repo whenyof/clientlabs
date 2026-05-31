@@ -213,7 +213,7 @@ export function ImportClients() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-4 py-2.5 border border-slate-200 text-slate-600 text-[13px] font-medium rounded-xl hover:border-[#1FA97A] hover:text-[#1FA97A] transition-colors"
+        className="flex items-center gap-2 px-4 py-2.5 border border-slate-200 text-slate-600 text-[13px] font-medium rounded-xl hover:border-[#0F766E] hover:text-[#0F766E] transition-colors"
       >
         <Upload className="h-4 w-4" />
         Importar CSV
@@ -227,7 +227,7 @@ export function ImportClients() {
             <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
               <div>
                 <h2 className="text-[15px] font-semibold text-slate-900 flex items-center gap-2">
-                  <Upload className="h-4 w-4 text-[#1FA97A]" />
+                  <Upload className="h-4 w-4 text-[#0F766E]" />
                   Importar Clientes
                 </h2>
                 <p className="text-[11px] text-slate-400 mt-0.5">
@@ -251,7 +251,7 @@ export function ImportClients() {
                     value={pastedText}
                     onChange={e => setPastedText(e.target.value)}
                     placeholder={"CSV (nombre, email, teléfono, tipo, NIF, fuente, notas):\nMaría García,maria@empresa.com,699123456,AUTONOMO,12345678A,instagram,Diseñadora\n\nTexto libre:\nAna López 612345678 instagram ana@negocio.es autónoma"}
-                    className="w-full min-h-[260px] border border-slate-200 rounded-xl p-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#1FA97A] focus:ring-2 focus:ring-[#1FA97A]/10 outline-none resize-none font-mono bg-slate-50 focus:bg-white transition-colors"
+                    className="w-full min-h-[260px] border border-slate-200 rounded-xl p-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/10 outline-none resize-none font-mono bg-slate-50 focus:bg-white transition-colors"
                   />
                   <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg border border-blue-100">
                     <Info className="h-3.5 w-3.5 text-blue-400 mt-0.5 flex-shrink-0" />
@@ -304,7 +304,7 @@ export function ImportClients() {
                                     value={client.name || ""}
                                     onChange={e => updateField(idx, "name", e.target.value)}
                                     placeholder="Nombre"
-                                    className="bg-transparent border border-transparent rounded-md px-2 py-1 hover:border-slate-200 focus:border-[#1FA97A] focus:ring-1 focus:ring-[#1FA97A]/20 outline-none text-sm w-32 text-slate-900"
+                                    className="bg-transparent border border-transparent rounded-md px-2 py-1 hover:border-slate-200 focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E]/20 outline-none text-sm w-32 text-slate-900"
                                   />
                                 </td>
                                 <td className="px-3 py-2.5 text-slate-500 text-xs">{client.email || "—"}</td>
@@ -315,7 +315,7 @@ export function ImportClients() {
                                 <td className="px-3 py-2.5 text-center">
                                   <button
                                     onClick={() => toggleExclude(idx)}
-                                    className={`p-1 rounded transition-colors ${client.excluded ? "text-[#1FA97A] hover:bg-[#F0FDF8]" : "text-slate-400 hover:text-red-500"}`}
+                                    className={`p-1 rounded transition-colors ${client.excluded ? "text-[#0F766E] hover:bg-[#F0FDF8]" : "text-slate-400 hover:text-red-500"}`}
                                     title={client.excluded ? "Incluir" : "Excluir"}
                                   >
                                     {client.excluded ? <Undo2 className="h-4 w-4" /> : <X className="h-4 w-4" />}
@@ -334,7 +334,7 @@ export function ImportClients() {
               {/* Step 3: Importing */}
               {step === "importing" && (
                 <div className="flex flex-col items-center justify-center py-16 space-y-4">
-                  <Loader2 className="h-10 w-10 text-[#1FA97A] animate-spin" />
+                  <Loader2 className="h-10 w-10 text-[#0F766E] animate-spin" />
                   <p className="text-slate-600 text-sm">Importando {validCount} clientes...</p>
                 </div>
               )}
@@ -351,7 +351,7 @@ export function ImportClients() {
                   <button
                     onClick={handleAnalyze}
                     disabled={!pastedText.trim()}
-                    className="px-6 py-2.5 rounded-xl text-[13px] font-medium text-white bg-[#1FA97A] hover:bg-[#1a9068] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="px-6 py-2.5 rounded-xl text-[13px] font-medium text-white bg-[#0F766E] hover:bg-[#0E665F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     Analizar texto
                   </button>
@@ -365,7 +365,7 @@ export function ImportClients() {
                   <button
                     onClick={handleImport}
                     disabled={validCount === 0}
-                    className="px-6 py-2.5 rounded-xl text-[13px] font-medium text-white bg-[#1FA97A] hover:bg-[#1a9068] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                    className="px-6 py-2.5 rounded-xl text-[13px] font-medium text-white bg-[#0F766E] hover:bg-[#0E665F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                   >
                     <CheckCircle className="h-4 w-4" />
                     Importar {validCount} cliente{validCount !== 1 ? "s" : ""}

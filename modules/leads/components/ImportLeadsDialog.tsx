@@ -253,7 +253,7 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
  <DialogContent className="bg-white border-slate-200 max-w-4xl max-h-[90vh] overflow-hidden flex flex-col rounded-2xl">
  <DialogHeader className="bg-white border-b border-slate-100 pb-4">
  <DialogTitle className="text-slate-900 text-xl flex items-center gap-2">
- <FileSpreadsheet className="h-5 w-5 text-[#1FA97A]" />
+ <FileSpreadsheet className="h-5 w-5 text-[#0F766E]" />
  Importar Leads desde CSV/Excel
  </DialogTitle>
  <DialogDescription className="text-slate-500">
@@ -270,10 +270,10 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
  <div className="py-8 px-4">
  <div
  onClick={() => !loading && fileInputRef.current?.click()}
- className="group border-2 border-dashed border-slate-200 rounded-xl p-10 text-center hover:border-[#1FA97A]/50 hover:bg-[#F0FDF8]/50 transition-all cursor-pointer"
+ className="group border-2 border-dashed border-slate-200 rounded-xl p-10 text-center hover:border-[#0F766E]/50 hover:bg-[#F0FDF8]/50 transition-all cursor-pointer"
  >
  <div className="flex justify-center mb-4">
- <Upload className="h-12 w-12 text-slate-300 group-hover:text-[#1FA97A] transition-colors" />
+ <Upload className="h-12 w-12 text-slate-300 group-hover:text-[#0F766E] transition-colors" />
  </div>
  <p className="text-slate-700 font-medium">Arrastra tu archivo aquí o haz clic para seleccionar</p>
  <p className="text-slate-400 text-sm mt-1">Formatos soportados: CSV, XLSX, XLS</p>
@@ -289,7 +289,7 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
 
  <button
  disabled={loading}
- className="mt-6 bg-[#1FA97A] text-white rounded-lg px-4 py-2 text-sm hover:bg-[#178f68] transition-colors disabled:opacity-50"
+ className="mt-6 bg-[#0F766E] text-white rounded-lg px-4 py-2 text-sm hover:bg-[#0E665F] transition-colors disabled:opacity-50"
  onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click() }}
  >
  {loading ? (
@@ -347,7 +347,7 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
  <tr key={idx} className={`border-b border-slate-100 hover:bg-slate-50/50 transition-all ${lead.excluded ? 'opacity-40' : ''}`}>
  <td className="px-4 py-3">
  {lead.status === "valid" && !lead.excluded && (
- <span className="flex items-center gap-1 text-[#1FA97A]">
+ <span className="flex items-center gap-1 text-[#0F766E]">
  <CheckCircle className="h-3 w-3" />
  <span className="text-xs">Nuevo</span>
  </span>
@@ -441,7 +441,7 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
  <button
  onClick={() => toggleExclude(idx)}
  className={`p-1 rounded transition-colors ${lead.excluded
- ? 'text-[#1FA97A] hover:bg-[#F0FDF8]'
+ ? 'text-[#0F766E] hover:bg-[#F0FDF8]'
  : 'text-slate-400 hover:text-red-500'
  }`}
  title={lead.excluded ? "Incluir" : "Excluir"}
@@ -462,7 +462,7 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
  {/* STEP 3: Importing */}
  {step === "importing" && (
  <div className="flex flex-col items-center justify-center py-12 space-y-4">
- <Loader2 className="h-12 w-12 text-[#1FA97A] animate-spin" />
+ <Loader2 className="h-12 w-12 text-[#0F766E] animate-spin" />
  <p className="text-slate-700">Importando {validCount} leads...</p>
  </div>
  )}
@@ -470,16 +470,16 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
  {/* STEP 4: Result */}
  {step === "result" && importResult && (
  <div className="flex flex-col items-center justify-center py-10 px-6 space-y-6">
- <div className="flex items-center justify-center w-16 h-16 rounded-full bg-[#F0FDF8] border border-[#1FA97A]/20">
- <CheckCircle className="h-8 w-8 text-[#1FA97A]" />
+ <div className="flex items-center justify-center w-16 h-16 rounded-full bg-[#F0FDF8] border border-[#0F766E]/20">
+ <CheckCircle className="h-8 w-8 text-[#0F766E]" />
  </div>
  <div>
  <h3 className="text-center text-slate-900 font-semibold text-base">Importación completada</h3>
  <p className="text-center text-slate-500 text-sm mt-1">Los datos se han procesado correctamente</p>
  </div>
  <div className="grid grid-cols-3 gap-4 w-full max-w-sm">
- <div className="bg-[#F0FDF8] rounded-xl p-4 border border-[#1FA97A]/20 text-center">
- <p className="text-2xl font-bold text-[#1FA97A]">{importResult.created}</p>
+ <div className="bg-[#F0FDF8] rounded-xl p-4 border border-[#0F766E]/20 text-center">
+ <p className="text-2xl font-bold text-[#0F766E]">{importResult.created}</p>
  <p className="text-xs text-slate-500 mt-1">Creados</p>
  </div>
  <div className="bg-amber-50 rounded-xl p-4 border border-amber-100 text-center">
@@ -509,7 +509,7 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
  <button
  onClick={handleImport}
  disabled={validCount === 0}
- className="bg-[#1FA97A] text-white rounded-xl px-5 py-2.5 hover:bg-[#178f68] transition-colors text-sm disabled:opacity-50 flex items-center gap-2"
+ className="bg-[#0F766E] text-white rounded-xl px-5 py-2.5 hover:bg-[#0E665F] transition-colors text-sm disabled:opacity-50 flex items-center gap-2"
  >
  <CheckCircle className="h-4 w-4" />
  Importar {validCount} Lead{validCount !== 1 ? "s" : ""}
@@ -519,7 +519,7 @@ export function ImportLeadsDialog({ open, onOpenChange }: { open: boolean; onOpe
  {step === "result" && (
  <button
  onClick={handleCloseResult}
- className="bg-[#1FA97A] text-white rounded-xl px-6 py-2.5 hover:bg-[#178f68] transition-colors text-sm font-medium"
+ className="bg-[#0F766E] text-white rounded-xl px-6 py-2.5 hover:bg-[#0E665F] transition-colors text-sm font-medium"
  >
  Cerrar
  </button>

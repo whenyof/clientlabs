@@ -110,14 +110,14 @@ export function DocumentScanner({
             width: 36,
             height: 36,
             borderRadius: 10,
-            background: "#1FA97A15",
-            border: "1px solid #1FA97A25",
+            background: "#0F766E15",
+            border: "1px solid #0F766E25",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             flexShrink: 0,
           }}>
-            <FileText style={{ width: 16, height: 16, color: "#1FA97A" }} />
+            <FileText style={{ width: 16, height: 16, color: "#0F766E" }} />
           </div>
           <div style={{ flex: 1 }}>
             <p style={{ fontSize: 15, fontWeight: 600, margin: 0, color: "var(--text-primary)" }}>
@@ -172,7 +172,7 @@ export function DocumentScanner({
                   textAlign: "left",
                   transition: "border-color 0.12s",
                 }}
-                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "#1FA97A" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "#0F766E" }}
                 onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--border-subtle)" }}
               >
                 <div style={{
@@ -214,21 +214,21 @@ export function DocumentScanner({
                   textAlign: "left",
                   transition: "border-color 0.12s",
                 }}
-                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "#1FA97A" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "#0F766E" }}
                 onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--border-subtle)" }}
               >
                 <div style={{
                   width: 44,
                   height: 44,
                   borderRadius: 10,
-                  background: "#1FA97A10",
-                  border: "1px solid #1FA97A20",
+                  background: "#0F766E10",
+                  border: "1px solid #0F766E20",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   flexShrink: 0,
                 }}>
-                  <Upload style={{ width: 20, height: 20, color: "#1FA97A" }} />
+                  <Upload style={{ width: 20, height: 20, color: "#0F766E" }} />
                 </div>
                 <div>
                   <p style={{ fontSize: 14, fontWeight: 600, margin: 0, color: "var(--text-primary)" }}>
@@ -361,7 +361,7 @@ export function DocumentScanner({
                   alignItems: "center",
                   gap: 6,
                   padding: "9px 22px",
-                  background: "#1FA97A",
+                  background: "#0F766E",
                   border: "none",
                   borderRadius: 8,
                   fontSize: 13,

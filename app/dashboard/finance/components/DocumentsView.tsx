@@ -89,7 +89,7 @@ export function DocumentsView({ billingNode, onNavigateToInvoices }: Props) {
                     value={clientSearch}
                     onChange={e => setClientSearch(e.target.value)}
                     placeholder="Buscar cliente..."
-                    className="w-full text-[12px] px-3 py-1.5 rounded-lg border border-slate-200 outline-none text-slate-900 placeholder-slate-400 focus:border-[#1FA97A]"
+                    className="w-full text-[12px] px-3 py-1.5 rounded-lg border border-slate-200 outline-none text-slate-900 placeholder-slate-400 focus:border-[#0F766E]"
                   />
                 </div>
                 <div className="max-h-60 overflow-y-auto">
@@ -133,7 +133,7 @@ export function DocumentsView({ billingNode, onNavigateToInvoices }: Props) {
               className={cn(
                 "h-8 px-4 rounded-lg text-[13px] font-medium transition-colors",
                 activeTab === tab.id
-                  ? "bg-[#1FA97A] text-white"
+                  ? "bg-[#0F766E] text-white"
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
               )}
             >

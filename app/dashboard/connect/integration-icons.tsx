@@ -41,7 +41,7 @@ function OutlookIcon({ size = 20, color = "#0078D4" }: { size?: number; color?: 
 // Map: integration id → { icon element, bg tailwind class }
 export const ICON_CONFIG: Record<string, { el: (size?: number) => React.ReactNode; bg: string }> = {
   // Captación
-  web:               { el: (s=20) => <Globe size={s} style={{ color: "#1FA97A" }} />,            bg: "bg-[#E8F5EF]" },
+  web:               { el: (s=20) => <Globe size={s} style={{ color: "#0F766E" }} />,            bg: "bg-[#E8F5EF]" },
   whatsapp:          { el: (s=20) => <SiWhatsapp size={s} style={{ color: "#25D366" }} />,        bg: "bg-green-50" },
   facebook:          { el: (s=20) => <SiMeta size={s} style={{ color: "#0467DF" }} />,            bg: "bg-blue-50" },
   "google-ads":      { el: (s=20) => <SiGoogleads size={s} style={{ color: "#4285F4" }} />,       bg: "bg-red-50" },
@@ -68,7 +68,7 @@ export const ICON_CONFIG: Record<string, { el: (size?: number) => React.ReactNod
   notion:            { el: (s=20) => <SiNotion size={s} style={{ color: "#000000" }} />,          bg: "bg-gray-100" },
   "google-drive":    { el: (s=20) => <SiGoogledrive size={s} style={{ color: "#4285F4" }} />,     bg: "bg-green-50" },
   // Web providers (used in ConnectView)
-  web_sdk:           { el: (s=20) => <Globe size={s} style={{ color: "#1FA97A" }} />,             bg: "bg-[#E8F5EF]" },
+  web_sdk:           { el: (s=20) => <Globe size={s} style={{ color: "#0F766E" }} />,             bg: "bg-[#E8F5EF]" },
   wordpress:         { el: (s=20) => <SiWordpress size={s} style={{ color: "#21759B" }} />,       bg: "bg-sky-50" },
   shopify:           { el: (s=20) => <SiShopify size={s} style={{ color: "#7AB55C" }} />,         bg: "bg-lime-50" },
   gtm:               { el: (s=20) => <SiGoogletagmanager size={s} style={{ color: "#246FDB" }} />, bg: "bg-orange-50" },

@@ -40,7 +40,7 @@ export default function AutomatizacionesAnalyticsPage() {
   }, [])
 
   const rate = data?.kpis.successRate ?? 100
-  const rateColor = rate >= 90 ? "#1FA97A" : rate >= 70 ? "#F59E0B" : "#EF4444"
+  const rateColor = rate >= 90 ? "#0F766E" : rate >= 70 ? "#F59E0B" : "#EF4444"
   const sparkActivity = (data?.activity ?? []).slice(-12).map(d => d.total)
   const withSuccess = (data?.activity ?? []).map(d => ({ ...d, tasa: rate }))
   const totalResults = (data?.byResult ?? []).reduce((s, x) => s + x.value, 0)
@@ -63,7 +63,7 @@ export default function AutomatizacionesAnalyticsPage() {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPICard title="Total"             value={data?.kpis.total ?? 0}           badge={`${data?.kpis.active ?? 0} activas`} badgeColor="#1FA97A" loading={loading} />
+        <KPICard title="Total"             value={data?.kpis.total ?? 0}           badge={`${data?.kpis.active ?? 0} activas`} badgeColor="#0F766E" loading={loading} />
         <KPICard title="Activas"           value={data?.kpis.active ?? 0}          badge={data?.kpis.total ? `${Math.round(((data.kpis.active) / data.kpis.total) * 100)}% activación` : undefined} badgeColor="#8B5CF6" loading={loading} />
         <KPICard title="Ejecuciones"       value={(data?.kpis.totalExecutions ?? 0).toLocaleString("es-ES")} sparkData={sparkActivity} sparkColor="#8B5CF6" loading={loading} />
         <KPICard title="Tasa de éxito"     value={`${rate}%`}                      badge={rate >= 90 ? "Excelente" : rate >= 70 ? "Aceptable" : "Revisar"} badgeColor={rateColor} loading={loading} />
@@ -100,7 +100,7 @@ export default function AutomatizacionesAnalyticsPage() {
           {loading ? <Skel /> : (data?.byResult?.length ?? 0) === 0
             ? (
               <div className="h-52 flex flex-col items-center justify-center gap-2">
-                <CheckCircle2 size={32} style={{ color: "#1FA97A" }} />
+                <CheckCircle2 size={32} style={{ color: "#0F766E" }} />
                 <p className="text-xs text-[var(--text-secondary)] text-center">Sin ejecuciones en los últimos 30 días</p>
               </div>
             ) : (

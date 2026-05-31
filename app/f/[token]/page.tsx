@@ -90,7 +90,7 @@ export default function PublicFormPage({ params }: { params: { token: string } }
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <Loader2 className="w-8 h-8 text-[#1FA97A] animate-spin" />
+        <Loader2 className="w-8 h-8 text-[#0F766E] animate-spin" />
       </div>
     )
   }
@@ -109,8 +109,8 @@ export default function PublicFormPage({ params }: { params: { token: string } }
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="text-center max-w-sm px-6">
-          <div className="w-14 h-14 rounded-full bg-[#1FA97A]/10 flex items-center justify-center mx-auto mb-4">
-            <CheckCircle2 className="w-7 h-7 text-[#1FA97A]" />
+          <div className="w-14 h-14 rounded-full bg-[#0F766E]/10 flex items-center justify-center mx-auto mb-4">
+            <CheckCircle2 className="w-7 h-7 text-[#0F766E]" />
           </div>
           <p className="text-slate-800 font-semibold text-base mb-1">Enviado</p>
           <p className="text-slate-500 text-sm">{successMessage}</p>
@@ -144,7 +144,7 @@ export default function PublicFormPage({ params }: { params: { token: string } }
                     rows={4}
                     value={formData[field.key] ?? ""}
                     onChange={e => setFormData(prev => ({ ...prev, [field.key]: e.target.value }))}
-                    className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A] resize-none transition-colors"
+                    className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30 focus:border-[#0F766E] resize-none transition-colors"
                     style={{ borderRadius: 8 }}
                   />
                 ) : (
@@ -152,7 +152,7 @@ export default function PublicFormPage({ params }: { params: { token: string } }
                     type={field.type}
                     value={formData[field.key] ?? ""}
                     onChange={e => setFormData(prev => ({ ...prev, [field.key]: e.target.value }))}
-                    className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A] transition-colors"
+                    className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30 focus:border-[#0F766E] transition-colors"
                     style={{ borderRadius: 8 }}
                   />
                 )}
@@ -170,7 +170,7 @@ export default function PublicFormPage({ params }: { params: { token: string } }
               type="submit"
               disabled={submitting}
               className="w-full py-2.5 px-4 rounded-lg text-sm font-medium text-white transition-opacity disabled:opacity-60"
-              style={{ background: "#1FA97A", borderRadius: 8 }}
+              style={{ background: "#0F766E", borderRadius: 8 }}
             >
               {submitting ? (
                 <span className="flex items-center justify-center gap-2">

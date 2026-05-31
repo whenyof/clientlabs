@@ -19,7 +19,7 @@ export function Budgets() {
     <div className="rounded-xl border border-slate-200 bg-white p-5">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-[13px] font-semibold text-slate-900">Presupuestos</h3>
-        <button className="flex items-center gap-1.5 text-[11px] text-[#1FA97A] font-medium hover:underline">
+        <button className="flex items-center gap-1.5 text-[11px] text-[#0F766E] font-medium hover:underline">
           <Plus className="h-3.5 w-3.5" />
           Nuevo presupuesto
         </button>
@@ -63,7 +63,7 @@ export function Budgets() {
                   <div
                     className={cn(
                       "h-full rounded-full transition-all",
-                      pct < 70 ? "bg-[#1FA97A]" : pct < 90 ? "bg-amber-400" : "bg-red-500"
+                      pct < 70 ? "bg-[#0F766E]" : pct < 90 ? "bg-amber-400" : "bg-red-500"
                     )}
                     style={{ width: `${Math.min(pct, 100)}%` }}
                   />
@@ -81,7 +81,7 @@ export function Budgets() {
 
           <div className="mt-3 pt-3 border-t border-slate-100 grid grid-cols-3 gap-2 text-center text-[11px]">
             <div>
-              <span className="font-semibold text-[#1FA97A]">
+              <span className="font-semibold text-[#0F766E]">
                 {budgets.filter((b) => b.status === "good").length}
               </span>
               <span className="text-slate-400 ml-1">ok</span>

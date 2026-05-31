@@ -67,7 +67,7 @@ export function SelectInvoiceForRectificationDialog({ open, invoices, onClose, o
               placeholder="Buscar por número o cliente..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 bg-white pl-8 pr-4 py-2 text-[13px] text-slate-700 placeholder-slate-400 focus:border-[#1FA97A] focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/20"
+              className="w-full rounded-lg border border-slate-200 bg-white pl-8 pr-4 py-2 text-[13px] text-slate-700 placeholder-slate-400 focus:border-[#0F766E] focus:outline-none focus:ring-1 focus:ring-[#0F766E]/20"
             />
           </div>
         </div>

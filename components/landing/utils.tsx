@@ -155,11 +155,11 @@ export function NoiseOverlay({ opacity = 0.03, className }: NoiseOverlayProps) {
 
 interface PillProps {
   children: ReactNode
-  dotColor?: string   // CSS color value, e.g. "#1FA97A"
+  dotColor?: string   // CSS color value, e.g. "#0F766E"
   className?: string
 }
 
-export function Pill({ children, dotColor = "#1FA97A", className }: PillProps) {
+export function Pill({ children, dotColor = "#0F766E", className }: PillProps) {
   return (
     <span
       className={cn(

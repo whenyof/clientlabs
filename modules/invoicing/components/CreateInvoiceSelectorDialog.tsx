@@ -48,7 +48,7 @@ export function CreateInvoiceSelectorDialog({
               onClose()
               onManual()
             }}
-            className="flex-1 flex flex-col items-start gap-2 rounded-xl border border-slate-200 bg-white p-4 text-left hover:border-[#1FA97A]/40 hover:shadow-[0_2px_8px_rgba(31,169,122,0.08)] transition-all"
+            className="flex-1 flex flex-col items-start gap-2 rounded-xl border border-slate-200 bg-white p-4 text-left hover:border-[#0F766E]/40 hover:shadow-[0_2px_8px_rgba(15,118,110,0.08)] transition-all"
           >
             <span className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-slate-50 border border-slate-100 text-slate-500">
               <PencilSquareIcon className="w-4 h-4" />
@@ -65,7 +65,7 @@ export function CreateInvoiceSelectorDialog({
               onClose()
               onFromSale()
             }}
-            className="flex-1 flex flex-col items-start gap-2 rounded-xl border border-slate-200 bg-white p-4 text-left hover:border-[#1FA97A]/40 hover:shadow-[0_2px_8px_rgba(31,169,122,0.08)] transition-all"
+            className="flex-1 flex flex-col items-start gap-2 rounded-xl border border-slate-200 bg-white p-4 text-left hover:border-[#0F766E]/40 hover:shadow-[0_2px_8px_rgba(15,118,110,0.08)] transition-all"
           >
             <span className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-slate-50 border border-slate-100 text-slate-500">
               <ShoppingCartIcon className="w-4 h-4" />

@@ -82,7 +82,7 @@ export function ClientProfileCard({ client }: ClientProfileCardProps) {
               Cancelar
             </button>
             <button type="button" onClick={handleSave} disabled={isSaving}
-              className="text-[11px] font-semibold text-white bg-[#1FA97A] px-3 py-1 rounded-md hover:opacity-90 transition-opacity inline-flex items-center gap-1 disabled:opacity-50">
+              className="text-[11px] font-semibold text-white bg-[#0F766E] px-3 py-1 rounded-md hover:opacity-90 transition-opacity inline-flex items-center gap-1 disabled:opacity-50">
               {isSaving && <Loader2 className="h-3 w-3 animate-spin" />}
               Guardar
             </button>
@@ -106,7 +106,7 @@ export function ClientProfileCard({ client }: ClientProfileCardProps) {
               <input
                 type={type} value={form[field]} placeholder={`—`}
                 onChange={(e) => setForm((p) => ({ ...p, [field]: e.target.value }))}
-                className="flex-1 min-w-0 text-[13px] text-[var(--text-primary)] bg-[var(--bg-surface)] rounded-md px-2.5 py-1.5 border border-[var(--border-subtle)] focus:outline-none focus:border-[#1FA97A] focus:ring-1 focus:ring-[#1FA97A]/20 transition-all"
+                className="flex-1 min-w-0 text-[13px] text-[var(--text-primary)] bg-[var(--bg-surface)] rounded-md px-2.5 py-1.5 border border-[var(--border-subtle)] focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E]/20 transition-all"
               />
             ) : (
               <span className="text-[13px] text-[var(--text-primary)] flex-1 truncate">
@@ -137,7 +137,7 @@ export function ClientProfileCard({ client }: ClientProfileCardProps) {
               onChange={(e) => setForm((p) => ({ ...p, additionalInfo: e.target.value }))}
               placeholder="Información extra del cliente..."
               rows={3}
-              className="w-full text-[13px] text-[var(--text-primary)] bg-[var(--bg-surface)] rounded-md px-2.5 py-1.5 border border-[var(--border-subtle)] focus:outline-none focus:border-[#1FA97A] focus:ring-1 focus:ring-[#1FA97A]/20 transition-all resize-none placeholder:text-[var(--text-secondary)]"
+              className="w-full text-[13px] text-[var(--text-primary)] bg-[var(--bg-surface)] rounded-md px-2.5 py-1.5 border border-[var(--border-subtle)] focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E]/20 transition-all resize-none placeholder:text-[var(--text-secondary)]"
             />
           ) : (
             <p className="text-[13px] leading-relaxed whitespace-pre-wrap">

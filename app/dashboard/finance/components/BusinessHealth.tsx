@@ -24,7 +24,7 @@ export function BusinessHealth() {
   ]
 
   const score = items.filter((i) => i.ok).length
-  const scoreColor = score === 4 ? "#1FA97A" : score >= 2 ? "#D97706" : "#DC2626"
+  const scoreColor = score === 4 ? "#0F766E" : score >= 2 ? "#D97706" : "#DC2626"
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5 flex flex-col justify-between">
@@ -49,7 +49,7 @@ export function BusinessHealth() {
           <div key={item.label} className="flex items-center justify-between py-1.5 border-b border-slate-100 last:border-0">
             <div className="flex items-center gap-2">
               {item.ok
-                ? <CheckCircle2 className="h-3.5 w-3.5 text-[#1FA97A] flex-shrink-0" />
+                ? <CheckCircle2 className="h-3.5 w-3.5 text-[#0F766E] flex-shrink-0" />
                 : <AlertCircle className="h-3.5 w-3.5 text-amber-500 flex-shrink-0" />}
               <span className="text-[11px] text-slate-500">{item.label}</span>
             </div>

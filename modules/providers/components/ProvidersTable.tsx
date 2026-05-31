@@ -144,8 +144,8 @@ function ProviderRow({ p, onProviderClick, onProviderUpdate, onOrder, onTask }: 
     >
       <td style={{ padding: "12px 16px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(31,169,122,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: "#1FA97A" }}>{initials(p.name)}</span>
+          <div style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(15,118,110,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: "#0F766E" }}>{initials(p.name)}</span>
           </div>
           <div>
             <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", display: "block" }}>{p.name}</span>
@@ -169,7 +169,7 @@ function ProviderRow({ p, onProviderClick, onProviderUpdate, onOrder, onTask }: 
       <td style={{ padding: "12px 16px" }} onClick={e => e.stopPropagation()}>
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
           {([
-            { Icon: ShoppingBag, title: "Nuevo pedido", color: "#1FA97A", bg: "rgba(31,169,122,0.08)", fn: onOrder },
+            { Icon: ShoppingBag, title: "Nuevo pedido", color: "#0F766E", bg: "rgba(15,118,110,0.08)", fn: onOrder },
             { Icon: CheckSquare, title: "Nueva tarea", color: "#D97706", bg: "rgba(217,119,6,0.08)", fn: onTask },
             { Icon: Mail, title: "Enviar email", color: "#0EA5E9", bg: "rgba(14,165,233,0.08)", fn: () => p.contactEmail ? window.open(`mailto:${p.contactEmail}`) : onProviderClick(p) },
           ] as const).map(({ Icon, title, color, bg, fn }) => (
@@ -202,7 +202,7 @@ function ProvidersTableComponent({ providers, onProviderClick, onProviderUpdate,
       <h3 style={{ fontSize: 16, fontWeight: 600, color: "var(--text-primary)", margin: "0 0 4px" }}>{hasActiveFilters ? "Sin resultados" : "Sin proveedores"}</h3>
       <p style={{ fontSize: 13, color: "var(--text-secondary)", margin: 0 }}>{hasActiveFilters ? "Ajusta los filtros para ver más." : "Añade el primer proveedor para empezar."}</p>
       {!hasActiveFilters && onCreateClick && (
-        <button onClick={onCreateClick} style={{ marginTop: 16, padding: "8px 20px", borderRadius: 8, background: "#1FA97A", color: "#fff", fontSize: 13, fontWeight: 500, border: "none", cursor: "pointer" }}>Nuevo proveedor</button>
+        <button onClick={onCreateClick} style={{ marginTop: 16, padding: "8px 20px", borderRadius: 8, background: "#0F766E", color: "#fff", fontSize: 13, fontWeight: 500, border: "none", cursor: "pointer" }}>Nuevo proveedor</button>
       )}
     </div>
   )

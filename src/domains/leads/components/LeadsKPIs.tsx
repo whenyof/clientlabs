@@ -21,8 +21,8 @@ function DeltaText({ value, suffix, invert }: { value: number; suffix: string; i
   const isPositive = value > 0
   const isNegative = value < 0
   const color = invert
-    ? isPositive ? "#E24B4A" : isNegative ? "#1FA97A" : "var(--text-secondary)"
-    : isPositive ? "#1FA97A" : isNegative ? "#E24B4A" : "var(--text-secondary)"
+    ? isPositive ? "#E24B4A" : isNegative ? "#0F766E" : "var(--text-secondary)"
+    : isPositive ? "#0F766E" : isNegative ? "#E24B4A" : "var(--text-secondary)"
   const prefix = isPositive ? "+" : ""
   return (
     <span style={{ color, fontWeight: 500 }}>
@@ -32,7 +32,7 @@ function DeltaText({ value, suffix, invert }: { value: number; suffix: string; i
 }
 
 function RateText({ value, suffix }: { value: number; suffix: string }) {
-  const color = value > 0 ? "#1FA97A" : "var(--text-secondary)"
+  const color = value > 0 ? "#0F766E" : "var(--text-secondary)"
   return (
     <span style={{ color, fontWeight: 500 }}>
       {value}% {suffix}
@@ -90,9 +90,9 @@ export function LeadsKPIs({ kpis, activeKpi, onKpiClick }: LeadsKPIsProps) {
             type="button"
             onClick={() => onKpiClick?.(card.key)}
             style={{
-              background: active ? "rgba(31,169,122,0.06)" : "var(--bg-card)",
-              border: active ? "1px solid #1FA97A" : "0.5px solid var(--border-subtle)",
-              boxShadow: active ? "0 0 0 3px rgba(31,169,122,0.10)" : "none",
+              background: active ? "rgba(15,118,110,0.06)" : "var(--bg-card)",
+              border: active ? "1px solid #0F766E" : "0.5px solid var(--border-subtle)",
+              boxShadow: active ? "0 0 0 3px rgba(15,118,110,0.10)" : "none",
               borderRadius: 12,
               padding: "14px 16px",
               textAlign: "left",
@@ -101,15 +101,15 @@ export function LeadsKPIs({ kpis, activeKpi, onKpiClick }: LeadsKPIsProps) {
               position: "relative",
             }}
             onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = "var(--bg-surface)" }}
-            onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = active ? "rgba(31,169,122,0.06)" : "var(--bg-card)" }}
+            onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = active ? "rgba(15,118,110,0.06)" : "var(--bg-card)" }}
           >
             {active && (
-              <span style={{ position: "absolute", top: 10, right: 12, width: 6, height: 6, borderRadius: "50%", background: "#1FA97A" }} />
+              <span style={{ position: "absolute", top: 10, right: 12, width: 6, height: 6, borderRadius: "50%", background: "#0F766E" }} />
             )}
             <p style={{
               fontSize: 11,
               fontWeight: 500,
-              color: active ? "#1FA97A" : "var(--text-secondary)",
+              color: active ? "#0F766E" : "var(--text-secondary)",
               letterSpacing: "0.06em",
               margin: 0,
             }}>
@@ -125,7 +125,7 @@ export function LeadsKPIs({ kpis, activeKpi, onKpiClick }: LeadsKPIsProps) {
             </p>
             <div style={{
               height: 1,
-              background: active ? "rgba(31,169,122,0.2)" : "var(--border-subtle)",
+              background: active ? "rgba(15,118,110,0.2)" : "var(--border-subtle)",
               margin: "10px 0",
             }} />
             <p style={{ fontSize: 12, margin: 0, lineHeight: 1.4 }}>

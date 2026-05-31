@@ -309,7 +309,7 @@ export function RevenueChart({
           paceMetrics.todayRevenue === 0 && prevMonthRevenue === 0
             ? "—"
             : `${vsLastMonth >= 0 ? "+" : ""}${vsLastMonth.toFixed(0)}%`,
-        color: vsLastMonth >= 0 ? "#1FA97A" : "#C95656",
+        color: vsLastMonth >= 0 ? "#0F766E" : "#C95656",
       },
     ],
     [paceMetrics, daysInMonth, prevMonthRevenue, vsLastMonth]
@@ -450,7 +450,7 @@ export function RevenueChart({
                 <p
                   style={{
                     fontSize: 13,
-                    color: "#1FA97A",
+                    color: "#0F766E",
                     margin: 0,
                     fontWeight: 500,
                   }}
@@ -460,7 +460,7 @@ export function RevenueChart({
                 <p
                   style={{
                     fontSize: 13,
-                    color: paceMetrics.deltaVsExpected >= 0 ? "#1FA97A" : "#C95656",
+                    color: paceMetrics.deltaVsExpected >= 0 ? "#0F766E" : "#C95656",
                     margin: 0,
                   }}
                 >
@@ -495,7 +495,7 @@ export function RevenueChart({
                   style={{
                     fontSize: 13,
                     fontWeight: 500,
-                    color: "#1FA97A",
+                    color: "#0F766E",
                     background: "none",
                     border: "none",
                     cursor: "pointer",
@@ -524,7 +524,7 @@ export function RevenueChart({
               <p
                 style={{
                   fontSize: 13,
-                  color: vsLastMonth >= 0 ? "#1FA97A" : "#C95656",
+                  color: vsLastMonth >= 0 ? "#0F766E" : "#C95656",
                   margin: "6px 0 0 0",
                   fontWeight: 500,
                 }}
@@ -553,7 +553,7 @@ export function RevenueChart({
               style={{
                 width: `${progressPercentage}%`,
                 height: "100%",
-                background: "#1FA97A",
+                background: "#0F766E",
                 borderRadius: 4,
                 transition: "width 0.7s ease-out",
               }}
@@ -611,14 +611,14 @@ export function RevenueChart({
             <Area
               type="monotone"
               dataKey="revenue"
-              stroke="#1FA97A"
+              stroke="#0F766E"
               strokeWidth={2.5}
-              fill="#1FA97A"
+              fill="#0F766E"
               fillOpacity={0.07}
               dot={false}
               activeDot={{
                 r: 4,
-                stroke: "#1FA97A",
+                stroke: "#0F766E",
                 strokeWidth: 2,
                 fill: "#FFFFFF",
               }}
@@ -673,14 +673,14 @@ export function RevenueChart({
             <Area
               type="monotone"
               dataKey="revenue"
-              stroke="#1FA97A"
+              stroke="#0F766E"
               strokeWidth={2.5}
-              fill="#1FA97A"
+              fill="#0F766E"
               fillOpacity={0.07}
               dot={false}
               activeDot={{
                 r: 4,
-                stroke: "#1FA97A",
+                stroke: "#0F766E",
                 strokeWidth: 2,
                 fill: "#FFFFFF",
               }}

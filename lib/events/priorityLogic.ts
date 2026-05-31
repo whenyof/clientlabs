@@ -64,7 +64,7 @@ export function priorityColor(level: PriorityLevel): string {
     switch (level) {
         case 4: return '#C95656'  // critical red
         case 3: return '#D9A441'  // warm amber
-        case 2: return '#1FA97A'  // accent green
+        case 2: return '#0F766E'  // accent green
         case 1: return '#5B7280'  // neutral gray
     }
 }

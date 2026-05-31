@@ -72,7 +72,7 @@ export default function ConfiguracionFiscalPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-40">
-        <div className="h-5 w-5 rounded-full border-2 border-[#1FA97A] border-t-transparent animate-spin" />
+        <div className="h-5 w-5 rounded-full border-2 border-[#0F766E] border-t-transparent animate-spin" />
       </div>
     )
   }
@@ -115,7 +115,7 @@ export default function ConfiguracionFiscalPage() {
                 onChange={set("taxId")}
                 placeholder="12345678A"
                 maxLength={9}
-                className="w-full h-9 rounded-lg border border-slate-200 px-3 text-[13px] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/40 focus:border-[#1FA97A]"
+                className="w-full h-9 rounded-lg border border-slate-200 px-3 text-[13px] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#0F766E]/40 focus:border-[#0F766E]"
               />
             </div>
             <div>
@@ -125,7 +125,7 @@ export default function ConfiguracionFiscalPage() {
                 value={perfil.legalName ?? perfil.companyName ?? ""}
                 onChange={set("legalName")}
                 placeholder="Juan García López"
-                className="w-full h-9 rounded-lg border border-slate-200 px-3 text-[13px] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/40 focus:border-[#1FA97A]"
+                className="w-full h-9 rounded-lg border border-slate-200 px-3 text-[13px] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#0F766E]/40 focus:border-[#0F766E]"
               />
             </div>
           </div>
@@ -141,7 +141,7 @@ export default function ConfiguracionFiscalPage() {
               value={perfil.address ?? ""}
               onChange={set("address")}
               placeholder="Calle Mayor 1, 2.º A"
-              className="w-full h-9 rounded-lg border border-slate-200 px-3 text-[13px] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/40 focus:border-[#1FA97A]"
+              className="w-full h-9 rounded-lg border border-slate-200 px-3 text-[13px] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#0F766E]/40 focus:border-[#0F766E]"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -152,7 +152,7 @@ export default function ConfiguracionFiscalPage() {
                 value={perfil.city ?? ""}
                 onChange={set("city")}
                 placeholder="Madrid"
-                className="w-full h-9 rounded-lg border border-slate-200 px-3 text-[13px] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/40 focus:border-[#1FA97A]"
+                className="w-full h-9 rounded-lg border border-slate-200 px-3 text-[13px] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#0F766E]/40 focus:border-[#0F766E]"
               />
             </div>
             <div>
@@ -163,7 +163,7 @@ export default function ConfiguracionFiscalPage() {
                 onChange={set("postalCode")}
                 placeholder="28001"
                 maxLength={5}
-                className="w-full h-9 rounded-lg border border-slate-200 px-3 text-[13px] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/40 focus:border-[#1FA97A]"
+                className="w-full h-9 rounded-lg border border-slate-200 px-3 text-[13px] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#0F766E]/40 focus:border-[#0F766E]"
               />
             </div>
           </div>
@@ -174,7 +174,7 @@ export default function ConfiguracionFiscalPage() {
               value={perfil.phone ?? ""}
               onChange={set("phone")}
               placeholder="600 000 000"
-              className="w-full h-9 rounded-lg border border-slate-200 px-3 text-[13px] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/40 focus:border-[#1FA97A]"
+              className="w-full h-9 rounded-lg border border-slate-200 px-3 text-[13px] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#0F766E]/40 focus:border-[#0F766E]"
             />
           </div>
         </div>
@@ -187,7 +187,7 @@ export default function ConfiguracionFiscalPage() {
             <select
               value={perfil.ivaRegime ?? "GENERAL"}
               onChange={set("ivaRegime")}
-              className="w-full h-9 rounded-lg border border-slate-200 px-3 text-[13px] text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/40 focus:border-[#1FA97A]"
+              className="w-full h-9 rounded-lg border border-slate-200 px-3 text-[13px] text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#0F766E]/40 focus:border-[#0F766E]"
             >
               {IVA_REGIMES.map((r) => (
                 <option key={r.value} value={r.value}>{r.label}</option>
@@ -201,7 +201,7 @@ export default function ConfiguracionFiscalPage() {
               value={perfil.epigrafIAE ?? ""}
               onChange={set("epigrafIAE")}
               placeholder="701 — Actividad informática / consultoría"
-              className="w-full h-9 rounded-lg border border-slate-200 px-3 text-[13px] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/40 focus:border-[#1FA97A]"
+              className="w-full h-9 rounded-lg border border-slate-200 px-3 text-[13px] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#0F766E]/40 focus:border-[#0F766E]"
             />
           </div>
         </div>
@@ -211,7 +211,7 @@ export default function ConfiguracionFiscalPage() {
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex items-center gap-2 h-9 px-5 rounded-lg bg-[#1FA97A] hover:bg-[#178a64] text-white text-[13px] font-semibold transition-colors disabled:opacity-60"
+            className="inline-flex items-center gap-2 h-9 px-5 rounded-lg bg-[#0F766E] hover:bg-[#0E665F] text-white text-[13px] font-semibold transition-colors disabled:opacity-60"
           >
             {saving ? (
               <div className="h-3.5 w-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />

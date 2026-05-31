@@ -37,7 +37,7 @@ interface KPICardProps {
   loading?: boolean
 }
 
-export function KPICard({ title, value, trend, trendLabel, badge, badgeColor = "#F59E0B", sparkData, sparkColor = "#1FA97A", loading }: KPICardProps) {
+export function KPICard({ title, value, trend, trendLabel, badge, badgeColor = "#F59E0B", sparkData, sparkColor = "#0F766E", loading }: KPICardProps) {
   return (
     <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-5 flex flex-col justify-between" style={{ minHeight: 148 }}>
       <div className="flex items-start justify-between">
@@ -55,7 +55,7 @@ export function KPICard({ title, value, trend, trendLabel, badge, badgeColor = "
       <div className="flex items-end justify-between">
         {trend !== undefined
           ? (
-            <span className="flex items-center gap-1 text-[11px] font-semibold" style={{ color: trend >= 0 ? "#1FA97A" : "#EF4444" }}>
+            <span className="flex items-center gap-1 text-[11px] font-semibold" style={{ color: trend >= 0 ? "#0F766E" : "#EF4444" }}>
               {trend >= 0 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
               {trend > 0 ? "+" : ""}{trend}%{trendLabel && <span className="font-normal text-[var(--text-secondary)]"> {trendLabel}</span>}
             </span>

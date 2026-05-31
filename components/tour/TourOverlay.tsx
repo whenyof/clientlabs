@@ -48,19 +48,19 @@ export function TourOverlay() {
           exit={{ opacity: 0, x: 16, scale: 0.97 }}
           transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
           className="fixed bottom-5 right-5 z-[200] w-[340px] bg-white rounded-2xl border border-slate-200 overflow-hidden pointer-events-auto"
-          style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.14), 0 0 0 1px rgba(31,169,122,0.08)" }}
+          style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.14), 0 0 0 1px rgba(15,118,110,0.08)" }}
         >
           {/* Top accent bar */}
-          <div className="h-1 bg-gradient-to-r from-[#1FA97A] to-[#178a64]" />
+          <div className="h-1 bg-gradient-to-r from-[#0F766E] to-[#0E665F]" />
 
           {/* Header */}
           <div className="px-5 pt-4 pb-3 flex items-start justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#1FA97A]/10 border border-[#1FA97A]/15 flex items-center justify-center shrink-0">
-                <StepIcon size={17} className="text-[#1FA97A]" />
+              <div className="w-9 h-9 rounded-xl bg-[#0F766E]/10 border border-[#0F766E]/15 flex items-center justify-center shrink-0">
+                <StepIcon size={17} className="text-[#0F766E]" />
               </div>
               <div>
-                <p className="text-[10px] font-bold text-[#1FA97A] uppercase tracking-widest leading-none mb-0.5">
+                <p className="text-[10px] font-bold text-[#0F766E] uppercase tracking-widest leading-none mb-0.5">
                   {step + 1} / {total}
                 </p>
                 <h3 className="text-[15px] font-bold text-[#0B1F2A] leading-tight">{currentStep.title}</h3>
@@ -86,12 +86,12 @@ export function TourOverlay() {
           {currentStep.tips.length > 0 && (
             <div className="mx-5 mb-4 bg-[#F8FAFC] rounded-xl border border-slate-100 p-3 space-y-1.5">
               <div className="flex items-center gap-1.5 mb-2">
-                <Lightbulb size={11} className="text-[#1FA97A]" />
-                <span className="text-[9.5px] font-bold text-[#1FA97A] uppercase tracking-widest">Tips</span>
+                <Lightbulb size={11} className="text-[#0F766E]" />
+                <span className="text-[9.5px] font-bold text-[#0F766E] uppercase tracking-widest">Tips</span>
               </div>
               {currentStep.tips.map((tip, i) => (
                 <div key={i} className="flex items-start gap-2">
-                  <div className="w-1 h-1 rounded-full bg-[#1FA97A] mt-[5px] shrink-0" />
+                  <div className="w-1 h-1 rounded-full bg-[#0F766E] mt-[5px] shrink-0" />
                   <span className="text-[11.5px] text-slate-500 leading-snug">{tip}</span>
                 </div>
               ))}
@@ -116,8 +116,8 @@ export function TourOverlay() {
                 <div
                   key={i}
                   className={`rounded-full transition-all duration-200 ${
-                    i === step  ? "w-5 h-1.5 bg-[#1FA97A]"
-                    : i < step  ? "w-1.5 h-1.5 bg-[#1FA97A]/35"
+                    i === step  ? "w-5 h-1.5 bg-[#0F766E]"
+                    : i < step  ? "w-1.5 h-1.5 bg-[#0F766E]/35"
                     : "w-1.5 h-1.5 bg-slate-200"
                   }`}
                 />
@@ -138,7 +138,7 @@ export function TourOverlay() {
               <button
                 onClick={handleNext}
                 className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12.5px] font-semibold text-white transition-all hover:opacity-90 active:scale-[.98]"
-                style={{ background: "linear-gradient(135deg, #1FA97A 0%, #178a64 100%)" }}
+                style={{ background: "linear-gradient(135deg, #0F766E 0%, #0E665F 100%)" }}
               >
                 {isLast ? (
                   <>

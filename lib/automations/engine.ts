@@ -56,7 +56,7 @@ function buildEmailHtml(asunto: string, cuerpo: string): string {
       <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
         <tr>
           <td style="background:#0B1F2A;padding:20px 30px;border-radius:12px 12px 0 0;">
-            <span style="color:#1FA97A;font-size:18px;font-weight:700;letter-spacing:-0.5px;">ClientLabs</span>
+            <span style="color:#0F766E;font-size:18px;font-weight:700;letter-spacing:-0.5px;">ClientLabs</span>
           </td>
         </tr>
         <tr>
@@ -69,7 +69,7 @@ function buildEmailHtml(asunto: string, cuerpo: string): string {
           <td style="padding:20px 0;text-align:center;">
             <p style="color:#94a3b8;font-size:11px;margin:0;">
               Enviado automáticamente por ClientLabs ·
-              <a href="https://clientlabs.io" style="color:#1FA97A;text-decoration:none;">clientlabs.io</a>
+              <a href="https://clientlabs.io" style="color:#0F766E;text-decoration:none;">clientlabs.io</a>
             </p>
           </td>
         </tr>

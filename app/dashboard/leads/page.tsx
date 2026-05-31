@@ -2,12 +2,10 @@ import { prisma } from "@infra/database/prisma"
 import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { LeadsHeader } from "@domains/leads/components/LeadsHeader"
 import { LeadsKpisClient } from "./components/LeadsKpisClient"
 import { LeadsFilters } from "@domains/leads/components/LeadsFilters"
-import { LeadsCharts } from "@domains/leads/components/LeadsCharts"
 import { LeadsClientShell } from "./components/LeadsClientShell"
-import { Suspense } from "react"
+import { LeadsPageView } from "./components/LeadsPageView"
 import { format, subDays, eachDayOfInterval } from "date-fns"
 import { es } from "date-fns/locale"
 import type { Lead } from "@prisma/client"
@@ -28,7 +26,7 @@ type SearchParams = Promise<{
 }>
 
 const STATUS_COLORS: Record<string, string> = {
-  NEW:       "#1FA97A",
+  NEW:       "#0F766E",
   CONTACTED: "#3B82F6",
   QUALIFIED: "#D9A441",
   STALLED:   "#F59E0B",
@@ -162,17 +160,26 @@ export default async function LeadsPage({
 
   const chartInitial = { daily: dailyFiltered, byStatus }
 
-  return (
+  const tableNode = (
     <LeadsClientShell>
-      <div className="space-y-6">
-        <LeadsHeader />
-        <LeadsKpisClient
-          initialLeads={initialLeadsData as Lead[]}
-          initialTotal={initialLeadsCount}
-        >
-          <LeadsFilters sources={sources} />
-        </LeadsKpisClient>
-      </div>
+      <LeadsKpisClient
+        initialLeads={initialLeadsData as Lead[]}
+        initialTotal={initialLeadsCount}
+      >
+        <LeadsFilters sources={sources} />
+      </LeadsKpisClient>
     </LeadsClientShell>
+  )
+
+  return (
+    <LeadsPageView
+      totalLeads={totalLeads}
+      kpis={kpis}
+      dailyData={dailyFiltered}
+      byStatus={byStatus}
+      initialLeads={initialLeadsData as Lead[]}
+      initialTotal={initialLeadsCount}
+      tableNode={tableNode}
+    />
   )
 }

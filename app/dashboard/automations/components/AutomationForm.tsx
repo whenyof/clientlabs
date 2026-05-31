@@ -275,9 +275,9 @@ export default function AutomationForm({ ruleId }: Props) {
                             }
                             className="px-4 py-2 rounded-lg text-sm font-medium border transition-colors"
                             style={{
-                                borderColor: form.triggerType === "ON_EVENT" ? "#1FA97A" : "#E2E8F0",
+                                borderColor: form.triggerType === "ON_EVENT" ? "#0F766E" : "#E2E8F0",
                                 backgroundColor: form.triggerType === "ON_EVENT" ? "#F0FFF4" : "#fff",
-                                color: form.triggerType === "ON_EVENT" ? "#1FA97A" : "#8FA6B2",
+                                color: form.triggerType === "ON_EVENT" ? "#0F766E" : "#8FA6B2",
                             }}
                         >
                             When event occurs
@@ -292,9 +292,9 @@ export default function AutomationForm({ ruleId }: Props) {
                             }
                             className="px-4 py-2 rounded-lg text-sm font-medium border transition-colors"
                             style={{
-                                borderColor: form.triggerType === "ON_SCORE_THRESHOLD" ? "#1FA97A" : "#E2E8F0",
+                                borderColor: form.triggerType === "ON_SCORE_THRESHOLD" ? "#0F766E" : "#E2E8F0",
                                 backgroundColor: form.triggerType === "ON_SCORE_THRESHOLD" ? "#F0FFF4" : "#fff",
-                                color: form.triggerType === "ON_SCORE_THRESHOLD" ? "#1FA97A" : "#8FA6B2",
+                                color: form.triggerType === "ON_SCORE_THRESHOLD" ? "#0F766E" : "#8FA6B2",
                             }}
                         >
                             When score reaches
@@ -353,7 +353,7 @@ export default function AutomationForm({ ruleId }: Props) {
                         <button
                             onClick={addCondition}
                             className="flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-md border transition-colors hover:bg-gray-50"
-                            style={{ color: "#1FA97A", borderColor: "#E2E8F0" }}
+                            style={{ color: "#0F766E", borderColor: "#E2E8F0" }}
                         >
                             <PlusIcon className="w-3 h-3" />
                             Add condition
@@ -420,7 +420,7 @@ export default function AutomationForm({ ruleId }: Props) {
                         <button
                             onClick={addAction}
                             className="flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-md border transition-colors hover:bg-gray-50"
-                            style={{ color: "#1FA97A", borderColor: "#E2E8F0" }}
+                            style={{ color: "#0F766E", borderColor: "#E2E8F0" }}
                         >
                             <PlusIcon className="w-3 h-3" />
                             Add action
@@ -480,7 +480,7 @@ export default function AutomationForm({ ruleId }: Props) {
                         <button
                             onClick={() => setForm((f) => ({ ...f, isActive: !f.isActive }))}
                             className="relative inline-flex h-7 w-12 items-center rounded-full transition-colors"
-                            style={{ backgroundColor: form.isActive ? "#1FA97A" : "#CBD5E0" }}
+                            style={{ backgroundColor: form.isActive ? "#0F766E" : "#CBD5E0" }}
                         >
                             <span
                                 className="inline-block h-5 w-5 rounded-full bg-white transition-transform shadow-sm"
@@ -515,9 +515,9 @@ export default function AutomationForm({ ruleId }: Props) {
                         onClick={handleSave}
                         disabled={saving}
                         className="px-6 py-2.5 rounded-lg text-sm font-medium text-white transition-colors disabled:opacity-50"
-                        style={{ backgroundColor: "#1FA97A" }}
-                        onMouseEnter={(e) => { if (!saving) e.currentTarget.style.backgroundColor = "#2ED39C" }}
-                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "#1FA97A" }}
+                        style={{ backgroundColor: "#0F766E" }}
+                        onMouseEnter={(e) => { if (!saving) e.currentTarget.style.backgroundColor = "#34D399" }}
+                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "#0F766E" }}
                     >
                         {saving ? "Saving…" : isEdit ? "Update Rule" : "Create Rule"}
                     </button>

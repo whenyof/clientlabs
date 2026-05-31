@@ -27,7 +27,7 @@ const REQUIREMENTS = [
 ]
 
 const STRENGTH_LABEL = ["", "Muy débil", "Débil", "Regular", "Fuerte", "Muy fuerte"]
-const STRENGTH_COLOR = ["", "#ef4444", "#f97316", "#eab308", "#84cc16", "#1FA97A"]
+const STRENGTH_COLOR = ["", "#ef4444", "#f97316", "#eab308", "#84cc16", "#0F766E"]
 
 export default function Register({ onSwitch }: Props) {
   const [name, setName]         = useState("")
@@ -130,7 +130,7 @@ export default function Register({ onSwitch }: Props) {
             required
             placeholder="Tu nombre y apellidos"
             onChange={e => setName(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl text-[13.5px] text-slate-900 placeholder:text-slate-300 bg-white border border-slate-200 outline-none transition-all focus:border-[#1FA97A] focus:ring-2 focus:ring-[rgba(31,169,122,0.12)] hover:border-slate-300"
+            className="w-full px-4 py-3 rounded-xl text-[13.5px] text-slate-900 placeholder:text-slate-300 bg-white border border-slate-200 outline-none transition-all focus:border-[#0F766E] focus:ring-2 focus:ring-[rgba(15,118,110,0.12)] hover:border-slate-300"
           />
         </div>
 
@@ -143,7 +143,7 @@ export default function Register({ onSwitch }: Props) {
             required
             placeholder="tu@empresa.com"
             onChange={e => setEmail(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl text-[13.5px] text-slate-900 placeholder:text-slate-300 bg-white border border-slate-200 outline-none transition-all focus:border-[#1FA97A] focus:ring-2 focus:ring-[rgba(31,169,122,0.12)] hover:border-slate-300"
+            className="w-full px-4 py-3 rounded-xl text-[13.5px] text-slate-900 placeholder:text-slate-300 bg-white border border-slate-200 outline-none transition-all focus:border-[#0F766E] focus:ring-2 focus:ring-[rgba(15,118,110,0.12)] hover:border-slate-300"
           />
         </div>
 
@@ -159,7 +159,7 @@ export default function Register({ onSwitch }: Props) {
               onChange={e => setPassword(e.target.value)}
               onFocus={() => setPwFocused(true)}
               onBlur={() => setPwFocused(false)}
-              className="w-full px-4 py-3 pr-11 rounded-xl text-[13.5px] text-slate-900 placeholder:text-slate-300 bg-white border border-slate-200 outline-none transition-all focus:border-[#1FA97A] focus:ring-2 focus:ring-[rgba(31,169,122,0.12)] hover:border-slate-300"
+              className="w-full px-4 py-3 pr-11 rounded-xl text-[13.5px] text-slate-900 placeholder:text-slate-300 bg-white border border-slate-200 outline-none transition-all focus:border-[#0F766E] focus:ring-2 focus:ring-[rgba(15,118,110,0.12)] hover:border-slate-300"
             />
             <button
               type="button"
@@ -195,7 +195,7 @@ export default function Register({ onSwitch }: Props) {
                 const ok = req.test(password)
                 return (
                   <div key={i} className="flex items-center gap-2">
-                    <div className={`w-4 h-4 rounded-full flex items-center justify-center transition-all duration-200 shrink-0 ${ok ? "bg-[#1FA97A]" : "bg-slate-200"}`}>
+                    <div className={`w-4 h-4 rounded-full flex items-center justify-center transition-all duration-200 shrink-0 ${ok ? "bg-[#0F766E]" : "bg-slate-200"}`}>
                       {ok && <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />}
                     </div>
                     <span className={`text-[11.5px] transition-colors ${ok ? "text-slate-600" : "text-slate-400"}`}>{req.label}</span>
@@ -215,17 +215,17 @@ export default function Register({ onSwitch }: Props) {
               onChange={e => setAccepted(e.target.checked)}
               className="sr-only"
             />
-            <div className={`w-4 h-4 rounded flex items-center justify-center transition-all duration-150 border ${accepted ? "bg-[#1FA97A] border-[#1FA97A]" : "bg-white border-slate-300 group-hover:border-[#1FA97A]"}`}>
+            <div className={`w-4 h-4 rounded flex items-center justify-center transition-all duration-150 border ${accepted ? "bg-[#0F766E] border-[#0F766E]" : "bg-white border-slate-300 group-hover:border-[#0F766E]"}`}>
               {accepted && <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />}
             </div>
           </div>
           <span className="text-[12.5px] text-slate-500 leading-snug">
             He leído y acepto los{" "}
-            <a href="/terms" target="_blank" onClick={e => e.stopPropagation()} className="font-semibold text-[#1FA97A] hover:text-[#178a64] underline underline-offset-2 transition-colors">
+            <a href="/terms" target="_blank" onClick={e => e.stopPropagation()} className="font-semibold text-[#0F766E] hover:text-[#0E665F] underline underline-offset-2 transition-colors">
               términos y condiciones
             </a>
             {" "}y la{" "}
-            <a href="/privacy" target="_blank" onClick={e => e.stopPropagation()} className="font-semibold text-[#1FA97A] hover:text-[#178a64] underline underline-offset-2 transition-colors">
+            <a href="/privacy" target="_blank" onClick={e => e.stopPropagation()} className="font-semibold text-[#0F766E] hover:text-[#0E665F] underline underline-offset-2 transition-colors">
               política de privacidad
             </a>
           </span>
@@ -236,7 +236,7 @@ export default function Register({ onSwitch }: Props) {
           type="submit"
           disabled={!canSubmit || loading}
           className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-[13.5px] font-semibold text-white transition-all duration-150 disabled:opacity-50 hover:opacity-90 active:scale-[.99]"
-          style={{ background: canSubmit ? "linear-gradient(135deg, #1FA97A 0%, #178a64 100%)" : "#94a3b8", boxShadow: canSubmit ? "0 4px 14px rgba(31,169,122,0.35)" : "none" }}
+          style={{ background: canSubmit ? "linear-gradient(135deg, #0F766E 0%, #0E665F 100%)" : "#94a3b8", boxShadow: canSubmit ? "0 4px 14px rgba(15,118,110,0.35)" : "none" }}
         >
           {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Creando cuenta...</> : "Crear cuenta gratis →"}
         </button>
@@ -245,7 +245,7 @@ export default function Register({ onSwitch }: Props) {
       {/* Switch */}
       <p className="text-center text-[13px] text-slate-500">
         ¿Ya tienes cuenta?{" "}
-        <button onClick={onSwitch} className="font-semibold text-[#1FA97A] hover:text-[#178a64] transition-colors">
+        <button onClick={onSwitch} className="font-semibold text-[#0F766E] hover:text-[#0E665F] transition-colors">
           Iniciar sesión
         </button>
       </p>

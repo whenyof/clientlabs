@@ -66,7 +66,7 @@ export function formatTimeAgo(createdAt: string): string {
 /* ── Score bar colors ── */
 
 export function getScoreColors(score: number): { barColor: string; numColor: string } {
-  if (score >= 60) return { barColor: "#1FA97A", numColor: "#0F6E56" }
+  if (score >= 60) return { barColor: "#0F766E", numColor: "#0F6E56" }
   if (score >= 30) return { barColor: "#EF9F27", numColor: "#854F0B" }
   return { barColor: "#B4B2A9", numColor: "var(--text-secondary)" }
 }

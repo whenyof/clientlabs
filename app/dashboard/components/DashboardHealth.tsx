@@ -55,7 +55,7 @@ export function DashboardHealth({
             <div
               className={cn(
                 "h-1.5 w-1.5 rounded-full",
-                ind.isProblema ? "bg-red-400" : "bg-[#1FA97A]"
+                ind.isProblema ? "bg-red-400" : "bg-[#0F766E]"
               )}
             />
             <span className="text-[12px] text-slate-600">{ind.label}</span>

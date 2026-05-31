@@ -14,7 +14,7 @@ export default function TermsPage() {
       <div className="max-w-2xl mx-auto">
 
         <div className="mb-12">
-          <Link href="/" className="text-[18px] font-bold" style={{ color: "#1FA97A" }}>
+          <Link href="/" className="text-[18px] font-bold" style={{ color: "#0F766E" }}>
             ClientLabs
           </Link>
         </div>
@@ -29,7 +29,7 @@ export default function TermsPage() {
             <p>
               ClientLabs es una plataforma de gestión para autónomos y pequeños negocios operada
               por su fundador con domicilio a efectos de comunicaciones en{" "}
-              <a href="mailto:hola@clientlabs.io" className="text-[#1FA97A] hover:underline">
+              <a href="mailto:hola@clientlabs.io" className="text-[#0F766E] hover:underline">
                 hola@clientlabs.io
               </a>
             </p>
@@ -117,7 +117,7 @@ export default function TermsPage() {
             <p>
               Puedes cancelar tu cuenta en cualquier momento desde Ajustes → Suscripción. También
               puedes solicitar la eliminación completa de tus datos enviando un email a{" "}
-              <a href="mailto:hola@clientlabs.io" className="text-[#1FA97A] hover:underline">
+              <a href="mailto:hola@clientlabs.io" className="text-[#0F766E] hover:underline">
                 hola@clientlabs.io
               </a>.
               Nos reservamos el derecho de suspender cuentas que incumplan estos términos.

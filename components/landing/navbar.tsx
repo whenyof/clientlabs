@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
+import { Logo } from "@/components/Logo"
 import { useSession, signOut } from "next-auth/react"
 import { LayoutDashboard, User, Settings, LogOut, ChevronDown, Menu, X } from "lucide-react"
 
@@ -37,7 +38,7 @@ function ProfileDropdown({ name, email, image }: { name?: string | null; email?:
         {image ? (
           <Image src={image} alt={name ?? "Perfil"} width={28} height={28} className="rounded-full object-cover" />
         ) : (
-          <div className="h-7 w-7 rounded-full bg-emerald flex items-center justify-center text-[11px] font-bold text-white" style={{ background: "#1FA97A" }}>
+          <div className="h-7 w-7 rounded-full bg-emerald flex items-center justify-center text-[11px] font-bold text-white" style={{ background: "#0F766E" }}>
             {initials}
           </div>
         )}
@@ -124,7 +125,7 @@ export function Navbar() {
           href="/"
           className="flex shrink-0 items-center gap-1 font-display text-[18px] font-extrabold tracking-[-0.02em]"
         >
-          <Image src="/logo-trimmed.webp" alt="ClientLabs" width={28} height={28} className="object-contain" />
+          <Logo variant="icon-solid-green" width={28} height={28} />
           <span>{navbarContent.brand}</span>
         </Link>
 
@@ -179,7 +180,7 @@ export function Navbar() {
               </Link>
               <Link
                 href={navbarContent.ctas.primary.href}
-                className="inline-flex items-center gap-2 rounded-full bg-emerald px-4 py-2.5 font-display text-sm font-semibold tracking-[-0.01em] text-white shadow-[0_1px_0_rgba(255,255,255,.2)_inset,0_8px_20px_rgba(31,169,122,.28)] transition-all duration-[180ms] hover:-translate-y-px hover:bg-emerald-2"
+                className="inline-flex items-center gap-2 rounded-full bg-emerald px-4 py-2.5 font-display text-sm font-semibold tracking-[-0.01em] text-white shadow-[0_1px_0_rgba(255,255,255,.2)_inset,0_8px_20px_rgba(15,118,110,.28)] transition-all duration-[180ms] hover:-translate-y-px hover:bg-emerald-2"
               >
                 {navbarContent.ctas.primary.label}
                 <LandingIcons.arrow className="h-4 w-4" />
@@ -236,7 +237,7 @@ export function Navbar() {
                 <Link
                   href="/dashboard"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-center gap-2 min-h-[44px] rounded-full bg-[#1FA97A] px-4 py-2.5 text-sm font-semibold text-white"
+                  className="flex items-center justify-center gap-2 min-h-[44px] rounded-full bg-[#0F766E] px-4 py-2.5 text-sm font-semibold text-white"
                 >
                   <LayoutDashboard className="h-4 w-4" />
                   Ir al Dashboard
@@ -257,7 +258,7 @@ export function Navbar() {
                 <Link
                   href={navbarContent.ctas.primary.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-center gap-2 min-h-[44px] rounded-full bg-[#1FA97A] px-4 py-2.5 text-sm font-semibold text-white"
+                  className="flex items-center justify-center gap-2 min-h-[44px] rounded-full bg-[#0F766E] px-4 py-2.5 text-sm font-semibold text-white"
                 >
                   {navbarContent.ctas.primary.label}
                 </Link>

@@ -44,7 +44,7 @@ export function FinanceSidebar() {
             className={cn(
               "flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors",
               isActive
-                ? "bg-[#1FA97A]/10 text-[#1FA97A]"
+                ? "bg-[#0F766E]/10 text-[#0F766E]"
                 : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
             )}
             aria-current={isActive ? "page" : undefined}

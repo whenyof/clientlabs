@@ -151,7 +151,7 @@ function HeroSection() {
 
       <div className="relative z-10 mx-auto w-full max-w-4xl flex flex-col items-center text-center gap-6 pt-20 pb-12">
         <span className="hero-tag inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/6 px-4 py-1.5 text-xs uppercase tracking-[0.25em] text-[#8FA6B2]">
-          <Clock className="w-3 h-3 text-[#1FA97A]" />
+          <Clock className="w-3 h-3 text-[#0F766E]" />
           Respuesta media: &lt; 2h
         </span>
 
@@ -159,7 +159,7 @@ function HeroSection() {
           {"Habla con el equipo de ClientLabs".split(" ").map((word, i) => (
             <span key={i} className="hero-word inline-block mr-[0.25em]">
               {word === "equipo" ? (
-                <span className="text-[#1FA97A]">{word}</span>
+                <span className="text-[#0F766E]">{word}</span>
               ) : (
                 word
               )}
@@ -174,7 +174,7 @@ function HeroSection() {
         <div className="flex flex-col sm:flex-row items-center gap-4">
           <button
             onClick={handleScrollToForm}
-            className="hero-cta inline-flex items-center gap-2 rounded-lg bg-[#1FA97A] hover:bg-[#178a64] px-6 py-3 text-sm font-semibold text-white transition-colors"
+            className="hero-cta inline-flex items-center gap-2 rounded-lg bg-[#0F766E] hover:bg-[#0E665F] px-6 py-3 text-sm font-semibold text-white transition-colors"
           >
             Enviar mensaje
             <Send className="w-4 h-4" />
@@ -260,7 +260,7 @@ function FormSection() {
             <p className="text-xs uppercase tracking-[0.25em] text-[#5F7280]">Soporte humano</p>
             <h2 className="text-3xl md:text-4xl font-semibold text-[#0F1F2A] leading-tight">
               Operaciones reales requieren{" "}
-              <span className="text-[#1FA97A]">atención</span> real
+              <span className="text-[#0F766E]">atención</span> real
             </h2>
             <p className="text-[#5F7280] leading-relaxed">
               No tickets anónimos ni respuestas automáticas. Un equipo que conoce tu operación y te acompaña con contexto.
@@ -271,7 +271,7 @@ function FormSection() {
             {FEATURES.map(({ icon: Icon, text }) => (
               <div key={text} className="form-feature flex items-center gap-3">
                 <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-[#E8F5EF] flex items-center justify-center">
-                  <Icon className="w-4 h-4 text-[#1FA97A]" />
+                  <Icon className="w-4 h-4 text-[#0F766E]" />
                 </div>
                 <span className="text-sm text-[#374151]">{text}</span>
               </div>
@@ -280,7 +280,7 @@ function FormSection() {
 
           <div className="rounded-xl border border-[#E2E8ED] bg-[#F4F7F9] p-5">
             <div className="flex items-center gap-3 mb-2">
-              <LifeBuoy className="w-5 h-5 text-[#1FA97A]" />
+              <LifeBuoy className="w-5 h-5 text-[#0F766E]" />
               <span className="text-sm font-semibold text-[#0F1F2A]">Centro de soporte</span>
             </div>
             <p className="text-sm text-[#5F7280]">
@@ -288,7 +288,7 @@ function FormSection() {
             </p>
             <a
               href="/recursos"
-              className="mt-3 inline-flex items-center gap-1.5 text-sm text-[#1FA97A] font-medium hover:underline"
+              className="mt-3 inline-flex items-center gap-1.5 text-sm text-[#0F766E] font-medium hover:underline"
             >
               Ver recursos
               <ArrowRight className="w-3.5 h-3.5" />
@@ -301,7 +301,7 @@ function FormSection() {
           {status === "success" ? (
             <div className="flex flex-col items-center justify-center gap-4 py-12 text-center">
               <div className="w-12 h-12 rounded-full bg-[#E8F5EF] flex items-center justify-center">
-                <CheckCircle2 className="w-6 h-6 text-[#1FA97A]" />
+                <CheckCircle2 className="w-6 h-6 text-[#0F766E]" />
               </div>
               <h3 className="text-lg font-semibold text-[#0F1F2A]">Mensaje enviado</h3>
               <p className="text-sm text-[#5F7280]">
@@ -309,7 +309,7 @@ function FormSection() {
               </p>
               <button
                 onClick={() => { setStatus("idle"); setForm({ name: "", email: "", company: "", message: "" }) }}
-                className="text-sm text-[#1FA97A] font-medium hover:underline"
+                className="text-sm text-[#0F766E] font-medium hover:underline"
               >
                 Enviar otro mensaje
               </button>
@@ -327,7 +327,7 @@ function FormSection() {
                     placeholder={field.placeholder}
                     value={form[field.id]}
                     onChange={(e) => handleChange(field.id, e.target.value)}
-                    className="w-full rounded-lg border border-[#E2E8ED] bg-white px-4 py-2.5 text-sm text-[#0F1F2A] placeholder:text-[#9CA3AF] focus:border-[#1FA97A] focus:outline-none transition-colors"
+                    className="w-full rounded-lg border border-[#E2E8ED] bg-white px-4 py-2.5 text-sm text-[#0F1F2A] placeholder:text-[#9CA3AF] focus:border-[#0F766E] focus:outline-none transition-colors"
                   />
                   {errors[field.id] && (
                     <p className="text-xs text-rose-500">Campo requerido</p>
@@ -345,7 +345,7 @@ function FormSection() {
                   placeholder="Describe tu contexto y tus objetivos."
                   value={form.message}
                   onChange={(e) => handleChange("message", e.target.value)}
-                  className="w-full rounded-lg border border-[#E2E8ED] bg-white px-4 py-2.5 text-sm text-[#0F1F2A] placeholder:text-[#9CA3AF] focus:border-[#1FA97A] focus:outline-none transition-colors resize-none"
+                  className="w-full rounded-lg border border-[#E2E8ED] bg-white px-4 py-2.5 text-sm text-[#0F1F2A] placeholder:text-[#9CA3AF] focus:border-[#0F766E] focus:outline-none transition-colors resize-none"
                 />
                 {errors.message && <p className="text-xs text-rose-500">Campo requerido</p>}
               </div>
@@ -353,7 +353,7 @@ function FormSection() {
               <button
                 type="submit"
                 disabled={status === "loading"}
-                className="w-full rounded-lg bg-[#1FA97A] hover:bg-[#178a64] px-4 py-3 text-sm font-semibold text-white transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                className="w-full rounded-lg bg-[#0F766E] hover:bg-[#0E665F] px-4 py-3 text-sm font-semibold text-white transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
               >
                 {status === "loading" ? (
                   "Enviando..."
@@ -412,7 +412,7 @@ function CanalesSection() {
           <p className="text-xs uppercase tracking-[0.25em] text-[#5F7280]">Canales de soporte</p>
           <h2 className="text-3xl md:text-4xl font-semibold text-[#0F1F2A]">
             Elige cómo{" "}
-            <span className="text-[#1FA97A]">conectar</span>
+            <span className="text-[#0F766E]">conectar</span>
           </h2>
           <p className="text-[#5F7280] max-w-xl mx-auto">
             Varios canales disponibles según la urgencia y el tipo de consulta.
@@ -427,11 +427,11 @@ function CanalesSection() {
             >
               <div className="flex items-start justify-between">
                 <div className="w-10 h-10 rounded-lg bg-[#E8F5EF] flex items-center justify-center">
-                  <Icon className="w-5 h-5 text-[#1FA97A]" />
+                  <Icon className="w-5 h-5 text-[#0F766E]" />
                 </div>
                 <div className="text-right">
                   <p className="text-[10px] uppercase tracking-[0.2em] text-[#8FA6B2]">{badgeLabel}</p>
-                  <p className="text-sm font-semibold text-[#1FA97A]">{badge}</p>
+                  <p className="text-sm font-semibold text-[#0F766E]">{badge}</p>
                 </div>
               </div>
               <div>
@@ -440,7 +440,7 @@ function CanalesSection() {
               </div>
               <a
                 href={href}
-                className="mt-auto inline-flex items-center gap-1.5 text-sm font-medium text-[#1FA97A] hover:underline"
+                className="mt-auto inline-flex items-center gap-1.5 text-sm font-medium text-[#0F766E] hover:underline"
               >
                 {action}
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -489,7 +489,7 @@ function FAQSection() {
           <p className="text-xs uppercase tracking-[0.25em] text-[#5F7280]">Preguntas frecuentes</p>
           <h2 className="text-3xl md:text-4xl font-semibold text-[#0F1F2A]">
             Resolvemos tus{" "}
-            <span className="text-[#1FA97A]">dudas</span>
+            <span className="text-[#0F766E]">dudas</span>
           </h2>
         </div>
 
@@ -545,7 +545,7 @@ function CtaSection() {
           <p className="text-xs uppercase tracking-[0.25em] text-[#8FA6B2]">Estamos aquí</p>
           <h2 className="text-4xl md:text-5xl font-semibold text-[#E6F1F5] leading-tight">
             Habla con un humano.{" "}
-            <span className="text-[#1FA97A]">De verdad.</span>
+            <span className="text-[#0F766E]">De verdad.</span>
           </h2>
           <p className="text-[#8FA6B2] max-w-xl mx-auto">
             Sin bots, sin respuestas genéricas. Un equipo que conoce el contexto de tu operación y te ayuda a escalar con control.
@@ -558,7 +558,7 @@ function CtaSection() {
                 const el = document.getElementById("form")
                 if (el) gsap.to(window, { scrollTo: { y: el }, duration: 0.9, ease: "power2.inOut" })
               }}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#1FA97A] hover:bg-[#178a64] px-6 py-3 text-sm font-semibold text-white transition-colors"
+              className="inline-flex items-center gap-2 rounded-lg bg-[#0F766E] hover:bg-[#0E665F] px-6 py-3 text-sm font-semibold text-white transition-colors"
             >
               Contactar ahora
               <Send className="w-4 h-4" />

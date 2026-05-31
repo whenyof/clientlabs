@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { signIn } from "next-auth/react"
-import Image from "next/image"
+import { Logo } from "@/components/Logo"
 import Link from "next/link"
 
 const SESSION_KEY    = "cl_verify_pw"
@@ -164,9 +164,9 @@ function VerifyForm() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <Image src="/logo-trimmed.webp" width={32} height={32} alt="ClientLabs" className="rounded-lg" priority />
+            <Logo variant="icon-solid-green" width={32} height={32} className="rounded-lg" priority />
             <span className="font-bold text-[18px] tracking-tight text-slate-900">
-              Client<span style={{ color: "#1FA97A" }}>Labs</span>
+              Client<span style={{ color: "#0F766E" }}>Labs</span>
             </span>
           </Link>
           <h1 className="text-[24px] font-bold tracking-tight text-slate-900">Verifica tu email</h1>
@@ -193,10 +193,10 @@ function VerifyForm() {
                 disabled={loading}
                 className="w-12 h-14 text-center text-[22px] font-bold rounded-xl border-2 transition-all outline-none disabled:opacity-50"
                 style={{
-                  borderColor: error ? "#fca5a5" : digit ? "#1FA97A" : i === filled ? "#1FA97A" : "#e2e8f0",
+                  borderColor: error ? "#fca5a5" : digit ? "#0F766E" : i === filled ? "#0F766E" : "#e2e8f0",
                   color:       "#0B1F2A",
                   background:  error ? "#fff5f5" : "#fff",
-                  boxShadow:   i === filled && !error ? "0 0 0 3px rgba(31,169,122,0.12)" : "none",
+                  boxShadow:   i === filled && !error ? "0 0 0 3px rgba(15,118,110,0.12)" : "none",
                 }}
               />
             ))}
@@ -215,7 +215,7 @@ function VerifyForm() {
           {/* Loading */}
           {loading && (
             <div className="flex items-center justify-center gap-2 text-[13px] text-slate-500 mb-4">
-              <svg className="w-4 h-4 animate-spin text-[#1FA97A]" viewBox="0 0 24 24" fill="none">
+              <svg className="w-4 h-4 animate-spin text-[#0F766E]" viewBox="0 0 24 24" fill="none">
                 <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="30 70" />
               </svg>
               Verificando...
@@ -231,7 +231,7 @@ function VerifyForm() {
                 onClick={resendCode}
                 disabled={!canResend}
                 className="font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                style={{ color: canResend ? "#1FA97A" : "#94a3b8" }}
+                style={{ color: canResend ? "#0F766E" : "#94a3b8" }}
               >
                 {resendLabel()}
               </button>
@@ -262,7 +262,7 @@ export default function VerifyPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center" style={{ background: "#f8fafc" }}>
-          <div className="w-8 h-8 border-2 border-[#1FA97A] border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-[#0F766E] border-t-transparent rounded-full animate-spin" />
         </div>
       }
     >

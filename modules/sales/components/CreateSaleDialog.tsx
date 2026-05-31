@@ -106,7 +106,7 @@ export function CreateSaleDialog({ open, onOpenChange, onSuccess }: Props) {
               id="clientName"
               value={clientName}
               onChange={(e) => setClientName(e.target.value)}
-              className="bg-slate-50 border-slate-200 text-slate-900 focus:bg-white focus:border-[#1FA97A]"
+              className="bg-slate-50 border-slate-200 text-slate-900 focus:bg-white focus:border-[#0F766E]"
               placeholder="Nombre del cliente"
               required
             />
@@ -120,7 +120,7 @@ export function CreateSaleDialog({ open, onOpenChange, onSuccess }: Props) {
               type="email"
               value={clientEmail}
               onChange={(e) => setClientEmail(e.target.value)}
-              className="bg-slate-50 border-slate-200 text-slate-900 focus:bg-white focus:border-[#1FA97A]"
+              className="bg-slate-50 border-slate-200 text-slate-900 focus:bg-white focus:border-[#0F766E]"
               placeholder="email@ejemplo.com"
             />
           </div>
@@ -132,7 +132,7 @@ export function CreateSaleDialog({ open, onOpenChange, onSuccess }: Props) {
               id="product"
               value={product}
               onChange={(e) => setProduct(e.target.value)}
-              className="bg-slate-50 border-slate-200 text-slate-900 focus:bg-white focus:border-[#1FA97A]"
+              className="bg-slate-50 border-slate-200 text-slate-900 focus:bg-white focus:border-[#0F766E]"
               placeholder="Concepto o producto"
               required
             />
@@ -149,7 +149,7 @@ export function CreateSaleDialog({ open, onOpenChange, onSuccess }: Props) {
                 min="0"
                 value={total}
                 onChange={(e) => setTotal(e.target.value)}
-                className="bg-slate-50 border-slate-200 text-slate-900 focus:bg-white focus:border-[#1FA97A]"
+                className="bg-slate-50 border-slate-200 text-slate-900 focus:bg-white focus:border-[#0F766E]"
                 placeholder="0"
                 required
               />
@@ -163,7 +163,7 @@ export function CreateSaleDialog({ open, onOpenChange, onSuccess }: Props) {
                 type="date"
                 value={saleDate}
                 onChange={(e) => setSaleDate(e.target.value)}
-                className="bg-slate-50 border-slate-200 text-slate-900 focus:bg-white focus:border-[#1FA97A]"
+                className="bg-slate-50 border-slate-200 text-slate-900 focus:bg-white focus:border-[#0F766E]"
               />
             </div>
           </div>
@@ -195,7 +195,7 @@ export function CreateSaleDialog({ open, onOpenChange, onSuccess }: Props) {
               id="notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="bg-slate-50 border-slate-200 text-slate-900 resize-none focus:bg-white focus:border-[#1FA97A]"
+              className="bg-slate-50 border-slate-200 text-slate-900 resize-none focus:bg-white focus:border-[#0F766E]"
               placeholder="Notas opcionales..."
               rows={2}
             />
@@ -213,7 +213,7 @@ export function CreateSaleDialog({ open, onOpenChange, onSuccess }: Props) {
             <Button
               type="submit"
               disabled={loading}
-              className="bg-[#1FA97A] hover:bg-[#178f68] text-white"
+              className="bg-[#0F766E] hover:bg-[#0E665F] text-white"
             >
               {loading ? labels.common.loading : sl.ui.saveSale}
             </Button>

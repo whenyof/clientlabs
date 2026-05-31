@@ -24,7 +24,7 @@ export function CookieBanner() {
         <div className="flex-1">
           <p className="text-[13px] text-slate-700 leading-relaxed">
             Usamos cookies técnicas necesarias para el funcionamiento de la web. Sin cookies de publicidad ni rastreo.{" "}
-            <Link href="/cookies" className="text-[#1FA97A] hover:underline font-medium">
+            <Link href="/cookies" className="text-[#0F766E] hover:underline font-medium">
               Más información
             </Link>
           </p>
@@ -32,7 +32,7 @@ export function CookieBanner() {
         <div className="flex gap-2 flex-shrink-0">
           <button
             onClick={accept}
-            className="px-5 py-2.5 bg-[#1FA97A] text-white text-[12px] font-semibold rounded-xl hover:bg-[#178f68] transition-colors whitespace-nowrap"
+            className="px-5 py-2.5 bg-[#0F766E] text-white text-[12px] font-semibold rounded-xl hover:bg-[#0E665F] transition-colors whitespace-nowrap"
           >
             Aceptar
           </button>

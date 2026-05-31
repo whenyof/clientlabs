@@ -6,7 +6,7 @@ import { sendEmail } from "@/lib/email"
 
 const schema = z.object({ email: z.string().email() })
 
-const GREEN = "#1FA97A"
+const GREEN = "#0F766E"
 const NAVY  = "#0B1F2A"
 
 function verificationCodeEmail(code: string) {
@@ -30,7 +30,7 @@ function verificationCodeEmail(code: string) {
 
     <!-- Card -->
     <div style="background:#fff;border-radius:16px;padding:40px 36px;box-shadow:0 1px 4px rgba(0,0,0,0.07);border:1px solid #E8EFF4;text-align:center">
-      <div style="width:56px;height:56px;background:rgba(31,169,122,0.1);border-radius:50%;margin:0 auto 20px;display:flex;align-items:center;justify-content:center">
+      <div style="width:56px;height:56px;background:rgba(15,118,110,0.1);border-radius:50%;margin:0 auto 20px;display:flex;align-items:center;justify-content:center">
         <span style="font-size:24px">✉️</span>
       </div>
       <h1 style="color:${NAVY};font-size:22px;font-weight:700;margin:0 0 10px;letter-spacing:-0.3px">Verifica tu email</h1>

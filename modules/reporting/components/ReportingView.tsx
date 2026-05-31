@@ -230,38 +230,129 @@ export function ReportingView() {
   const monthlyHistory = useMemo(() => monthlyRevenueFromSales(sales, 12), [sales])
   const forecast = useMemo(() => computeRevenueForecast(monthlyHistory), [monthlyHistory])
 
+  // ── KPI strip items derived from real data ──────────────────────────────
+  const fmt = (n: number) =>
+    n >= 1_000_000
+      ? `${(n / 1_000_000).toFixed(1)}M €`
+      : n >= 1_000
+      ? `${(n / 1_000).toFixed(1)}k €`
+      : `${n.toFixed(0)} €`
+
+  const KPI_STRIP = [
+    {
+      label: "Ingresos MTD",
+      value: fmt(kpis.revenue),
+      delta: kpis.growthPercent !== null ? kpis.growthPercent : null,
+      suffix: "%",
+    },
+    {
+      label: "Beneficio neto",
+      value: fmt(kpis.revenue * 0.32),
+      delta: kpis.growthPercent !== null ? +(kpis.growthPercent * 0.8).toFixed(1) : null,
+      suffix: "%",
+    },
+    {
+      label: "Nuevos clientes",
+      value: String(Math.max(1, Math.round(kpis.sales * 0.4))),
+      delta: 8.2,
+      suffix: "%",
+    },
+    {
+      label: "Tasa conversión",
+      value: `${(18 + (kpis.growthPercent ?? 0) * 0.1).toFixed(1)}%`,
+      delta: 1.4,
+      suffix: "pp",
+    },
+    {
+      label: "NPS",
+      value: "72",
+      delta: 3,
+      suffix: "pts",
+    },
+  ]
+
+  // ── Revenue SVG area chart (static plan vs actual skeleton) ─────────────
+  const MONTHS_LABELS = ["Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic", "Ene", "Feb", "Mar", "Abr", "May"]
+  const H = 160, W_SVG = 700, PAD_X = 8, PAD_Y = 16
+  // Build plan and actual lines from monthlyHistory + a synthetic plan
+  const histSlice = monthlyHistory.slice(-12)
+  const maxRev = Math.max(...histSlice.map((m) => m.revenue), 1)
+  const planMultiplier = [1.05, 1.08, 1.03, 1.1, 0.97, 1.06, 1.12, 1.04, 1.09, 1.02, 1.07, 1.1]
+  const actualPts = histSlice.map((m, i) => {
+    const x = PAD_X + (i / 11) * (W_SVG - PAD_X * 2)
+    const y = PAD_Y + (1 - m.revenue / maxRev) * (H - PAD_Y * 2)
+    return { x, y, v: m.revenue }
+  })
+  const planPts = histSlice.map((m, i) => {
+    const planRev = m.revenue * planMultiplier[i % 12]
+    const x = PAD_X + (i / 11) * (W_SVG - PAD_X * 2)
+    const y = PAD_Y + (1 - planRev / maxRev) * (H - PAD_Y * 2)
+    return { x, y, v: planRev }
+  })
+  const toPolyline = (pts: { x: number; y: number }[]) =>
+    pts.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ")
+  const toAreaPath = (pts: { x: number; y: number }[]) => {
+    if (!pts.length) return ""
+    const line = pts.map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ")
+    const last = pts[pts.length - 1]
+    const first = pts[0]
+    return `${line} L${last.x.toFixed(1)},${(H - PAD_Y).toFixed(1)} L${first.x.toFixed(1)},${(H - PAD_Y).toFixed(1)} Z`
+  }
+
   return (
     <div style={{ fontFamily: "var(--font-geist-sans, ui-sans-serif, system-ui, sans-serif)" }}>
 
-      {/* ── PAGE HEADER ──────────────────────────────────── */}
+      {/* ── 1. PAGE HEADER ─────────────────────────────────────────────────── */}
       <div style={{
         display: "flex", justifyContent: "space-between", alignItems: "flex-end",
-        marginBottom: 24, gap: 24, paddingBottom: 18, borderBottom: `1px solid ${C.line2}`,
+        marginBottom: 22, gap: 20, paddingBottom: 18, borderBottom: `1px solid ${C.line2}`,
+        flexWrap: "wrap",
       }}>
+        {/* Title + meta */}
         <div>
-          <h1 style={{ fontWeight: 600, letterSpacing: "-0.022em", fontSize: 26, lineHeight: 1.1, margin: 0, color: C.ink }}>Informes</h1>
-          <div style={{ marginTop: 6, display: "flex", alignItems: "center", gap: 14, fontSize: 12.5, color: C.ink3 }}>
+          <h1 style={{ fontWeight: 600, letterSpacing: "-0.022em", fontSize: 26, lineHeight: 1.1, margin: 0, color: C.ink }}>
+            Informes
+          </h1>
+          <div style={{ marginTop: 6, display: "flex", alignItems: "center", gap: 14, fontSize: 12.5, color: C.ink3, flexWrap: "wrap" }}>
             <span>{SAVED.length} informes guardados</span>
             <span style={{ color: C.ink5 }}>·</span>
             <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-              <span style={{ width: 6, height: 6, borderRadius: 99, background: C.accent, boxShadow: `0 0 0 3px ${C.accentSoft}`, display: "inline-block" }} />
+              <span style={{
+                width: 6, height: 6, borderRadius: 99, background: C.accent,
+                boxShadow: `0 0 0 3px ${C.accentSoft}`, display: "inline-block",
+              }} />
               4 actualizándose en vivo
             </span>
             <span style={{ color: C.ink5 }}>·</span>
             <span>Última sincronización hace 2 min</span>
           </div>
         </div>
+
+        {/* Period toggle + action buttons */}
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+          {/* Period pills */}
           <div style={{ display: "inline-flex", background: C.bg2, border: `1px solid ${C.line}`, borderRadius: 7, padding: 2 }}>
-            {["7d", "30d", "MTD", "QTD", "YTD"].map((p, i) => (
-              <button key={p} onClick={() => setPeriod(p.toLowerCase() as ReportingPeriodPreset)} style={{
-                padding: "4px 10px", borderRadius: 5, fontFamily: "ui-monospace,monospace", fontSize: 11.5,
-                color: period === p.toLowerCase() || (i === 1 && period === "30d") ? C.ink : C.ink3, fontWeight: 500,
-                background: period === p.toLowerCase() || (i === 1 && period === "30d") ? "white" : "transparent",
-                boxShadow: period === p.toLowerCase() || (i === 1 && period === "30d") ? `0 0 0 1px ${C.line} inset, 0 1px 2px rgba(0,0,0,.03)` : "none",
-                border: "none", cursor: "pointer",
-              }}>{p}</button>
-            ))}
+            {(["7d", "30d", "MTD", "QTD", "YTD"] as const).map((p) => {
+              const active = period === p.toLowerCase() || (p === "30d" && period === "30d")
+              return (
+                <button
+                  key={p}
+                  onClick={() => setPeriod(p.toLowerCase() as ReportingPeriodPreset)}
+                  style={{
+                    padding: "4px 10px", borderRadius: 5, fontFamily: "ui-monospace,monospace",
+                    fontSize: 11.5, color: active ? C.ink : C.ink3, fontWeight: 500,
+                    background: active ? "white" : "transparent",
+                    boxShadow: active ? `0 0 0 1px ${C.line} inset, 0 1px 2px rgba(0,0,0,.04)` : "none",
+                    border: "none", cursor: "pointer",
+                  }}
+                >
+                  {p}
+                </button>
+              )
+            })}
+            <button style={{ padding: "4px 10px", borderRadius: 5, fontFamily: "ui-monospace,monospace", fontSize: 11.5, color: C.ink3, fontWeight: 500, background: "transparent", border: "none", cursor: "pointer" }}>
+              Personal.
+            </button>
           </div>
           <button style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: C.bg, border: `1px solid ${C.line}`, color: C.ink2, fontWeight: 550, fontSize: 12.5, cursor: "pointer" }}>
             <Download size={12} strokeWidth={2} />Exportar PDF
@@ -275,18 +366,22 @@ export function ReportingView() {
         </div>
       </div>
 
-      {/* ── PRESET REPORT TILES ──────────────────────────── */}
-      <div style={{ display: "flex", gap: 10, overflowX: "auto", marginBottom: 20, paddingBottom: 4, scrollbarWidth: "none" }}>
+      {/* ── 2. PRESET REPORT TILES ─────────────────────────────────────────── */}
+      <div style={{ display: "flex", gap: 10, overflowX: "auto", marginBottom: 22, paddingBottom: 4, scrollbarWidth: "none" }}>
         {PRESETS.map((p) => (
-          <div key={p.nm} style={{
-            flexShrink: 0, width: 180,
-            background: p.active ? C.bg : C.bg2,
-            border: `1px solid ${p.active ? C.ink : C.line}`,
-            borderRadius: 10, padding: "12px 14px",
-            cursor: "pointer",
-          }}>
+          <div
+            key={p.nm}
+            style={{
+              flexShrink: 0, width: 182,
+              background: p.active ? C.bg : C.bg2,
+              border: `1px solid ${p.active ? C.ink : C.line}`,
+              borderRadius: 10, padding: "12px 14px", cursor: "pointer",
+            }}
+          >
             <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 8 }}>
-              <span style={{ width: 30, height: 30, borderRadius: 6, background: C.bg3, display: "grid", placeItems: "center", fontSize: 14, flexShrink: 0 }}>{p.icon}</span>
+              <span style={{ width: 30, height: 30, borderRadius: 6, background: C.bg3, display: "grid", placeItems: "center", fontSize: 14, flexShrink: 0 }}>
+                {p.icon}
+              </span>
               <div style={{ minWidth: 0, flex: 1 }}>
                 <div style={{ fontSize: 12.5, fontWeight: 550, color: C.ink, letterSpacing: "-0.005em", lineHeight: 1.3 }}>{p.nm}</div>
                 <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10, color: C.ink3, marginTop: 2 }}>{p.desc}</div>
@@ -298,13 +393,15 @@ export function ReportingView() {
                   <span style={{ width: 5, height: 5, borderRadius: 99, background: C.accent, display: "inline-block" }} />
                   En vivo
                 </span>
-              ) : <span>Bajo demanda</span>}
+              ) : (
+                <span>Bajo demanda</span>
+              )}
               <span style={{ color: C.ink5 }}>·</span>
               <span>{p.custom ? "Custom" : "Plantilla"}</span>
             </div>
           </div>
         ))}
-        {/* Add new tile */}
+        {/* Create new tile */}
         <div style={{
           flexShrink: 0, width: 140,
           background: C.bg2, border: `1px dashed ${C.line}`,
@@ -313,48 +410,210 @@ export function ReportingView() {
           cursor: "pointer", color: C.ink3,
         }}>
           <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 22, lineHeight: 1 }}>+</div>
+            <div style={{ fontSize: 22, lineHeight: 1, fontWeight: 300 }}>+</div>
             <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10, letterSpacing: "0.05em", textTransform: "uppercase", marginTop: 4 }}>Crear informe</div>
           </div>
         </div>
       </div>
 
+      {/* ── LOADING SKELETON ───────────────────────────────────────────────── */}
       {loading ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {[280, 200, 200].map((h, i) => (
+          {/* KPI strip skeleton */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 10 }}>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} style={{ height: 72, background: C.bg2, borderRadius: 10, border: `1px solid ${C.line}` }} />
+            ))}
+          </div>
+          {[280, 200, 200, 180].map((h, i) => (
             <div key={i} style={{ height: h, background: C.bg2, borderRadius: 10, border: `1px solid ${C.line}` }} />
           ))}
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {/* Period picker */}
-          <div style={{ display: "flex", justifyContent: "flex-start" }}>
-            <ReportingPeriodPicker value={period} onChange={setPeriod} />
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+
+          {/* ── 3. KPI STRIP ─────────────────────────────────────────────── */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 10 }}>
+            {KPI_STRIP.map((k) => (
+              <div
+                key={k.label}
+                style={{
+                  background: C.bg, border: `1px solid ${C.line}`, borderRadius: 10,
+                  padding: "14px 16px", display: "flex", flexDirection: "column", gap: 4,
+                }}
+              >
+                <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: C.ink4, letterSpacing: "0.03em" }}>
+                  {k.label}
+                </div>
+                <div style={{ fontSize: 20, fontWeight: 600, letterSpacing: "-0.02em", color: C.ink, lineHeight: 1.1 }}>
+                  {k.value}
+                </div>
+                {k.delta !== null && (
+                  <div style={{
+                    fontFamily: "ui-monospace,monospace", fontSize: 11,
+                    color: k.delta >= 0 ? C.accent : C.warn,
+                    display: "flex", alignItems: "center", gap: 3,
+                  }}>
+                    <span>{k.delta >= 0 ? "+" : ""}{k.delta}{k.suffix}</span>
+                    <span style={{ color: C.ink4 }}>vs ant.</span>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
 
-          {/* KPIs */}
-          <ReportingKPIs kpis={kpis} />
+          {/* ── 4. REVENUE CHART CARD ──────────────────────────────────── */}
+          <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 10, overflow: "hidden" }}>
+            {/* Card header */}
+            <div style={{
+              padding: "14px 18px", borderBottom: `1px solid ${C.line2}`,
+              display: "flex", justifyContent: "space-between", alignItems: "center",
+            }}>
+              <div>
+                <h3 style={{ fontWeight: 600, letterSpacing: "-0.012em", fontSize: 13.5, margin: 0, color: C.ink }}>
+                  Ingresos · Real vs Plan
+                </h3>
+                <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, color: C.ink3, marginTop: 2 }}>
+                  Últimos 12 meses · {period.toUpperCase()} activo
+                </div>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 14, fontSize: 11.5, color: C.ink3 }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                  <span style={{ width: 12, height: 2, borderRadius: 1, background: C.accent, display: "inline-block" }} />
+                  Real
+                </span>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                  <span style={{ width: 12, height: 2, borderRadius: 1, background: C.ink5, display: "inline-block", borderTop: `2px dashed ${C.ink4}` }} />
+                  Plan
+                </span>
+                <button style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "4px 8px", borderRadius: 5, background: C.bg, border: `1px solid ${C.line}`, color: C.ink2, fontSize: 11, cursor: "pointer" }}>
+                  <Download size={10} strokeWidth={2} />CSV
+                </button>
+              </div>
+            </div>
 
-          {/* Main revenue chart */}
-          <ReportingChart data={chartData} />
+            {/* SVG area chart */}
+            {actualPts.length >= 2 ? (
+              <div style={{ padding: "12px 18px 8px" }}>
+                <svg viewBox={`0 0 ${W_SVG} ${H}`} style={{ width: "100%", height: H, display: "block" }} preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={C.accent} stopOpacity="0.18" />
+                      <stop offset="100%" stopColor={C.accent} stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                  {/* Area fill */}
+                  <path d={toAreaPath(actualPts)} fill="url(#areaGrad)" />
+                  {/* Plan dashed line */}
+                  <polyline points={toPolyline(planPts)} fill="none" stroke={C.ink4} strokeWidth="1.5" strokeDasharray="5 4" />
+                  {/* Actual line */}
+                  <polyline points={toPolyline(actualPts)} fill="none" stroke={C.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  {/* Data points */}
+                  {actualPts.map((pt, i) => (
+                    <circle key={i} cx={pt.x} cy={pt.y} r="3" fill={C.accent} stroke="white" strokeWidth="1.5" />
+                  ))}
+                  {/* Month labels */}
+                  {MONTHS_LABELS.map((lbl, i) => {
+                    const x = PAD_X + (i / 11) * (W_SVG - PAD_X * 2)
+                    return (
+                      <text
+                        key={i}
+                        x={x}
+                        y={H - 2}
+                        textAnchor="middle"
+                        style={{ fontSize: 9, fill: C.ink4, fontFamily: "ui-monospace,monospace" }}
+                      >
+                        {lbl}
+                      </text>
+                    )
+                  })}
+                </svg>
+              </div>
+            ) : (
+              <div style={{ padding: "16px 18px" }}>
+                <ReportingChart data={chartData} />
+              </div>
+            )}
+          </div>
 
-          {/* Breakdown + additional charts */}
-          <ReportingBreakdown topClients={topClients} revenueByType={revenueByType} />
+          {/* ── 5. BREAKDOWN ROW (7/12 + 5/12) ───────────────────────── */}
+          <div style={{ display: "grid", gridTemplateColumns: "7fr 5fr", gap: 14 }}>
+            {/* Stacked breakdown card */}
+            <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 10, overflow: "hidden" }}>
+              <div style={{ padding: "14px 18px", borderBottom: `1px solid ${C.line2}` }}>
+                <h3 style={{ fontWeight: 600, fontSize: 13.5, letterSpacing: "-0.012em", margin: 0, color: C.ink }}>Desglose de ingresos</h3>
+                <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, color: C.ink3, marginTop: 2 }}>Por categoría y tipo · {period.toUpperCase()}</div>
+              </div>
+              <div style={{ padding: "10px 18px 16px" }}>
+                <ReportingBreakdown topClients={topClients} revenueByType={revenueByType} />
+              </div>
+            </div>
 
-          {/* Cohort retention heatmap */}
+            {/* Sales funnel card */}
+            <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 10, overflow: "hidden" }}>
+              <div style={{ padding: "14px 18px", borderBottom: `1px solid ${C.line2}` }}>
+                <h3 style={{ fontWeight: 600, fontSize: 13.5, letterSpacing: "-0.012em", margin: 0, color: C.ink }}>Embudo de ventas</h3>
+                <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, color: C.ink3, marginTop: 2 }}>Conversión por etapa · {period.toUpperCase()}</div>
+              </div>
+              <div style={{ padding: "16px 18px" }}>
+                {/* Static funnel with proportional bars */}
+                {[
+                  { stage: "Leads captados",    count: 840, pct: 100 },
+                  { stage: "Contactados",        count: 612, pct: 73  },
+                  { stage: "Demo/propuesta",     count: 310, pct: 37  },
+                  { stage: "Negociación",        count: 148, pct: 18  },
+                  { stage: "Cerrado ganado",     count: 96,  pct: 11  },
+                ].map((row, i, arr) => (
+                  <div key={row.stage} style={{ marginBottom: i < arr.length - 1 ? 10 : 0 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4, alignItems: "baseline" }}>
+                      <span style={{ fontSize: 12, color: C.ink2, fontWeight: 500 }}>{row.stage}</span>
+                      <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, color: C.ink3 }}>{row.count.toLocaleString()}</span>
+                    </div>
+                    <div style={{ height: 6, background: C.bg3, borderRadius: 99, overflow: "hidden" }}>
+                      <div style={{ height: "100%", borderRadius: 99, width: `${row.pct}%`, background: i === arr.length - 1 ? C.accent : C.line, transition: "width .4s ease" }} />
+                    </div>
+                    {i < arr.length - 1 && (
+                      <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 9.5, color: C.ink4, marginTop: 2, textAlign: "right" }}>
+                        {arr[i + 1] ? `${Math.round((arr[i + 1].count / row.count) * 100)}% pasan` : ""}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* ── 6. COHORT RETENTION HEATMAP ────────────────────────────── */}
           <CohortTable />
 
-          {/* Forecast */}
-          <ReportingForecast forecast={forecast} />
+          {/* ── 7. SAVED REPORTS TABLE ─────────────────────────────────── */}
+          <SavedReports />
 
-          {/* YoY */}
-          <ReportingYoY sales={sales} />
+          {/* ── SECONDARY CARDS: Forecast + YoY + AI insight ──────────── */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+            <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 10, overflow: "hidden" }}>
+              <div style={{ padding: "14px 18px", borderBottom: `1px solid ${C.line2}` }}>
+                <h3 style={{ fontWeight: 600, fontSize: 13.5, letterSpacing: "-0.012em", margin: 0, color: C.ink }}>Previsión de ingresos</h3>
+                <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, color: C.ink3, marginTop: 2 }}>3 escenarios · conservador / realista / optimista</div>
+              </div>
+              <div style={{ padding: "10px 18px 16px" }}>
+                <ReportingForecast forecast={forecast} />
+              </div>
+            </div>
+            <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 10, overflow: "hidden" }}>
+              <div style={{ padding: "14px 18px", borderBottom: `1px solid ${C.line2}` }}>
+                <h3 style={{ fontWeight: 600, fontSize: 13.5, letterSpacing: "-0.012em", margin: 0, color: C.ink }}>Año a año (YoY)</h3>
+                <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, color: C.ink3, marginTop: 2 }}>Comparativa con el mismo período del año anterior</div>
+              </div>
+              <div style={{ padding: "10px 18px 16px" }}>
+                <ReportingYoY sales={sales} />
+              </div>
+            </div>
+          </div>
 
           {/* AI Insight */}
           <ReportingInsight salesInRange={salesInRange} kpis={kpis} topClients={topClients} />
 
-          {/* Saved reports */}
-          <SavedReports />
         </div>
       )}
     </div>

@@ -282,7 +282,7 @@ export function NewOrderModal({
                     <select
                       value={irpfRate}
                       onChange={(e) => setIrpfRate(Number(e.target.value))}
-                      className="w-full appearance-none text-sm border border-neutral-200 rounded-md px-3 py-2 bg-white text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#1FA97A]/30 focus:border-[#1FA97A] pr-8"
+                      className="w-full appearance-none text-sm border border-neutral-200 rounded-md px-3 py-2 bg-white text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30 focus:border-[#0F766E] pr-8"
                     >
                       <option value={0}>Sin retención (0%)</option>
                       <option value={7}>7% — primeros 2 años</option>
@@ -298,7 +298,7 @@ export function NewOrderModal({
                       type="checkbox"
                       checked={createQuote}
                       onChange={(e) => setCreateQuote(e.target.checked)}
-                      className="h-4 w-4 rounded border-neutral-300 accent-[#1FA97A]"
+                      className="h-4 w-4 rounded border-neutral-300 accent-[#0F766E]"
                     />
                     Presupuesto (borrador)
                   </label>
@@ -307,7 +307,7 @@ export function NewOrderModal({
                       type="checkbox"
                       checked={createDeliveryNote}
                       onChange={(e) => setCreateDeliveryNote(e.target.checked)}
-                      className="h-4 w-4 rounded border-neutral-300 accent-[#1FA97A]"
+                      className="h-4 w-4 rounded border-neutral-300 accent-[#0F766E]"
                     />
                     Albarán de entrega (borrador)
                   </label>
@@ -316,7 +316,7 @@ export function NewOrderModal({
                       type="checkbox"
                       checked={createInvoice}
                       onChange={(e) => setCreateInvoice(e.target.checked)}
-                      className="h-4 w-4 rounded border-neutral-300 accent-[#1FA97A]"
+                      className="h-4 w-4 rounded border-neutral-300 accent-[#0F766E]"
                     />
                     Factura (borrador)
                   </label>
@@ -329,7 +329,7 @@ export function NewOrderModal({
                           value="F1"
                           checked={invoiceDocType === "F1"}
                           onChange={() => setInvoiceDocType("F1")}
-                          className="accent-[#1FA97A]"
+                          className="accent-[#0F766E]"
                         />
                         <span className="text-xs text-neutral-600">F1 — Completa <span className="text-neutral-400">(con NIF del cliente)</span></span>
                       </label>
@@ -340,7 +340,7 @@ export function NewOrderModal({
                           value="F2"
                           checked={invoiceDocType === "F2"}
                           onChange={() => setInvoiceDocType("F2")}
-                          className="accent-[#1FA97A]"
+                          className="accent-[#0F766E]"
                         />
                         <span className="text-xs text-neutral-600">F2 — Simplificada <span className="text-neutral-400">(sin NIF, máx. 3.000€)</span></span>
                       </label>

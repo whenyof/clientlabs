@@ -18,7 +18,7 @@ const TOOLS = [
   { id:"postit",   label:"Post-its",  bg:"#FCD34D", rotBase:-22,
     icon:<svg viewBox="0 0 24 24" fill="none" width="26" height="26"><rect x="3" y="3" width="18" height="18" rx="2" fill="#FCD34D"/><path d="M7 8h10M7 12h7M7 16h5" stroke="#92400E" strokeWidth="1.5" strokeLinecap="round"/></svg> },
   { id:"factura",  label:"Facturas",  bg:"#475569", rotBase:14,
-    icon:<svg viewBox="0 0 24 24" fill="none" width="26" height="26"><rect x="4" y="2" width="16" height="20" rx="2" fill="#475569"/><path d="M8 7h8M8 11h8M8 15h5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/><path d="M15 15l2 2 3-3" stroke="#1FA97A" strokeWidth="1.5" strokeLinecap="round"/></svg> },
+    icon:<svg viewBox="0 0 24 24" fill="none" width="26" height="26"><rect x="4" y="2" width="16" height="20" rx="2" fill="#475569"/><path d="M8 7h8M8 11h8M8 15h5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/><path d="M15 15l2 2 3-3" stroke="#0F766E" strokeWidth="1.5" strokeLinecap="round"/></svg> },
   { id:"notion",   label:"Notion",    bg:"#191919", rotBase:-10,
     icon:<svg viewBox="0 0 24 24" fill="none" width="26" height="26"><rect x="3" y="3" width="18" height="18" rx="2" fill="#191919"/><path d="M7 7h6v2H7zM7 11h10v1.5H7zM7 14h8v1.5H7z" fill="#fff" opacity=".8"/></svg> },
   { id:"calendar", label:"Calendario",bg:"#2563EB", rotBase:20,
@@ -356,14 +356,14 @@ export function ChaosAnimation() {
       {/* Fondo grid puntos */}
       <div style={{
         position: 'absolute', inset: 0, pointerEvents: 'none',
-        backgroundImage: 'radial-gradient(circle, rgba(31,169,122,0.06) 1px, transparent 1px)',
+        backgroundImage: 'radial-gradient(circle, rgba(15,118,110,0.06) 1px, transparent 1px)',
         backgroundSize: '32px 32px',
       }}/>
 
       {/* Glow central */}
       <div style={{
         position: 'absolute', width: '500px', height: '500px', borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(31,169,122,0.05) 0%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(15,118,110,0.05) 0%, transparent 70%)',
         pointerEvents: 'none',
       }}/>
 
@@ -385,7 +385,7 @@ export function ChaosAnimation() {
       {/* RIPPLE */}
       <div ref={ripRef} style={{
         position: 'absolute', width: '220px', height: '440px', borderRadius: '44px',
-        border: '1.5px solid rgba(31,169,122,.6)', opacity: 0, zIndex: 9, pointerEvents: 'none',
+        border: '1.5px solid rgba(15,118,110,.6)', opacity: 0, zIndex: 9, pointerEvents: 'none',
       }}/>
 
       {/* iPHONE */}
@@ -418,8 +418,8 @@ export function ChaosAnimation() {
               display:'flex', alignItems:'center', padding:'0 8px', overflow:'hidden',
             }} className="chaos-di">
               <div className="chaos-di-dot" style={{
-                width:'7px', height:'7px', borderRadius:'50%', background:'#1FA97A',
-                opacity:0, transition:'opacity .3s', boxShadow:'0 0 6px #1FA97A', flexShrink:0,
+                width:'7px', height:'7px', borderRadius:'50%', background:'#0F766E',
+                opacity:0, transition:'opacity .3s', boxShadow:'0 0 6px #0F766E', flexShrink:0,
               }}/>
               <span ref={diTRef} className="chaos-di-txt" style={{
                 fontSize:'9px', color:'rgba(255,255,255,.92)', fontWeight:600,
@@ -440,8 +440,8 @@ export function ChaosAnimation() {
               <div style={{ fontSize:'11px', color:'rgba(255,255,255,.45)', fontWeight:300, marginBottom:'18px', textTransform:'capitalize' }}>{fecha}</div>
               <div style={{ width:'100%', padding:'0 10px', display:'flex', flexDirection:'column', gap:'7px' }}>
                 {[
-                  { ref:ln1Ref, bg:'rgba(31,169,122,.18)', title:'Lead nuevo — María García', sub:'Formulario web · Diseño web', time:'ahora',
-                    icon:<svg viewBox="0 0 16 16" fill="none" width="13" height="13"><circle cx="8" cy="6" r="3" stroke="#1FA97A" strokeWidth="1.5"/><path d="M2 14c0-3 2.7-5 6-5s6 2 6 5" stroke="#1FA97A" strokeWidth="1.5" strokeLinecap="round"/></svg> },
+                  { ref:ln1Ref, bg:'rgba(15,118,110,.18)', title:'Lead nuevo — María García', sub:'Formulario web · Diseño web', time:'ahora',
+                    icon:<svg viewBox="0 0 16 16" fill="none" width="13" height="13"><circle cx="8" cy="6" r="3" stroke="#0F766E" strokeWidth="1.5"/><path d="M2 14c0-3 2.7-5 6-5s6 2 6 5" stroke="#0F766E" strokeWidth="1.5" strokeLinecap="round"/></svg> },
                   { ref:ln2Ref, bg:'rgba(59,130,246,.18)',  title:'Factura cobrada — 2.400€', sub:'Restaurante Mirador', time:'3m',
                     icon:<svg viewBox="0 0 16 16" fill="none" width="13" height="13"><rect x="2" y="4" width="12" height="8" rx="1.5" stroke="#3b82f6" strokeWidth="1.5"/><path d="M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1" stroke="#3b82f6" strokeWidth="1.5"/></svg> },
                   { ref:ln3Ref, bg:'rgba(139,92,246,.18)',  title:'Automatización enviada', sub:'12 leads en seguimiento', time:'8m',
@@ -494,7 +494,7 @@ export function ChaosAnimation() {
         opacity: 0,
         zIndex: 9999,
         background: '#f0f2f5',
-        boxShadow: '0 40px 120px rgba(0,0,0,.5), 0 0 80px rgba(31,169,122,.08)',
+        boxShadow: '0 40px 120px rgba(0,0,0,.5), 0 0 80px rgba(15,118,110,.08)',
         display: 'flex',
         willChange: 'transform, opacity',
         pointerEvents: 'none',
@@ -503,13 +503,13 @@ export function ChaosAnimation() {
         {/* Sidebar */}
         <div style={{ width:'185px', flexShrink:0, background:'#fff', borderRight:'.5px solid #e8eaed', display:'flex', flexDirection:'column', padding:'16px 0' }}>
           <div style={{ display:'flex', alignItems:'center', gap:'7px', padding:'0 14px 14px' }}>
-            <div style={{ width:'20px', height:'20px', background:'#1FA97A', borderRadius:'6px' }}/>
-            <span style={{ fontSize:'13px', fontWeight:700, color:'#0B1F2A', letterSpacing:'-.3px' }}>Client<span style={{ color:'#1FA97A' }}>Labs</span></span>
+            <div style={{ width:'20px', height:'20px', background:'#0F766E', borderRadius:'6px' }}/>
+            <span style={{ fontSize:'13px', fontWeight:700, color:'#0B1F2A', letterSpacing:'-.3px' }}>Client<span style={{ color:'#0F766E' }}>Labs</span></span>
           </div>
           {[
             { s:true, l:'Core' },
             { l:'Dashboard', a:true },
-            { l:'Leads', b:'47', bc:'#E1F5EE', bt:'#1FA97A' },
+            { l:'Leads', b:'47', bc:'#E1F5EE', bt:'#0F766E' },
             { l:'Clientes' }, { l:'Proveedores' },
             { l:'Tareas', b:'3', bc:'#fee2e2', bt:'#ef4444' },
             { l:'Finanzas' },
@@ -519,14 +519,14 @@ export function ChaosAnimation() {
             <div key={i} style={{ fontSize:'9px', fontWeight:700, color:'#94a3b8', textTransform:'uppercase', letterSpacing:'.8px', padding:'10px 14px 4px' }}>{item.l}</div>
           ) : (
             <div key={i} style={{ display:'flex', alignItems:'center', gap:'8px', padding:'5px 12px', margin:'0 5px', borderRadius:'8px', background:item.a?'#E1F5EE':'transparent' }}>
-              <span style={{ fontSize:'11px', fontWeight:item.a?600:500, color:item.a?'#1FA97A':'#64748b', flex:1 }}>{item.l}</span>
+              <span style={{ fontSize:'11px', fontWeight:item.a?600:500, color:item.a?'#0F766E':'#64748b', flex:1 }}>{item.l}</span>
               {item.b && <span style={{ fontSize:'9px', fontWeight:700, padding:'1px 5px', borderRadius:'10px', background:item.bc, color:item.bt }}>{item.b}</span>}
             </div>
           ))}
           <div style={{ flex:1 }}/>
           <div style={{ height:'.5px', background:'#e8eaed', margin:'0 12px 8px' }}/>
           <div style={{ padding:'8px 12px', display:'flex', alignItems:'center', gap:'7px' }}>
-            <div style={{ width:'24px', height:'24px', borderRadius:'50%', background:'#1FA97A', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'9px', fontWeight:700, color:'#fff' }}>CL</div>
+            <div style={{ width:'24px', height:'24px', borderRadius:'50%', background:'#0F766E', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'9px', fontWeight:700, color:'#fff' }}>CL</div>
             <div><div style={{ fontSize:'10px', fontWeight:600, color:'#1e293b' }}>ClientLabs</div><div style={{ fontSize:'9px', color:'#94a3b8' }}>Plan Pro</div></div>
           </div>
         </div>
@@ -535,13 +535,13 @@ export function ChaosAnimation() {
           <div style={{ height:'50px', flexShrink:0, background:'#fff', borderBottom:'.5px solid #e8eaed', display:'flex', alignItems:'center', padding:'0 20px', gap:'10px' }}>
             <div style={{ flex:1 }}><div style={{ fontSize:'15px', fontWeight:700, color:'#0B1F2A' }}>Buenas tardes ☀️</div><div style={{ fontSize:'10px', color:'#94a3b8', marginTop:'1px' }}>Resumen del negocio en tiempo real</div></div>
             <button style={{ padding:'5px 10px', borderRadius:'8px', border:'.5px solid #e2e8f0', background:'#fff', fontSize:'10px', fontWeight:600, color:'#64748b' }}>+ Nuevo lead</button>
-            <button style={{ padding:'5px 10px', borderRadius:'8px', border:'none', background:'#1FA97A', fontSize:'10px', fontWeight:600, color:'#fff' }}>+ Nueva tarea</button>
+            <button style={{ padding:'5px 10px', borderRadius:'8px', border:'none', background:'#0F766E', fontSize:'10px', fontWeight:600, color:'#fff' }}>+ Nueva tarea</button>
           </div>
           <div style={{ flex:1, padding:'14px 18px', display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gridTemplateRows:'auto auto 1fr', gap:'11px', overflow:'hidden' }}>
             {[
-              { l:'Facturado este mes', v:'14.280€', s:'↑ +23%', sc:'#1FA97A', w:'74%', bc:'#1FA97A' },
+              { l:'Facturado este mes', v:'14.280€', s:'↑ +23%', sc:'#0F766E', w:'74%', bc:'#0F766E' },
               { l:'Pendiente de cobro',  v:'3.900€',  s:'2 facturas · 8d', sc:'#94a3b8', w:'38%', bc:'#f59e0b' },
-              { l:'Leads activos',       v:'47',       s:'↑ +12 esta semana', sc:'#1FA97A', w:'82%', bc:'#1FA97A' },
+              { l:'Leads activos',       v:'47',       s:'↑ +12 esta semana', sc:'#0F766E', w:'82%', bc:'#0F766E' },
             ].map((k, i) => (
               <div key={i} style={{ background:'#fff', borderRadius:'11px', border:'.5px solid #e8eaed', padding:'13px 15px' }}>
                 <div style={{ fontSize:'8px', fontWeight:700, color:'#94a3b8', textTransform:'uppercase', letterSpacing:'.7px', marginBottom:'4px' }}>{k.l}</div>
@@ -553,7 +553,7 @@ export function ChaosAnimation() {
             <div style={{ background:'#fff', borderRadius:'11px', border:'.5px solid #e8eaed', padding:'13px 15px', gridColumn:'1/4' }}>
               <div style={{ fontSize:'11px', fontWeight:700, color:'#0B1F2A', marginBottom:'8px', display:'flex', justifyContent:'space-between' }}>Pipeline de leads<span style={{ fontSize:'9px', fontWeight:500, color:'#94a3b8' }}>47 en total</span></div>
               <div style={{ display:'flex', gap:'7px' }}>
-                {[{l:'Nuevo',n:18,c:'#1FA97A',bg:'#E1F5EE'},{l:'Contactado',n:12,c:'#3b82f6',bg:'#dbeafe'},{l:'Cualificado',n:9,c:'#f59e0b',bg:'#fef3c7'},{l:'Convertido',n:6,c:'#8b5cf6',bg:'#ede9fe'},{l:'Perdido',n:2,c:'#ef4444',bg:'#fee2e2'}].map((col,i)=>(
+                {[{l:'Nuevo',n:18,c:'#0F766E',bg:'#E1F5EE'},{l:'Contactado',n:12,c:'#3b82f6',bg:'#dbeafe'},{l:'Cualificado',n:9,c:'#f59e0b',bg:'#fef3c7'},{l:'Convertido',n:6,c:'#8b5cf6',bg:'#ede9fe'},{l:'Perdido',n:2,c:'#ef4444',bg:'#fee2e2'}].map((col,i)=>(
                   <div key={i} style={{ flex:1, background:'#f8fafc', borderRadius:'8px', padding:'9px', border:'.5px solid #e8eaed' }}>
                     <div style={{ fontSize:'8px', fontWeight:700, color:col.c, marginBottom:'3px' }}>{col.l}</div>
                     <div style={{ fontSize:'17px', fontWeight:800, color:'#0B1F2A' }}>{col.n}</div>
@@ -564,7 +564,7 @@ export function ChaosAnimation() {
             </div>
             <div style={{ background:'#fff', borderRadius:'11px', border:'.5px solid #e8eaed', padding:'13px 15px', gridColumn:'1/3' }}>
               <div style={{ fontSize:'11px', fontWeight:700, color:'#0B1F2A', marginBottom:'7px' }}>Leads recientes</div>
-              {[{av:'MG',c:'#1FA97A',n:'María García Ruiz',m:'Diseño web',bl:'Nuevo',bc:'#E1F5EE',bt:'#1FA97A'},{av:'RM',c:'#3b82f6',n:'Restaurante Mirador',m:'Branding',bl:'Contactado',bc:'#dbeafe',bt:'#3b82f6'},{av:'EV',c:'#f59e0b',n:'Estudio Vega',m:'Web + SEO',bl:'Cualificado',bc:'#fef3c7',bt:'#d97706'},{av:'HM',c:'#8b5cf6',n:'Hotel Miramar BCN',m:'Diseño web',bl:'Propuesta',bc:'#ede9fe',bt:'#7c3aed'}].map((r,i)=>(
+              {[{av:'MG',c:'#0F766E',n:'María García Ruiz',m:'Diseño web',bl:'Nuevo',bc:'#E1F5EE',bt:'#0F766E'},{av:'RM',c:'#3b82f6',n:'Restaurante Mirador',m:'Branding',bl:'Contactado',bc:'#dbeafe',bt:'#3b82f6'},{av:'EV',c:'#f59e0b',n:'Estudio Vega',m:'Web + SEO',bl:'Cualificado',bc:'#fef3c7',bt:'#d97706'},{av:'HM',c:'#8b5cf6',n:'Hotel Miramar BCN',m:'Diseño web',bl:'Propuesta',bc:'#ede9fe',bt:'#7c3aed'}].map((r,i)=>(
                 <div key={i} style={{ display:'flex', alignItems:'center', gap:'8px', padding:'5px 0', borderBottom:'.5px solid #f1f5f9' }}>
                   <div style={{ width:'24px', height:'24px', borderRadius:'50%', background:r.c, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'8px', fontWeight:700, color:'#fff', flexShrink:0 }}>{r.av}</div>
                   <div style={{ flex:1, minWidth:0 }}><div style={{ fontSize:'10px', fontWeight:600, color:'#1e293b', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{r.n}</div><div style={{ fontSize:'9px', color:'#94a3b8' }}>{r.m}</div></div>
@@ -574,7 +574,7 @@ export function ChaosAnimation() {
             </div>
             <div style={{ background:'#fff', borderRadius:'11px', border:'.5px solid #e8eaed', padding:'13px 15px' }}>
               <div style={{ fontSize:'11px', fontWeight:700, color:'#0B1F2A', marginBottom:'7px' }}>Actividad reciente</div>
-              {[{c:'#1FA97A',t:'Nuevo lead — María García',m:'Hace 2 minutos'},{c:'#3b82f6',t:'Factura cobrada 2.400€',m:'Hace 8 minutos'},{c:'#8b5cf6',t:'Email automático enviado',m:'Hace 15 minutos'},{c:'#f59e0b',t:'Tarea — Propuesta Vega',m:'Hace 1 hora'}].map((a,i)=>(
+              {[{c:'#0F766E',t:'Nuevo lead — María García',m:'Hace 2 minutos'},{c:'#3b82f6',t:'Factura cobrada 2.400€',m:'Hace 8 minutos'},{c:'#8b5cf6',t:'Email automático enviado',m:'Hace 15 minutos'},{c:'#f59e0b',t:'Tarea — Propuesta Vega',m:'Hace 1 hora'}].map((a,i)=>(
                 <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:'7px', padding:'5px 0', borderBottom:i<3?'.5px solid #f1f5f9':'none' }}>
                   <div style={{ width:'6px', height:'6px', borderRadius:'50%', background:a.c, flexShrink:0, marginTop:'3px' }}/>
                   <div style={{ flex:1 }}><div style={{ fontSize:'9px', fontWeight:600, color:'#334155' }}>{a.t}</div><div style={{ fontSize:'8px', color:'#94a3b8', marginTop:'1px' }}>{a.m}</div></div>

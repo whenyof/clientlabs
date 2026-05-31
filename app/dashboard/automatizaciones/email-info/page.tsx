@@ -43,11 +43,11 @@ export default function EmailInfoPage() {
         {/* Hero */}
         <div className="mb-10">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#1FA97A] to-[#0B8A5E] flex items-center justify-center shadow-lg shadow-[#1FA97A]/20">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#0F766E] to-[#0B8A5E] flex items-center justify-center shadow-lg shadow-[#0F766E]/20">
               <Mail className="h-6 w-6 text-white" />
             </div>
             <div>
-              <div className="text-[11px] font-semibold text-[#1FA97A] uppercase tracking-wider mb-0.5">
+              <div className="text-[11px] font-semibold text-[#0F766E] uppercase tracking-wider mb-0.5">
                 Emails automáticos
               </div>
               <h1 className="text-[24px] font-bold text-slate-900 leading-tight">
@@ -90,7 +90,7 @@ export default function EmailInfoPage() {
                 descripcion:
                   "El mensaje se envía desde hola@clientlabs.io pero con tu nombre como remitente. Tu cliente ve \"De: [Tu nombre]\" en su bandeja de entrada.",
                 icon: Mail,
-                color: "bg-[#E1F5EE] text-[#1FA97A]",
+                color: "bg-[#E1F5EE] text-[#0F766E]",
               },
               {
                 paso: "4",
@@ -135,7 +135,7 @@ export default function EmailInfoPage() {
                 descripcion:
                   "El 78% de los clientes elige al proveedor que responde primero. Con ClientLabs, tú siempre eres el primero.",
                 icon: Zap,
-                color: "text-[#1FA97A]",
+                color: "text-[#0F766E]",
                 bg: "bg-[#E1F5EE]",
               },
               {
@@ -232,7 +232,7 @@ export default function EmailInfoPage() {
 
             {/* Cabecera de la card */}
             <div className="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-[#E1F5EE]">
-              <div className="w-9 h-9 rounded-xl bg-[#1FA97A] flex items-center justify-center flex-shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-[#0F766E] flex items-center justify-center flex-shrink-0">
                 <Globe className="h-4 w-4 text-white" />
               </div>
               <div className="flex-1">
@@ -240,7 +240,7 @@ export default function EmailInfoPage() {
                   <span className="text-[14px] font-bold text-slate-900">
                     Envía desde tu propio dominio
                   </span>
-                  <span className="px-2 py-0.5 bg-[#1FA97A] rounded-full text-[10px] font-bold text-white uppercase tracking-wide">
+                  <span className="px-2 py-0.5 bg-[#0F766E] rounded-full text-[10px] font-bold text-white uppercase tracking-wide">
                     Próximamente
                   </span>
                 </div>
@@ -264,7 +264,7 @@ export default function EmailInfoPage() {
                   "Tus clientes ven hola@tuempresa.com — nunca saben que usas ClientLabs",
                 ].map((paso, i) => (
                   <div key={i} className="flex items-start gap-3">
-                    <div className="w-5 h-5 rounded-full bg-[#1FA97A] flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <div className="w-5 h-5 rounded-full bg-[#0F766E] flex items-center justify-center flex-shrink-0 mt-0.5">
                       <span className="text-[9px] font-bold text-white">{i + 1}</span>
                     </div>
                     <span className="text-[13px] text-slate-600 leading-relaxed">{paso}</span>
@@ -278,7 +278,7 @@ export default function EmailInfoPage() {
                   ser de los primeros en usarla, escríbenos a{" "}
                   <a
                     href="mailto:hola@clientlabs.io"
-                    className="text-[#1FA97A] font-medium hover:underline"
+                    className="text-[#0F766E] font-medium hover:underline"
                   >
                     hola@clientlabs.io
                   </a>
@@ -339,8 +339,8 @@ export default function EmailInfoPage() {
         </section>
 
         {/* CTA final */}
-        <div className="bg-[#E1F5EE] border border-[#1FA97A]/20 rounded-2xl p-6 text-center">
-          <div className="w-10 h-10 rounded-xl bg-[#1FA97A] flex items-center justify-center mx-auto mb-3">
+        <div className="bg-[#E1F5EE] border border-[#0F766E]/20 rounded-2xl p-6 text-center">
+          <div className="w-10 h-10 rounded-xl bg-[#0F766E] flex items-center justify-center mx-auto mb-3">
             <Zap className="h-5 w-5 text-white" />
           </div>
           <h3 className="text-[16px] font-bold text-slate-900 mb-2">
@@ -352,7 +352,7 @@ export default function EmailInfoPage() {
           </p>
           <button
             onClick={() => router.push("/dashboard/automatizaciones")}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1FA97A] text-white text-[13px] font-semibold rounded-xl hover:bg-[#1a9068] transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0F766E] text-white text-[13px] font-semibold rounded-xl hover:bg-[#0E665F] transition-colors"
           >
             Ver mis automatizaciones
             <ChevronRight className="h-4 w-4" />

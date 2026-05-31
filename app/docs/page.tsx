@@ -166,7 +166,7 @@ export default function DocsPage() {
                 <a
                   key={link.id}
                   href={`#${link.id}`}
-                  className="block px-3 py-2 text-[13px] text-slate-600 rounded-lg hover:bg-slate-50 hover:text-[#1FA97A] transition-colors"
+                  className="block px-3 py-2 text-[13px] text-slate-600 rounded-lg hover:bg-slate-50 hover:text-[#0F766E] transition-colors"
                 >
                   {link.label}
                 </a>
@@ -183,7 +183,7 @@ export default function DocsPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 {startCards.map((c) => (
                   <div key={c.title} className="border border-slate-200 rounded-xl p-5">
-                    <c.Icon className="w-5 h-5 text-[#1FA97A] mb-3" />
+                    <c.Icon className="w-5 h-5 text-[#0F766E] mb-3" />
                     <h3 className="text-[14px] font-semibold mb-1">{c.title}</h3>
                     <p className="text-[13px] text-slate-500 leading-relaxed">{c.desc}</p>
                   </div>
@@ -199,7 +199,7 @@ export default function DocsPage() {
                   <h3 className="text-[15px] font-semibold mb-2">2.1 Gestión de leads</h3>
                   <p className="text-[13px] text-slate-600 leading-relaxed mb-2">Los leads pasan por 5 estados: <strong>Nuevo → Contactado → Cualificado → Convertido → Perdido</strong>. Cada cambio de estado actualiza el scoring automáticamente. Puedes añadir notas, registrar interacciones (llamadas, emails, reuniones) y convertir un lead en cliente con un clic.</p>
                   <p className="text-[13px] text-slate-500 mb-2">Los leads sin actividad durante 7 días pasan automáticamente a estado "Estancado".</p>
-                  <Link href="/blog/como-no-perder-clientes-seguimiento" className="text-[#1FA97A] hover:underline text-[13px]">
+                  <Link href="/blog/como-no-perder-clientes-seguimiento" className="text-[#0F766E] hover:underline text-[13px]">
                     Leer: Cómo no perder clientes por no hacer seguimiento →
                   </Link>
                 </div>
@@ -210,7 +210,7 @@ export default function DocsPage() {
                 <div className="border border-slate-200 rounded-xl p-5">
                   <h3 className="text-[15px] font-semibold mb-2">2.3 Facturación</h3>
                   <p className="text-[13px] text-slate-600 leading-relaxed mb-2">Genera facturas legales en segundos. Configura tus datos fiscales una sola vez y selecciona el cliente al crear cada factura. Envíala por email directamente desde la plataforma. Registra pagos y gestiona facturas vencidas desde el panel.</p>
-                  <Link href="/blog/facturacion-autonomos-espana-2026" className="text-[#1FA97A] hover:underline text-[13px]">
+                  <Link href="/blog/facturacion-autonomos-espana-2026" className="text-[#0F766E] hover:underline text-[13px]">
                     Leer: Facturación para autónomos en España en 2026 →
                   </Link>
                 </div>
@@ -253,7 +253,7 @@ export default function DocsPage() {
               <div className="border border-slate-200 rounded-xl p-6">
                 <p className="text-[14px] text-slate-700 leading-relaxed">
                   ¿No encuentras lo que buscas? Escríbenos a{" "}
-                  <a href="mailto:hola@clientlabs.io" className="text-[#1FA97A] font-medium hover:underline">
+                  <a href="mailto:hola@clientlabs.io" className="text-[#0F766E] font-medium hover:underline">
                     hola@clientlabs.io
                   </a>{" "}
                   y respondemos en menos de 24h.
@@ -292,7 +292,7 @@ export default function DocsPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 {automationCards.map((card) => (
                   <div key={card.title} className="border border-slate-200 rounded-xl p-5">
-                    <card.Icon className="w-5 h-5 text-[#1FA97A] mb-3" />
+                    <card.Icon className="w-5 h-5 text-[#0F766E] mb-3" />
                     <h3 className="text-[14px] font-semibold mb-1">{card.title}</h3>
                     <p className="text-[13px] text-slate-500 leading-relaxed">{card.desc}</p>
                   </div>

@@ -28,7 +28,7 @@ type EditProviderProductDialogProps = {
     onSuccess?: () => void
 }
 
-const inputClass = "w-full px-4 py-2.5 rounded-xl border border-slate-200 text-[14px] text-slate-900 placeholder:text-slate-400 bg-slate-50 focus:bg-white focus:border-[#1FA97A] focus:ring-2 focus:ring-[#1FA97A]/10 outline-none transition-all"
+const inputClass = "w-full px-4 py-2.5 rounded-xl border border-slate-200 text-[14px] text-slate-900 placeholder:text-slate-400 bg-slate-50 focus:bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/10 outline-none transition-all"
 const labelClass = "text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500"
 
 export function EditProviderProductDialog({
@@ -121,7 +121,7 @@ export function EditProviderProductDialog({
                 <form onSubmit={handleSubmit}>
                     <div className="px-6 py-5 space-y-4 max-h-[65vh] overflow-y-auto">
                         <div className="space-y-1.5">
-                            <label className={labelClass}>NOMBRE <span className="text-[#1FA97A]">*</span></label>
+                            <label className={labelClass}>NOMBRE <span className="text-[#0F766E]">*</span></label>
                             <input
                                 value={formData.name}
                                 onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
@@ -132,7 +132,7 @@ export function EditProviderProductDialog({
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className={labelClass}>CÓDIGO <span className="text-[#1FA97A]">*</span></label>
+                            <label className={labelClass}>CÓDIGO <span className="text-[#0F766E]">*</span></label>
                             <input
                                 value={formData.code}
                                 onChange={(e) => setFormData((prev) => ({ ...prev, code: e.target.value }))}
@@ -164,7 +164,7 @@ export function EditProviderProductDialog({
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className={labelClass}>PRECIO (€) <span className="text-[#1FA97A]">*</span></label>
+                            <label className={labelClass}>PRECIO (€) <span className="text-[#0F766E]">*</span></label>
                             <input
                                 type="text"
                                 inputMode="decimal"
@@ -193,7 +193,7 @@ export function EditProviderProductDialog({
                                 id="edit-product-active"
                                 checked={formData.isActive}
                                 onChange={(e) => setFormData((prev) => ({ ...prev, isActive: e.target.checked }))}
-                                className="w-4 h-4 rounded border-slate-300 accent-[#1FA97A]"
+                                className="w-4 h-4 rounded border-slate-300 accent-[#0F766E]"
                             />
                             <label htmlFor="edit-product-active" className="text-sm text-slate-700 cursor-pointer">
                                 Producto activo (visible en catálogo y pedidos)
@@ -205,7 +205,7 @@ export function EditProviderProductDialog({
                         <button type="button" onClick={() => onOpenChange(false)} className="px-5 py-2.5 rounded-xl border border-slate-200 text-[13px] font-medium text-slate-700 hover:bg-slate-50 transition-colors">
                             {labels.common.cancel}
                         </button>
-                        <button type="submit" disabled={loading} className="px-5 py-2.5 rounded-xl bg-[#1FA97A] text-white text-[13px] font-medium hover:bg-[#178f68] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+                        <button type="submit" disabled={loading} className="px-5 py-2.5 rounded-xl bg-[#0F766E] text-white text-[13px] font-medium hover:bg-[#0E665F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
                             {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Guardando...</> : "Guardar cambios"}
                         </button>
                     </div>

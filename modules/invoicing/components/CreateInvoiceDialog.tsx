@@ -601,7 +601,7 @@ export function CreateInvoiceDialog({
                     onClick={() => setInvoiceDocType(type)}
                     className={`flex-1 rounded-lg border px-3 py-2.5 text-left transition-colors ${
                       invoiceDocType === type
-                        ? "border-[#1FA97A] bg-[#1FA97A]/8 text-[#1FA97A]"
+                        ? "border-[#0F766E] bg-[#0F766E]/8 text-[#0F766E]"
                         : "border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50"
                     }`}
                   >
@@ -625,7 +625,7 @@ export function CreateInvoiceDialog({
                     onChange={(e) => setClientId(e.target.value)}
                     required
                     disabled={!editableInEditMode}
-                    className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-8 text-sm text-slate-800 focus:border-[#1FA97A] focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/20 disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-8 text-sm text-slate-800 focus:border-[#0F766E] focus:outline-none focus:ring-1 focus:ring-[#0F766E]/20 disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     <option value="">Seleccionar cliente</option>
                     {clients.map((c) => (
@@ -646,7 +646,7 @@ export function CreateInvoiceDialog({
                     value={saleId}
                     onChange={(e) => setSaleId(e.target.value)}
                     disabled={!editableInEditMode || !clientId || loadingSales}
-                    className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-8 text-sm text-slate-800 focus:border-[#1FA97A] focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/20 disabled:opacity-50"
+                    className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-8 text-sm text-slate-800 focus:border-[#0F766E] focus:outline-none focus:ring-1 focus:ring-[#0F766E]/20 disabled:opacity-50"
                   >
                     <option value="">
                       {loadingSales
@@ -682,7 +682,7 @@ export function CreateInvoiceDialog({
                   onChange={(e) => setIssueDate(e.target.value)}
                   required
                   disabled={!editableInEditMode}
-                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-[#1FA97A] focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/20 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-[#0F766E] focus:outline-none focus:ring-1 focus:ring-[#0F766E]/20 disabled:opacity-60 disabled:cursor-not-allowed"
                 />
               </div>
               <div>
@@ -695,7 +695,7 @@ export function CreateInvoiceDialog({
                   onChange={(e) => setDueDate(e.target.value)}
                   required
                   disabled={!editableInEditMode}
-                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-[#1FA97A] focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/20 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-[#0F766E] focus:outline-none focus:ring-1 focus:ring-[#0F766E]/20 disabled:opacity-60 disabled:cursor-not-allowed"
                 />
               </div>
             </div>
@@ -708,7 +708,7 @@ export function CreateInvoiceDialog({
                     <button
                       type="button"
                       onClick={() => setBillingLockedFromClient(false)}
-                      className="text-xs text-[#1FA97A] hover:text-[#178a64] underline"
+                      className="text-xs text-[#0F766E] hover:text-[#0E665F] underline"
                     >
                       Editar datos para esta factura
                     </button>
@@ -739,7 +739,7 @@ export function CreateInvoiceDialog({
                         placeholder={label}
                         className={`w-full rounded-lg border px-3 py-2 text-sm text-slate-800 placeholder-slate-400 disabled:opacity-60 ${billingLockedFromClient
                           ? "border-slate-200 bg-slate-100 cursor-default"
-                          : "border-slate-200 bg-white focus:border-[#1FA97A] focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/20"
+                          : "border-slate-200 bg-white focus:border-[#0F766E] focus:outline-none focus:ring-1 focus:ring-[#0F766E]/20"
                           }`}
                       />
                     </div>
@@ -751,7 +751,7 @@ export function CreateInvoiceDialog({
                       type="button"
                       onClick={handleUpdateClient}
                       disabled={updatingClient}
-                      className="text-xs font-medium text-[#1FA97A] hover:text-[#178a64] disabled:opacity-50 transition-colors"
+                      className="text-xs font-medium text-[#0F766E] hover:text-[#0E665F] disabled:opacity-50 transition-colors"
                     >
                       {updatingClient ? "Actualizando ficha..." : "Guardar cambios en ficha de cliente"}
                     </button>
@@ -800,7 +800,7 @@ export function CreateInvoiceDialog({
                               onBlur={() => setTimeout(() => setProductAC((prev) => ({ ...prev, open: false })), 150)}
                               placeholder="Descripción"
                               disabled={!editableInEditMode}
-                              className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-slate-800 placeholder-slate-400 text-sm focus:border-[#1FA97A] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                              className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-slate-800 placeholder-slate-400 text-sm focus:border-[#0F766E] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
                             />
                             {productAC.lineId === line.id && productAC.open && filteredProductSuggestions(productAC.query).length > 0 && (
                               <div className="absolute left-0 top-full mt-1 w-72 bg-white border border-slate-200 rounded-lg shadow-lg z-20 overflow-hidden">
@@ -833,7 +833,7 @@ export function CreateInvoiceDialog({
                             value={line.quantity || ""}
                             onChange={(e) => handleQtyChange(line, Number(e.target.value) || 0)}
                             disabled={!editableInEditMode}
-                            className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-slate-800 placeholder-slate-300 text-sm text-right focus:border-[#1FA97A] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-slate-800 placeholder-slate-300 text-sm text-right focus:border-[#0F766E] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
                           />
                         </td>
                         <td className="py-1.5 px-2 text-right">
@@ -845,7 +845,7 @@ export function CreateInvoiceDialog({
                             value={line.unitPrice || ""}
                             onChange={(e) => handleUnitChange(line, Number(e.target.value) || 0)}
                             disabled={!editableInEditMode}
-                            className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-slate-800 placeholder-slate-300 text-sm text-right focus:border-[#1FA97A] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-slate-800 placeholder-slate-300 text-sm text-right focus:border-[#0F766E] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
                           />
                         </td>
                         <td className="py-1.5 px-2 text-right">
@@ -856,7 +856,7 @@ export function CreateInvoiceDialog({
                             value={line.taxPercent ?? ""}
                             onChange={(e) => handleVatChange(line, Number(e.target.value) || 0)}
                             disabled={!editableInEditMode}
-                            className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-slate-800 text-sm text-right focus:border-[#1FA97A] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-slate-800 text-sm text-right focus:border-[#0F766E] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
                           />
                         </td>
                         <td className="py-1.5 px-2 text-right tabular-nums text-slate-700">
@@ -867,7 +867,7 @@ export function CreateInvoiceDialog({
                             value={line.quantity <= 0 ? "" : computeLineTotal(line) || ""}
                             onChange={(e) => handleTotalChange(line, Number(e.target.value) || 0)}
                             disabled={!editableInEditMode || line.quantity <= 0}
-                            className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-slate-800 text-sm text-right focus:border-[#1FA97A] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-slate-800 text-sm text-right focus:border-[#0F766E] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
                           />
                         </td>
                         <td className="py-1.5 px-1">
@@ -904,7 +904,7 @@ export function CreateInvoiceDialog({
                   value={irpfRate}
                   onChange={(e) => setIrpfRate(parseFloat(e.target.value))}
                   disabled={!editableInEditMode}
-                  className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-8 text-sm text-slate-800 focus:border-[#1FA97A] focus:outline-none disabled:opacity-60"
+                  className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-8 text-sm text-slate-800 focus:border-[#0F766E] focus:outline-none disabled:opacity-60"
                 >
                   <option value={0}>Sin retención</option>
                   <option value={7}>7% — Primer año de actividad</option>
@@ -926,7 +926,7 @@ export function CreateInvoiceDialog({
                       value={paymentMethod}
                       onChange={(e) => setPaymentMethod(e.target.value)}
                       disabled={!editableInEditMode}
-                      className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-8 text-sm text-slate-800 focus:border-[#1FA97A] focus:outline-none disabled:opacity-60"
+                      className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-8 text-sm text-slate-800 focus:border-[#0F766E] focus:outline-none disabled:opacity-60"
                     >
                       <option value="transferencia">Transferencia</option>
                       <option value="tarjeta">Tarjeta</option>
@@ -943,7 +943,7 @@ export function CreateInvoiceDialog({
                     onChange={(e) => setPaymentReference(e.target.value)}
                     disabled={!editableInEditMode}
                     placeholder="Referencia de pago"
-                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-[#1FA97A] focus:outline-none disabled:opacity-60"
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-[#0F766E] focus:outline-none disabled:opacity-60"
                   />
                 </div>
                 <div className="sm:col-span-2">
@@ -954,7 +954,7 @@ export function CreateInvoiceDialog({
                     onChange={(e) => setIban(e.target.value)}
                     disabled={!editableInEditMode}
                     placeholder="ES00 0000 0000 0000 0000 0000"
-                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-[#1FA97A] focus:outline-none disabled:opacity-60"
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-[#0F766E] focus:outline-none disabled:opacity-60"
                   />
                 </div>
                 <div>
@@ -965,7 +965,7 @@ export function CreateInvoiceDialog({
                     onChange={(e) => setBic(e.target.value)}
                     disabled={!editableInEditMode}
                     placeholder="BIC/SWIFT"
-                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-[#1FA97A] focus:outline-none disabled:opacity-60"
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-[#0F766E] focus:outline-none disabled:opacity-60"
                   />
                 </div>
               </div>
@@ -982,7 +982,7 @@ export function CreateInvoiceDialog({
                   onChange={(e) => setNotes(e.target.value)}
                   rows={2}
                   disabled={!editableInEditMode}
-                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-[#1FA97A] focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/20 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-[#0F766E] focus:outline-none focus:ring-1 focus:ring-[#0F766E]/20 disabled:opacity-60 disabled:cursor-not-allowed"
                 />
               </div>
               <div>
@@ -994,7 +994,7 @@ export function CreateInvoiceDialog({
                   onChange={(e) => setTerms(e.target.value)}
                   rows={2}
                   disabled={!editableInEditMode}
-                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-[#1FA97A] focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/20 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-[#0F766E] focus:outline-none focus:ring-1 focus:ring-[#0F766E]/20 disabled:opacity-60 disabled:cursor-not-allowed"
                 />
               </div>
             </div>
@@ -1011,7 +1011,7 @@ export function CreateInvoiceDialog({
             <button
               type="submit"
               disabled={!editableInEditMode || saving || !clientId || lines.some((l) => !l.description.trim())}
-              className="rounded-lg bg-[#1FA97A] px-4 py-2 text-sm font-medium text-white hover:bg-[#178a64] disabled:opacity-50 transition-colors"
+              className="rounded-lg bg-[#0F766E] px-4 py-2 text-sm font-medium text-white hover:bg-[#0E665F] disabled:opacity-50 transition-colors"
             >
               {saving ? "Guardando…" : editInvoiceId ? "Actualizar borrador" : "Guardar como borrador"}
             </button>

@@ -101,7 +101,7 @@ export function LeadsCharts({ initialData }: LeadsChartsProps) {
         className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-slate-50 transition-colors"
       >
         <div className="flex items-center gap-2.5">
-          <BarChart2 className="h-4 w-4 text-[#1FA97A]" />
+          <BarChart2 className="h-4 w-4 text-[#0F766E]" />
           <span className="text-[13px] font-semibold text-slate-700">
             Resumen visual
           </span>
@@ -210,11 +210,11 @@ export function LeadsCharts({ initialData }: LeadsChartsProps) {
                     />
                     <Tooltip
                       content={<BarTooltip />}
-                      cursor={{ fill: "rgba(31,169,122,0.06)", radius: 4 }}
+                      cursor={{ fill: "rgba(15,118,110,0.06)", radius: 4 }}
                     />
                     <ReferenceLine
                       y={avg}
-                      stroke="#1FA97A"
+                      stroke="#0F766E"
                       strokeDasharray="3 3"
                       strokeOpacity={0.4}
                       strokeWidth={1}
@@ -225,7 +225,7 @@ export function LeadsCharts({ initialData }: LeadsChartsProps) {
                           key={i}
                           fill={
                             i === dailyData.length - 1
-                              ? "#1FA97A"
+                              ? "#0F766E"
                               : entry.total > 0
                                 ? "#D1FAE5"
                                 : "#F3F4F6"
@@ -244,7 +244,7 @@ export function LeadsCharts({ initialData }: LeadsChartsProps) {
                               x={x + width / 2}
                               y={y - 6}
                               textAnchor="middle"
-                              fill="#1FA97A"
+                              fill="#0F766E"
                               fontSize={10}
                               fontWeight={600}
                             >

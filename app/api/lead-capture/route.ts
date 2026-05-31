@@ -59,7 +59,7 @@ function buildCouponEmail(): string {
         <img src="${logoUrl}" width="36" height="36" alt="ClientLabs"
              style="border-radius:8px;display:block;margin:0 auto 10px;" />
         <span style="font-size:20px;font-weight:700;color:#0B1F2A;letter-spacing:-0.3px;">
-          Client<span style="color:#1FA97A;">Labs</span>
+          Client<span style="color:#0F766E;">Labs</span>
         </span>
       </td></tr>
 
@@ -67,7 +67,7 @@ function buildCouponEmail(): string {
       <tr><td style="background:#ffffff;border-radius:12px;border:1px solid #e5e9ec;padding:40px 36px;">
 
         <p style="margin:0 0 16px;font-size:11px;font-weight:700;text-transform:uppercase;
-                  letter-spacing:0.12em;color:#1FA97A;">
+                  letter-spacing:0.12em;color:#0F766E;">
           Oferta exclusiva de bienvenida
         </p>
 
@@ -83,10 +83,10 @@ function buildCouponEmail(): string {
 
         <!-- Coupon box -->
         <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
-          <tr><td style="background:#f0faf6;border:2px dashed #1FA97A;border-radius:10px;
+          <tr><td style="background:#f0faf6;border:2px dashed #0F766E;border-radius:10px;
                          padding:20px 24px;text-align:center;">
             <p style="margin:0 0 4px;font-size:11px;font-weight:600;text-transform:uppercase;
-                      letter-spacing:0.1em;color:#1FA97A;">
+                      letter-spacing:0.1em;color:#0F766E;">
               Tu codigo de descuento
             </p>
             <p style="margin:0;font-size:30px;font-weight:800;letter-spacing:0.15em;color:#0B1F2A;">
@@ -109,7 +109,7 @@ function buildCouponEmail(): string {
         <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
           <tr><td align="center">
             <a href="${precios}"
-               style="display:inline-block;background:linear-gradient(135deg,#1FA97A 0%,#178a64 100%);
+               style="display:inline-block;background:linear-gradient(135deg,#0F766E 0%,#0E665F 100%);
                       color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;
                       padding:14px 32px;border-radius:8px;">
               Ver planes y contratar

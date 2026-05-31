@@ -34,10 +34,10 @@ export default function InformesPage() {
           >
             <div style={{
               width: 36, height: 36, borderRadius: 8,
-              background: "#1FA97A18", display: "flex", alignItems: "center", justifyContent: "center",
+              background: "#0F766E18", display: "flex", alignItems: "center", justifyContent: "center",
               marginBottom: 12,
             }}>
-              <Icon style={{ width: 18, height: 18, color: "#1FA97A" }} />
+              <Icon style={{ width: 18, height: 18, color: "#0F766E" }} />
             </div>
             <p style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)", margin: "0 0 4px" }}>{label}</p>
             <p style={{ fontSize: 12, color: "var(--text-secondary)", margin: 0 }}>{desc}</p>

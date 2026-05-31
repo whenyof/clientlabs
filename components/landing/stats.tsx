@@ -78,7 +78,7 @@ function MiniChart() {
               style={{
                 width: "38%",
                 height: `${((after[i] as number) / max) * 100}%`,
-                background: "linear-gradient(to top, #1FA97A, #17c088)",
+                background: "linear-gradient(to top, #0F766E, #17c088)",
                 borderRadius: "4px 4px 0 0",
               }}
             />
@@ -181,7 +181,7 @@ export function Stats() {
                   {chart.legendBefore}
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <span className="inline-block h-2.5 w-2.5 rounded-[3px] bg-[#1FA97A]" />
+                  <span className="inline-block h-2.5 w-2.5 rounded-[3px] bg-[#0F766E]" />
                   {chart.legendAfter}
                 </span>
               </div>

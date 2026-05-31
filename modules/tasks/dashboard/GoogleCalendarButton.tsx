@@ -60,8 +60,8 @@ export function GoogleCalendarButton() {
         title="Desconectar Google Calendar"
         style={{
           display: "inline-flex", alignItems: "center", gap: 6,
-          padding: "7px 12px", border: "0.5px solid #1FA97A55", borderRadius: 8,
-          background: "#1FA97A10", cursor: "pointer", color: "#1FA97A",
+          padding: "7px 12px", border: "0.5px solid #0F766E55", borderRadius: 8,
+          background: "#0F766E10", cursor: "pointer", color: "#0F766E",
           fontSize: 13, fontWeight: 500,
         }}
       >

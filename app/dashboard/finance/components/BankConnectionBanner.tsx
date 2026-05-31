@@ -42,10 +42,10 @@ export function BankConnectionBanner() {
   if (status === "loading" || status === "connected" || dismissed) return null
 
   return (
-    <div className="relative flex items-start gap-4 rounded-xl border border-[#1FA97A]/25 bg-gradient-to-r from-[#1FA97A]/5 to-emerald-50/40 px-5 py-4 mb-5">
+    <div className="relative flex items-start gap-4 rounded-xl border border-[#0F766E]/25 bg-gradient-to-r from-[#0F766E]/5 to-emerald-50/40 px-5 py-4 mb-5">
       {/* Icon */}
-      <div className="shrink-0 w-9 h-9 rounded-lg bg-[#1FA97A]/10 border border-[#1FA97A]/20 flex items-center justify-center mt-0.5">
-        <Building2 className="h-4.5 w-4.5 text-[#1FA97A]" />
+      <div className="shrink-0 w-9 h-9 rounded-lg bg-[#0F766E]/10 border border-[#0F766E]/20 flex items-center justify-center mt-0.5">
+        <Building2 className="h-4.5 w-4.5 text-[#0F766E]" />
       </div>
 
       {/* Text */}
@@ -62,7 +62,7 @@ export function BankConnectionBanner() {
             type="button"
             onClick={handleConnect}
             disabled={connecting}
-            className="inline-flex items-center gap-1.5 h-8 px-4 rounded-lg bg-[#1FA97A] hover:bg-[#178a64] text-white text-[12px] font-semibold transition-colors disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 h-8 px-4 rounded-lg bg-[#0F766E] hover:bg-[#0E665F] text-white text-[12px] font-semibold transition-colors disabled:opacity-60"
           >
             {connecting ? (
               <><RefreshCw className="h-3.5 w-3.5 animate-spin" /> Redirigiendo...</>
@@ -72,7 +72,7 @@ export function BankConnectionBanner() {
           </button>
           <Link
             href="/dashboard/finance/banco"
-            className="inline-flex items-center gap-1 text-[12px] text-[#1FA97A] hover:underline font-medium"
+            className="inline-flex items-center gap-1 text-[12px] text-[#0F766E] hover:underline font-medium"
           >
             Ver detalles <ArrowRight className="h-3 w-3" />
           </Link>

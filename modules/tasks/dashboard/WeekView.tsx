@@ -145,9 +145,9 @@ export function WeekView({ tasks, onTaskClick, onCellClick }: WeekViewProps) {
           const isToday = isSameDay(day, today)
           const isWeekend = i === 5 || i === 6
           return (
-            <div key={i} style={{ padding: "10px 0", textAlign: "center", background: isToday ? "#1FA97A08" : isWeekend ? "#f8fafc" : "transparent", borderLeft: "0.5px solid var(--border-subtle)" }}>
+            <div key={i} style={{ padding: "10px 0", textAlign: "center", background: isToday ? "#0F766E08" : isWeekend ? "#f8fafc" : "transparent", borderLeft: "0.5px solid var(--border-subtle)" }}>
               <p style={{ fontSize: 11, color: isWeekend && !isToday ? "#94a3b8" : "var(--text-secondary)", margin: 0, textTransform: "uppercase", letterSpacing: "0.05em" }}>{DAY_LABELS[i]}</p>
-              <p style={{ fontSize: 18, fontWeight: isToday ? 700 : 400, color: isToday ? "#1FA97A" : isWeekend ? "#94a3b8" : "var(--text-primary)", margin: "2px 0 0", lineHeight: 1 }}>{day.getDate()}</p>
+              <p style={{ fontSize: 18, fontWeight: isToday ? 700 : 400, color: isToday ? "#0F766E" : isWeekend ? "#94a3b8" : "var(--text-primary)", margin: "2px 0 0", lineHeight: 1 }}>{day.getDate()}</p>
             </div>
           )
         })}
@@ -199,7 +199,7 @@ export function WeekView({ tasks, onTaskClick, onCellClick }: WeekViewProps) {
 
                 {/* Drop highlight */}
                 {dropTarget?.di === di && (
-                  <div style={{ position: "absolute", top: (dropTarget.hour - GRID_START_H) * CELL_H, left: 2, right: 2, height: CELL_H, background: "#1FA97A10", border: "1.5px dashed #1FA97A", borderRadius: 4, pointerEvents: "none", zIndex: 3 }} />
+                  <div style={{ position: "absolute", top: (dropTarget.hour - GRID_START_H) * CELL_H, left: 2, right: 2, height: CELL_H, background: "#0F766E10", border: "1.5px dashed #0F766E", borderRadius: 4, pointerEvents: "none", zIndex: 3 }} />
                 )}
 
                 {/* Tasks */}
@@ -248,8 +248,8 @@ export function WeekView({ tasks, onTaskClick, onCellClick }: WeekViewProps) {
                 {/* Now line — updates every minute, green */}
                 {isToday && nowMins >= GRID_START_MINS && nowMins < (GRID_START_H + HOURS.length) * 60 && (
                   <div style={{ position: "absolute", left: 0, right: 0, top: nowTop, zIndex: 20, pointerEvents: "none", display: "flex", alignItems: "center" }}>
-                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#1FA97A", flexShrink: 0, marginLeft: -4 }} />
-                    <div style={{ flex: 1, height: 1.5, background: "#1FA97A", opacity: 0.6 }} />
+                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#0F766E", flexShrink: 0, marginLeft: -4 }} />
+                    <div style={{ flex: 1, height: 1.5, background: "#0F766E", opacity: 0.6 }} />
                   </div>
                 )}
               </div>

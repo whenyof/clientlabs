@@ -95,7 +95,7 @@ export function GenerateDocumentsModal({ quoteId, quoteNumber, existing, onClose
             existing={existing.deliveryNote}
           />
           <DocOption
-            icon={<Receipt className="h-4 w-4 text-[#1FA97A]" />}
+            icon={<Receipt className="h-4 w-4 text-[#0F766E]" />}
             title="Factura"
             description="Se creará como borrador. Emítela desde Facturación para Verifactu."
             checked={genInvoice}
@@ -111,7 +111,7 @@ export function GenerateDocumentsModal({ quoteId, quoteNumber, existing, onClose
                     value="F1"
                     checked={invoiceDocType === "F1"}
                     onChange={() => setInvoiceDocType("F1")}
-                    className="accent-[#1FA97A]"
+                    className="accent-[#0F766E]"
                   />
                   <span className="text-[12px] text-slate-700">F1 — Completa <span className="text-slate-400">(con NIF del cliente)</span></span>
                 </label>
@@ -122,7 +122,7 @@ export function GenerateDocumentsModal({ quoteId, quoteNumber, existing, onClose
                     value="F2"
                     checked={invoiceDocType === "F2"}
                     onChange={() => setInvoiceDocType("F2")}
-                    className="accent-[#1FA97A]"
+                    className="accent-[#0F766E]"
                   />
                   <span className="text-[12px] text-slate-700">F2 — Simplificada <span className="text-slate-400">(sin NIF, máx. 3.000€)</span></span>
                 </label>
@@ -148,7 +148,7 @@ export function GenerateDocumentsModal({ quoteId, quoteNumber, existing, onClose
           <button
             onClick={handleGenerate}
             disabled={loading || newCount === 0}
-            className="px-5 py-2 rounded-lg bg-[#1FA97A] text-white text-[13px] font-medium hover:bg-[#178f68] disabled:opacity-50 transition-colors"
+            className="px-5 py-2 rounded-lg bg-[#0F766E] text-white text-[13px] font-medium hover:bg-[#0E665F] disabled:opacity-50 transition-colors"
           >
             {loading ? "Generando..." : "Generar"}
           </button>
@@ -172,12 +172,12 @@ function DocOption({
   if (existing) {
     return (
       <div className="flex items-start gap-3 p-3.5 rounded-xl border border-[#9FE1CB] bg-[#F0FDF9]">
-        <CheckCircle className="h-4 w-4 text-[#1FA97A] mt-0.5 shrink-0" />
+        <CheckCircle className="h-4 w-4 text-[#0F766E] mt-0.5 shrink-0" />
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             {icon}
             <span className="text-[13px] font-medium text-slate-900">{title}</span>
-            <span className="font-mono text-[11px] text-[#1FA97A] font-semibold">{existing.number}</span>
+            <span className="font-mono text-[11px] text-[#0F766E] font-semibold">{existing.number}</span>
           </div>
           <p className="text-[11px] text-slate-400 mt-0.5">Ya creado</p>
         </div>
@@ -191,7 +191,7 @@ function DocOption({
           type="checkbox"
           checked={checked}
           onChange={e => onChange(e.target.checked)}
-          className="mt-0.5 h-4 w-4 rounded border-slate-300 accent-[#1FA97A] cursor-pointer"
+          className="mt-0.5 h-4 w-4 rounded border-slate-300 accent-[#0F766E] cursor-pointer"
         />
         <div>
           <div className="flex items-center gap-2">

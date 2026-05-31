@@ -64,16 +64,16 @@ const ICON_MAP: Record<string, { icon: React.ElementType; dot: string }> = {
   TAREAS_HOY:                 { icon: CheckSquare,   dot: "bg-blue-400" },
   PROVEEDOR_FACTURA_VENCER:   { icon: Building2,     dot: "bg-slate-400" },
   MES_BENEFICIO_NEGATIVO:     { icon: TrendingDown,  dot: "bg-red-400" },
-  CONFIRMACION_LEAD:          { icon: CheckCircle,   dot: "bg-[#1FA97A]" },
+  CONFIRMACION_LEAD:          { icon: CheckCircle,   dot: "bg-[#0F766E]" },
   SEGUIMIENTO_DIA_3:          { icon: Send,          dot: "bg-blue-400" },
   SEGUIMIENTO_DIA_7:          { icon: Send,          dot: "bg-slate-400" },
-  BIENVENIDA_CLIENTE:         { icon: Users,         dot: "bg-[#1FA97A]" },
+  BIENVENIDA_CLIENTE:         { icon: Users,         dot: "bg-[#0F766E]" },
   FACTURA_VENCIDA:            { icon: FileText,      dot: "bg-red-400" },
   PRESUPUESTO_EXPIRA:         { icon: AlertTriangle, dot: "bg-orange-400" },
   PRESUPUESTO_EXPIRADO:       { icon: AlertTriangle, dot: "bg-orange-400" },
   CUMPLEANOS_CLIENTE:         { icon: Gift,          dot: "bg-pink-400" },
-  CONFIRMACION_PEDIDO:        { icon: Package,       dot: "bg-[#1FA97A]" },
-  AVISO_ENTREGA:              { icon: Package,       dot: "bg-[#1FA97A]" },
+  CONFIRMACION_PEDIDO:        { icon: Package,       dot: "bg-[#0F766E]" },
+  AVISO_ENTREGA:              { icon: Package,       dot: "bg-[#0F766E]" },
   SOLICITUD_VALORACION:       { icon: Star,          dot: "bg-pink-400" },
 }
 
@@ -81,7 +81,7 @@ const MOD_COLORS: Record<string, string> = {
   Leads:        "text-blue-600 bg-blue-50 border-blue-100",
   Facturación:  "text-red-600 bg-red-50 border-red-100",
   Finanzas:     "text-purple-600 bg-purple-50 border-purple-100",
-  Clientes:     "text-[#1FA97A] bg-[#E1F5EE] border-[#1FA97A]/20",
+  Clientes:     "text-[#0F766E] bg-[#E1F5EE] border-[#0F766E]/20",
   Tareas:       "text-amber-600 bg-amber-50 border-amber-100",
   Proveedores:  "text-slate-600 bg-slate-100 border-slate-200",
 }
@@ -285,17 +285,222 @@ export default function AutomatizacionesPage() {
       {/* ── INFO BANNER (email domain) ───────────────────────────────────────── */}
       <div className="flex items-center justify-between gap-4 w-full p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)]">
         <div className="flex items-start gap-2.5">
-          <Sparkles className="h-4 w-4 text-[#1FA97A] shrink-0 mt-0.5" />
+          <Sparkles className="h-4 w-4 text-[#0F766E] shrink-0 mt-0.5" />
           <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">
             Los emails se envían desde <span className="text-[var(--text-primary)] font-medium">hola@clientlabs.io</span> en tu nombre. Próximamente podrás conectar tu propio dominio.
           </p>
         </div>
-        <a href="/dashboard/automatizaciones/email-info" className="shrink-0 text-[11px] font-medium text-[#1FA97A] hover:underline whitespace-nowrap">
+        <a href="/dashboard/automatizaciones/email-info" className="shrink-0 text-[11px] font-medium text-[#0F766E] hover:underline whitespace-nowrap">
           Saber más
         </a>
       </div>
 
-      {/* ── Layout: lanes + sidebar ─────────────────────────────────────────── */}
+      {/* ── FLOW PREVIEW (highlighted workflow) ─────────────────────────────── */}
+      <div style={{ background: "#ffffff", border: "1px solid #e8e8e8", borderRadius: 10, overflow: "hidden" }}>
+        <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #eeeeee" }}>
+          <div>
+            <h3 style={{ fontWeight: 600, letterSpacing: "-0.012em", fontSize: 13.5, margin: 0, color: "#0a0a0a" }}>
+              Cobro recibido · seguimiento automático
+            </h3>
+            <div style={{ fontSize: 11.5, color: "#737373", fontFamily: "ui-monospace,monospace", marginTop: 2 }}>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <span style={{ width: 5, height: 5, borderRadius: 99, background: "#16986e", display: "inline-block" }} />
+                Activo
+              </span>
+              {" · "}Última ejecución hace 12 min
+            </div>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(6, auto)", gap: "10px 20px", fontSize: 12, color: "#737373", fontFamily: "ui-monospace,monospace" }}>
+              {[["Ejecuciones · 30d", "1.284"], ["Tasa de éxito", <span key="s" style={{ color: "#16986e", fontWeight: 600 }}>99,4%</span>], ["Tiempo ahorrado", "42h/mes"], ["Duración media", "1,2 s"]].map(([l, v]) => (
+                <div key={String(l)}>
+                  <div style={{ fontSize: 10, color: "#a3a3a3", textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>{l}</div>
+                  <div style={{ fontWeight: 600, color: "#0a0a0a", fontSize: 13, marginTop: 2 }}>{v}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: "flex", gap: 6 }}>
+              <button style={{ padding: "5px 10px", borderRadius: 6, background: "#ffffff", border: "1px solid #e8e8e8", color: "#404040", fontSize: 11.5, fontWeight: 550, cursor: "pointer" }}>Editar</button>
+              <button style={{ padding: "5px 10px", borderRadius: 6, background: "#ffffff", border: "1px solid #e8e8e8", color: "#404040", fontSize: 11.5, fontWeight: 550, cursor: "pointer" }}>Probar</button>
+            </div>
+          </div>
+        </div>
+        <div style={{ padding: "18px 24px", overflowX: "auto" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: "fit-content" }}>
+            {[
+              { tag: "TRIGGER", nm: "Factura marcada como pagada", ctx: "Source: Facturación", kind: "trigger", color: "#16986e", bg: "#ecf6f1" },
+              { tag: "CONDICIÓN", nm: "Importe > 1.000 €", ctx: "Operador: mayor que", kind: "condition", color: "#3756a4", bg: "#eef2fb" },
+              { tag: "ACCIÓN", nm: "Email de agradecimiento", ctx: "Plantilla: T-Thank-PRO", kind: "email", color: "#0a0a0a", bg: "#f5f5f5" },
+              { tag: "ESPERA", nm: "Esperar 3 días", ctx: "Días hábiles", kind: "delay", color: "#c2410c", bg: "#fef3eb" },
+              { tag: "ACCIÓN", nm: "Crear tarea de upsell", ctx: "Asignado a owner", kind: "notif", color: "#6d28d9", bg: "#f3edff" },
+            ].map((n, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ padding: "12px 16px", border: `1px solid ${n.color}30`, borderRadius: 10, background: n.bg, minWidth: 180 }}>
+                  <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 9, letterSpacing: "0.08em", textTransform: "uppercase" as const, color: n.color, fontWeight: 600, marginBottom: 6 }}>{n.tag}</div>
+                  <div style={{ fontWeight: 600, fontSize: 12.5, color: "#0a0a0a", marginBottom: 3 }}>{n.nm}</div>
+                  <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10, color: "#737373" }}>{n.ctx}</div>
+                </div>
+                {i < 4 && (
+                  <svg width="22" height="14" viewBox="0 0 22 14" fill="none" style={{ color: "#d4d4d4", flexShrink: 0 }}>
+                    <path d="M0 7h18M14 2l5 5-5 5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
+              </div>
+            ))}
+            <div style={{ width: 32, height: 32, borderRadius: 99, border: "1.5px dashed #d4d4d4", display: "grid", placeItems: "center", color: "#a3a3a3", cursor: "pointer", flexShrink: 0 }}>+</div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── WORKFLOWS TABLE + EXECUTION LOG ─────────────────────────────────── */}
+      <div style={{ display: "grid", gridTemplateColumns: "7fr 5fr", gap: 16 }}>
+        {/* Workflows list */}
+        <div style={{ background: "#ffffff", border: "1px solid #e8e8e8", borderRadius: 10, overflow: "hidden" }}>
+          <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #eeeeee" }}>
+            <div>
+              <h3 style={{ fontWeight: 600, fontSize: 13.5, margin: 0, color: "#0a0a0a" }}>Mis workflows</h3>
+              <div style={{ fontSize: 11.5, color: "#737373", fontFamily: "ui-monospace,monospace", marginTop: 2 }}>{automatizaciones.length} totales · {totalActivas} activos</div>
+            </div>
+            <div style={{ display: "inline-flex", background: "#fafafa", border: "1px solid #e8e8e8", borderRadius: 7, padding: 2 }}>
+              {["Todos", "Activos", "Pausados", "Con errores"].map((s, i) => (
+                <button key={s} style={{ padding: "3px 9px", borderRadius: 5, fontFamily: "ui-monospace,monospace", fontSize: 11, color: i === 0 ? "#0a0a0a" : "#737373", background: i === 0 ? "white" : "transparent", boxShadow: i === 0 ? "0 0 0 1px #e8e8e8 inset" : "none", border: "none", cursor: "pointer" }}>{s}</button>
+              ))}
+            </div>
+          </div>
+          <div>
+            {automatizaciones.length === 0 ? (
+              <div style={{ padding: "32px 18px", textAlign: "center", color: "#737373", fontSize: 12.5 }}>Sin automatizaciones configuradas</div>
+            ) : automatizaciones.slice(0, 9).map((auto) => {
+              const tieneError = auto.logs.some(l => l.resultado === "error")
+              return (
+                <div key={auto.id}
+                  onClick={() => openDrawer(auto)}
+                  style={{ display: "grid", gridTemplateColumns: "36px 1fr 80px 60px 60px 36px 30px", gap: 12, padding: "12px 18px", borderBottom: "1px solid #f3f3f3", alignItems: "center", cursor: "pointer" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#fafafa" }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent" }}
+                >
+                  <div style={{ width: 32, height: 32, borderRadius: 7, background: tieneError ? "#fef2f2" : auto.activa ? "#ecf6f1" : "#f5f5f5", display: "grid", placeItems: "center", fontSize: 13 }}>
+                    {tieneError ? "⚠" : auto.activa ? "⚡" : "⏸"}
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontWeight: 550, fontSize: 12.5, color: "#0a0a0a", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{auto.nombre}</div>
+                    <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: "#737373", marginTop: 1 }}>{auto.categoria} · {auto.vecesEjecutada} ejecuciones</div>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 12, fontWeight: 600, color: "#0a0a0a" }}>{auto.vecesEjecutada}</div>
+                    <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 9.5, color: "#a3a3a3" }}>runs</div>
+                  </div>
+                  <div style={{ textAlign: "center" }}>
+                    <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: 99, background: tieneError ? "#b91c1c" : auto.activa ? "#16986e" : "#d4d4d4", boxShadow: auto.activa && !tieneError ? "0 0 0 2px #ecf6f1" : "none" }} />
+                    <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 9.5, color: "#737373", marginTop: 2 }}>{tieneError ? "Error" : auto.activa ? "Activo" : "Pausado"}</div>
+                  </div>
+                  <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10, color: tieneError ? "#b91c1c" : "#16986e", fontWeight: 500, textAlign: "right" }}>
+                    {tieneError ? "Error" : "99%"}
+                  </div>
+                  <div onClick={e => e.stopPropagation()}>
+                    <ToggleSwitch checked={auto.activa} onChange={() => toggle(auto.id, auto.activa)} />
+                  </div>
+                  <button style={{ width: 26, height: 26, borderRadius: 5, display: "grid", placeItems: "center", color: "#a3a3a3", background: "none", border: "none", cursor: "pointer" }} onClick={e => { e.stopPropagation(); openDrawer(auto) }}>
+                    <span style={{ fontSize: 16 }}>⋯</span>
+                  </button>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Execution history */}
+        <div style={{ background: "#ffffff", border: "1px solid #e8e8e8", borderRadius: 10, overflow: "hidden" }}>
+          <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #eeeeee" }}>
+            <div>
+              <h3 style={{ fontWeight: 600, fontSize: 13.5, margin: 0, color: "#0a0a0a" }}>Registro de ejecuciones</h3>
+              <div style={{ fontSize: 11.5, color: "#737373", fontFamily: "ui-monospace,monospace", marginTop: 2 }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                  <span style={{ width: 5, height: 5, borderRadius: 99, background: "#16986e", display: "inline-block" }} />
+                  En vivo
+                </span>
+                {" · "}últimos 100 runs
+              </div>
+            </div>
+          </div>
+          <div>
+            {automatizaciones.flatMap(a => a.logs).slice(0, 8).map((log, i) => {
+              const isOk = log.resultado === "ok" || log.resultado === "completado"
+              const isErr = log.resultado === "error"
+              const auto = automatizaciones.find(a => a.logs.some(l => l.id === log.id))
+              return (
+                <div key={log.id || i} style={{ display: "grid", gridTemplateColumns: "20px 1fr 50px 80px", gap: 10, padding: "10px 18px", borderBottom: "1px solid #f3f3f3", alignItems: "center" }}>
+                  <div style={{ width: 20, height: 20, borderRadius: 99, background: isErr ? "#fef2f2" : "#ecf6f1", display: "grid", placeItems: "center", fontSize: 10, color: isErr ? "#b91c1c" : "#16986e" }}>
+                    {isErr ? "✕" : "✓"}
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontWeight: 550, fontSize: 12, color: "#0a0a0a", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{auto?.nombre ?? "Automatización"}</div>
+                    <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10, color: "#737373", marginTop: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{log.detalle ?? "—"}</div>
+                  </div>
+                  <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: "#737373", textAlign: "right" }}>—</div>
+                  <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: "#a3a3a3", textAlign: "right" }}>
+                    {log.ejecutadaEn ? new Date(log.ejecutadaEn).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) : "—"}
+                  </div>
+                </div>
+              )
+            })}
+            {automatizaciones.flatMap(a => a.logs).length === 0 && (
+              <div style={{ padding: "32px 18px", textAlign: "center", color: "#737373", fontSize: 12.5 }}>Sin ejecuciones registradas</div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ── TEMPLATES GALLERY ────────────────────────────────────────────────── */}
+      <div style={{ background: "#ffffff", border: "1px solid #e8e8e8", borderRadius: 10, overflow: "hidden" }}>
+        <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #eeeeee" }}>
+          <div>
+            <h3 style={{ fontWeight: 600, fontSize: 13.5, margin: 0, color: "#0a0a0a" }}>Plantillas recomendadas</h3>
+            <div style={{ fontSize: 11.5, color: "#737373", fontFamily: "ui-monospace,monospace", marginTop: 2 }}>Empieza desde una receta probada · 24 plantillas</div>
+          </div>
+          <div style={{ display: "inline-flex", background: "#fafafa", border: "1px solid #e8e8e8", borderRadius: 7, padding: 2 }}>
+            {["Todas", "Leads", "Facturación", "Clientes", "IA"].map((s, i) => (
+              <button key={s} style={{ padding: "3px 9px", borderRadius: 5, fontFamily: "ui-monospace,monospace", fontSize: 11, color: i === 0 ? "#0a0a0a" : "#737373", background: i === 0 ? "white" : "transparent", boxShadow: i === 0 ? "0 0 0 1px #e8e8e8 inset" : "none", border: "none", cursor: "pointer" }}>{s}</button>
+            ))}
+          </div>
+        </div>
+        <div style={{ padding: 18, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+          {[
+            { nm: "Nutrir lead nuevo", desc: "Saludo + score + tarea de seguimiento si score ≥ 70.", chain: ["Nuevo lead", "Email", "Score", "Tarea"], color: "#16986e", bg: "#ecf6f1", uses: "248 workspaces" },
+            { nm: "Cobrar al vencimiento", desc: "Recordatorios automáticos a 7/3/0 días antes del vencimiento.", chain: ["Factura emitida", "Espera", "Email", "Repetir"], color: "#0a0a0a", bg: "#f5f5f5", uses: "186 workspaces" },
+            { nm: "Cliente en riesgo", desc: "Detecta caída de actividad y crea tarea de recuperación.", chain: ["Schedule", "Condición", "Tarea"], color: "#3756a4", bg: "#eef2fb", uses: "132 workspaces" },
+            { nm: "Bienvenida con IA", desc: "Genera mensaje personalizado por sector del cliente.", chain: ["Nuevo cliente", "IA", "Email"], color: "#6d28d9", bg: "#f3edff", uses: "94 workspaces" },
+            { nm: "Resumen semanal a Slack", desc: "Cada lunes envía resumen de KPIs al canal #ventas.", chain: ["Schedule", "Informe", "Slack"], color: "#c2410c", bg: "#fef3eb", uses: "112 workspaces" },
+            { nm: "Crear tarea por keyword", desc: "Si un correo contiene una palabra clave, abre tarea.", chain: ["Email entrante", "Condición", "Tarea"], color: "#0e7490", bg: "#ecfeff", uses: "78 workspaces" },
+          ].map((t) => (
+            <div key={t.nm} style={{ padding: 14, border: "1px solid #e8e8e8", borderRadius: 8, cursor: "pointer" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "#a3a3a3" }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "#e8e8e8" }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <span style={{ width: 28, height: 28, borderRadius: 6, background: t.bg, display: "grid", placeItems: "center", color: t.color, fontSize: 13, flexShrink: 0 }}>⚡</span>
+                <div style={{ fontWeight: 600, fontSize: 12.5, color: "#0a0a0a" }}>{t.nm}</div>
+              </div>
+              <div style={{ fontSize: 12, color: "#737373", marginBottom: 10, lineHeight: 1.5 }}>{t.desc}</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap" as const, marginBottom: 8 }}>
+                {t.chain.map((step, i) => (
+                  <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                    <span style={{ padding: "2px 8px", borderRadius: 4, background: i === 0 ? t.bg : "#f5f5f5", color: i === 0 ? t.color : "#404040", fontSize: 11, fontWeight: 500 }}>{step}</span>
+                    {i < t.chain.length - 1 && <span style={{ color: "#d4d4d4", fontSize: 11 }}>›</span>}
+                  </span>
+                ))}
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#737373" }}>
+                <span>{t.uses}</span>
+                <span style={{ fontWeight: 600, color: "#0a0a0a", cursor: "pointer" }}>Usar plantilla →</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── LEGACY LANES (hidden, keep functional) ─────────────────────────── */}
+      <div style={{ display: "none" }}>
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_1fr_300px] lg:grid-cols-2 gap-5">
 
         <Lane
@@ -322,11 +527,11 @@ export default function AutomatizacionesPage() {
         <Lane
           titulo="Para tus contactos"
           subtitulo="Emails automáticos en tu nombre"
-          accentClass="border-[#1FA97A]/30"
-          headerBg="bg-[#1FA97A]/5"
-          dotColor="bg-[#1FA97A]"
+          accentClass="border-[#0F766E]/30"
+          headerBg="bg-[#0F766E]/5"
+          dotColor="bg-[#0F766E]"
           icon={Mail}
-          iconClass="text-[#1FA97A]"
+          iconClass="text-[#0F766E]"
           count={paraContactos.filter((a) => a.activa).length}
           total={paraContactos.length}
         >
@@ -358,10 +563,10 @@ export default function AutomatizacionesPage() {
             <div className="w-full h-2 bg-[var(--bg-surface)] rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full transition-all duration-500"
-                style={{ width: `${pct}%`, background: "linear-gradient(90deg, #1FA97A, #0B8A5E)" }}
+                style={{ width: `${pct}%`, background: "linear-gradient(90deg, #0F766E, #0B8A5E)" }}
               />
             </div>
-            <p className="text-[11px] text-[#1FA97A] font-semibold mt-2 text-right">{pct}% activo</p>
+            <p className="text-[11px] text-[#0F766E] font-semibold mt-2 text-right">{pct}% activo</p>
           </div>
 
           <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl p-5 flex-1">
@@ -375,7 +580,7 @@ export default function AutomatizacionesPage() {
                 { step: "3", titulo: "ClientLabs actúa solo", desc: "Los emails se envían automáticamente cuando se cumple la condición." },
               ].map(({ step, titulo, desc }) => (
                 <div key={step} className="flex gap-3">
-                  <div className="w-5 h-5 rounded-full bg-[#E1F5EE] text-[#1FA97A] text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="w-5 h-5 rounded-full bg-[#E1F5EE] text-[#0F766E] text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
                     {step}
                   </div>
                   <div>
@@ -403,7 +608,7 @@ export default function AutomatizacionesPage() {
                 <div
                   className={cn(
                     "w-2 h-2 rounded-full shrink-0",
-                    log.resultado === "SUCCESS" ? "bg-[#1FA97A]" : "bg-red-400"
+                    log.resultado === "SUCCESS" ? "bg-[#0F766E]" : "bg-red-400"
                   )}
                 />
                 <div className="flex-1 min-w-0">
@@ -435,6 +640,7 @@ export default function AutomatizacionesPage() {
           </div>
         )}
       </div>
+      </div>{/* end hidden legacy lanes */}
 
       {/* ── Drawer ──────────────────────────────────────────────────────────── */}
       {drawerAuto && (
@@ -511,7 +717,7 @@ function ToggleSwitch({ checked, onChange }: { checked: boolean; onChange: () =>
         flexShrink: 0,
         outline: "none",
         transition: "background-color 240ms ease, box-shadow 240ms ease",
-        backgroundColor: checked ? "#1FA97A" : "var(--bg-surface)",
+        backgroundColor: checked ? "#0F766E" : "var(--bg-surface)",
         boxShadow: checked
           ? "inset 0 1px 2px rgba(0,0,0,0.15)"
           : "0 0 0 1.5px var(--border-subtle)",
@@ -614,7 +820,7 @@ interface DrawerProps {
   onDias: (v: number) => void
 }
 
-const INPUT = "w-full px-4 py-2.5 border border-slate-200 rounded-xl text-[13px] text-slate-800 outline-none bg-white focus:border-[#1FA97A] focus:ring-1 focus:ring-[#1FA97A]/20 transition-all"
+const INPUT = "w-full px-4 py-2.5 border border-slate-200 rounded-xl text-[13px] text-slate-800 outline-none bg-white focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E]/20 transition-all"
 
 function Drawer({ auto, activa, asunto, mensaje, diasVal, vars, onClose, onSave, onToggle, onAsunto, onMensaje, onDias }: DrawerProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -679,7 +885,7 @@ function Drawer({ auto, activa, asunto, mensaje, diasVal, vars, onClose, onSave,
           {/* Última ejecución */}
           {auto.ultimaEjecucion && (
             <div className="flex items-center gap-2 px-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#1FA97A]" />
+              <div className="w-1.5 h-1.5 rounded-full bg-[#0F766E]" />
               <span className="text-[12px] text-slate-500">
                 Última ejecución: {new Date(auto.ultimaEjecucion).toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" })}
               </span>
@@ -728,7 +934,7 @@ function Drawer({ auto, activa, asunto, mensaje, diasVal, vars, onClose, onSave,
                     key={v}
                     type="button"
                     onClick={() => insertVar(v)}
-                    className="text-[10px] px-2 py-1 rounded-lg bg-slate-100 hover:bg-[#E1F5EE] hover:text-[#1FA97A] text-slate-500 font-mono transition-colors"
+                    className="text-[10px] px-2 py-1 rounded-lg bg-slate-100 hover:bg-[#E1F5EE] hover:text-[#0F766E] text-slate-500 font-mono transition-colors"
                   >
                     {v}
                   </button>
@@ -800,7 +1006,7 @@ function Drawer({ auto, activa, asunto, mensaje, diasVal, vars, onClose, onSave,
           <button
             onClick={onSave}
             className="flex-1 py-2.5 rounded-xl text-[13px] font-semibold text-white transition-colors"
-            style={{ background: "linear-gradient(135deg, #1FA97A, #0B8A5E)" }}
+            style={{ background: "linear-gradient(135deg, #0F766E, #0B8A5E)" }}
           >
             Guardar cambios
           </button>

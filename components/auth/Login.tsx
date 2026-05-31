@@ -86,7 +86,7 @@ export default function Login({ onSwitch }: Props) {
             required
             placeholder="tu@empresa.com"
             onChange={e => setEmail(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl text-[13.5px] text-slate-900 placeholder:text-slate-300 bg-white border border-slate-200 outline-none transition-all focus:border-[#1FA97A] focus:ring-2 focus:ring-[rgba(31,169,122,0.12)] hover:border-slate-300"
+            className="w-full px-4 py-3 rounded-xl text-[13.5px] text-slate-900 placeholder:text-slate-300 bg-white border border-slate-200 outline-none transition-all focus:border-[#0F766E] focus:ring-2 focus:ring-[rgba(15,118,110,0.12)] hover:border-slate-300"
           />
         </div>
 
@@ -94,7 +94,7 @@ export default function Login({ onSwitch }: Props) {
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Contraseña</label>
-            <a href="#" className="text-[11.5px] font-medium text-[#1FA97A] hover:text-[#178a64] transition-colors">
+            <a href="#" className="text-[11.5px] font-medium text-[#0F766E] hover:text-[#0E665F] transition-colors">
               ¿Olvidaste tu contraseña?
             </a>
           </div>
@@ -105,7 +105,7 @@ export default function Login({ onSwitch }: Props) {
               required
               placeholder="••••••••"
               onChange={e => setPassword(e.target.value)}
-              className="w-full px-4 py-3 pr-11 rounded-xl text-[13.5px] text-slate-900 placeholder:text-slate-300 bg-white border border-slate-200 outline-none transition-all focus:border-[#1FA97A] focus:ring-2 focus:ring-[rgba(31,169,122,0.12)] hover:border-slate-300"
+              className="w-full px-4 py-3 pr-11 rounded-xl text-[13.5px] text-slate-900 placeholder:text-slate-300 bg-white border border-slate-200 outline-none transition-all focus:border-[#0F766E] focus:ring-2 focus:ring-[rgba(15,118,110,0.12)] hover:border-slate-300"
             />
             <button
               type="button"
@@ -122,7 +122,7 @@ export default function Login({ onSwitch }: Props) {
           type="submit"
           disabled={loading}
           className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-[13.5px] font-semibold text-white transition-all duration-150 disabled:opacity-60 hover:opacity-90 active:scale-[.99]"
-          style={{ background: "linear-gradient(135deg, #1FA97A 0%, #178a64 100%)", boxShadow: "0 4px 14px rgba(31,169,122,0.35)" }}
+          style={{ background: "linear-gradient(135deg, #0F766E 0%, #0E665F 100%)", boxShadow: "0 4px 14px rgba(15,118,110,0.35)" }}
         >
           {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Entrando...</> : "Entrar al panel →"}
         </button>
@@ -131,7 +131,7 @@ export default function Login({ onSwitch }: Props) {
       {/* Switch */}
       <p className="text-center text-[13px] text-slate-500">
         ¿No tienes cuenta?{" "}
-        <button onClick={onSwitch} className="font-semibold text-[#1FA97A] hover:text-[#178a64] transition-colors">
+        <button onClick={onSwitch} className="font-semibold text-[#0F766E] hover:text-[#0E665F] transition-colors">
           Crear cuenta gratis
         </button>
       </p>

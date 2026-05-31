@@ -62,8 +62,8 @@ export default function ClientsAnalyticsPage() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard title="Total clientes"   value={data?.kpis.total ?? 0}               sparkData={sparkMonths} sparkColor="#3B82F6" trend={data?.kpis.newThisMonth ? Math.round((data.kpis.newThisMonth / Math.max(data.kpis.total - data.kpis.newThisMonth, 1)) * 100) : undefined} trendLabel="vs mes anterior" loading={loading} />
-        <KPICard title="Clientes activos" value={data?.kpis.active ?? 0}              badge={data ? `${Math.round((data.kpis.active / Math.max(data.kpis.total, 1)) * 100)}% del total` : undefined} badgeColor="#1FA97A" loading={loading} />
-        <KPICard title="Revenue total"    value={loading ? "—" : eur(data?.kpis.totalRevenue ?? 0)} sparkData={sparkMonths.map((v, i) => sparkMonths.slice(0, i + 1).reduce((s, x) => s + x, 0))} sparkColor="#1FA97A" loading={loading} />
+        <KPICard title="Clientes activos" value={data?.kpis.active ?? 0}              badge={data ? `${Math.round((data.kpis.active / Math.max(data.kpis.total, 1)) * 100)}% del total` : undefined} badgeColor="#0F766E" loading={loading} />
+        <KPICard title="Revenue total"    value={loading ? "—" : eur(data?.kpis.totalRevenue ?? 0)} sparkData={sparkMonths.map((v, i) => sparkMonths.slice(0, i + 1).reduce((s, x) => s + x, 0))} sparkColor="#0F766E" loading={loading} />
         <KPICard title="Revenue medio"    value={loading ? "—" : eur(data?.kpis.avgRevenue ?? 0)}  badge="por cliente" badgeColor="#3B82F6" loading={loading} />
       </div>
 
@@ -85,7 +85,7 @@ export default function ClientsAnalyticsPage() {
                   <RY yAxisId="right" orientation="right" allowDecimals={false} tick={ax} axisLine={false} tickLine={false} />
                   <RT contentStyle={tip} />
                   <RBar yAxisId="left" dataKey="total" fill="#3B82F6" fillOpacity={0.85} radius={[4, 4, 0, 0]} name="Nuevos" maxBarSize={28} />
-                  <RLine yAxisId="right" type="monotone" dataKey="cum" stroke="#1FA97A" strokeWidth={2} dot={{ fill: "#1FA97A", r: 3 }} name="Acumulado" />
+                  <RLine yAxisId="right" type="monotone" dataKey="cum" stroke="#0F766E" strokeWidth={2} dot={{ fill: "#0F766E", r: 3 }} name="Acumulado" />
                 </CC>
               </RC>
             </div>

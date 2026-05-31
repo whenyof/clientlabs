@@ -39,7 +39,7 @@ function Delta({ pct }: { pct: number }) {
   const up = pct >= 0
   return (
     <span className={`inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[10px] font-semibold tabular-nums ${
-      up ? "bg-[#ECFDF5] text-[#1FA97A]" : "bg-red-50 text-red-500"
+      up ? "bg-[#ECFDF5] text-[#0F766E]" : "bg-red-50 text-red-500"
     }`}>
       {up ? <ArrowUpRight className="h-2.5 w-2.5" /> : <ArrowDownRight className="h-2.5 w-2.5" />}
       {up ? "+" : ""}{pct.toFixed(1)}%
@@ -70,14 +70,14 @@ export function FinanceKPIs() {
       delta: trends?.incomeGrowth ?? null,
       sub: "cobrado este mes",
       spark: monthly.map((m) => m.income),
-      sparkColor: "#1FA97A",
-      accent: "border-t-[#1FA97A]",
+      sparkColor: "#0F766E",
+      accent: "border-t-[#0F766E]",
     },
     {
       id: "profit",
       label: "Beneficio neto",
       value: fmt.format(netProfit),
-      valueColor: netProfit >= 0 ? "text-[#1FA97A]" : "text-red-500",
+      valueColor: netProfit >= 0 ? "text-[#0F766E]" : "text-red-500",
       delta: trends?.profitGrowth ?? null,
       sub: `${marginPct}% de margen`,
       spark: monthly.map((m) => m.profit),

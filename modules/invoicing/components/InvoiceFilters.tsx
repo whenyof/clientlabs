@@ -53,7 +53,7 @@ export function InvoiceFilters({ filters, onFiltersChange, clients }: InvoiceFil
           placeholder="Buscar por número o cliente"
           value={filters.search}
           onChange={(e) => onFiltersChange({ ...filters, search: e.target.value })}
-          className="w-full rounded-lg border border-slate-200 bg-white pl-8 pr-4 py-2 text-[12px] text-slate-700 placeholder-slate-400 focus:border-[#1FA97A] focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/20 transition-colors"
+          className="w-full rounded-lg border border-slate-200 bg-white pl-8 pr-4 py-2 text-[12px] text-slate-700 placeholder-slate-400 focus:border-[#0F766E] focus:outline-none focus:ring-1 focus:ring-[#0F766E]/20 transition-colors"
           aria-label="Buscar facturas"
         />
       </div>
@@ -84,7 +84,7 @@ export function InvoiceFilters({ filters, onFiltersChange, clients }: InvoiceFil
           placeholder="Importe mínimo"
           value={filters.minAmount}
           onChange={(e) => onFiltersChange({ ...filters, minAmount: e.target.value })}
-          className="w-28 rounded-lg border border-slate-200 bg-white px-3 py-2 text-[12px] text-slate-700 placeholder-slate-400 focus:border-[#1FA97A] focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/20"
+          className="w-28 rounded-lg border border-slate-200 bg-white px-3 py-2 text-[12px] text-slate-700 placeholder-slate-400 focus:border-[#0F766E] focus:outline-none focus:ring-1 focus:ring-[#0F766E]/20"
           aria-label="Importe mínimo"
         />
         <input
@@ -92,7 +92,7 @@ export function InvoiceFilters({ filters, onFiltersChange, clients }: InvoiceFil
           placeholder="Importe máximo"
           value={filters.maxAmount}
           onChange={(e) => onFiltersChange({ ...filters, maxAmount: e.target.value })}
-          className="w-28 rounded-lg border border-slate-200 bg-white px-3 py-2 text-[12px] text-slate-700 placeholder-slate-400 focus:border-[#1FA97A] focus:outline-none focus:ring-1 focus:ring-[#1FA97A]/20"
+          className="w-28 rounded-lg border border-slate-200 bg-white px-3 py-2 text-[12px] text-slate-700 placeholder-slate-400 focus:border-[#0F766E] focus:outline-none focus:ring-1 focus:ring-[#0F766E]/20"
           aria-label="Importe máximo"
         />
       </div>

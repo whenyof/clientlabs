@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
       data: {
         name: name.trim(),
         description: description?.trim() ?? null,
-        color: color ?? "#1FA97A",
+        color: color ?? "#0F766E",
         status: status ?? "ACTIVE",
         startDate: startDate ? new Date(startDate) : null,
         endDate: endDate ? new Date(endDate) : null,

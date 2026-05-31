@@ -149,7 +149,7 @@ export function ModalDocumentosTransaccion({
     return (
       <div className="flex flex-col items-center justify-center py-8 px-6 text-center">
         <div className="w-16 h-16 rounded-full bg-[#E1F5EE] flex items-center justify-center mb-4">
-          <FileCheck className="h-8 w-8 text-[#1FA97A]" />
+          <FileCheck className="h-8 w-8 text-[#0F766E]" />
         </div>
         <h3 className="text-[18px] font-bold text-slate-900 mb-2">
           {exitosos.length} documento{exitosos.length !== 1 ? "s" : ""} importado{exitosos.length !== 1 ? "s" : ""}
@@ -171,7 +171,7 @@ export function ModalDocumentosTransaccion({
         )}
         <button
           onClick={onCompletado}
-          className="px-6 py-2.5 bg-[#1FA97A] text-white rounded-xl text-[13px] font-semibold hover:bg-[#1a9068] transition-colors"
+          className="px-6 py-2.5 bg-[#0F766E] text-white rounded-xl text-[13px] font-semibold hover:bg-[#0E665F] transition-colors"
         >
           Perfecto, continuar
         </button>
@@ -231,7 +231,7 @@ export function ModalDocumentosTransaccion({
           </button>
           <button
             onClick={() => { setDocPreview(null); setPaso("seleccion") }}
-            className="flex-1 py-2.5 bg-[#1FA97A] text-white rounded-xl text-[13px] font-semibold hover:bg-[#1a9068] transition-colors"
+            className="flex-1 py-2.5 bg-[#0F766E] text-white rounded-xl text-[13px] font-semibold hover:bg-[#0E665F] transition-colors"
           >
             ✓ Confirmar este documento
           </button>
@@ -245,12 +245,12 @@ export function ModalDocumentosTransaccion({
     <div className="flex flex-col h-full">
       {/* Header con contexto de la transacción */}
       <div className="px-6 pt-5 pb-4 flex-shrink-0">
-        <div className="flex items-center gap-3 p-3 bg-[#E1F5EE]/50 border border-[#1FA97A]/20 rounded-xl">
-          <div className="w-8 h-8 rounded-lg bg-[#1FA97A] flex items-center justify-center flex-shrink-0">
+        <div className="flex items-center gap-3 p-3 bg-[#E1F5EE]/50 border border-[#0F766E]/20 rounded-xl">
+          <div className="w-8 h-8 rounded-lg bg-[#0F766E] flex items-center justify-center flex-shrink-0">
             <CheckCircle className="h-4 w-4 text-white" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[12px] font-bold text-[#1FA97A]">
+            <p className="text-[12px] font-bold text-[#0F766E]">
               {tipo === "venta" ? "Venta registrada" : "Compra registrada"}
             </p>
             <p className="text-[11px] text-slate-500 truncate">
@@ -277,9 +277,9 @@ export function ModalDocumentosTransaccion({
               className={cn(
                 "rounded-2xl border-2 transition-all duration-150",
                 doc.subido
-                  ? "border-[#1FA97A] bg-[#E1F5EE]/20"
+                  ? "border-[#0F766E] bg-[#E1F5EE]/20"
                   : doc.archivo
-                  ? "border-[#1FA97A]/40 bg-[#E1F5EE]/10"
+                  ? "border-[#0F766E]/40 bg-[#E1F5EE]/10"
                   : "border-slate-200 bg-white"
               )}
             >
@@ -295,7 +295,7 @@ export function ModalDocumentosTransaccion({
                       </span>
                     )}
                     {doc.archivo && (
-                      <span className="text-[9px] font-bold text-[#1FA97A] bg-[#E1F5EE] px-1.5 py-0.5 rounded-full">
+                      <span className="text-[9px] font-bold text-[#0F766E] bg-[#E1F5EE] px-1.5 py-0.5 rounded-full">
                         ✓ Listo
                       </span>
                     )}
@@ -366,19 +366,19 @@ export function ModalDocumentosTransaccion({
                       value={doc.numero}
                       onChange={(e) => actualizarCampo(doc.id, "numero", e.target.value)}
                       placeholder="Nº documento"
-                      className="px-3 py-2 border border-slate-200 rounded-xl text-[12px] outline-none bg-white focus:border-[#1FA97A]"
+                      className="px-3 py-2 border border-slate-200 rounded-xl text-[12px] outline-none bg-white focus:border-[#0F766E]"
                     />
                     <input
                       type="number"
                       value={doc.importe}
                       onChange={(e) => actualizarCampo(doc.id, "importe", e.target.value)}
                       placeholder="Importe €"
-                      className="px-3 py-2 border border-slate-200 rounded-xl text-[12px] outline-none bg-white focus:border-[#1FA97A]"
+                      className="px-3 py-2 border border-slate-200 rounded-xl text-[12px] outline-none bg-white focus:border-[#0F766E]"
                     />
                     <select
                       value={doc.estadoPago}
                       onChange={(e) => actualizarCampo(doc.id, "estadoPago", e.target.value)}
-                      className="col-span-2 px-3 py-2 border border-slate-200 rounded-xl text-[12px] outline-none bg-white focus:border-[#1FA97A]"
+                      className="col-span-2 px-3 py-2 border border-slate-200 rounded-xl text-[12px] outline-none bg-white focus:border-[#0F766E]"
                     >
                       <option value="pendiente">Pendiente de cobro</option>
                       <option value="pagada">{tipo === "venta" ? "Cobrada" : "Pagada"}</option>
@@ -396,7 +396,7 @@ export function ModalDocumentosTransaccion({
       <div className="px-6 py-4 border-t border-slate-100 flex-shrink-0 space-y-2">
         {conArchivo.length > 0 && (
           <div className="flex items-center gap-2 text-[11px] text-slate-500 mb-1">
-            <CheckCircle className="h-3.5 w-3.5 text-[#1FA97A]" />
+            <CheckCircle className="h-3.5 w-3.5 text-[#0F766E]" />
             {conArchivo.length} documento{conArchivo.length !== 1 ? "s" : ""} listo{conArchivo.length !== 1 ? "s" : ""} para importar
           </div>
         )}
@@ -413,7 +413,7 @@ export function ModalDocumentosTransaccion({
             className={cn(
               "flex-1 py-2.5 rounded-xl text-[13px] font-semibold flex items-center justify-center gap-2 transition-colors",
               conArchivo.length > 0 && !subiendo
-                ? "bg-[#1FA97A] text-white hover:bg-[#1a9068]"
+                ? "bg-[#0F766E] text-white hover:bg-[#0E665F]"
                 : "bg-slate-100 text-slate-400 cursor-not-allowed"
             )}
           >

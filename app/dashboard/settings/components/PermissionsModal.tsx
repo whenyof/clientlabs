@@ -187,7 +187,7 @@ export function PermissionsModal({ memberId, memberName, memberRole, onClose }: 
                           onClick={() => toggle(key)}
                           style={{
                             width: 36, height: 20, borderRadius: 10, flexShrink: 0,
-                            background: values[key] ? "#1FA97A" : "#cbd5e1",
+                            background: values[key] ? "#0F766E" : "#cbd5e1",
                             position: "relative", transition: "background 0.15s", cursor: "pointer",
                           }}
                         >
@@ -220,7 +220,7 @@ export function PermissionsModal({ memberId, memberName, memberRole, onClose }: 
             type="button"
             onClick={handleSave}
             disabled={saving}
-            style={{ padding: "8px 18px", borderRadius: 7, border: "none", background: "#1FA97A", color: "white", fontSize: 13, fontWeight: 600, cursor: "pointer", opacity: saving ? 0.7 : 1 }}
+            style={{ padding: "8px 18px", borderRadius: 7, border: "none", background: "#0F766E", color: "white", fontSize: 13, fontWeight: 600, cursor: "pointer", opacity: saving ? 0.7 : 1 }}
           >
             {saving ? "Guardando…" : "Guardar permisos"}
           </button>

@@ -16,7 +16,7 @@ const CARDS = [
     key: "completed" as const,
     label: "COMPLETADAS",
     Icon: CheckSquare,
-    color: "#1FA97A",
+    color: "#0F766E",
     sub: (d: TasksKPIsData) => `${d.completionRate}% de completitud`,
   },
   {
@@ -31,7 +31,7 @@ const CARDS = [
     key: "completionRate" as const,
     label: "TASA COMPLETITUD",
     Icon: TrendingUp,
-    color: "#1FA97A",
+    color: "#0F766E",
     sub: (d: TasksKPIsData) => `${d.completed} completadas en total`,
     format: "percent" as const,
   },

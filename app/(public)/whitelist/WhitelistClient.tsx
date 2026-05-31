@@ -53,7 +53,7 @@ function LaunchCountdown() {
   ]
 
   return (
-    <div className="w-full py-2.5 px-4 text-center" style={{ background: "#1FA97A" }}>
+    <div className="w-full py-2.5 px-4 text-center" style={{ background: "#0F766E" }}>
       <div className="flex items-center justify-center gap-3 flex-wrap">
         <Rocket className="h-3.5 w-3.5 text-white/80 hidden sm:block" />
         <span className="text-white/90 text-[12px] font-medium hidden sm:inline">
@@ -115,7 +115,7 @@ function HeroSection() {
 
       <div className="relative z-10 w-full max-w-2xl mx-auto text-center">
         <div className="hero-logo mb-5 sm:mb-10">
-          <span className="text-[20px] sm:text-[22px] font-bold tracking-tight" style={{ color: "#1FA97A" }}>
+          <span className="text-[20px] sm:text-[22px] font-bold tracking-tight" style={{ color: "#0F766E" }}>
             ClientLabs
           </span>
         </div>
@@ -131,7 +131,7 @@ function HeroSection() {
           ))}
           <br />
           {"Sin caos.".split(" ").map((w, i) => (
-            <span key={`line2-${i}`} className="hero-word inline-block mr-[0.25em]" style={{ color: "#1FA97A" }}>
+            <span key={`line2-${i}`} className="hero-word inline-block mr-[0.25em]" style={{ color: "#0F766E" }}>
               {w}
             </span>
           ))}
@@ -219,8 +219,8 @@ function OfertaSection() {
               onMouseEnter={e => gsap.to(e.currentTarget, { y: -4, duration: 0.2, ease: "power2.out" })}
               onMouseLeave={e => gsap.to(e.currentTarget, { y: 0, duration: 0.2, ease: "power2.out" })}
             >
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#1FA97A]/10 mb-5">
-                <Icon className="h-6 w-6 text-[#1FA97A]" />
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#0F766E]/10 mb-5">
+                <Icon className="h-6 w-6 text-[#0F766E]" />
               </div>
               <h3 className="text-[16px] font-semibold text-[#0B1F2A] mb-2">{title}</h3>
               <p className="text-[13px] text-slate-500 leading-relaxed whitespace-pre-line">{desc}</p>
@@ -374,8 +374,8 @@ function QueIncluyeSection() {
               className="feature-item bg-white border border-slate-200 rounded-xl p-4 sm:p-5 hover:border-slate-300 hover:shadow-sm transition-all"
             >
               <div className="flex items-start justify-between mb-3">
-                <div className="w-9 h-9 rounded-lg bg-[#1FA97A]/10 flex items-center justify-center">
-                  <Icon className="h-4.5 w-4.5 text-[#1FA97A]" style={{ width: 18, height: 18 }} />
+                <div className="w-9 h-9 rounded-lg bg-[#0F766E]/10 flex items-center justify-center">
+                  <Icon className="h-4.5 w-4.5 text-[#0F766E]" style={{ width: 18, height: 18 }} />
                 </div>
                 <span className={`text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${TAG_STYLES[tagColor]}`}>
                   {tag}
@@ -389,7 +389,7 @@ function QueIncluyeSection() {
 
         <div className="flex items-center justify-center gap-6 mt-8 flex-wrap">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#1FA97A]" />
+            <span className="w-2 h-2 rounded-full bg-[#0F766E]" />
             <span className="text-[11px] text-slate-500">Disponible en el lanzamiento</span>
           </div>
           <div className="flex items-center gap-2">
@@ -452,7 +452,7 @@ function FaqSection() {
           {FAQ_ITEMS.map((faq, i) => (
             <details
               key={i}
-              className="group border border-slate-200 rounded-xl overflow-hidden bg-slate-50 hover:border-[#1FA97A]/40 transition-colors"
+              className="group border border-slate-200 rounded-xl overflow-hidden bg-slate-50 hover:border-[#0F766E]/40 transition-colors"
             >
               <summary className="flex items-center justify-between cursor-pointer px-5 py-4 text-[14px] font-semibold text-[#0B1F2A] [list-style:none] select-none [&::-webkit-details-marker]:hidden">
                 {faq.q}
@@ -519,7 +519,7 @@ function Footer() {
     <footer className="bg-[#060F15] py-8 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
         <div className="flex items-center gap-4">
-          <span className="text-[15px] font-bold text-[#1FA97A]">ClientLabs</span>
+          <span className="text-[15px] font-bold text-[#0F766E]">ClientLabs</span>
           <span className="text-[12px] text-white/30">© {new Date().getFullYear()} ClientLabs</span>
         </div>
         <div className="flex items-center gap-1 text-[12px] text-white/30">

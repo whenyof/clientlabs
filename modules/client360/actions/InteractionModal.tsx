@@ -111,7 +111,7 @@ export function InteractionModal({ open, onClose, clientId }: InteractionModalPr
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
-              className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3.5 py-2.5 text-[14px] text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/60 focus:outline-none focus:border-[#1FA97A] focus:ring-2 focus:ring-[#1FA97A]/10 transition-all resize-none"
+              className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3.5 py-2.5 text-[14px] text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/60 focus:outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/10 transition-all resize-none"
               placeholder="¿De qué trató la interacción?"
             />
           </div>
@@ -130,7 +130,7 @@ export function InteractionModal({ open, onClose, clientId }: InteractionModalPr
             type="submit"
             form="interaction-modal-form"
             disabled={isSubmitting || !type}
-            className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-[#1FA97A] text-[13px] font-semibold text-white hover:opacity-90 transition-all disabled:opacity-40"
+            className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-[#0F766E] text-[13px] font-semibold text-white hover:opacity-90 transition-all disabled:opacity-40"
           >
             {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
             {isSubmitting ? "Registrando..." : "Registrar"}

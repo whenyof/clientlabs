@@ -66,7 +66,7 @@ export function IssuedInvoiceEditBlockedModal({
                 onClose()
                 onCreateRectificativa()
               }}
-              className="flex items-center gap-1.5 bg-[#1FA97A] text-white rounded-xl px-5 py-2.5 text-[13px] font-medium hover:bg-[#178f68] transition-colors"
+              className="flex items-center gap-1.5 bg-[#0F766E] text-white rounded-xl px-5 py-2.5 text-[13px] font-medium hover:bg-[#0E665F] transition-colors"
             >
               <ArrowRightIcon className="h-4 w-4" aria-hidden />
               Crear rectificativa
@@ -75,7 +75,7 @@ export function IssuedInvoiceEditBlockedModal({
             <Link
               href="/dashboard/finance/invoicing"
               onClick={onClose}
-              className="flex items-center gap-1.5 bg-[#1FA97A] text-white rounded-xl px-5 py-2.5 text-[13px] font-medium hover:bg-[#178f68] transition-colors"
+              className="flex items-center gap-1.5 bg-[#0F766E] text-white rounded-xl px-5 py-2.5 text-[13px] font-medium hover:bg-[#0E665F] transition-colors"
             >
               <ArrowRightIcon className="h-4 w-4" aria-hidden />
               Crear rectificativa

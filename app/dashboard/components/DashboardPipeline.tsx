@@ -16,7 +16,7 @@ const STAGES = [
   { key: "NEW" as const, label: "Nuevos", color: "#475569", bg: "#F8FAFC", border: "#E2E8F0", strip: "#94A3B8", pill: "#E2E8F0" },
   { key: "CONTACTED" as const, label: "Contactados", color: "#1D4ED8", bg: "#EFF6FF", border: "#DBEAFE", strip: "#60A5FA", pill: "#DBEAFE" },
   { key: "QUALIFIED" as const, label: "Cualificados", color: "#92400E", bg: "#FFFBEB", border: "#FEF3C7", strip: "#FBBF24", pill: "#FEF3C7" },
-  { key: "CONVERTED" as const, label: "Convertidos", color: "#1FA97A", bg: "#ECFDF5", border: "#D1FAE5", strip: "#34D399", pill: "#D1FAE5" },
+  { key: "CONVERTED" as const, label: "Convertidos", color: "#0F766E", bg: "#ECFDF5", border: "#D1FAE5", strip: "#34D399", pill: "#D1FAE5" },
 ]
 
 function stepConv(from: number, to: number): number | null {
@@ -26,7 +26,7 @@ function stepConv(from: number, to: number): number | null {
 
 function convColor(cr: number | null): string {
   if (cr === null) return "#CBD5E1"
-  if (cr >= 80) return "#1FA97A"
+  if (cr >= 80) return "#0F766E"
   if (cr >= 50) return "#D97706"
   return "#DC2626"
 }
@@ -58,8 +58,8 @@ export function DashboardPipeline({ leadsByStatus }: Props) {
           <p className="mt-0.5 text-[10px] text-slate-400">{total} leads · {activeTotal} activos</p>
         </div>
         <div className="flex flex-shrink-0 items-center gap-1.5 rounded-lg bg-[#ECFDF5] px-2.5 py-1.5">
-          <TrendingUp className="h-3 w-3 text-[#1FA97A]" />
-          <span className="text-[10px] font-semibold text-[#1FA97A]">{globalConv}% conv.</span>
+          <TrendingUp className="h-3 w-3 text-[#0F766E]" />
+          <span className="text-[10px] font-semibold text-[#0F766E]">{globalConv}% conv.</span>
         </div>
       </div>
 

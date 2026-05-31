@@ -24,7 +24,7 @@ export function ChatPreview() {
               <div key={i} className="flex gap-2.5">
                 <div
                   className="grid h-[26px] w-[26px] shrink-0 place-items-center rounded-[6px] font-display text-[11px] font-bold text-white"
-                  style={{ background: msg.role === "me" ? "#4a5a63" : "#1FA97A" }}
+                  style={{ background: msg.role === "me" ? "#4a5a63" : "#0F766E" }}
                 >
                   {msg.role === "me" ? "YO" : "CL"}
                 </div>

@@ -51,7 +51,7 @@ export function AcceptInviteClient({ token, workspaceName, role, alreadyMember }
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl border border-slate-200 p-8 max-w-md w-full text-center space-y-6">
         <div className="w-14 h-14 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center mx-auto">
-          <Users className="w-7 h-7 text-[#1FA97A]" />
+          <Users className="w-7 h-7 text-[#0F766E]" />
         </div>
 
         <div>
@@ -70,7 +70,7 @@ export function AcceptInviteClient({ token, workspaceName, role, alreadyMember }
             </div>
             <a
               href="/dashboard"
-              className="block w-full rounded-lg bg-[#1FA97A] text-white text-sm font-medium py-2.5 hover:opacity-90 transition-opacity"
+              className="block w-full rounded-lg bg-[#0F766E] text-white text-sm font-medium py-2.5 hover:opacity-90 transition-opacity"
             >
               Ir al panel
             </a>
@@ -85,7 +85,7 @@ export function AcceptInviteClient({ token, workspaceName, role, alreadyMember }
             <button
               onClick={handleAccept}
               disabled={accepting}
-              className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#1FA97A] text-white text-sm font-medium py-2.5 hover:opacity-90 transition-opacity disabled:opacity-60"
+              className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#0F766E] text-white text-sm font-medium py-2.5 hover:opacity-90 transition-opacity disabled:opacity-60"
             >
               {accepting ? "Procesando…" : <>Aceptar invitación <ChevronRight className="w-4 h-4" /></>}
             </button>

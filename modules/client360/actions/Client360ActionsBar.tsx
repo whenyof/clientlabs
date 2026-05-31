@@ -32,7 +32,7 @@ export function Client360ActionsBar({ clientId, defaultEmail }: Client360Actions
         <button
           type="button"
           onClick={() => setActive("order")}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-[#1FA97A] px-4 py-2 text-[13px] font-semibold text-white hover:opacity-90 active:scale-[.98] transition-all"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-[#0F766E] px-4 py-2 text-[13px] font-semibold text-white hover:opacity-90 active:scale-[.98] transition-all"
         >
           <Plus className="h-3.5 w-3.5" />
           Nuevo pedido

@@ -64,7 +64,7 @@ function CopyButton({ text, label = "Copiar URL" }: { text: string; label?: stri
       style={{
         display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
         padding: "9px", borderRadius: 8, border: "1.5px solid #e2e8f0",
-        background: copied ? "#f0fdf9" : "white", color: copied ? "#1FA97A" : "#334155",
+        background: copied ? "#f0fdf9" : "white", color: copied ? "#0F766E" : "#334155",
         fontSize: 12, fontWeight: 600, cursor: "pointer", width: "100%", transition: "all 0.15s",
       }}
     >
@@ -178,7 +178,7 @@ export function ConnectCalendarModal({ onClose }: Props) {
           ) : error ? (
             <div style={{ textAlign: "center", padding: "28px 0" }}>
               <p style={{ fontSize: 13, color: "#ef4444", margin: "0 0 10px" }}>Error al cargar. Inténtalo de nuevo.</p>
-              <button type="button" onClick={() => window.location.reload()} style={{ fontSize: 12, color: "#1FA97A", background: "none", border: "none", cursor: "pointer" }}>
+              <button type="button" onClick={() => window.location.reload()} style={{ fontSize: 12, color: "#0F766E", background: "none", border: "none", cursor: "pointer" }}>
                 Recargar página
               </button>
             </div>
@@ -191,7 +191,7 @@ export function ConnectCalendarModal({ onClose }: Props) {
                 {APPS.map((a) => (
                   <button key={a.key} type="button" onClick={() => setStep(a.key)}
                     style={{ display: "flex", alignItems: "center", gap: 12, padding: "11px 12px", borderRadius: 10, border: "1px solid #e2e8f0", background: "white", cursor: "pointer", textAlign: "left", width: "100%" }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#1FA97A"; (e.currentTarget as HTMLElement).style.background = "#f0fdf9" }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#0F766E"; (e.currentTarget as HTMLElement).style.background = "#f0fdf9" }}
                     onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#e2e8f0"; (e.currentTarget as HTMLElement).style.background = "white" }}
                   >
                     <div style={{ width: 36, height: 36, borderRadius: 8, background: a.iconBg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{a.icon}</div>
@@ -221,9 +221,9 @@ export function ConnectCalendarModal({ onClose }: Props) {
             </div>
           ) : step === "connected" ? (
             <div style={{ textAlign: "center" }}>
-              <div style={{ width: 44, height: 44, borderRadius: "50%", background: "#f0fdf9", border: "1.5px solid #1FA97A", display: "flex", alignItems: "center", justifyContent: "center", margin: "4px auto 14px" }}>
+              <div style={{ width: 44, height: 44, borderRadius: "50%", background: "#f0fdf9", border: "1.5px solid #0F766E", display: "flex", alignItems: "center", justifyContent: "center", margin: "4px auto 14px" }}>
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M4 10l4 4 8-8" stroke="#1FA97A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M4 10l4 4 8-8" stroke="#0F766E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
               <p style={{ fontSize: 13, fontWeight: 600, color: "#0f172a", margin: "0 0 14px" }}>Calendario añadido correctamente</p>
@@ -231,12 +231,12 @@ export function ConnectCalendarModal({ onClose }: Props) {
                 <p style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 8px" }}>Qué se sincroniza</p>
                 {SYNCED_ITEMS.map((item) => (
                   <div key={item} style={{ display: "flex", alignItems: "flex-start", gap: 7, marginBottom: 5 }}>
-                    <div style={{ width: 4, height: 4, borderRadius: "50%", background: "#1FA97A", flexShrink: 0, marginTop: 5 }} />
+                    <div style={{ width: 4, height: 4, borderRadius: "50%", background: "#0F766E", flexShrink: 0, marginTop: 5 }} />
                     <span style={{ fontSize: 12, color: "#475569", lineHeight: 1.4 }}>{item}</span>
                   </div>
                 ))}
               </div>
-              <button type="button" onClick={onClose} style={{ width: "100%", padding: "10px", borderRadius: 8, border: "none", background: "#1FA97A", color: "white", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+              <button type="button" onClick={onClose} style={{ width: "100%", padding: "10px", borderRadius: 8, border: "none", background: "#0F766E", color: "white", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
                 Listo
               </button>
               <button type="button" onClick={handleRegenerate} disabled={regenerating}
@@ -305,7 +305,7 @@ export function ConnectCalendarModal({ onClose }: Props) {
                 style={{
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
                   padding: "10px", borderRadius: 8,
-                  background: isLocalhost ? "#e2e8f0" : "#1FA97A",
+                  background: isLocalhost ? "#e2e8f0" : "#0F766E",
                   color: isLocalhost ? "#94a3b8" : "white",
                   fontSize: 13, fontWeight: 600, textDecoration: "none",
                   cursor: isLocalhost ? "not-allowed" : "pointer",

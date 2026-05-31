@@ -156,7 +156,7 @@ export function FinanceNavbar() {
         className="flex items-center gap-2 shrink-0 select-none"
         aria-label="Finanzas — inicio"
       >
-        <span className="text-[#1FA97A] font-bold text-[15px] leading-none">$</span>
+        <span className="text-[#0F766E] font-bold text-[15px] leading-none">$</span>
         <span className="text-[13px] font-semibold text-[var(--text-primary)]">Finanzas</span>
       </Link>
 
@@ -181,12 +181,12 @@ export function FinanceNavbar() {
                 className={cn(
                   "flex items-center gap-1.5 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 whitespace-nowrap",
                   active
-                    ? "bg-[#1FA97A]/10 text-[#1FA97A]"
+                    ? "bg-[#0F766E]/10 text-[#0F766E]"
                     : "text-[var(--text-secondary)] hover:bg-[var(--bg-card)] hover:text-[var(--text-primary)]"
                 )}
                 aria-current={active ? "page" : undefined}
               >
-                <Icon className={cn("h-[15px] w-[15px] shrink-0", active ? "text-[#1FA97A]" : "text-[var(--text-secondary)]")} aria-hidden />
+                <Icon className={cn("h-[15px] w-[15px] shrink-0", active ? "text-[#0F766E]" : "text-[var(--text-secondary)]")} aria-hidden />
                 {tab.label}
                 {tab.hasDropdown && (
                   <ChevronDown
@@ -219,18 +219,18 @@ export function FinanceNavbar() {
                         className={cn(
                           "flex items-center gap-3 px-3 py-2.5 mx-1.5 rounded-lg transition-colors",
                           subActive
-                            ? "bg-[#1FA97A]/8 text-[#1FA97A]"
+                            ? "bg-[#0F766E]/8 text-[#0F766E]"
                             : "hover:bg-[var(--bg-card)] text-[var(--text-primary)]"
                         )}
                       >
                         <div className={cn(
                           "w-7 h-7 rounded-lg flex items-center justify-center shrink-0",
-                          subActive ? "bg-[#1FA97A]/15" : "bg-[var(--bg-card)]"
+                          subActive ? "bg-[#0F766E]/15" : "bg-[var(--bg-card)]"
                         )}>
-                          <SubIcon className={cn("h-3.5 w-3.5", subActive ? "text-[#1FA97A]" : "text-[var(--text-secondary)]")} aria-hidden />
+                          <SubIcon className={cn("h-3.5 w-3.5", subActive ? "text-[#0F766E]" : "text-[var(--text-secondary)]")} aria-hidden />
                         </div>
                         <div className="min-w-0">
-                          <p className={cn("text-[13px] font-medium leading-tight", subActive ? "text-[#1FA97A]" : "text-[var(--text-primary)]")}>
+                          <p className={cn("text-[13px] font-medium leading-tight", subActive ? "text-[#0F766E]" : "text-[var(--text-primary)]")}>
                             {sub.label}
                           </p>
                           <p className="text-[11px] text-[var(--text-secondary)] leading-tight mt-0.5">
@@ -258,7 +258,7 @@ export function FinanceNavbar() {
       {/* Acción rápida */}
       <button
         onClick={() => router.push("/dashboard/finance/facturas")}
-        className="shrink-0 flex items-center gap-1.5 px-3.5 py-2 bg-[#1FA97A] text-white text-[12px] font-semibold rounded-lg hover:bg-[#1a9068] transition-colors"
+        className="shrink-0 flex items-center gap-1.5 px-3.5 py-2 bg-[#0F766E] text-white text-[12px] font-semibold rounded-lg hover:bg-[#0E665F] transition-colors"
       >
         + Nueva factura
       </button>

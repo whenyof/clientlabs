@@ -70,7 +70,7 @@ export function NoteModal({ open, onClose, clientId }: NoteModalProps) {
             onChange={(e) => setNote(e.target.value)}
             autoFocus
             rows={6}
-            className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3.5 py-3 text-[14px] text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/60 focus:outline-none focus:border-[#1FA97A] focus:ring-2 focus:ring-[#1FA97A]/10 transition-all resize-none"
+            className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3.5 py-3 text-[14px] text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/60 focus:outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/10 transition-all resize-none"
             placeholder="Escribe una nota interna sobre este cliente..."
           />
           <p className="mt-2 text-[11px] text-[var(--text-secondary)]">{note.length} caracteres</p>
@@ -89,7 +89,7 @@ export function NoteModal({ open, onClose, clientId }: NoteModalProps) {
             type="submit"
             form="note-modal-form"
             disabled={isSubmitting || !note.trim()}
-            className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-[#1FA97A] text-[13px] font-semibold text-white hover:opacity-90 transition-all disabled:opacity-40"
+            className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-[#0F766E] text-[13px] font-semibold text-white hover:opacity-90 transition-all disabled:opacity-40"
           >
             {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
             {isSubmitting ? "Guardando..." : "Guardar nota"}

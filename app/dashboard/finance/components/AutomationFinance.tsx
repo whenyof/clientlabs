@@ -91,7 +91,7 @@ export function AutomationFinance() {
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1FA97A] hover:bg-[#1a9068] text-white text-xs font-medium rounded-lg transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0F766E] hover:bg-[#0E665F] text-white text-xs font-medium rounded-lg transition-colors"
         >
           <Plus className="w-3.5 h-3.5" />
           Nueva
@@ -256,7 +256,7 @@ export function AutomationFinance() {
               </button>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="flex-1 px-4 py-2.5 bg-[#1FA97A] hover:bg-[#1a9068] text-white rounded-lg transition-colors text-sm font-medium"
+                className="flex-1 px-4 py-2.5 bg-[#0F766E] hover:bg-[#0E665F] text-white rounded-lg transition-colors text-sm font-medium"
               >
                 Entendido
               </button>

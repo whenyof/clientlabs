@@ -134,8 +134,8 @@ export function MonthView({ tasks, onDayClick, onTaskClick }: MonthViewProps) {
           const overflow = dayTasks.length - 3
 
           const cellBg = isDrop
-            ? "#1FA97A08"
-            : isToday ? "#1FA97A06"
+            ? "#0F766E08"
+            : isToday ? "#0F766E06"
             : isWeekend ? isCurrentMonth ? "#f8fafc" : "#f1f5f9"
             : !isCurrentMonth ? "#fafafa"
             : "transparent"
@@ -157,7 +157,7 @@ export function MonthView({ tasks, onDayClick, onTaskClick }: MonthViewProps) {
                 position: "relative",
                 overflow: "hidden",
                 minWidth: 0,
-                outline: isDrop ? "1.5px dashed #1FA97A" : undefined,
+                outline: isDrop ? "1.5px dashed #0F766E" : undefined,
                 outlineOffset: isDrop ? -1 : undefined,
                 transition: "background 0.1s",
               }}
@@ -165,7 +165,7 @@ export function MonthView({ tasks, onDayClick, onTaskClick }: MonthViewProps) {
               {/* Day number */}
               <div style={{
                 width: 24, height: 24, borderRadius: "50%",
-                background: isToday ? "#1FA97A" : "transparent",
+                background: isToday ? "#0F766E" : "transparent",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 marginBottom: 4,
               }}>

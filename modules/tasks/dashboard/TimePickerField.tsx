@@ -77,7 +77,7 @@ export function TimePickerField({ value, onChange }: TimePickerFieldProps) {
 
   const chip = (active: boolean): React.CSSProperties => ({
     height: 30, borderRadius: 6, border: "none",
-    background: active ? "#1FA97A" : "#f8fafc",
+    background: active ? "#0F766E" : "#f8fafc",
     color: active ? "#fff" : "var(--text-primary)",
     fontSize: 12, fontWeight: active ? 600 : 400,
     cursor: "pointer", transition: "background 0.1s, color 0.1s",
@@ -88,13 +88,13 @@ export function TimePickerField({ value, onChange }: TimePickerFieldProps) {
       <button ref={btnRef} type="button" onClick={handleOpen} style={{
         display: "flex", alignItems: "center", gap: 8, width: "100%",
         padding: "9px 12px", background: "var(--bg-card)",
-        border: `1px solid ${open ? "#1FA97A" : "var(--border-subtle)"}`,
+        border: `1px solid ${open ? "#0F766E" : "var(--border-subtle)"}`,
         borderRadius: 8, cursor: "pointer", textAlign: "left",
         color: hasValue ? "var(--text-primary)" : "var(--text-secondary)",
         fontSize: 13, transition: "border-color 0.15s",
         boxSizing: "border-box",
       }}>
-        <Clock style={{ width: 14, height: 14, flexShrink: 0, color: hasValue ? "#1FA97A" : "var(--text-secondary)" }} />
+        <Clock style={{ width: 14, height: 14, flexShrink: 0, color: hasValue ? "#0F766E" : "var(--text-secondary)" }} />
         <span style={{ flex: 1, fontVariantNumeric: "tabular-nums" }}>{displayText}</span>
         {hasValue && (
           <X style={{ width: 12, height: 12, color: "var(--text-secondary)", flexShrink: 0 }}

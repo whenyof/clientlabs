@@ -75,7 +75,7 @@ export default async function BlogArticlePage({ params: paramsPromise }: Props) 
           }}
         />
         <article className="mx-auto max-w-2xl px-6 pt-28 pb-24">
-          <Link href="/blog" className="inline-flex items-center gap-1.5 text-slate-500 text-[13px] hover:text-[#1FA97A] mb-8 transition-colors">
+          <Link href="/blog" className="inline-flex items-center gap-1.5 text-slate-500 text-[13px] hover:text-[#0F766E] mb-8 transition-colors">
             <ArrowLeft className="w-4 h-4" />
             Volver al blog
           </Link>
@@ -84,7 +84,7 @@ export default async function BlogArticlePage({ params: paramsPromise }: Props) 
           </span>
           <h1 className="text-[28px] font-bold leading-tight mb-4">{article.title}</h1>
           <p className="text-slate-400 text-[13px] mb-10">{article.readTime} lectura · {formatDate(article.publishedAt)}</p>
-          <div className="prose-content text-[15px] leading-relaxed text-slate-700 space-y-4 [&_h2]:text-[20px] [&_h2]:font-bold [&_h2]:text-[#0B1F2A] [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:text-[16px] [&_h3]:font-semibold [&_h3]:text-[#0B1F2A] [&_h3]:mt-6 [&_h3]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-1.5 [&_strong]:text-[#0B1F2A] [&_strong]:font-semibold [&_a]:text-[#1FA97A] [&_a]:hover:underline [&_table]:w-full [&_table]:border-collapse [&_table]:text-[13px] [&_table]:my-5 [&_th]:text-left [&_th]:py-2 [&_th]:px-3 [&_th]:border-b-2 [&_th]:border-slate-200 [&_th]:font-semibold [&_th]:text-[#0B1F2A] [&_th]:bg-slate-50 [&_td]:py-2 [&_td]:px-3 [&_td]:border-b [&_td]:border-slate-100">
+          <div className="prose-content text-[15px] leading-relaxed text-slate-700 space-y-4 [&_h2]:text-[20px] [&_h2]:font-bold [&_h2]:text-[#0B1F2A] [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:text-[16px] [&_h3]:font-semibold [&_h3]:text-[#0B1F2A] [&_h3]:mt-6 [&_h3]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-1.5 [&_strong]:text-[#0B1F2A] [&_strong]:font-semibold [&_a]:text-[#0F766E] [&_a]:hover:underline [&_table]:w-full [&_table]:border-collapse [&_table]:text-[13px] [&_table]:my-5 [&_th]:text-left [&_th]:py-2 [&_th]:px-3 [&_th]:border-b-2 [&_th]:border-slate-200 [&_th]:font-semibold [&_th]:text-[#0B1F2A] [&_th]:bg-slate-50 [&_td]:py-2 [&_td]:px-3 [&_td]:border-b [&_td]:border-slate-100">
             {content}
           </div>
 
@@ -93,7 +93,7 @@ export default async function BlogArticlePage({ params: paramsPromise }: Props) 
               <h3 className="text-[14px] font-semibold text-slate-900 mb-4">Artículos relacionados</h3>
               <div className="space-y-3">
                 {relatedArticles.map((a) => (
-                  <Link key={a.slug} href={`/blog/${a.slug}`} className="flex items-center gap-2 text-[14px] text-[#1FA97A] hover:underline">
+                  <Link key={a.slug} href={`/blog/${a.slug}`} className="flex items-center gap-2 text-[14px] text-[#0F766E] hover:underline">
                     <ArrowRight className="h-3.5 w-3.5 shrink-0" />
                     {a.title}
                   </Link>
@@ -102,10 +102,10 @@ export default async function BlogArticlePage({ params: paramsPromise }: Props) 
             </div>
           )}
 
-          <div className="mt-16 p-6 bg-[#E1F5EE] rounded-xl border border-[#1FA97A]/20">
+          <div className="mt-16 p-6 bg-[#E1F5EE] rounded-xl border border-[#0F766E]/20">
             <p className="text-[14px] font-semibold text-[#0B1F2A] mb-1">Gestiona todo esto desde un solo panel</p>
             <p className="text-[13px] text-slate-600 mb-4">ClientLabs centraliza leads, clientes y facturación para autónomos españoles.</p>
-            <Link href="/register" className="inline-block px-5 py-2 bg-[#1FA97A] text-white text-[13px] font-semibold rounded-lg hover:bg-[#1a9068] transition-colors">
+            <Link href="/register" className="inline-block px-5 py-2 bg-[#0F766E] text-white text-[13px] font-semibold rounded-lg hover:bg-[#0E665F] transition-colors">
               Empezar gratis 14 días
             </Link>
           </div>

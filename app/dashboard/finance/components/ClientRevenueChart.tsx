@@ -5,7 +5,7 @@ import { useFinanceData } from "../context/FinanceDataContext"
 
 const fmt = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 })
 
-const PALETTE = ["#1FA97A", "#6366F1", "#F59E0B", "#3B82F6", "#EC4899", "#14B8A6"]
+const PALETTE = ["#0F766E", "#6366F1", "#F59E0B", "#3B82F6", "#EC4899", "#14B8A6"]
 
 export function ClientRevenueChart() {
   const { analytics, loading } = useFinanceData()

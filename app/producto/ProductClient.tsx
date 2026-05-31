@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import Image from "next/image"
+import { Logo } from "@/components/Logo"
 import Link from "next/link"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
@@ -22,7 +22,7 @@ const MODULES = [
     tagline: "Pipeline, clientes y relaciones sin silos",
     desc: "Centraliza cada contacto, sigue el pipeline en tiempo real y convierte leads en clientes recurrentes con historial completo.",
     stats: [{ label: "Conversión media", val: "+31%" }, { label: "Leads cualificados", val: "∞" }],
-    color: "#1FA97A",
+    color: "#0F766E",
     preview: "crm",
   },
   {
@@ -120,15 +120,15 @@ function HeroSection() {
   return (
     <section ref={ref} id="hero" className="relative h-screen flex flex-col items-center justify-center px-6 bg-[#0B1F2A] overflow-hidden">
       {/* Scan line */}
-      <div className="hero-scan absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#1FA97A] to-transparent opacity-80" />
+      <div className="hero-scan absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#0F766E] to-transparent opacity-80" />
 
       {/* Decorative dots */}
-      <div className="hero-dot absolute top-24 left-12 h-2 w-2 rounded-full bg-[#1FA97A]" />
+      <div className="hero-dot absolute top-24 left-12 h-2 w-2 rounded-full bg-[#0F766E]" />
       <div className="hero-dot absolute top-40 right-16 h-1.5 w-1.5 rounded-full bg-[#3B82F6]" />
       <div className="hero-dot absolute bottom-32 left-20 h-1.5 w-1.5 rounded-full bg-[#8B5CF6]" />
 
       {/* Grid bg */}
-      <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "linear-gradient(#1FA97A 1px, transparent 1px), linear-gradient(90deg, #1FA97A 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
+      <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "linear-gradient(#0F766E 1px, transparent 1px), linear-gradient(90deg, #0F766E 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
 
       <div className="relative z-10 mx-auto max-w-5xl w-full text-center space-y-8">
         <h1 className="perspective-[1000px] text-5xl md:text-7xl font-bold leading-[1.05] tracking-tight text-[#E6F1F5]">
@@ -136,7 +136,7 @@ function HeroSection() {
             <span key={i} className="hero-word inline-block mr-[0.25em]">{w} </span>
           ))}
           <br />
-          <span className="hero-word inline-block text-[#1FA97A]">en un solo lugar.</span>
+          <span className="hero-word inline-block text-[#0F766E]">en un solo lugar.</span>
         </h1>
 
         <p className="hero-sub text-[#8FA6B2] text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
@@ -144,10 +144,10 @@ function HeroSection() {
         </p>
 
         <div className="hero-cta flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link href="/contacto" className="rounded-lg bg-[#1FA97A] hover:bg-[#157A5C] text-white font-semibold px-8 py-3.5 transition-colors text-sm">
+          <Link href="/contacto" className="rounded-lg bg-[#0F766E] hover:bg-[#157A5C] text-white font-semibold px-8 py-3.5 transition-colors text-sm">
             Empezar gratis 14 días
           </Link>
-          <Link href="/precios" className="rounded-lg border border-[#E6F1F5]/20 hover:border-[#1FA97A]/40 text-[#8FA6B2] hover:text-[#E6F1F5] font-medium px-8 py-3.5 transition-colors text-sm">
+          <Link href="/precios" className="rounded-lg border border-[#E6F1F5]/20 hover:border-[#0F766E]/40 text-[#8FA6B2] hover:text-[#E6F1F5] font-medium px-8 py-3.5 transition-colors text-sm">
             Ver planes →
           </Link>
         </div>
@@ -168,7 +168,7 @@ function HeroSection() {
       {/* Scroll indicator */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-40">
         <span className="text-[10px] uppercase tracking-widest text-[#8FA6B2]">Scroll</span>
-        <div className="h-8 w-px bg-gradient-to-b from-[#1FA97A] to-transparent" />
+        <div className="h-8 w-px bg-gradient-to-b from-[#0F766E] to-transparent" />
       </div>
     </section>
   )
@@ -277,7 +277,7 @@ function ModulePreview({ id, color }: { id: string; color: string }) {
     <div className="space-y-2">
       {[{ t: "Propuesta NextSite", p: "Alta", done: false }, { t: "Revisión contrato Q2", p: "Media", done: true }, { t: "Demo producto nuevo cliente", p: "Alta", done: false }].map((t, i) => (
         <div key={i} className="flex items-center gap-3 rounded-lg border border-[#E2E8ED] bg-white px-3 py-2">
-          <div className={`h-4 w-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${t.done ? "bg-[#1FA97A] border-[#1FA97A]" : "border-[#E2E8ED]"}`}>
+          <div className={`h-4 w-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${t.done ? "bg-[#0F766E] border-[#0F766E]" : "border-[#E2E8ED]"}`}>
             {t.done && <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5L8.5 2" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
           </div>
           <span className={`text-xs flex-1 ${t.done ? "line-through text-[#5F7280]" : "text-[#0F1F2A]"}`}>{t.t}</span>
@@ -344,7 +344,7 @@ const TASK_COLS = [
   { id: "pendiente", label: "Pendiente", color: "#5F7280", tasks: [{ t: "Propuesta cliente nuevo", p: "Alta", tag: "CRM" }, { t: "Actualizar precios Q2", p: "Media", tag: "Billing" }] },
   { id: "proceso", label: "En proceso", color: "#3B82F6", tasks: [{ t: "Demo NextSite", p: "Alta", tag: "CRM" }, { t: "Automatización email", p: "Media", tag: "Auto" }, { t: "Informe mensual", p: "Baja", tag: "Analytics" }] },
   { id: "revision", label: "Revisión", color: "#F59E0B", tasks: [{ t: "Contrato Firma Digital", p: "Alta", tag: "Legal" }] },
-  { id: "done", label: "Completado", color: "#1FA97A", tasks: [{ t: "Onboarding TechMark", p: "Alta", tag: "CRM" }, { t: "Integración Stripe", p: "Alta", tag: "Billing" }] },
+  { id: "done", label: "Completado", color: "#0F766E", tasks: [{ t: "Onboarding TechMark", p: "Alta", tag: "CRM" }, { t: "Integración Stripe", p: "Alta", tag: "Billing" }] },
 ]
 
 function TareasSection() {
@@ -460,15 +460,15 @@ function IASection() {
       <span className="pointer-events-none absolute right-0 top-16 text-[160px] font-black leading-none select-none" style={{ color: "rgba(255,255,255,0.03)", transform: "translateX(30%)" }}>04</span>
 
       {/* Ambient glow */}
-      <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-[#1FA97A]/10 blur-[80px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 h-48 w-48 rounded-full bg-[#1FA97A]/8 blur-[60px] pointer-events-none" />
+      <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-[#0F766E]/10 blur-[80px] pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 h-48 w-48 rounded-full bg-[#0F766E]/8 blur-[60px] pointer-events-none" />
 
       <div className="mx-auto w-full max-w-7xl">
         <div className="mb-12">
-          <p className="ia-headline text-xs uppercase tracking-[0.3em] text-[#1FA97A] mb-3">Inteligencia artificial</p>
+          <p className="ia-headline text-xs uppercase tracking-[0.3em] text-[#0F766E] mb-3">Inteligencia artificial</p>
           <h2 className="text-4xl md:text-5xl font-bold text-[#E6F1F5] leading-tight">
             <span className="ia-headline inline-block">Tu co-piloto.</span>{" "}
-            <span className="ia-headline inline-block text-[#1FA97A]">Siempre activo.</span>
+            <span className="ia-headline inline-block text-[#0F766E]">Siempre activo.</span>
           </h2>
           <p className="ia-headline mt-4 text-[#8FA6B2] max-w-xl leading-relaxed">
             Pregunta en lenguaje natural, recibe análisis profundos. La IA trabaja sobre tus datos reales, no demos.
@@ -479,13 +479,13 @@ function IASection() {
           {/* Chat */}
           <div ref={chatRef} className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm overflow-hidden">
             <div className="flex items-center gap-3 border-b border-white/10 px-5 py-4">
-              <Image src="/logo-trimmed.webp" alt="ClientLabs" width={36} height={36} className="flex-shrink-0 object-contain" />
+              <Logo variant="icon-solid-green" width={36} height={36} className="flex-shrink-0" />
               <div>
                 <p className="text-sm font-semibold text-[#E6F1F5] leading-none">Asistente IA</p>
                 <p className="text-[11px] text-[#8FA6B2] mt-0.5">responde en 0.4s · conoce tu negocio</p>
               </div>
               <div className="ml-auto flex items-center gap-1.5">
-                <div className="h-1.5 w-1.5 rounded-full bg-[#1FA97A] animate-pulse" />
+                <div className="h-1.5 w-1.5 rounded-full bg-[#0F766E] animate-pulse" />
                 <span className="text-[11px] text-[#8FA6B2]">En línea</span>
               </div>
             </div>
@@ -493,13 +493,13 @@ function IASection() {
               {AI_MESSAGES.map((m, i) => (
                 <div key={i} className={`ia-chat-bubble flex gap-3 ${m.role === "user" ? "flex-row-reverse" : ""}`}>
                   {m.role === "ai" ? (
-                    <Image src="/logo-trimmed.webp" alt="ClientLabs" width={32} height={32} className="flex-shrink-0 object-contain" />
+                    <Logo variant="icon-solid-green" width={32} height={32} className="flex-shrink-0" />
                   ) : (
-                    <div className="h-7 w-7 rounded-full flex items-center justify-center text-xs flex-shrink-0 bg-[#1FA97A]/20 text-[#1FA97A] font-semibold">
+                    <div className="h-7 w-7 rounded-full flex items-center justify-center text-xs flex-shrink-0 bg-[#0F766E]/20 text-[#0F766E] font-semibold">
                       Tú
                     </div>
                   )}
-                  <div className={`rounded-2xl px-4 py-3 text-sm max-w-[80%] leading-relaxed ${m.role === "ai" ? "border border-[#1FA97A]/20 bg-[#1FA97A]/[0.07] text-[#E6F1F5] rounded-tl-sm" : "bg-[#1FA97A]/20 text-[#E6F1F5] rounded-tr-sm"}`}>
+                  <div className={`rounded-2xl px-4 py-3 text-sm max-w-[80%] leading-relaxed ${m.role === "ai" ? "border border-[#0F766E]/20 bg-[#0F766E]/[0.07] text-[#E6F1F5] rounded-tl-sm" : "bg-[#0F766E]/20 text-[#E6F1F5] rounded-tr-sm"}`}>
                     {m.text}
                   </div>
                 </div>
@@ -507,7 +507,7 @@ function IASection() {
             </div>
             <div className="border-t border-white/10 px-4 py-3 flex items-center gap-3">
               <input readOnly placeholder="Pregunta algo sobre tu negocio..." className="flex-1 bg-transparent text-sm text-[#8FA6B2] placeholder-[#8FA6B2]/50 outline-none" />
-              <button className="rounded-lg bg-[#1FA97A]/20 border border-[#1FA97A]/30 px-3 py-1.5 text-xs text-[#1FA97A] hover:bg-[#1FA97A]/30 transition-colors">Enviar</button>
+              <button className="rounded-lg bg-[#0F766E]/20 border border-[#0F766E]/30 px-3 py-1.5 text-xs text-[#0F766E] hover:bg-[#0F766E]/30 transition-colors">Enviar</button>
             </div>
           </div>
 
@@ -626,7 +626,7 @@ function AutomatizacionesSection() {
                     <p className="text-sm font-semibold text-[#0F1F2A]">{f.name}</p>
                     <p className="text-xs text-[#5F7280] mt-1">Trigger: {f.trigger}</p>
                   </div>
-                  <span className="flex-shrink-0 h-2 w-2 rounded-full bg-[#1FA97A] mt-1.5" />
+                  <span className="flex-shrink-0 h-2 w-2 rounded-full bg-[#0F766E] mt-1.5" />
                 </div>
                 <p className="text-[10px] text-[#5F7280] mt-2">{f.runs}</p>
               </button>
@@ -637,7 +637,7 @@ function AutomatizacionesSection() {
           <div className="rounded-2xl border border-[#E2E8ED] bg-[#F4F7F9] p-8">
             <div className="flex items-center justify-between mb-8">
               <h3 className="text-base font-semibold text-[#0F1F2A]">{flow.name}</h3>
-              <span className="text-xs font-medium text-[#1FA97A] bg-[#1FA97A]/10 rounded-full px-3 py-1">● Activo — {flow.runs}</span>
+              <span className="text-xs font-medium text-[#0F766E] bg-[#0F766E]/10 rounded-full px-3 py-1">● Activo — {flow.runs}</span>
             </div>
 
             {/* Nodes */}
@@ -695,14 +695,14 @@ function CtaSection() {
     tl.fromTo(".cta-module-item", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.35, stagger: 0.06 }, "-=0.3")
 
     // Pulse glow on CTA button
-    gsap.to(".cta-glow", { boxShadow: "0 0 40px rgba(31,169,122,0.4)", repeat: -1, yoyo: true, duration: 2, ease: "sine.inOut" })
+    gsap.to(".cta-glow", { boxShadow: "0 0 40px rgba(15,118,110,0.4)", repeat: -1, yoyo: true, duration: 2, ease: "sine.inOut" })
   }, { scope: ref })
 
   return (
     <section ref={ref} id="cta" className="relative min-h-screen flex flex-col bg-[#0B1F2A] overflow-hidden">
       {/* Ambient */}
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 h-96 w-96 rounded-full bg-[#1FA97A]/8 blur-[100px] pointer-events-none" />
-      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(#1FA97A 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 h-96 w-96 rounded-full bg-[#0F766E]/8 blur-[100px] pointer-events-none" />
+      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(#0F766E 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
 
       <div className="flex-1 flex items-center justify-center px-6 py-24">
         <div className="text-center max-w-4xl mx-auto space-y-10">
@@ -726,10 +726,10 @@ function CtaSection() {
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/contacto" className="cta-btn cta-glow rounded-lg bg-[#1FA97A] hover:bg-[#157A5C] text-white font-semibold px-10 py-4 transition-colors text-sm">
+            <Link href="/contacto" className="cta-btn cta-glow rounded-lg bg-[#0F766E] hover:bg-[#157A5C] text-white font-semibold px-10 py-4 transition-colors text-sm">
               Empezar gratis 14 días
             </Link>
-            <Link href="/precios" className="cta-btn rounded-lg border border-white/20 hover:border-[#1FA97A]/40 text-[#8FA6B2] hover:text-[#E6F1F5] font-medium px-10 py-4 transition-colors text-sm">
+            <Link href="/precios" className="cta-btn rounded-lg border border-white/20 hover:border-[#0F766E]/40 text-[#8FA6B2] hover:text-[#E6F1F5] font-medium px-10 py-4 transition-colors text-sm">
               Ver planes →
             </Link>
           </div>
@@ -770,7 +770,7 @@ function SectionDots({ active }: { active: string }) {
           onClick={() => scrollTo(s.id)}
           title={s.label}
           aria-label={s.label}
-          className={`h-2 w-2 rounded-full transition-all duration-300 ${active === s.id ? "bg-[#1FA97A] scale-125" : "bg-[#8FA6B2]/40 hover:bg-[#8FA6B2]/80"}`}
+          className={`h-2 w-2 rounded-full transition-all duration-300 ${active === s.id ? "bg-[#0F766E] scale-125" : "bg-[#8FA6B2]/40 hover:bg-[#8FA6B2]/80"}`}
         />
       ))}
     </nav>

@@ -87,7 +87,7 @@ export function DashboardTasks({ tasks, overdueCount, activityFeed }: Props) {
         </div>
         <button
           onClick={() => router.push("/dashboard/tasks")}
-          className="flex items-center gap-1 text-[11px] font-medium text-slate-400 transition-colors hover:text-[#1FA97A]"
+          className="flex items-center gap-1 text-[11px] font-medium text-slate-400 transition-colors hover:text-[#0F766E]"
         >
           Ver
           <ArrowRight className="h-3 w-3" />
@@ -96,7 +96,7 @@ export function DashboardTasks({ tasks, overdueCount, activityFeed }: Props) {
 
       {tasks.length === 0 ? (
         <div className="py-4 text-center">
-          <CheckCircle className="mx-auto mb-1.5 h-6 w-6 text-[#1FA97A] opacity-40" />
+          <CheckCircle className="mx-auto mb-1.5 h-6 w-6 text-[#0F766E] opacity-40" />
           <p className="text-[11px] text-slate-500">Sin tareas urgentes</p>
         </div>
       ) : (
@@ -129,8 +129,8 @@ export function DashboardTasks({ tasks, overdueCount, activityFeed }: Props) {
             Actividad reciente
           </h3>
           <span className="relative flex h-1.5 w-1.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#1FA97A] opacity-60" />
-            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#1FA97A]" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#0F766E] opacity-60" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#0F766E]" />
           </span>
           <span className="text-[9px] text-slate-400">En vivo</span>
         </div>
@@ -142,7 +142,7 @@ export function DashboardTasks({ tasks, overdueCount, activityFeed }: Props) {
               const Icon = item.icon
               return (
                 <div key={item.id} className="flex items-start gap-2">
-                  <div className={`mt-0.5 h-1.5 w-1.5 flex-shrink-0 rounded-full ${item.isLead ? "bg-[#1FA97A]" : "bg-slate-300"}`} />
+                  <div className={`mt-0.5 h-1.5 w-1.5 flex-shrink-0 rounded-full ${item.isLead ? "bg-[#0F766E]" : "bg-slate-300"}`} />
                   <p className="flex-1 text-[11px] text-slate-600 leading-relaxed">{item.label}</p>
                   <span className="flex-shrink-0 text-[10px] text-slate-400">{item.time}</span>
                 </div>

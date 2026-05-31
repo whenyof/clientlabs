@@ -67,7 +67,7 @@ export async function GET() {
     const resultMap = new Map<string, number>()
     logs.forEach(l => resultMap.set(l.resultado, (resultMap.get(l.resultado) ?? 0) + 1))
     const byResult = [
-      { name: "Exitosa", value: successLogs, color: "#1FA97A" },
+      { name: "Exitosa", value: successLogs, color: "#0F766E" },
       { name: "Error", value: logs.length - successLogs, color: "#EF4444" },
     ].filter(r => r.value > 0)
 

@@ -150,7 +150,7 @@ export function InvoicePreviewModal({ invoiceId, onClose, onPaid }: InvoicePrevi
                 type="button"
                 onClick={handleMarkAsPaid}
                 disabled={paying}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium bg-[#1FA97A] hover:bg-[#178a64] text-white rounded-lg transition-colors disabled:opacity-60"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium bg-[#0F766E] hover:bg-[#0E665F] text-white rounded-lg transition-colors disabled:opacity-60"
               >
                 {paying ? (
                   <RefreshCw className="h-3.5 w-3.5 animate-spin" />

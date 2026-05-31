@@ -63,14 +63,14 @@ export function VerifactuActivationModal({ nifDefault, nombreDefault, direccionD
   }
 
   const inputClass =
-    "w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#1FA97A] focus:border-[#1FA97A]"
+    "w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#0F766E] focus:border-[#0F766E]"
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="relative w-full max-w-lg rounded-xl bg-white shadow-xl">
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
           <div className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-[#1FA97A]" />
+            <Shield className="h-5 w-5 text-[#0F766E]" />
             <h2 className="text-[15px] font-semibold text-slate-900">Activar facturación legal (Verifactu)</h2>
           </div>
           {step !== 3 && (
@@ -83,7 +83,7 @@ export function VerifactuActivationModal({ nifDefault, nombreDefault, direccionD
         {step !== 3 && (
           <div className="flex gap-1.5 px-6 pt-4">
             {([1, 2] as const).map((s) => (
-              <div key={s} className={`h-1 flex-1 rounded-full transition-colors ${s <= step ? "bg-[#1FA97A]" : "bg-slate-100"}`} />
+              <div key={s} className={`h-1 flex-1 rounded-full transition-colors ${s <= step ? "bg-[#0F766E]" : "bg-slate-100"}`} />
             ))}
           </div>
         )}
@@ -124,7 +124,7 @@ export function VerifactuActivationModal({ nifDefault, nombreDefault, direccionD
                 <button
                   onClick={() => setStep(2)}
                   disabled={!canGoStep2}
-                  className="inline-flex items-center gap-2 rounded-lg bg-[#1FA97A] px-4 py-2 text-sm font-medium text-white hover:bg-[#1a9469] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="inline-flex items-center gap-2 rounded-lg bg-[#0F766E] px-4 py-2 text-sm font-medium text-white hover:bg-[#1a9469] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   Siguiente <ArrowRight className="h-4 w-4" />
                 </button>
@@ -157,14 +157,14 @@ export function VerifactuActivationModal({ nifDefault, nombreDefault, direccionD
 
               <div className="space-y-2.5">
                 <label className="flex cursor-pointer items-start gap-2.5">
-                  <input type="checkbox" className="mt-0.5 h-4 w-4 rounded border-slate-300 accent-[#1FA97A]" checked={agreementChecked} onChange={(e) => setAgreementChecked(e.target.checked)} />
+                  <input type="checkbox" className="mt-0.5 h-4 w-4 rounded border-slate-300 accent-[#0F766E]" checked={agreementChecked} onChange={(e) => setAgreementChecked(e.target.checked)} />
                   <span className="text-[12px] text-slate-700">He leído y acepto el acuerdo de representación</span>
                 </label>
                 <label className="flex cursor-pointer items-start gap-2.5">
-                  <input type="checkbox" className="mt-0.5 h-4 w-4 rounded border-slate-300 accent-[#1FA97A]" checked={declaracionChecked} onChange={(e) => setDeclaracionChecked(e.target.checked)} />
+                  <input type="checkbox" className="mt-0.5 h-4 w-4 rounded border-slate-300 accent-[#0F766E]" checked={declaracionChecked} onChange={(e) => setDeclaracionChecked(e.target.checked)} />
                   <span className="text-[12px] text-slate-700">
                     He leído la{" "}
-                    <Link href="/legal/declaracion-responsable" target="_blank" className="text-[#1FA97A] underline underline-offset-2 hover:text-[#1a9469]">
+                    <Link href="/legal/declaracion-responsable" target="_blank" className="text-[#0F766E] underline underline-offset-2 hover:text-[#1a9469]">
                       declaración responsable del fabricante
                     </Link>
                   </span>
@@ -190,7 +190,7 @@ export function VerifactuActivationModal({ nifDefault, nombreDefault, direccionD
                 <button
                   onClick={handleActivate}
                   disabled={saving || !canActivate}
-                  className="inline-flex items-center gap-2 rounded-lg bg-[#1FA97A] px-4 py-2 text-sm font-medium text-white hover:bg-[#1a9469] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="inline-flex items-center gap-2 rounded-lg bg-[#0F766E] px-4 py-2 text-sm font-medium text-white hover:bg-[#1a9469] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {saving ? "Activando..." : "Activar Verifactu"}
                 </button>
@@ -201,7 +201,7 @@ export function VerifactuActivationModal({ nifDefault, nombreDefault, direccionD
           {step === 3 && (
             <div className="space-y-4 py-2 text-center">
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50">
-                <CheckCircle2 className="h-7 w-7 text-[#1FA97A]" />
+                <CheckCircle2 className="h-7 w-7 text-[#0F766E]" />
               </div>
               <h3 className="text-[15px] font-semibold text-slate-900">Verifactu activado correctamente</h3>
               <p className="text-[13px] text-slate-500">Tus facturas se enviarán automáticamente a la AEAT.</p>
@@ -216,7 +216,7 @@ export function VerifactuActivationModal({ nifDefault, nombreDefault, direccionD
               </ul>
               <button
                 onClick={() => onSuccess(nif, nombre, direccion || undefined, cp || undefined, ciudad || undefined)}
-                className="w-full rounded-lg bg-[#1FA97A] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#1a9469] transition-colors"
+                className="w-full rounded-lg bg-[#0F766E] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#1a9469] transition-colors"
               >
                 Continuar
               </button>

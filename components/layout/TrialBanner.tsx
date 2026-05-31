@@ -38,10 +38,10 @@ export function TrialBanner() {
       return (
         <div
           className="flex items-center justify-between gap-3 px-4 py-2.5 text-[12.5px] font-medium"
-          style={{ background: "rgba(31,169,122,0.08)", borderBottom: "1px solid rgba(31,169,122,0.15)", color: "#0d7a58" }}
+          style={{ background: "rgba(15,118,110,0.08)", borderBottom: "1px solid rgba(15,118,110,0.15)", color: "#0d7a58" }}
         >
           <div className="flex items-center gap-2 min-w-0">
-            <Sparkles size={13} className="shrink-0 text-[#1FA97A]" />
+            <Sparkles size={13} className="shrink-0 text-[#0F766E]" />
             <span>
               Estás en prueba gratuita del plan <strong>{planName}</strong> —{" "}
               {daysLeft > 0
@@ -50,7 +50,7 @@ export function TrialBanner() {
               }{" "}
               <Link
                 href="/dashboard/settings?section=subscription"
-                className="underline underline-offset-2 hover:text-[#1FA97A]"
+                className="underline underline-offset-2 hover:text-[#0F766E]"
               >
                 Gestionar suscripción →
               </Link>
@@ -58,7 +58,7 @@ export function TrialBanner() {
           </div>
           <button
             onClick={() => setDismissed(true)}
-            className="shrink-0 p-1 rounded hover:bg-[rgba(31,169,122,0.12)] transition-colors"
+            className="shrink-0 p-1 rounded hover:bg-[rgba(15,118,110,0.12)] transition-colors"
             aria-label="Cerrar"
           >
             <X size={13} />
@@ -71,13 +71,13 @@ export function TrialBanner() {
     return (
       <div
         className="flex items-center justify-between gap-3 px-4 py-2.5 text-[12.5px] font-medium"
-        style={{ background: "rgba(31,169,122,0.08)", borderBottom: "1px solid rgba(31,169,122,0.15)", color: "#0d7a58" }}
+        style={{ background: "rgba(15,118,110,0.08)", borderBottom: "1px solid rgba(15,118,110,0.15)", color: "#0d7a58" }}
       >
         <div className="flex items-center gap-2 min-w-0">
-          <Sparkles size={13} className="shrink-0 text-[#1FA97A]" />
+          <Sparkles size={13} className="shrink-0 text-[#0F766E]" />
           <span>
             Tu prueba termina en <strong>{daysLeft} {daysLeft === 1 ? "día" : "días"}</strong>.{" "}
-            <Link href="/plan" className="underline underline-offset-2 hover:text-[#1FA97A]">
+            <Link href="/plan" className="underline underline-offset-2 hover:text-[#0F766E]">
               Elige un plan
             </Link>{" "}
             para no perder el acceso.
@@ -85,7 +85,7 @@ export function TrialBanner() {
         </div>
         <button
           onClick={() => setDismissed(true)}
-          className="shrink-0 p-1 rounded hover:bg-[rgba(31,169,122,0.12)] transition-colors"
+          className="shrink-0 p-1 rounded hover:bg-[rgba(15,118,110,0.12)] transition-colors"
           aria-label="Cerrar"
         >
           <X size={13} />

@@ -46,17 +46,6 @@ const C = {
   warn: "#c2410c",
 }
 
-// ─── Preset report tiles ───────────────────────────────────────────────────
-const PRESETS = [
-  { icon: "💰", nm: "Ingresos · MoM",         desc: "Real vs plan · 12 meses",  live: true,  active: true  },
-  { icon: "📊", nm: "Embudo de ventas",       desc: "Conversión por etapa",      live: true                },
-  { icon: "👥", nm: "Retención · cohortes",   desc: "% activos cada mes",        live: false               },
-  { icon: "✅", nm: "Productividad equipo",   desc: "Tareas/persona · 30d",      live: true                },
-  { icon: "📧", nm: "Eficacia campañas",      desc: "Apertura · clic · conv.",   live: false               },
-  { icon: "🕐", nm: "Aging cobros",           desc: "Pendientes y morosidad",    live: true                },
-  { icon: "⭐", nm: "Custom: KPIs CEO",       desc: "Snapshot semanal",          live: false, custom: true },
-]
-
 // ─── Saved reports (static) ────────────────────────────────────────────────
 const SAVED = [
   { nm: "Cierre mensual · CFO",        sub: "Plantilla custom · 6 widgets",    type: "Custom",    by: "MG", when: "Hace 2h",   schedule: "Mensual"      },
@@ -366,55 +355,6 @@ export function ReportingView() {
         </div>
       </div>
 
-      {/* ── 2. PRESET REPORT TILES ─────────────────────────────────────────── */}
-      <div style={{ display: "flex", gap: 10, overflowX: "auto", marginBottom: 22, paddingBottom: 4, scrollbarWidth: "none" }}>
-        {PRESETS.map((p) => (
-          <div
-            key={p.nm}
-            style={{
-              flexShrink: 0, width: 182,
-              background: p.active ? C.bg : C.bg2,
-              border: `1px solid ${p.active ? C.ink : C.line}`,
-              borderRadius: 10, padding: "12px 14px", cursor: "pointer",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 8 }}>
-              <span style={{ width: 30, height: 30, borderRadius: 6, background: C.bg3, display: "grid", placeItems: "center", fontSize: 14, flexShrink: 0 }}>
-                {p.icon}
-              </span>
-              <div style={{ minWidth: 0, flex: 1 }}>
-                <div style={{ fontSize: 12.5, fontWeight: 550, color: C.ink, letterSpacing: "-0.005em", lineHeight: 1.3 }}>{p.nm}</div>
-                <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10, color: C.ink3, marginTop: 2 }}>{p.desc}</div>
-              </div>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, fontFamily: "ui-monospace,monospace", fontSize: 10, color: C.ink3 }}>
-              {p.live ? (
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-                  <span style={{ width: 5, height: 5, borderRadius: 99, background: C.accent, display: "inline-block" }} />
-                  En vivo
-                </span>
-              ) : (
-                <span>Bajo demanda</span>
-              )}
-              <span style={{ color: C.ink5 }}>·</span>
-              <span>{p.custom ? "Custom" : "Plantilla"}</span>
-            </div>
-          </div>
-        ))}
-        {/* Create new tile */}
-        <div style={{
-          flexShrink: 0, width: 140,
-          background: C.bg2, border: `1px dashed ${C.line}`,
-          borderRadius: 10, padding: "12px 14px",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          cursor: "pointer", color: C.ink3,
-        }}>
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 22, lineHeight: 1, fontWeight: 300 }}>+</div>
-            <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10, letterSpacing: "0.05em", textTransform: "uppercase", marginTop: 4 }}>Crear informe</div>
-          </div>
-        </div>
-      </div>
 
       {/* ── LOADING SKELETON ───────────────────────────────────────────────── */}
       {loading ? (

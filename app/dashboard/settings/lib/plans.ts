@@ -157,3 +157,10 @@ export function canUpgrade(currentPlan: string, targetPlan: string): boolean {
   const targetIndex = order.indexOf(targetPlan.toLowerCase())
   return targetIndex > currentIndex
 }
+
+export function canDowngrade(currentPlan: string, targetPlan: string): boolean {
+  const order = ['starter', 'pro', 'business']
+  const currentIndex = order.indexOf(currentPlan.toLowerCase())
+  const targetIndex = order.indexOf(targetPlan.toLowerCase())
+  return currentIndex > 0 && targetIndex >= 0 && targetIndex < currentIndex
+}

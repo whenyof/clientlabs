@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { PLANS, Plan, canUpgrade } from "../lib/plans"
+import { PLANS, Plan, canUpgrade, canDowngrade } from "../lib/plans"
 import { Check, CreditCard, Zap, Gift, Building2, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useStripeCheckout } from "@/hooks/use-stripe"
@@ -46,7 +46,7 @@ export function PlansSection() {
   const [currentPlan, setCurrentPlan] = useState("starter")
   const [planExpiresAt, setPlanExpiresAt] = useState<string | null>(null)
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly")
-  const { checkout, openPortal, loading } = useStripeCheckout()
+  const { checkout, openPortal, changePlan, loading } = useStripeCheckout()
 
   useEffect(() => {
     fetch("/api/settings/profile")
@@ -65,6 +65,10 @@ export function PlansSection() {
   function handleUpgrade(planId: string) {
     if (planId === "starter") return checkout("STARTER", billingCycle)
     checkout(toStripePlan(planId), billingCycle)
+  }
+
+  function handleDowngrade(planId: string) {
+    changePlan(toStripePlan(planId), billingCycle)
   }
 
   return (
@@ -133,9 +137,10 @@ export function PlansSection() {
         {PLANS.map((plan) => {
           const isCurrent = plan.id === currentPlan
           const canUp = canUpgrade(currentPlan, plan.id)
+          const canDown = canDowngrade(currentPlan, plan.id)
           const colors = PLAN_COLORS[plan.id as keyof typeof PLAN_COLORS]
           const Icon = PLAN_ICONS[plan.id as keyof typeof PLAN_ICONS] ?? Gift
-          const isLoading = loading && (isCurrent || canUp)
+          const isLoading = loading && (isCurrent || canUp || canDown)
 
           return (
             <div
@@ -213,27 +218,31 @@ export function PlansSection() {
 
               {/* CTA */}
               <button
-                onClick={() => isCurrent ? openPortal() : handleUpgrade(plan.id)}
-                disabled={loading || (!canUp && !isCurrent)}
+                onClick={() => {
+                  if (isCurrent) return openPortal()
+                  if (canDown) return handleDowngrade(plan.id)
+                  return handleUpgrade(plan.id)
+                }}
+                disabled={loading || isCurrent}
                 className={cn(
                   "w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-[13px] font-semibold transition-all disabled:cursor-not-allowed"
                 )}
                 style={
                   isCurrent
                     ? { background: colors.bg, color: colors.accent, border: `1px solid ${colors.border}` }
-                    : canUp
-                    ? { background: "#0F766E", color: "#fff", opacity: loading && !isLoading ? 0.5 : 1 }
-                    : { background: "#F8FAFC", color: "#CBD5E1", border: "1px solid #E2E8F0" }
+                    : canDown
+                    ? { background: "#F8FAFC", color: "#64748B", border: "1px solid #E2E8F0", opacity: loading && !isLoading ? 0.5 : 1 }
+                    : { background: "#0F766E", color: "#fff", opacity: loading && !isLoading ? 0.5 : 1 }
                 }
               >
                 {isLoading ? (
                   <><Loader2 className="w-3.5 h-3.5 animate-spin" />Procesando...</>
                 ) : isCurrent ? (
                   "Plan actual"
-                ) : canUp ? (
-                  `Cambiar a ${plan.name}`
+                ) : canDown ? (
+                  `Bajar a ${plan.name}`
                 ) : (
-                  "No disponible"
+                  `Cambiar a ${plan.name}`
                 )}
               </button>
             </div>

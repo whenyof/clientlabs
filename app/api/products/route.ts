@@ -7,12 +7,12 @@ import { prisma } from "@/lib/prisma"
 
 const createProductSchema = z.object({
   name: z.string().min(1, "Nombre requerido").max(200).trim(),
-  description: z.string().max(2000).trim().optional(),
+  description: z.string().max(2000).trim().nullish(),
   price: z.number({ error: "Precio requerido" }).min(0).max(999999),
-  taxRate: z.number().min(0).max(100).optional().default(21),
-  unit: z.string().max(50).optional().default("ud"),
-  category: z.string().max(100).optional(),
-  isService: z.boolean().optional().default(false),
+  taxRate: z.number().min(0).max(100).nullish().transform(v => v ?? 21),
+  unit: z.string().max(50).nullish().transform(v => v ?? "ud"),
+  category: z.string().max(100).nullish(),
+  isService: z.boolean().nullish().transform(v => v ?? false),
 })
 
 export async function GET() {

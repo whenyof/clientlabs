@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { Plus, Pencil, Trash2, Search, Package, Check, X, Upload } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 import { ProductImportModal } from "./ProductImportModal"
 
 type Product = {
@@ -89,7 +90,7 @@ export function ProductCatalog() {
   const saveEdit = async (id: string) => {
     setSaving(true)
     try {
-      await fetch(`/api/products/${id}`, {
+      const res = await fetch(`/api/products/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -102,8 +103,15 @@ export function ProductCatalog() {
           isService: form.isService,
         }),
       })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        toast.error(data.error ?? "Error al guardar")
+        return
+      }
       setEditingId(null)
       fetchProducts()
+    } catch {
+      toast.error("Error de conexión")
     } finally {
       setSaving(false)
     }
@@ -119,7 +127,7 @@ export function ProductCatalog() {
     if (!form.name) return
     setSaving(true)
     try {
-      await fetch("/api/products", {
+      const res = await fetch("/api/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -132,9 +140,16 @@ export function ProductCatalog() {
           isService: form.isService,
         }),
       })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        toast.error(data.error ?? "Error al crear el producto")
+        return
+      }
       setShowCreate(false)
       setForm(EMPTY_FORM)
       fetchProducts()
+    } catch {
+      toast.error("Error de conexión")
     } finally {
       setSaving(false)
     }

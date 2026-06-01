@@ -20,25 +20,26 @@ export async function GET(_req: NextRequest) {
     return NextResponse.json({ invoices: [], plan: user?.plan ?? "STARTER", planExpiresAt: null })
   }
 
-  const stripeInvoices = await stripe.invoices.list({
-    customer: user.stripeCustomerId,
-    limit: 24,
-  })
+  try {
+    const stripeInvoices = await stripe.invoices.list({
+      customer: user.stripeCustomerId,
+      limit: 24,
+    })
 
-  const invoices = stripeInvoices.data.map((inv) => ({
-    id:          inv.id,
-    amount:      inv.amount_paid,
-    currency:    inv.currency.toUpperCase(),
-    status:      inv.status === "paid" ? "succeeded" : inv.status === "open" ? "pending" : "failed",
-    invoiceUrl:  inv.hosted_invoice_url ?? null,
-    pdfUrl:      inv.invoice_pdf ?? null,
-    createdAt:   new Date(inv.created * 1000).toISOString(),
-    description: inv.lines.data[0]?.description ?? "Suscripción ClientLabs",
-  }))
+    const invoices = stripeInvoices.data.map((inv) => ({
+      id:          inv.id,
+      amount:      inv.amount_paid,
+      currency:    inv.currency.toUpperCase(),
+      status:      inv.status === "paid" ? "succeeded" : inv.status === "open" ? "pending" : "failed",
+      invoiceUrl:  inv.hosted_invoice_url ?? null,
+      pdfUrl:      inv.invoice_pdf ?? null,
+      createdAt:   new Date(inv.created * 1000).toISOString(),
+      description: inv.lines.data[0]?.description ?? "Suscripción ClientLabs",
+    }))
 
-  return NextResponse.json({
-    invoices,
-    plan:         user.plan,
-    planExpiresAt: user.planExpiresAt,
-  })
+    return NextResponse.json({ invoices, plan: user.plan, planExpiresAt: user.planExpiresAt })
+  } catch (err) {
+    console.error("[stripe/invoices]", err instanceof Error ? err.message : err)
+    return NextResponse.json({ invoices: [], plan: user.plan, planExpiresAt: user.planExpiresAt })
+  }
 }

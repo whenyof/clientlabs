@@ -7,9 +7,10 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   ClockIcon,
-  DocumentIcon,
 } from "@heroicons/react/24/outline"
+import { Receipt } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 import { useStripeCheckout } from "@/hooks/use-stripe"
 
 interface Invoice {
@@ -32,14 +33,17 @@ export function BillingHistory() {
 
   useEffect(() => {
     fetch("/api/stripe/invoices")
-      .then((r) => r.json())
-      .then((d) => {
+      .then(async (r) => {
+        const d = await r.json().catch(() => ({ invoices: [] }))
         setInvoices(d.invoices ?? [])
         if (d.plan) setPlan(d.plan)
         if (d.planExpiresAt) setPlanExpiresAt(d.planExpiresAt)
         setFetched(true)
       })
-      .catch(() => setFetched(true))
+      .catch(() => {
+        setFetched(true)
+        toast.error("No se pudo cargar el historial de facturación")
+      })
   }, [])
 
   const getStatusText = (status: string) => {
@@ -187,8 +191,11 @@ export function BillingHistory() {
 
         {fetched && invoices.length === 0 && (
           <div className="p-12 text-center">
-            <DocumentIcon className="w-10 h-10 text-slate-200 mx-auto mb-3" />
-            <p className="text-sm text-slate-400">Sin registros de facturación.</p>
+            <Receipt className="w-10 h-10 text-slate-200 mx-auto mb-3" />
+            <p className="text-sm font-medium text-slate-500">Aún no tienes facturas.</p>
+            <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
+              Aquí aparecerán tus pagos cuando actives un plan de pago.
+            </p>
           </div>
         )}
       </div>

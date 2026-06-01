@@ -9,7 +9,9 @@ import { toast } from "sonner"
 export default function TwoFactorVerifyPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard"
+  const raw = searchParams.get("callbackUrl") ?? "/dashboard"
+  // Prevent open redirect: only allow same-origin relative paths
+  const callbackUrl = raw.startsWith("/") && !raw.startsWith("//") ? raw : "/dashboard"
   const { update } = useSession()
 
   const [code, setCode] = useState("")

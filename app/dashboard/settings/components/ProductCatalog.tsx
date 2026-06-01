@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Plus, Pencil, Trash2, Search, Package, Check, X } from "lucide-react"
+import { Plus, Pencil, Trash2, Search, Package, Check, X, Upload } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { ProductImportModal } from "./ProductImportModal"
 
 type Product = {
   id: string
@@ -47,6 +48,7 @@ export function ProductCatalog() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<FormState>(EMPTY_FORM)
   const [showCreate, setShowCreate] = useState(false)
+  const [showImport, setShowImport] = useState(false)
   const [saving, setSaving] = useState(false)
 
   const fetchProducts = useCallback(async () => {
@@ -140,19 +142,35 @@ export function ProductCatalog() {
 
   return (
     <div className="space-y-5">
+      {showImport && (
+        <ProductImportModal
+          onClose={() => setShowImport(false)}
+          onDone={() => { setShowImport(false); fetchProducts() }}
+        />
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <h2 className="text-[15px] font-semibold text-slate-900">Catálogo de productos</h2>
+          <h2 className="text-[15px] font-semibold text-slate-900">Mis productos y servicios</h2>
           <p className="text-[12px] text-slate-500 mt-0.5">Productos y servicios para usar en presupuestos y facturas</p>
         </div>
-        <button
-          onClick={() => { setShowCreate(true); setEditingId(null); setForm(EMPTY_FORM) }}
-          className="flex items-center gap-2 px-4 py-2 bg-[#0F766E] text-white rounded-lg text-[12px] font-medium hover:bg-[#0E665F] transition-colors"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          Nuevo producto
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowImport(true)}
+            className="flex items-center gap-2 px-4 py-2 border border-slate-200 bg-white text-slate-700 rounded-lg text-[12px] font-medium hover:bg-slate-50 transition-colors"
+          >
+            <Upload className="h-3.5 w-3.5" />
+            Importar
+          </button>
+          <button
+            onClick={() => { setShowCreate(true); setEditingId(null); setForm(EMPTY_FORM) }}
+            className="flex items-center gap-2 px-4 py-2 bg-[#0F766E] text-white rounded-lg text-[12px] font-medium hover:bg-[#0E665F] transition-colors"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Nuevo producto
+          </button>
+        </div>
       </div>
 
       {/* Search */}

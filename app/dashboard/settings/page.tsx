@@ -65,7 +65,7 @@ const NAV_GROUPS = [
   {
     title: "Datos",
     items: [
-      { id: "catalog",  label: "Campos personalizados" },
+      { id: "catalog",  label: "Mis productos y servicios" },
       { id: "invoicing",label: "Importar / Exportar" },
       { id: "limits",   label: "Backups" },
     ],

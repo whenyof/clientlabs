@@ -34,7 +34,7 @@ const SECONDARY_SECTIONS = [
   { id: "security",   label: "Seguridad",       icon: ShieldCheck,   href: "/dashboard/settings?section=security" },
   { id: "appearance", label: "Apariencia",      icon: Palette,       href: "/dashboard/settings?section=appearance" },
   { id: "activity",   label: "Actividad",       icon: Clock,         href: "/dashboard/settings?section=activity" },
-  { id: "catalog",    label: "Catálogo",        icon: Package,       href: "/dashboard/settings?section=catalog" },
+  { id: "catalog",    label: "Mis productos y servicios", icon: Package, href: "/dashboard/settings?section=catalog" },
   { id: "danger",     label: "Zona Peligrosa",  icon: AlertTriangle, href: "/dashboard/settings?section=danger", danger: true },
 ]
 

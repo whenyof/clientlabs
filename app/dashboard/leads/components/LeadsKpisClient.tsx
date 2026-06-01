@@ -130,40 +130,14 @@ function LeadsKpisClientInner({ initialLeads, initialTotal, children }: LeadsKpi
     searchTerm.trim()
   )
 
-  const kpiLeadsActivos = initialTotal
-  const kpiLeadsCalientes = initialLeads.filter(l => (l.score ?? 0) >= 70 || l.temperature === "HOT").length
-  const kpiConversion = (initialLeads.filter(l => l.leadStatus === "CONVERTED").length / Math.max(initialTotal, 1) * 100)
-  const kpiEstaSemana = initialLeads.filter(l => new Date(l.createdAt) > new Date(Date.now() - 7 * 86400000)).length
-
   return (
     <>
-      {/* Institutional KPI row */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", border: "1px solid #e8e8e8", borderRadius: 10, background: "#ffffff", marginBottom: 16, overflow: "hidden" }}>
-        <div style={{ padding: "18px 22px", borderRight: "1px solid #eeeeee", display: "flex", flexDirection: "column", gap: 4 }}>
-          <div style={{ fontSize: 11.5, color: "#737373", fontWeight: 500 }}>Leads activos <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 9, padding: "1px 5px", borderRadius: 3, background: "#f5f5f5", color: "#737373", letterSpacing: "0.04em", textTransform: "uppercase" }}>total</span></div>
-          <div style={{ fontWeight: 600, letterSpacing: "-0.028em", fontSize: 28, lineHeight: 1.1, marginTop: 4, color: "#0a0a0a", fontVariantNumeric: "tabular-nums" }}>{kpiLeadsActivos}</div>
-          <div style={{ marginTop: 10, fontSize: 11.5, color: "#a3a3a3", fontFamily: "ui-monospace,monospace" }}>en base de datos</div>
+      {/* Unified toolbar: filters + view toggle */}
+      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 18px", borderBottom: "1px solid #eeeeee" }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {children}
         </div>
-        <div style={{ padding: "18px 22px", borderRight: "1px solid #eeeeee", display: "flex", flexDirection: "column", gap: 4 }}>
-          <div style={{ fontSize: 11.5, color: "#737373", fontWeight: 500 }}>Leads calientes <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 9, padding: "1px 5px", borderRadius: 3, background: "#ecf6f1", color: "#16986e", letterSpacing: "0.04em", textTransform: "uppercase" }}>hot</span></div>
-          <div style={{ fontWeight: 600, letterSpacing: "-0.028em", fontSize: 28, lineHeight: 1.1, marginTop: 4, color: "#0a0a0a", fontVariantNumeric: "tabular-nums" }}>{kpiLeadsCalientes}</div>
-          <div style={{ marginTop: 10, fontSize: 11.5, color: "#a3a3a3", fontFamily: "ui-monospace,monospace" }}>score ≥ 70 o temp HOT</div>
-        </div>
-        <div style={{ padding: "18px 22px", borderRight: "1px solid #eeeeee", display: "flex", flexDirection: "column", gap: 4 }}>
-          <div style={{ fontSize: 11.5, color: "#737373", fontWeight: 500 }}>Tasa conversión <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 9, padding: "1px 5px", borderRadius: 3, background: "#f5f5f5", color: "#737373", letterSpacing: "0.04em", textTransform: "uppercase" }}>conv</span></div>
-          <div style={{ fontWeight: 600, letterSpacing: "-0.028em", fontSize: 28, lineHeight: 1.1, marginTop: 4, color: "#0a0a0a", fontVariantNumeric: "tabular-nums" }}>{kpiConversion.toFixed(1)}%</div>
-          <div style={{ marginTop: 10, fontSize: 11.5, color: "#a3a3a3", fontFamily: "ui-monospace,monospace" }}>leads convertidos</div>
-        </div>
-        <div style={{ padding: "18px 22px", display: "flex", flexDirection: "column", gap: 4 }}>
-          <div style={{ fontSize: 11.5, color: "#737373", fontWeight: 500 }}>Esta semana <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 9, padding: "1px 5px", borderRadius: 3, background: "#f5f5f5", color: "#737373", letterSpacing: "0.04em", textTransform: "uppercase" }}>7d</span></div>
-          <div style={{ fontWeight: 600, letterSpacing: "-0.028em", fontSize: 28, lineHeight: 1.1, marginTop: 4, color: "#0a0a0a", fontVariantNumeric: "tabular-nums" }}>{kpiEstaSemana}</div>
-          <div style={{ marginTop: 10, fontSize: 11.5, color: "#a3a3a3", fontFamily: "ui-monospace,monospace" }}>nuevos últimos 7 días</div>
-        </div>
-      </div>
-
-      {/* View toggle */}
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <div style={{ display: "flex", background: "var(--bg-surface)", border: "0.5px solid var(--border-subtle)", borderRadius: 8, padding: 3, gap: 2 }}>
+        <div style={{ display: "flex", background: "#f5f5f5", border: "0.5px solid #e8e8e8", borderRadius: 8, padding: 3, gap: 2, flexShrink: 0 }}>
           <button type="button" onClick={() => setViewMode("list")} style={viewBtnStyle(viewMode === "list")}>
             <List size={13} />
             Lista
@@ -179,7 +153,6 @@ function LeadsKpisClientInner({ initialLeads, initialTotal, children }: LeadsKpi
         <LeadsKanbanView />
       ) : (
         <>
-          {children}
 
           {hasActiveFilter && (
             <div style={{

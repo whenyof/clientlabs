@@ -46,70 +46,65 @@ export default async function Client360Page({ params: paramsPromise }: { params:
   return (
     <DashboardContainer>
 
-      {/* ── Back link — institutional style ────────────────────────────── */}
-      <div style={{ paddingBottom: 14, marginBottom: 16, borderBottom: "1px solid #eeeeee" }}>
+      {/* ── Back link ──────────────────────────────────────────────────── */}
+      <div style={{ marginBottom: 16 }}>
         <a
           href="/dashboard/clients"
-          style={{
-            display: "inline-flex", alignItems: "center", gap: 5,
-            fontSize: 12.5, color: "#737373", fontWeight: 500, textDecoration: "none",
-            transition: "color .12s ease",
-          }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#0a0a0a" }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#737373" }}
+          className="ld-back"
         >
-          <svg width="13" height="13" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="currentColor" aria-hidden="true">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" strokeWidth={2.4} stroke="currentColor" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 18l-6-6 6-6" />
           </svg>
           Volver a clientes
         </a>
+        <style>{`.ld-back{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#737373;font-family:ui-monospace,monospace;padding:4px 8px;margin-left:-8px;border-radius:5px;text-decoration:none;transition:color .12s ease,background .12s ease}.ld-back:hover{color:#0a0a0a;background:#fafafa}`}</style>
       </div>
 
-      {/* ── Header: identidad del cliente ──────────────────────────────── */}
-      <div className="mb-4">
-        <ClientHeader
-          client={client}
-          kpis={kpis}
-          lastActivityAt={timeline[0]?.date ?? null}
-        />
-      </div>
+      {/* ── Hero card (full width) ─────────────────────────────────────── */}
+      <ClientHeader
+        client={client}
+        kpis={kpis}
+        lastActivityAt={timeline[0]?.date ?? null}
+      />
 
-      {/* ── 4 KPIs separados ───────────────────────────────────────────── */}
-      <div className="mb-4">
+      {/* ── KPI overview strip ────────────────────────────────────────── */}
+      <div style={{ marginTop: 16 }}>
         <ClientKpiOverview kpis={kpis} salesKpis={salesData.kpis} />
       </div>
 
-      {/* ── Layout 70 / 30 — stacked on mobile, side-by-side on xl ───── */}
-      <div className="flex flex-col xl:flex-row gap-5 items-start">
+      {/* ── Two-column layout: main + right rail ──────────────────────── */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "minmax(0, 1fr) 340px",
+        gap: 18,
+        alignItems: "start",
+        marginTop: 16,
+      }}>
 
-        {/* ── Columna izquierda (70%) ─────────────────────────────────── */}
-        <div className="flex-1 min-w-0 space-y-4 w-full">
+        {/* ── Left column ─────────────────────────────────────────────── */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 14, minWidth: 0 }}>
 
-          {/* Riesgo + Rentabilidad en dos tarjetas lado a lado */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Riesgo + Rentabilidad side-by-side */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
             <ClientFinancialRiskCard risk={financialRisk} />
             <ClientProfitabilityCard profitability={profitability} />
           </div>
 
-          {/* Historial: pedidos, facturas y pagos */}
-          <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-subtle)] overflow-hidden">
-            <ClientTransactionsTabs
-              clientId={clientId}
-              invoices={invoices}
-              paymentsData={paymentsData}
-            />
-          </div>
+          {/* Transactions: pedidos, facturas, pagos */}
+          <ClientTransactionsTabs
+            clientId={clientId}
+            invoices={invoices}
+            paymentsData={paymentsData}
+          />
+
+          {/* Activity timeline */}
+          <ClientTimeline events={timeline} />
         </div>
 
-        {/* ── Columna derecha (30%) ───────────────────────────────────── */}
-        <aside className="w-full xl:w-[300px] xl:shrink-0 xl:sticky xl:top-6 space-y-4">
-
-          {/* Información del cliente (editable) */}
+        {/* ── Right rail (340px) ──────────────────────────────────────── */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <ClientProfileCard client={client} />
-
-          {/* Timeline: 4 eventos + ver más */}
-          <ClientTimeline events={timeline} />
-        </aside>
+        </div>
       </div>
 
     </DashboardContainer>

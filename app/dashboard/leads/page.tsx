@@ -161,25 +161,25 @@ export default async function LeadsPage({
   const chartInitial = { daily: dailyFiltered, byStatus }
 
   const tableNode = (
-    <LeadsClientShell>
-      <LeadsKpisClient
-        initialLeads={initialLeadsData as Lead[]}
-        initialTotal={initialLeadsCount}
-      >
-        <LeadsFilters sources={sources} />
-      </LeadsKpisClient>
-    </LeadsClientShell>
+    <LeadsKpisClient
+      initialLeads={initialLeadsData as Lead[]}
+      initialTotal={initialLeadsCount}
+    >
+      <LeadsFilters sources={sources} />
+    </LeadsKpisClient>
   )
 
   return (
-    <LeadsPageView
-      totalLeads={totalLeads}
-      kpis={kpis}
-      dailyData={dailyFiltered}
-      byStatus={byStatus}
-      initialLeads={initialLeadsData as Lead[]}
-      initialTotal={initialLeadsCount}
-      tableNode={tableNode}
-    />
+    <LeadsClientShell>
+      <LeadsPageView
+        totalLeads={totalLeads}
+        kpis={kpis}
+        dailyData={dailyFiltered}
+        byStatus={byStatus}
+        initialLeads={initialLeadsData as Lead[]}
+        initialTotal={initialLeadsCount}
+        tableNode={tableNode}
+      />
+    </LeadsClientShell>
   )
 }

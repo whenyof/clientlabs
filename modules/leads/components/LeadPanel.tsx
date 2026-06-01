@@ -2,25 +2,14 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { ChevronLeft } from "lucide-react"
 import { LeadHeader } from "@domains/leads/components/LeadHeader"
 import { LeadTimeline } from "@domains/leads/components/LeadTimeline"
 import { LeadInfoCard } from "@domains/leads/components/LeadInfoCard"
 import { LeadAIRecommendations } from "@domains/leads/components/LeadAIRecommendations"
 import { LeadNextActionCard } from "@domains/leads/components/LeadNextActionCard"
 import { LeadNotesCard } from "@domains/leads/components/LeadNotesCard"
-import { LeadEmailModule } from "@domains/leads/components/LeadEmailModule"
 import { LeadQuickTaskCard } from "@/modules/leads/components/LeadQuickTaskCard"
 import { LeadContactsCard } from "@domains/leads/components/LeadContactsCard"
-import { LeadCustomFieldsCard } from "@domains/leads/components/LeadCustomFieldsCard"
-
-// ─── Design tokens ─────────────────────────────────────────────────────────
-const C = {
-  bg: "#ffffff", bg2: "#fafafa",
-  ink: "#0a0a0a", ink2: "#404040", ink3: "#737373", ink4: "#a3a3a3",
-  line: "#e8e8e8", line2: "#eeeeee",
-  accent: "#16986e", accentSoft: "#ecf6f1",
-}
 
 interface LeadPanelProps {
   lead: {
@@ -41,61 +30,51 @@ interface LeadPanelProps {
 
 export function LeadPanel({ lead }: LeadPanelProps) {
   const [timelineKey, setTimelineKey] = useState(0)
+  const refresh = () => setTimelineKey(k => k + 1)
 
   return (
-    <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "var(--font-geist-sans, ui-sans-serif, system-ui, sans-serif)" }}>
-      {/* ── Back button ─────────────────────────────────── */}
-      <div style={{ padding: "14px 24px 0", borderBottom: `1px solid ${C.line2}`, paddingBottom: 14 }}>
+    <div style={{ fontFamily: "var(--font-geist-sans, ui-sans-serif, system-ui, sans-serif)", color: "#0a0a0a" }}>
+      <div style={{ maxWidth: 1320, margin: "0 auto", padding: "22px 28px 80px" }}>
+
+        {/* Back link */}
         <Link
           href="/dashboard/leads"
           style={{
-            display: "inline-flex", alignItems: "center", gap: 5,
-            fontSize: 12.5, color: C.ink3, fontWeight: 500, textDecoration: "none",
-            transition: "color .12s ease",
+            display: "inline-flex", alignItems: "center", gap: 6,
+            fontSize: 12, color: "#737373", fontFamily: "ui-monospace,monospace",
+            padding: "4px 8px", margin: "0 0 16px -8px", borderRadius: 5,
+            textDecoration: "none", transition: "color .12s ease, background .12s ease",
           }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = C.ink }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = C.ink3 }}
         >
-          <ChevronLeft size={13} strokeWidth={2.2} />
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
           Volver a leads
         </Link>
-      </div>
 
-      <div style={{ padding: "20px 24px 60px" }}>
-        {/* ── Hero ─────────────────────────────────────── */}
-        <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 12, overflow: "hidden", marginBottom: 16 }}>
-          <LeadHeader lead={lead} />
-        </div>
+        {/* Hero card */}
+        <LeadHeader lead={lead} onRefresh={refresh} />
 
-        {/* ── Two-column layout ─────────────────────────── */}
-        <div
-          style={{ display: "flex", gap: 16, alignItems: "flex-start" }}
-          className="lead-panel-columns"
-        >
-          {/* Left column — main content */}
-          <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 16 }}>
+        {/* Two-column grid */}
+        <div className="ld-grid" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) 340px", gap: 18, alignItems: "start", marginTop: 14 }}>
+
+          {/* Left column */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 14, minWidth: 0 }}>
+            <LeadNextActionCard leadId={lead.id} leadStatus={lead.leadStatus} />
             <LeadContactsCard leadId={lead.id} />
-            <LeadEmailModule leadId={lead.id} leadEmail={lead.email} leadName={lead.name} />
+            <LeadNotesCard leadId={lead.id} onActivityCreated={refresh} />
             <LeadTimeline refreshTrigger={timelineKey} leadId={lead.id} createdAt={lead.createdAt} />
-            <LeadNotesCard leadId={lead.id} onActivityCreated={() => setTimelineKey(k => k + 1)} />
           </div>
 
-          {/* Right column — sidebar */}
-          <div style={{ width: 320, flexShrink: 0, display: "flex", flexDirection: "column", gap: 16 }} className="lead-panel-sidebar">
-            <LeadInfoCard lead={lead} onUpdate={() => setTimelineKey(k => k + 1)} />
-            <LeadCustomFieldsCard leadId={lead.id} />
-            <LeadQuickTaskCard leadId={lead.id} onTaskCreated={() => setTimelineKey(k => k + 1)} />
+          {/* Right column */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <LeadInfoCard lead={lead} onUpdate={refresh} />
+            <LeadQuickTaskCard leadId={lead.id} onTaskCreated={refresh} />
             <LeadAIRecommendations score={lead.score} phone={lead.phone} leadStatus={lead.leadStatus} />
-            <LeadNextActionCard leadId={lead.id} leadStatus={lead.leadStatus} />
           </div>
         </div>
       </div>
 
       <style>{`
-        @media (max-width: 768px) {
-          .lead-panel-columns { flex-direction: column !important; }
-          .lead-panel-sidebar { width: auto !important; }
-        }
+        @media (max-width: 1100px) { .ld-grid { grid-template-columns: 1fr !important; } }
       `}</style>
     </div>
   )

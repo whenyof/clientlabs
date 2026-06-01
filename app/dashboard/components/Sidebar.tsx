@@ -105,14 +105,9 @@ const NAV: NavGroup[] = [
     ],
   },
   {
-    title: "Marketing",
-    items: [
-      { id: "marketing", label: "Email Marketing", icon: Megaphone, href: "/dashboard/marketing" },
-    ],
-  },
-  {
     title: "Inteligencia",
     items: [
+      { id: "marketing", label: "Email Marketing", icon: Megaphone, href: "/dashboard/marketing" },
       { id: "auto", label: "Automatizaciones", icon: Zap, href: "/dashboard/automations" },
       { id: "reports", label: "Informes", icon: BarChart3, href: "/dashboard/reporting" },
       { id: "ai", label: "Asistente IA", icon: Sparkles, href: "/dashboard/ai-assistant" },
@@ -405,7 +400,7 @@ export default function Sidebar({
     }}>
       {/* ── Brand header ────────────────────────────────── */}
       <div style={{
-        height: 52,
+        height: 60,
         display: "flex",
         alignItems: "center",
         gap: 10,
@@ -413,23 +408,14 @@ export default function Sidebar({
         borderBottom: `1px solid ${C.line2}`,
         flexShrink: 0,
       }}>
-        <div style={{
-          display: "flex", alignItems: "center", gap: 9,
-          flex: 1, minWidth: 0,
-          fontWeight: 600, letterSpacing: "-0.02em", fontSize: 14.5,
-        }}>
-          <span style={{
-            width: 22, height: 22,
-            background: C.ink, color: "white",
-            display: "grid", placeItems: "center",
-            fontWeight: 700, fontSize: 11,
-            borderRadius: 5, flexShrink: 0,
-          }}>C</span>
-          {!isCollapsed && (
-            <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", color: C.ink }}>
-              ClientLabs
-            </span>
-          )}
+        <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center" }}>
+          <img
+            src="/clientlabs-icon-solid-green.svg"
+            alt="ClientLabs"
+            width={44}
+            height={44}
+            style={{ flexShrink: 0, borderRadius: 9 }}
+          />
         </div>
         <button
           onClick={onToggleCollapsed}

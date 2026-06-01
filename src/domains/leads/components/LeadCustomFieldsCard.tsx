@@ -46,6 +46,7 @@ export function LeadCustomFieldsCard({ leadId }: Props) {
   const { data: allFields = [] } = useQuery<CustomField[]>({
     queryKey: ["custom-fields", "lead"],
     queryFn: () => fetch("/api/custom-fields?entity=lead").then((r) => r.json()),
+    select: (d: unknown) => Array.isArray(d) ? (d as CustomField[]) : ((d as { fields?: CustomField[] })?.fields ?? []),
     ...QUERY_OPTS,
   })
 
@@ -101,10 +102,10 @@ export function LeadCustomFieldsCard({ leadId }: Props) {
     createFieldMutation.mutate(payload)
   }
 
-  const fieldsToRender = allFields.map((field) => {
+  const fieldsToRender = Array.isArray(allFields) ? allFields.map((field) => {
     const existing = fieldValues.find((fv) => fv.customFieldId === field.id)
     return { field, value: existing?.value ?? "" }
-  })
+  }) : []
 
   return (
     <div style={{ background: "var(--bg-card)", border: "0.5px solid var(--border-subtle)", borderRadius: 12, padding: 20 }}>

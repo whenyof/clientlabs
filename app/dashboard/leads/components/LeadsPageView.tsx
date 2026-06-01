@@ -3,10 +3,11 @@
 import { useState, useId } from "react"
 import { useRouter } from "next/navigation"
 import {
-  RefreshCw, Zap, Plus, MoreVertical, ArrowUpRight, ArrowDownRight,
-  Minus, ExternalLink, Download,
+  RefreshCw, Plus, MoreVertical, ArrowUpRight, ArrowDownRight,
+  Minus, ExternalLink, Download, Link2,
 } from "lucide-react"
 import type { Lead } from "@prisma/client"
+import { CreateLeadManualDialog } from "@/modules/leads/components/CreateLeadManualDialog"
 
 // ─── Design tokens ─────────────────────────────────────────────────────────
 const C = {
@@ -131,7 +132,21 @@ interface Props {
 // ─── Main Component ─────────────────────────────────────────────────────────
 export function LeadsPageView({ totalLeads, kpis, dailyData, initialLeads, initialTotal, tableNode }: Props) {
   const router = useRouter()
-  const [activeView, setActiveView] = useState<"list" | "pipe">("list")
+  const [showBanner, setShowBanner] = useState(true)
+  const [newLeadOpen, setNewLeadOpen] = useState(false)
+  const [recalcStatus, setRecalcStatus] = useState<"idle" | "loading" | "ok" | "err">("idle")
+
+  const handleRecalculate = async () => {
+    setRecalcStatus("loading")
+    try {
+      const res = await fetch("/api/admin/recalculate-scores", { method: "POST" })
+      setRecalcStatus(res.ok ? "ok" : "err")
+      setTimeout(() => setRecalcStatus("idle"), 3000)
+    } catch {
+      setRecalcStatus("err")
+      setTimeout(() => setRecalcStatus("idle"), 3000)
+    }
+  }
 
   // Derive source breakdown from leads
   const srcMap: Record<string, number> = {}
@@ -153,12 +168,6 @@ export function LeadsPageView({ totalLeads, kpis, dailyData, initialLeads, initi
   funnelStages[0].count = totalLeads
   const maxFunnel = Math.max(...funnelStages.map(s => s.count), 1)
 
-  // Pipeline groups for kanban
-  const pipeGroups = statusOrder.slice(0, 5).map((s) => ({
-    id: s, nm: STATUS_LABELS[s] ?? s,
-    cards: initialLeads.filter(l => l.leadStatus === s).slice(0, 4),
-  }))
-
   // KPI sparks
   type Trend = "up" | "down" | "flat"
   const kpiData: { label: string; tag: string; value: number; unit: string; trend: Trend; delta: number; vs: string; spark: number[] }[] = [
@@ -166,14 +175,6 @@ export function LeadsPageView({ totalLeads, kpis, dailyData, initialLeads, initi
     { label: "Leads calientes",     tag: "score 70+", value: kpis.hot,             unit: "",  trend: "up",   delta: 33.0, vs: "30d",       spark: Array.from({ length: 12 }, (_, i) => Math.max(0, Math.round(kpis.hot * (0.5 + i * 0.044 + pRnd(i * 5) * 0.1))) ) },
     { label: "Tasa de conversión",  tag: "90d",       value: kpis.conversionRate,  unit: "%", trend: "up",   delta: 3.2,  vs: "vs trim.",  spark: Array.from({ length: 12 }, (_, i) => Math.max(0, kpis.conversionRate * (0.7 + i * 0.026 + pRnd(i * 7) * 0.04)) ) },
     { label: "Nuevos esta semana",  tag: "7d",        value: kpis.newThisWeek,     unit: "",  trend: "flat", delta: 18.0, vs: "vs sem ant.",spark: Array.from({ length: 12 }, (_, i) => Math.max(0, Math.round(kpis.newThisWeek * (0.4 + i * 0.055 + pRnd(i * 11) * 0.15))) ) },
-  ]
-
-  const SLA_DATA = [
-    { nm: "Primer contacto", sub: "Tiempo desde captura", v: "2h 14m", target: "Obj. < 4h", ok: true },
-    { nm: "Cualificación", sub: "Lead → Cualificado", v: "1,8d", target: "Obj. < 3d", ok: true },
-    { nm: "Envío propuesta", sub: "Cualificado → Propuesta", v: "4,2d", target: "Obj. < 5d", ok: false },
-    { nm: "Ciclo de venta", sub: "Nuevo → Ganado", v: "23d", target: "Obj. < 30d", ok: true },
-    { nm: "Sin tocar > 48h", sub: "Riesgo de churn temprano", v: String(kpis.stalled), target: "Obj. 0", ok: kpis.stalled === 0 },
   ]
 
   return (
@@ -195,27 +196,31 @@ export function LeadsPageView({ totalLeads, kpis, dailyData, initialLeads, initi
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-          <div style={{ display: "inline-flex", background: C.bg2, border: `1px solid ${C.line}`, borderRadius: 7, padding: 2 }}>
-            {(["list", "pipe"] as const).map(v => (
-              <button key={v} onClick={() => setActiveView(v)} style={{ padding: "4px 10px", borderRadius: 5, fontFamily: "ui-monospace,monospace", fontSize: 11.5, color: activeView === v ? C.ink : C.ink3, fontWeight: 500, background: activeView === v ? "white" : "transparent", boxShadow: activeView === v ? `0 0 0 1px ${C.line} inset, 0 1px 2px rgba(0,0,0,.03)` : "none", border: "none", cursor: "pointer" }}>
-                {v === "list" ? "Lista" : "Pipeline"}
-              </button>
-            ))}
-          </div>
-          <button style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 6, background: C.bg, border: `1px solid ${C.line}`, color: C.ink2, fontWeight: 550, fontSize: 12.5, cursor: "pointer" }}>
-            <RefreshCw size={12} strokeWidth={2} />Recalcular scores
+          <button
+            onClick={handleRecalculate}
+            disabled={recalcStatus === "loading"}
+            style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 6, background: C.bg, border: `1px solid ${recalcStatus === "ok" ? C.accent : recalcStatus === "err" ? C.red : C.line}`, color: recalcStatus === "ok" ? C.accentInk : recalcStatus === "err" ? C.red : C.ink2, fontWeight: 550, fontSize: 12.5, cursor: recalcStatus === "loading" ? "not-allowed" : "pointer", opacity: recalcStatus === "loading" ? 0.6 : 1 }}
+          >
+            <RefreshCw size={12} strokeWidth={2} className={recalcStatus === "loading" ? "animate-spin" : ""} />
+            {recalcStatus === "ok" ? "Scores actualizados" : recalcStatus === "err" ? "Error" : "Recalcular scores"}
           </button>
-          <button style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 6, background: C.bg, border: `1px solid ${C.line}`, color: C.ink2, fontWeight: 550, fontSize: 12.5, cursor: "pointer" }}>
-            <Zap size={12} strokeWidth={2} />Automatizar
+          <button
+            onClick={() => router.push("/dashboard/connect")}
+            style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 6, background: C.bg, border: `1px solid ${C.line}`, color: C.ink2, fontWeight: 550, fontSize: 12.5, cursor: "pointer" }}
+          >
+            <Link2 size={12} strokeWidth={2} />Conectar
           </button>
-          <button style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: C.ink, color: "white", fontWeight: 550, fontSize: 12.5, border: "none", cursor: "pointer" }}>
+          <button
+            onClick={() => setNewLeadOpen(true)}
+            style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: C.ink, color: "white", fontWeight: 550, fontSize: 12.5, border: "none", cursor: "pointer" }}
+          >
             <Plus size={12} strokeWidth={2.5} />Nuevo lead
           </button>
         </div>
       </div>
 
       {/* ── AI BANNER ────────────────────────────────── */}
-      {hotLeads.length > 0 && (
+      {hotLeads.length > 0 && showBanner && (
         <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 18px", borderRadius: 10, border: `1px solid ${C.accentSoft}`, background: `linear-gradient(180deg, rgba(236,246,241,0.7) 0%, white 100%)`, marginBottom: 16 }}>
           <div style={{ width: 32, height: 32, borderRadius: 8, background: "white", border: `1px solid ${C.accentSoft}`, display: "grid", placeItems: "center", color: C.accentInk, flexShrink: 0, fontSize: 14 }}>✨</div>
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -227,8 +232,8 @@ export function LeadsPageView({ totalLeads, kpis, dailyData, initialLeads, initi
             </p>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-            <button style={{ padding: "5px 10px", borderRadius: 6, background: C.bg, border: `1px solid ${C.line}`, color: C.ink2, fontSize: 11.5, fontWeight: 550, cursor: "pointer" }}>Ignorar</button>
-            <button style={{ padding: "5px 10px", borderRadius: 6, background: C.ink, color: "white", fontSize: 11.5, fontWeight: 550, border: "none", cursor: "pointer" }}>Ver leads →</button>
+            <button onClick={() => setShowBanner(false)} style={{ padding: "5px 10px", borderRadius: 6, background: C.bg, border: `1px solid ${C.line}`, color: C.ink2, fontSize: 11.5, fontWeight: 550, cursor: "pointer" }}>Ignorar</button>
+            <button onClick={() => setShowBanner(false)} style={{ padding: "5px 10px", borderRadius: 6, background: C.ink, color: "white", fontSize: 11.5, fontWeight: 550, border: "none", cursor: "pointer" }}>Ver leads →</button>
           </div>
         </div>
       )}
@@ -262,8 +267,8 @@ export function LeadsPageView({ totalLeads, kpis, dailyData, initialLeads, initi
         })}
       </div>
 
-      {/* ── ROW 1: DAILY + SOURCES + SLA ─────────────── */}
-      <div className="grid gap-4 mb-4" style={{ gridTemplateColumns: "5fr 4fr 3fr" }}>
+      {/* ── ROW 1: DAILY + SOURCES ───────────────────── */}
+      <div className="grid gap-4 mb-4" style={{ gridTemplateColumns: "5fr 4fr" }}>
         {/* Daily chart */}
         <Card>
           <CardHead title="Leads nuevos · últimos 30 días" subtitle="Diario · Ø 4,8/día · +18% vs mes anterior"
@@ -275,7 +280,7 @@ export function LeadsPageView({ totalLeads, kpis, dailyData, initialLeads, initi
               </div>
             }
           />
-          <div style={{ padding: 18 }}>
+          <div style={{ padding: "8px 0 14px" }}>
             <DailyChart data={dailyData} />
           </div>
         </Card>
@@ -302,24 +307,6 @@ export function LeadsPageView({ totalLeads, kpis, dailyData, initialLeads, initi
           </div>
         </Card>
 
-        {/* SLA */}
-        <Card>
-          <CardHead title="SLA & velocidad" subtitle="Objetivos del equipo de ventas" />
-          <div>
-            {SLA_DATA.map((s, i) => (
-              <div key={s.nm} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 18px", borderBottom: i < SLA_DATA.length - 1 ? `1px solid ${C.line3}` : "none", gap: 8 }}>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: 12.5, fontWeight: 550, color: C.ink, letterSpacing: "-0.005em" }}>{s.nm}</div>
-                  <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10, color: C.ink4, marginTop: 1 }}>{s.sub}</div>
-                </div>
-                <div style={{ textAlign: "right", flexShrink: 0 }}>
-                  <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 12.5, fontWeight: 600, color: s.ok ? C.accentInk : C.red }}>{s.v}</div>
-                  <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 9.5, color: C.ink4, marginTop: 1 }}>{s.target}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
       </div>
 
       {/* ── ROW 2: ATENCIÓN + FUNNEL ──────────────────── */}
@@ -415,92 +402,26 @@ export function LeadsPageView({ totalLeads, kpis, dailyData, initialLeads, initi
         </Card>
       </div>
 
-      {/* ── PIPELINE / KANBAN ────────────────────────── */}
-      {activeView === "pipe" && (
-        <Card style={{ marginBottom: 16 }}>
-          <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `1px solid ${C.line2}` }}>
-            <div>
-              <h3 style={{ fontWeight: 600, letterSpacing: "-0.012em", fontSize: 13.5, margin: 0, color: C.ink }}>Pipeline · vista Kanban</h3>
-              <div style={{ fontSize: 11.5, color: C.ink3, fontFamily: "ui-monospace,monospace", marginTop: 2 }}>
-                Arrastra para mover de etapa · {initialTotal} leads en pipeline
-              </div>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, fontFamily: "ui-monospace,monospace", fontSize: 10.5 }}>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}><span style={{ width: 6, height: 6, borderRadius: 99, background: "#c2410c", display: "inline-block" }} />Hot 70+</span>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}><span style={{ width: 6, height: 6, borderRadius: 99, background: "#737373", display: "inline-block" }} />Warm 40-69</span>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}><span style={{ width: 6, height: 6, borderRadius: 99, background: "#d4d4d4", display: "inline-block" }} />Cold &lt;40</span>
-              </div>
-            </div>
-          </div>
-          <div style={{ padding: 16, display: "grid", gridTemplateColumns: `repeat(${pipeGroups.length}, 1fr)`, gap: 10, overflowX: "auto" }}>
-            {pipeGroups.map(col => (
-              <div key={col.id} style={{ background: C.bg2, borderRadius: 8, overflow: "hidden" }}>
-                <div style={{ padding: "10px 12px", display: "flex", alignItems: "center", justifyContent: "space-between", background: C.bg3, borderBottom: `1px solid ${C.line2}` }}>
-                  <span style={{ fontWeight: 600, fontSize: 12.5, color: C.ink, letterSpacing: "-0.005em" }}>{col.nm}</span>
-                  <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, color: C.ink3, background: C.bg, border: `1px solid ${C.line}`, padding: "1px 6px", borderRadius: 99 }}>{col.cards.length}</span>
-                </div>
-                <div style={{ padding: "8px", display: "flex", flexDirection: "column", gap: 6, minHeight: 80 }}>
-                  {col.cards.map(card => {
-                    const isHot = (card.score ?? 0) >= 70
-                    const isWarm = (card.score ?? 0) >= 40 && !isHot
-                    return (
-                      <div key={card.id} onClick={() => router.push(`/dashboard/leads/${card.id}`)}
-                        style={{ background: isHot ? "#fff9f0" : "white", border: `1px solid ${isHot ? C.warnSoft : C.line}`, borderRadius: 8, padding: "10px 12px", cursor: "pointer" }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = C.bg2 }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = isHot ? "#fff9f0" : "white" }}
-                      >
-                        <div style={{ fontWeight: 550, fontSize: 12.5, color: C.ink, letterSpacing: "-0.005em", marginBottom: 2 }}>
-                          {card.name || card.email || "Sin nombre"}
-                        </div>
-                        <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10, color: C.ink3, marginBottom: 6 }}>
-                          {card.source || "—"}
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                          <div style={{ height: 4, background: C.bg3, borderRadius: 99, flex: 1, overflow: "hidden", marginRight: 6 }}>
-                            <div style={{ height: "100%", width: `${card.score ?? 0}%`, background: isHot ? C.warn : isWarm ? "#737373" : C.ink5, borderRadius: 99 }} />
-                          </div>
-                          <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 11.5, fontWeight: 600, color: isHot ? C.warn : C.ink }}>{card.score ?? 0}</span>
-                        </div>
-                      </div>
-                    )
-                  })}
-                  {col.cards.length === 0 && (
-                    <div style={{ padding: "12px 0", textAlign: "center", color: C.ink4, fontSize: 11.5, fontFamily: "ui-monospace,monospace" }}>Sin leads</div>
-                  )}
-                  <div style={{ padding: "6px 4px", fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: C.ink4, cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
-                    <Plus size={10} strokeWidth={2} />Añadir lead
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
-
       {/* ── LEADS TABLE ──────────────────────────────── */}
       <Card>
-        <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `1px solid ${C.line2}`, gap: 12, flexWrap: "wrap" }}>
+        <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `1px solid ${C.line2}`, gap: 12 }}>
           <div>
             <h3 style={{ fontWeight: 600, letterSpacing: "-0.012em", fontSize: 13.5, margin: 0, color: C.ink }}>Mis leads</h3>
-            <div style={{ fontSize: 11.5, color: C.ink3, fontFamily: "ui-monospace,monospace", marginTop: 2 }}>{initialTotal} resultados · actualizado ahora</div>
+            <div style={{ fontSize: 11.5, color: C.ink3, fontFamily: "ui-monospace,monospace", marginTop: 2 }}>{initialTotal} resultados</div>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-            {[["Estado", "Todos"], ["Fuente", "Todas"], ["Score", "≥ 0"], ["Owner", "Equipo"]].map(([label, val]) => (
-              <div key={label} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 10px", border: `1px solid ${C.line}`, borderRadius: 6, background: C.bg, fontSize: 11.5, color: C.ink3, cursor: "pointer" }}>
-                <span>{label}</span>
-                <span style={{ color: C.ink, fontWeight: 550 }}>{val}</span>
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6" /></svg>
-              </div>
-            ))}
-            <a style={{ fontSize: 11.5, color: C.ink3, fontWeight: 500, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4 }}>
-              Exportar CSV <Download size={11} />
-            </a>
-          </div>
+          <a style={{ fontSize: 12, color: C.ink3, fontWeight: 500, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4 }}>
+            Exportar CSV <Download size={11} />
+          </a>
         </div>
         {/* Table content — existing functional component */}
         <div>{tableNode}</div>
       </Card>
+
+      {/* ── CREATE LEAD DIALOG ─────────────────────────── */}
+      <CreateLeadManualDialog
+        open={newLeadOpen}
+        onOpenChange={setNewLeadOpen}
+      />
 
     </div>
   )

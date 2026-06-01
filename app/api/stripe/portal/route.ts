@@ -17,15 +17,20 @@ export async function POST(_req: NextRequest) {
   })
 
   if (!user?.stripeCustomerId) {
-    return NextResponse.json({ error: "Sin suscripción activa" }, { status: 400 })
+    return NextResponse.json({ error: "No tienes una suscripción de pago activa. Actualiza tu plan para gestionar la facturación." }, { status: 400 })
   }
 
   const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000"
 
-  const portalSession = await stripe.billingPortal.sessions.create({
-    customer: user.stripeCustomerId,
-    return_url: `${baseUrl}/dashboard/settings?section=subscription`,
-  })
-
-  return NextResponse.json({ url: portalSession.url })
+  try {
+    const portalSession = await stripe.billingPortal.sessions.create({
+      customer: user.stripeCustomerId,
+      return_url: `${baseUrl}/dashboard/settings?section=subscription`,
+    })
+    return NextResponse.json({ url: portalSession.url })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Error al conectar con Stripe"
+    console.error("[stripe/portal]", message)
+    return NextResponse.json({ error: "No se pudo abrir el portal de facturación. Inténtalo de nuevo." }, { status: 500 })
+  }
 }

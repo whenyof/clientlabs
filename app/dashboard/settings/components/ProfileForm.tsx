@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { UserIcon, PencilIcon, CheckIcon, XMarkIcon } from "@heroicons/react/24/outline"
 import { toast } from "sonner"
@@ -17,6 +18,7 @@ interface UserProfile {
 }
 
 export function ProfileForm() {
+  const router = useRouter()
   const [isEditing, setIsEditing] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -64,6 +66,7 @@ export function ProfileForm() {
       if (res.ok && data.success) {
         setProfile((prev) => prev ? { ...prev, ...data.user } : data.user)
         setIsEditing(false)
+        router.refresh()
         toast.success("Perfil guardado correctamente")
       } else {
         toast.error(data.error ?? "Error al guardar el perfil")

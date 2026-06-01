@@ -1,6 +1,6 @@
 "use client"
 import { getBaseUrl } from "@/lib/api/baseUrl"
-
+import { useRouter } from "next/navigation"
 
 import { useState, useEffect, useRef, useCallback } from "react"
 import Image from "next/image"
@@ -31,6 +31,7 @@ const defaultData = {
 const inputClasses = "w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-[#0B1F2A] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] focus:border-[var(--accent)] disabled:bg-slate-50 disabled:text-slate-400 transition-colors"
 
 export function CompanySettings() {
+  const router = useRouter()
   const queryClient = useQueryClient()
   const [isEditing, setIsEditing] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -120,6 +121,7 @@ export function CompanySettings() {
           logoUrl: p.logoUrl ?? null,
         })
         setIsEditing(false)
+        router.refresh()
         toast.success("Guardado correctamente")
         queryClient.invalidateQueries({ queryKey: ["activation-checklist"] })
       } else {

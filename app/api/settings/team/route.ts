@@ -65,7 +65,7 @@ export async function GET() {
       success: true,
       myRole: "OWNER",
       plan,
-      limit: TEAM_LIMITS[plan] === Infinity ? Infinity : (TEAM_LIMITS[plan] ?? 1) + extraSeats,
+      limit: TEAM_LIMITS[plan] === Infinity ? null : (TEAM_LIMITS[plan] ?? 1) + extraSeats,
       members: workspace.members.map((m) => ({
         id: m.id,
         userId: m.userId,
@@ -95,7 +95,7 @@ export async function GET() {
     success: true,
     myRole,
     plan,
-    limit: TEAM_LIMITS[plan] === Infinity ? Infinity : (TEAM_LIMITS[plan] ?? 1) + extraSeats,
+    limit: TEAM_LIMITS[plan] === Infinity ? null : (TEAM_LIMITS[plan] ?? 1) + extraSeats,
     workspaceId: workspace.id,
     workspaceName: workspace.name,
     members,

@@ -120,7 +120,7 @@ export function PlansSection() {
               {cycle === "monthly" ? "Mensual" : "Anual"}
               {cycle === "yearly" && (
                 <span className="absolute -top-2 -right-1 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#F59E0B] text-black">
-                  -25%
+                  -17%
                 </span>
               )}
             </button>

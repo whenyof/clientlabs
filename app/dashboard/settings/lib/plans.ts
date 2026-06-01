@@ -1,11 +1,13 @@
 // Plan configuration — fuente de verdad para precios y features en settings
-// Precios en céntimos para Stripe (14,99€ = 1499, 24,99€ = 2499, 39,99€ = 3999)
+// Precios en céntimos (17,99€ = 1799). Solo display UI — no tocar Stripe priceIds.
 
 export interface Plan {
   id: string
   name: string
   price: number
   priceYearly: number
+  yearlyTotal?: number
+  savings?: string
   currency: string
   interval: 'month' | 'year'
   stripePriceId: string
@@ -25,8 +27,10 @@ export const PLANS: Plan[] = [
   {
     id: 'starter',
     name: 'Básico',
-    price: 1499, // 14,99€
-    priceYearly: 1250, // 12,50€/mes
+    price: 1799, // 17,99€/mes
+    priceYearly: 1499, // 14,99€/mes en anual
+    yearlyTotal: 17988, // 179,88€/año
+    savings: '17%',
     currency: 'EUR',
     interval: 'month',
     stripePriceId: process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || '',
@@ -52,8 +56,10 @@ export const PLANS: Plan[] = [
   {
     id: 'pro',
     name: 'Pro',
-    price: 2499, // 24,99€
-    priceYearly: 2083, // 20,83€/mes
+    price: 2999, // 29,99€/mes
+    priceYearly: 2499, // 24,99€/mes en anual
+    yearlyTotal: 29988, // 299,88€/año
+    savings: '17%',
     currency: 'EUR',
     interval: 'month',
     stripePriceId: process.env.STRIPE_PRO_MONTHLY_PRICE_ID || '',
@@ -80,8 +86,10 @@ export const PLANS: Plan[] = [
   {
     id: 'business',
     name: 'Negocio',
-    price: 3999, // 39,99€
-    priceYearly: 3333, // 33,33€/mes
+    price: 4999, // 49,99€/mes
+    priceYearly: 4166, // 41,66€/mes en anual
+    yearlyTotal: 49992, // 499,92€/año
+    savings: '17%',
     currency: 'EUR',
     interval: 'month',
     stripePriceId: process.env.STRIPE_BUSINESS_MONTHLY_PRICE_ID || '',

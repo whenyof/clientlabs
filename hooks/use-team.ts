@@ -14,7 +14,7 @@ export function useTeam() {
     members: data?.members ?? [],
     myRole,
     plan: data?.plan ?? "FREE",
-    limit: data?.limit ?? 1,
+    limit: data?.limit ?? Infinity,
     workspaceId: data?.workspaceId ?? null,
     workspaceName: data?.workspaceName ?? null,
     isOwner: myRole === "OWNER",

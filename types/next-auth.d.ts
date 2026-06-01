@@ -15,10 +15,13 @@ declare module "next-auth" {
       role: "USER" | "ADMIN"
       onboardingCompleted: boolean
       selectedSector: string | null
+      twoFactorEnabled: boolean
       name?: string | null
       email?: string | null
       image?: string | null
     }
+    jti?: string
+    twoFactorVerified?: boolean
   }
 }
 
@@ -29,5 +32,8 @@ declare module "next-auth/jwt" {
     role: "USER" | "ADMIN"
     onboardingCompleted: boolean
     selectedSector: string | null
+    twoFactorEnabled: boolean
+    twoFactorVerified: boolean
+    jti?: string
   }
 }

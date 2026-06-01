@@ -4,6 +4,7 @@ import GoogleProvider from "next-auth/providers/google"
 import CredentialsProvider from "next-auth/providers/credentials"
 import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
+import { recordSession } from "@/lib/auth/session-tracking"
 
 export const authOptions: NextAuthOptions = {
  adapter: PrismaAdapter(prisma),
@@ -78,6 +79,11 @@ export const authOptions: NextAuthOptions = {
  // ─────────────────────────────────────────────
  async signIn({ user }) {
  if (!user?.email) return false
+ // Track last login timestamp (IP/UA captured in JWT callback via headers)
+ await prisma.user.update({
+   where: { id: user.id },
+   data: { lastLoginAt: new Date() },
+ }).catch(() => {})
  return true
  },
 
@@ -85,7 +91,7 @@ export const authOptions: NextAuthOptions = {
  // JWT: solo leer datos (Credentials ya trae todo; Google viene del adapter sin onboarding)
  // Para Google, hidratar desde BD para que session refleje el estado real.
  // ─────────────────────────────────────────────
- async jwt({ token, user }) {
+ async jwt({ token, user, trigger }) {
  if (user) {
  token.userId = user.id
  token.name = user.name
@@ -100,23 +106,31 @@ export const authOptions: NextAuthOptions = {
  } else {
  const dbUser = await prisma.user.findUnique({
  where: { id: user.id },
- select: { role: true, plan: true, onboardingCompleted: true, selectedSector: true },
+ select: { role: true, plan: true, onboardingCompleted: true, selectedSector: true, twoFactorEnabled: true },
  })
  if (dbUser) {
  token.role = dbUser.role as "USER" | "ADMIN"
  token.plan = dbUser.plan as "FREE" | "TRIAL" | "STARTER" | "PRO" | "BUSINESS"
  token.onboardingCompleted = dbUser.onboardingCompleted
  token.selectedSector = dbUser.selectedSector ?? null
+ token.twoFactorEnabled = dbUser.twoFactorEnabled
  }
  }
+ // On fresh sign-in, 2FA is not yet verified
+ token.twoFactorVerified = false
  return token
+ }
+
+ // On update trigger (after 2FA verify page succeeds)
+ if (trigger === "update" && token.userId) {
+ token.twoFactorVerified = true
  }
 
  // Subsequent session refreshes — re-read mutable fields from DB
  if (token.userId) {
  const dbUser = await prisma.user.findUnique({
  where: { id: token.userId as string },
- select: { role: true, plan: true, name: true, onboardingCompleted: true, selectedSector: true },
+ select: { role: true, plan: true, name: true, onboardingCompleted: true, selectedSector: true, twoFactorEnabled: true },
  })
  if (dbUser) {
  token.role = dbUser.role as "USER" | "ADMIN"
@@ -124,8 +138,15 @@ export const authOptions: NextAuthOptions = {
  token.name = dbUser.name ?? token.name
  token.onboardingCompleted = dbUser.onboardingCompleted
  token.selectedSector = dbUser.selectedSector ?? null
+ token.twoFactorEnabled = dbUser.twoFactorEnabled
  }
  }
+
+ // Register/refresh session record (best-effort, non-blocking)
+ if (token.jti && token.userId) {
+   recordSession(token.userId as string, token.jti, null, null).catch(() => {})
+ }
+
  return token
  },
 
@@ -143,7 +164,10 @@ export const authOptions: NextAuthOptions = {
  session.user.name = token.name as string
  session.user.email = token.email as string
  session.user.image = token.picture as string | null
+ session.user.twoFactorEnabled = (token.twoFactorEnabled as boolean) ?? false
  }
+ session.jti = token.jti
+ session.twoFactorVerified = (token.twoFactorVerified as boolean) ?? false
 
  return session
  },

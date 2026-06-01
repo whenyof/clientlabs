@@ -172,44 +172,44 @@ model SdkInstallation {
 }
 
 model BusinessProfile {
-  id                   String   @id @default(cuid())
-  userId               String   @unique
-  sector               String
-  name                 String?
-  createdAt            DateTime @default(now())
-  address              String?
-  bic                  String?
-  city                 String?
-  companyName          String?
-  country              String?
-  defaultNotesTemplate String?
-  defaultTermsTemplate String?
-  email                String?
-  iban                 String?
-  invoiceLanguage      String?
-  legalName            String?
-  logoUrl              String?
-  phone                String?
-  postalCode           String?
-  taxId                String?
-  updatedAt            DateTime @updatedAt
-  website              String?
-  ivaRegime            String   @default("GENERAL")
-  epigrafIAE           String?
+  id                           String    @id @default(cuid())
+  userId                       String    @unique
+  sector                       String
+  name                         String?
+  createdAt                    DateTime  @default(now())
+  address                      String?
+  bic                          String?
+  city                         String?
+  companyName                  String?
+  country                      String?
+  defaultNotesTemplate         String?
+  defaultTermsTemplate         String?
+  email                        String?
+  iban                         String?
+  invoiceLanguage              String?
+  legalName                    String?
+  logoUrl                      String?
+  phone                        String?
+  postalCode                   String?
+  taxId                        String?
+  updatedAt                    DateTime  @updatedAt
+  website                      String?
+  ivaRegime                    String    @default("GENERAL")
+  epigrafIAE                   String?
   // Verifactu
-  verifactuApiKey               String?
-  verifactuEnabled              Boolean   @default(false)
-  verifactuActivatedAt          DateTime?
-  verifactuAgreementAccepted    Boolean   @default(false)
-  verifactuAgreementAcceptedAt  DateTime?
-  verifactuAgreementSignedBy    String?
-  verifactuAgreementSignedNif   String?
-  activeTemplateId String?
-  extraSeats       Int      @default(0)
+  verifactuApiKey              String?
+  verifactuEnabled             Boolean   @default(false)
+  verifactuActivatedAt         DateTime?
+  verifactuAgreementAccepted   Boolean   @default(false)
+  verifactuAgreementAcceptedAt DateTime?
+  verifactuAgreementSignedBy   String?
+  verifactuAgreementSignedNif  String?
+  activeTemplateId             String?
+  extraSeats                   Int       @default(0)
   // Lotes y caducidad en documentos
-  enableProductLots   Boolean  @default(false)
-  enableProductExpiry Boolean  @default(false)
-  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  enableProductLots            Boolean   @default(false)
+  enableProductExpiry          Boolean   @default(false)
+  user                         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
@@ -565,18 +565,18 @@ model FinancialRecord {
 }
 
 model Lead {
-  id                    String          @id @default(cuid())
+  id                    String             @id @default(cuid())
   userId                String
   websiteId             String?
   email                 String?
   name                  String?
   phone                 String?
   message               String?
-  source                String          @default("WEB")
+  source                String             @default("WEB")
   formId                String?
   /// @deprecated Use `leadStatus` (enum) as the single source of truth. Kept for backward compatibility; auto-synced from leadStatus.
-  status                String          @default("NEW")
-  leadStatus            LeadStatus      @default(NEW)
+  status                String             @default("NEW")
+  leadStatus            LeadStatus         @default(NEW)
   temperature           LeadTemp?
   page                  String?
   lastAction            String?
@@ -585,19 +585,19 @@ model Lead {
   aiPrediction          Float?
   aiReasoning           String?
   aiSegment             String?
-  converted             Boolean         @default(false)
-  validationStatus      String          @default("PENDING")
+  converted             Boolean            @default(false)
+  validationStatus      String             @default("PENDING")
   category              String?
-  priority              String          @default("MEDIUM")
-  tags                  String[]        @default([])
+  priority              String             @default("MEDIUM")
+  tags                  String[]           @default([])
   notes                 String?
   additionalInfo        String?
   ip                    String?
   country               String?
   device                String?
   userAgent             String?
-  spamScore             Float           @default(0)
-  score                 Int             @default(0)
+  spamScore             Float              @default(0)
+  score                 Int                @default(0)
   stageId               String?
   interactions          Json?
   conversionProbability Float?
@@ -612,18 +612,18 @@ model Lead {
   conversionProduct     String?
   allowedDomain         String?
   aiReason              String?
-  createdAt             DateTime        @default(now())
-  updatedAt             DateTime        @updatedAt
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
   AIInsight             AIInsight[]
   activities            Activity[]
   aiInsights            AiInsight[]
   AiLog                 AiLog[]
   Alert                 Alert[]
   Event                 Event[]
-  client                Client?         @relation("ClientLeads", fields: [clientId], references: [id])
-  stage                 PipelineStage?  @relation(fields: [stageId], references: [id])
-  User                  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  Website               Website?        @relation(fields: [websiteId], references: [id])
+  client                Client?            @relation("ClientLeads", fields: [clientId], references: [id])
+  stage                 PipelineStage?     @relation(fields: [stageId], references: [id])
+  User                  User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Website               Website?           @relation(fields: [websiteId], references: [id])
   LeadAIInsight         LeadAIInsight?
   LeadAlert             LeadAlert[]
   LeadEvent             LeadEvent[]
@@ -653,16 +653,15 @@ model Lead {
   @@index([userId])
   @@index([validationStatus])
   @@index([websiteId])
-
   // ── Compound indexes for scalable queries ──
-  @@index([userId, createdAt(sort: Desc)])        // Default listing: WHERE userId ORDER BY createdAt DESC
+  @@index([userId, createdAt(sort: Desc)]) // Default listing: WHERE userId ORDER BY createdAt DESC
   @@index([userId, leadStatus, createdAt(sort: Desc)]) // Status filter + sort
   @@index([userId, temperature, createdAt(sort: Desc)]) // Temperature filter + sort
   @@index([userId, source, createdAt(sort: Desc)]) // Source filter + sort
-  @@index([userId, score(sort: Desc)])            // Score-based sort
-  @@index([userId, lastActionAt(sort: Desc)])     // Last activity sort
-  @@index([userId, email])                        // Duplicate checking (case-sensitive)
-  @@index([userId, phone])                        // Duplicate checking (phone-based)
+  @@index([userId, score(sort: Desc)]) // Score-based sort
+  @@index([userId, lastActionAt(sort: Desc)]) // Last activity sort
+  @@index([userId, email]) // Duplicate checking (case-sensitive)
+  @@index([userId, phone]) // Duplicate checking (phone-based)
 }
 
 model LeadContact {
@@ -799,32 +798,32 @@ model Post {
 }
 
 model Sale {
-  id               String           @id @default(uuid())
+  id               String               @id @default(uuid())
   userId           String
   clientId         String?
   clientName       String
   clientEmail      String?
-  discount         Decimal          @db.Decimal(10, 2)
-  total            Decimal          @db.Decimal(10, 2)
-  amount           Decimal?         @db.Decimal(10, 2)
-  currency         String           @default("EUR")
-  provider         String           @default("STRIPE")
+  discount         Decimal              @db.Decimal(10, 2)
+  total            Decimal              @db.Decimal(10, 2)
+  amount           Decimal?             @db.Decimal(10, 2)
+  currency         String               @default("EUR")
+  provider         String               @default("STRIPE")
   paymentMethod    String
-  status           String           @default("PAGADO")
+  status           String               @default("PAGADO")
   stripePaymentId  String?
   stripeCustomerId String?
   metadata         Json?
   notes            String?
-  saleDate         DateTime         @default(now())
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+  saleDate         DateTime             @default(now())
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
   invoiceUrl       String?
-  subtotal         Decimal          @db.Decimal(10, 2)
-  taxTotal         Decimal          @db.Decimal(10, 2)
+  subtotal         Decimal              @db.Decimal(10, 2)
+  taxTotal         Decimal              @db.Decimal(10, 2)
   BillingInvoice   BillingInvoice[]
   Invoice          Invoice[]
-  Client           Client?            @relation(fields: [clientId], references: [id])
-  User             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Client           Client?              @relation(fields: [clientId], references: [id])
+  User             User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   items            SaleItem[]
   documentos       DocumentoImportado[]
 
@@ -910,7 +909,7 @@ model User {
   lastActiveAt           DateTime?
   monthlyRevenueTarget   Int?
   notificationPrefs      Json?
-  onboardingStep         Int       @default(0)
+  onboardingStep         Int                     @default(0)
   activationChecklist    Json?
   firstClientAt          DateTime?
   firstLeadAt            DateTime?
@@ -918,8 +917,15 @@ model User {
   firstAutomationAt      DateTime?
   taxConfiguredAt        DateTime?
   onboardingEmailsSent   Json?
-  totalInvoicesGenerated Int       @default(0)
-  totalTimesSaved        Int       @default(0)
+  totalInvoicesGenerated Int                     @default(0)
+  totalTimesSaved        Int                     @default(0)
+  twoFactorEnabled       Boolean                 @default(false)
+  twoFactorSecret        String?
+  twoFactorBackupCodes   String[]
+  twoFactorVerifiedAt    DateTime?
+  lastLoginIp            String?
+  lastLoginUserAgent     String?
+  currentWorkspaceId     String?
   AIInsight              AIInsight[]
   AIPrediction           AIPrediction[]
   accounts               Account[]
@@ -988,13 +994,13 @@ model User {
   Task                   Task[]
   TaskCalendarSync       TaskCalendarSync[]
   teamMembers            TeamMember[]
-  ownedWorkspaces        Workspace[]           @relation("WorkspaceOwner")
-  workspaceMemberships   WorkspaceMember[]     @relation("WorkspaceMembers")
-  activityLogs           ActivityLog[]         @relation("ActivityLogs")
-  projects               Project[]             @relation("UserProjects")
-  projectMembers         ProjectMember[]       @relation("UserProjectMembers")
-  taskAssignees          TaskAssignee[]        @relation("UserTaskAssignees")
-  customFields           CustomField[]         @relation("UserCustomFields")
+  ownedWorkspaces        Workspace[]             @relation("WorkspaceOwner")
+  workspaceMemberships   WorkspaceMember[]       @relation("WorkspaceMembers")
+  activityLogs           ActivityLog[]           @relation("ActivityLogs")
+  projects               Project[]               @relation("UserProjects")
+  projectMembers         ProjectMember[]         @relation("UserProjectMembers")
+  taskAssignees          TaskAssignee[]          @relation("UserTaskAssignees")
+  customFields           CustomField[]           @relation("UserCustomFields")
   TrackingEvent          TrackingEvent[]
   transactions           Transaction[]
   planRelation           Plan?                   @relation(fields: [planId], references: [id])
@@ -1026,6 +1032,35 @@ model User {
   emailCampaigns         EmailCampaign[]
   publicForms            PublicForm[]
   calendarFeedToken      String?                 @unique
+  twoFactorChallenges    TwoFactorChallenge[]
+  sessionRevocations     SessionRevocation[]
+}
+
+model TwoFactorChallenge {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model SessionRevocation {
+  id           String    @id @default(cuid())
+  userId       String
+  sessionToken String    @unique
+  ipAddress    String?
+  userAgent    String?
+  location     String?
+  createdAt    DateTime  @default(now())
+  lastUsedAt   DateTime  @default(now())
+  revokedAt    DateTime?
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([sessionToken])
 }
 
 model CalendarIntegration {
@@ -1579,7 +1614,7 @@ model Task {
   User                   User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   calendarSyncs          TaskCalendarSync[]
   projectId              String?
-  project                Project?            @relation(fields: [projectId], references: [id])
+  project                Project?           @relation(fields: [projectId], references: [id])
   assignees              TaskAssignee[]
 
   @@index([userId])
@@ -1728,21 +1763,30 @@ model ProviderOrder {
   notes                String?
   orderNumber          String?
   templateId           String?
-  includePrices        Boolean  @default(true)
+  includePrices        Boolean                 @default(true)
+  fullNumber           String?
+  pedNumber            Int?
+  pedSeries            String?
+  pedYear              Int?
+  workspaceId          String?
   invoice              Invoice?
   files                ProviderFile[]          @relation("OrderFiles")
   Provider             Provider                @relation(fields: [providerId], references: [id], onDelete: Cascade)
   emailTemplate        ProviderEmailTemplate?  @relation("OrderTemplate", fields: [templateId], references: [id])
   User                 User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace            Workspace?              @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
   items                ProviderOrderItem[]
   payment              ProviderPayment?
   timelineEvents       ProviderTimelineEvent[]
   documentos           DocumentoImportado[]
 
+  @@unique([workspaceId, pedSeries, pedYear, pedNumber])
   @@index([providerId])
   @@index([userId])
   @@index([status])
   @@index([templateId])
+  @@index([fullNumber])
+  @@index([workspaceId])
 }
 
 model ProviderOrderItem {
@@ -1922,7 +1966,7 @@ model Service {
 }
 
 model Invoice {
-  id                     String               @id @default(cuid())
+  id                     String        @id @default(cuid())
   userId                 String
   number                 String
   series                 String
@@ -1931,21 +1975,21 @@ model Invoice {
   issueDate              DateTime
   dueDate                DateTime
   serviceDate            DateTime?
-  currency               String               @default("EUR")
-  subtotal               Decimal              @db.Decimal(14, 2)
-  taxAmount              Decimal              @db.Decimal(14, 2)
-  total                  Decimal              @db.Decimal(14, 2)
-  status                 InvoiceStatus        @default(DRAFT)
+  currency               String        @default("EUR")
+  subtotal               Decimal       @db.Decimal(14, 2)
+  taxAmount              Decimal       @db.Decimal(14, 2)
+  total                  Decimal       @db.Decimal(14, 2)
+  status                 InvoiceStatus @default(DRAFT)
   notes                  String?
   terms                  String?
   paidAt                 DateTime?
-  createdAt              DateTime             @default(now())
-  updatedAt              DateTime             @updatedAt
-  type                   InvoiceType          @default(CUSTOMER)
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+  type                   InvoiceType   @default(CUSTOMER)
   providerId             String?
-  providerOrderId        String?              @unique
-  providerPaymentId      String?              @unique
-  linkedInvoicePaymentId String?              @unique
+  providerOrderId        String?       @unique
+  providerPaymentId      String?       @unique
+  linkedInvoicePaymentId String?       @unique
   pdfUrl                 String?
   pdfGeneratedAt         DateTime?
   issuedCompanySnapshot  Json?
@@ -1958,47 +2002,47 @@ model Invoice {
   iban                   String?
   bic                    String?
   paymentReference       String?
-  isRectification        Boolean              @default(false)
+  isRectification        Boolean       @default(false)
   rectificationReason    String?
   rectifiesInvoiceId     String?
   /// Optional discount total at invoice level
-  discount               Decimal              @default(0) @db.Decimal(14, 2)
+  discount               Decimal       @default(0) @db.Decimal(14, 2)
   /// Optional explicit tax total (mirrors taxAmount) for reporting
-  taxTotal               Decimal              @default(0) @db.Decimal(14, 2)
+  taxTotal               Decimal       @default(0) @db.Decimal(14, 2)
   /// IRPF retention percentage (15 general, 7 first year, 0 none)
-  irpfRate               Float?               @default(0)
+  irpfRate               Float?        @default(0)
   /// IRPF retention amount (subtotal * irpfRate / 100)
-  irpfAmount             Float?               @default(0)
+  irpfAmount             Float?        @default(0)
   /// Date when the invoice was sent by email to the client
   sentAt                 DateTime?
 
   // ═══ VERIFACTU ═══
-  verifactuUuid          String?
-  verifactuStatus        String?   // Pendiente / Aceptado / Rechazado / Error
-  verifactuQr            String?   // QR base64 PNG
-  verifactuHuella        String?   // Hash/huella del registro
-  verifactuUrl           String?   // URL de verificación AEAT
-  verifactuSentAt        DateTime?
-  verifactuCancelledAt   DateTime?
+  verifactuUuid        String?
+  verifactuStatus      String? // Pendiente / Aceptado / Rechazado / Error
+  verifactuQr          String? // QR base64 PNG
+  verifactuHuella      String? // Hash/huella del registro
+  verifactuUrl         String? // URL de verificación AEAT
+  verifactuSentAt      DateTime?
+  verifactuCancelledAt DateTime?
 
   // Tipo de documento Verifactu
-  invoiceDocType         String?               // F1, F2, F3, R1-R5 (null = legacy)
-  rectificationMethod    String?               // S (sustitución) o I (diferencias)
+  invoiceDocType      String? // F1, F2, F3, R1-R5 (null = legacy)
+  rectificationMethod String? // S (sustitución) o I (diferencias)
 
-  Client                 Client?              @relation(fields: [clientId], references: [id], onDelete: Restrict)
-  LinkedInvoicePayment   InvoicePayment?      @relation("LinkedFromPayment", fields: [linkedInvoicePaymentId], references: [id])
-  Provider               Provider?            @relation(fields: [providerId], references: [id], onDelete: Restrict)
-  ProviderOrder          ProviderOrder?       @relation(fields: [providerOrderId], references: [id])
-  ProviderPayment        ProviderPayment?     @relation(fields: [providerPaymentId], references: [id])
-  RectifiesInvoice       Invoice?             @relation("Rectifications", fields: [rectifiesInvoiceId], references: [id], onDelete: Restrict)
-  Rectifications         Invoice[]            @relation("Rectifications")
-  Sale                   Sale?                @relation(fields: [saleId], references: [id])
-  User                   User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  events                 InvoiceEvent[]
-  items                  InvoiceItem[]
-  lines                  InvoiceLine[]
-  payments               InvoicePayment[]     @relation("InvoicePayments")
-  reminderLogs           InvoiceReminderLog[]
+  Client               Client?              @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  LinkedInvoicePayment InvoicePayment?      @relation("LinkedFromPayment", fields: [linkedInvoicePaymentId], references: [id])
+  Provider             Provider?            @relation(fields: [providerId], references: [id], onDelete: Restrict)
+  ProviderOrder        ProviderOrder?       @relation(fields: [providerOrderId], references: [id])
+  ProviderPayment      ProviderPayment?     @relation(fields: [providerPaymentId], references: [id])
+  RectifiesInvoice     Invoice?             @relation("Rectifications", fields: [rectifiesInvoiceId], references: [id], onDelete: Restrict)
+  Rectifications       Invoice[]            @relation("Rectifications")
+  Sale                 Sale?                @relation(fields: [saleId], references: [id])
+  User                 User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events               InvoiceEvent[]
+  items                InvoiceItem[]
+  lines                InvoiceLine[]
+  payments             InvoicePayment[]     @relation("InvoicePayments")
+  reminderLogs         InvoiceReminderLog[]
 
   @@unique([userId, saleId])
   @@index([userId])
@@ -2039,7 +2083,7 @@ enum ScanSessionStatus {
 }
 
 model ScanSession {
-  id              String               @id @default(cuid())
+  id              String                @id @default(cuid())
   entityType      ScanSessionEntityType
   entityId        String
   category        ProviderFileCategory
@@ -2047,13 +2091,13 @@ model ScanSession {
   createdByUserId String
   // Token is used for auth-less mobile access. Once the mobile uploads the document
   // we invalidate the token to prevent reuse/abuse and limit the window of exposure.
-  publicToken     String?              @unique
+  publicToken     String?               @unique
 
-  status          ScanSessionStatus    @default(PENDING)
-  fileUrl         String?
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt
-  expiresAt       DateTime
+  status    ScanSessionStatus @default(PENDING)
+  fileUrl   String?
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  expiresAt DateTime
 
   @@index([createdByUserId])
   @@index([entityType, entityId])
@@ -2121,60 +2165,60 @@ model InvoiceEvent {
 }
 
 model InvoiceSeries {
-  id         String @id @default(cuid())
+  id         String  @id @default(cuid())
   userId     String
   name       String
   prefix     String
-  nextNumber Int    @default(1)
-  year       Int    @default(2026)
+  nextNumber Int     @default(1)
+  year       Int     @default(2026)
   isDefault  Boolean @default(false)
-  User       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  User       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, name])
   @@index([userId])
 }
 
 model BillingInvoice {
-  id           String               @id @default(cuid())
-  userId       String
-  clientId     String
-  saleId       String?
-  number       String
-  status       BillingInvoiceStatus @default(DRAFT)
-  currency     String               @default("EUR")
-  subtotal     Decimal              @db.Decimal(14, 2)
-  tax          Decimal              @db.Decimal(14, 2)
-  total        Decimal              @db.Decimal(14, 2)
-  issuedAt     DateTime
-  dueAt        DateTime
-  paidAt       DateTime?
-  notes        String?
-  createdAt    DateTime             @default(now())
-  updatedAt    DateTime             @updatedAt
+  id        String               @id @default(cuid())
+  userId    String
+  clientId  String
+  saleId    String?
+  number    String
+  status    BillingInvoiceStatus @default(DRAFT)
+  currency  String               @default("EUR")
+  subtotal  Decimal              @db.Decimal(14, 2)
+  tax       Decimal              @db.Decimal(14, 2)
+  total     Decimal              @db.Decimal(14, 2)
+  issuedAt  DateTime
+  dueAt     DateTime
+  paidAt    DateTime?
+  notes     String?
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
 
   // ═══ RECTIFICATIVAS ═══
-  isRectificativa     Boolean  @default(false)
+  isRectificativa     Boolean @default(false)
   rectificadaId       String?
   motivoRectificacion String?
 
   // ═══ VERIFACTU (preparado, inactivo hasta 2027) ═══
   // Estos campos se activarán cuando Verifactu sea obligatorio.
   // NO modificar la lógica de emisión hasta entonces.
-  verifactuHash       String?   // Hash SHA-256 de este registro
-  verifactuHashPrev   String?   // Hash del registro anterior (encadenado)
-  verifactuQR         String?   // QR en base64 para el PDF
-  verifactuXML        String?   // XML completo para la AEAT
+  verifactuHash       String? // Hash SHA-256 de este registro
+  verifactuHashPrev   String? // Hash del registro anterior (encadenado)
+  verifactuQR         String? // QR en base64 para el PDF
+  verifactuXML        String? // XML completo para la AEAT
   verifactuEnviado    Boolean   @default(false)
   verifactuFechaEnvio DateTime?
-  verifactuEstado     String?   // PENDIENTE / ACEPTADA / RECHAZADA / ERROR
-  verifactuCSV        String?   // Código Seguro de Verificación de la AEAT
-  verifactuError      String?   // Mensaje de error si fue rechazada
+  verifactuEstado     String? // PENDIENTE / ACEPTADA / RECHAZADA / ERROR
+  verifactuCSV        String? // Código Seguro de Verificación de la AEAT
+  verifactuError      String? // Mensaje de error si fue rechazada
 
   // ═══ INALTERABILIDAD (snapshot en momento de emisión) ═══
   snapshotFecha    DateTime? // Fecha exacta de emisión inmutable
-  snapshotEmisor   Json?     // Datos fiscales del emisor en el momento de emisión
-  snapshotReceptor Json?     // Datos del cliente en el momento de emisión
-  registroEventos  Json?     // Array: {tipo, fecha, usuario, notas}
+  snapshotEmisor   Json? // Datos fiscales del emisor en el momento de emisión
+  snapshotReceptor Json? // Datos del cliente en el momento de emisión
+  registroEventos  Json? // Array: {tipo, fecha, usuario, notas}
 
   Client       Client               @relation(fields: [clientId], references: [id])
   Sale         Sale?                @relation(fields: [saleId], references: [id])
@@ -2606,22 +2650,22 @@ enum DeliveryNoteStatus {
 }
 
 model Product {
-  id          String   @id @default(cuid())
-  userId      String
-  name        String
-  description String?
-  price       Float
-  taxRate     Float    @default(21)
-  unit        String   @default("ud")
-  category    String?
-  isService   Boolean  @default(false)
-  active      Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  deletedAt   DateTime?
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  quoteItems        QuoteItem[]
-  deliveryNoteItems DeliveryNoteItem[]
+  id                 String              @id @default(cuid())
+  userId             String
+  name               String
+  description        String?
+  price              Float
+  taxRate            Float               @default(21)
+  unit               String              @default("ud")
+  category           String?
+  isService          Boolean             @default(false)
+  active             Boolean             @default(true)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  deletedAt          DateTime?
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quoteItems         QuoteItem[]
+  deliveryNoteItems  DeliveryNoteItem[]
   purchaseOrderItems PurchaseOrderItem[]
 
   @@index([userId])
@@ -2630,30 +2674,30 @@ model Product {
 }
 
 model Quote {
-  id                        String      @id @default(cuid())
+  id                        String         @id @default(cuid())
   userId                    String
   clientId                  String
   number                    String
-  series                    String      @default("P")
-  status                    QuoteStatus @default(DRAFT)
-  issueDate                 DateTime    @default(now())
+  series                    String         @default("P")
+  status                    QuoteStatus    @default(DRAFT)
+  issueDate                 DateTime       @default(now())
   validUntil                DateTime
   notes                     String?
   terms                     String?
-  subtotal                  Float       @default(0)
-  taxTotal                  Float       @default(0)
-  irpfRate                  Float?      @default(0)
-  irpfAmount                Float?      @default(0)
-  total                     Float       @default(0)
+  subtotal                  Float          @default(0)
+  taxTotal                  Float          @default(0)
+  irpfRate                  Float?         @default(0)
+  irpfAmount                Float?         @default(0)
+  total                     Float          @default(0)
   pdfUrl                    String?
   convertedToInvoiceId      String?
   convertedToDeliveryNoteId String?
-  quoteType                 String      @default("quote")
-  createdAt                 DateTime    @default(now())
-  updatedAt                 DateTime    @updatedAt
+  quoteType                 String         @default("quote")
+  createdAt                 DateTime       @default(now())
+  updatedAt                 DateTime       @updatedAt
   deletedAt                 DateTime?
-  user                      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  client                    Client      @relation(fields: [clientId], references: [id])
+  user                      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  client                    Client         @relation(fields: [clientId], references: [id])
   items                     QuoteItem[]
   deliveryNote              DeliveryNote?
   purchaseOrder             PurchaseOrder?
@@ -2837,20 +2881,20 @@ enum ClientPurchaseStatus {
 }
 
 model ClientSale {
-  id          String           @id @default(cuid())
-  concept     String
-  amount      Float
-  tax         Float            @default(21)
-  total       Float
-  status      ClientSaleStatus @default(PENDING)
-  date        DateTime         @default(now())
-  notes       String?
-  clientId    String
-  client      Client           @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  userId      String
-  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  id        String           @id @default(cuid())
+  concept   String
+  amount    Float
+  tax       Float            @default(21)
+  total     Float
+  status    ClientSaleStatus @default(PENDING)
+  date      DateTime         @default(now())
+  notes     String?
+  clientId  String
+  client    Client           @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
 
   @@index([clientId])
   @@index([userId])
@@ -2910,20 +2954,20 @@ enum TipoAutomatizacion {
 }
 
 model Automatizacion {
-  id              String             @id @default(cuid())
+  id              String              @id @default(cuid())
   userId          String
   nombre          String
   descripcion     String?
   tipo            TipoAutomatizacion
-  categoria       String             @default("para_ti")
-  activa          Boolean            @default(false)
+  categoria       String              @default("para_ti")
+  activa          Boolean             @default(false)
   config          Json?
-  vecesEjecutada  Int                @default(0)
+  vecesEjecutada  Int                 @default(0)
   ultimaEjecucion DateTime?
   ultimoError     String?
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
-  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   logs            AutomatizacionLog[]
 
   @@unique([userId, tipo])
@@ -2979,17 +3023,17 @@ model NewsletterEdicion {
 }
 
 model DocumentoImportado {
-  id               String         @id @default(cuid())
-  userId           String
-  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Relaciones con entidades reales
-  saleId           String?
-  sale             Sale?          @relation(fields: [saleId], references: [id], onDelete: SetNull)
-  providerOrderId  String?
-  providerOrder    ProviderOrder? @relation(fields: [providerOrderId], references: [id], onDelete: SetNull)
-  clientId         String?
-  providerId       String?
+  saleId          String?
+  sale            Sale?          @relation(fields: [saleId], references: [id], onDelete: SetNull)
+  providerOrderId String?
+  providerOrder   ProviderOrder? @relation(fields: [providerOrderId], references: [id], onDelete: SetNull)
+  clientId        String?
+  providerId      String?
 
   // Metadatos del documento
   tipo             String
@@ -3004,8 +3048,8 @@ model DocumentoImportado {
   fileUrl          String?
   mimeType         String?
 
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // ─── Team / Workspace System ──────────────────────────────────────────────────
@@ -3016,70 +3060,105 @@ enum TeamRole {
   MEMBER
 }
 
-model Workspace {
-  id        String   @id @default(cuid())
-  name      String
-  ownerId   String
-  owner     User     @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-  members   WorkspaceMember[]
-  invites   WorkspaceInvite[]
-  activityLogs ActivityLog[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+enum MemberStatus {
+  PENDING
+  ACTIVE
+  REMOVED
+}
 
+model Workspace {
+  id             String             @id @default(cuid())
+  name           String
+  ownerId        String
+  plan           PlanType           @default(STARTER)
+  settings       Json               @default("{}")
+  slug           String?            @unique
+  deletedAt      DateTime?
+  owner          User               @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members        WorkspaceMember[]
+  invites        WorkspaceInvite[]
+  activityLogs   ActivityLog[]
+  counters       WorkspaceCounter[]
+  providerOrders ProviderOrder[]
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@index([ownerId])
+  @@index([slug])
   @@map("workspaces")
 }
 
 model WorkspaceMember {
-  id          String              @id @default(cuid())
+  id          String             @id @default(cuid())
   workspaceId String
-  workspace   Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspace   Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   userId      String
-  user        User                @relation("WorkspaceMembers", fields: [userId], references: [id], onDelete: Cascade)
-  role        TeamRole            @default(MEMBER)
-  joinedAt    DateTime            @default(now())
+  user        User               @relation("WorkspaceMembers", fields: [userId], references: [id], onDelete: Cascade)
+  role        TeamRole           @default(MEMBER)
+  status      MemberStatus       @default(ACTIVE)
+  joinedAt    DateTime?
+  invitedAt   DateTime?
+  invitedBy   String?
   permissions MemberPermissions?
 
   @@unique([workspaceId, userId])
+  @@index([userId])
+  @@index([workspaceId, status])
   @@map("workspace_members")
 }
 
+model WorkspaceCounter {
+  id            String    @id @default(cuid())
+  workspaceId   String
+  documentType  String
+  series        String
+  year          Int
+  currentNumber Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, documentType, series, year])
+  @@index([workspaceId, documentType])
+  @@map("workspace_counters")
+}
+
 model MemberPermissions {
-  id               String          @id @default(cuid())
-  memberId         String          @unique
-  member           WorkspaceMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  id                String          @id @default(cuid())
+  memberId          String          @unique
+  member            WorkspaceMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
   // Facturas
-  createInvoices   Boolean @default(true)
-  editInvoices     Boolean @default(true)
-  deleteInvoices   Boolean @default(false)
-  issueInvoices    Boolean @default(false)
-  viewInvoices     Boolean @default(true)
+  createInvoices    Boolean         @default(true)
+  editInvoices      Boolean         @default(true)
+  deleteInvoices    Boolean         @default(false)
+  issueInvoices     Boolean         @default(false)
+  viewInvoices      Boolean         @default(true)
   // Documentos (presupuestos, albaranes, pedidos)
-  createDocuments  Boolean @default(true)
-  editDocuments    Boolean @default(false)
-  deleteDocuments  Boolean @default(false)
+  createDocuments   Boolean         @default(true)
+  editDocuments     Boolean         @default(false)
+  deleteDocuments   Boolean         @default(false)
   // Clientes
-  createClients    Boolean @default(true)
-  editClients      Boolean @default(true)
-  deleteClients    Boolean @default(false)
-  viewAllClients   Boolean @default(true)
+  createClients     Boolean         @default(true)
+  editClients       Boolean         @default(true)
+  deleteClients     Boolean         @default(false)
+  viewAllClients    Boolean         @default(true)
   // Leads
-  viewLeads        Boolean @default(true)
-  editLeads        Boolean @default(false)
-  deleteLeads      Boolean @default(false)
+  viewLeads         Boolean         @default(true)
+  editLeads         Boolean         @default(false)
+  deleteLeads       Boolean         @default(false)
   // Informes
-  viewReports      Boolean @default(true)
-  exportData       Boolean @default(false)
+  viewReports       Boolean         @default(true)
+  exportData        Boolean         @default(false)
   // Automatizaciones
-  createAutomations Boolean @default(false)
-  editAutomations   Boolean @default(false)
-  deleteAutomations Boolean @default(false)
+  createAutomations Boolean         @default(false)
+  editAutomations   Boolean         @default(false)
+  deleteAutomations Boolean         @default(false)
   // Equipo / Admin
-  inviteMembers    Boolean @default(false)
-  manageMembers    Boolean @default(false)
-  manageSettings   Boolean @default(false)
-  manageBilling    Boolean @default(false)
-  updatedAt        DateTime @updatedAt
+  inviteMembers     Boolean         @default(false)
+  manageMembers     Boolean         @default(false)
+  manageSettings    Boolean         @default(false)
+  manageBilling     Boolean         @default(false)
+  updatedAt         DateTime        @updatedAt
 
   @@map("member_permissions")
 }
@@ -3127,17 +3206,17 @@ model VerificationCode {
 }
 
 model InvoiceTemplate {
-  id          String         @id @default(cuid())
-  name        String
-  slug        String         @unique
-  description String?
-  thumbnail   String?
-  category    String         @default("free")
-  price       Float          @default(0)
-  style       Json
-  isDefault   Boolean        @default(false)
-  sortOrder   Int            @default(0)
-  createdAt   DateTime       @default(now())
+  id            String         @id @default(cuid())
+  name          String
+  slug          String         @unique
+  description   String?
+  thumbnail     String?
+  category      String         @default("free")
+  price         Float          @default(0)
+  style         Json
+  isDefault     Boolean        @default(false)
+  sortOrder     Int            @default(0)
+  createdAt     DateTime       @default(now())
   userTemplates UserTemplate[]
 
   @@index([category])
@@ -3184,20 +3263,20 @@ enum ProjectStatus {
 }
 
 model Project {
-  id          String        @id @default(cuid())
+  id          String          @id @default(cuid())
   name        String
   description String?
-  color       String        @default("#1FA97A")
-  status      ProjectStatus @default(ACTIVE)
+  color       String          @default("#1FA97A")
+  status      ProjectStatus   @default(ACTIVE)
   startDate   DateTime?
   endDate     DateTime?
   userId      String
-  user        User          @relation("UserProjects", fields: [userId], references: [id])
+  user        User            @relation("UserProjects", fields: [userId], references: [id])
   clientId    String?
   tasks       Task[]
   members     ProjectMember[]
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
 
   @@index([userId])
   @@index([clientId])
@@ -3237,21 +3316,21 @@ enum RecurringFrequency {
 }
 
 model RecurringInvoice {
-  id            String              @id @default(cuid())
-  userId        String
-  user          User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  clientId      String
-  frequency     RecurringFrequency  @default(MONTHLY)
-  nextRunAt     DateTime
-  lastRunAt     DateTime?
-  active        Boolean             @default(true)
-  notes         String?
-  terms         String?
-  currency      String              @default("EUR")
-  irpfRate      Float               @default(0)
-  createdAt     DateTime            @default(now())
-  updatedAt     DateTime            @updatedAt
-  items         RecurringInvoiceItem[]
+  id        String                 @id @default(cuid())
+  userId    String
+  user      User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clientId  String
+  frequency RecurringFrequency     @default(MONTHLY)
+  nextRunAt DateTime
+  lastRunAt DateTime?
+  active    Boolean                @default(true)
+  notes     String?
+  terms     String?
+  currency  String                 @default("EUR")
+  irpfRate  Float                  @default(0)
+  createdAt DateTime               @default(now())
+  updatedAt DateTime               @updatedAt
+  items     RecurringInvoiceItem[]
 
   @@index([userId])
   @@index([nextRunAt])
@@ -3259,15 +3338,15 @@ model RecurringInvoice {
 }
 
 model RecurringInvoiceItem {
-  id                  String           @id @default(cuid())
-  recurringInvoiceId  String
-  recurringInvoice    RecurringInvoice @relation(fields: [recurringInvoiceId], references: [id], onDelete: Cascade)
-  description         String
-  quantity            Float            @default(1)
-  unitPrice           Float
-  taxPercent          Float            @default(21)
-  discountPercent     Float            @default(0)
-  createdAt           DateTime         @default(now())
+  id                 String           @id @default(cuid())
+  recurringInvoiceId String
+  recurringInvoice   RecurringInvoice @relation(fields: [recurringInvoiceId], references: [id], onDelete: Cascade)
+  description        String
+  quantity           Float            @default(1)
+  unitPrice          Float
+  taxPercent         Float            @default(21)
+  discountPercent    Float            @default(0)
+  createdAt          DateTime         @default(now())
 
   @@index([recurringInvoiceId])
   @@map("recurring_invoice_items")

@@ -48,7 +48,7 @@ export function ProductImportModal({ onClose, onDone }: Props) {
       setTotalRows(parsed.data.length)
       setPreview(parsed.data.slice(0, 3))
     } else if (name.endsWith(".xlsx") || name.endsWith(".xls")) {
-      const XLSX = await import("xlsx")
+      const XLSX = await import("@e965/xlsx")
       const buf = await f.arrayBuffer()
       const wb = XLSX.read(buf, { type: "array" })
       const sheet = wb.Sheets[wb.SheetNames[0]]

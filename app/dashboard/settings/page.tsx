@@ -17,6 +17,7 @@ import { ProductCatalog } from "./components/ProductCatalog"
 import { ActivityLogSection } from "./components/ActivityLogSection"
 import { InvoicingConfig } from "./components/InvoicingConfig"
 import { ImportExportPanel } from "./components/ImportExportPanel"
+import { BackupsPanel } from "./components/BackupsPanel"
 import { InvoiceTemplates } from "./components/InvoiceTemplates"
 import { VerifactuSettings } from "./components/VerifactuSettings"
 import { SubscriptionSettings } from "./components/SubscriptionSettings"
@@ -39,7 +40,7 @@ const sections: Record<string, React.ComponentType> = {
   invoicing:     InvoicingConfig,
   subscription:  SubscriptionSettings,
   notifications: NotificationSettings,
-  limits:        UsageLimits,
+  limits:        BackupsPanel,
   security:      SecuritySettings,
   appearance:    AppearanceSettings,
   activity:      ActivityLogSection,

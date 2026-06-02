@@ -28,6 +28,18 @@ export default function DashboardShell({
         setMobileSidebarOpen(false)
     }, [pathname])
 
+    // Sync sidebar collapsed state from AppearanceSettings
+    useEffect(() => {
+        const saved = localStorage.getItem("cl_sidebar_collapsed")
+        if (saved === "true") setIsCollapsed(true)
+
+        const handler = (e: Event) => {
+            setIsCollapsed((e as CustomEvent<{ collapsed: boolean }>).detail.collapsed)
+        }
+        window.addEventListener("sidebar-toggle", handler)
+        return () => window.removeEventListener("sidebar-toggle", handler)
+    }, [])
+
     return (
         <TourProvider>
             <div className="flex h-screen w-screen overflow-hidden bg-[var(--bg-main)] text-[var(--text-primary)]" data-debug="shell">
@@ -53,7 +65,7 @@ export default function DashboardShell({
                             aria-hidden="true"
                         />
                         {/* Drawer */}
-                        <div className="fixed top-0 left-0 h-full w-64 z-50 overflow-hidden lg:hidden shadow-xl" style={{ background: "#fafafa" }}>
+                        <div className="fixed top-0 left-0 h-full w-64 z-50 overflow-hidden lg:hidden shadow-xl bg-[var(--bg-surface)]">
                             <Sidebar
                                 isCollapsed={false}
                                 onToggleCollapsed={() => setMobileSidebarOpen(false)}
@@ -87,8 +99,7 @@ export default function DashboardShell({
                     </div>
 
                     <main
-                        className="flex-1 overflow-y-auto overflow-x-hidden relative"
-                        style={{ background: "#ffffff" }}
+                        className="flex-1 overflow-y-auto overflow-x-hidden relative bg-[var(--bg-card)]"
                         data-debug="shell-main"
                     >
                         <div className="mx-auto w-full max-w-[1400px] flex-1 flex flex-col px-4 sm:px-7 py-4 sm:py-6 pb-20">

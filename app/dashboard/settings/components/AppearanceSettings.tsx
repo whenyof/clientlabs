@@ -1,24 +1,60 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { ComputerDesktopIcon, MoonIcon, SunIcon } from "@heroicons/react/24/outline"
+import { useState, useEffect, useCallback } from "react"
+import { Monitor, Moon, Sun } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { toast } from "sonner"
+
+interface UIPrefs {
+  theme: "light" | "dark" | "system"
+  sidebarCollapsed: boolean
+  highDensity: boolean
+  animationsEnabled: boolean
+}
+
+const DEFAULTS: UIPrefs = {
+  theme: "light",
+  sidebarCollapsed: false,
+  highDensity: false,
+  animationsEnabled: true,
+}
 
 const STORAGE_KEY = "cl_appearance"
 
-function loadPrefs() {
-  if (typeof window === "undefined") return null
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : null
-  } catch {
-    return null
+function applyTheme(theme: UIPrefs["theme"]) {
+  const root = document.documentElement
+  const mq = window.matchMedia("(prefers-color-scheme: dark)")
+
+  if (theme === "system") {
+    root.setAttribute("data-theme", mq.matches ? "dark" : "light")
+    const handler = (e: MediaQueryListEvent) =>
+      root.setAttribute("data-theme", e.matches ? "dark" : "light")
+    mq.addEventListener("change", handler)
+    // Store cleanup ref on window to avoid duplicate listeners
+    ;(window as Window & { __themeCleanup?: () => void }).__themeCleanup?.()
+    ;(window as Window & { __themeCleanup?: () => void }).__themeCleanup = () =>
+      mq.removeEventListener("change", handler)
+  } else {
+    ;(window as Window & { __themeCleanup?: () => void }).__themeCleanup?.()
+    root.setAttribute("data-theme", theme)
   }
+  // Keep legacy "theme" key in sync for ThemeProvider
+  localStorage.setItem("theme", theme === "system" ? (mq.matches ? "dark" : "light") : theme)
 }
 
-function savePrefs(prefs: object) {
-  if (typeof window === "undefined") return
+function applySidebar(collapsed: boolean) {
+  localStorage.setItem("cl_sidebar_collapsed", collapsed ? "true" : "false")
+  window.dispatchEvent(new CustomEvent("sidebar-toggle", { detail: { collapsed } }))
+}
+
+function applyDensity(high: boolean) {
+  document.documentElement.classList.toggle("density-high", high)
+}
+
+function applyAnimations(enabled: boolean) {
+  document.documentElement.classList.toggle("no-animations", !enabled)
+}
+
+function saveLocal(prefs: UIPrefs) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs))
   } catch {
@@ -27,69 +63,120 @@ function savePrefs(prefs: object) {
 }
 
 export function AppearanceSettings() {
-  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('light')
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-  const [animationsEnabled, setAnimationsEnabled] = useState(true)
-  const [compactMode, setCompactMode] = useState(false)
-  const [saved, setSaved] = useState(false)
+  const [prefs, setPrefs] = useState<UIPrefs>(DEFAULTS)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const prefs = loadPrefs()
-    if (prefs) {
-      if (prefs.theme) setTheme(prefs.theme)
-      if (typeof prefs.sidebarCollapsed === "boolean") setSidebarCollapsed(prefs.sidebarCollapsed)
-      if (typeof prefs.animationsEnabled === "boolean") setAnimationsEnabled(prefs.animationsEnabled)
-      if (typeof prefs.compactMode === "boolean") setCompactMode(prefs.compactMode)
-    }
+    fetch("/api/settings/appearance")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.prefs) {
+          const p = { ...DEFAULTS, ...data.prefs } as UIPrefs
+          setPrefs(p)
+          applyTheme(p.theme)
+          applySidebar(p.sidebarCollapsed)
+          applyDensity(p.highDensity)
+          applyAnimations(p.animationsEnabled)
+          saveLocal(p)
+        }
+      })
+      .catch(() => {
+        // Fallback to localStorage
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY)
+          if (raw) {
+            const p = { ...DEFAULTS, ...JSON.parse(raw) } as UIPrefs
+            setPrefs(p)
+            applyTheme(p.theme)
+            applySidebar(p.sidebarCollapsed)
+            applyDensity(p.highDensity)
+            applyAnimations(p.animationsEnabled)
+          }
+        } catch {
+          // ignore
+        }
+      })
+      .finally(() => setLoading(false))
   }, [])
 
-  const handleThemeChange = (newTheme: 'light' | 'dark' | 'system') => {
-    setTheme(newTheme)
-  }
+  const update = useCallback(async (patch: Partial<UIPrefs>) => {
+    const next = { ...prefs, ...patch }
+    setPrefs(next)
 
-  const handleSave = () => {
-    const prefs = { theme, sidebarCollapsed, animationsEnabled, compactMode }
-    savePrefs(prefs)
-    setSaved(true)
-    toast.success("Preferencias de apariencia guardadas")
-    setTimeout(() => setSaved(false), 2000)
-  }
+    // Apply DOM immediately
+    if (patch.theme !== undefined) applyTheme(patch.theme)
+    if (patch.sidebarCollapsed !== undefined) applySidebar(patch.sidebarCollapsed)
+    if (patch.highDensity !== undefined) applyDensity(patch.highDensity)
+    if (patch.animationsEnabled !== undefined) applyAnimations(patch.animationsEnabled)
+
+    saveLocal(next)
+
+    fetch("/api/settings/appearance", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(patch),
+    }).catch(() => {
+      // silent — localStorage already saved
+    })
+  }, [prefs])
 
   const themes = [
-    { id: 'light' as const, label: 'Claro', desc: 'Interfaz de alta luminosidad.', icon: SunIcon },
-    { id: 'dark' as const, label: 'Oscuro', desc: 'Configuración de bajo ruido visual.', icon: MoonIcon },
-    { id: 'system' as const, label: 'Sistema', desc: 'Sincronización automática con el OS.', icon: ComputerDesktopIcon },
+    { id: "light" as const, label: "Claro", desc: "Interfaz de alta luminosidad.", Icon: Sun },
+    { id: "dark" as const, label: "Oscuro", desc: "Configuración de bajo ruido visual.", Icon: Moon },
+    { id: "system" as const, label: "Sistema", desc: "Sincronización automática con el OS.", Icon: Monitor },
   ]
 
-  const toggleSettings = [
-    { label: 'Sidebar compacto', desc: 'Reducir ancho de la barra lateral.', value: sidebarCollapsed, onChange: () => setSidebarCollapsed(!sidebarCollapsed) },
-    { label: 'Modo densidad alta', desc: 'Optimizar espacio para vistas analíticas.', value: compactMode, onChange: () => setCompactMode(!compactMode) },
-    { label: 'Animaciones', desc: 'Transiciones fluidas de interfaz.', value: animationsEnabled, onChange: () => setAnimationsEnabled(!animationsEnabled) },
+  const toggles = [
+    {
+      label: "Sidebar compacto",
+      desc: "Reducir ancho de la barra lateral.",
+      value: prefs.sidebarCollapsed,
+      onChange: () => update({ sidebarCollapsed: !prefs.sidebarCollapsed }),
+    },
+    {
+      label: "Densidad alta",
+      desc: "Optimizar espacio para vistas analíticas.",
+      value: prefs.highDensity,
+      onChange: () => update({ highDensity: !prefs.highDensity }),
+    },
+    {
+      label: "Animaciones",
+      desc: "Transiciones fluidas de interfaz.",
+      value: prefs.animationsEnabled,
+      onChange: () => update({ animationsEnabled: !prefs.animationsEnabled }),
+    },
   ]
+
+  if (loading) {
+    return (
+      <div className="space-y-6 animate-pulse">
+        <div className="h-8 w-48 bg-slate-100 rounded" />
+        <div className="h-40 bg-slate-50 rounded-xl border border-slate-200" />
+        <div className="h-40 bg-slate-50 rounded-xl border border-slate-200" />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
-      {/* Section Header */}
       <div>
         <h2 className="text-lg font-semibold text-[#0B1F2A]">Apariencia</h2>
         <p className="text-sm text-slate-500 mt-0.5">Configuración visual y preferencias de interfaz.</p>
       </div>
 
-      {/* Theme Selection */}
+      {/* Theme */}
       <div className="bg-white rounded-xl border border-slate-200 p-6">
         <h3 className="text-sm font-medium text-slate-500 mb-4">Tema</h3>
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {themes.map((t) => {
-            const Icon = t.icon
-            const isActive = theme === t.id
+          {themes.map(({ id, label, desc, Icon }) => {
+            const active = prefs.theme === id
             return (
               <button
-                key={t.id}
-                onClick={() => handleThemeChange(t.id)}
+                key={id}
+                onClick={() => update({ theme: id })}
                 className={cn(
                   "p-4 rounded-lg border text-left transition-colors",
-                  isActive
+                  active
                     ? "border-[var(--accent)] bg-[var(--accent)]/5"
                     : "border-slate-100 bg-slate-50 hover:bg-white hover:border-slate-200"
                 )}
@@ -97,62 +184,49 @@ export function AppearanceSettings() {
                 <div className="flex items-center gap-3 mb-2">
                   <div className={cn(
                     "w-9 h-9 rounded-lg flex items-center justify-center border transition-colors",
-                    isActive
-                      ? "bg-[var(--accent)] border-[var(--accent)]"
-                      : "bg-white border-slate-200"
+                    active ? "bg-[var(--accent)] border-[var(--accent)]" : "bg-white border-slate-200"
                   )}>
-                    <Icon className={cn("w-5 h-5", isActive ? "text-white" : "text-slate-400")} />
+                    <Icon className={cn("w-5 h-5", active ? "text-white" : "text-slate-400")} />
                   </div>
-                  <span className={cn(
-                    "text-sm font-semibold",
-                    isActive ? "text-[#0B1F2A]" : "text-slate-500"
-                  )}>
-                    {t.label}
+                  <span className={cn("text-sm font-semibold", active ? "text-[#0B1F2A]" : "text-slate-500")}>
+                    {label}
                   </span>
                 </div>
-                <p className="text-xs text-slate-500">{t.desc}</p>
+                <p className="text-xs text-slate-500">{desc}</p>
               </button>
             )
           })}
         </div>
       </div>
 
-      {/* Layout Settings */}
+      {/* Layout toggles */}
       <div className="bg-white rounded-xl border border-slate-200 p-6">
         <h3 className="text-sm font-medium text-slate-500 mb-4">Opciones de layout</h3>
-
         <div className="space-y-4">
-          {toggleSettings.map((setting) => (
-            <div key={setting.label} className="flex items-center justify-between py-3 border-b border-slate-50 last:border-b-0">
+          {toggles.map(({ label, desc, value, onChange }) => (
+            <div key={label} className="flex items-center justify-between py-3 border-b border-slate-50 last:border-b-0">
               <div>
-                <div className="text-sm font-semibold text-[#0B1F2A]">{setting.label}</div>
-                <div className="text-xs text-slate-500 mt-0.5">{setting.desc}</div>
+                <div className="text-sm font-semibold text-[#0B1F2A]">{label}</div>
+                <div className="text-xs text-slate-500 mt-0.5">{desc}</div>
               </div>
               <button
-                onClick={setting.onChange}
+                onClick={onChange}
                 className={cn(
                   "relative inline-flex h-6 w-11 items-center rounded-full transition-colors",
-                  setting.value ? "bg-[var(--accent)]" : "bg-slate-200"
+                  value ? "bg-[var(--accent)]" : "bg-slate-200"
                 )}
+                aria-checked={value}
+                role="switch"
               >
                 <span className={cn(
                   "inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm",
-                  setting.value ? "translate-x-6" : "translate-x-1"
+                  value ? "translate-x-6" : "translate-x-1"
                 )} />
               </button>
             </div>
           ))}
         </div>
-      </div>
-
-      {/* Save */}
-      <div className="flex justify-end">
-        <button
-          onClick={handleSave}
-          className="px-5 py-2.5 text-sm font-medium text-white bg-[var(--accent)] rounded-lg hover:opacity-90 transition-colors"
-        >
-          {saved ? "¡Guardado!" : "Guardar preferencias"}
-        </button>
+        <p className="text-xs text-slate-400 mt-4">Los cambios se guardan automáticamente.</p>
       </div>
     </div>
   )

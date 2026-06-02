@@ -13,7 +13,7 @@ export async function POST() {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 })
   }
 
-  const priceId = process.env.STRIPE_EXTRA_SEAT_PRICE_ID
+  const priceId = process.env.STRIPE_PRICE_EXTRA_SEAT
   if (!priceId) return NextResponse.json({ error: "Precio no configurado" }, { status: 500 })
 
   try {

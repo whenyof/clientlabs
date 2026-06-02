@@ -10,7 +10,7 @@ export async function POST() {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 })
   }
 
-  const priceId = process.env.STRIPE_TEMPLATE_PACK_PRICE_ID
+  const priceId = process.env.STRIPE_PRICE_TEMPLATE_PACK
   if (!priceId) return NextResponse.json({ error: "Precio no configurado" }, { status: 500 })
 
   try {
@@ -34,8 +34,8 @@ export async function POST() {
       client_reference_id: session.user.id,
       metadata: { userId: session.user.id, type: "template_pack_all" },
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${baseUrl}/dashboard/settings?section=invoicing&template_purchased=1`,
-      cancel_url: `${baseUrl}/dashboard/settings?section=invoicing`,
+      success_url: `${baseUrl}/dashboard/settings?section=templates&purchased=true`,
+      cancel_url: `${baseUrl}/dashboard/settings?section=templates`,
     })
 
     return NextResponse.json({ url: checkoutSession.url })

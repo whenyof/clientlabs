@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Check, Lock, Upload, Package } from "lucide-react"
 import { toast } from "sonner"
@@ -65,10 +66,21 @@ function TemplateMiniPreview({ style }: { style: Record<string, string> }) {
 }
 
 export function InvoiceTemplateGallery() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [templates, setTemplates] = useState<TemplateItem[]>([])
   const [activeId, setActiveId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [activating, setActivating] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (searchParams.get("purchased") === "true") {
+      toast.success("¡Plantilla desbloqueada! Ya puedes usarla.")
+      const params = new URLSearchParams(searchParams.toString())
+      params.delete("purchased")
+      router.replace(`/dashboard/settings?${params.toString()}`)
+    }
+  }, [searchParams, router])
 
   const load = useCallback(async () => {
     try {

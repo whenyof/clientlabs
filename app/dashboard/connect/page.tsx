@@ -38,6 +38,13 @@ import {
   Download,
 } from "lucide-react"
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
   INTEGRATIONS,
   CATEGORIES,
   type IntegrationDef,
@@ -215,16 +222,20 @@ function CreateFormModal({ onClose, onCreate }: { onClose: () => void; onCreate:
                       placeholder="Etiqueta"
                       className="px-2 py-1.5 text-xs rounded border border-[#E2E8ED] bg-white focus:outline-none focus:border-[#0F766E] transition-colors"
                     />
-                    <select
+                    <Select
                       value={f.type}
-                      onChange={e => updateField(i, { type: e.target.value as FormField["type"] })}
-                      className="px-2 py-1.5 text-xs rounded border border-[#E2E8ED] bg-white focus:outline-none focus:border-[#0F766E] transition-colors"
+                      onValueChange={(v) => updateField(i, { type: v as FormField["type"] })}
                     >
-                      <option value="text">Texto</option>
-                      <option value="email">Email</option>
-                      <option value="tel">Teléfono</option>
-                      <option value="textarea">Área de texto</option>
-                    </select>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Seleccionar..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="text">Texto</SelectItem>
+                        <SelectItem value="email">Email</SelectItem>
+                        <SelectItem value="tel">Teléfono</SelectItem>
+                        <SelectItem value="textarea">Área de texto</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <label className="flex items-center gap-1 text-[11px] text-[#5F7280] whitespace-nowrap flex-shrink-0">
                     <input type="checkbox" checked={f.required} onChange={e => updateField(i, { required: e.target.checked })} className="rounded" />

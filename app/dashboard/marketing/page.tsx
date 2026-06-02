@@ -7,6 +7,13 @@ import { usePlan } from "@/hooks/use-plan"
 import { toast } from "sonner"
 import { UpgradeWall } from "@/components/ui/upgrade-wall"
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
   Megaphone, Filter, Plus, Upload, MoreHorizontal, ArrowUpRight,
   LayoutDashboard, Send, Newspaper,
   Sparkles, Users2, BarChart3, Globe,
@@ -368,24 +375,29 @@ function TabCampanas({ onNuevaCampana }: { onNuevaCampana: () => void }) {
               className="pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-[13px] outline-none w-64 focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/10 transition-all"
             />
           </div>
-          <select
-            value={filtroEstado}
-            onChange={(e) => setFiltroEstado(e.target.value)}
-            className="px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-[13px] outline-none text-slate-600 cursor-pointer focus:border-[#0F766E]"
-          >
-            <option value="todos">Todos los estados</option>
-            <option value="activa">Activas</option>
-            <option value="automatica">Automáticas</option>
-            <option value="programada">Programadas</option>
-            <option value="enviada">Enviadas</option>
-            <option value="borrador">Borradores</option>
-          </select>
-          <select className="px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-[13px] outline-none text-slate-600 cursor-pointer focus:border-[#0F766E]">
-            <option>Todos los canales</option>
-            <option>Email</option>
-            <option>WhatsApp</option>
-            <option>SMS</option>
-          </select>
+          <Select value={filtroEstado} onValueChange={(v) => setFiltroEstado(v)}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Todos los estados" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos los estados</SelectItem>
+              <SelectItem value="activa">Activas</SelectItem>
+              <SelectItem value="automatica">Automáticas</SelectItem>
+              <SelectItem value="programada">Programadas</SelectItem>
+              <SelectItem value="enviada">Enviadas</SelectItem>
+              <SelectItem value="borrador">Borradores</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Todos los canales" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="email">Email</SelectItem>
+              <SelectItem value="whatsapp">WhatsApp</SelectItem>
+              <SelectItem value="sms">SMS</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <button
           onClick={onNuevaCampana}
@@ -1015,15 +1027,16 @@ function TabNewsletter() {
                   <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
                     Estado
                   </label>
-                  <select
-                    value={edicionForm.estado}
-                    onChange={e => setEdicionForm(f => ({ ...f, estado: e.target.value }))}
-                    className="w-full px-4 py-3 border border-slate-200 rounded-xl text-[13px] outline-none bg-white focus:border-[#0F766E]"
-                  >
-                    <option value="borrador">Borrador</option>
-                    <option value="programada">Programada</option>
-                    <option value="enviada">Enviada</option>
-                  </select>
+                  <Select value={edicionForm.estado} onValueChange={(v) => setEdicionForm(f => ({ ...f, estado: v }))}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Seleccionar..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="borrador">Borrador</SelectItem>
+                      <SelectItem value="programada">Programada</SelectItem>
+                      <SelectItem value="enviada">Enviada</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
@@ -1043,15 +1056,16 @@ function TabNewsletter() {
                   <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
                     Hora de envío
                   </label>
-                  <select
-                    value={edicionForm.hora}
-                    onChange={e => setEdicionForm(f => ({ ...f, hora: e.target.value }))}
-                    className="w-full px-4 py-3 border border-slate-200 rounded-xl text-[13px] outline-none bg-white focus:border-[#0F766E]"
-                  >
-                    {["07:00","08:00","09:00","10:00","11:00","12:00","17:00","18:00","19:00","20:00"].map(h => (
-                      <option key={h} value={h}>{h}</option>
-                    ))}
-                  </select>
+                  <Select value={edicionForm.hora} onValueChange={(v) => setEdicionForm(f => ({ ...f, hora: v }))}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Seleccionar..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {["07:00","08:00","09:00","10:00","11:00","12:00","17:00","18:00","19:00","20:00"].map(h => (
+                        <SelectItem key={h} value={h}>{h}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
             </div>

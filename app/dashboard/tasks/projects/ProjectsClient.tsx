@@ -3,12 +3,19 @@
 import { useState, useMemo } from "react"
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query"
 import {
-  FolderKanban, Plus, Users, Trash2, CheckCircle2, Pause, Archive,
-  X, Calendar, PlayCircle, Search, ChevronDown,
+  FolderKanban, Plus, Users, Trash2, CheckCircle2, Pause,
+  X, Calendar, PlayCircle, Search,
 } from "lucide-react"
 import { toast } from "sonner"
 import { CreateProjectModal } from "./CreateProjectModal"
 import { ProjectKanban } from "./ProjectKanban"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 type ProjectStatus = "ACTIVE" | "PAUSED" | "COMPLETED" | "ARCHIVED"
 
@@ -288,16 +295,17 @@ export function ProjectsClient() {
             style={{ width: "100%", padding: "8px 10px 8px 30px", border: "1px solid var(--border-subtle)", borderRadius: 8, fontSize: 12, background: "var(--bg-card)", color: "var(--text-primary)", outline: "none", boxSizing: "border-box" }}
           />
         </div>
-        <div style={{ position: "relative" }}>
-          <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as ProjectStatus | "ALL")}
-            style={{ padding: "8px 28px 8px 10px", border: "1px solid var(--border-subtle)", borderRadius: 8, fontSize: 12, background: "var(--bg-card)", color: "var(--text-primary)", cursor: "pointer", outline: "none", appearance: "none", WebkitAppearance: "none" }}>
-            <option value="ALL">Todos los estados</option>
+        <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as ProjectStatus | "ALL")}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Todos los estados" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">Todos los estados</SelectItem>
             {(Object.keys(STATUS_LABELS) as ProjectStatus[]).map(s => (
-              <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+              <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>
             ))}
-          </select>
-          <ChevronDown style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", width: 12, height: 12, color: "var(--text-secondary)", pointerEvents: "none" }} />
-        </div>
+          </SelectContent>
+        </Select>
       </div>
 
       {isLoading && (

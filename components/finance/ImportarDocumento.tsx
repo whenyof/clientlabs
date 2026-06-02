@@ -2,6 +2,13 @@
 import { useState } from "react"
 import { Upload, FileText, CheckCircle, X, Loader2, AlertCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface Props {
   tipo: "factura" | "presupuesto" | "albaran" | "pedido" | "rectificativa" | "otro"
@@ -188,16 +195,20 @@ export function ImportarDocumento({ tipo, onImportado }: Props) {
           <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
             Estado de pago
           </label>
-          <select
+          <Select
             value={form.estadoPago}
-            onChange={(e) => setForm((f) => ({ ...f, estadoPago: e.target.value }))}
-            className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-[13px] outline-none bg-white focus:border-[#0F766E]"
+            onValueChange={(v) => setForm((f) => ({ ...f, estadoPago: v }))}
           >
-            <option value="pendiente">Pendiente</option>
-            <option value="pagada">Pagada / Cobrada</option>
-            <option value="vencida">Vencida</option>
-            <option value="cancelada">Cancelada</option>
-          </select>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Seleccionar..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="pendiente">Pendiente</SelectItem>
+              <SelectItem value="pagada">Pagada / Cobrada</SelectItem>
+              <SelectItem value="vencida">Vencida</SelectItem>
+              <SelectItem value="cancelada">Cancelada</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

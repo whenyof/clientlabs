@@ -1,8 +1,15 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { X, Plus, Trash2, ChevronDown } from "lucide-react"
+import { X, Plus, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 type Client = { id: string; name: string | null; email?: string | null }
 type Quote = { id: string; number: string; client: { id: string; name: string | null } }
@@ -156,36 +163,36 @@ export function NewDeliveryNoteModal({ open, onClose, onSuccess, defaultClientId
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider mb-1.5">Cliente *</label>
-              <div className="relative">
-                <select
-                  value={clientId}
-                  onChange={e => { setClientId(e.target.value); setQuoteId("") }}
-                  className="w-full appearance-none text-[13px] border border-slate-200 rounded-lg px-3 py-2.5 text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30 focus:border-[#0F766E] pr-8"
-                >
-                  <option value="">Seleccionar</option>
+              <Select
+                value={clientId}
+                onValueChange={(v) => { setClientId(v); setQuoteId("") }}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Seleccionar" />
+                </SelectTrigger>
+                <SelectContent>
                   {clients.map(c => (
-                    <option key={c.id} value={c.id}>{c.name ?? c.email ?? c.id}</option>
+                    <SelectItem key={c.id} value={c.id}>{c.name ?? c.email ?? c.id}</SelectItem>
                   ))}
-                </select>
-                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
-              </div>
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider mb-1.5">Desde presupuesto</label>
-              <div className="relative">
-                <select
-                  value={quoteId}
-                  onChange={e => { setQuoteId(e.target.value); loadFromQuote(e.target.value) }}
-                  disabled={!clientId || quotes.length === 0}
-                  className="w-full appearance-none text-[13px] border border-slate-200 rounded-lg px-3 py-2.5 text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30 focus:border-[#0F766E] pr-8 disabled:bg-slate-50 disabled:text-slate-400"
-                >
-                  <option value="">Ninguno</option>
+              <Select
+                value={quoteId}
+                onValueChange={(v) => { setQuoteId(v); loadFromQuote(v) }}
+                disabled={!clientId || quotes.length === 0}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Ninguno" />
+                </SelectTrigger>
+                <SelectContent>
                   {quotes.map(q => (
-                    <option key={q.id} value={q.id}>{q.number}</option>
+                    <SelectItem key={q.id} value={q.id}>{q.number}</SelectItem>
                   ))}
-                </select>
-                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
-              </div>
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider mb-1.5">Fecha de entrega</label>

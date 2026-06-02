@@ -13,6 +13,13 @@ import {
   XMarkIcon,
   PhotoIcon
 } from "@heroicons/react/24/outline"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 const defaultData = {
   name: "",
@@ -339,18 +346,22 @@ export function CompanySettings() {
 
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-slate-700">País</label>
-            <select
+            <Select
               value={companyData.country}
-              onChange={(e) => setCompanyData({ ...companyData, country: e.target.value })}
+              onValueChange={(v) => setCompanyData({ ...companyData, country: v })}
               disabled={!isEditing}
-              className={inputClasses}
             >
-              <option value="España">España</option>
-              <option value="México">México</option>
-              <option value="Argentina">Argentina</option>
-              <option value="Colombia">Colombia</option>
-              <option value="Chile">Chile</option>
-            </select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Seleccionar..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="España">España</SelectItem>
+                <SelectItem value="México">México</SelectItem>
+                <SelectItem value="Argentina">Argentina</SelectItem>
+                <SelectItem value="Colombia">Colombia</SelectItem>
+                <SelectItem value="Chile">Chile</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-1.5">
@@ -377,18 +388,22 @@ export function CompanySettings() {
 
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-slate-700">Sector</label>
-            <select
+            <Select
               value={companyData.sector}
-              onChange={(e) => setCompanyData({ ...companyData, sector: e.target.value })}
+              onValueChange={(v) => setCompanyData({ ...companyData, sector: v })}
               disabled={!isEditing}
-              className={inputClasses}
             >
-              {sectors.map(sector => (
-                <option key={sector.value} value={sector.value}>
-                  {sector.label}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Seleccionar..." />
+              </SelectTrigger>
+              <SelectContent>
+                {sectors.map(sector => (
+                  <SelectItem key={sector.value} value={sector.value}>
+                    {sector.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>

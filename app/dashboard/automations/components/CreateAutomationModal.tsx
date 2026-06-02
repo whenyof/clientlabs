@@ -3,6 +3,13 @@
 import { useState } from "react"
 import { XMarkIcon, PlusIcon } from "@heroicons/react/24/outline"
 import { motion, AnimatePresence } from "framer-motion"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface AutomationAction {
   id: string
@@ -106,17 +113,20 @@ export function CreateAutomationModal({ onClose }: CreateAutomationModalProps) {
                   <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">
                     Trigger
                   </label>
-                  <select
+                  <Select
                     value={automation.triggerType}
-                    onChange={(e) => setAutomation(prev => ({ ...prev, triggerType: e.target.value }))}
-                    className="w-full px-3 py-2 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    onValueChange={(v) => setAutomation(prev => ({ ...prev, triggerType: v }))}
                   >
-                    <option value="">Seleccionar trigger</option>
-                    <option value="new_lead">Nuevo Lead</option>
-                    <option value="client_won">Cliente Ganado</option>
-                    <option value="cart_abandoned">Carrito Abandonado</option>
-                    <option value="new_order">Nuevo Pedido</option>
-                  </select>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Seleccionar trigger" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="new_lead">Nuevo Lead</SelectItem>
+                      <SelectItem value="client_won">Cliente Ganado</SelectItem>
+                      <SelectItem value="cart_abandoned">Carrito Abandonado</SelectItem>
+                      <SelectItem value="new_order">Nuevo Pedido</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>

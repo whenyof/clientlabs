@@ -12,6 +12,13 @@ import {
   WrenchScrewdriverIcon,
   BoltIcon
 } from "@heroicons/react/24/outline"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface AutomationAction {
   id: string
@@ -265,16 +272,20 @@ export function ActionBuilder({ actions, onActionsChange }: ActionBuilderProps) 
                     </div>
                     <div>
                       <label className="block text-xs text-[var(--text-secondary)] mb-1">Método</label>
-                      <select
+                      <Select
                         value={action.config.method || 'POST'}
-                        onChange={(e) => updateActionConfig(action.id, { method: e.target.value })}
-                        className="w-full px-2 py-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                        onValueChange={(v) => updateActionConfig(action.id, { method: v })}
                       >
-                        <option value="GET">GET</option>
-                        <option value="POST">POST</option>
-                        <option value="PUT">PUT</option>
-                        <option value="PATCH">PATCH</option>
-                      </select>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Seleccionar..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="GET">GET</SelectItem>
+                          <SelectItem value="POST">POST</SelectItem>
+                          <SelectItem value="PUT">PUT</SelectItem>
+                          <SelectItem value="PATCH">PATCH</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 )}

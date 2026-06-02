@@ -3,6 +3,13 @@
 import { useState, useEffect } from "react"
 import { X, FolderKanban, Loader2 } from "lucide-react"
 import { Dialog, DialogContent, DialogClose, DialogTitle } from "@/components/ui/dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { toast } from "sonner"
 import { useQueryClient } from "@tanstack/react-query"
 import { cn } from "@/lib/utils"
@@ -172,12 +179,14 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
             {clients.length > 0 && (
               <div>
                 <Label>Cliente vinculado <span style={{ color: "var(--text-secondary)", fontWeight: 400, textTransform: "none", letterSpacing: 0, fontSize: 11 }}>(opcional)</span></Label>
-                <div style={{ position: "relative" }}>
-                  <select value={clientId} onChange={e => setClientId(e.target.value)} style={{ ...inputStyle, appearance: "none" as const }}>
-                    <option value="">Sin cliente</option>
-                    {clients.map((c: Client) => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </select>
-                </div>
+                <Select value={clientId} onValueChange={(v) => setClientId(v)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Sin cliente" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {clients.map((c: Client) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
             )}
 

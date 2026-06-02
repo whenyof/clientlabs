@@ -11,6 +11,13 @@ import {
     XMarkIcon,
     TrashIcon,
 } from "@heroicons/react/24/outline"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 /* ── Constants ──────────────────────────────────────── */
 
@@ -67,9 +74,6 @@ const inputColors = {
     color: "#0B1F2A",
     backgroundColor: "#fff",
 }
-
-const selectStyle =
-    "px-3 py-2 rounded-lg border text-sm outline-none transition-colors focus:ring-2 focus:ring-emerald-200"
 
 /* ── Types ──────────────────────────────────────────── */
 
@@ -302,23 +306,26 @@ export default function AutomationForm({ ruleId }: Props) {
                     </div>
 
                     {form.triggerType === "ON_EVENT" && (
-                        <select
+                        <Select
                             value={(form.triggerValue.eventType as string) || ""}
-                            onChange={(e) =>
+                            onValueChange={(v) =>
                                 setForm((f) => ({
                                     ...f,
-                                    triggerValue: { eventType: e.target.value },
+                                    triggerValue: { eventType: v },
                                 }))
                             }
-                            className={selectStyle + " w-full"}
-                            style={inputColors}
                         >
-                            {EVENT_TYPES.map((t) => (
-                                <option key={t} value={t}>
-                                    {t.replace(/_/g, " ")}
-                                </option>
-                            ))}
-                        </select>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Seleccionar..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {EVENT_TYPES.map((t) => (
+                                    <SelectItem key={t} value={t}>
+                                        {t.replace(/_/g, " ")}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     )}
 
                     {form.triggerType === "ON_SCORE_THRESHOLD" && (
@@ -369,27 +376,33 @@ export default function AutomationForm({ ruleId }: Props) {
                     <div className="space-y-3">
                         {form.conditions.map((c, i) => (
                             <div key={i} className="flex items-center gap-3">
-                                <select
+                                <Select
                                     value={c.field}
-                                    onChange={(e) => updateCondition(i, "field", e.target.value)}
-                                    className={selectStyle}
-                                    style={inputColors}
+                                    onValueChange={(v) => updateCondition(i, "field", v)}
                                 >
-                                    {CONDITION_FIELDS.map((f) => (
-                                        <option key={f.value} value={f.value}>{f.label}</option>
-                                    ))}
-                                </select>
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Seleccionar..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {CONDITION_FIELDS.map((f) => (
+                                            <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
 
-                                <select
+                                <Select
                                     value={c.operator}
-                                    onChange={(e) => updateCondition(i, "operator", e.target.value)}
-                                    className={selectStyle}
-                                    style={inputColors}
+                                    onValueChange={(v) => updateCondition(i, "operator", v)}
                                 >
-                                    {OPERATORS.map((o) => (
-                                        <option key={o.value} value={o.value}>{o.label}</option>
-                                    ))}
-                                </select>
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Seleccionar..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {OPERATORS.map((o) => (
+                                            <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
 
                                 <input
                                     type="text"
@@ -432,16 +445,19 @@ export default function AutomationForm({ ruleId }: Props) {
                             const actionMeta = ACTION_TYPES.find((t) => t.value === a.type) || ACTION_TYPES[0]
                             return (
                                 <div key={i} className="flex items-center gap-3">
-                                    <select
+                                    <Select
                                         value={a.type}
-                                        onChange={(e) => updateAction(i, "type", e.target.value)}
-                                        className={selectStyle}
-                                        style={inputColors}
+                                        onValueChange={(v) => updateAction(i, "type", v)}
                                     >
-                                        {ACTION_TYPES.map((t) => (
-                                            <option key={t.value} value={t.value}>{t.label}</option>
-                                        ))}
-                                    </select>
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Seleccionar..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {ACTION_TYPES.map((t) => (
+                                                <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
 
                                     <input
                                         type="text"

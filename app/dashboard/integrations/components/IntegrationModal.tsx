@@ -3,6 +3,13 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { XMarkIcon, KeyIcon, CogIcon, ArrowPathIcon } from "@heroicons/react/24/outline"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface IntegrationModalProps {
   integration: any
@@ -123,12 +130,17 @@ export function IntegrationModal({ integration, isOpen, onClose }: IntegrationMo
                 <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
                   Frecuencia de sincronización
                 </label>
-                <select className="w-full px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                  <option value="realtime">Tiempo real</option>
-                  <option value="hourly">Cada hora</option>
-                  <option value="daily">Diario</option>
-                  <option value="weekly">Semanal</option>
-                </select>
+                <Select>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Seleccionar..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="realtime">Tiempo real</SelectItem>
+                    <SelectItem value="hourly">Cada hora</SelectItem>
+                    <SelectItem value="daily">Diario</SelectItem>
+                    <SelectItem value="weekly">Semanal</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>

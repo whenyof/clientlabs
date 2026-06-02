@@ -1,13 +1,20 @@
 "use client"
 
 import { useState } from "react"
-import { UsersIcon, TrashIcon, UserPlusIcon, ChevronDownIcon } from "@heroicons/react/24/outline"
+import { UsersIcon, TrashIcon, UserPlusIcon } from "@heroicons/react/24/outline"
 import { Settings } from "lucide-react"
 import { toast } from "sonner"
 import { useTeam } from "@/hooks/use-team"
 import { RolesInfoModal } from "@/components/team/RolesInfoModal"
 import { PermissionsModal } from "./PermissionsModal"
 import type { TeamRole } from "@prisma/client"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 const PLAN_LABELS: Record<string, string> = {
   FREE: "Básico",
@@ -243,14 +250,18 @@ export function TeamMembers() {
 
             <div className="space-y-1">
               <label className="text-xs font-medium text-slate-600">Rol</label>
-              <select
+              <Select
                 value={inviteRole}
-                onChange={(e) => setInviteRole(e.target.value as "ADMIN" | "MEMBER")}
-                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-[#0B1F2A] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition-colors"
+                onValueChange={(v) => setInviteRole(v as "ADMIN" | "MEMBER")}
               >
-                <option value="MEMBER">Miembro</option>
-                <option value="ADMIN">Admin</option>
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Seleccionar..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="MEMBER">Miembro</SelectItem>
+                  <SelectItem value="ADMIN">Admin</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -328,18 +339,19 @@ export function TeamMembers() {
                   {/* Role badge */}
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {canModify && member.role !== "OWNER" ? (
-                      <div className="relative">
-                        <select
-                          value={member.role}
-                          onChange={(e) => handleChangeRole(member.id, e.target.value as "ADMIN" | "MEMBER")}
-                          disabled={changingRole === member.id}
-                          className={`appearance-none pr-6 pl-2.5 py-1 text-xs font-semibold rounded-md border cursor-pointer focus:outline-none ${getRoleBadge(member.role)} disabled:opacity-60`}
-                        >
-                          <option value="ADMIN">Admin</option>
-                          <option value="MEMBER">Miembro</option>
-                        </select>
-                        <ChevronDownIcon className="w-3 h-3 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none text-current opacity-60" />
-                      </div>
+                      <Select
+                        value={member.role}
+                        onValueChange={(v) => handleChangeRole(member.id, v as "ADMIN" | "MEMBER")}
+                        disabled={changingRole === member.id}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Seleccionar..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="ADMIN">Admin</SelectItem>
+                          <SelectItem value="MEMBER">Miembro</SelectItem>
+                        </SelectContent>
+                      </Select>
                     ) : (
                       <span
                         className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-md ${getRoleBadge(member.role)}`}

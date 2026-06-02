@@ -2,6 +2,13 @@
 
 import { useState, useEffect } from "react"
 import { Save, AlertCircle, CheckCircle2 } from "lucide-react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 const IVA_REGIMES = [
   { value: "GENERAL", label: "Régimen general" },
@@ -39,8 +46,11 @@ export default function ConfiguracionFiscalPage() {
       .finally(() => setLoading(false))
   }, [])
 
-  const set = (key: keyof Perfil) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+  const set = (key: keyof Perfil) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setPerfil((p) => ({ ...p, [key]: e.target.value }))
+
+  const setField = (key: keyof Perfil) => (value: string) =>
+    setPerfil((p) => ({ ...p, [key]: value }))
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -184,15 +194,19 @@ export default function ConfiguracionFiscalPage() {
           <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Datos fiscales</p>
           <div>
             <label className="block text-[12px] font-medium text-slate-700 mb-1.5">Régimen de IVA</label>
-            <select
+            <Select
               value={perfil.ivaRegime ?? "GENERAL"}
-              onChange={set("ivaRegime")}
-              className="w-full h-9 rounded-lg border border-slate-200 px-3 text-[13px] text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#0F766E]/40 focus:border-[#0F766E]"
+              onValueChange={setField("ivaRegime")}
             >
-              {IVA_REGIMES.map((r) => (
-                <option key={r.value} value={r.value}>{r.label}</option>
-              ))}
-            </select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Seleccionar..." />
+              </SelectTrigger>
+              <SelectContent>
+                {IVA_REGIMES.map((r) => (
+                  <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <label className="block text-[12px] font-medium text-slate-700 mb-1.5">Epígrafe IAE</label>

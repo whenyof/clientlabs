@@ -16,6 +16,13 @@ import {
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { detectarAnomalia } from "@/lib/billing/detectarAnomalia"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 type Gasto = {
   id: string
@@ -314,18 +321,21 @@ function NuevoGastoModal({
               <label className="text-[11px] font-semibold text-slate-600 uppercase tracking-wider block mb-1.5">
                 Categoria
               </label>
-              <select
+              <Select
                 value={form.categoria}
-                onChange={(e) => setForm((f) => ({ ...f, categoria: e.target.value }))}
-                className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-[#0F766E] bg-white"
+                onValueChange={(v) => setForm((f) => ({ ...f, categoria: v }))}
               >
-                <option value="">Sin categorizar</option>
-                {CATEGORIAS.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Sin categorizar" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORIAS.map((c) => (
+                    <SelectItem key={c.value} value={c.value}>
+                      {c.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -365,16 +375,20 @@ function NuevoGastoModal({
               <label className="text-[11px] font-semibold text-slate-600 uppercase tracking-wider block mb-1.5">
                 IVA (%)
               </label>
-              <select
+              <Select
                 value={form.ivaRate}
-                onChange={(e) => setForm((f) => ({ ...f, ivaRate: e.target.value }))}
-                className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-[#0F766E] bg-white"
+                onValueChange={(v) => setForm((f) => ({ ...f, ivaRate: v }))}
               >
-                <option value="0">0%</option>
-                <option value="4">4% (superreducido)</option>
-                <option value="10">10% (reducido)</option>
-                <option value="21">21% (general)</option>
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Seleccionar..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">0%</SelectItem>
+                  <SelectItem value="4">4% (superreducido)</SelectItem>
+                  <SelectItem value="10">10% (reducido)</SelectItem>
+                  <SelectItem value="21">21% (general)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

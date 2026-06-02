@@ -4,6 +4,13 @@ import { useState } from "react"
 import { XMarkIcon, MagnifyingGlassIcon, FunnelIcon } from "@heroicons/react/24/outline"
 import { motion, AnimatePresence } from "framer-motion"
 import type { AutomationLog } from "../mock"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface LogsPanelProps {
   onClose: () => void
@@ -121,29 +128,31 @@ export function LogsPanel({ onClose }: LogsPanelProps) {
                 </div>
 
                 <div>
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                  >
-                    <option value="all">Todos los estados</option>
-                    <option value="success">Éxito</option>
-                    <option value="error">Error</option>
-                    <option value="running">Ejecutándose</option>
-                  </select>
+                  <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v)}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Todos los estados" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos los estados</SelectItem>
+                      <SelectItem value="success">Éxito</SelectItem>
+                      <SelectItem value="error">Error</SelectItem>
+                      <SelectItem value="running">Ejecutándose</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div>
-                  <select
-                    value={automationFilter}
-                    onChange={(e) => setAutomationFilter(e.target.value)}
-                    className="px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                  >
-                    <option value="all">Todas las automatizaciones</option>
-                    <option value="lead-whatsapp-email">Lead → WhatsApp + Email</option>
-                    <option value="client-invoice-contract">Cliente → Factura + Contrato</option>
-                    <option value="abandoned-cart-reminder">Carrito Abandonado</option>
-                  </select>
+                  <Select value={automationFilter} onValueChange={(v) => setAutomationFilter(v)}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Todas las automatizaciones" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas las automatizaciones</SelectItem>
+                      <SelectItem value="lead-whatsapp-email">Lead → WhatsApp + Email</SelectItem>
+                      <SelectItem value="client-invoice-contract">Cliente → Factura + Contrato</SelectItem>
+                      <SelectItem value="abandoned-cart-reminder">Carrito Abandonado</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>

@@ -1,8 +1,15 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import { X, Plus, Trash2, ChevronDown } from "lucide-react"
+import { X, Plus, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 type Client = { id: string; name: string | null; email?: string | null }
 type Product = { id: string; name: string; description: string | null; price: number; taxRate: number; unit: string | null }
@@ -184,19 +191,16 @@ export function NewQuoteModal({ open, onClose, onSuccess, defaultClientId }: Pro
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="sm:col-span-1">
               <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider mb-1.5">Cliente *</label>
-              <div className="relative">
-                <select
-                  value={clientId}
-                  onChange={e => setClientId(e.target.value)}
-                  className="w-full appearance-none text-[13px] border border-slate-200 rounded-lg px-3 py-2.5 text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30 focus:border-[#0F766E] pr-8"
-                >
-                  <option value="">Seleccionar cliente</option>
+              <Select value={clientId} onValueChange={(v) => setClientId(v)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Seleccionar cliente" />
+                </SelectTrigger>
+                <SelectContent>
                   {clients.map(c => (
-                    <option key={c.id} value={c.id}>{c.name ?? c.email ?? c.id}</option>
+                    <SelectItem key={c.id} value={c.id}>{c.name ?? c.email ?? c.id}</SelectItem>
                   ))}
-                </select>
-                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
-              </div>
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider mb-1.5">Fecha de emisión</label>
@@ -358,17 +362,17 @@ export function NewQuoteModal({ open, onClose, onSuccess, defaultClientId }: Pro
             {/* IRPF */}
             <div>
               <label className="block text-[11px] font-medium text-slate-500 uppercase tracking-wider mb-1.5">Retención IRPF</label>
-              <div className="relative w-60">
-                <select
-                  value={irpfRate}
-                  onChange={e => setIrpfRate(Number(e.target.value))}
-                  className="w-full appearance-none text-[13px] border border-slate-200 rounded-lg px-3 py-2.5 text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30 focus:border-[#0F766E] pr-8"
-                >
-                  <option value={0}>Sin retención (0%)</option>
-                  <option value={7}>7% — primeros 2 años de autónomo</option>
-                  <option value={15}>15% — retención estándar</option>
-                </select>
-                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+              <div className="w-60">
+                <Select value={String(irpfRate)} onValueChange={(v) => setIrpfRate(Number(v))}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Seleccionar retención" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="0">Sin retención (0%)</SelectItem>
+                    <SelectItem value="7">7% — primeros 2 años de autónomo</SelectItem>
+                    <SelectItem value="15">15% — retención estándar</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <p className="text-[11px] text-slate-400 mt-1">Se aplica a servicios profesionales. No aplica si vendes productos.</p>
             </div>

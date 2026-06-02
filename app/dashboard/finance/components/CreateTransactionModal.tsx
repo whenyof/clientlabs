@@ -3,6 +3,13 @@
 import { useState } from "react"
 import { X, ArrowUpCircle, ArrowDownCircle } from "lucide-react"
 import { transactionCategories, paymentMethods } from "../mock"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface CreateTransactionModalProps {
   isOpen: boolean
@@ -167,19 +174,18 @@ export function CreateTransactionModal({ isOpen, onClose, onSuccess }: CreateTra
               <label className="block text-xs font-medium text-[var(--text-secondary)] mb-2 uppercase tracking-wider">
                 Categoría
               </label>
-              <select
-                value={formData.category}
-                onChange={(e) => set("category", e.target.value)}
-                className="w-full px-3 py-2.5 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-emerald-500/60 text-sm"
-                required
-              >
-                <option value="">Seleccionar categoría</option>
-                {availableCategories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
+              <Select value={formData.category} onValueChange={(v) => set("category", v)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Seleccionar categoría" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableCategories.map((cat) => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Payment Method */}
@@ -187,19 +193,18 @@ export function CreateTransactionModal({ isOpen, onClose, onSuccess }: CreateTra
               <label className="block text-xs font-medium text-[var(--text-secondary)] mb-2 uppercase tracking-wider">
                 Método de pago
               </label>
-              <select
-                value={formData.paymentMethod}
-                onChange={(e) => set("paymentMethod", e.target.value)}
-                className="w-full px-3 py-2.5 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-emerald-500/60 text-sm"
-                required
-              >
-                <option value="">Seleccionar método</option>
-                {paymentMethods.map((m) => (
-                  <option key={m} value={m}>
-                    {m}
-                  </option>
-                ))}
-              </select>
+              <Select value={formData.paymentMethod} onValueChange={(v) => set("paymentMethod", v)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Seleccionar método" />
+                </SelectTrigger>
+                <SelectContent>
+                  {paymentMethods.map((m) => (
+                    <SelectItem key={m} value={m}>
+                      {m}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Date */}

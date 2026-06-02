@@ -5,6 +5,13 @@ import { X } from "lucide-react"
 import { useSectorConfig } from "@/hooks/useSectorConfig"
 import { ModalDocumentosTransaccion } from "@/components/finance/ModalDocumentosTransaccion"
 import type { SaleRecord, SaleStatus } from "./constants"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface CreateSaleModalProps {
   open: boolean
@@ -152,17 +159,18 @@ export function CreateSaleModal({ open, onClose, onCreate }: CreateSaleModalProp
           </label>
           <label className="space-y-1 text-sm text-[var(--text-secondary)]">
             {sl.table.state}
-            <select
-              value={estado}
-              onChange={(event) => setEstado(event.target.value as SaleStatus)}
-              className="w-full rounded-xl border border-[var(--border-subtle)] bg-transparent px-3 py-2 text-[var(--text-primary)] focus:border-emerald-500 focus:outline-none"
-            >
-              {STATUS_OPTIONS.map((status) => (
-                <option key={status} value={status}>
-                  {getStatusLabel(status, sl.status)}
-                </option>
-              ))}
-            </select>
+            <Select value={estado} onValueChange={(v) => setEstado(v as SaleStatus)}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Seleccionar..." />
+              </SelectTrigger>
+              <SelectContent>
+                {STATUS_OPTIONS.map((status) => (
+                  <SelectItem key={status} value={status}>
+                    {getStatusLabel(status, sl.status)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </label>
           <div className="space-y-1 text-sm text-[var(--text-secondary)]">
             {sl.table.origin}

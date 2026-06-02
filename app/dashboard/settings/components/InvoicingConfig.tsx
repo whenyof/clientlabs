@@ -4,6 +4,13 @@ import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { PencilIcon, CheckIcon, XMarkIcon } from "@heroicons/react/24/outline"
 import { toast } from "sonner"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface InvoicingData {
   iban: string
@@ -170,17 +177,21 @@ export function InvoicingConfig() {
           </div>
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-slate-700">Idioma de facturas</label>
-            <select
+            <Select
               value={form.invoiceLanguage}
-              onChange={(e) => setForm({ ...form, invoiceLanguage: e.target.value })}
+              onValueChange={(v) => setForm({ ...form, invoiceLanguage: v })}
               disabled={!isEditing}
-              className={inputClasses}
             >
-              <option value="es">Español</option>
-              <option value="en">English</option>
-              <option value="ca">Català</option>
-              <option value="eu">Euskera</option>
-            </select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Seleccionar..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="es">Español</SelectItem>
+                <SelectItem value="en">English</SelectItem>
+                <SelectItem value="ca">Català</SelectItem>
+                <SelectItem value="eu">Euskera</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>

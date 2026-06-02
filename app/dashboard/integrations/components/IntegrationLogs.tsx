@@ -11,6 +11,13 @@ import {
   ClockIcon,
   FunnelIcon
 } from "@heroicons/react/24/outline"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 export function IntegrationLogs() {
   const [filter, setFilter] = useState<'all' | 'success' | 'error'>('all')
@@ -71,15 +78,16 @@ export function IntegrationLogs() {
         </div>
 
         <div className="flex items-center gap-3">
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value as typeof filter)}
-            className="px-4 py-2 bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
-          >
-            <option value="all">Todos</option>
-            <option value="success">Exitosos</option>
-            <option value="error">Errores</option>
-          </select>
+          <Select value={filter} onValueChange={(v) => setFilter(v as typeof filter)}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Seleccionar..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
+              <SelectItem value="success">Exitosos</SelectItem>
+              <SelectItem value="error">Errores</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

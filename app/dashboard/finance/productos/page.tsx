@@ -4,6 +4,13 @@ import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { Plus, Package, Pencil, Trash2, Search, Tag, Layers } from "lucide-react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface Product {
   id: string
@@ -101,9 +108,14 @@ function ProductModal({
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <div>
               <label style={labelStyle}>Unidad</label>
-              <select style={inputStyle} value={form.unit} onChange={(e) => set("unit", e.target.value)}>
-                {UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
-              </select>
+              <Select value={form.unit} onValueChange={(v) => set("unit", v)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Seleccionar..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {UNITS.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <label style={labelStyle}>Categoría</label>

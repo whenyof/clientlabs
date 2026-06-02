@@ -5,6 +5,13 @@ import {
   ChevronRight, Trash2, ZoomIn, FileCheck,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface Documento {
   id: string
@@ -375,15 +382,21 @@ export function ModalDocumentosTransaccion({
                       placeholder="Importe €"
                       className="px-3 py-2 border border-slate-200 rounded-xl text-[12px] outline-none bg-white focus:border-[#0F766E]"
                     />
-                    <select
-                      value={doc.estadoPago}
-                      onChange={(e) => actualizarCampo(doc.id, "estadoPago", e.target.value)}
-                      className="col-span-2 px-3 py-2 border border-slate-200 rounded-xl text-[12px] outline-none bg-white focus:border-[#0F766E]"
-                    >
-                      <option value="pendiente">Pendiente de cobro</option>
-                      <option value="pagada">{tipo === "venta" ? "Cobrada" : "Pagada"}</option>
-                      <option value="vencida">Vencida</option>
-                    </select>
+                    <div className="col-span-2">
+                      <Select
+                        value={doc.estadoPago}
+                        onValueChange={(v) => actualizarCampo(doc.id, "estadoPago", v)}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Seleccionar..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pendiente">Pendiente de cobro</SelectItem>
+                          <SelectItem value="pagada">{tipo === "venta" ? "Cobrada" : "Pagada"}</SelectItem>
+                          <SelectItem value="vencida">Vencida</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </div>
               )}

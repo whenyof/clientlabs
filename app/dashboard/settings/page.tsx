@@ -16,6 +16,9 @@ import { DangerZone } from "./components/DangerZone"
 import { ProductCatalog } from "./components/ProductCatalog"
 import { ActivityLogSection } from "./components/ActivityLogSection"
 import { InvoicingSettings } from "./components/InvoicingSettings"
+import { InvoicingConfig } from "./components/InvoicingConfig"
+import { InvoiceTemplates } from "./components/InvoiceTemplates"
+import { VerifactuSettings } from "./components/VerifactuSettings"
 import { SubscriptionSettings } from "./components/SubscriptionSettings"
 
 // ─── Design tokens ─────────────────────────────────────────────────────────
@@ -33,7 +36,7 @@ const sections: Record<string, React.ComponentType> = {
   account:       ProfileForm,
   company:       CompanySettings,
   team:          TeamMembers,
-  invoicing:     InvoicingSettings,
+  invoicing:     InvoicingConfig,
   subscription:  SubscriptionSettings,
   notifications: NotificationSettings,
   limits:        UsageLimits,
@@ -45,8 +48,8 @@ const sections: Record<string, React.ComponentType> = {
   danger:        DangerZone,
   // Aliases
   profile:          ProfileForm,
-  verifactu:        InvoicingSettings,
-  templates:        InvoicingSettings,
+  verifactu:        VerifactuSettings,
+  templates:        InvoiceTemplates,
   "import-export":  InvoicingSettings,
   plans:            SubscriptionSettings,
   billing:          SubscriptionSettings,

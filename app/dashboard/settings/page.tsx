@@ -44,11 +44,13 @@ const sections: Record<string, React.ComponentType> = {
   catalog:       ProductCatalog,
   danger:        DangerZone,
   // Aliases
-  profile:   ProfileForm,
-  verifactu: InvoicingSettings,
-  plans:     SubscriptionSettings,
-  billing:   SubscriptionSettings,
-  usage:     UsageLimits,
+  profile:          ProfileForm,
+  verifactu:        InvoicingSettings,
+  templates:        InvoicingSettings,
+  "import-export":  InvoicingSettings,
+  plans:            SubscriptionSettings,
+  billing:          SubscriptionSettings,
+  usage:            UsageLimits,
 }
 
 // ─── Left nav structure ─────────────────────────────────────────────────────
@@ -57,17 +59,30 @@ const NAV_GROUPS = [
     title: "Workspace",
     items: [
       { id: "company",      label: "General" },
-      { id: "appearance",   label: "Marca y apariencia" },
       { id: "team",         label: "Equipo y permisos" },
       { id: "subscription", label: "Plan y facturación" },
     ],
   },
   {
-    title: "Datos",
+    title: "Facturación",
     items: [
-      { id: "catalog",  label: "Mis productos y servicios" },
-      { id: "invoicing",label: "Importar / Exportar" },
-      { id: "limits",   label: "Backups" },
+      { id: "invoicing",  label: "Configuración de facturación" },
+      { id: "templates",  label: "Plantillas de factura" },
+      { id: "verifactu",  label: "Verifactu" },
+    ],
+  },
+  {
+    title: "Apariencia",
+    items: [
+      { id: "appearance", label: "Marca y apariencia" },
+    ],
+  },
+  {
+    title: "Productos y datos",
+    items: [
+      { id: "catalog",        label: "Mis productos y servicios" },
+      { id: "import-export",  label: "Importar / Exportar" },
+      { id: "limits",         label: "Backups" },
     ],
   },
   {
@@ -80,16 +95,15 @@ const NAV_GROUPS = [
     title: "Seguridad",
     items: [
       { id: "security",    label: "Doble factor (2FA)", warn: true },
-      { id: "permissions", label: "SSO · SAML" },
+      { id: "permissions", label: "SSO · SAML", soon: true },
       { id: "activity",    label: "Auditoría · registro" },
     ],
   },
   {
     title: "Cuenta",
     items: [
-      { id: "account",    label: "Mi perfil" },
-      { id: "appearance", label: "Preferencias" },
-      { id: "danger",     label: "Zona de peligro", danger: true },
+      { id: "account", label: "Mi perfil" },
+      { id: "danger",  label: "Zona de peligro", danger: true },
     ],
   },
 ]
@@ -140,7 +154,7 @@ function SettingsContent() {
                 {group.title}
               </div>
               {group.items.map(item => {
-                const isActive = activeSection === item.id || (activeSection === "account" && item.id === "account")
+                const isActive = activeSection === item.id
                 const itemColor = (item as { danger?: boolean }).danger ? C.red : (item as { warn?: boolean }).warn ? C.warn : C.ink2
                 return (
                   <button
@@ -161,6 +175,9 @@ function SettingsContent() {
                     <span>{item.label}</span>
                     {(item as { warn?: boolean }).warn && (
                       <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 9, padding: "1px 5px", borderRadius: 99, background: C.warnSoft, color: C.warn, fontWeight: 600, letterSpacing: "0.04em" }}>PDTE.</span>
+                    )}
+                    {(item as { soon?: boolean }).soon && (
+                      <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 9, padding: "1px 5px", borderRadius: 99, background: C.bg3, color: C.ink4, fontWeight: 600, letterSpacing: "0.04em" }}>PRONTO</span>
                     )}
                   </button>
                 )

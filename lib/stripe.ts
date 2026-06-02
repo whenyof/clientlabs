@@ -1,8 +1,24 @@
 import Stripe from "stripe"
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2026-02-25.clover",
-  typescript: true,
+let _instance: Stripe | null = null
+
+function getInstance(): Stripe {
+  if (!_instance) {
+    _instance = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      apiVersion: "2026-02-25.clover",
+      typescript: true,
+    })
+  }
+  return _instance
+}
+
+// Lazy proxy: defers new Stripe() until first property access (at request time, not module evaluation)
+export const stripe = new Proxy({} as Stripe, {
+  get(_, prop: string | symbol) {
+    const instance = getInstance()
+    const val = Reflect.get(instance, prop)
+    return typeof val === "function" ? val.bind(instance) : val
+  },
 })
 
 export const PRICE_IDS = {

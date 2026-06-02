@@ -1,12 +1,12 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { signIn, useSession } from "next-auth/react"
+import { useSession } from "next-auth/react"
 import { ShieldCheckIcon } from "@heroicons/react/24/outline"
 import { toast } from "sonner"
 
-export default function TwoFactorVerifyPage() {
+function TwoFactorVerifyContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const raw = searchParams.get("callbackUrl") ?? "/dashboard"
@@ -94,5 +94,17 @@ export default function TwoFactorVerifyPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function TwoFactorVerifyPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1FA97A]" />
+      </div>
+    }>
+      <TwoFactorVerifyContent />
+    </Suspense>
   )
 }

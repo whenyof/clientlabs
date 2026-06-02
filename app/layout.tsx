@@ -114,8 +114,18 @@ export const metadata: Metadata = {
 const themeScript = `
 (function() {
   try {
-    var theme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', theme);
+    var p = localStorage.getItem('cl_appearance');
+    var prefs = p ? JSON.parse(p) : {};
+    document.documentElement.setAttribute('data-theme', 'light');
+    if (prefs.accentColor) {
+      document.documentElement.style.setProperty('--accent', prefs.accentColor);
+      document.documentElement.style.setProperty('--brand-500', prefs.accentColor);
+    }
+    if (prefs.highDensity) document.documentElement.classList.add('density-high');
+    if (prefs.animationsEnabled === false) document.documentElement.classList.add('no-animations');
+    if (prefs.dateFormat) localStorage.setItem('cl_date_format', prefs.dateFormat);
+    if (prefs.currency) localStorage.setItem('cl_currency', prefs.currency);
+    if (prefs.itemsPerPage) localStorage.setItem('cl_items_per_page', String(prefs.itemsPerPage));
   } catch (e) {}
 })();
 `

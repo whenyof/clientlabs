@@ -3,7 +3,6 @@
 import { useSearchParams, useRouter } from "next/navigation"
 import { Suspense } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { RefreshCw, Save } from "lucide-react"
 import { ProfileForm } from "./components/ProfileForm"
 import { SecuritySettings } from "./components/SecuritySettings"
 import { CompanySettings } from "./components/CompanySettings"
@@ -138,14 +137,7 @@ function SettingsContent() {
             <span>Última modificación · hace 2 min</span>
           </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <button style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: C.bg, border: `1px solid ${C.line}`, color: C.ink2, fontWeight: 550, fontSize: 12.5, cursor: "pointer" }}>
-            <RefreshCw size={12} strokeWidth={2} />Descartar cambios
-          </button>
-          <button style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: C.ink, color: "white", fontWeight: 550, fontSize: 12.5, border: "none", cursor: "pointer" }}>
-            <Save size={12} strokeWidth={2} />Guardar
-          </button>
-        </div>
+        <span style={{ fontSize: 12, color: C.ink3 }}>Los cambios se guardan automáticamente</span>
       </div>
 
       {/* ── LAYOUT: LEFT NAV + CONTENT ────────────────────────── */}

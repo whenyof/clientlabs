@@ -909,6 +909,7 @@ model User {
   lastActiveAt           DateTime?
   monthlyRevenueTarget   Int?
   notificationPrefs      Json?
+  uiPreferences          Json?
   onboardingStep         Int                     @default(0)
   activationChecklist    Json?
   firstClientAt          DateTime?

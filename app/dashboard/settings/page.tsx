@@ -15,8 +15,8 @@ import { AppearanceSettings } from "./components/AppearanceSettings"
 import { DangerZone } from "./components/DangerZone"
 import { ProductCatalog } from "./components/ProductCatalog"
 import { ActivityLogSection } from "./components/ActivityLogSection"
-import { InvoicingSettings } from "./components/InvoicingSettings"
 import { InvoicingConfig } from "./components/InvoicingConfig"
+import { ImportExportPanel } from "./components/ImportExportPanel"
 import { InvoiceTemplates } from "./components/InvoiceTemplates"
 import { VerifactuSettings } from "./components/VerifactuSettings"
 import { SubscriptionSettings } from "./components/SubscriptionSettings"
@@ -50,7 +50,7 @@ const sections: Record<string, React.ComponentType> = {
   profile:          ProfileForm,
   verifactu:        VerifactuSettings,
   templates:        InvoiceTemplates,
-  "import-export":  InvoicingSettings,
+  "import-export":  ImportExportPanel,
   plans:            SubscriptionSettings,
   billing:          SubscriptionSettings,
   usage:            UsageLimits,

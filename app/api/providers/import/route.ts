@@ -4,19 +4,37 @@ import { z } from "zod"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import type { ProviderDependency } from "@prisma/client"
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024
 const MAX_ROWS = 5_000
 
+const DEP_MAP: Record<string, ProviderDependency> = {
+  bajo: "LOW",
+  medio: "MEDIUM",
+  alto: "HIGH",
+  crítico: "CRITICAL",
+  critico: "CRITICAL",
+}
+
 const importRowSchema = z.object({
   nombre: z.string().min(1, "nombre es obligatorio").max(200).trim(),
-  email: z.string().max(200).trim().optional().default(""),
-  telefono: z.string().max(50).trim().optional().default(""),
+  tipo: z.string().max(100).trim().optional().default(""),
+  email_contacto: z.string().max(200).trim().optional().default(""),
+  telefono_contacto: z.string().max(50).trim().optional().default(""),
+  web: z.string().max(300).trim().optional().default(""),
   notas: z.string().max(2000).trim().optional().default(""),
-  origen: z.string().max(100).trim().optional().default("import"),
+  coste_mensual: z.preprocess(
+    (v) => {
+      const n = parseFloat(String(v ?? "0").replace(",", "."))
+      return isNaN(n) ? 0 : n
+    },
+    z.number().min(0).max(999999)
+  ),
+  nivel_dependencia: z.string().max(50).trim().optional().default("bajo"),
 })
 
-const KNOWN_KEYS = ["nombre", "email", "telefono", "notas", "origen"] as const
+const KNOWN_KEYS = ["nombre", "tipo", "email_contacto", "telefono_contacto", "web", "notas", "coste_mensual", "nivel_dependencia"] as const
 
 function sanitizeRow(raw: unknown): Record<string, string> {
   const r = raw as Record<string, unknown>
@@ -80,55 +98,24 @@ export async function POST(req: NextRequest) {
 
     if (validRows.length === 0) return NextResponse.json({ imported: 0, updated: 0, errors })
 
-    const emails = validRows.filter(r => r.data.email).map(r => r.data.email as string)
-    const existing = await prisma.client.findMany({
-      where: { userId: session.user.id, email: { in: emails } },
-      select: { id: true, email: true },
+    await prisma.provider.createMany({
+      data: validRows.map(({ data: d }) => ({
+        userId: session.user.id,
+        name: d.nombre,
+        type: d.tipo || null,
+        contactEmail: d.email_contacto || null,
+        contactPhone: d.telefono_contacto || null,
+        website: d.web || null,
+        notes: d.notas || null,
+        monthlyCost: d.coste_mensual || null,
+        dependencyLevel: DEP_MAP[d.nivel_dependencia.toLowerCase()] ?? "LOW",
+        status: "ACTIVE",
+      })),
     })
-    const existingByEmail = new Map(existing.map(c => [c.email!, c.id]))
 
-    const toCreate: ValidRow[] = []
-    const toUpdate: { id: string; data: ValidRow }[] = []
-
-    for (const { data } of validRows) {
-      const existingId = data.email ? existingByEmail.get(data.email) : undefined
-      if (existingId) {
-        toUpdate.push({ id: existingId, data })
-      } else {
-        toCreate.push(data)
-      }
-    }
-
-    await prisma.$transaction([
-      ...(toCreate.length > 0
-        ? [prisma.client.createMany({
-            data: toCreate.map(d => ({
-              userId: session.user.id,
-              name: d.nombre,
-              email: d.email || null,
-              phone: d.telefono || null,
-              notes: d.notas || null,
-              source: d.origen || "import",
-              status: "ACTIVE",
-              totalSpent: 0,
-            })),
-          })]
-        : []),
-      ...toUpdate.map(({ id, data: d }) =>
-        prisma.client.update({
-          where: { id },
-          data: {
-            phone: d.telefono || null,
-            notes: d.notas || null,
-            source: d.origen || "import",
-          },
-        })
-      ),
-    ])
-
-    return NextResponse.json({ imported: toCreate.length, updated: toUpdate.length, errors })
+    return NextResponse.json({ imported: validRows.length, updated: 0, errors })
   } catch (err) {
-    console.error("[clients/import]", err instanceof Error ? err.message : err)
+    console.error("[providers/import]", err instanceof Error ? err.message : err)
     return NextResponse.json({ error: "Error al procesar el archivo" }, { status: 500 })
   }
 }

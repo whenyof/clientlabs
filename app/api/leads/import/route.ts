@@ -4,19 +4,40 @@ import { z } from "zod"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import type { LeadStatus, LeadTemp } from "@prisma/client"
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024
 const MAX_ROWS = 5_000
 
+const STATUS_MAP: Record<string, LeadStatus> = {
+  nuevo: "NEW",
+  contactado: "CONTACTED",
+  interesado: "INTERESTED",
+  cualificado: "QUALIFIED",
+  calificado: "QUALIFIED",
+  estancado: "STALLED",
+  perdido: "LOST",
+  convertido: "CONVERTED",
+}
+
+const TEMP_MAP: Record<string, LeadTemp> = {
+  caliente: "HOT",
+  tibio: "WARM",
+  frio: "COLD",
+  frío: "COLD",
+}
+
 const importRowSchema = z.object({
-  nombre: z.string().min(1, "nombre es obligatorio").max(200).trim(),
+  nombre: z.string().max(200).trim().optional().default(""),
   email: z.string().max(200).trim().optional().default(""),
   telefono: z.string().max(50).trim().optional().default(""),
-  notas: z.string().max(2000).trim().optional().default(""),
+  mensaje: z.string().max(2000).trim().optional().default(""),
   origen: z.string().max(100).trim().optional().default("import"),
+  estado: z.string().max(50).trim().optional().default("nuevo"),
+  temperatura: z.string().max(50).trim().optional().default(""),
 })
 
-const KNOWN_KEYS = ["nombre", "email", "telefono", "notas", "origen"] as const
+const KNOWN_KEYS = ["nombre", "email", "telefono", "mensaje", "origen", "estado", "temperatura"] as const
 
 function sanitizeRow(raw: unknown): Record<string, string> {
   const r = raw as Record<string, unknown>
@@ -70,6 +91,10 @@ export async function POST(req: NextRequest) {
 
     for (let i = 0; i < rawRows.length; i++) {
       const clean = sanitizeRow(rawRows[i])
+      if (!clean.nombre && !clean.email) {
+        errors.push({ row: i + 2, message: "Se requiere nombre o email" })
+        continue
+      }
       const parsed = importRowSchema.safeParse(clean)
       if (!parsed.success) {
         errors.push({ row: i + 2, message: parsed.error.issues[0]?.message ?? "Datos inválidos" })
@@ -81,11 +106,11 @@ export async function POST(req: NextRequest) {
     if (validRows.length === 0) return NextResponse.json({ imported: 0, updated: 0, errors })
 
     const emails = validRows.filter(r => r.data.email).map(r => r.data.email as string)
-    const existing = await prisma.client.findMany({
+    const existing = await prisma.lead.findMany({
       where: { userId: session.user.id, email: { in: emails } },
       select: { id: true, email: true },
     })
-    const existingByEmail = new Map(existing.map(c => [c.email!, c.id]))
+    const existingByEmail = new Map(existing.map(l => [l.email!, l.id]))
 
     const toCreate: ValidRow[] = []
     const toUpdate: { id: string; data: ValidRow }[] = []
@@ -101,26 +126,31 @@ export async function POST(req: NextRequest) {
 
     await prisma.$transaction([
       ...(toCreate.length > 0
-        ? [prisma.client.createMany({
+        ? [prisma.lead.createMany({
             data: toCreate.map(d => ({
               userId: session.user.id,
-              name: d.nombre,
+              name: d.nombre || null,
               email: d.email || null,
               phone: d.telefono || null,
-              notes: d.notas || null,
+              message: d.mensaje || null,
               source: d.origen || "import",
-              status: "ACTIVE",
-              totalSpent: 0,
+              status: STATUS_MAP[d.estado.toLowerCase()] ?? "NEW",
+              leadStatus: STATUS_MAP[d.estado.toLowerCase()] ?? "NEW",
+              temperature: (d.temperatura ? TEMP_MAP[d.temperatura.toLowerCase()] : null) ?? null,
             })),
           })]
         : []),
       ...toUpdate.map(({ id, data: d }) =>
-        prisma.client.update({
+        prisma.lead.update({
           where: { id },
           data: {
-            phone: d.telefono || null,
-            notes: d.notas || null,
-            source: d.origen || "import",
+            name: d.nombre || undefined,
+            phone: d.telefono || undefined,
+            message: d.mensaje || undefined,
+            source: d.origen || undefined,
+            status: STATUS_MAP[d.estado.toLowerCase()] ?? undefined,
+            leadStatus: STATUS_MAP[d.estado.toLowerCase()] ?? undefined,
+            temperature: d.temperatura ? (TEMP_MAP[d.temperatura.toLowerCase()] ?? undefined) : undefined,
           },
         })
       ),
@@ -128,7 +158,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ imported: toCreate.length, updated: toUpdate.length, errors })
   } catch (err) {
-    console.error("[clients/import]", err instanceof Error ? err.message : err)
+    console.error("[leads/import]", err instanceof Error ? err.message : err)
     return NextResponse.json({ error: "Error al procesar el archivo" }, { status: 500 })
   }
 }

@@ -119,21 +119,25 @@ export function DashboardHeader() {
           {shortcutKeys && (
             <span style={{ display: "flex", alignItems: "center", gap: 2, marginLeft: "auto" }}>
               {shortcutKeys.map((k, i) => (
-                <kbd
-                  key={i}
-                  style={{
-                    fontFamily: "ui-monospace, monospace",
-                    fontSize: 10,
-                    padding: "1px 5px",
-                    background: "white",
-                    border: "1px solid #e8e8e8",
-                    borderRadius: 3,
-                    color: "#737373",
-                    fontWeight: 500,
-                  }}
+                <span key={i} style={{ display: "contents" }}>
+                  {i > 0 && (
+                    <span style={{ fontSize: 9, color: "#a3a3a3", lineHeight: 1 }}>+</span>
+                  )}
+                  <kbd
+                    style={{
+                      fontFamily: "ui-monospace, monospace",
+                      fontSize: 10,
+                      padding: "1px 5px",
+                      background: "white",
+                      border: "1px solid #e8e8e8",
+                      borderRadius: 3,
+                      color: "#737373",
+                      fontWeight: 500,
+                    }}
                 >
                   {k}
                 </kbd>
+                </span>
               ))}
             </span>
           )}

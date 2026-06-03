@@ -102,7 +102,7 @@ export default function DashboardShell({
                         className="flex-1 overflow-y-auto overflow-x-hidden relative bg-[var(--bg-card)]"
                         data-debug="shell-main"
                     >
-                        <div className="mx-auto w-full max-w-[1400px] flex-1 flex flex-col px-4 sm:px-7 py-4 sm:py-6 pb-20">
+                        <div className="w-full flex-1 flex flex-col px-4 sm:px-7 py-4 sm:py-6 pb-20">
                             {children}
                         </div>
                     </main>

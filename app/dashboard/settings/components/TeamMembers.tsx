@@ -3,11 +3,13 @@
 import { useState } from "react"
 import { useSession } from "next-auth/react"
 import { UsersIcon, TrashIcon, UserPlusIcon } from "@heroicons/react/24/outline"
-import { Settings, Shield, User, Eye } from "lucide-react"
+import { Settings, Shield, User, Eye, Briefcase, TrendingUp } from "lucide-react"
 import { toast } from "sonner"
 import { useTeam } from "@/hooks/use-team"
 import { RolesInfoModal } from "@/components/team/RolesInfoModal"
 import { PermissionsModal } from "./PermissionsModal"
+import { RolePermissionsTable } from "./RolePermissionsTable"
+import { ROLE_META } from "@/lib/role-permissions"
 import type { TeamRole } from "@prisma/client"
 import {
   Select,
@@ -25,43 +27,16 @@ const PLAN_LABELS: Record<string, string> = {
   BUSINESS: "Negocio",
 }
 
-const ROLE_OPTIONS: {
-  value: "ADMIN" | "MEMBER"
-  label: string
-  description: string
+const INVITABLE_ROLES: {
+  value: "ADMIN" | "MANAGER" | "SALES" | "MEMBER" | "VIEWER"
   icon: React.ElementType
-  badge: string
-  badgeColor: string
 }[] = [
-  {
-    value: "ADMIN",
-    label: "Administrador",
-    description: "Acceso total. Gestiona leads, clientes, facturas, documentos y ajustes. No puede gestionar facturación del SaaS.",
-    icon: Shield,
-    badge: "bg-blue-100 text-blue-700 border border-blue-200",
-    badgeColor: "text-blue-600",
-  },
-  {
-    value: "MEMBER",
-    label: "Miembro",
-    description: "Acceso estándar. Puede ver y crear leads, clientes y documentos. Sin acceso a eliminar ni a ajustes.",
-    icon: User,
-    badge: "bg-slate-100 text-slate-600 border border-slate-200",
-    badgeColor: "text-slate-500",
-  },
+  { value: "ADMIN",   icon: Shield },
+  { value: "MANAGER", icon: Briefcase },
+  { value: "SALES",   icon: TrendingUp },
+  { value: "MEMBER",  icon: User },
+  { value: "VIEWER",  icon: Eye },
 ]
-
-function getRoleBadge(role: TeamRole) {
-  if (role === "OWNER") return "bg-emerald-100 text-emerald-700 border border-emerald-200"
-  if (role === "ADMIN") return "bg-blue-100 text-blue-700 border border-blue-200"
-  return "bg-slate-100 text-slate-600 border border-slate-200"
-}
-
-function getRoleLabel(role: TeamRole) {
-  if (role === "OWNER") return "Propietario"
-  if (role === "ADMIN") return "Administrador"
-  return "Miembro"
-}
 
 function getInitials(name?: string | null, email?: string | null) {
   if (name) {
@@ -72,10 +47,16 @@ function getInitials(name?: string | null, email?: string | null) {
   return (email ?? "?").slice(0, 2).toUpperCase()
 }
 
-function getAvatarColor(role: TeamRole) {
-  if (role === "OWNER") return "bg-emerald-500"
-  if (role === "ADMIN") return "bg-blue-500"
-  return "bg-slate-400"
+function getAvatarBg(role: TeamRole) {
+  const colors: Record<string, string> = {
+    OWNER: "bg-yellow-500",
+    ADMIN: "bg-red-500",
+    MANAGER: "bg-blue-500",
+    SALES: "bg-green-500",
+    MEMBER: "bg-slate-400",
+    VIEWER: "bg-purple-500",
+  }
+  return colors[role] ?? "bg-slate-400"
 }
 
 interface Member {
@@ -93,7 +74,7 @@ export function TeamMembers() {
   const { members, myRole, plan, limit, isAdmin, isOwner, mutate, isLoading } = useTeam()
   const [showInviteForm, setShowInviteForm] = useState(false)
   const [inviteEmail, setInviteEmail] = useState("")
-  const [inviteRole, setInviteRole] = useState<"ADMIN" | "MEMBER">("MEMBER")
+  const [inviteRole, setInviteRole] = useState<"ADMIN" | "MANAGER" | "SALES" | "MEMBER" | "VIEWER">("MEMBER")
   const [inviting, setInviting] = useState(false)
   const [changingRole, setChangingRole] = useState<string | null>(null)
   const [permsMember, setPermsMember] = useState<Member | null>(null)
@@ -130,7 +111,7 @@ export function TeamMembers() {
     }
   }
 
-  const handleChangeRole = async (memberId: string, newRole: "ADMIN" | "MEMBER") => {
+  const handleChangeRole = async (memberId: string, newRole: string) => {
     setChangingRole(memberId)
     try {
       const res = await fetch(`/api/settings/team/${memberId}`, {
@@ -276,16 +257,16 @@ export function TeamMembers() {
             />
           </div>
 
-          {/* Role selector — cards */}
+          {/* Role cards */}
           <div className="space-y-1">
             <label className="text-xs font-medium text-slate-600">Rol</label>
-            <div className="space-y-2 mt-1">
-              {ROLE_OPTIONS.map((opt) => {
-                const Icon = opt.icon
-                const selected = inviteRole === opt.value
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
+              {INVITABLE_ROLES.map(({ value, icon: Icon }) => {
+                const meta = ROLE_META[value]
+                const selected = inviteRole === value
                 return (
                   <label
-                    key={opt.value}
+                    key={value}
                     className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
                       selected
                         ? "border-[var(--accent)] bg-emerald-50/40"
@@ -295,20 +276,17 @@ export function TeamMembers() {
                     <input
                       type="radio"
                       name="invite-role"
-                      value={opt.value}
+                      value={value}
                       checked={selected}
-                      onChange={() => setInviteRole(opt.value)}
+                      onChange={() => setInviteRole(value)}
                       className="mt-0.5 accent-[var(--accent)]"
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <Icon className={`w-4 h-4 shrink-0 ${opt.badgeColor}`} />
-                        <span className="text-sm font-medium text-[#0B1F2A]">{opt.label}</span>
-                        <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${opt.badge}`}>
-                          {opt.value}
-                        </span>
+                        <Icon className="w-3.5 h-3.5 shrink-0" style={{ color: meta.color }} />
+                        <span className="text-sm font-medium text-[#0B1F2A]">{meta.label}</span>
                       </div>
-                      <p className="text-xs text-slate-500 mt-0.5">{opt.description}</p>
+                      <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">{meta.description}</p>
                     </div>
                   </label>
                 )
@@ -353,6 +331,7 @@ export function TeamMembers() {
             {(members as Member[]).map((member) => {
               const isMe = member.userId === session?.user?.id
               const canModify = !isMe && (isOwner || (isAdmin && member.role !== "OWNER"))
+              const meta = ROLE_META[member.role]
 
               return (
                 <div
@@ -368,9 +347,7 @@ export function TeamMembers() {
                         className="w-9 h-9 rounded-full object-cover flex-shrink-0"
                       />
                     ) : (
-                      <div
-                        className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0 ${getAvatarColor(member.role)}`}
-                      >
+                      <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0 ${getAvatarBg(member.role)}`}>
                         {getInitials(member.name, member.email)}
                       </div>
                     )}
@@ -396,7 +373,7 @@ export function TeamMembers() {
                     {canModify && member.role !== "OWNER" ? (
                       <Select
                         value={member.role}
-                        onValueChange={(v) => handleChangeRole(member.id, v as "ADMIN" | "MEMBER")}
+                        onValueChange={(v) => handleChangeRole(member.id, v)}
                         disabled={changingRole === member.id}
                       >
                         <SelectTrigger className="w-36">
@@ -404,12 +381,15 @@ export function TeamMembers() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="ADMIN">Administrador</SelectItem>
+                          <SelectItem value="MANAGER">Gestor</SelectItem>
+                          <SelectItem value="SALES">Ventas</SelectItem>
                           <SelectItem value="MEMBER">Miembro</SelectItem>
+                          <SelectItem value="VIEWER">Visor</SelectItem>
                         </SelectContent>
                       </Select>
                     ) : (
-                      <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-md ${getRoleBadge(member.role)}`}>
-                        {getRoleLabel(member.role)}
+                      <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-md ${meta?.badgeClass ?? "bg-slate-100 text-slate-600 border border-slate-200"}`}>
+                        {meta?.label ?? member.role}
                       </span>
                     )}
 
@@ -437,6 +417,13 @@ export function TeamMembers() {
               )
             })}
           </div>
+        </div>
+      )}
+
+      {/* Roles & Permissions Table */}
+      {isAdmin && (
+        <div className="mt-8 pt-8 border-t border-slate-200">
+          <RolePermissionsTable />
         </div>
       )}
 

@@ -3058,7 +3058,10 @@ model DocumentoImportado {
 enum TeamRole {
   OWNER
   ADMIN
+  MANAGER
+  SALES
   MEMBER
+  VIEWER
 }
 
 enum MemberStatus {

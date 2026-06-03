@@ -9,7 +9,7 @@ import { z } from "zod"
 import { DEFAULT_PERMISSIONS } from "@/lib/role-permissions"
 
 const updateSchema = z.object({
-  role: z.enum(["ADMIN", "MEMBER"]).optional(),
+  role: z.enum(["ADMIN", "MANAGER", "SALES", "MEMBER", "VIEWER"]).optional(),
 })
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

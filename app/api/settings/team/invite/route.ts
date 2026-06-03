@@ -18,7 +18,7 @@ const TEAM_LIMITS: Record<string, number> = {
 
 const inviteSchema = z.object({
   email: z.string().email("Email inválido").toLowerCase(),
-  role: z.enum(["ADMIN", "MEMBER"]).default("MEMBER"),
+  role: z.enum(["ADMIN", "MANAGER", "SALES", "MEMBER", "VIEWER"]).default("MEMBER"),
 })
 
 export async function POST(req: NextRequest) {

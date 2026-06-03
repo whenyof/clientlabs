@@ -49,15 +49,21 @@ function getRelativeTime(dateStr: string): string {
 }
 
 function getAvatarColor(role: TeamRole) {
-  if (role === "OWNER") return "bg-emerald-500"
-  if (role === "ADMIN") return "bg-blue-500"
+  if (role === "OWNER") return "bg-yellow-500"
+  if (role === "ADMIN") return "bg-red-500"
+  if (role === "MANAGER") return "bg-blue-500"
+  if (role === "SALES") return "bg-green-500"
+  if (role === "VIEWER") return "bg-purple-500"
   return "bg-slate-400"
 }
 
 function getRoleLabel(role: TeamRole) {
   if (role === "OWNER") return "Propietario"
-  if (role === "ADMIN") return "Admin"
-  return "Usuario"
+  if (role === "ADMIN") return "Administrador"
+  if (role === "MANAGER") return "Gestor"
+  if (role === "SALES") return "Ventas"
+  if (role === "VIEWER") return "Visor"
+  return "Miembro"
 }
 
 function getInitials(name?: string | null, email?: string | null) {

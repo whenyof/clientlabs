@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 import { TeamRole } from "@prisma/client"
+import { DEFAULT_PERMISSIONS } from "@/lib/role-permissions"
 
 const TEAM_LIMITS: Record<string, number> = {
   FREE: 1,
@@ -72,12 +73,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Ya eres miembro de este equipo" }, { status: 409 })
     }
 
+    const role = invite.role as TeamRole
+    const rolePerms = DEFAULT_PERMISSIONS[role] ?? DEFAULT_PERMISSIONS["MEMBER"]
+
     await prisma.$transaction([
       prisma.workspaceMember.create({
         data: {
           workspaceId: invite.workspaceId,
           userId: session.user.id,
-          role: invite.role as TeamRole,
+          role,
+          permissions: { create: rolePerms },
         },
       }),
       prisma.workspaceInvite.delete({ where: { id: invite.id } }),

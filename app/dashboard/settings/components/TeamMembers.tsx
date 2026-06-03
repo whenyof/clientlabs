@@ -1,8 +1,9 @@
 "use client"
 
 import { useState } from "react"
+import { useSession } from "next-auth/react"
 import { UsersIcon, TrashIcon, UserPlusIcon } from "@heroicons/react/24/outline"
-import { Settings } from "lucide-react"
+import { Settings, Shield, User, Eye } from "lucide-react"
 import { toast } from "sonner"
 import { useTeam } from "@/hooks/use-team"
 import { RolesInfoModal } from "@/components/team/RolesInfoModal"
@@ -24,6 +25,32 @@ const PLAN_LABELS: Record<string, string> = {
   BUSINESS: "Negocio",
 }
 
+const ROLE_OPTIONS: {
+  value: "ADMIN" | "MEMBER"
+  label: string
+  description: string
+  icon: React.ElementType
+  badge: string
+  badgeColor: string
+}[] = [
+  {
+    value: "ADMIN",
+    label: "Administrador",
+    description: "Acceso total. Gestiona leads, clientes, facturas, documentos y ajustes. No puede gestionar facturación del SaaS.",
+    icon: Shield,
+    badge: "bg-blue-100 text-blue-700 border border-blue-200",
+    badgeColor: "text-blue-600",
+  },
+  {
+    value: "MEMBER",
+    label: "Miembro",
+    description: "Acceso estándar. Puede ver y crear leads, clientes y documentos. Sin acceso a eliminar ni a ajustes.",
+    icon: User,
+    badge: "bg-slate-100 text-slate-600 border border-slate-200",
+    badgeColor: "text-slate-500",
+  },
+]
+
 function getRoleBadge(role: TeamRole) {
   if (role === "OWNER") return "bg-emerald-100 text-emerald-700 border border-emerald-200"
   if (role === "ADMIN") return "bg-blue-100 text-blue-700 border border-blue-200"
@@ -32,7 +59,7 @@ function getRoleBadge(role: TeamRole) {
 
 function getRoleLabel(role: TeamRole) {
   if (role === "OWNER") return "Propietario"
-  if (role === "ADMIN") return "Admin"
+  if (role === "ADMIN") return "Administrador"
   return "Miembro"
 }
 
@@ -62,6 +89,7 @@ interface Member {
 }
 
 export function TeamMembers() {
+  const { data: session } = useSession()
   const { members, myRole, plan, limit, isAdmin, isOwner, mutate, isLoading } = useTeam()
   const [showInviteForm, setShowInviteForm] = useState(false)
   const [inviteEmail, setInviteEmail] = useState("")
@@ -194,7 +222,7 @@ export function TeamMembers() {
         )}
       </div>
 
-      {/* Add seat CTA — always visible on non-Business plans */}
+      {/* Add seat CTA */}
       {plan !== "BUSINESS" && (
         <div className={`rounded-xl border p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${atLimit ? "border-amber-200 bg-amber-50" : "border-slate-200 bg-slate-50"}`}>
           <div>
@@ -222,7 +250,7 @@ export function TeamMembers() {
         </div>
       )}
 
-      {/* Inline Invite Form */}
+      {/* Invite Form */}
       {showInviteForm && (
         <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
           <div className="flex items-center gap-3">
@@ -235,33 +263,56 @@ export function TeamMembers() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-600">Email</label>
-              <input
-                type="email"
-                value={inviteEmail}
-                onChange={(e) => setInviteEmail(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleInviteMember()}
-                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-[#0B1F2A] placeholder-slate-300 focus:outline-none focus:ring-1 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition-colors"
-                placeholder="usuario@empresa.com"
-              />
-            </div>
+          {/* Email */}
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-slate-600">Email</label>
+            <input
+              type="email"
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleInviteMember()}
+              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-[#0B1F2A] placeholder-slate-300 focus:outline-none focus:ring-1 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition-colors"
+              placeholder="usuario@empresa.com"
+            />
+          </div>
 
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-600">Rol</label>
-              <Select
-                value={inviteRole}
-                onValueChange={(v) => setInviteRole(v as "ADMIN" | "MEMBER")}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccionar..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="MEMBER">Miembro</SelectItem>
-                  <SelectItem value="ADMIN">Admin</SelectItem>
-                </SelectContent>
-              </Select>
+          {/* Role selector — cards */}
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-slate-600">Rol</label>
+            <div className="space-y-2 mt-1">
+              {ROLE_OPTIONS.map((opt) => {
+                const Icon = opt.icon
+                const selected = inviteRole === opt.value
+                return (
+                  <label
+                    key={opt.value}
+                    className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                      selected
+                        ? "border-[var(--accent)] bg-emerald-50/40"
+                        : "border-slate-200 hover:bg-slate-50"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="invite-role"
+                      value={opt.value}
+                      checked={selected}
+                      onChange={() => setInviteRole(opt.value)}
+                      className="mt-0.5 accent-[var(--accent)]"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <Icon className={`w-4 h-4 shrink-0 ${opt.badgeColor}`} />
+                        <span className="text-sm font-medium text-[#0B1F2A]">{opt.label}</span>
+                        <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${opt.badge}`}>
+                          {opt.value}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 mt-0.5">{opt.description}</p>
+                    </div>
+                  </label>
+                )
+              })}
             </div>
           </div>
 
@@ -300,8 +351,8 @@ export function TeamMembers() {
 
           <div className="divide-y divide-slate-50">
             {(members as Member[]).map((member) => {
-              const canModify = isOwner || (isAdmin && member.role !== "OWNER")
-              const isMe = member.role === myRole && member.role === "OWNER"
+              const isMe = member.userId === session?.user?.id
+              const canModify = !isMe && (isOwner || (isAdmin && member.role !== "OWNER"))
 
               return (
                 <div
@@ -324,10 +375,14 @@ export function TeamMembers() {
                       </div>
                     )}
                     <div className="min-w-0">
-                      <div className="text-sm font-semibold text-[#0B1F2A] truncate">
-                        {member.name ?? member.email}
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-sm font-semibold text-[#0B1F2A] truncate">
+                          {member.name ?? member.email}
+                        </span>
                         {isMe && (
-                          <span className="ml-1.5 text-[10px] text-slate-400 font-normal">(tú)</span>
+                          <span className="text-[10px] text-slate-400 font-normal bg-slate-100 px-1.5 py-0.5 rounded">
+                            Tú
+                          </span>
                         )}
                       </div>
                       {member.name && (
@@ -336,7 +391,7 @@ export function TeamMembers() {
                     </div>
                   </div>
 
-                  {/* Role badge */}
+                  {/* Role */}
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {canModify && member.role !== "OWNER" ? (
                       <Select
@@ -344,23 +399,20 @@ export function TeamMembers() {
                         onValueChange={(v) => handleChangeRole(member.id, v as "ADMIN" | "MEMBER")}
                         disabled={changingRole === member.id}
                       >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Seleccionar..." />
+                        <SelectTrigger className="w-36">
+                          <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="ADMIN">Admin</SelectItem>
+                          <SelectItem value="ADMIN">Administrador</SelectItem>
                           <SelectItem value="MEMBER">Miembro</SelectItem>
                         </SelectContent>
                       </Select>
                     ) : (
-                      <span
-                        className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-md ${getRoleBadge(member.role)}`}
-                      >
+                      <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-md ${getRoleBadge(member.role)}`}>
                         {getRoleLabel(member.role)}
                       </span>
                     )}
 
-                    {/* Permissions button */}
                     {canModify && member.role !== "OWNER" && (
                       <button
                         onClick={() => setPermsMember(member)}
@@ -371,7 +423,6 @@ export function TeamMembers() {
                       </button>
                     )}
 
-                    {/* Remove button */}
                     {canModify && member.role !== "OWNER" && (
                       <button
                         onClick={() => handleRemoveMember(member.id, member.email)}
@@ -388,6 +439,7 @@ export function TeamMembers() {
           </div>
         </div>
       )}
+
       {permsMember && (
         <PermissionsModal
           memberId={permsMember.id}

@@ -6,6 +6,7 @@ import { prisma, safePrismaQuery } from "@/lib/prisma"
 import { getUserWorkspace } from "@/lib/get-workspace"
 import { TeamRole } from "@prisma/client"
 import { z } from "zod"
+import { DEFAULT_PERMISSIONS } from "@/lib/role-permissions"
 
 const updateSchema = z.object({
   role: z.enum(["ADMIN", "MEMBER"]).optional(),
@@ -49,12 +50,20 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json({ error: "No se puede modificar al propietario" }, { status: 403 })
   }
 
-  const updated = await safePrismaQuery(() =>
+  const newRole = parsed.data.role as TeamRole
+  const rolePerms = DEFAULT_PERMISSIONS[newRole] ?? DEFAULT_PERMISSIONS["MEMBER"]
+
+  const [updated] = await prisma.$transaction([
     prisma.workspaceMember.update({
       where: { id },
-      data: { role: parsed.data.role as TeamRole },
-    })
-  )
+      data: { role: newRole },
+    }),
+    prisma.memberPermissions.upsert({
+      where: { memberId: id },
+      update: rolePerms,
+      create: { memberId: id, ...rolePerms },
+    }),
+  ])
 
   return NextResponse.json({ success: true, member: updated })
 }

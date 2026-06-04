@@ -98,7 +98,6 @@ const NAV_GROUPS = [
     title: "Seguridad",
     items: [
       { id: "security",    label: "Doble factor (2FA)", warn: true },
-      { id: "permissions", label: "SSO · SAML", soon: true },
       { id: "activity",    label: "Auditoría · registro" },
     ],
   },

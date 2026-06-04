@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, Fragment } from "react"
 import { Check, X, Pencil, Save, AlertTriangle } from "lucide-react"
 import { toast } from "sonner"
 import { DEFAULT_PERMISSIONS, ROLE_META } from "@/lib/role-permissions"
@@ -212,9 +212,9 @@ export function RolePermissionsTable() {
           </thead>
           <tbody>
             {PERMISSION_GROUPS.map((group, gi) => (
-              <>
+              <Fragment key={`g-${gi}`}>
                 {/* Group header row */}
-                <tr key={`g-${gi}`} className="bg-slate-50/60 border-t border-slate-100">
+                <tr className="bg-slate-50/60 border-t border-slate-100">
                   <td
                     colSpan={EDITABLE_ROLES.length + 1}
                     className="px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400"
@@ -249,7 +249,7 @@ export function RolePermissionsTable() {
                     })}
                   </tr>
                 ))}
-              </>
+              </Fragment>
             ))}
           </tbody>
         </table>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, Fragment } from "react"
+import { useState, useCallback, useEffect, Fragment } from "react"
 import { Check, X, Pencil, Save, AlertTriangle } from "lucide-react"
 import { toast } from "sonner"
 import { DEFAULT_PERMISSIONS, ROLE_META } from "@/lib/role-permissions"
@@ -97,11 +97,37 @@ function buildMatrix(): PermMatrix {
 
 export function RolePermissionsTable() {
   const [matrix, setMatrix] = useState<PermMatrix>(buildMatrix)
-  const [original] = useState<PermMatrix>(buildMatrix)
+  const [savedMatrix, setSavedMatrix] = useState<PermMatrix>(buildMatrix)
+  const [loading, setLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
   const [saving, setSaving] = useState(false)
 
-  const hasChanges = JSON.stringify(matrix) !== JSON.stringify(original)
+  // Load persisted permissions from API on mount
+  useEffect(() => {
+    fetch("/api/settings/role-permissions")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.permissions) {
+          const m = buildMatrix()
+          for (const role of EDITABLE_ROLES) {
+            const src = data.permissions[role]
+            if (src) {
+              for (const group of PERMISSION_GROUPS) {
+                for (const item of group.items) {
+                  if (item.key in src) m[role][item.key] = src[item.key]
+                }
+              }
+            }
+          }
+          setMatrix(m)
+          setSavedMatrix(m)
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  const hasChanges = JSON.stringify(matrix) !== JSON.stringify(savedMatrix)
 
   const toggle = useCallback((role: EditableRole, key: PermKey) => {
     if (!isEditing) return
@@ -115,7 +141,7 @@ export function RolePermissionsTable() {
     setSaving(true)
     try {
       const changedRoles = EDITABLE_ROLES.filter(
-        (r) => JSON.stringify(matrix[r]) !== JSON.stringify(original[r])
+        (r) => JSON.stringify(matrix[r]) !== JSON.stringify(savedMatrix[r])
       )
       await Promise.all(
         changedRoles.map((role) =>
@@ -126,6 +152,7 @@ export function RolePermissionsTable() {
           }).then((r) => r.json())
         )
       )
+      setSavedMatrix(matrix) // persist in memory so cancel restores to this
       toast.success("Permisos actualizados")
       setIsEditing(false)
     } catch {
@@ -136,8 +163,17 @@ export function RolePermissionsTable() {
   }
 
   const handleCancel = () => {
-    setMatrix(buildMatrix())
+    setMatrix(savedMatrix) // restore to last saved state
     setIsEditing(false)
+  }
+
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <div className="h-6 w-48 bg-slate-100 rounded animate-pulse" />
+        <div className="h-64 bg-slate-50 rounded-xl border border-slate-200 animate-pulse" />
+      </div>
+    )
   }
 
   return (

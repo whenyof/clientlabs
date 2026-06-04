@@ -1031,6 +1031,8 @@ model User {
   userTemplates          UserTemplate[]
   recurringInvoices      RecurringInvoice[]
   emailCampaigns         EmailCampaign[]
+  emailTemplates         EmailTemplate[]
+  emailSegments          EmailSegment[]
   publicForms            PublicForm[]
   calendarFeedToken      String?                 @unique
   twoFactorChallenges    TwoFactorChallenge[]
@@ -3425,6 +3427,39 @@ model EmailUnsubscribe {
 
   @@index([email])
   @@map("email_unsubscribes")
+}
+
+model EmailTemplate {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  subject     String
+  htmlContent String   @db.Text
+  category    String?
+  isDefault   Boolean  @default(false)
+  usageCount  Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@map("email_templates")
+}
+
+model EmailSegment {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  conditions  Json     @default("[]")
+  memberCount Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@map("email_segments")
 }
 
 model PublicForm {

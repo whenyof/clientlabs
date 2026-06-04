@@ -13,6 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { EmailEditor } from "@/components/email/EmailEditor"
+import { TemplateGallery, SaveTemplateModal } from "@/components/email/TemplateGallery"
 import {
   Megaphone, Filter, Plus, Upload, MoreHorizontal, ArrowUpRight,
   LayoutDashboard, Send, Newspaper,
@@ -561,6 +563,8 @@ function TabNewsletter() {
   const [modalEdicion, setModalEdicion] = useState(false)
   const [edicionForm, setEdicionForm] = useState<EdicionForm>(EDICION_FORM_DEFAULT)
   const [editandoEdicion, setEditandoEdicion] = useState<string | null>(null)
+  const [showGallery, setShowGallery] = useState(false)
+  const [showSaveTemplate, setShowSaveTemplate] = useState(false)
 
   useEffect(() => {
     cargarNewsletter()
@@ -1010,17 +1014,54 @@ function TabNewsletter() {
               </div>
 
               <div>
-                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
-                  Contenido
-                </label>
-                <textarea
-                  value={edicionForm.contenido}
-                  onChange={e => setEdicionForm(f => ({ ...f, contenido: e.target.value }))}
-                  rows={8}
-                  placeholder="Escribe aquí el contenido de tu newsletter..."
-                  className="w-full px-4 py-3 border border-slate-200 rounded-xl text-[13px] outline-none resize-none font-mono leading-relaxed focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/10"
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    Contenido
+                  </label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowGallery(true)}
+                      className="text-[11px] font-medium text-[#0F766E] hover:underline"
+                    >
+                      Usar plantilla
+                    </button>
+                    {edicionForm.contenido && (
+                      <button
+                        type="button"
+                        onClick={() => setShowSaveTemplate(true)}
+                        className="text-[11px] font-medium text-slate-500 hover:underline"
+                      >
+                        Guardar como plantilla
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <EmailEditor
+                  content={edicionForm.contenido}
+                  onChange={(html) => setEdicionForm(f => ({ ...f, contenido: html }))}
+                  placeholder="Escribe aquí el contenido de tu newsletter…"
+                  minHeight={240}
                 />
               </div>
+
+              <TemplateGallery
+                open={showGallery}
+                onClose={() => setShowGallery(false)}
+                onSelect={({ subject, htmlContent }) =>
+                  setEdicionForm(f => ({
+                    ...f,
+                    asunto: f.asunto || subject,
+                    contenido: htmlContent,
+                  }))
+                }
+              />
+              <SaveTemplateModal
+                open={showSaveTemplate}
+                onClose={() => setShowSaveTemplate(false)}
+                subject={edicionForm.asunto}
+                htmlContent={edicionForm.contenido}
+              />
 
               <div className="grid grid-cols-2 gap-4">
                 <div>

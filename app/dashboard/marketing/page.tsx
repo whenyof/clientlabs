@@ -2112,11 +2112,30 @@ export default function MarketingPage() {
   const ctr         = mktStats?.kpis?.ctr            ?? 14.2
   const campanasAPI: { id: string; nombre: string; estado: string; totalEnviados: number; totalAbiertos: number; totalClicks: number; aperturaPct: number | null }[] = mktStats?.campanasRecientes ?? []
 
+  const { data: deliverabilityData, isLoading: delivLoading } = useQuery({
+    queryKey: ["email-deliverability"],
+    queryFn: () => fetch("/api/email/deliverability").then(r => r.json()),
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
+    retry: 0,
+  })
+
   const [emTab, setEmTab] = useState("campanas")
   const [campFilter, setCampFilter] = useState("Todas")
   const [tmplFilter, setTmplFilter] = useState("Todas")
   const [showComposer, setShowComposer] = useState(false)
   const [composerStep, setComposerStep] = useState(0)
+
+  // A/B test composer state
+  const [abEnabled, setAbEnabled] = useState(false)
+  const [abSubjectA, setAbSubjectA] = useState("")
+  const [abSubjectB, setAbSubjectB] = useState("")
+  const [abSplit, setAbSplit] = useState(50)
+  const [abMetric, setAbMetric] = useState<"openRate" | "clickRate">("openRate")
+  const [abSaving, setAbSaving] = useState(false)
+  const [abTestId, setAbTestId] = useState<string | null>(null)
+  const [abTestData, setAbTestData] = useState<{ status: string; sentToA: number; sentToB: number; opensA: number; opensB: number; clicksA: number; clicksB: number; winnerId?: string | null } | null>(null)
+  const [abLaunching, setAbLaunching] = useState(false)
 
   // ─── Design tokens ─────────────────────────────────────────────────────────
   const D = {
@@ -2419,27 +2438,144 @@ export default function MarketingPage() {
                     <div>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
                         <h4 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: D.ink }}>Test A/B</h4>
-                        <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, color: D.accentInk, fontWeight: 600 }}>ACTIVADO</span>
+                        <button
+                          type="button"
+                          onClick={() => setAbEnabled(v => !v)}
+                          style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 99, border: "none", cursor: "pointer", background: abEnabled ? D.accentSoft : D.bg3, color: abEnabled ? D.accentInk : D.ink3 }}
+                        >
+                          {abEnabled ? "ACTIVADO" : "DESACTIVADO"}
+                        </button>
                       </div>
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                        {[
-                          { tag: "Variante A · 50%", subj: "Lo nuevo de verano (y un regalo dentro) ☀️" },
-                          { tag: "Variante B · 50%", subj: "Wheny, hemos guardado un 20% para ti." },
-                        ].map(v => (
-                          <div key={v.tag} style={{ padding: 14, border: `1px solid ${D.line}`, borderRadius: 8, background: D.bg2 }}>
-                            <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10, color: D.ink3, letterSpacing: "0.05em", marginBottom: 8 }}>{v.tag}</div>
-                            <div style={{ fontWeight: 550, fontSize: 12.5, color: D.ink }}>{v.subj}</div>
+
+                      {!abEnabled ? (
+                        <div style={{ padding: "20px 0", textAlign: "center", color: D.ink3, fontSize: 12 }}>
+                          Activa el A/B test para probar dos asuntos distintos y descubrir cuál convierte mejor.
+                        </div>
+                      ) : abTestData?.status === "running" || abTestData?.status === "winner_selected" ? (
+                        /* Results view */
+                        <div>
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
+                            {(["A", "B"] as const).map(v => {
+                              const sent = v === "A" ? abTestData.sentToA : abTestData.sentToB
+                              const opens = v === "A" ? abTestData.opensA : abTestData.opensB
+                              const rate = sent > 0 ? Math.round((opens / sent) * 1000) / 10 : 0
+                              const isWinner = abTestData.winnerId === v
+                              return (
+                                <div key={v} style={{ padding: 14, border: `1.5px solid ${isWinner ? D.accent : D.line}`, borderRadius: 8, background: isWinner ? D.accentSoft : D.bg2 }}>
+                                  <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10, color: isWinner ? D.accentInk : D.ink3, letterSpacing: "0.05em", marginBottom: 6 }}>
+                                    VARIANTE {v} {isWinner && "· GANADOR"}
+                                  </div>
+                                  <div style={{ fontWeight: 600, fontSize: 12, color: D.ink, marginBottom: 10 }}>{v === "A" ? abSubjectA : abSubjectB}</div>
+                                  <div style={{ fontSize: 11, color: D.ink3 }}>Enviados: <strong style={{ color: D.ink }}>{sent}</strong></div>
+                                  <div style={{ fontSize: 11, color: D.ink3, marginTop: 2 }}>Aperturas: <strong style={{ color: D.ink }}>{opens}</strong></div>
+                                  <div style={{ marginTop: 8 }}>
+                                    <div style={{ height: 6, background: D.bg3, borderRadius: 99, overflow: "hidden" }}>
+                                      <div style={{ width: `${rate}%`, height: "100%", background: isWinner ? D.accent : D.ink3, borderRadius: 99 }} />
+                                    </div>
+                                    <div style={{ fontSize: 13, fontWeight: 700, color: isWinner ? D.accentInk : D.ink, marginTop: 4 }}>{rate}%</div>
+                                  </div>
+                                </div>
+                              )
+                            })}
                           </div>
-                        ))}
-                      </div>
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginTop: 14 }}>
-                        {[["Métrica ganadora", "Tasa de apertura"], ["Muestra inicial", "20% · 1.680 env."], ["Decisión automática", "tras 4 horas"]].map(r => (
-                          <div key={r[0]}>
-                            <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10, color: D.ink3, textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>{r[0]}</div>
-                            <div style={{ fontWeight: 550, fontSize: 12.5, color: D.ink, marginTop: 3 }}>{r[1]}</div>
+                          {abTestData.status === "running" && (
+                            <button
+                              type="button"
+                              disabled={abLaunching}
+                              onClick={async () => {
+                                if (!abTestId) return
+                                setAbLaunching(true)
+                                try {
+                                  const r = await fetch(`/api/email/ab-test/${abTestId}/select-winner`, { method: "POST" })
+                                  const d = await r.json()
+                                  setAbTestData(prev => prev ? { ...prev, ...d } : d)
+                                } catch { /* ignore */ } finally { setAbLaunching(false) }
+                              }}
+                              style={{ width: "100%", padding: "8px 0", borderRadius: 6, background: D.ink, color: "white", fontSize: 12.5, fontWeight: 600, border: "none", cursor: abLaunching ? "not-allowed" : "pointer" }}
+                            >
+                              {abLaunching ? "Procesando..." : "Seleccionar ganador y enviar al resto"}
+                            </button>
+                          )}
+                        </div>
+                      ) : (
+                        /* Config form */
+                        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                            {[
+                              { tag: `Variante A · ${abSplit}%`, value: abSubjectA, setter: setAbSubjectA, ph: "Asunto variante A..." },
+                              { tag: `Variante B · ${100 - abSplit}%`, value: abSubjectB, setter: setAbSubjectB, ph: "Asunto variante B..." },
+                            ].map(v => (
+                              <div key={v.tag}>
+                                <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10, color: D.ink3, letterSpacing: "0.05em", marginBottom: 6 }}>{v.tag}</div>
+                                <input
+                                  value={v.value}
+                                  onChange={e => v.setter(e.target.value)}
+                                  placeholder={v.ph}
+                                  style={{ width: "100%", padding: "8px 10px", border: `1px solid ${D.line}`, borderRadius: 6, fontSize: 12.5, color: D.ink, background: D.bg, outline: "none", boxSizing: "border-box" as const }}
+                                />
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
+
+                          {/* Split slider */}
+                          <div>
+                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: D.ink3, marginBottom: 4 }}>
+                              <span>División</span>
+                              <span>A: {abSplit}% · B: {100 - abSplit}%</span>
+                            </div>
+                            <input type="range" min={10} max={90} step={10} value={abSplit} onChange={e => setAbSplit(Number(e.target.value))} style={{ width: "100%", cursor: "pointer" }} />
+                          </div>
+
+                          {/* Metric selector */}
+                          <div style={{ display: "flex", gap: 8 }}>
+                            {(["openRate", "clickRate"] as const).map(m => (
+                              <button key={m} type="button" onClick={() => setAbMetric(m)}
+                                style={{ flex: 1, padding: "6px 0", borderRadius: 6, border: `1px solid ${abMetric === m ? D.accent : D.line}`, background: abMetric === m ? D.accentSoft : D.bg, color: abMetric === m ? D.accentInk : D.ink3, fontSize: 12, fontWeight: abMetric === m ? 600 : 450, cursor: "pointer" }}>
+                                {m === "openRate" ? "Open rate" : "Click rate"}
+                              </button>
+                            ))}
+                          </div>
+
+                          <button
+                            type="button"
+                            disabled={!abSubjectA.trim() || !abSubjectB.trim() || abSaving}
+                            onClick={async () => {
+                              if (!abSubjectA.trim() || !abSubjectB.trim()) return
+                              setAbSaving(true)
+                              try {
+                                const r = await fetch("/api/email/ab-test", {
+                                  method: "POST",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({ name: `A/B - ${new Date().toLocaleDateString("es-ES")}`, subjectA: abSubjectA, contentA: "<p>Contenido A</p>", subjectB: abSubjectB, contentB: "<p>Contenido B</p>", splitRatio: abSplit, winnerMetric: abMetric }),
+                                })
+                                const d = await r.json()
+                                if (r.ok) { setAbTestId(d.id) }
+                              } catch { /* ignore */ } finally { setAbSaving(false) }
+                            }}
+                            style={{ padding: "8px 0", borderRadius: 6, background: !abSubjectA.trim() || !abSubjectB.trim() ? D.bg3 : D.accent, color: !abSubjectA.trim() || !abSubjectB.trim() ? D.ink4 : "white", fontSize: 12.5, fontWeight: 600, border: "none", cursor: "pointer" }}
+                          >
+                            {abTestId ? "Test guardado" : abSaving ? "Guardando..." : "Guardar test A/B"}
+                          </button>
+
+                          {abTestId && (
+                            <button
+                              type="button"
+                              disabled={abLaunching}
+                              onClick={async () => {
+                                setAbLaunching(true)
+                                try {
+                                  const r = await fetch(`/api/email/ab-test/${abTestId}/launch`, { method: "POST" })
+                                  const d = await r.json()
+                                  if (r.ok) setAbTestData({ status: "running", sentToA: d.sentToA, sentToB: d.sentToB, opensA: 0, opensB: 0, clicksA: 0, clicksB: 0 })
+                                } catch { /* ignore */ } finally { setAbLaunching(false) }
+                              }}
+                              style={{ padding: "8px 0", borderRadius: 6, background: D.ink, color: "white", fontSize: 12.5, fontWeight: 600, border: "none", cursor: abLaunching ? "not-allowed" : "pointer" }}
+                            >
+                              {abLaunching ? "Lanzando..." : "Lanzar test ahora"}
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
                   {(composerStep === 3 || composerStep === 4) && (
@@ -2782,54 +2918,92 @@ export default function MarketingPage() {
 
       {/* ══════════ ENTREGABILIDAD ══════════ */}
       {emTab === "entregabilidad" && (
-        <div className="grid grid-cols-2 gap-4">
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+          {/* Left: DNS checklist */}
           <div style={{ background: D.bg, border: `1px solid ${D.line}`, borderRadius: 10, overflow: "hidden" }}>
             <div style={{ padding: "14px 18px", borderBottom: `1px solid ${D.line2}` }}>
               <h3 style={{ fontWeight: 600, fontSize: 13.5, margin: 0, color: D.ink }}>Autenticación del dominio</h3>
-              <div style={{ fontSize: 11.5, color: D.ink3, fontFamily: "ui-monospace,monospace", marginTop: 2 }}>estudiovega.com · verificado hace 2 h</div>
+              <div style={{ fontSize: 11, color: D.ink3, marginTop: 4, lineHeight: 1.5 }}>
+                Verifica estos registros en tu proveedor DNS. Resend los gestiona automáticamente si usas su dominio verificado.
+              </div>
             </div>
             <div style={{ padding: 18 }}>
               {[
-                { ok: true,  nm: "SPF", sub: "v=spf1 include:_spf.clientlabs.io ~all", val: "Verificado" },
-                { ok: true,  nm: "DKIM", sub: "RSA-2048 · cl1._domainkey.estudiovega.com", val: "Verificado" },
-                { ok: true,  nm: "DMARC", sub: "p=quarantine · rua=postmaster@estudiovega.com", val: "100% align" },
-                { ok: false, nm: "BIMI", sub: "Falta certificado VMC para Gmail / Yahoo Inbox", val: "Sin certificado" },
-                { ok: true,  nm: "IP dedicada", sub: "185.43.18.12 · Sin presencia en 89 listas negras", val: "Reputación 96/100" },
+                { ok: true,  nm: "SPF", sub: "v=spf1 include:_spf.resend.com ~all", val: "Verificado" },
+                { ok: true,  nm: "DKIM", sub: "RSA-2048 · Firmado por Resend", val: "Verificado" },
+                { ok: true,  nm: "DMARC", sub: "p=quarantine · Alinea SPF + DKIM", val: "Recomendado" },
+                { ok: false, nm: "BIMI", sub: "Certificado VMC necesario para logotipo en inbox", val: "Opcional" },
               ].map((it, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 14, padding: "12px 0", borderBottom: i < 4 ? `1px solid ${D.line3}` : "none" }}>
-                  <div style={{ width: 32, height: 32, borderRadius: 8, background: it.ok ? D.accentSoft : D.warnSoft, display: "grid", placeItems: "center", color: it.ok ? D.accentInk : D.warn, flexShrink: 0, fontSize: 14 }}>{it.ok ? "✓" : "⚠"}</div>
+                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 14, padding: "12px 0", borderBottom: i < 3 ? `1px solid ${D.line3}` : "none" }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 8, background: it.ok ? D.accentSoft : D.bg3, display: "grid", placeItems: "center", color: it.ok ? D.accentInk : D.ink3, flexShrink: 0, fontSize: 14 }}>{it.ok ? "✓" : "—"}</div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 600, fontSize: 13, color: D.ink }}>{it.nm}</div>
                     <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: D.ink3, marginTop: 2 }}>{it.sub}</div>
                   </div>
-                  <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, padding: "3px 8px", borderRadius: 5, background: it.ok ? D.accentSoft : D.warnSoft, color: it.ok ? D.accentInk : D.warn, fontWeight: 600, flexShrink: 0 }}>{it.val}</span>
+                  <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, padding: "3px 8px", borderRadius: 5, background: it.ok ? D.accentSoft : D.bg3, color: it.ok ? D.accentInk : D.ink3, fontWeight: 600, flexShrink: 0 }}>{it.val}</span>
                 </div>
               ))}
             </div>
           </div>
+
+          {/* Right: real metrics */}
           <div style={{ background: D.bg, border: `1px solid ${D.line}`, borderRadius: 10, overflow: "hidden" }}>
             <div style={{ padding: "14px 18px", borderBottom: `1px solid ${D.line2}` }}>
-              <h3 style={{ fontWeight: 600, fontSize: 13.5, margin: 0, color: D.ink }}>Métricas de reputación</h3>
-              <div style={{ fontSize: 11.5, color: D.ink3, fontFamily: "ui-monospace,monospace", marginTop: 2 }}>Últimos 30 días · hola@estudiovega.com</div>
+              <h3 style={{ fontWeight: 600, fontSize: 13.5, margin: 0, color: D.ink }}>Métricas de lista reales</h3>
+              <div style={{ fontSize: 11.5, color: D.ink3, marginTop: 2 }}>Datos calculados de tus campañas</div>
             </div>
-            <div style={{ padding: 18, display: "flex", flexDirection: "column", gap: 16 }}>
-              {[
-                { l: "Reputación IP",     v: 96, max: 100, color: D.accent, fmt: "/100" },
-                { l: "Tasa de entrega",   v: 99.1, max: 100, color: D.accent, fmt: "%" },
-                { l: "Bounce rate",       v: 0.8, max: 5, color: D.ink2, fmt: "%" },
-                { l: "Spam rate",         v: 0.02, max: 1, color: D.ink2, fmt: "%" },
-                { l: "Unsub rate",        v: 0.21, max: 1, color: D.ink2, fmt: "%" },
-              ].map(k => (
-                <div key={k.l}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-                    <span style={{ fontSize: 12.5, fontWeight: 500, color: D.ink2 }}>{k.l}</span>
-                    <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 13, fontWeight: 600, color: k.color }}>{k.v}{k.fmt}</span>
+            <div style={{ padding: 18, display: "flex", flexDirection: "column", gap: 14 }}>
+              {delivLoading ? (
+                <div style={{ color: D.ink3, fontSize: 12 }}>Cargando...</div>
+              ) : (
+                <>
+                  {/* Subscribers active/inactive */}
+                  <div>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+                      <span style={{ fontSize: 12.5, fontWeight: 500, color: D.ink2 }}>Suscriptores activos</span>
+                      <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 13, fontWeight: 600, color: D.accent }}>
+                        {deliverabilityData?.subscribers?.active ?? 0}
+                        <span style={{ fontSize: 10, color: D.ink3, fontWeight: 400 }}> / {deliverabilityData?.subscribers?.total ?? 0}</span>
+                      </span>
+                    </div>
+                    <div style={{ height: 6, background: D.bg3, borderRadius: 99, overflow: "hidden" }}>
+                      <div style={{ width: `${deliverabilityData?.subscribers?.total > 0 ? (deliverabilityData.subscribers.active / deliverabilityData.subscribers.total) * 100 : 0}%`, height: "100%", background: D.accent, borderRadius: 99 }} />
+                    </div>
                   </div>
-                  <div style={{ height: 6, background: D.bg3, borderRadius: 99, overflow: "hidden" }}>
-                    <div style={{ width: `${(k.v / k.max) * 100}%`, height: "100%", background: k.color, borderRadius: 99 }} />
-                  </div>
-                </div>
-              ))}
+                  {/* Bounce rate */}
+                  {[
+                    { l: "Bounce rate", v: deliverabilityData?.bounceRate ?? 0, max: 10, color: (deliverabilityData?.bounceRate ?? 0) > 5 ? D.warn : D.ink2, fmt: "%" },
+                    { l: "Unsub rate",  v: deliverabilityData?.unsubRate ?? 0,  max: 5,  color: (deliverabilityData?.unsubRate ?? 0) > 2 ? D.warn : D.ink2, fmt: "%" },
+                  ].map(k => (
+                    <div key={k.l}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+                        <span style={{ fontSize: 12.5, fontWeight: 500, color: D.ink2 }}>{k.l}</span>
+                        <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 13, fontWeight: 600, color: k.color }}>{k.v}{k.fmt}</span>
+                      </div>
+                      <div style={{ height: 6, background: D.bg3, borderRadius: 99, overflow: "hidden" }}>
+                        <div style={{ width: `${Math.min((k.v / k.max) * 100, 100)}%`, height: "100%", background: k.color, borderRadius: 99 }} />
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Recommendations */}
+                  {(deliverabilityData?.recommendations ?? []).length > 0 && (
+                    <div style={{ marginTop: 4 }}>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: D.ink3, marginBottom: 8, textTransform: "uppercase" as const, letterSpacing: "0.04em" }}>Recomendaciones</div>
+                      {(deliverabilityData.recommendations as { type: string; message: string }[]).map((r, i) => (
+                        <div key={i} style={{
+                          padding: "8px 10px", borderRadius: 6, marginBottom: 6, fontSize: 12,
+                          background: r.type === "warning" ? D.warnSoft : r.type === "success" ? D.accentSoft : "#f0f7ff",
+                          color: r.type === "warning" ? D.warn : r.type === "success" ? D.accentInk : "#1e40af",
+                          borderLeft: `3px solid ${r.type === "warning" ? D.warn : r.type === "success" ? D.accentInk : "#3b82f6"}`,
+                        }}>
+                          {r.message}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>

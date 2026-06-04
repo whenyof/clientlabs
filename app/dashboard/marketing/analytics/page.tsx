@@ -1,159 +1,298 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { Megaphone, Send, Eye, MousePointer, Users } from "lucide-react"
-import { KPICard } from "@/components/analytics/KPICard"
+import { useEffect, useState, useMemo } from "react"
+import { Send, Eye, MousePointer, UserMinus, TrendingUp, Clock } from "lucide-react"
 import dynamic from "next/dynamic"
 
 const RC  = dynamic(() => import("recharts").then(m => m.ResponsiveContainer),  { ssr: false })
-const BC  = dynamic(() => import("recharts").then(m => m.BarChart),              { ssr: false })
-const RBar= dynamic(() => import("recharts").then(m => m.Bar),                   { ssr: false })
-const RX  = dynamic(() => import("recharts").then(m => m.XAxis),                 { ssr: false })
-const RY  = dynamic(() => import("recharts").then(m => m.YAxis),                 { ssr: false })
-const RT  = dynamic(() => import("recharts").then(m => m.Tooltip),               { ssr: false })
-const RL  = dynamic(() => import("recharts").then(m => m.Legend),                { ssr: false })
-const PC  = dynamic(() => import("recharts").then(m => m.PieChart),              { ssr: false })
-const RPie= dynamic(() => import("recharts").then(m => m.Pie),                   { ssr: false })
-const RCell=dynamic(() => import("recharts").then(m => m.Cell),                  { ssr: false })
+const BC  = dynamic(() => import("recharts").then(m => m.BarChart),             { ssr: false })
+const LC  = dynamic(() => import("recharts").then(m => m.LineChart),            { ssr: false })
+const RBar= dynamic(() => import("recharts").then(m => m.Bar),                  { ssr: false })
+const RLine=dynamic(() => import("recharts").then(m => m.Line),                 { ssr: false })
+const RX  = dynamic(() => import("recharts").then(m => m.XAxis),                { ssr: false })
+const RY  = dynamic(() => import("recharts").then(m => m.YAxis),                { ssr: false })
+const RT  = dynamic(() => import("recharts").then(m => m.Tooltip),              { ssr: false })
+const RL  = dynamic(() => import("recharts").then(m => m.Legend),               { ssr: false })
+const RRef= dynamic(() => import("recharts").then(m => m.ReferenceLine),        { ssr: false })
+
+// ── Types ──────────────────────────────────────────────────────────────────────
+
+interface Summary {
+  totalCampaigns: number
+  totalSent: number
+  totalOpens: number
+  totalClicks: number
+  totalUnsubscribes: number
+  totalBounces: number
+  avgOpenRate: number
+  avgClickRate: number
+  avgUnsubRate: number
+}
+
+interface SubscriberMonth { month: string; subscribers: number; unsubscribes: number }
+interface CampaignRow {
+  id: string; name: string; sentAt: string | null
+  sent: number; opens: number; clicks: number
+  openRate: number; clickRate: number
+}
+interface HourData { hour: number; opens: number }
 
 interface Data {
-  kpis: { total: number; sent: number; totalSent: number; avgOpenRate: number; avgClickRate: number }
-  byEdition: { name: string; apertura: number; clicks: number }[]
-  byStatus: { name: string; value: number; color: string }[]
+  summary: Summary
+  subscriberGrowth: SubscriberMonth[]
+  campaignPerformance: CampaignRow[]
+  bestHours: HourData[]
 }
+
+// ── Design tokens ──────────────────────────────────────────────────────────────
 
 const C = "bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-5"
 const tip = { background: "var(--bg-card)", border: "0.5px solid var(--border-subtle)", borderRadius: 8, fontSize: 12 }
 const ax = { fontSize: 11, fill: "var(--text-secondary)" }
-const Skel = () => <div className="h-52 bg-[var(--bg-surface)] rounded-lg animate-pulse" />
+const Skel = ({ h = 52 }: { h?: number }) => (
+  <div className={`h-${h} bg-[var(--bg-surface)] rounded-lg animate-pulse`} style={{ height: h }} />
+)
 
-function EngagementBar({ label, value, max, color }: { label: string; value: number; max: number; color: string }) {
-  const pct = max > 0 ? Math.round((value / max) * 100) : 0
+// ── KPI Card ───────────────────────────────────────────────────────────────────
+
+function KPI({ title, value, sub, loading, icon: Icon, color = "#1FA97A" }: {
+  title: string; value: string | number; sub?: string; loading?: boolean
+  icon: React.ElementType; color?: string
+}) {
   return (
-    <div>
-      <div className="flex justify-between mb-1.5 text-xs">
-        <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full shrink-0" style={{ background: color }} /><span className="font-medium text-[var(--text-primary)]">{label}</span></div>
-        <div className="flex items-center gap-2"><span className="font-bold text-[var(--text-primary)]">{value.toLocaleString("es-ES")}</span><span className="text-[var(--text-secondary)]">{pct}%</span></div>
+    <div className={C}>
+      <div className="flex items-start justify-between mb-3">
+        <p className="text-xs text-[var(--text-secondary)] font-medium">{title}</p>
+        <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: color + "18" }}>
+          <Icon className="w-3.5 h-3.5" style={{ color }} />
+        </div>
       </div>
-      <div className="h-2.5 bg-[var(--bg-surface)] rounded-full overflow-hidden">
-        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: color }} />
-      </div>
+      {loading ? <Skel h={28} /> : (
+        <p className="text-2xl font-bold text-[var(--text-primary)] tabular-nums">{value}</p>
+      )}
+      {sub && !loading && (
+        <p className="text-xs text-[var(--text-secondary)] mt-1">{sub}</p>
+      )}
     </div>
   )
 }
 
-export default function MarketingAnalyticsPage() {
+// ── Sort key ───────────────────────────────────────────────────────────────────
+
+type SortKey = "openRate" | "clickRate" | "sent" | "sentAt"
+
+// ── Page ──────────────────────────────────────────────────────────────────────
+
+export default function EmailAnalyticsPage() {
   const [data, setData] = useState<Data | null>(null)
   const [loading, setLoading] = useState(true)
+  const [sortKey, setSortKey] = useState<SortKey>("sentAt")
+  const [sortAsc, setSortAsc] = useState(false)
 
   useEffect(() => {
-    fetch("/api/marketing/analytics").then(r => r.json()).then(d => { setData(d); setLoading(false) }).catch(() => setLoading(false))
+    fetch("/api/email/analytics")
+      .then(r => r.json())
+      .then((d: Data) => { setData(d); setLoading(false) })
+      .catch(() => setLoading(false))
   }, [])
 
-  const totalSent = data?.kpis.totalSent ?? 0
-  const opened  = Math.round(totalSent * ((data?.kpis.avgOpenRate  ?? 0) / 100))
-  const clicked = Math.round(totalSent * ((data?.kpis.avgClickRate ?? 0) / 100))
-  const totalStatus = (data?.byStatus ?? []).reduce((s, x) => s + x.value, 0)
+  const s = data?.summary
+
+  // Best hours: find top 3
+  const topHours = useMemo(() => {
+    if (!data?.bestHours) return new Set<number>()
+    const sorted = [...data.bestHours].sort((a, b) => b.opens - a.opens)
+    return new Set(sorted.slice(0, 3).map(h => h.hour))
+  }, [data])
+
+  // Sorted campaign table
+  const sortedCampaigns = useMemo(() => {
+    if (!data?.campaignPerformance) return []
+    return [...data.campaignPerformance].sort((a, b) => {
+      const va = a[sortKey] as number | string | null
+      const vb = b[sortKey] as number | string | null
+      if (va == null) return 1
+      if (vb == null) return -1
+      if (va < vb) return sortAsc ? -1 : 1
+      if (va > vb) return sortAsc ? 1 : -1
+      return 0
+    })
+  }, [data, sortKey, sortAsc])
+
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) setSortAsc(v => !v)
+    else { setSortKey(key); setSortAsc(false) }
+  }
+
+  const fmtDate = (d: string | null) => d ? new Date(d).toLocaleDateString("es-ES", { day: "numeric", month: "short" }) : "—"
 
   return (
     <div className="p-6 w-full space-y-5">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-[11px] text-[var(--text-secondary)] mb-1">Dashboard / <span className="text-[var(--text-primary)]">Marketing</span></p>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">Analíticas de Marketing</h1>
-          <p className="text-sm text-[var(--text-secondary)] mt-0.5">Rendimiento de newsletters, alcance y engagement por campaña</p>
-        </div>
-        <div className="flex items-center gap-6 text-right">
-          <div><p className="text-xs text-[var(--text-secondary)]">Apertura media</p><p className="text-2xl font-bold text-[#0F766E]">{data?.kpis.avgOpenRate ?? 0}%</p></div>
-          <div><p className="text-xs text-[var(--text-secondary)]">Clicks medio</p><p className="text-2xl font-bold text-[#3B82F6]">{data?.kpis.avgClickRate ?? 0}%</p></div>
-        </div>
+
+      {/* Header */}
+      <div>
+        <p className="text-[11px] text-[var(--text-secondary)] mb-1">
+          Dashboard / Marketing / <span className="text-[var(--text-primary)]">Analíticas</span>
+        </p>
+        <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">Analíticas de Email</h1>
+        <p className="text-sm text-[var(--text-secondary)] mt-0.5">
+          Métricas reales de campañas, suscriptores y engagement
+        </p>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        <KPICard title="Newsletters"   value={data?.kpis.total ?? 0}   loading={loading} />
-        <KPICard title="Enviadas"      value={data?.kpis.sent ?? 0}    badge={data?.kpis.total ? `${Math.round(((data.kpis.sent) / data.kpis.total) * 100)}% del total` : undefined} badgeColor="#0F766E" loading={loading} />
-        <KPICard title="Destinatarios" value={(totalSent).toLocaleString("es-ES")} badge="envíos totales" badgeColor="#8B5CF6" loading={loading} />
-        <KPICard title="Tasa apertura" value={`${data?.kpis.avgOpenRate ?? 0}%`}  sparkColor="#0F766E" loading={loading} />
-        <KPICard title="Tasa clicks"   value={`${data?.kpis.avgClickRate ?? 0}%`} sparkColor="#3B82F6" loading={loading} />
+      {/* KPI row */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <KPI title="Total enviados" value={s?.totalSent.toLocaleString("es-ES") ?? "—"} sub={`${s?.totalCampaigns ?? 0} campañas`} loading={loading} icon={Send} color="#3B82F6" />
+        <KPI title="Tasa de apertura" value={s ? `${s.avgOpenRate}%` : "—"} sub={`${s?.totalOpens.toLocaleString("es-ES") ?? 0} aperturas`} loading={loading} icon={Eye} color="#1FA97A" />
+        <KPI title="Tasa de clicks" value={s ? `${s.avgClickRate}%` : "—"} sub={`${s?.totalClicks.toLocaleString("es-ES") ?? 0} clicks`} loading={loading} icon={MousePointer} color="#8B5CF6" />
+        <KPI title="Tasa de bajas" value={s ? `${s.avgUnsubRate}%` : "—"} sub={`${s?.totalUnsubscribes ?? 0} bajas · ${s?.totalBounces ?? 0} rebotes`} loading={loading} icon={UserMinus} color="#EF4444" />
       </div>
 
+      {/* Subscriber growth chart */}
       <div className={C}>
         <div className="flex items-start justify-between mb-4">
           <div>
-            <p className="text-[13px] font-semibold text-[var(--text-primary)]">Apertura vs. Clicks por newsletter</p>
-            <p className="text-xs text-[var(--text-secondary)] mt-0.5">Últimas 6 campañas enviadas · comparativa de engagement</p>
+            <p className="text-[13px] font-semibold text-[var(--text-primary)] flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-[#1FA97A]" />
+              Crecimiento de suscriptores
+            </p>
+            <p className="text-xs text-[var(--text-secondary)] mt-0.5">Últimos 12 meses — nuevas altas vs bajas</p>
           </div>
         </div>
-        {loading ? <div className="h-56 bg-[var(--bg-surface)] rounded-lg animate-pulse" /> : (data?.byEdition?.length ?? 0) === 0
-          ? <div className="h-56 grid place-items-center"><div className="text-center"><Send size={28} className="mx-auto mb-2 opacity-20 text-[var(--text-secondary)]" /><p className="text-xs text-[var(--text-secondary)]">Aún no has enviado ninguna newsletter</p></div></div>
-          : (
-            <div className="h-56">
+        {loading ? <Skel h={200} /> : (
+          <div style={{ height: 200 }}>
+            <RC width="100%" height="100%">
+              <LC data={data?.subscriberGrowth ?? []} margin={{ top: 4, right: 4, left: -14, bottom: 0 }}>
+                <RX dataKey="month" tick={ax} axisLine={false} tickLine={false} />
+                <RY tick={ax} axisLine={false} tickLine={false} />
+                <RT contentStyle={tip} />
+                <RL wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
+                <RLine type="monotone" dataKey="subscribers" stroke="#1FA97A" strokeWidth={2} dot={false} name="Nuevos suscriptores" />
+                <RLine type="monotone" dataKey="unsubscribes" stroke="#EF4444" strokeWidth={2} dot={false} name="Bajas" />
+              </LC>
+            </RC>
+          </div>
+        )}
+      </div>
+
+      {/* Campaign performance table + best hours */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+        {/* Campaign table */}
+        <div className={`${C} lg:col-span-2 !p-0 overflow-hidden`}>
+          <div className="p-5 pb-3">
+            <p className="text-[13px] font-semibold text-[var(--text-primary)]">Rendimiento por campaña</p>
+            <p className="text-xs text-[var(--text-secondary)] mt-0.5">Últimas 10 campañas · haz clic en una columna para ordenar</p>
+          </div>
+          {loading ? (
+            <div className="p-5 pt-0 space-y-2">{[...Array(5)].map((_, i) => <Skel key={i} h={32} />)}</div>
+          ) : sortedCampaigns.length === 0 ? (
+            <div className="h-40 grid place-items-center text-xs text-[var(--text-secondary)]">Sin campañas enviadas aún</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-[var(--border-subtle)]">
+                    {([
+                      { label: "Campaña", key: null },
+                      { label: "Enviados", key: "sent" as SortKey },
+                      { label: "Open rate", key: "openRate" as SortKey },
+                      { label: "Click rate", key: "clickRate" as SortKey },
+                      { label: "Fecha", key: "sentAt" as SortKey },
+                    ] as const).map(col => (
+                      <th
+                        key={col.label}
+                        onClick={col.key ? () => handleSort(col.key!) : undefined}
+                        className={`text-left px-4 py-2.5 text-[11px] font-medium text-[var(--text-secondary)] ${col.key ? "cursor-pointer hover:text-[var(--text-primary)]" : ""}`}
+                      >
+                        {col.label}
+                        {col.key && sortKey === col.key && (
+                          <span className="ml-1">{sortAsc ? "↑" : "↓"}</span>
+                        )}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedCampaigns.map((c, i) => (
+                    <tr key={c.id} className={`border-b border-[var(--border-subtle)] hover:bg-[var(--bg-surface)] transition-colors ${i % 2 === 0 ? "" : "bg-[var(--bg-surface)]/30"}`}>
+                      <td className="px-4 py-2.5 max-w-[160px]">
+                        <p className="font-medium text-[var(--text-primary)] truncate">{c.name}</p>
+                      </td>
+                      <td className="px-4 py-2.5 text-[var(--text-secondary)] tabular-nums">
+                        {c.sent > 0 ? c.sent.toLocaleString("es-ES") : "—"}
+                      </td>
+                      <td className="px-4 py-2.5">
+                        <span className={`font-semibold ${c.openRate >= 20 ? "text-[#1FA97A]" : c.openRate > 0 ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]"}`}>
+                          {c.openRate > 0 ? `${c.openRate}%` : "—"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2.5">
+                        <span className={`font-semibold ${c.clickRate >= 5 ? "text-[#8B5CF6]" : c.clickRate > 0 ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]"}`}>
+                          {c.clickRate > 0 ? `${c.clickRate}%` : "—"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2.5 text-[var(--text-secondary)]">{fmtDate(c.sentAt)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {/* Best hours chart */}
+        <div className={C}>
+          <p className="text-[13px] font-semibold text-[var(--text-primary)] flex items-center gap-2 mb-1">
+            <Clock className="w-4 h-4 text-[#F59E0B]" />
+            Mejores horarios
+          </p>
+          <p className="text-xs text-[var(--text-secondary)] mb-4">Aperturas por hora del día</p>
+          {loading ? <Skel h={200} /> : (data?.bestHours ?? []).every(h => h.opens === 0) ? (
+            <div className="h-52 grid place-items-center text-xs text-[var(--text-secondary)]">
+              Sin datos de aperturas aún
+            </div>
+          ) : (
+            <div style={{ height: 200 }}>
               <RC width="100%" height="100%">
-                <BC data={data?.byEdition ?? []} margin={{ top: 4, right: 4, left: -14, bottom: 0 }} barGap={4}>
-                  <RX dataKey="name" tick={ax} axisLine={false} tickLine={false} />
-                  <RY tick={ax} axisLine={false} tickLine={false} unit="%" domain={[0, 100]} />
-                  <RT contentStyle={tip} formatter={(v) => [`${v}%`]} />
-                  <RL wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
-                  <RBar dataKey="apertura" fill="#0F766E" fillOpacity={0.85} radius={[4, 4, 0, 0]} name="Apertura" maxBarSize={24} />
-                  <RBar dataKey="clicks"   fill="#3B82F6" fillOpacity={0.85} radius={[4, 4, 0, 0]} name="Clicks"   maxBarSize={24} />
+                <BC data={data?.bestHours ?? []} margin={{ top: 4, right: 4, left: -18, bottom: 0 }}>
+                  <RX dataKey="hour" tick={{ ...ax, fontSize: 9 }} axisLine={false} tickLine={false} tickFormatter={h => `${h}h`} interval={3} />
+                  <RY tick={ax} axisLine={false} tickLine={false} />
+                  <RT contentStyle={tip} formatter={(v, _, p) => [v, `${(p.payload as HourData).hour}:00h`]} />
+                  <RBar
+                    dataKey="opens"
+                    radius={[2, 2, 0, 0]}
+                    maxBarSize={14}
+                    name="Aperturas"
+                    fill="#F59E0B"
+                    fillOpacity={0.8}
+                    // highlight top hours
+                    label={false}
+                  />
                 </BC>
               </RC>
             </div>
           )}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className={C}>
-          <p className="text-[13px] font-semibold text-[var(--text-primary)] mb-1">Embudo de engagement</p>
-          <p className="text-xs text-[var(--text-secondary)] mb-5">Del total enviado cuántos abrieron y cuántos hicieron click</p>
-          {loading ? <Skel /> : totalSent === 0
-            ? <div className="h-40 grid place-items-center text-xs text-[var(--text-secondary)]">Sin envíos realizados</div>
-            : (
-              <div className="space-y-4">
-                <EngagementBar label="Enviados"  value={totalSent} max={totalSent} color="#06B6D4" />
-                <EngagementBar label="Abiertos"  value={opened}    max={totalSent} color="#0F766E" />
-                <EngagementBar label="Clicks"    value={clicked}   max={totalSent} color="#3B82F6" />
-              </div>
-            )}
-        </div>
-
-        <div className={C}>
-          <p className="text-[13px] font-semibold text-[var(--text-primary)] mb-1">Por estado</p>
-          <p className="text-xs text-[var(--text-secondary)] mb-3">Distribución de newsletters por situación actual</p>
-          {loading ? <Skel /> : (data?.byStatus?.length ?? 0) === 0 ? <div className="h-52 grid place-items-center text-xs text-[var(--text-secondary)]">Sin datos</div> : (
-            <div className="flex items-center gap-5">
-              <div className="relative w-36 h-36 shrink-0">
-                <RC width="100%" height="100%">
-                  <PC>
-                    <RPie data={data?.byStatus ?? []} cx="50%" cy="50%" innerRadius={44} outerRadius={68} dataKey="value" paddingAngle={4}>
-                      {(data?.byStatus ?? []).map((e, i) => <RCell key={i} fill={e.color} />)}
-                    </RPie>
-                    <RT contentStyle={tip} />
-                  </PC>
-                </RC>
-                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <p className="text-[10px] text-[var(--text-secondary)] uppercase">Total</p>
-                  <p className="text-xl font-bold text-[var(--text-primary)]">{totalStatus}</p>
-                </div>
-              </div>
-              <div className="flex-1 space-y-2">
-                {(data?.byStatus ?? []).map((s, i) => {
-                  const pct = totalStatus > 0 ? Math.round((s.value / totalStatus) * 100) : 0
-                  return (
-                    <div key={i} className="p-2.5 rounded-lg" style={{ background: s.color + "12" }}>
-                      <div className="flex justify-between items-center mb-1">
-                        <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full" style={{ background: s.color }} /><span className="text-xs font-semibold text-[var(--text-primary)]">{s.name}</span></div>
-                        <span className="text-sm font-bold" style={{ color: s.color }}>{s.value}</span>
-                      </div>
-                      <p className="text-[10px] text-[var(--text-secondary)]">{pct}% del total</p>
+          {!loading && data && data.bestHours.some(h => h.opens > 0) && (
+            <div className="mt-3 pt-3 border-t border-[var(--border-subtle)]">
+              <p className="text-[11px] font-medium text-[var(--text-secondary)] mb-1.5">Top horarios</p>
+              <div className="space-y-1">
+                {[...data.bestHours]
+                  .sort((a, b) => b.opens - a.opens)
+                  .slice(0, 3)
+                  .filter(h => h.opens > 0)
+                  .map(h => (
+                    <div key={h.hour} className="flex items-center justify-between text-xs">
+                      <span className="text-[var(--text-primary)] font-medium">{h.hour.toString().padStart(2, "0")}:00h</span>
+                      <span className="text-[#F59E0B] font-semibold">{h.opens} aperturas</span>
                     </div>
-                  )
-                })}
+                  ))}
               </div>
             </div>
           )}
         </div>
       </div>
+
     </div>
   )
 }

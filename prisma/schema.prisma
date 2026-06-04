@@ -1031,6 +1031,7 @@ model User {
   userTemplates          UserTemplate[]
   recurringInvoices      RecurringInvoice[]
   emailCampaigns         EmailCampaign[]
+  emailABTests           EmailABTest[]
   emailTemplates         EmailTemplate[]
   emailSegments          EmailSegment[]
   publicForms            PublicForm[]
@@ -3427,6 +3428,40 @@ model EmailUnsubscribe {
 
   @@index([email])
   @@map("email_unsubscribes")
+}
+
+model EmailABTest {
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String
+  status       String    @default("draft")
+
+  subjectA     String
+  contentA     String    @db.Text
+  sentToA      Int       @default(0)
+  opensA       Int       @default(0)
+  clicksA      Int       @default(0)
+
+  subjectB     String
+  contentB     String    @db.Text
+  sentToB      Int       @default(0)
+  opensB       Int       @default(0)
+  clicksB      Int       @default(0)
+
+  splitRatio   Int       @default(50)
+  winnerMetric String    @default("openRate")
+  winnerId     String?
+  winnerSentAt DateTime?
+
+  audienceSize Int       @default(0)
+  segmentId    String?
+
+  createdAt    DateTime  @default(now())
+  completedAt  DateTime?
+
+  @@index([userId])
+  @@map("email_ab_tests")
 }
 
 model EmailTemplate {

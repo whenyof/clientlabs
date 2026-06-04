@@ -3378,6 +3378,55 @@ model EmailCampaign {
   @@map("email_campaigns")
 }
 
+model EmailOpen {
+  id             String   @id @default(cuid())
+  campaignId     String
+  recipientEmail String
+  openedAt       DateTime @default(now())
+  ipAddress      String?
+  userAgent      String?
+
+  @@unique([campaignId, recipientEmail])
+  @@index([campaignId])
+  @@map("email_opens")
+}
+
+model EmailClick {
+  id             String   @id @default(cuid())
+  campaignId     String
+  recipientEmail String
+  url            String   @db.Text
+  clickedAt      DateTime @default(now())
+  ipAddress      String?
+
+  @@index([campaignId])
+  @@map("email_clicks")
+}
+
+model EmailBounce {
+  id         String   @id @default(cuid())
+  campaignId String?
+  email      String
+  bounceType String
+  reason     String?  @db.Text
+  bouncedAt  DateTime @default(now())
+
+  @@index([email])
+  @@map("email_bounces")
+}
+
+model EmailUnsubscribe {
+  id               String   @id @default(cuid())
+  email            String
+  campaignId       String?
+  subscriberId     String?
+  unsubscribedAt   DateTime @default(now())
+  reason           String?
+
+  @@index([email])
+  @@map("email_unsubscribes")
+}
+
 model PublicForm {
   id             String   @id @default(cuid())
   userId         String

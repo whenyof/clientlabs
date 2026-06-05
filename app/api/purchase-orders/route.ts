@@ -5,6 +5,7 @@ import { z } from "zod"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import * as invoiceService from "@/modules/invoicing/services/invoice.service"
+import { getNextDocumentNumber } from "@/lib/counters/document-counter"
 
 const poLineSchema = z.object({
   productId: z.string().optional(),
@@ -26,37 +27,16 @@ const createPurchaseOrderSchema = z.object({
   irpfRate: z.number().min(0).max(100).optional().default(0),
 })
 
-async function nextPONumber(userId: string): Promise<string> {
-  const year = new Date().getFullYear()
-  const last = await prisma.purchaseOrder.findFirst({
-    where: { userId, number: { startsWith: `PED-${year}-` } },
-    orderBy: { createdAt: "desc" },
-    select: { number: true },
-  })
-  const seq = last ? parseInt(last.number.split("-")[2] ?? "0") + 1 : 1
-  return `PED-${year}-${String(seq).padStart(3, "0")}`
+function nextPONumber(userId: string): Promise<string> {
+  return getNextDocumentNumber(userId, "PED")
 }
 
-async function nextQuoteNumber(userId: string): Promise<string> {
-  const year = new Date().getFullYear()
-  const last = await prisma.quote.findFirst({
-    where: { userId, number: { startsWith: `P-${year}-` } },
-    orderBy: { createdAt: "desc" },
-    select: { number: true },
-  })
-  const seq = last ? parseInt(last.number.split("-")[2] ?? "0") + 1 : 1
-  return `P-${year}-${String(seq).padStart(3, "0")}`
+function nextQuoteNumber(userId: string): Promise<string> {
+  return getNextDocumentNumber(userId, "P")
 }
 
-async function nextDNNumber(userId: string): Promise<string> {
-  const year = new Date().getFullYear()
-  const last = await prisma.deliveryNote.findFirst({
-    where: { userId, number: { startsWith: `ALB-${year}-` } },
-    orderBy: { createdAt: "desc" },
-    select: { number: true },
-  })
-  const seq = last ? parseInt(last.number.split("-")[2] ?? "0") + 1 : 1
-  return `ALB-${year}-${String(seq).padStart(3, "0")}`
+function nextDNNumber(userId: string): Promise<string> {
+  return getNextDocumentNumber(userId, "ALB")
 }
 
 

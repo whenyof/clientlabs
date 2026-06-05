@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { InvoiceSeriesSettings } from "./InvoiceSeriesSettings"
 
 interface InvoicingData {
   iban: string
@@ -285,6 +286,13 @@ export function InvoicingConfig() {
             </div>
           )}
         </div>
+      </div>
+      <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <h3 className="text-sm font-medium text-slate-500 mb-1">Series de facturación</h3>
+        <p className="text-xs text-slate-400 mb-4">
+          Configura el número de inicio de cada serie. Útil si vienes de otro software con numeración avanzada.
+        </p>
+        <InvoiceSeriesSettings />
       </div>
     </div>
   )

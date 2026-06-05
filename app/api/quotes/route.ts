@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth"
 import { z } from "zod"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { getNextDocumentNumber } from "@/lib/counters/document-counter"
 
 const lineItemSchema = z.object({
   productId: z.string().optional(),
@@ -23,15 +24,8 @@ const createQuoteSchema = z.object({
   quoteType: z.enum(["quote", "proforma"]).optional().default("quote"),
 })
 
-async function nextQuoteNumber(userId: string): Promise<string> {
-  const year = new Date().getFullYear()
-  const last = await prisma.quote.findFirst({
-    where: { userId, number: { startsWith: `P-${year}-` } },
-    orderBy: { createdAt: "desc" },
-    select: { number: true },
-  })
-  const seq = last ? parseInt(last.number.split("-")[2] ?? "0") + 1 : 1
-  return `P-${year}-${String(seq).padStart(3, "0")}`
+function nextQuoteNumber(userId: string): Promise<string> {
+  return getNextDocumentNumber(userId, "P")
 }
 
 export async function GET(req: NextRequest) {

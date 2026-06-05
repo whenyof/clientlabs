@@ -6,12 +6,13 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
-export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const { id } = await params
 
   const test = await prisma.emailABTest.findFirst({
-    where: { id: params.id, userId: session.user.id },
+    where: { id, userId: session.user.id },
   })
   if (!test) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
@@ -23,17 +24,18 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   return NextResponse.json({ ...test, openRateA, openRateB, clickRateA, clickRateB })
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const { id } = await params
 
   const test = await prisma.emailABTest.findFirst({
-    where: { id: params.id, userId: session.user.id },
+    where: { id, userId: session.user.id },
     select: { id: true, status: true },
   })
   if (!test) return NextResponse.json({ error: "Not found" }, { status: 404 })
   if (test.status === "running") return NextResponse.json({ error: "Cannot delete a running test" }, { status: 409 })
 
-  await prisma.emailABTest.delete({ where: { id: params.id } })
+  await prisma.emailABTest.delete({ where: { id } })
   return NextResponse.json({ ok: true })
 }

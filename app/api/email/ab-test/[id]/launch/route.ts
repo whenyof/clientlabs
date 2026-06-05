@@ -9,16 +9,18 @@ import { Resend } from "resend"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
-export async function POST(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   const userId = session.user.id
+  const { id } = await params
 
   const test = await prisma.emailABTest.findFirst({
-    where: { id: params.id, userId },
+    where: { id, userId },
   })
   if (!test) return NextResponse.json({ error: "Not found" }, { status: 404 })
   if (test.status !== "draft") return NextResponse.json({ error: "Test is not in draft status" }, { status: 409 })
+  const testId = test.id
 
   // Get subscriber list
   const subscribers = await prisma.newsletterSubscriber.findMany({

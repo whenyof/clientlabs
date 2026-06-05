@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth"
 import { z } from "zod"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { getNextDocumentNumber } from "@/lib/counters/document-counter"
 
 const itemSchema = z.object({
   productId: z.string().optional(),
@@ -23,15 +24,8 @@ const createDeliveryNoteSchema = z.object({
   items: z.array(itemSchema).max(200).default([]),
 })
 
-async function nextNumber(userId: string): Promise<string> {
-  const year = new Date().getFullYear()
-  const last = await prisma.deliveryNote.findFirst({
-    where: { userId, number: { startsWith: `A-${year}-` } },
-    orderBy: { createdAt: "desc" },
-    select: { number: true },
-  })
-  const seq = last ? parseInt(last.number.split("-")[2] ?? "0") + 1 : 1
-  return `A-${year}-${String(seq).padStart(3, "0")}`
+function nextNumber(userId: string): Promise<string> {
+  return getNextDocumentNumber(userId, "ALB")
 }
 
 export async function GET(req: NextRequest) {

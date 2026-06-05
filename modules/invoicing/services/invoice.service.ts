@@ -416,14 +416,14 @@ export async function issueInvoice(invoiceId: string, userId: string): Promise<I
       const { resolveVerifactuApiKey, createVerifactuInvoice: sendToVerifactu, formatDateForVerifactu } = await import("@/lib/verifactu")
       const nifApiKey = await resolveVerifactuApiKey(userId)
       if (!nifApiKey) {
-        console.error("[Verifactu] SKIP: no hay API key configurada (ni personal ni env VERIFACTI_ACCOUNT_KEY)")
+        console.log("[Verifactu] SKIP: no hay API key configurada (ni personal ni env VERIFACTI_ACCOUNT_KEY)")
       } else {
         const bizProfile2 = await prisma.businessProfile.findUnique({
           where: { userId },
           select: { verifactuEnabled: true },
         })
         if (!bizProfile2?.verifactuEnabled) {
-          console.error("[Verifactu] SKIP: verifactuEnabled=false en BusinessProfile del usuario", userId)
+          console.log("[Verifactu] SKIP: verifactuEnabled=false en BusinessProfile del usuario", userId)
         } else {
           const clientSnap = issuedClientSnapshot as Record<string, unknown>
           const clientTaxId = typeof clientSnap?.taxId === "string" ? clientSnap.taxId : undefined
@@ -495,7 +495,7 @@ export async function issueInvoice(invoiceId: string, userId: string): Promise<I
             }
           }
 
-          console.error("[Verifactu] Enviando factura:", JSON.stringify(data))
+          console.log("[Verifactu] Enviando factura:", JSON.stringify(data))
           const result = await sendToVerifactu(nifApiKey, data)
           await prisma.invoice.update({
             where: { id: invoiceId },
@@ -508,7 +508,7 @@ export async function issueInvoice(invoiceId: string, userId: string): Promise<I
               verifactuSentAt: new Date(),
             },
           })
-          console.error("[Verifactu] OK — UUID:", result.uuid, "Estado:", result.estado)
+          console.log("[Verifactu] OK — UUID:", result.uuid, "Estado:", result.estado)
         }
       }
     } catch (err) {

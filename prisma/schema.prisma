@@ -1038,6 +1038,8 @@ model User {
   calendarFeedToken      String?                 @unique
   twoFactorChallenges    TwoFactorChallenge[]
   sessionRevocations     SessionRevocation[]
+  passwordResetTokens    PasswordResetToken[]
+  documentViews          DocumentView[]
 }
 
 model TwoFactorChallenge {
@@ -3514,4 +3516,71 @@ model PublicForm {
 
   @@index([userId])
   @@map("public_forms")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+enum DocumentViewStatus {
+  SENT
+  EMAIL_OPENED
+  DOC_OPENED
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+enum DocumentViewType {
+  INVOICE
+  QUOTE
+  DELIVERY_NOTE
+  PURCHASE_ORDER
+}
+
+model DocumentView {
+  id              String             @id @default(cuid())
+  token           String             @unique @default(cuid())
+
+  type            DocumentViewType
+  documentId      String
+  userId          String
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  recipientEmail  String
+  recipientName   String
+
+  status          DocumentViewStatus @default(SENT)
+  sentAt          DateTime           @default(now())
+  emailOpenedAt   DateTime?
+  docOpenedAt     DateTime?
+  viewCount       Int                @default(0)
+  viewDurationSec Int?
+  downloadedAt    DateTime?
+
+  decidedAt       DateTime?
+  signatureName   String?
+  signatureIp     String?
+  signatureHash   String?
+  rejectionReason String?
+
+  reminderCount   Int                @default(0)
+  lastReminderAt  DateTime?
+  expiresAt       DateTime?
+
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@index([userId])
+  @@index([documentId, type])
+  @@index([token])
+  @@map("document_views")
 }

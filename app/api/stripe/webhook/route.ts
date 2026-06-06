@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { stripe, getPlanFromPriceId } from "@/lib/stripe"
 import { prisma, safePrismaQuery } from "@/lib/prisma"
+import { sendPaymentFailedEmail, sendSubscriptionActivatedEmail, sendSubscriptionCancelledEmail } from "@/lib/email-service"
 import type Stripe from "stripe"
 
 export const maxDuration = 30
@@ -140,6 +141,27 @@ export async function POST(req: NextRequest) {
           )
         } else {
           await upsertSubscription(userId, sub)
+
+          // Detect trial→active or incomplete→active: send activation email
+          const prev = (event.data.previous_attributes as Record<string, unknown> | undefined)
+          const prevStatus = prev?.status as string | undefined
+          const justActivated =
+            sub.status === "active" &&
+            (prevStatus === "trialing" || prevStatus === "incomplete")
+
+          if (justActivated) {
+            const user = await prisma.user.findUnique({
+              where: { id: userId },
+              select: { email: true, name: true, plan: true, planExpiresAt: true },
+            })
+            if (user?.email) {
+              const planLabel = user.plan ?? "Pro"
+              const nextBilling = user.planExpiresAt
+                ? user.planExpiresAt.toLocaleDateString("es-ES")
+                : "—"
+              sendSubscriptionActivatedEmail(user.email, user.name ?? "Usuario", planLabel, nextBilling).catch(() => {})
+            }
+          }
         }
 
         break
@@ -150,6 +172,11 @@ export async function POST(req: NextRequest) {
         const sub = event.data.object as Stripe.Subscription
         const userId = sub.metadata?.userId
         if (!userId) break
+
+        const userBefore = await prisma.user.findUnique({
+          where: { id: userId },
+          select: { email: true, name: true, plan: true, planExpiresAt: true },
+        })
 
         await safePrismaQuery(() =>
           prisma.user.update({
@@ -162,6 +189,18 @@ export async function POST(req: NextRequest) {
             },
           })
         )
+
+        if (userBefore?.email) {
+          const accessUntil = userBefore.planExpiresAt
+            ? userBefore.planExpiresAt.toLocaleDateString("es-ES")
+            : new Date().toLocaleDateString("es-ES")
+          sendSubscriptionCancelledEmail(
+            userBefore.email,
+            userBefore.name ?? "Usuario",
+            userBefore.plan ?? "Pro",
+            accessUntil
+          ).catch(() => {})
+        }
         break
       }
 
@@ -204,7 +243,19 @@ export async function POST(req: NextRequest) {
         const userId = sub.metadata?.userId
         if (!userId) break
 
-        console.warn(`[Stripe webhook] Payment failed for user ${userId}, sub ${sub.id}`)
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+          select: { email: true, name: true, plan: true, planExpiresAt: true },
+        })
+        if (user?.email) {
+          const planLabel = user.plan ?? "Pro"
+          const nextAttempt =
+            (invoice as unknown as { next_payment_attempt?: number | null }).next_payment_attempt
+          const retryDate = nextAttempt
+            ? new Date(nextAttempt * 1000).toLocaleDateString("es-ES")
+            : "—"
+          sendPaymentFailedEmail(user.email, user.name ?? "Usuario", planLabel, retryDate).catch(() => {})
+        }
         break
       }
 

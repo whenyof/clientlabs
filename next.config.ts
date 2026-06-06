@@ -52,6 +52,17 @@ const nextConfig: NextConfig = {
     } : false,
   },
 
+  async redirects() {
+    return [
+      // Rutas en inglés del sistema legacy de automatizaciones
+      { source: "/dashboard/automations/new", destination: "/dashboard/automatizaciones", permanent: true },
+      { source: "/dashboard/automations/:id/edit", destination: "/dashboard/automatizaciones", permanent: true },
+      // Alias en español para ajustes
+      { source: "/dashboard/ajustes", destination: "/dashboard/settings", permanent: true },
+      { source: "/dashboard/ajustes/:path*", destination: "/dashboard/settings/:path*", permanent: true },
+    ]
+  },
+
   // Headers for cache and security
   async headers() {
     return [

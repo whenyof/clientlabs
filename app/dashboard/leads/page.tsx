@@ -126,7 +126,9 @@ export default async function LeadsPage({
     stalled: stalledLeads,
     newThisWeek,
     hotDelta: hotNow - hotYesterday,
-    conversionRate: totalThisMonth > 0 ? Math.round((convertedThisMonth / totalThisMonth) * 100) : 0,
+    conversionRate: (convertedThisMonth + initialLeadsCount) > 0
+      ? Math.round((convertedThisMonth / (convertedThisMonth + initialLeadsCount)) * 100)
+      : 0,
   }
 
   const sources = distinctSources.map((s) => s.source).filter(Boolean) as string[]

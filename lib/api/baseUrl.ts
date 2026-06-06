@@ -9,8 +9,8 @@ export function getBaseUrl(): string {
   }
   
   // 2. Explicit Environment Variable (Preferred for Server/Workers)
-  if (process.env.NEXT_PUBLIC_BASE_URL) {
-    return process.env.NEXT_PUBLIC_BASE_URL
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL
   }
   
   // 3. Fallbacks for Next.js Server contexts

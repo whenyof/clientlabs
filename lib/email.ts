@@ -8,13 +8,19 @@ function getResend(): Resend | null {
     : null
 }
 
+export interface EmailAttachment {
+  filename: string
+  content: string // base64
+}
+
 export async function sendEmail(
   to: string,
   subject: string,
   html: string,
   from?: string,
   text?: string,
-  replyTo?: string
+  replyTo?: string,
+  attachments?: EmailAttachment[]
 ): Promise<{ success: boolean; id?: string; mock?: boolean; error?: unknown }> {
   const resend = getResend()
   if (!resend) {
@@ -27,8 +33,9 @@ export async function sendEmail(
       to,
       subject,
       html,
-      ...(text    && { text }),
-      ...(replyTo && { reply_to: replyTo }),
+      ...(text        && { text }),
+      ...(replyTo     && { reply_to: replyTo }),
+      ...(attachments && { attachments }),
     }
     const { data, error } = await resend.emails.send(payload)
     if (error) {

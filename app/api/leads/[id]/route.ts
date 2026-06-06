@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { invalidateCachedData } from "@/lib/redis-cache"
 import { updateLeadScore } from "@/lib/scoring/updateLeadScore"
+import { sendLeadConvertedEmail } from "@/lib/email-service"
 
 export async function PATCH(
   request: NextRequest,
@@ -79,6 +80,17 @@ export async function PATCH(
     if (data.leadStatus) {
       const uid = session.user!.id
       updateLeadScore(params.id, uid).catch(() => {})
+    }
+
+    // Notify user when lead is converted to client
+    if (data.leadStatus === "CONVERTED") {
+      const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { email: true, name: true },
+      })
+      if (user?.email) {
+        sendLeadConvertedEmail(user.email, user.name ?? "Usuario", lead.name ?? "Lead").catch(() => {})
+      }
     }
 
     // Fire-and-forget — don't let a slow/down Redis block the response

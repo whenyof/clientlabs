@@ -38,6 +38,7 @@ export function Pricing() {
     plans,
     faqsHeading,
     faqs,
+    footnote,
   } = pricingContent
 
   return (
@@ -160,7 +161,7 @@ export function Pricing() {
                   type="button"
                   disabled={loadingPlan !== null}
                   onClick={async () => {
-                    const stripePlan = plan.name.toUpperCase() as "STARTER" | "PRO" | "BUSINESS"
+                    const stripePlan = plan.planId
                     const period = annual ? "yearly" : "monthly"
                     setLoadingPlan(plan.name)
                     try { await startCheckout(stripePlan, period) }
@@ -180,6 +181,11 @@ export function Pricing() {
             )
           })}
         </div>
+
+        {/* ── Footnote tarjeta ── */}
+        <p className="mt-6 text-center text-[11.5px] leading-[1.6] text-[#6b7e88]">
+          {footnote}
+        </p>
 
         {/* ── FAQ ─────────────────────────────────────────────────────────────
             ref: .faq { max-width: 780px; margin: 72px auto 0; border-top }

@@ -222,7 +222,7 @@ export function ExitIntentPopup() {
             </a>
 
             <p className="text-center text-[11px] mt-3" style={{ color: "rgba(255,255,255,0.22)" }}>
-              14 dias gratis · Sin tarjeta · Cancela cuando quieras
+              14 días gratis · Sin permanencia · Cancela cuando quieras
             </p>
           </>
         )}

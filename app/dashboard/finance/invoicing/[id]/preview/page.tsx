@@ -1,13 +1,14 @@
 "use client"
 import { getBaseUrl } from "@/lib/api/baseUrl"
 
-
 import { useParams, useRouter } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
 import { InvoicePreview, type InvoicePreviewCompany } from "@domains/invoicing"
 import type { InvoiceDetail } from "@domains/invoicing"
 import { FiscalWarning } from "@/components/fiscal/FiscalWarning"
 import { calculateFiscalCompleteness } from "@/lib/clients/calculateFiscalCompleteness"
+import { DocumentTrackingPanel } from "@/components/ui/DocumentTrackingPanel"
+import { Mail, Loader2 } from "lucide-react"
 
 export default function InvoicePreviewPage() {
   const params = useParams()
@@ -15,8 +16,10 @@ export default function InvoicePreviewPage() {
   const id = typeof params.id === "string" ? params.id : null
   const [invoice, setInvoice] = useState<InvoiceDetail | null>(null)
   const [company, setCompany] = useState<InvoicePreviewCompany | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
+  const [loading, setLoading]       = useState(true)
+  const [error, setError]           = useState(false)
+  const [sending, setSending]       = useState(false)
+  const [sendResult, setSendResult] = useState<"sent" | "error" | null>(null)
 
   useEffect(() => {
     if (!id) {
@@ -57,6 +60,23 @@ export default function InvoicePreviewPage() {
     router.back()
   }, [router])
 
+  const handleSendEmail = useCallback(async () => {
+    if (!id || sending) return
+    setSending(true)
+    setSendResult(null)
+    try {
+      const res = await fetch(`${getBaseUrl()}/api/invoicing/${id}/send`, {
+        method: "POST",
+        credentials: "include",
+      })
+      setSendResult(res.ok ? "sent" : "error")
+    } catch {
+      setSendResult("error")
+    } finally {
+      setSending(false)
+    }
+  }, [id, sending])
+
   if (loading) {
     return (
       <div className="min-h-screen bg-zinc-100 flex items-center justify-center">
@@ -88,13 +108,33 @@ export default function InvoicePreviewPage() {
   return (
     <div className="min-h-screen bg-zinc-200 py-6 px-4">
       <div className="max-w-3xl mx-auto">
-        <button
-          type="button"
-          onClick={handleBack}
-          className="mb-4 text-sm text-zinc-600 hover:text-zinc-900 font-medium"
-        >
-          ← Volver a facturación
-        </button>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={handleBack}
+            className="text-sm text-zinc-600 hover:text-zinc-900 font-medium"
+          >
+            ← Volver a facturación
+          </button>
+          <div className="flex items-center gap-2">
+            {sendResult === "sent" && (
+              <span className="text-[12px] text-emerald-600 font-medium">Factura enviada</span>
+            )}
+            {sendResult === "error" && (
+              <span className="text-[12px] text-red-500 font-medium">Error al enviar</span>
+            )}
+            <button
+              type="button"
+              onClick={handleSendEmail}
+              disabled={sending}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] font-medium text-white disabled:opacity-60 transition-all hover:opacity-90"
+              style={{ background: "#0F766E" }}
+            >
+              {sending ? <Loader2 size={13} className="animate-spin" /> : <Mail size={13} />}
+              Enviar por email
+            </button>
+          </div>
+        </div>
         {/* Verifactu disclaimer */}
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 mb-4">
           <strong>Documento orientativo</strong> — No válido como factura legal. Pendiente de certificación Verifactu.
@@ -108,6 +148,12 @@ export default function InvoicePreviewPage() {
           </div>
         )}
         <InvoicePreview invoice={invoice} company={company} />
+
+        {invoice.status !== "DRAFT" && (
+          <div className="mt-4">
+            <DocumentTrackingPanel documentId={invoice.id} type="INVOICE" />
+          </div>
+        )}
       </div>
     </div>
   )

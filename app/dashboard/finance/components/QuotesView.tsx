@@ -3,13 +3,14 @@
 import { useState, useEffect, useCallback } from "react"
 import {
   FileText, Send, CheckCircle, XCircle, Clock,
-  Trash2, Search, Upload, X, Plus
+  Trash2, Search, Upload, X, Plus, ChevronDown
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { BannerLegal } from "@/components/finance/BannerLegal"
 import { ImportarDocumento } from "@/components/finance/ImportarDocumento"
 import { NewQuoteModal } from "./NewQuoteModal"
 import { GenerateDocumentsModal } from "./GenerateDocumentsModal"
+import { DocumentTrackingPanel } from "@/components/ui/DocumentTrackingPanel"
 
 type QuoteStatus = "DRAFT" | "SENT" | "ACCEPTED" | "REJECTED" | "EXPIRED" | "CONVERTED"
 
@@ -68,12 +69,13 @@ function fmtDate(d: string) {
 
 type Props = {
   clientId?: string
+  initialOpenId?: string
   onNavigateToInvoices?: () => void
   onNavigateToPurchaseOrders?: () => void
   onNavigateToDelivery?: () => void
 }
 
-export function QuotesView({ clientId, onNavigateToInvoices, onNavigateToPurchaseOrders, onNavigateToDelivery }: Props) {
+export function QuotesView({ clientId, initialOpenId, onNavigateToInvoices, onNavigateToPurchaseOrders, onNavigateToDelivery }: Props) {
   const [quotes, setQuotes] = useState<Quote[]>([])
   const [loading, setLoading] = useState(true)
   const [activeFilter, setActiveFilter] = useState("")
@@ -82,6 +84,7 @@ export function QuotesView({ clientId, onNavigateToInvoices, onNavigateToPurchas
   const [modalImportar, setModalImportar] = useState(false)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [generateModalQuote, setGenerateModalQuote] = useState<Quote | null>(null)
+  const [trackingOpenId, setTrackingOpenId] = useState<string | null>(initialOpenId ?? null)
 
   const fetchQuotes = useCallback(async () => {
     setLoading(true)
@@ -218,6 +221,8 @@ export function QuotesView({ clientId, onNavigateToInvoices, onNavigateToPurchas
                     <tr
                       key={q.id}
                       className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors"
+                      onClick={() => q.status !== "DRAFT" && setTrackingOpenId(trackingOpenId === q.id ? null : q.id)}
+                      style={{ cursor: q.status !== "DRAFT" ? "pointer" : "default" }}
                     >
                       <td className="py-3.5 px-4 font-mono text-[12px] text-slate-700 font-medium">{q.number}</td>
                       <td className="py-3.5 px-4 text-[13px] text-slate-900">{q.client.name ?? q.client.email ?? "—"}</td>
@@ -311,8 +316,25 @@ export function QuotesView({ clientId, onNavigateToInvoices, onNavigateToPurchas
                           )}
                         </div>
                       </td>
+                      {q.status !== "DRAFT" && (
+                        <td className="py-3.5 px-2 text-right" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            onClick={() => setTrackingOpenId(trackingOpenId === q.id ? null : q.id)}
+                            className="p-1 rounded text-slate-400 hover:text-slate-600 transition-colors"
+                            title="Ver seguimiento"
+                          >
+                            <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", trackingOpenId === q.id && "rotate-180")} />
+                          </button>
+                        </td>
+                      )}
                     </tr>
-
+                    {trackingOpenId === q.id && (
+                      <tr key={`tracking-${q.id}`} className="bg-slate-50/50 border-b border-slate-100">
+                        <td colSpan={8} className="px-4 py-3">
+                          <DocumentTrackingPanel documentId={q.id} type="QUOTE" />
+                        </td>
+                      </tr>
+                    )}
                   </>
                 ))}
               </tbody>

@@ -16,6 +16,10 @@ import {
  Shield,
  ChevronLeft,
  ChevronRight,
+ Target,
+ Package2,
+ Mail,
+ TrendingUp,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 
@@ -36,7 +40,10 @@ const menu: MenuGroup[] = [
  title: "CORE",
  items: [
  { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
+ { label: "Leads", icon: Target, href: "/dashboard/leads" },
  { label: "Clientes", icon: Users, href: "/dashboard/clients" },
+ { label: "Proveedores", icon: Package2, href: "/dashboard/providers" },
+ { label: "Ventas", icon: TrendingUp, href: "/dashboard/sales" },
  { label: "Finanzas", icon: BarChart3, href: "/dashboard/finance" },
  { label: "Tareas", icon: CheckSquare, href: "/dashboard/tasks" },
  ],
@@ -44,6 +51,7 @@ const menu: MenuGroup[] = [
  {
  title: "INTELIGENCIA",
  items: [
+ { label: "Email Marketing", icon: Mail, href: "/dashboard/marketing" },
  { label: "Automatizaciones", icon: Zap, href: "/dashboard/automatizaciones", badge: "pro" },
  { label: "Analytics", icon: LineChart, href: "/dashboard/analytics", badge: "beta" },
  { label: "Reporte Ejecutivo", icon: FileText, href: "/dashboard/reporting" },

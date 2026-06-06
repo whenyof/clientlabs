@@ -35,7 +35,7 @@ function primaryBtn(label: string, url: string): string {
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:28px auto 0">
       <tr>
         <td style="background:${C.green};border-radius:8px">
-          <a href="${url}" style="display:block;padding:14px 26px;font-size:15px;font-weight:600;color:#fff;text-decoration:none;white-space:nowrap;font-family:${FONT}">
+          <a href="${url}" target="_blank" rel="noopener noreferrer" style="display:block;padding:14px 26px;font-size:15px;font-weight:600;color:#fff;text-decoration:none;white-space:nowrap;font-family:${FONT}">
             ${label}
           </a>
         </td>
@@ -48,7 +48,7 @@ function outlineBtn(label: string, url: string): string {
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:12px auto 0">
       <tr>
         <td style="border:2px solid ${C.border};border-radius:8px">
-          <a href="${url}" style="display:block;padding:12px 24px;font-size:14px;font-weight:600;color:${C.grayLight};text-decoration:none;white-space:nowrap;font-family:${FONT}">
+          <a href="${url}" target="_blank" rel="noopener noreferrer" style="display:block;padding:12px 24px;font-size:14px;font-weight:600;color:${C.grayLight};text-decoration:none;white-space:nowrap;font-family:${FONT}">
             ${label}
           </a>
         </td>
@@ -166,11 +166,11 @@ function clShell(headerBadge: string, content: string): string {
           </tr>
         </table>
         <p style="font-size:12px;color:${C.grayLight};margin:0 0 8px;font-family:${FONT}">
-          <a href="${APP_URL}/help" style="color:${C.teal};text-decoration:none">Centro de ayuda</a>
+          <a href="${APP_URL}/help" target="_blank" rel="noopener noreferrer" style="color:${C.teal};text-decoration:none">Centro de ayuda</a>
           &nbsp;·&nbsp;
-          <a href="https://clientlabs.io/privacidad" style="color:${C.teal};text-decoration:none">Privacidad</a>
+          <a href="https://clientlabs.io/privacidad" target="_blank" rel="noopener noreferrer" style="color:${C.teal};text-decoration:none">Privacidad</a>
           &nbsp;·&nbsp;
-          <a href="mailto:hola@clientlabs.io" style="color:${C.teal};text-decoration:none">Contacto</a>
+          <a href="mailto:hola@clientlabs.io" target="_blank" rel="noopener noreferrer" style="color:${C.teal};text-decoration:none">Contacto</a>
         </p>
         <p style="font-size:11px;color:#C4CDD6;margin:0;font-family:${FONT};line-height:1.6">
           Mensaje automático · No respondas a este correo<br>
@@ -233,7 +233,7 @@ function bizShell(opts: {
       <tr><td>
         <p style="font-size:11px;color:${C.grayLight};margin:0 0 4px;font-family:${FONT}">${opts.businessName}</p>
         <p style="font-size:10px;color:#C4CDD6;margin:0;font-family:${FONT}">
-          Enviado con <a href="https://clientlabs.io" style="color:${C.grayLight};text-decoration:none">ClientLabs</a>
+          Enviado con <a href="https://clientlabs.io" target="_blank" rel="noopener noreferrer" style="color:${C.grayLight};text-decoration:none">ClientLabs</a>
         </p>
       </td></tr>
     </table>
@@ -266,7 +266,7 @@ export function welcomeEmail(name: string): string {
     `)}
     ${primaryBtn("Abrir mi dashboard", `${APP_URL}/dashboard`)}
     ${divider()}
-    ${smallP(`¿Tienes alguna duda? Escríbenos a <a href="mailto:hola@clientlabs.io" style="color:${C.teal};text-decoration:none;font-weight:600">hola@clientlabs.io</a> y te respondemos enseguida.`)}
+    ${smallP(`¿Tienes alguna duda? Escríbenos a <a href="mailto:hola@clientlabs.io" target="_blank" rel="noopener noreferrer" style="color:${C.teal};text-decoration:none;font-weight:600">hola@clientlabs.io</a> y te respondemos enseguida.`)}
   `
   return clShell("Cuenta · Bienvenida", content)
 }
@@ -385,7 +385,7 @@ export function subscriptionActivatedEmail(
     `)}
     ${primaryBtn("Ir al dashboard", `${APP_URL}/dashboard`)}
     ${divider()}
-    ${smallP(`Puedes gestionar tu suscripción en <a href="${APP_URL}/dashboard/settings/billing" style="color:${C.teal};text-decoration:none">Ajustes → Facturación</a>.`)}
+    ${smallP(`Puedes gestionar tu suscripción en <a href="${APP_URL}/dashboard/settings/billing" target="_blank" rel="noopener noreferrer" style="color:${C.teal};text-decoration:none">Ajustes → Facturación</a>.`)}
   `
   return clShell("Suscripción · ¡Activo!", content)
 }
@@ -408,7 +408,7 @@ export function paymentFailedEmail(
     </div>
     ${primaryBtn("Actualizar método de pago", `${APP_URL}/dashboard/settings/billing`)}
     ${divider()}
-    ${smallP(`Si crees que es un error bancario, contacta con tu entidad o escríbenos a <a href="mailto:hola@clientlabs.io" style="color:${C.teal};text-decoration:none">hola@clientlabs.io</a>.`)}
+    ${smallP(`Si crees que es un error bancario, contacta con tu entidad o escríbenos a <a href="mailto:hola@clientlabs.io" target="_blank" rel="noopener noreferrer" style="color:${C.teal};text-decoration:none">hola@clientlabs.io</a>.`)}
   `
   return clShell("Suscripción · Pago", content)
 }
@@ -431,7 +431,7 @@ export function subscriptionCancelledEmail(
     </div>
     ${primaryBtn("Reactivar mi suscripción", `${APP_URL}/dashboard/settings/billing`)}
     ${divider()}
-    ${smallP(`Gracias por haber confiado en ClientLabs. Si quieres contarnos por qué cancelaste, escríbenos a <a href="mailto:hola@clientlabs.io" style="color:${C.teal};text-decoration:none">hola@clientlabs.io</a>.`)}
+    ${smallP(`Gracias por haber confiado en ClientLabs. Si quieres contarnos por qué cancelaste, escríbenos a <a href="mailto:hola@clientlabs.io" target="_blank" rel="noopener noreferrer" style="color:${C.teal};text-decoration:none">hola@clientlabs.io</a>.`)}
   `
   return clShell("Suscripción · Cancelación", content)
 }
@@ -627,7 +627,7 @@ export function weeklyBusinessSummaryEmail(name: string, stats: WeeklyStats): st
     </table>
     ${primaryBtn("Ver dashboard completo", `${APP_URL}/dashboard`)}
     ${divider()}
-    ${smallP(`Recibes este resumen cada lunes. Puedes desactivarlo en <a href="${APP_URL}/dashboard/settings" style="color:${C.teal};text-decoration:none">Ajustes → Notificaciones</a>.`)}
+    ${smallP(`Recibes este resumen cada lunes. Puedes desactivarlo en <a href="${APP_URL}/dashboard/settings" target="_blank" rel="noopener noreferrer" style="color:${C.teal};text-decoration:none">Ajustes → Notificaciones</a>.`)}
   `
   return clShell("Resumen · Semanal", content)
 }
@@ -872,16 +872,16 @@ export function onboardingWelcomeEmail(name: string): { subject: string; html: s
       <p>Cree ClientLabs porque yo mismo perdi un cliente por no hacerle seguimiento. Desde ese dia decidi que tenia que existir algo simple, en español y pensado de verdad para autonomos como tu y como yo.</p>
       <p>Tienes 14 dias para probarlo todo sin limites y sin meter tarjeta. Para que le saques el maximo partido desde ya, te recomiendo hacer estas 3 cosas hoy — no tardan mas de 5 minutos:</p>
       <p style="padding-left:16px">
-        → <a href="https://app.clientlabs.io/dashboard/clients" style="color:#0F766E">Anade tus primeros 3 clientes</a><br>
-        → <a href="https://app.clientlabs.io/dashboard/leads" style="color:#0F766E">Crea tu primer lead</a><br>
-        → <a href="https://app.clientlabs.io/dashboard/finance/invoicing" style="color:#0F766E">Genera una factura de prueba</a>
+        → <a href="https://app.clientlabs.io/dashboard/clients" target="_blank" rel="noopener noreferrer" style="color:#0F766E">Anade tus primeros 3 clientes</a><br>
+        → <a href="https://app.clientlabs.io/dashboard/leads" target="_blank" rel="noopener noreferrer" style="color:#0F766E">Crea tu primer lead</a><br>
+        → <a href="https://app.clientlabs.io/dashboard/finance/invoicing" target="_blank" rel="noopener noreferrer" style="color:#0F766E">Genera una factura de prueba</a>
       </p>
       <p>Si en algun momento tienes una duda o algo no va como esperas — respondeme a este email directamente. Lo leo yo.</p>
       <p>Bienvenido.</p>
       <p>
         <strong>Errepe</strong><br>
         <span style="color:#64748B;font-size:13px">Founder de ClientLabs</span><br>
-        <span style="color:#64748B;font-size:13px">WhatsApp: <a href="${ERREPE_WA}" style="color:#0F766E">${ERREPE_NUM}</a></span>
+        <span style="color:#64748B;font-size:13px">WhatsApp: <a href="${ERREPE_WA}" target="_blank" rel="noopener noreferrer" style="color:#0F766E">${ERREPE_NUM}</a></span>
       </p>
       <p style="color:#94A3B8;font-size:12px;margin-top:24px">P.D. Puedes responderme directamente aqui — lo leo yo personalmente.</p>
     `, "Soy el founder — respondo personalmente a cada email"),
@@ -897,7 +897,7 @@ export function onboardingDay3Email(name: string, completedSteps: number): { sub
       <p>Ey ${first},</p>
       <p>Vi que entraste a ClientLabs pero te quedaste en el paso ${completedSteps} de 5.</p>
       <p>¿Hay algo que no quedo claro o que no encontraste? A veces el primer paso es el mas dificil.</p>
-      <p>Si me dices donde te atascaste te ayudo en 10 minutos — por aqui o por <a href="${ERREPE_WA}" style="color:#0F766E">WhatsApp</a>.</p>
+      <p>Si me dices donde te atascaste te ayudo en 10 minutos — por aqui o por <a href="${ERREPE_WA}" target="_blank" rel="noopener noreferrer" style="color:#0F766E">WhatsApp</a>.</p>
       <p>
         <strong>Errepe</strong><br>
         <span style="color:#64748B;font-size:13px">${ERREPE_NUM}</span>
@@ -938,7 +938,7 @@ export function onboardingDay7Email(name: string, stats: Day7Stats): { subject: 
         ${pending}${pendingAmt}
       </div>
       ${followUp}
-      <p>¿Quieres que te explique como usar las automatizaciones para que esto no se te escape? Respondeme aqui o por <a href="${ERREPE_WA}" style="color:#0F766E">WhatsApp</a>.</p>
+      <p>¿Quieres que te explique como usar las automatizaciones para que esto no se te escape? Respondeme aqui o por <a href="${ERREPE_WA}" target="_blank" rel="noopener noreferrer" style="color:#0F766E">WhatsApp</a>.</p>
       <p><strong>Errepe</strong></p>
     `, "Resumen de tu primera semana — responde si tienes preguntas"),
   }
@@ -954,11 +954,330 @@ export function onboardingDay10Email(name: string): { subject: string; html: str
       <p>Tu prueba gratuita termina en 4 dias.</p>
       <p>Antes de que acabe queria preguntarte — ¿has podido probar todo lo que necesitabas? ¿Hay algo que no funcione como esperabas?</p>
       <p>Si quieres te hago una llamada rapida de 10-15 minutos para ensenarte las partes que igual no has visto — las automatizaciones y los informes fiscales son las que mas gustan.</p>
-      <p>Dimelo por aqui o por <a href="${ERREPE_WA}" style="color:#0F766E">WhatsApp (${ERREPE_NUM})</a> y lo cuadramos.</p>
+      <p>Dimelo por aqui o por <a href="${ERREPE_WA}" target="_blank" rel="noopener noreferrer" style="color:#0F766E">WhatsApp (${ERREPE_NUM})</a> y lo cuadramos.</p>
       <p><strong>Errepe</strong></p>
-      <p style="color:#94A3B8;font-size:12px;margin-top:20px">P.D. Si ya tienes claro que quieres continuar — <a href="https://clientlabs.io/plan" style="color:#0F766E">elige tu plan aqui</a>.</p>
+      <p style="color:#94A3B8;font-size:12px;margin-top:20px">P.D. Si ya tienes claro que quieres continuar — <a href="https://clientlabs.io/plan" target="_blank" rel="noopener noreferrer" style="color:#0F766E">elige tu plan aqui</a>.</p>
     `, "Faltan 4 dias — te hago una llamada si quieres"),
   }
+}
+
+// ── TRACKING EMAILS (6 templates) ─────────────────────────────────────────────
+
+// EMAIL 1 — Factura al cliente (reemplaza invoiceSentEmail con docUrl + pixel)
+export function invoiceToClientEmail(params: {
+  clientName: string
+  invoiceNumber: string
+  total: number
+  businessName: string
+  docUrl: string
+  pixelUrl: string
+  dueDate?: string | null
+  senderEmail?: string | null
+}): string {
+  const { clientName, invoiceNumber, total, businessName, docUrl, pixelUrl, dueDate, senderEmail } = params
+  const totalFmt = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(total)
+  const content = `
+    <p style="font-family:${FONT};font-size:16px;color:${C.grayText};line-height:1.6;margin:0 0 8px">Hola <strong>${clientName}</strong>,</p>
+    ${h1El("Tu factura está lista")}
+    ${bodyP(`<strong>${businessName}</strong> te ha enviado la factura <strong>${invoiceNumber}</strong> por un importe de <strong>${totalFmt}</strong>.`)}
+    <div style="border:1px solid ${C.border};border-radius:12px;overflow:hidden;margin:0 0 24px">
+      <div style="background:${C.grayBg};padding:16px 20px;border-bottom:1px solid ${C.border}">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+          <tr>
+            <td>
+              <p style="font-family:${FONT};font-size:12px;font-weight:700;color:${C.grayLight};text-transform:uppercase;letter-spacing:0.08em;margin:0 0 2px">Número</p>
+              <p style="font-family:${FONT};font-size:15px;font-weight:700;color:${C.navy};margin:0">${invoiceNumber}</p>
+            </td>
+            <td style="text-align:right">
+              <p style="font-family:${FONT};font-size:12px;font-weight:700;color:${C.grayLight};text-transform:uppercase;letter-spacing:0.08em;margin:0 0 2px">De</p>
+              <p style="font-family:${FONT};font-size:15px;font-weight:600;color:${C.navy};margin:0">${businessName}</p>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <div style="background:#FCFDFD;padding:24px 20px;text-align:center">
+        <p style="font-family:${FONT};font-size:11px;font-weight:700;color:${C.grayLight};text-transform:uppercase;letter-spacing:0.1em;margin:0 0 10px">Total factura</p>
+        <p style="font-family:${FONT};font-size:36px;font-weight:800;color:${C.navy};margin:0;letter-spacing:-0.02em">${totalFmt}</p>
+        ${dueDate ? `<p style="font-family:${FONT};font-size:12px;color:${C.grayLight};margin:8px 0 0">Vencimiento: <strong>${dueDate}</strong></p>` : ""}
+      </div>
+    </div>
+    ${primaryBtn("Ver factura →", docUrl)}
+    ${divider()}
+    ${smallP(`También puedes descargar el PDF desde el enlace anterior.${senderEmail ? `<br>Si tienes alguna pregunta, contacta con <strong>${businessName}</strong> en <a href="mailto:${senderEmail}" target="_blank" rel="noopener noreferrer" style="color:${C.teal};text-decoration:none">${senderEmail}</a>.` : ""}`)}
+    <img src="${pixelUrl}" width="1" height="1" alt="" style="display:block;width:1px;height:1px;overflow:hidden;border:0;margin:0;padding:0">
+  `
+  return bizShell({ businessName, badgeText: "Factura", badgeBg: C.grayBg, badgeColor: C.grayLight, topAccent: C.green, content })
+}
+
+// EMAIL 2 — Presupuesto al cliente (reemplaza quoteSentEmail con docUrl + pixel)
+export function quoteToClientEmail(params: {
+  clientName: string
+  quoteNumber: string
+  total: number
+  businessName: string
+  docUrl: string
+  pixelUrl: string
+  expiresAt?: Date | string | null
+  senderEmail?: string | null
+}): string {
+  const { clientName, quoteNumber, total, businessName, docUrl, pixelUrl, expiresAt, senderEmail } = params
+  const totalFmt = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(total)
+  const expiresFmt = expiresAt
+    ? new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "long", year: "numeric" }).format(new Date(expiresAt))
+    : null
+  const content = `
+    <p style="font-family:${FONT};font-size:16px;color:${C.grayText};line-height:1.6;margin:0 0 8px">Hola <strong>${clientName}</strong>,</p>
+    ${h1El("Tu presupuesto está listo")}
+    ${bodyP(`<strong>${businessName}</strong> te ha enviado un presupuesto por un importe de <strong>${totalFmt}</strong>. Puedes revisarlo y responder directamente desde el enlace.`)}
+    <div style="border:1px solid ${C.border};border-radius:12px;overflow:hidden;margin:0 0 24px">
+      <div style="background:${C.grayBg};padding:16px 20px;border-bottom:1px solid ${C.border}">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+          <tr>
+            <td>
+              <p style="font-family:${FONT};font-size:12px;font-weight:700;color:${C.grayLight};text-transform:uppercase;letter-spacing:0.08em;margin:0 0 2px">Número</p>
+              <p style="font-family:${FONT};font-size:15px;font-weight:700;color:${C.navy};margin:0">${quoteNumber}</p>
+            </td>
+            <td style="text-align:right">
+              <p style="font-family:${FONT};font-size:12px;font-weight:700;color:${C.grayLight};text-transform:uppercase;letter-spacing:0.08em;margin:0 0 2px">De</p>
+              <p style="font-family:${FONT};font-size:15px;font-weight:600;color:${C.navy};margin:0">${businessName}</p>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <div style="background:#FCFDFD;padding:24px 20px;text-align:center">
+        <p style="font-family:${FONT};font-size:11px;font-weight:700;color:${C.grayLight};text-transform:uppercase;letter-spacing:0.1em;margin:0 0 10px">Total presupuestado</p>
+        <p style="font-family:${FONT};font-size:36px;font-weight:800;color:${C.navy};margin:0;letter-spacing:-0.02em">${totalFmt}</p>
+        ${expiresFmt ? `<p style="font-family:${FONT};font-size:12px;color:${C.grayLight};margin:8px 0 0">Válido hasta el <strong>${expiresFmt}</strong></p>` : ""}
+      </div>
+    </div>
+    ${primaryBtn("Ver y responder presupuesto →", docUrl)}
+    ${divider()}
+    ${smallP(`Puedes aceptar o rechazar el presupuesto directamente desde el enlace anterior.${senderEmail ? `<br>¿Tienes preguntas? Escribe a <a href="mailto:${senderEmail}" target="_blank" rel="noopener noreferrer" style="color:${C.teal};text-decoration:none">${senderEmail}</a>.` : ""}`)}
+    <img src="${pixelUrl}" width="1" height="1" alt="" style="display:block;width:1px;height:1px;overflow:hidden;border:0;margin:0;padding:0">
+  `
+  return bizShell({ businessName, badgeText: "Presupuesto", badgeBg: C.greenLight, badgeColor: C.teal, topAccent: C.green, content })
+}
+
+// EMAIL 3 — Al autónomo: cliente abrió el documento
+export function documentOpenedEmail(params: {
+  senderName: string
+  recipientName: string
+  recipientEmail: string
+  docType: "INVOICE" | "QUOTE"
+  docNumber?: string | null
+  total?: number | null
+  dashboardUrl: string
+}): string {
+  const { senderName, recipientName, recipientEmail, docType, docNumber, total, dashboardUrl } = params
+  const typeLabel = docType === "INVOICE" ? "factura" : "presupuesto"
+  const totalFmt = total != null ? new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(total) : null
+  const content = `
+    ${badgePill("Documento abierto", C.greenLight, C.teal, C.green)}
+    ${h1El(`${recipientName} ha visto tu ${typeLabel}`)}
+    ${bodyP(`<strong>${recipientName}</strong> (<a href="mailto:${recipientEmail}" target="_blank" rel="noopener noreferrer" style="color:${C.teal};text-decoration:none">${recipientEmail}</a>) acaba de abrir el documento${docNumber ? ` <strong>${docNumber}</strong>` : ""}${totalFmt ? ` por importe de <strong>${totalFmt}</strong>` : ""}.`)}
+    ${docType === "QUOTE" ? bodyP("Puede aceptar o rechazar el presupuesto directamente desde el enlace. Te avisaremos cuando tome una decisión.") : ""}
+    ${infoBox(`
+      ${infoRow("Cliente", `${recipientName} · ${recipientEmail}`)}
+      ${infoRow(docType === "INVOICE" ? "Factura" : "Presupuesto", docNumber ?? "—", true)}
+    `)}
+    ${primaryBtn("Ver estado del documento →", dashboardUrl)}
+    ${divider()}
+    ${smallP(`Hola <strong>${senderName}</strong>, si el cliente lleva más de 48h sin responder, te enviaremos un recordatorio automático.`)}
+  `
+  return clShell("Seguimiento · Documento abierto", content)
+}
+
+// EMAIL 4 — Al autónomo: presupuesto aceptado
+export function quoteAcceptedToSenderEmail(params: {
+  senderName: string
+  recipientName: string
+  recipientEmail: string
+  quoteNumber: string
+  total: number
+  signatureName: string
+  signatureHash: string
+  acceptedAt: Date | string
+  invoicingUrl: string
+  quotesUrl?: string
+}): string {
+  const { senderName, recipientName, recipientEmail, quoteNumber, total, signatureName, signatureHash, acceptedAt, invoicingUrl, quotesUrl } = params
+  const totalFmt = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(total)
+  const dateStr = new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(acceptedAt))
+  const content = `
+    ${badgePill("¡Aceptado!", C.greenLight, C.teal, C.green)}
+    ${h1El("¡Tu presupuesto ha sido aceptado!")}
+    ${bodyP(`<strong>${recipientName}</strong> (<a href="mailto:${recipientEmail}" target="_blank" rel="noopener noreferrer" style="color:${C.teal};text-decoration:none">${recipientEmail}</a>) ha aceptado el presupuesto <strong>${quoteNumber}</strong> de <strong>${totalFmt}</strong> el ${dateStr}.`)}
+    ${infoBox(`
+      ${infoRow("Firmado por", signatureName)}
+      ${infoRow("Fecha y hora", dateStr)}
+      ${infoRow("Importe aceptado", totalFmt)}
+      ${infoRow("Referencia legal", `<span style="font-family:monospace;font-size:11px;word-break:break-all">${signatureHash.substring(0, 32)}…</span>`, true)}
+    `)}
+    ${bodyP("Se ha creado automáticamente un borrador de factura en tu panel de facturación.")}
+    ${primaryBtn("Ver borrador de factura →", invoicingUrl)}
+    ${quotesUrl ? `
+    <p style="text-align:center;font-family:${FONT};font-size:13px;color:${C.grayLight};margin:8px 0">o</p>
+    ${outlineBtn("Ver presupuesto original →", quotesUrl)}` : ""}
+    ${divider()}
+    ${smallP(`Hola <strong>${senderName}</strong>, el hash de firma completo está guardado en el registro del documento para uso legal.`)}
+  `
+  return clShell("Seguimiento · Presupuesto aceptado", content)
+}
+
+// EMAIL 5 — Al autónomo: presupuesto rechazado
+export function quoteRejectedToSenderEmail(params: {
+  senderName: string
+  recipientName: string
+  recipientEmail: string
+  quoteNumber: string
+  total: number
+  rejectionReason?: string | null
+  dashboardUrl: string
+}): string {
+  const { senderName, recipientName, recipientEmail, quoteNumber, total, rejectionReason, dashboardUrl } = params
+  const totalFmt = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(total)
+  const reasonBlock = rejectionReason
+    ? `<div style="background:${C.redLight};border:1px solid #FECACA;border-radius:10px;padding:16px 20px;margin:0 0 24px">
+        <p style="font-family:${FONT};font-size:12px;font-weight:700;color:${C.red};text-transform:uppercase;letter-spacing:0.06em;margin:0 0 6px">Motivo indicado</p>
+        <p style="font-family:${FONT};font-size:14px;color:${C.navy};margin:0;line-height:1.6">"${rejectionReason}"</p>
+      </div>`
+    : ""
+  const content = `
+    ${badgePill("Rechazado", C.redLight, C.red, C.red)}
+    ${h1El("Presupuesto rechazado")}
+    ${bodyP(`<strong>${recipientName}</strong> (<a href="mailto:${recipientEmail}" target="_blank" rel="noopener noreferrer" style="color:${C.teal};text-decoration:none">${recipientEmail}</a>) ha rechazado el presupuesto <strong>${quoteNumber}</strong> de <strong>${totalFmt}</strong>.`)}
+    ${reasonBlock}
+    ${bodyP(`Puedes contactar con <strong>${recipientName}</strong> para conocer más detalles y enviar una propuesta revisada.`)}
+    ${primaryBtn("Ver en el panel →", dashboardUrl)}
+    ${divider()}
+    ${smallP(`Hola <strong>${senderName}</strong>, el registro del documento sigue disponible en tu panel.`)}
+  `
+  return clShell("Seguimiento · Presupuesto rechazado", content)
+}
+
+// EMAIL 6 — Al cliente: confirmación de aceptación
+export function acceptanceConfirmationEmail(params: {
+  businessName: string
+  recipientName: string
+  docNumber: string
+  senderName: string
+  signatureName: string
+  acceptedAt: Date | string
+  docUrl: string
+}): string {
+  const { businessName, recipientName, docNumber, senderName, signatureName, acceptedAt, docUrl } = params
+  const dateStr = new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "long", year: "numeric" }).format(new Date(acceptedAt))
+  const timeStr = new Intl.DateTimeFormat("es-ES", { hour: "2-digit", minute: "2-digit" }).format(new Date(acceptedAt))
+  const content = `
+    <p style="font-family:${FONT};font-size:16px;color:${C.grayText};line-height:1.6;margin:0 0 8px">Hola <strong>${recipientName}</strong>,</p>
+    ${h1El("Has aceptado el presupuesto")}
+    ${bodyP(`Hemos registrado tu aceptación del presupuesto <strong>${docNumber}</strong> de <strong>${senderName}</strong>.`)}
+    ${infoBox(`
+      ${infoRow("Firmado como", signatureName)}
+      ${infoRow("Fecha", dateStr)}
+      ${infoRow("Hora", timeStr)}
+      ${infoRow("Documento", docNumber, true)}
+    `)}
+    ${bodyP(`<strong>${senderName}</strong> recibirá una notificación y se pondrá en contacto contigo próximamente.`)}
+    ${primaryBtn("Ver el documento →", docUrl)}
+    ${divider()}
+    ${smallP("Esta confirmación tiene validez como aceptación electrónica según el Reglamento eIDAS de la UE. Guarda este email como justificante.")}
+  `
+  return bizShell({ businessName, badgeText: "Confirmación", badgeBg: C.greenLight, badgeColor: C.teal, topAccent: C.green, content })
+}
+
+// ── 9. Presupuesto aceptado — confirmación al CLIENTE ─────────────────────────
+
+export function quoteAcceptedToRecipientEmail(params: {
+  recipientName: string
+  senderName: string
+  senderEmail: string
+  number: string
+  total: number
+  decidedAt: string
+  docUrl: string
+}): string {
+  const { recipientName, senderName, senderEmail, number, total, decidedAt, docUrl } = params
+  const totalFmt = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(total)
+  const content = `
+    <p style="font-family:${FONT};font-size:16px;color:${C.grayText};line-height:1.6;margin:0 0 8px">Hola <strong>${recipientName}</strong>,</p>
+    ${h1El("Tu aceptación ha sido registrada")}
+    ${bodyP(`Hemos registrado correctamente tu aceptación del presupuesto <strong>${number}</strong>.`)}
+    ${infoBox(`
+      ${infoRow("Estado", "&#10003; Aceptado")}
+      ${infoRow("Fecha", decidedAt)}
+      ${infoRow("Importe", totalFmt)}
+      ${infoRow("Presupuesto", number, true)}
+    `, C.greenLight, "#A7F3D0")}
+    ${bodyP(`En breve <strong>${senderName}</strong> se pondrá en contacto contigo para confirmar los detalles y dar comienzo al trabajo.`)}
+    ${bodyP(`Si necesitas consultar el presupuesto puedes acceder desde el enlace original en cualquier momento.`)}
+    ${outlineBtn("Ver presupuesto →", docUrl)}
+    ${divider()}
+    ${smallP(`Si tienes alguna pregunta antes, puedes contactar directamente con ${senderName} en <a href="mailto:${senderEmail}" target="_blank" rel="noopener noreferrer" style="color:${C.teal};text-decoration:none">${senderEmail}</a>`)}
+  `
+  return bizShell({ businessName: senderName, badgeText: "Confirmación", badgeBg: C.greenLight, badgeColor: C.teal, topAccent: C.green, content })
+}
+
+// ── 10. Presupuesto rechazado — confirmación al CLIENTE ────────────────────────
+
+export function quoteRejectedToRecipientEmail(params: {
+  recipientName: string
+  senderName: string
+  senderEmail: string
+  number: string
+  docUrl: string
+}): string {
+  const { recipientName, senderName, senderEmail, number, docUrl } = params
+  const content = `
+    <p style="font-family:${FONT};font-size:16px;color:${C.grayText};line-height:1.6;margin:0 0 8px">Hola <strong>${recipientName}</strong>,</p>
+    ${h1El("Hemos recibido tu respuesta")}
+    ${bodyP(`Hemos recibido tu respuesta sobre el presupuesto <strong>${number}</strong>.`)}
+    ${bodyP(`Entendemos que esta vez no era el momento adecuado. Gracias por haberte tomado el tiempo de revisarlo.`)}
+    ${bodyP(`Si en el futuro necesitas nuestros servicios o quieres que revisemos la propuesta, no dudes en ponerte en contacto con <strong>${senderName}</strong>.`)}
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:28px auto 0">
+      <tr>
+        <td style="border:2px solid ${C.border};border-radius:8px">
+          <a href="mailto:${senderEmail}" target="_blank" rel="noopener noreferrer" style="display:block;padding:12px 24px;font-size:14px;font-weight:600;color:${C.grayText};text-decoration:none;white-space:nowrap;font-family:${FONT}">
+            Contactar con ${senderName} →
+          </a>
+        </td>
+      </tr>
+    </table>
+    ${divider()}
+    ${smallP(`Este email es una confirmación automática. No es necesario que respondas.`)}
+  `
+  void docUrl
+  return bizShell({ businessName: senderName, badgeText: "Respuesta recibida", badgeBg: C.grayBg, badgeColor: C.grayLight, content })
+}
+
+// ── 11. Factura recibida — primera apertura (al CLIENTE) ──────────────────────
+
+export function invoiceReceivedByClientEmail(params: {
+  recipientName: string
+  senderName: string
+  senderEmail: string
+  number: string
+  total: number
+  dueDate?: string
+  docUrl: string
+}): string {
+  const { recipientName, senderName, senderEmail, number, total, dueDate, docUrl } = params
+  const totalFmt = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(total)
+  const content = `
+    <p style="font-family:${FONT};font-size:16px;color:${C.grayText};line-height:1.6;margin:0 0 8px">Hola <strong>${recipientName}</strong>,</p>
+    ${h1El("Tu factura está disponible")}
+    ${bodyP(`Gracias por confiar en <strong>${senderName}</strong>.`)}
+    ${infoBox(`
+      ${infoRow("Factura", number)}
+      ${infoRow("Importe", totalFmt)}
+      ${dueDate ? infoRow("Vencimiento", dueDate, true) : infoRow("Estado", "Pendiente de pago", true)}
+    `)}
+    ${bodyP(`Puedes ver y descargar tu factura en cualquier momento desde el enlace siguiente.`)}
+    ${primaryBtn("Ver factura →", docUrl)}
+    ${divider()}
+    ${smallP(`Si tienes alguna pregunta sobre esta factura, contacta con <strong>${senderName}</strong> en <a href="mailto:${senderEmail}" target="_blank" rel="noopener noreferrer" style="color:${C.teal};text-decoration:none">${senderEmail}</a>`)}
+  `
+  return bizShell({ businessName: senderName, badgeText: "Factura", badgeBg: C.grayBg, badgeColor: C.grayLight, content })
 }
 
 export function onboardingDay14Email(name: string): { subject: string; html: string; from: string } {
@@ -969,12 +1288,12 @@ export function onboardingDay14Email(name: string): { subject: string; html: str
     html: erepeHtml(`
       <p>Buenas ${first},</p>
       <p>Hoy es el ultimo dia de tu prueba gratuita.</p>
-      <p>Si ClientLabs te ha servido — puedes <a href="https://clientlabs.io/plan" style="color:#0F766E">elegir tu plan aqui</a>. Todos incluyen IVA y puedes cancelar cuando quieras.</p>
+      <p>Si ClientLabs te ha servido — puedes <a href="https://clientlabs.io/plan" target="_blank" rel="noopener noreferrer" style="color:#0F766E">elegir tu plan aqui</a>. Todos incluyen IVA y puedes cancelar cuando quieras.</p>
       <p>Si todavia no pudiste probarlo bien o tienes dudas — dimelo y <strong>te mantengo el acceso 7 dias mas</strong> para que termines de verlo sin prisas. Sin compromiso.</p>
       <p>Y si ClientLabs no es para ti — tambien me lo puedes decir. Me ayuda saber por que para seguir mejorando.</p>
       <p>
         <strong>Errepe</strong><br>
-        <span style="color:#64748B;font-size:13px">WhatsApp: <a href="${ERREPE_WA}" style="color:#0F766E">${ERREPE_NUM}</a></span>
+        <span style="color:#64748B;font-size:13px">WhatsApp: <a href="${ERREPE_WA}" target="_blank" rel="noopener noreferrer" style="color:#0F766E">${ERREPE_NUM}</a></span>
       </p>
     `, "Hoy termina — puedo darte 7 dias mas si todavia no lo viste bien"),
   }

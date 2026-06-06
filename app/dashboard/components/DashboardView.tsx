@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useId } from "react"
+import Link from "next/link"
 import { ArrowUpRight, ArrowDownRight, Minus, ExternalLink, Download } from "lucide-react"
 import type { SummaryData } from "../page"
 
@@ -154,11 +155,11 @@ function CardHead({ title, subtitle, actions }: { title: string; subtitle?: stri
   )
 }
 
-function CardLink({ children }: { children: React.ReactNode }) {
+function CardLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <a style={{ fontSize: 11.5, color: C.ink3, fontWeight: 500, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4 }}>
+    <Link href={href} style={{ fontSize: 11.5, color: C.ink3, fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 4, textDecoration: "none" }}>
       {children} <ExternalLink size={11} />
-    </a>
+    </Link>
   )
 }
 
@@ -288,6 +289,7 @@ const STATUS_CFG: Record<string, { bg: string; color: string; label: string }> =
   NEW:       { bg: C.bg3,       color: C.ink2,     label: "Nuevo" },
   CONTACTED: { bg: "#eef2fb",   color: "#3756a4",  label: "Contactado" },
   QUALIFIED: { bg: C.bg3,       color: C.ink2,     label: "Cualificado" },
+  STALLED:   { bg: "#fff7ed",   color: "#c2410c",  label: "Estancado" },
   CONVERTED: { bg: C.accentSoft, color: C.accentInk, label: "Ganado" },
   LOST:      { bg: C.redSoft,   color: C.red,      label: "Perdido" },
 }
@@ -420,7 +422,7 @@ export function DashboardView({ data }: Props) {
             {greeting}{meta.userName ? `, ${meta.userName.split(" ")[0]}` : ""}
           </h1>
           <div style={{ marginTop: 6, display: "flex", alignItems: "center", gap: 14, fontSize: 12.5, color: C.ink3 }}>
-            <span>{meta.currentDate}</span>
+            <span>{meta.currentDate ? new Intl.DateTimeFormat("es-ES", { weekday: "long", year: "numeric", month: "long", day: "numeric" }).format(new Date(meta.currentDate)) : ""}</span>
             <span style={{ color: C.ink5 }}>·</span>
             <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
               <span style={{ width: 6, height: 6, borderRadius: 99, background: C.accent, boxShadow: `0 0 0 3px ${C.accentSoft}`, display: "inline-block", animation: "pulse-dot 2s ease-in-out infinite" }} />
@@ -467,7 +469,7 @@ export function DashboardView({ data }: Props) {
                   <span style={{ width: 10, height: 0, borderTop: `2px dashed ${C.ink4}`, display: "inline-block" }} />Plan
                 </span>
               </div>
-              <CardLink>Detalle</CardLink>
+              <CardLink href="/dashboard/finance/invoicing">Detalle</CardLink>
             </>}
           />
           <div style={{ padding: 18 }}>
@@ -476,7 +478,7 @@ export function DashboardView({ data }: Props) {
         </Card>
 
         <Card>
-          <CardHead title="Leads recientes" subtitle={`${kpis.leadsActive} activos`} actions={<CardLink>Pipeline</CardLink>} />
+          <CardHead title="Leads recientes" subtitle={`${kpis.leadsActive} activos`} actions={<CardLink href="/dashboard/leads">Pipeline</CardLink>} />
           <div>
             {leadsRecent.length === 0 ? (
               <div style={{ padding: "32px 18px", textAlign: "center", color: C.ink3, fontSize: 12.5 }}>No hay leads recientes</div>
@@ -503,7 +505,7 @@ export function DashboardView({ data }: Props) {
           <CardHead
             title="Pipeline comercial"
             subtitle={`${totalLeads} leads · conversión ${convRate.toFixed(1)}%`}
-            actions={<CardLink>Pipeline completo</CardLink>}
+            actions={<CardLink href="/dashboard/leads">Pipeline completo</CardLink>}
           />
           <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)" }}>
             {pipelineStages.map((s, i) => (
@@ -525,7 +527,7 @@ export function DashboardView({ data }: Props) {
           <CardHead
             title="Tareas prioritarias"
             subtitle={`${tasksHighPriority.length} abiertas · ${kpis.tasksOverdue} vencidas`}
-            actions={<CardLink>Tablero</CardLink>}
+            actions={<CardLink href="/dashboard/tasks">Tablero</CardLink>}
           />
           <div style={{ padding: 18 }}>
             {tasksHighPriority.length === 0 ? (
@@ -568,7 +570,7 @@ export function DashboardView({ data }: Props) {
       <div className="grid grid-cols-2 gap-4 mb-4">
         {/* Client health */}
         <Card>
-          <CardHead title="Salud de cartera" subtitle={`${kpis.clientsActive} clientes activos`} actions={<CardLink>Clientes</CardLink>} />
+          <CardHead title="Salud de cartera" subtitle={`${kpis.clientsActive} clientes activos`} actions={<CardLink href="/dashboard/clients">Clientes</CardLink>} />
           <div style={{ padding: 18 }}>
             <div style={{ display: "flex", gap: 3, height: 8, marginBottom: 12 }}>
               {[
@@ -610,7 +612,7 @@ export function DashboardView({ data }: Props) {
 
         {/* Lead sources */}
         <Card>
-          <CardHead title="Origen de oportunidades" subtitle="Últimos 90 días" actions={<CardLink>Atribución</CardLink>} />
+          <CardHead title="Origen de oportunidades" subtitle="Últimos 90 días" actions={<CardLink href="/dashboard/leads">Atribución</CardLink>} />
           <div style={{ padding: 18 }}>
             {sources.length === 0 ? (
               <div style={{ textAlign: "center", padding: "24px 0", color: C.ink3, fontSize: 12.5 }}>Sin datos de fuentes</div>

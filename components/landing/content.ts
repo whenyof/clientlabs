@@ -37,8 +37,8 @@ export const heroContent = {
   },
   trust: [
     "14 días gratis",
-    "Sin tarjeta",
     "Sin permanencia",
+    "Cancela cuando quieras",
   ],
   tools: [
     { name: "Excel",      color: "#1f7145", style: { top: "8%",  left:  "6%",  "--rot": "-6deg", "--tx": "4px",  "--ty": "-8px", animationDelay: "0s"   } },
@@ -425,7 +425,7 @@ export const carouselContent = {
     eyebrow: "Empieza ya",
     headline: "Regístrate\ngratis hoy.",
     cta: { label: "Empezar gratis", href: "/register" },
-    hint: "Sin tarjeta de crédito · cancela cuando quieras",
+    hint: "14 días gratis · cancela cuando quieras",
   },
 } as const
 
@@ -434,19 +434,20 @@ export const carouselContent = {
 export const pricingContent = {
   eyebrow: "Precios",
   headline: "Simple. Sin sorpresas.",
-  sub: "14 días gratis en cualquier plan. Sin tarjeta. Elige cuando estés listo.",
+  sub: "14 días gratis en cualquier plan. Sin permanencia. Cancela cuando quieras.",
   annualDiscount: "Ahorra 25%",
   toggleLabels: { monthly: "Mensual", annual: "Anual" },
   plans: [
     {
       name: "Básico",
+      planId: "STARTER" as const,
       tag: "Para autónomos que empiezan",
       monthly: 17.99,
       yearly: 14.99,
       yearlyBilled: 179.99,
       featured: false,
       featuredLabel: null,
-      note: "14 días gratis · Sin tarjeta",
+      note: "14 días gratis · Sin permanencia",
       cta: "Empezar 14 días gratis",
       features: [
         "1 usuario incluido",
@@ -460,13 +461,14 @@ export const pricingContent = {
     },
     {
       name: "Pro",
+      planId: "PRO" as const,
       tag: "Para autónomos y pymes establecidos",
       monthly: 29.99,
       yearly: 24.99,
       yearlyBilled: 299.99,
       featured: true,
       featuredLabel: "Más popular",
-      note: "14 días gratis · Sin tarjeta",
+      note: "14 días gratis · Sin permanencia",
       cta: "Empezar 14 días gratis",
       features: [
         "3 usuarios incluidos",
@@ -480,13 +482,14 @@ export const pricingContent = {
     },
     {
       name: "Negocio",
+      planId: "BUSINESS" as const,
       tag: "Para pymes en crecimiento",
       monthly: 49.99,
       yearly: 41.66,
       yearlyBilled: 499.99,
       featured: false,
       featuredLabel: null,
-      note: "14 días gratis · Sin tarjeta",
+      note: "14 días gratis · Sin permanencia",
       cta: "Empezar 14 días gratis",
       features: [
         "5 usuarios incluidos",
@@ -503,7 +506,7 @@ export const pricingContent = {
   faqs: [
     [
       "¿Hay un plan gratuito?",
-      "No hay plan gratuito permanente. Todos los planes incluyen 14 días de prueba completa (nivel Pro) sin tarjeta. Al terminar el trial, eliges el plan que mejor se adapta a tu negocio.",
+      "No hay plan gratuito permanente. Todos los planes incluyen 14 días de prueba completa. Puedes cancelar en cualquier momento antes de que finalice el periodo de prueba. Al terminar, eliges el plan que mejor se adapta a tu negocio.",
     ],
     [
       "¿Puedo cancelar cuando quiera?",
@@ -522,6 +525,7 @@ export const pricingContent = {
       "Claro. Todo el equipo es hispanohablante. Soporte por email en Básico, soporte prioritario en Pro, WhatsApp directo en Negocio.",
     ],
   ] as [string, string][],
+  footnote: "* Se requiere tarjeta para activar el periodo de prueba. No se realizará ningún cargo hasta el día 15. Cancela en cualquier momento desde tu panel.",
 } as const
 
 /* ─── Final CTA ──────────────────────────────────────────────────── */
@@ -530,14 +534,14 @@ export const finalCtaContent = {
   pill: "Tu negocio merece más",
   headline: "Tu negocio merece",
   headlineAccent: "un sistema.",
-  sub: "Empieza gratis hoy. Sin tarjeta. Sin permanencia. Sin excusas.",
+  sub: "Empieza gratis hoy. 14 días sin coste. Sin permanencia. Sin excusas.",
   ctas: {
     primary:   { label: "Empezar gratis",    href: "/register" },
     secondary: { label: "Ver demo en vivo",  href: "/demo" },
   },
   trust: [
     "14 días gratis",
-    "Sin tarjeta",
+    "Sin coste hasta el día 15",
     "Cancela cuando quieras",
     "Soporte en español",
   ],

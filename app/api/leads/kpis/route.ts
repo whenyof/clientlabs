@@ -28,7 +28,7 @@ export async function GET() {
 
   const staleDate = new Date(now.getTime() - staleDays)
 
-  const [total, hot, converted, stalled, newThisWeek, hotYesterday, hotNow, convertedThisMonth, totalThisMonth] =
+  const [total, hot, converted, stalled, newThisWeek, hotYesterday, hotNow, convertedThisMonth, activeLeads] =
     await Promise.all([
       prisma.lead.count({ where: { userId } }),
       // Potenciales = score > 40 OR leadStatus = QUALIFIED
@@ -67,12 +67,14 @@ export async function GET() {
       prisma.lead.count({
         where: { userId, leadStatus: "CONVERTED", updatedAt: { gte: monthStart } },
       }),
-      // Total leads this month (for conversion rate)
-      prisma.lead.count({ where: { userId, createdAt: { gte: monthStart } } }),
+      // Active leads (in funnel, not closed) — denominador correcto para tasa de conversión
+      prisma.lead.count({ where: { userId, leadStatus: { notIn: ["CONVERTED", "LOST"] } } }),
     ])
 
   const hotDelta = hotNow - hotYesterday
-  const conversionRate = totalThisMonth > 0 ? Math.round((convertedThisMonth / totalThisMonth) * 100) : 0
+  const conversionRate = (convertedThisMonth + activeLeads) > 0
+    ? Math.round((convertedThisMonth / (convertedThisMonth + activeLeads)) * 100)
+    : 0
 
   const result = { total, hot, converted, stalled, newThisWeek, hotDelta, conversionRate }
   await setCachedData(cacheKey, result, 60)

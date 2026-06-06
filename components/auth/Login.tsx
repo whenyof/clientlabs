@@ -94,7 +94,7 @@ export default function Login({ onSwitch }: Props) {
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Contraseña</label>
-            <a href="#" className="text-[11.5px] font-medium text-[#0F766E] hover:text-[#0E665F] transition-colors">
+            <a href="/auth/forgot-password" className="text-[11.5px] font-medium text-[#0F766E] hover:text-[#0E665F] transition-colors">
               ¿Olvidaste tu contraseña?
             </a>
           </div>

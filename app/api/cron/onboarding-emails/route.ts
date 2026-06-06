@@ -22,8 +22,7 @@ export async function GET(request: NextRequest) {
 
   const users = await prisma.user.findMany({
     where: {
-      plan: "TRIAL",
-      planExpiresAt: { not: null as never },
+      plan: { in: ["TRIAL", "STARTER", "PRO", "BUSINESS"] },
     },
     select: {
       id: true,

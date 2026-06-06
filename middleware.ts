@@ -110,6 +110,7 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith("/plan") ||
 
     // Tokens públicos y rutas de acceso directo
+    pathname.startsWith("/doc/") ||    // documentos compartidos con clientes
     pathname.startsWith("/f/") ||      // public forms
     pathname.startsWith("/r/") ||      // redirect shortlinks
     pathname.startsWith("/scan") ||
@@ -119,6 +120,7 @@ export async function middleware(req: NextRequest) {
 
     // APIs públicas (SDK, ingest, formularios)
     pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/api/doc/") ||  // tracking de documentos públicos
     pathname.startsWith("/api/waitlist") ||
     pathname.startsWith("/api/register") ||
     pathname.startsWith("/api/ingest") ||

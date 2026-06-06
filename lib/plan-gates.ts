@@ -129,7 +129,7 @@ export const PLAN_FEATURES = {
     activityFull: true,
     prioritySupport: true,
     dedicatedSupport: false,
-    emailMarketing: false,
+    emailMarketing: true,
   },
   STARTER: {
     leads: true,

@@ -15,6 +15,9 @@ import {
 } from "@/components/ui/select"
 import { EmailEditor } from "@/components/email/EmailEditor"
 import { TemplateGallery, SaveTemplateModal } from "@/components/email/TemplateGallery"
+import { NuevaPlantillaModal } from "@/components/email/NuevaPlantillaModal"
+import { TemplatePreviewModal } from "@/components/email/TemplatePreviewModal"
+import { EMAIL_TEMPLATES_CATALOG, CATEGORY_LABELS as TMPL_CAT_LABELS, type EmailTemplateDef } from "@/components/email/templates-catalog"
 import {
   Megaphone, Filter, Plus, Upload, MoreHorizontal, ArrowUpRight,
   LayoutDashboard, Send, Newspaper,
@@ -2125,6 +2128,11 @@ export default function MarketingPage() {
   const [tmplFilter, setTmplFilter] = useState("Todas")
   const [showComposer, setShowComposer] = useState(false)
   const [composerStep, setComposerStep] = useState(0)
+  const [hoveredTemplate, setHoveredTemplate] = useState<string | null>(null)
+  const [showNuevaPlantilla, setShowNuevaPlantilla] = useState(false)
+  const [previewTemplate, setPreviewTemplate] = useState<EmailTemplateDef | null>(null)
+  const [customEmailTemplates, setCustomEmailTemplates] = useState<EmailTemplateDef[]>([])
+  const [customEmailTemplatesLoaded, setCustomEmailTemplatesLoaded] = useState(false)
 
   // A/B test composer state
   const [abEnabled, setAbEnabled] = useState(false)
@@ -2177,16 +2185,24 @@ export default function MarketingPage() {
     { nm: "AI · Riesgo de cancelar", desc: "Modelo de churn detecta probabilidad > 60%.",    ct: 184,   open: 31.6, click: 4.2,  churn: 8.4, color: "#0e7490", bg: "#ecfeff" },
   ]
 
-  const TEMPLATES_DESIGN = [
-    { nm: "Bienvenida Pro",       cat: "Onboarding",     color: D.accent },
-    { nm: "Newsletter semanal",   cat: "Newsletter",     color: D.blue },
-    { nm: "Caso de éxito",        cat: "Marketing",      color: D.violet },
-    { nm: "Recordatorio compra",  cat: "Transaccional",  color: D.warn },
-    { nm: "Promo flash",          cat: "Marketing",      color: D.accent },
-    { nm: "Confirmación pago",    cat: "Transaccional",  color: D.blue },
-    { nm: "Reactivación 60d",     cat: "Re-engagement",  color: D.violet },
-    { nm: "Anuncio producto",     cat: "Marketing",      color: D.warn },
-  ]
+  async function loadCustomEmailTemplates() {
+    if (customEmailTemplatesLoaded) return
+    try {
+      const res = await fetch("/api/email/templates")
+      const data = await res.json()
+      const custom: EmailTemplateDef[] = (data.custom ?? []).map((c: { id: string; name: string; category: string; subject: string; htmlContent: string; description?: string }) => ({
+        id: c.id,
+        name: c.name,
+        category: (c.category ?? "marketing") as EmailTemplateDef["category"],
+        description: c.description ?? "",
+        blocks: 0,
+        subject: c.subject,
+        html: c.htmlContent,
+      }))
+      setCustomEmailTemplates(custom)
+      setCustomEmailTemplatesLoaded(true)
+    } catch { /* silent */ }
+  }
 
   const SCHED_7 = [
     { d: "Hoy",  date: 27, today: true,  slots: [
@@ -2878,43 +2894,141 @@ export default function MarketingPage() {
       )}
 
       {/* ══════════ PLANTILLAS ══════════ */}
-      {emTab === "plantillas" && (
-        <div>
-          <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" as const }}>
-            <div style={{ display: "inline-flex", background: D.bg2, border: `1px solid ${D.line}`, borderRadius: 7, padding: 2 }}>
-              {["Todas", "Marketing", "Transaccional", "Newsletter", "Onboarding"].map(s => (
-                <button key={s} onClick={() => setTmplFilter(s)} style={{ padding: "4px 10px", borderRadius: 5, fontFamily: "ui-monospace,monospace", fontSize: 11.5, color: tmplFilter === s ? D.ink : D.ink3, background: tmplFilter === s ? "white" : "transparent", boxShadow: tmplFilter === s ? `0 0 0 1px ${D.line} inset` : "none", border: "none", cursor: "pointer" }}>{s}</button>
-              ))}
-            </div>
-            <button style={{ marginLeft: "auto", padding: "6px 12px", borderRadius: 6, background: D.bg, border: `1px solid ${D.line}`, color: D.ink2, fontSize: 12.5, fontWeight: 550, cursor: "pointer" }}>+ Diseñar plantilla</button>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14 }}>
-            {TEMPLATES_DESIGN.filter(t => tmplFilter === "Todas" || t.cat === tmplFilter).map(tmpl => (
-              <div key={tmpl.nm} style={{ background: D.bg, border: `1px solid ${D.line}`, borderRadius: 10, overflow: "hidden", cursor: "pointer" }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = D.ink3 }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = D.line }}
-              >
-                {/* Thumbnail */}
-                <div style={{ height: 160, background: D.bg2, display: "flex", flexDirection: "column", padding: 12, gap: 6 }}>
-                  <div style={{ height: 12, borderRadius: 3, background: tmpl.color, width: "60%" }} />
-                  <div style={{ height: 60, borderRadius: 4, background: `${tmpl.color}20`, flex: "none" }} />
-                  <div style={{ height: 8, borderRadius: 3, background: D.line, width: "80%" }} />
-                  <div style={{ height: 8, borderRadius: 3, background: D.line, width: "60%" }} />
-                  <div style={{ height: 26, borderRadius: 5, background: tmpl.color, width: "50%", marginTop: 4 }} />
-                </div>
-                <div style={{ padding: "12px 14px" }}>
-                  <div style={{ fontWeight: 600, fontSize: 13, color: D.ink, marginBottom: 3 }}>{tmpl.nm}</div>
-                  <div style={{ fontSize: 11.5, color: D.ink3, display: "flex", alignItems: "center", gap: 6 }}>
-                    <span>{tmpl.cat}</span>
-                    <span style={{ color: D.ink5 }}>·</span>
-                    <span>6 bloques</span>
-                  </div>
-                </div>
+      {emTab === "plantillas" && (() => {
+        const TMPL_FILTERS = ["Todas", "Mis plantillas", "Marketing", "Newsletter", "Transaccional", "Onboarding"]
+        const CAT_MAP: Record<string, string> = { Marketing: "marketing", Newsletter: "newsletter", Transaccional: "transaccional", Onboarding: "onboarding" }
+        const ACCENT_COLOR: Record<string, string> = { onboarding: D.accent, newsletter: D.blue, marketing: D.violet, transaccional: D.warn }
+
+        const visibleTemplates = tmplFilter === "Mis plantillas"
+          ? customEmailTemplates
+          : EMAIL_TEMPLATES_CATALOG.filter(t => tmplFilter === "Todas" || t.category === CAT_MAP[tmplFilter])
+
+        return (
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            {/* Controls row */}
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" as const, alignItems: "center" }}>
+              <div style={{ display: "inline-flex", background: D.bg2, border: `1px solid ${D.line}`, borderRadius: 7, padding: 2, flexWrap: "wrap" as const }}>
+                {TMPL_FILTERS.map(s => (
+                  <button key={s} onClick={() => {
+                    setTmplFilter(s)
+                    if (s === "Mis plantillas") loadCustomEmailTemplates()
+                  }} style={{ padding: "4px 10px", borderRadius: 5, fontFamily: "ui-monospace,monospace", fontSize: 11.5, color: tmplFilter === s ? D.ink : D.ink3, background: tmplFilter === s ? "white" : "transparent", boxShadow: tmplFilter === s ? `0 0 0 1px ${D.line} inset` : "none", border: "none", cursor: "pointer", whiteSpace: "nowrap" as const }}>{s}{s === "Mis plantillas" && customEmailTemplates.length > 0 ? ` (${customEmailTemplates.length})` : ""}</button>
+                ))}
               </div>
-            ))}
+              <button onClick={() => setShowNuevaPlantilla(true)} style={{ marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 14px", borderRadius: 6, background: D.accent, color: "white", fontSize: 12.5, fontWeight: 600, border: "none", cursor: "pointer" }}>
+                <Plus className="h-3.5 w-3.5" />Diseñar plantilla
+              </button>
+            </div>
+
+            {/* Mis plantillas empty state */}
+            {tmplFilter === "Mis plantillas" && customEmailTemplatesLoaded && customEmailTemplates.length === 0 && (
+              <div style={{ background: D.bg, border: `1px solid ${D.line}`, borderRadius: 10, padding: "40px 24px", textAlign: "center" }}>
+                <div style={{ width: 48, height: 48, borderRadius: 10, background: D.bg2, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
+                  <Bookmark className="h-5 w-5 text-slate-300" />
+                </div>
+                <p style={{ fontWeight: 600, fontSize: 14, color: D.ink, margin: "0 0 6px", fontFamily: "system-ui,sans-serif" }}>Aún no tienes plantillas guardadas</p>
+                <p style={{ fontSize: 13, color: D.ink3, margin: "0 0 16px", fontFamily: "system-ui,sans-serif" }}>Diseña una plantilla personalizada o guarda una de las del catálogo</p>
+                <button onClick={() => setShowNuevaPlantilla(true)} style={{ padding: "8px 18px", borderRadius: 6, background: D.accent, color: "white", fontSize: 13, fontWeight: 600, border: "none", cursor: "pointer" }}>+ Diseñar mi primera plantilla</button>
+              </div>
+            )}
+
+            {/* Template grid */}
+            {visibleTemplates.length > 0 && (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14 }}>
+                {visibleTemplates.map(tmpl => {
+                  const accentColor = ACCENT_COLOR[tmpl.category] ?? D.accent
+                  const isHovered = hoveredTemplate === tmpl.id
+                  return (
+                    <div
+                      key={tmpl.id}
+                      style={{ background: D.bg, border: `1px solid ${isHovered ? D.ink3 : D.line}`, borderRadius: 10, overflow: "hidden", cursor: "pointer", position: "relative", transition: "border-color 0.15s" }}
+                      onMouseEnter={() => setHoveredTemplate(tmpl.id)}
+                      onMouseLeave={() => setHoveredTemplate(null)}
+                    >
+                      {/* Thumbnail — real HTML preview scaled down */}
+                      <div style={{ height: 160, background: D.bg2, overflow: "hidden", position: "relative" }}>
+                        {tmpl.html ? (
+                          <iframe
+                            srcDoc={tmpl.html}
+                            style={{ width: 600, height: 500, border: "none", transform: "scale(0.267)", transformOrigin: "top left", pointerEvents: "none" }}
+                            sandbox="allow-same-origin"
+                            title={tmpl.name}
+                          />
+                        ) : (
+                          <div style={{ height: "100%", display: "flex", flexDirection: "column", padding: 12, gap: 6 }}>
+                            <div style={{ height: 12, borderRadius: 3, background: accentColor, width: "60%" }} />
+                            <div style={{ height: 60, borderRadius: 4, background: `${accentColor}20`, flex: "none" }} />
+                            <div style={{ height: 8, borderRadius: 3, background: D.line, width: "80%" }} />
+                            <div style={{ height: 8, borderRadius: 3, background: D.line, width: "60%" }} />
+                            <div style={{ height: 26, borderRadius: 5, background: accentColor, width: "50%", marginTop: 4 }} />
+                          </div>
+                        )}
+                        {/* Hover overlay */}
+                        {isHovered && (
+                          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                            <button
+                              onClick={e => { e.stopPropagation(); setPreviewTemplate(tmpl) }}
+                              style={{ padding: "6px 12px", borderRadius: 6, background: "rgba(255,255,255,0.15)", color: "white", fontSize: 12, fontWeight: 600, border: "1px solid rgba(255,255,255,0.4)", cursor: "pointer", fontFamily: "system-ui,sans-serif" }}
+                            >Vista previa</button>
+                            <button
+                              onClick={e => { e.stopPropagation(); setEmTab("campanas"); setShowComposer(true); setComposerStep(0) }}
+                              style={{ padding: "6px 12px", borderRadius: 6, background: "white", color: D.ink, fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer", fontFamily: "system-ui,sans-serif" }}
+                            >Usar →</button>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Card info */}
+                      <div style={{ padding: "11px 14px 13px" }}>
+                        <div style={{ fontWeight: 600, fontSize: 13, color: D.ink, marginBottom: 2, fontFamily: "system-ui,sans-serif" }}>{tmpl.name}</div>
+                        <div style={{ fontSize: 11.5, color: D.ink3, display: "flex", alignItems: "center", gap: 5, fontFamily: "system-ui,sans-serif" }}>
+                          <span style={{ display: "inline-block", width: 6, height: 6, borderRadius: 99, background: accentColor, flexShrink: 0 }} />
+                          <span>{TMPL_CAT_LABELS[tmpl.category] ?? tmpl.category}</span>
+                          {tmpl.blocks > 0 && (<><span style={{ color: D.ink5 }}>·</span><span>{tmpl.blocks} bloques</span></>)}
+                        </div>
+                        {tmpl.description && (
+                          <p style={{ fontSize: 11, color: D.ink4, margin: "4px 0 0", lineHeight: 1.4, fontFamily: "system-ui,sans-serif", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as const, overflow: "hidden" }}>{tmpl.description}</p>
+                        )}
+                      </div>
+
+                      {/* Footer actions for mis plantillas */}
+                      {tmplFilter === "Mis plantillas" && (
+                        <div style={{ borderTop: `1px solid ${D.line2}`, padding: "8px 14px", display: "flex", gap: 6 }}>
+                          <button
+                            onClick={() => setPreviewTemplate(tmpl)}
+                            style={{ flex: 1, padding: "5px 0", borderRadius: 6, background: D.bg2, border: `1px solid ${D.line}`, color: D.ink2, fontSize: 12, fontWeight: 550, cursor: "pointer", fontFamily: "system-ui,sans-serif" }}
+                          >Vista previa</button>
+                          <button
+                            onClick={async () => {
+                              if (!confirm("¿Eliminar esta plantilla?")) return
+                              await fetch(`/api/email/templates/${tmpl.id}`, { method: "DELETE" })
+                              setCustomEmailTemplates(p => p.filter(t => t.id !== tmpl.id))
+                              toast.success("Plantilla eliminada")
+                            }}
+                            style={{ width: 28, height: 28, borderRadius: 6, background: "none", border: `1px solid ${D.line}`, color: D.ink3, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                          >×</button>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* Modals */}
+            <NuevaPlantillaModal
+              open={showNuevaPlantilla}
+              onClose={() => setShowNuevaPlantilla(false)}
+              onSaved={() => { setCustomEmailTemplatesLoaded(false); if (tmplFilter === "Mis plantillas") loadCustomEmailTemplates() }}
+            />
+            <TemplatePreviewModal
+              template={previewTemplate}
+              onClose={() => setPreviewTemplate(null)}
+              onUse={() => { setEmTab("campanas"); setShowComposer(true); setComposerStep(0) }}
+            />
           </div>
-        </div>
-      )}
+        )
+      })()}
 
       {/* ══════════ ENTREGABILIDAD ══════════ */}
       {emTab === "entregabilidad" && (

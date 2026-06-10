@@ -21,6 +21,8 @@ import {
   ChevronLeft,
   LogOut,
   ChevronsUpDown,
+  Check,
+  Plus,
 } from "lucide-react"
 
 // ─── Design tokens ─────────────────────────────────────────────────────────
@@ -95,8 +97,8 @@ const NAV: NavGroup[] = [
           { label: "Albaranes",               href: "/dashboard/finance?tab=albaranes" },
           { label: "Pedidos",                 href: "/dashboard/finance?tab=pedidos" },
           { label: "Recurrentes",             href: "/dashboard/finance?tab=recurrentes" },
-          { label: "Gastos · compras",        href: "/dashboard/finance?tab=gastos" },
-          { label: "Productos · servicios",   href: "/dashboard/finance?tab=productos" },
+          { label: "Gastos · Compras",        href: "/dashboard/finance?tab=gastos" },
+          { label: "Productos · Servicios",   href: "/dashboard/finance?tab=productos" },
           { label: "Impuestos · IVA/IRPF",    href: "/dashboard/finance?tab=impuestos" },
           { label: "Verifactu · AEAT",        href: "/dashboard/finance?tab=verifactu" },
           { label: "Configuración",           href: "/dashboard/finance?tab=configuracion" },
@@ -349,6 +351,7 @@ export default function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname()
   const { data: session, status } = useSession()
+  const [wsOpen, setWsOpen] = useState(false)
 
   if (status === "loading") {
     return (
@@ -438,53 +441,141 @@ export default function Sidebar({
       </div>
 
       {/* ── Workspace selector ──────────────────────────── */}
-      {isCollapsed ? (
-        <div style={{
-          margin: "10px auto 6px",
-          padding: 8,
-          border: `1px solid ${C.line}`,
-          borderRadius: 8,
-          background: C.bg,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          cursor: "pointer", width: 38, flexShrink: 0,
-        }}>
-          <span style={{
-            width: 22, height: 22,
-            background: "linear-gradient(135deg, #0a0a0a 0%, #404040 100%)",
-            color: "white", display: "grid", placeItems: "center",
-            fontWeight: 600, fontSize: 10, borderRadius: 5,
-          }}>
-            {workspaceInitials}
-          </span>
-        </div>
-      ) : (
-        <div style={{
-          margin: "10px 10px 6px",
-          padding: "8px 10px",
-          border: `1px solid ${C.line}`,
-          borderRadius: 8, background: C.bg,
-          display: "flex", alignItems: "center", gap: 9,
-          cursor: "pointer", flexShrink: 0,
-        }}>
-          <span style={{
-            width: 22, height: 22,
-            background: "linear-gradient(135deg, #0a0a0a 0%, #404040 100%)",
-            color: "white", display: "grid", placeItems: "center",
-            fontWeight: 600, fontSize: 10, borderRadius: 5, flexShrink: 0,
-          }}>
-            {workspaceInitials}
-          </span>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontWeight: 550, fontSize: 12.5, letterSpacing: "-0.005em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", color: C.ink }}>
-              {workspaceName}
+      <div style={{ position: "relative", flexShrink: 0 }}>
+        {/* Backdrop */}
+        {wsOpen && (
+          <div
+            style={{ position: "fixed", inset: 0, zIndex: 9 }}
+            onClick={() => setWsOpen(false)}
+          />
+        )}
+
+        {/* Trigger */}
+        {isCollapsed ? (
+          <div
+            onClick={() => setWsOpen(v => !v)}
+            style={{
+              margin: "10px auto 6px",
+              padding: 8,
+              border: `1px solid ${wsOpen ? C.accent : C.line}`,
+              borderRadius: 8,
+              background: C.bg,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer", width: 38,
+            }}
+          >
+            <span style={{
+              width: 22, height: 22,
+              background: "linear-gradient(135deg, #0a0a0a 0%, #404040 100%)",
+              color: "white", display: "grid", placeItems: "center",
+              fontWeight: 600, fontSize: 10, borderRadius: 5,
+            }}>
+              {workspaceInitials}
+            </span>
+          </div>
+        ) : (
+          <div
+            onClick={() => setWsOpen(v => !v)}
+            style={{
+              margin: "10px 10px 6px",
+              padding: "8px 10px",
+              border: `1px solid ${wsOpen ? C.accent : C.line}`,
+              borderRadius: 8, background: C.bg,
+              display: "flex", alignItems: "center", gap: 9,
+              cursor: "pointer",
+            }}
+          >
+            <span style={{
+              width: 22, height: 22,
+              background: "linear-gradient(135deg, #0a0a0a 0%, #404040 100%)",
+              color: "white", display: "grid", placeItems: "center",
+              fontWeight: 600, fontSize: 10, borderRadius: 5, flexShrink: 0,
+            }}>
+              {workspaceInitials}
+            </span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: 550, fontSize: 12.5, letterSpacing: "-0.005em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", color: C.ink }}>
+                {workspaceName}
+              </div>
+              <div style={{ fontFamily: "ui-monospace, monospace", fontSize: 10, color: C.ink3, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                Plan {planName || "Starter"}
+              </div>
             </div>
-            <div style={{ fontFamily: "ui-monospace, monospace", fontSize: 10, color: C.ink3, textTransform: "uppercase", letterSpacing: "0.04em" }}>
-              Plan {planName || "Starter"}
+            <ChevronsUpDown size={12} color={wsOpen ? C.accent : C.ink3} strokeWidth={2} />
+          </div>
+        )}
+
+        {/* Dropdown */}
+        {wsOpen && (
+          <div style={{
+            position: "absolute",
+            top: "calc(100% - 2px)",
+            left: isCollapsed ? 0 : 10,
+            right: isCollapsed ? "auto" : 10,
+            width: isCollapsed ? 210 : "auto",
+            zIndex: 10,
+            background: "#fff",
+            border: `1px solid ${C.line}`,
+            borderRadius: 10,
+            boxShadow: "0 8px 24px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04)",
+            overflow: "hidden",
+            padding: "5px 0",
+          }}>
+            {/* Active workspace */}
+            <div style={{
+              display: "flex", alignItems: "center", gap: 10,
+              padding: "8px 14px",
+              background: C.accentSoft,
+            }}>
+              <span style={{
+                width: 22, height: 22,
+                background: "linear-gradient(135deg, #0a0a0a 0%, #404040 100%)",
+                color: "white", display: "grid", placeItems: "center",
+                fontWeight: 600, fontSize: 10, borderRadius: 5, flexShrink: 0,
+              }}>
+                {workspaceInitials}
+              </span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 550, fontSize: 12.5, color: C.ink, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  {workspaceName}
+                </div>
+                <div style={{ fontFamily: "ui-monospace, monospace", fontSize: 10, color: C.ink3 }}>Activo</div>
+              </div>
+              <Check size={13} color={C.accent} strokeWidth={2.5} />
+            </div>
+
+            {/* Divider */}
+            <div style={{ height: 1, background: C.line2, margin: "4px 0" }} />
+
+            {/* Add workspace (disabled/teasing) */}
+            <div style={{
+              display: "flex", alignItems: "center", gap: 10,
+              padding: "8px 14px",
+              opacity: 0.45,
+              cursor: "not-allowed",
+              userSelect: "none",
+            }}>
+              <div style={{
+                width: 22, height: 22,
+                border: `1.5px dashed ${C.ink4}`,
+                borderRadius: 5, flexShrink: 0,
+                display: "grid", placeItems: "center",
+              }}>
+                <Plus size={11} color={C.ink3} strokeWidth={2} />
+              </div>
+              <span style={{ fontSize: 12.5, color: C.ink2, flex: 1 }}>Añadir workspace</span>
+              <span style={{
+                fontFamily: "ui-monospace, monospace",
+                fontSize: 9, padding: "2px 5px",
+                borderRadius: 4, background: C.bg3,
+                color: C.ink4, fontWeight: 600,
+                letterSpacing: "0.05em", textTransform: "uppercase",
+                flexShrink: 0,
+              }}>Próximamente</span>
             </div>
           </div>
-          <ChevronsUpDown size={12} color={C.ink3} strokeWidth={2} />
-        </div>
-      )}
+        )}
+      </div>
 
       {/* ── Navigation scroll area ───────────────────────── */}
       <nav

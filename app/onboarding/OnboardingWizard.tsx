@@ -5,14 +5,14 @@ import { Logo } from "@/components/Logo"
 import { AnimatePresence, motion } from "framer-motion"
 import {
   Check, ChevronLeft, ArrowRight,
-  Building2, MapPin, Palette, Sparkles,
+  Building2, Receipt, Users, Plus, X, Sparkles,
 } from "lucide-react"
 
-// ─── Steps metadata ──────────────────────────────────────────────────────────
+// ─── Steps ───────────────────────────────────────────────────────────────────
 const STEPS = [
-  { icon: Building2,       label: "Tu negocio" },
-  { icon: MapPin,          label: "Datos fiscales" },
-  { icon: Palette,         label: "Personalización" },
+  { icon: Building2, label: "Tu workspace" },
+  { icon: Receipt,   label: "Facturación"  },
+  { icon: Users,     label: "Tu equipo"    },
 ]
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -23,12 +23,10 @@ type FormData = {
   address: string
   postalCode: string
   city: string
-  province: string
-  logoFile: File | null
-  accentColor: string
+  inviteEmails: string[]
 }
 
-// ─── Shared class helpers ────────────────────────────────────────────────────
+// ─── Styles ───────────────────────────────────────────────────────────────────
 const inputCls =
   "w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-[13.5px] text-[#0B1F2A] " +
   "placeholder:text-slate-300 focus:outline-none focus:border-[#0F766E] " +
@@ -38,34 +36,65 @@ const labelCls = "block text-[11px] font-semibold text-slate-500 uppercase track
 
 // ─── Component ───────────────────────────────────────────────────────────────
 export default function OnboardingWizard() {
-  const [step, setStep]       = useState(0)
-  const [done, setDone]       = useState(false)   // completion screen
-  const [saving, setSaving]   = useState(false)
-  const [form, setForm]       = useState<FormData>({
-    businessName: "", sector: "otro", taxId: "",
-    address: "", postalCode: "", city: "", province: "",
-    logoFile: null, accentColor: "#0F766E",
+  const [step, setStep]     = useState(0)
+  const [done, setDone]     = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [form, setForm]     = useState<FormData>({
+    businessName: "", sector: "", taxId: "",
+    address: "", postalCode: "", city: "",
+    inviteEmails: [""],
   })
 
-  const set = (k: keyof FormData, v: any) => setForm(f => ({ ...f, [k]: v }))
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const setField = (k: keyof FormData, v: any) => setForm(f => ({ ...f, [k]: v }))
+
+  const setEmail = (i: number, v: string) =>
+    setForm(f => { const a = [...f.inviteEmails]; a[i] = v; return { ...f, inviteEmails: a } })
+
+  const addEmail = () =>
+    setForm(f => ({ ...f, inviteEmails: [...f.inviteEmails, ""] }))
+
+  const removeEmail = (i: number) =>
+    setForm(f => ({ ...f, inviteEmails: f.inviteEmails.filter((_, j) => j !== i) }))
 
   const next = () => setStep(s => Math.min(s + 1, STEPS.length - 1))
   const back = () => setStep(s => Math.max(s - 1, 0))
 
-  async function finish(startTour = false) {
+  const step0Valid = form.businessName.trim().length > 0
+  const hasValidEmails = form.inviteEmails.some(e => e.trim().includes("@"))
+
+  async function finish(withInvites = false) {
     setSaving(true)
     try {
       await fetch("/api/onboarding/complete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, logoFile: undefined }),
+        body: JSON.stringify({
+          businessName: form.businessName,
+          sector: form.sector || "otro",
+          taxId: form.taxId,
+          address: form.address,
+          postalCode: form.postalCode,
+          city: form.city,
+        }),
       })
     } catch { /* ignore */ }
-    if (startTour) {
-      localStorage.setItem("cl-tour-active", "1")
-      localStorage.setItem("cl-tour-step", "0")
+
+    if (withInvites && hasValidEmails) {
+      const valid = form.inviteEmails.filter(e => e.trim().includes("@"))
+      await Promise.allSettled(
+        valid.map(email =>
+          fetch("/api/settings/team/invite", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: email.trim(), role: "MEMBER" }),
+          })
+        )
+      )
     }
-    window.location.href = "/dashboard"
+
+    setSaving(false)
+    setDone(true)
   }
 
   // ── Completion screen ──────────────────────────────────────────────────────
@@ -78,35 +107,34 @@ export default function OnboardingWizard() {
           transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
           className="w-full max-w-md bg-white rounded-2xl border border-slate-200 shadow-sm p-10 text-center"
         >
-          {/* Success icon */}
           <div className="flex items-center justify-center mb-6">
             <div className="w-16 h-16 rounded-full bg-[#0F766E]/10 border-2 border-[#0F766E]/20 flex items-center justify-center">
               <Check className="w-8 h-8 text-[#0F766E]" strokeWidth={2.5} />
             </div>
           </div>
-
-          <h2 className="text-2xl font-bold text-[#0B1F2A] mb-2">¡Todo listo!</h2>
+          <h2 className="text-2xl font-bold text-[#0B1F2A] mb-2">¡Workspace configurado!</h2>
           <p className="text-[13.5px] text-slate-500 mb-8 leading-relaxed">
-            Tu cuenta está configurada. Puedes ir directamente al dashboard o hacer un tour rápido para conocer todas las funciones.
+            Todo listo. Puedes completar tus datos fiscales y añadir más miembros del equipo desde Ajustes en cualquier momento.
           </p>
-
           <div className="space-y-3">
             <button
-              onClick={() => finish(false)}
-              disabled={saving}
-              className="w-full py-3 rounded-xl text-[13.5px] font-semibold text-white transition-all hover:opacity-90 active:scale-[.99] disabled:opacity-50"
+              onClick={() => { window.location.href = "/dashboard" }}
+              className="w-full py-3 rounded-xl text-[13.5px] font-semibold text-white transition-all hover:opacity-90 active:scale-[.99]"
               style={{ background: "linear-gradient(135deg, #0F766E 0%, #0E665F 100%)", boxShadow: "0 4px 14px rgba(15,118,110,0.30)" }}
             >
-              {saving ? "Cargando..." : "Ir al dashboard →"}
+              Ir al dashboard
             </button>
             <button
-              onClick={() => finish(true)}
-              disabled={saving}
+              onClick={() => {
+                localStorage.setItem("cl-tour-active", "1")
+                localStorage.setItem("cl-tour-step", "0")
+                window.location.href = "/dashboard"
+              }}
               className="w-full py-3 rounded-xl text-[13.5px] font-semibold text-[#0F766E] bg-[#0F766E]/5 border border-[#0F766E]/20 hover:bg-[#0F766E]/10 transition-all"
             >
               <span className="flex items-center justify-center gap-2">
                 <Sparkles size={15} />
-                Empezar tour rápido (2 min)
+                Tour rápido (2 min)
               </span>
             </button>
           </div>
@@ -115,41 +143,57 @@ export default function OnboardingWizard() {
     )
   }
 
-  // ── Step forms ─────────────────────────────────────────────────────────────
+  // ── Step content ───────────────────────────────────────────────────────────
   const stepContent = [
 
-    // PASO 1 — Tu negocio
+    // PASO 1 — Tu workspace
     <div key="s0" className="space-y-5">
       <div>
-        <label className={labelCls}>Nombre del negocio</label>
+        <label className={labelCls}>
+          Nombre del negocio <span className="normal-case font-semibold text-[#0F766E]">*</span>
+        </label>
         <input
           className={inputCls}
           placeholder="Mi Negocio SL"
           value={form.businessName}
-          onChange={e => set("businessName", e.target.value)}
+          autoFocus
+          onChange={e => setField("businessName", e.target.value)}
         />
       </div>
-
       <div>
-        <label className={labelCls}>CIF / NIF <span className="normal-case font-normal text-slate-400">(opcional)</span></label>
+        <label className={labelCls}>
+          Sector <span className="normal-case font-normal text-slate-400">(opcional)</span>
+        </label>
         <input
           className={inputCls}
-          placeholder="B12345678"
-          value={form.taxId}
-          onChange={e => set("taxId", e.target.value)}
+          placeholder="Ej: Consultoría, Diseño, Hostelería, E-commerce..."
+          value={form.sector}
+          onChange={e => setField("sector", e.target.value)}
         />
       </div>
     </div>,
 
-    // PASO 2 — Datos fiscales
+    // PASO 2 — Facturación
     <div key="s1" className="space-y-5">
+      <p className="text-[12.5px] text-slate-400 -mt-1">
+        Estos datos aparecerán en tus facturas. Puedes completarlos ahora o más tarde en <span className="font-medium text-slate-500">Ajustes &rsaquo; Facturación</span>.
+      </p>
+      <div>
+        <label className={labelCls}>NIF / CIF</label>
+        <input
+          className={inputCls}
+          placeholder="B12345678"
+          value={form.taxId}
+          onChange={e => setField("taxId", e.target.value)}
+        />
+      </div>
       <div>
         <label className={labelCls}>Dirección</label>
         <input
           className={inputCls}
           placeholder="Calle Mayor 1, Local 2"
           value={form.address}
-          onChange={e => set("address", e.target.value)}
+          onChange={e => setField("address", e.target.value)}
         />
       </div>
       <div className="grid grid-cols-2 gap-3">
@@ -159,7 +203,7 @@ export default function OnboardingWizard() {
             className={inputCls}
             placeholder="28001"
             value={form.postalCode}
-            onChange={e => set("postalCode", e.target.value)}
+            onChange={e => setField("postalCode", e.target.value)}
           />
         </div>
         <div>
@@ -168,64 +212,46 @@ export default function OnboardingWizard() {
             className={inputCls}
             placeholder="Madrid"
             value={form.city}
-            onChange={e => set("city", e.target.value)}
+            onChange={e => setField("city", e.target.value)}
           />
         </div>
-      </div>
-      <div>
-        <label className={labelCls}>Provincia</label>
-        <input
-          className={inputCls}
-          placeholder="Madrid"
-          value={form.province}
-          onChange={e => set("province", e.target.value)}
-        />
       </div>
     </div>,
 
-    // PASO 3 — Personalización
-    <div key="s2" className="space-y-5">
-      <div>
-        <label className={labelCls}>Logo del negocio <span className="normal-case font-normal text-slate-400">(opcional)</span></label>
-        <label className="flex items-center gap-3 w-full bg-white border border-slate-200 rounded-xl px-4 py-3 cursor-pointer hover:border-slate-300 transition-all group">
-          <div className="w-8 h-8 rounded-lg bg-slate-100 group-hover:bg-slate-200 flex items-center justify-center transition-colors shrink-0">
-            <Palette size={15} className="text-slate-400" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-medium text-slate-700 truncate">
-              {form.logoFile ? form.logoFile.name : "Subir imagen"}
-            </p>
-            <p className="text-[11px] text-slate-400">PNG, JPG, SVG — máx. 2 MB</p>
-          </div>
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={e => set("logoFile", e.target.files?.[0] ?? null)}
-          />
-        </label>
-      </div>
-
-      <div>
-        <label className={labelCls}>Color principal <span className="normal-case font-normal text-slate-400">(opcional)</span></label>
-        <div className="flex items-center gap-3 bg-white border border-slate-200 rounded-xl px-4 py-3 hover:border-slate-300 transition-all">
-          <div className="relative">
+    // PASO 3 — Tu equipo
+    <div key="s2" className="space-y-4">
+      <p className="text-[12.5px] text-slate-400 -mt-1">
+        Invita a tu equipo por email. Recibirán un enlace para unirse. Puedes hacerlo más tarde desde <span className="font-medium text-slate-500">Ajustes &rsaquo; Equipo</span>.
+      </p>
+      <div className="space-y-2.5">
+        {form.inviteEmails.map((email, i) => (
+          <div key={i} className="flex items-center gap-2">
             <input
-              type="color"
-              value={form.accentColor}
-              onChange={e => set("accentColor", e.target.value)}
-              className="w-10 h-10 rounded-lg cursor-pointer border-0 bg-transparent p-0.5"
+              className={inputCls}
+              type="email"
+              placeholder="compañero@empresa.com"
+              value={email}
+              onChange={e => setEmail(i, e.target.value)}
             />
-            <div
-              className="w-10 h-10 rounded-lg pointer-events-none absolute inset-0"
-              style={{ background: form.accentColor, border: "1px solid rgba(0,0,0,0.08)" }}
-            />
+            {form.inviteEmails.length > 1 && (
+              <button
+                onClick={() => removeEmail(i)}
+                className="shrink-0 w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 transition-all"
+              >
+                <X size={13} strokeWidth={2} />
+              </button>
+            )}
           </div>
-          <div>
-            <p className="text-[13px] font-medium text-[#0B1F2A]">{form.accentColor.toUpperCase()}</p>
-            <p className="text-[11px] text-slate-400">Color de tu marca</p>
-          </div>
-        </div>
+        ))}
+        {form.inviteEmails.length < 5 && (
+          <button
+            onClick={addEmail}
+            className="flex items-center gap-1.5 text-[12.5px] text-[#0F766E] hover:text-[#0E665F] font-medium transition-colors mt-1"
+          >
+            <Plus size={13} strokeWidth={2.5} />
+            Añadir otro email
+          </button>
+        )}
       </div>
     </div>,
   ]
@@ -247,28 +273,20 @@ export default function OnboardingWizard() {
       {/* Step indicator */}
       <div className="w-full max-w-lg mb-8">
         <div className="relative flex items-start justify-between w-full">
-          {/* Connecting line behind circles */}
           <div className="absolute left-4 right-4 top-4 flex pointer-events-none" aria-hidden>
             {STEPS.slice(0, -1).map((_, i) => (
-              <div
-                key={i}
-                className={`flex-1 h-px transition-all duration-300 ${i < step ? "bg-[#0F766E]" : "bg-slate-200"}`}
-              />
+              <div key={i} className={`flex-1 h-px transition-all duration-300 ${i < step ? "bg-[#0F766E]" : "bg-slate-200"}`} />
             ))}
           </div>
-          {/* Circles + labels */}
           {STEPS.map((s, i) => {
-            const isDone   = i < step
-            const isActive = i === step
+            const isDone = i < step; const isActive = i === step
             return (
               <div key={i} className="relative z-10 flex flex-col items-center gap-1">
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold border-2 transition-all duration-300 ${
-                    isDone   ? "bg-[#0F766E] border-[#0F766E] text-white"
-                    : isActive ? "border-[#0F766E] bg-white text-[#0F766E]"
-                    : "border-slate-200 bg-white text-slate-400"
-                  }`}
-                >
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold border-2 transition-all duration-300 ${
+                  isDone ? "bg-[#0F766E] border-[#0F766E] text-white"
+                  : isActive ? "border-[#0F766E] bg-white text-[#0F766E]"
+                  : "border-slate-200 bg-white text-slate-400"
+                }`}>
                   {isDone ? <Check size={13} strokeWidth={3} /> : i + 1}
                 </div>
                 <span className={`text-[10px] font-medium hidden sm:block ${isActive ? "text-[#0F766E]" : "text-slate-400"}`}>
@@ -310,22 +328,18 @@ export default function OnboardingWizard() {
         <div className="px-8 pb-8 flex items-center justify-between">
           <div>
             {step > 0 ? (
-              <button
-                onClick={back}
-                className="flex items-center gap-1.5 text-[13px] text-slate-400 hover:text-slate-600 transition-colors"
-              >
-                <ChevronLeft size={15} />
-                Atrás
+              <button onClick={back} className="flex items-center gap-1.5 text-[13px] text-slate-400 hover:text-slate-600 transition-colors">
+                <ChevronLeft size={15} />Atrás
               </button>
             ) : (
               <button
                 onClick={() => {
-                  setDone(true)
                   fetch("/api/onboarding/complete", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ ...form, logoFile: undefined, skip: true }),
+                    body: JSON.stringify({ skip: true }),
                   }).catch(() => {})
+                  setDone(true)
                 }}
                 className="text-[13px] text-slate-400 hover:text-slate-600 transition-colors"
               >
@@ -335,32 +349,42 @@ export default function OnboardingWizard() {
           </div>
 
           <div className="flex items-center gap-3">
-            {!isLast && (
-              <button
-                onClick={next}
-                className="text-[13px] text-slate-400 hover:text-slate-600 transition-colors"
-              >
-                Saltar
-              </button>
-            )}
             {isLast ? (
-              <button
-                onClick={() => setDone(true)}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13.5px] font-semibold text-white transition-all hover:opacity-90 active:scale-[.99]"
-                style={{ background: "linear-gradient(135deg, #0F766E 0%, #0E665F 100%)", boxShadow: "0 4px 14px rgba(15,118,110,0.30)" }}
-              >
-                Finalizar
-                <Check size={14} strokeWidth={3} />
-              </button>
+              <>
+                <button
+                  onClick={() => finish(false)}
+                  disabled={saving}
+                  className="px-4 py-2.5 rounded-xl text-[13px] font-medium text-slate-500 bg-slate-100 hover:bg-slate-200 transition-all disabled:opacity-50"
+                >
+                  Continuar solo
+                </button>
+                <button
+                  onClick={() => finish(true)}
+                  disabled={saving}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13.5px] font-semibold text-white transition-all hover:opacity-90 active:scale-[.99] disabled:opacity-50"
+                  style={{ background: "linear-gradient(135deg, #0F766E 0%, #0E665F 100%)", boxShadow: "0 4px 14px rgba(15,118,110,0.30)" }}
+                >
+                  {saving ? "Guardando..." : hasValidEmails ? "Invitar y finalizar" : "Finalizar"}
+                  {!saving && <Check size={14} strokeWidth={3} />}
+                </button>
+              </>
             ) : (
-              <button
-                onClick={next}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13.5px] font-semibold text-white transition-all hover:opacity-90 active:scale-[.99]"
-                style={{ background: "linear-gradient(135deg, #0F766E 0%, #0E665F 100%)", boxShadow: "0 4px 14px rgba(15,118,110,0.30)" }}
-              >
-                Siguiente
-                <ArrowRight size={14} />
-              </button>
+              <>
+                {step === 1 && (
+                  <button onClick={next} className="text-[13px] text-slate-400 hover:text-slate-600 transition-colors">
+                    Completar más tarde
+                  </button>
+                )}
+                <button
+                  onClick={next}
+                  disabled={step === 0 && !step0Valid}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13.5px] font-semibold text-white transition-all hover:opacity-90 active:scale-[.99] disabled:opacity-40 disabled:cursor-not-allowed"
+                  style={{ background: "linear-gradient(135deg, #0F766E 0%, #0E665F 100%)", boxShadow: "0 4px 14px rgba(15,118,110,0.30)" }}
+                >
+                  Siguiente
+                  <ArrowRight size={14} />
+                </button>
+              </>
             )}
           </div>
         </div>

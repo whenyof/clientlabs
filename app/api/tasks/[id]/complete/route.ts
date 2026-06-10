@@ -3,6 +3,7 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getSessionUserId } from "@/app/api/tasks/utils"
 import { recalculateClientStatus } from "@/modules/clients/actions"
+import { invalidateCachedData } from "@/lib/redis-cache"
 
 type RouteParams = { params: Promise<{ id: string }> }
 
@@ -43,6 +44,9 @@ export async function POST(_request: Request, { params }: RouteParams) {
  if (task.clientId) {
  await recalculateClientStatus(task.clientId)
  }
+
+ // Bust dashboard summary cache so the completed task disappears on reload
+ await invalidateCachedData(`dashboard-v6-${userId}`)
 
  return NextResponse.json(task)
  } catch (error) {

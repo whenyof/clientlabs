@@ -108,41 +108,7 @@ export default function TeamPage() {
         <TeamMembers />
       </div>
 
-      {/* ── ACTIVITY HEATMAP ─────────────────────────────── */}
-      <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 10, overflow: "hidden" }}>
-        <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `1px solid ${C.line2}` }}>
-          <div>
-            <h3 style={{ fontWeight: 600, letterSpacing: "-0.012em", fontSize: 13.5, margin: 0, color: C.ink }}>Actividad por persona · 4 semanas</h3>
-            <div style={{ fontSize: 11.5, color: C.ink3, fontFamily: "ui-monospace,monospace", marginTop: 2 }}>Acciones registradas en CRM, Tareas y Facturación</div>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ display: "inline-flex", background: C.bg2, border: `1px solid ${C.line}`, borderRadius: 7, padding: 2 }}>
-              {["4 sem", "13 sem", "26 sem"].map((opt, i) => (
-                <button key={opt} style={{ padding: "4px 10px", borderRadius: 5, fontFamily: "ui-monospace,monospace", fontSize: 11, color: i === 0 ? C.ink : C.ink3, fontWeight: 500, background: i === 0 ? "white" : "transparent", boxShadow: i === 0 ? `0 0 0 1px ${C.line} inset` : "none", border: "none", cursor: "pointer" }}>{opt}</button>
-              ))}
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 4, fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: C.ink3 }}>
-              <span>Menos</span>
-              {["#f5f5f5", "#d6efe3", "#a8debf", "#5fbd8c", C.accent, C.accentInk].map((c, i) => (
-                <span key={i} style={{ width: 12, height: 12, borderRadius: 2, background: c, display: "inline-block" }} />
-              ))}
-              <span>Más</span>
-            </div>
-          </div>
-        </div>
-        <div style={{ padding: "8px 0 14px" }}>
-          {STATIC_MEMBERS.map((m) => (
-            <HeatmapRow key={m.av} seed={m.seed} bias={m.bias / 100} label={m.av} />
-          ))}
-          {/* X axis */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "4px 18px", marginTop: 4 }}>
-            <span style={{ width: 28, flexShrink: 0 }} />
-            <div style={{ flex: 1, display: "flex", justifyContent: "space-between", fontFamily: "ui-monospace,monospace", fontSize: 10, color: C.ink4 }}>
-              <span>Hace 28 d</span><span>Hace 21 d</span><span>Hace 14 d</span><span>Hace 7 d</span><span>Hoy</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* ACTIVITY HEATMAP: oculto hasta tener log de eventos real (julio) */}
     </div>
   )
 }

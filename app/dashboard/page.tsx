@@ -6,18 +6,23 @@ import { Suspense } from "react"
 import { DashboardView } from "./components/DashboardView"
 
 export interface SummaryData {
+  period: string
   kpis: {
     leadsActive: number
-    leadsNewThisWeek: number
-    leadsThisMonth: number
-    invoicedThisMonth: number
-    invoicedPrevMonth: number
+    clientsActive: number
     pendingCobro: number
     pendingCobroCount: number
-    tasksHighPriority: number
+    tasksHighPriorityCount: number
     tasksOverdue: number
     invoicesOverdue: number
-    clientsActive: number
+    invoicedCurrent: number
+    invoicedPrev: number
+    leadsCreatedCurrent: number
+    leadsCreatedPrev: number
+    clientsCreatedCurrent: number
+    clientsCreatedPrev: number
+    conversionsCurrent: number
+    conversionsPrev: number
   }
   leadsByStatus: {
     NEW: number
@@ -26,6 +31,21 @@ export interface SummaryData {
     CONVERTED: number
     LOST: number
   }
+  pipeline: Array<{
+    status: string
+    count: number
+    estimatedValue: number
+    leads: Array<{ id: string; name: string | null; companyName: string | null }>
+    wonRevenue?: number
+  }>
+  revenueChart: Array<{
+    month: string
+    revenue: number
+  }>
+  leadSources: Array<{
+    source: string
+    count: number
+  }>
   leadsRecent: Array<{
     id: string
     name: string | null
@@ -44,6 +64,18 @@ export interface SummaryData {
     leads: Array<{ id: string; name: string | null; createdAt: string }>
     invoices: Array<{ id: string; number: string; total: string | number; updatedAt: string }>
     tasks: Array<{ id: string; title: string; updatedAt: string }>
+  }
+  sparklines: {
+    leads: number[]
+    clients: number[]
+    conversions: number[]
+    revenue: number[]
+  }
+  healthBar: {
+    champions: number
+    saludables: number
+    enRiesgo: number
+    churnAlto: number
   }
   meta: {
     userName: string
@@ -130,12 +162,16 @@ function UpgradeToast() {
 }
 
 function DashboardPageInner() {
+  const searchParams = useSearchParams()
+  const period = searchParams?.get("period") ?? "MTD"
   const [data, setData] = useState<SummaryData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
   useEffect(() => {
-    fetch("/api/dashboard/summary")
+    setLoading(true)
+    setError(false)
+    fetch(`/api/dashboard/summary?period=${encodeURIComponent(period)}`)
       .then((r) => {
         if (!r.ok) throw new Error("Error")
         return r.json()
@@ -143,7 +179,7 @@ function DashboardPageInner() {
       .then((json: SummaryData) => setData(json))
       .catch(() => setError(true))
       .finally(() => setLoading(false))
-  }, [])
+  }, [period])
 
   if (loading) return <DashboardSkeleton />
 

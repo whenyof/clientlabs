@@ -598,6 +598,7 @@ model Lead {
   userAgent             String?
   spamScore             Float              @default(0)
   score                 Int                @default(0)
+  estimatedValue        Decimal?           @db.Decimal(14, 2)
   stageId               String?
   interactions          Json?
   conversionProbability Float?
@@ -2767,6 +2768,7 @@ model DeliveryNoteItem {
   description    String
   quantity       Float        @default(1)
   unitPrice      Float        @default(0)
+  taxRate        Float        @default(21)
   delivered      Boolean      @default(true)
   productRef     String?
   lotNumber      String?

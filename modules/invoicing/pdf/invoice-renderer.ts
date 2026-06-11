@@ -159,14 +159,26 @@ export async function renderInvoiceToBuffer(
     pdf.setFontSize(7)
     pdf.setFont("helvetica", "bold")
     pdf.setTextColor(60, 60, 60)
-    pdf.text("VERI*FACTU", txtX, qrStartY + 6)
+    pdf.text("VERI*FACTU", txtX, qrStartY + 4)
+    // Leyenda obligatoria RD 1007/2023
+    pdf.setFont("helvetica", "normal")
+    pdf.setFontSize(5.5)
+    pdf.setTextColor(80, 80, 80)
+    const legendLines = pdf.splitTextToSize(
+      "Factura verificable en la sede electrónica de la AEAT",
+      txtW
+    ) as string[]
+    let legendY = qrStartY + 8
+    legendLines.forEach((line: string) => {
+      pdf.text(line, txtX, legendY)
+      legendY += 3
+    })
     if (doc.footer.verifactuUrl) {
-      pdf.setFont("helvetica", "normal")
-      pdf.setFontSize(5.5)
+      pdf.setFontSize(5)
       pdf.setTextColor(100, 100, 100)
       const urlLines = pdf.splitTextToSize(doc.footer.verifactuUrl, txtW) as string[]
-      urlLines.slice(0, 5).forEach((line: string, i: number) => {
-        pdf.text(line, txtX, qrStartY + 11 + i * 3)
+      urlLines.slice(0, 4).forEach((line: string, i: number) => {
+        pdf.text(line, txtX, legendY + 1 + i * 2.5)
       })
     }
     infoY = qrStartY + QR_SIZE + 3
@@ -382,20 +394,40 @@ export async function renderInvoiceToBuffer(
     pdf.text(doc.totals.taxAmount, totalsValX, y, { align: "right" })
     pdf.setTextColor(...hexToRgb(colors.textMuted))
     y += totals.lineHeight
-    if (doc.totals.irpfAmount && doc.totals.irpfRate) {
-      pdf.setTextColor(220, 38, 38)
-      pdf.text(`Retención IRPF (${doc.totals.irpfRate}%):`, totalsX, y)
-      pdf.text(`-${doc.totals.irpfAmount}`, totalsValX, y, { align: "right" })
+    for (const re of doc.totals.recargoBreakdown) {
+      pdf.text(`Recargo equiv. (${re.rate}%):`, totalsX, y)
+      pdf.setTextColor(...hexToRgb(colors.text))
+      pdf.text(re.amount, totalsValX, y, { align: "right" })
       pdf.setTextColor(...hexToRgb(colors.textMuted))
       y += totals.lineHeight
     }
-    // TOTAL final
-    pdf.setFont("helvetica", "bold")
-    pdf.setFontSize(totals.finalSize)
-    pdf.setTextColor(...hexToRgb(colors.primary))
-    pdf.text("TOTAL:", totalsX, y)
-    pdf.text(doc.totals.total, totalsValX, y, { align: "right" })
-    y += totals.lineHeight + 6
+    if (doc.totals.irpfAmount && doc.totals.irpfRate && doc.totals.totalAPagar) {
+      // Con retención: Total factura (bruto) + retención + Total a pagar (neto)
+      pdf.setFont("helvetica", "bold")
+      pdf.setTextColor(...hexToRgb(colors.text))
+      pdf.text("Total factura:", totalsX, y)
+      pdf.text(doc.totals.total, totalsValX, y, { align: "right" })
+      pdf.setFont("helvetica", "normal")
+      y += totals.lineHeight
+      pdf.setTextColor(220, 38, 38)
+      pdf.text(`Retención IRPF (${doc.totals.irpfRate}%):`, totalsX, y)
+      pdf.text(`-${doc.totals.irpfAmount}`, totalsValX, y, { align: "right" })
+      y += totals.lineHeight
+      pdf.setFont("helvetica", "bold")
+      pdf.setFontSize(totals.finalSize)
+      pdf.setTextColor(...hexToRgb(colors.primary))
+      pdf.text("TOTAL A PAGAR:", totalsX, y)
+      pdf.text(doc.totals.totalAPagar, totalsValX, y, { align: "right" })
+      y += totals.lineHeight + 6
+    } else {
+      // TOTAL final
+      pdf.setFont("helvetica", "bold")
+      pdf.setFontSize(totals.finalSize)
+      pdf.setTextColor(...hexToRgb(colors.primary))
+      pdf.text("TOTAL:", totalsX, y)
+      pdf.text(doc.totals.total, totalsValX, y, { align: "right" })
+      y += totals.lineHeight + 6
+    }
   } else {
     // Simple single-rate totals
     pdf.setFontSize(totals.labelSize)
@@ -410,19 +442,37 @@ export async function renderInvoiceToBuffer(
     pdf.text(rateLabel, totalsX, y)
     pdf.text(doc.totals.taxAmount, totalsValX, y, { align: "right" })
     y += totals.lineHeight
-    if (doc.totals.irpfAmount && doc.totals.irpfRate) {
+    for (const re of doc.totals.recargoBreakdown) {
+      pdf.text(`Recargo equiv. (${re.rate}%)`, totalsX, y)
+      pdf.text(re.amount, totalsValX, y, { align: "right" })
+      y += totals.lineHeight
+    }
+    if (doc.totals.irpfAmount && doc.totals.irpfRate && doc.totals.totalAPagar) {
+      // Con retención: Total factura (bruto) + retención + Total a pagar (neto)
+      pdf.setFont("helvetica", "bold")
+      pdf.setTextColor(...hexToRgb(colors.text))
+      pdf.text("Total factura", totalsX, y)
+      pdf.text(doc.totals.total, totalsValX, y, { align: "right" })
+      pdf.setFont("helvetica", "normal")
+      y += totals.lineHeight
       pdf.setTextColor(220, 38, 38)
       pdf.text(`Retención IRPF (${doc.totals.irpfRate}%)`, totalsX, y)
       pdf.text(`-${doc.totals.irpfAmount}`, totalsValX, y, { align: "right" })
-      pdf.setTextColor(...hexToRgb(colors.textMuted))
       y += totals.lineHeight
+      pdf.setFont("helvetica", "bold")
+      pdf.setFontSize(totals.finalSize)
+      pdf.setTextColor(...hexToRgb(colors.primary))
+      pdf.text("Total a pagar", totalsX, y)
+      pdf.text(doc.totals.totalAPagar, totalsValX, y, { align: "right" })
+      y += totals.lineHeight + 6
+    } else {
+      pdf.setFont("helvetica", "bold")
+      pdf.setFontSize(totals.finalSize)
+      pdf.setTextColor(...hexToRgb(colors.primary))
+      pdf.text("Total", totalsX, y)
+      pdf.text(doc.totals.total, totalsValX, y, { align: "right" })
+      y += totals.lineHeight + 6
     }
-    pdf.setFont("helvetica", "bold")
-    pdf.setFontSize(totals.finalSize)
-    pdf.setTextColor(...hexToRgb(colors.primary))
-    pdf.text("Total", totalsX, y)
-    pdf.text(doc.totals.total, totalsValX, y, { align: "right" })
-    y += totals.lineHeight + 6
   }
 
   // =========================================================

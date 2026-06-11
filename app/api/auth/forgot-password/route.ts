@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma"
 import { sendPasswordResetEmail } from "@/lib/email-service"
 import crypto from "crypto"
 import { z } from "zod"
+import { checkDistributedRateLimit } from "@/lib/security/distributedRateLimiter"
 
 const schema = z.object({ email: z.string().email() })
 
@@ -16,6 +17,17 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) return NextResponse.json({ success: true })
 
   const { email } = parsed.data
+
+  // Dedicated limit to prevent reset-token flooding: 5 requests / 15 min per
+  // submitted email. The 429 is returned regardless of whether the email
+  // exists, so it does not leak account existence. Fail-closed.
+  const rl = await checkDistributedRateLimit(`auth:forgot:${email.toLowerCase().trim()}`, 5, 15 * 60)
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: "Demasiadas solicitudes. Inténtalo de nuevo en unos minutos." },
+      { status: 429 },
+    )
+  }
 
   try {
     const user = await prisma.user.findUnique({

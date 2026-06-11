@@ -408,28 +408,6 @@ export function CompanySettings() {
         </div>
       </div>
 
-      {/* Stats Card */}
-      <div className="bg-white rounded-xl border border-slate-200 p-6">
-        <h3 className="text-sm font-medium text-slate-500 mb-4">Indicadores</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center p-3 bg-slate-50 rounded-lg">
-            <div className="text-sm font-bold text-[var(--accent)]">2 AÑOS</div>
-            <div className="text-xs text-slate-500 mt-0.5">En sistema</div>
-          </div>
-          <div className="text-center p-3 bg-slate-50 rounded-lg">
-            <div className="text-sm font-bold text-[#0B1F2A]">€45K</div>
-            <div className="text-xs text-slate-500 mt-0.5">Volumen</div>
-          </div>
-          <div className="text-center p-3 bg-slate-50 rounded-lg">
-            <div className="text-sm font-bold text-[#0B1F2A]">1,247</div>
-            <div className="text-xs text-slate-500 mt-0.5">Entidades</div>
-          </div>
-          <div className="text-center p-3 bg-slate-50 rounded-lg">
-            <div className="text-sm font-bold text-[var(--accent)]">98.5%</div>
-            <div className="text-xs text-slate-500 mt-0.5">Score</div>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }

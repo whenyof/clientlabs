@@ -5,6 +5,7 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 import { recordSession } from "@/lib/auth/session-tracking"
+import { checkDistributedRateLimit } from "@/lib/security/distributedRateLimiter"
 
 export const authOptions: NextAuthOptions = {
  adapter: PrismaAdapter(prisma),
@@ -42,6 +43,14 @@ export const authOptions: NextAuthOptions = {
 
  const normalizedEmail = credentials.email.toLowerCase().trim()
 
+ // Dedicated per-account brute-force limit: 5 attempts / 15 min.
+ // checkDistributedRateLimit is fail-CLOSED (denies if Redis is down),
+ // which is the desired behaviour for the auth perimeter.
+ const rl = await checkDistributedRateLimit(`auth:login:${normalizedEmail}`, 5, 15 * 60)
+ if (!rl.allowed) {
+ throw new Error("Demasiados intentos de inicio de sesión. Inténtalo de nuevo en unos minutos.")
+ }
+
  const user = await prisma.user.findUnique({
  where: { email: normalizedEmail },
  })
@@ -54,6 +63,11 @@ export const authOptions: NextAuthOptions = {
  )
 
  if (!valid) return null
+
+ // Block login until the email is verified (A-03 / M-01).
+ if (!user.emailVerified) {
+ throw new Error("Verifica tu email antes de iniciar sesión")
+ }
 
  return {
  id: user.id,

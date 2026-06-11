@@ -6,6 +6,7 @@ import { z } from "zod"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { verifyToken, decryptSecret, verifyBackupCode, hashBackupCode } from "@/lib/auth/2fa"
+import { checkDistributedRateLimit } from "@/lib/security/distributedRateLimiter"
 
 const schema = z.object({
   token: z.string().min(6).max(9),
@@ -16,6 +17,16 @@ export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 })
+  }
+
+  // Dedicated brute-force limit for OTP/backup codes: 5 attempts / 15 min.
+  // Fail-closed (denies if Redis is down) — desired for the auth perimeter.
+  const rl = await checkDistributedRateLimit(`auth:2fa:${session.user.id}`, 5, 15 * 60)
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: "Demasiados intentos. Inténtalo de nuevo en unos minutos." },
+      { status: 429 },
+    )
   }
 
   const body = await req.json().catch(() => null)

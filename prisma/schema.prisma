@@ -384,6 +384,8 @@ model Client {
   riskLevel           String?               @default("LOW")
   legalType           String?
   taxId               String?
+  /// Cliente en régimen de recargo de equivalencia (comercio minorista)
+  recargoEquivalencia Boolean               @default(false)
   address             String?
   postalCode          String?
   city                String?
@@ -2020,6 +2022,10 @@ model Invoice {
   irpfRate               Float?        @default(0)
   /// IRPF retention amount (subtotal * irpfRate / 100)
   irpfAmount             Float?        @default(0)
+  /// Factura con recargo de equivalencia (cliente minorista en ese régimen)
+  recargoEquivalencia    Boolean       @default(false)
+  /// Suma de cuotas de recargo de equivalencia (incluida en total)
+  recargoAmount          Float?        @default(0)
   /// Date when the invoice was sent by email to the client
   sentAt                 DateTime?
 

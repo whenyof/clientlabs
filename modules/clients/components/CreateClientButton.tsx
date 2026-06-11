@@ -14,6 +14,7 @@ const EMPTY_FORM = {
   address: "", city: "",
   postalCode: "", country: "España",
   notes: "",
+  recargoEquivalencia: false,
 }
 
 export function CreateClientButton() {
@@ -58,6 +59,7 @@ export function CreateClientButton() {
           postalCode: form.postalCode || undefined,
           country: form.country || undefined,
           notes: form.notes || undefined,
+          recargoEquivalencia: form.recargoEquivalencia || undefined,
         }),
       })
 
@@ -246,6 +248,20 @@ export function CreateClientButton() {
                       <option value="Otro">Otro</option>
                     </select>
                   </div>
+                  <label className="flex items-start gap-2.5 cursor-pointer pt-1">
+                    <input
+                      type="checkbox"
+                      checked={form.recargoEquivalencia}
+                      onChange={e => setForm(prev => ({ ...prev, recargoEquivalencia: e.target.checked }))}
+                      className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#0F766E] focus:ring-[#0F766E]/30"
+                    />
+                    <span>
+                      <span className="block text-[12px] font-medium text-slate-700">Cliente en recargo de equivalencia</span>
+                      <span className="block text-[10px] text-slate-400 mt-0.5">
+                        Sus facturas añadirán el recargo automáticamente (21%→5,2 · 10%→1,4 · 4%→0,5)
+                      </span>
+                    </span>
+                  </label>
                 </div>
               )}
 

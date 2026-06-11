@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { X, Plus, Trash2 } from "lucide-react"
+import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import {
   Select,
@@ -19,6 +20,8 @@ type LineItem = {
   description: string
   quantity: number
   unit: string
+  unitPrice: number
+  taxRate: number
   delivered: boolean
   productRef?: string
   lotNumber?: string
@@ -40,8 +43,12 @@ const DEFAULT_ITEM = (): LineItem => ({
   description: "",
   quantity: 0,
   unit: "uds.",
+  unitPrice: 0,
+  taxRate: 21,
   delivered: false,
 })
+
+const TAX_RATES = [21, 10, 4, 0] as const
 
 export function NewDeliveryNoteModal({ open, onClose, onSuccess, defaultClientId }: Props) {
   const [clients, setClients] = useState<Client[]>([])
@@ -90,11 +97,15 @@ export function NewDeliveryNoteModal({ open, onClose, onSuccess, defaultClientId
       const res = await fetch(`/api/quotes/${id}`)
       const data = await res.json()
       if (data.quote?.items?.length) {
-        setItems(data.quote.items.map((i: { description: string; quantity: number }) => ({
+        // Arrastrar precio e IVA reales de cada línea del presupuesto —
+        // así la conversión albarán → factura respeta el taxRate original (ej. 10%)
+        setItems(data.quote.items.map((i: { description: string; quantity: number; unitPrice?: number; taxRate?: number }) => ({
           _key: newKey(),
           description: i.description,
           quantity: i.quantity,
           unit: "uds.",
+          unitPrice: typeof i.unitPrice === "number" ? i.unitPrice : 0,
+          taxRate: typeof i.taxRate === "number" ? i.taxRate : 21,
           delivered: false,
         })))
       }
@@ -110,6 +121,14 @@ export function NewDeliveryNoteModal({ open, onClose, onSuccess, defaultClientId
 
   const handleSave = async () => {
     if (!clientId) return
+    // Descartar líneas vacías y normalizar cantidades (el API exige quantity > 0)
+    const validItems = items
+      .filter(i => i.description.trim().length > 0)
+      .map(({ _key: _, ...rest }) => ({ ...rest, quantity: rest.quantity > 0 ? rest.quantity : 1 }))
+    if (validItems.length === 0) {
+      toast.error("Añade al menos un artículo con descripción")
+      return
+    }
     setSaving(true)
     try {
       const res = await fetch("/api/delivery-notes", {
@@ -120,10 +139,14 @@ export function NewDeliveryNoteModal({ open, onClose, onSuccess, defaultClientId
           quoteId: quoteId || null,
           deliveryDate: deliveryDate || null,
           notes: notes || null,
-          items: items.map(({ _key: _, ...rest }) => rest),
+          items: validItems,
         }),
       })
-      if (!res.ok) return
+      if (!res.ok) {
+        const data = await res.json().catch(() => null)
+        toast.error(data?.error ?? "No se pudo crear el albarán")
+        return
+      }
       reset()
       onSuccess()
     } finally {
@@ -213,11 +236,13 @@ export function NewDeliveryNoteModal({ open, onClose, onSuccess, defaultClientId
             </label>
             <div className="rounded-lg border border-slate-200 overflow-hidden">
               {/* Table header */}
-              <div className="grid grid-cols-[1fr_80px_72px_80px_32px] gap-px bg-slate-100 text-[10px] font-medium text-slate-500 uppercase tracking-wider px-3 py-2">
+              <div className="grid grid-cols-[1fr_64px_64px_84px_72px_64px_32px] gap-px bg-slate-100 text-[10px] font-medium text-slate-500 uppercase tracking-wider px-3 py-2">
                 <span>Descripción</span>
                 <span>Cant.</span>
                 <span>Unidad</span>
-                <span>Entregado</span>
+                <span>Precio €</span>
+                <span>IVA %</span>
+                <span>Entreg.</span>
                 <span />
               </div>
 
@@ -225,7 +250,7 @@ export function NewDeliveryNoteModal({ open, onClose, onSuccess, defaultClientId
               <div className="divide-y divide-slate-100">
                 {items.map((item) => (
                   <div key={item._key} className="bg-white px-3 py-2">
-                    <div className="grid grid-cols-[1fr_80px_72px_80px_32px] gap-px items-center">
+                    <div className="grid grid-cols-[1fr_64px_64px_84px_72px_64px_32px] gap-px items-center">
                       <input
                         value={item.description}
                         onChange={e => updateItem(item._key, { description: e.target.value })}
@@ -247,6 +272,24 @@ export function NewDeliveryNoteModal({ open, onClose, onSuccess, defaultClientId
                         placeholder="uds."
                         className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
                       />
+                      <input
+                        type="number"
+                        min={0}
+                        step="0.01"
+                        placeholder="0,00"
+                        value={item.unitPrice || ""}
+                        onChange={e => updateItem(item._key, { unitPrice: Math.max(0, Number(e.target.value)) })}
+                        className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 placeholder-slate-300 text-right focus:outline-none focus:ring-1 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
+                      />
+                      <select
+                        value={item.taxRate}
+                        onChange={e => updateItem(item._key, { taxRate: Number(e.target.value) })}
+                        className="w-full text-[12px] border border-slate-200 rounded-md px-1.5 py-1.5 text-slate-900 bg-white cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
+                      >
+                        {TAX_RATES.map(r => (
+                          <option key={r} value={r}>{r}%</option>
+                        ))}
+                      </select>
                       <div className="flex justify-center">
                         <input
                           type="checkbox"

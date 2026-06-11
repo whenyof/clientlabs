@@ -101,9 +101,9 @@ export function MeetingView({ task, entityData, entityType }: MeetingViewProps) 
     }
   }, [notes, savedNotes, task.id])
 
-  // Auto-save cada 5 segundos
+  // Auto-save cada 30 segundos (mínimo permitido de polling; beforeunload cubre salidas)
   useEffect(() => {
-    const t = setInterval(() => saveNotes(), 5000)
+    const t = setInterval(() => saveNotes(), 30_000)
     return () => clearInterval(t)
   }, [saveNotes])
 

@@ -61,6 +61,8 @@ function toPdfData(invoice: NonNullable<InvoiceForPdf>): InvoicePdfData {
     taxAmount: invoice.taxAmount,
     irpfRate: (invoice as { irpfRate?: number | null }).irpfRate ?? null,
     irpfAmount: (invoice as { irpfAmount?: number | null }).irpfAmount ?? null,
+    recargoEquivalencia: (invoice as { recargoEquivalencia?: boolean }).recargoEquivalencia ?? false,
+    recargoAmount: (invoice as { recargoAmount?: number | null }).recargoAmount ?? null,
     total: invoice.total,
     lines: (invoice.lines as Array<{
       description: string
@@ -102,7 +104,7 @@ function toPdfDataFromSnapshots(
   company: Record<string, unknown>,
   client: Record<string, unknown>,
   items: { description: string; quantity: number; unitPrice: number; taxPercent: number; subtotal: number; taxAmount: number; total: number }[],
-  totals: { subtotal: number; taxAmount: number; total: number; currency: string }
+  totals: { subtotal: number; taxAmount: number; total: number; currency: string; irpfRate?: number | null; irpfAmount?: number | null }
 ): InvoicePdfData {
   const recipient = {
     name: (client.name as string) ?? "",
@@ -138,6 +140,8 @@ function toPdfDataFromSnapshots(
     taxAmount: totals.taxAmount,
     irpfRate: (totals as { irpfRate?: number | null }).irpfRate ?? null,
     irpfAmount: (totals as { irpfAmount?: number | null }).irpfAmount ?? null,
+    recargoEquivalencia: (totals as { recargoEquivalencia?: boolean }).recargoEquivalencia ?? false,
+    recargoAmount: (totals as { recargoAmount?: number | null }).recargoAmount ?? null,
     total: totals.total,
     lines: items,
     payments: (invoice.payments as Array<{ amount: number; method: string | null }>).map((p) => ({
@@ -198,7 +202,7 @@ export async function generateInvoicePDF(
     const company = snap.issuedCompanySnapshot as Record<string, unknown>
     const client = snap.issuedClientSnapshot as Record<string, unknown>
     const items = snap.issuedItemsSnapshot as { description: string; quantity: number; unitPrice: number; taxPercent: number; subtotal: number; taxAmount: number; total: number }[]
-    const totals = snap.issuedTotalsSnapshot as { subtotal: number; taxAmount: number; total: number; currency: string }
+    const totals = snap.issuedTotalsSnapshot as { subtotal: number; taxAmount: number; total: number; currency: string; irpfRate?: number | null; irpfAmount?: number | null }
     data = toPdfDataFromSnapshots(snap, company, client, items, totals)
     branding = data.branding
   } else {

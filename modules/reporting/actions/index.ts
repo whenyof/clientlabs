@@ -1,1 +1,2 @@
-export { getReportingData } from "./getReportingData"
+export { getReportsOverview } from "./getReportsOverview"
+export type { ReportsOverview, ReportsPeriod } from "./getReportsOverview"

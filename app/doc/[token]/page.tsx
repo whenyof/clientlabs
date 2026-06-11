@@ -167,8 +167,8 @@ export default function DocViewPage() {
         </div>
       )}
 
-      {/* Área principal: PDF + panel de firma lateral */}
-      <div style={{ flex: 1, display: "flex", overflow: "hidden", minHeight: 0 }}>
+      {/* Área principal: PDF + panel de firma lateral (apilado en móvil) */}
+      <div className="docp-main" style={{ flex: 1, display: "flex", overflow: "hidden", minHeight: 0 }}>
 
         {/* PDF viewer con CSS scale — funciona en todos los navegadores incluyendo Safari */}
         <div
@@ -212,7 +212,7 @@ export default function DocViewPage() {
 
         {/* Panel de firma lateral — solo presupuestos pendientes */}
         {canDecide && (
-          <div style={{ flexShrink: 0, width: 272, borderLeft: "1px solid #3A4A54", background: "#fff", overflowY: "auto", padding: "22px 18px", display: "flex", flexDirection: "column" }}>
+          <div className="docp-panel" style={{ flexShrink: 0, width: 272, borderLeft: "1px solid #3A4A54", background: "#fff", overflowY: "auto", padding: "22px 18px", display: "flex", flexDirection: "column" }}>
             <h2 style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: "#0B1F2A", margin: "0 0 6px" }}>Firma este presupuesto</h2>
             <p style={{ fontFamily: FONT, fontSize: 12, color: "#7C8B96", margin: "0 0 18px", lineHeight: 1.5 }}>
               Lee el documento y, si estás de acuerdo, fírmalo aquí.
@@ -291,6 +291,20 @@ export default function DocViewPage() {
           </div>
         </div>
       )}
+
+      {/* Móvil: apilar PDF y panel de firma para que la firma sea accesible */}
+      <style>{`
+        @media (max-width: 720px) {
+          .docp-main { flex-direction: column !important; }
+          .docp-panel {
+            width: 100% !important;
+            border-left: none !important;
+            border-top: 1px solid #E2E6EA !important;
+            max-height: 46dvh;
+            box-sizing: border-box;
+          }
+        }
+      `}</style>
     </div>
   )
 }

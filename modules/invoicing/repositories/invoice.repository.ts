@@ -182,6 +182,9 @@ type CreatePayload = {
   /** Verifactu document type */
   invoiceDocType?: string | null
   rectificationMethod?: string | null
+  /** Recargo de equivalencia (cliente minorista) */
+  recargoEquivalencia?: boolean
+  recargoAmount?: number | null
   lines: Array<{
     description: string
     quantity: number
@@ -259,6 +262,7 @@ type UpdateDraftPayload = {
   subtotal: number
   taxAmount: number
   total: number
+  recargoAmount?: number | null
   lines: Array<{
     description: string
     quantity: number

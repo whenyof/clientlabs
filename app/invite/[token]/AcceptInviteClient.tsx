@@ -7,7 +7,11 @@ import { toast } from "sonner"
 
 const ROLE_LABELS: Record<string, string> = {
   OWNER: "Propietario",
-  ADMIN: "Admin",
+  ADMIN: "Administrador",
+  MANAGER: "Manager",
+  SALES: "Comercial",
+  MEMBER: "Miembro",
+  VIEWER: "Solo lectura",
   USER: "Usuario",
 }
 

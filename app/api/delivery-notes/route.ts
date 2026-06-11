@@ -11,6 +11,8 @@ const itemSchema = z.object({
   description: z.string().min(1).max(500),
   quantity: z.number().positive().max(99999),
   unitPrice: z.number().min(0).max(9999999).optional(),
+  taxRate: z.number().min(0).max(100).optional(),
+  delivered: z.boolean().optional(),
   productRef: z.string().max(100).optional().nullable(),
   lotNumber: z.string().max(100).optional().nullable(),
   expiryDate: z.string().optional().nullable(),
@@ -85,7 +87,7 @@ export async function POST(req: NextRequest) {
     if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Datos inválidos" }, { status: 400 })
     const { clientId, quoteId, deliveryDate, notes, items } = parsed.data
 
-    type NoteItem = { productId?: string; description: string; quantity: number; unitPrice?: number; productRef?: string | null; lotNumber?: string | null; expiryDate?: string | null }
+    type NoteItem = { productId?: string; description: string; quantity: number; unitPrice?: number; taxRate?: number; delivered?: boolean; productRef?: string | null; lotNumber?: string | null; expiryDate?: string | null }
     const number = await nextNumber(session.user.id)
 
     const note = await prisma.deliveryNote.create({
@@ -102,7 +104,8 @@ export async function POST(req: NextRequest) {
             description: i.description,
             quantity: Number(i.quantity) || 1,
             unitPrice: Number(i.unitPrice) || 0,
-            delivered: true,
+            taxRate: typeof i.taxRate === "number" ? i.taxRate : 21,
+            delivered: i.delivered ?? true,
             productRef: i.productRef ?? null,
             lotNumber: i.lotNumber ?? null,
             expiryDate: i.expiryDate ? new Date(i.expiryDate) : null,

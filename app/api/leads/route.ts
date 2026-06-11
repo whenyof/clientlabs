@@ -270,6 +270,11 @@ export async function POST(request: NextRequest) {
         leadStatus: 'NEW',
         status: 'NEW', // @deprecated — kept in sync with leadStatus
         notes,
+        // El pipeline del dashboard agrega Lead.estimatedValue — guardar en la
+        // columna real, no solo en metadata (metadata.budget se mantiene por compat)
+        ...(budget !== undefined && budget !== "" && Number.isFinite(parseFloat(String(budget)))
+          ? { estimatedValue: parseFloat(String(budget)) }
+          : {}),
         metadata: {
           ...(company ? { company } : {}),
           ...(budget !== undefined && budget !== "" ? { budget: parseFloat(String(budget)) } : {}),

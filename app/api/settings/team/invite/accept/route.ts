@@ -86,6 +86,12 @@ export async function POST(req: NextRequest) {
         },
       }),
       prisma.workspaceInvite.delete({ where: { id: invite.id } }),
+      // Team members ride the owner's workspace seat: skip plan selection and
+      // owner-style onboarding so they land directly on the dashboard.
+      prisma.user.update({
+        where: { id: session.user.id },
+        data: { onboardingCompleted: true },
+      }),
     ])
 
     return NextResponse.json({ success: true, workspaceName: invite.workspace.name })

@@ -458,6 +458,7 @@ export async function createLead(data: {
     phone?: string
     source?: string
     leadStatus?: string
+    estimatedValue?: string | number
 }) {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) throw new Error("Unauthorized")
@@ -472,6 +473,15 @@ export async function createLead(data: {
     const validStatuses = ["NEW", "CONTACTED", "QUALIFIED", "CONVERTED", "LOST"] as const
     const initialStatus = validStatuses.includes(data.leadStatus as any) ? data.leadStatus as typeof validStatuses[number] : "NEW"
 
+    // Valor estimado (€) — opcional; alimenta el pipeline del dashboard
+    let estimatedValue: number | null = null
+    if (data.estimatedValue !== undefined && data.estimatedValue !== "") {
+        const parsedValue = parseFloat(String(data.estimatedValue).replace(",", "."))
+        if (Number.isFinite(parsedValue) && parsedValue >= 0 && parsedValue <= 999_999_999) {
+            estimatedValue = parsedValue
+        }
+    }
+
     const lead = await prisma.lead.create({
         data: {
             userId: session.user.id,
@@ -483,6 +493,7 @@ export async function createLead(data: {
             status: initialStatus, // @deprecated — kept in sync
             temperature: "COLD",
             score: 0,
+            estimatedValue,
             lastActionAt: new Date(),
         },
     })

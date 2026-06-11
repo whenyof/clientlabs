@@ -80,7 +80,7 @@ export function CreateLeadManualDialog({
   const [loading, setLoading] = useState(false)
 
   // Manual
-  const [form, setForm] = useState({ name: "", email: "", phone: "", source: "", leadStatus: "NEW" })
+  const [form, setForm] = useState({ name: "", email: "", phone: "", source: "", leadStatus: "NEW", estimatedValue: "" })
 
   // Paste
   const [pasteText, setPasteText] = useState("")
@@ -92,7 +92,7 @@ export function CreateLeadManualDialog({
   const [mapping, setMapping] = useState<Record<string, string>>({})
 
   function handleClose() {
-    setForm({ name: "", email: "", phone: "", source: "", leadStatus: "NEW" })
+    setForm({ name: "", email: "", phone: "", source: "", leadStatus: "NEW", estimatedValue: "" })
     setPasteText(""); setPasteForm({ name: "", email: "", phone: "" })
     setCsv(null); setMapping({})
     onOpenChange(false)
@@ -270,6 +270,12 @@ export function CreateLeadManualDialog({
                     <ChevronDown size={14} style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", color: "#a3a3a3", pointerEvents: "none" }} />
                   </div>
                 </div>
+              </div>
+              <div>
+                <label style={lbl}>VALOR ESTIMADO (€)</label>
+                <input style={inp} type="number" min={0} step="0.01" inputMode="decimal" value={form.estimatedValue}
+                  onChange={e => setForm({ ...form, estimatedValue: e.target.value })}
+                  placeholder="0,00" />
               </div>
             </div>
             <div style={{ padding: "14px 24px", borderTop: "1px solid #eeeeee", display: "flex", justifyContent: "flex-end", gap: 8 }}>

@@ -36,6 +36,19 @@ export async function PATCH(
       }
     }
 
+    // Valor estimado (€) — acepta número o string numérico; "" lo limpia a null
+    if (body.estimatedValue !== undefined) {
+      if (body.estimatedValue === null || body.estimatedValue === "") {
+        data.estimatedValue = null
+      } else {
+        const parsedValue = parseFloat(String(body.estimatedValue).replace(",", "."))
+        if (!Number.isFinite(parsedValue) || parsedValue < 0 || parsedValue > 999_999_999) {
+          return NextResponse.json({ error: "estimatedValue no válido" }, { status: 400 })
+        }
+        data.estimatedValue = parsedValue
+      }
+    }
+
     if (Array.isArray(body.tags)) {
       data.tags = body.tags.filter((t: unknown) => typeof t === "string" && (t as string).trim().length > 0)
     }
@@ -59,7 +72,7 @@ export async function PATCH(
     // Register activity for the update (fire-and-forget)
     const fieldLabels: Record<string, string> = {
       name: "Nombre", email: "Email", phone: "Teléfono",
-      source: "Fuente", leadStatus: "Estado",
+      source: "Fuente", leadStatus: "Estado", estimatedValue: "Valor estimado",
     }
     const changed = Object.keys(data)
       .filter(f => f !== "lastActionAt" && f !== "status")

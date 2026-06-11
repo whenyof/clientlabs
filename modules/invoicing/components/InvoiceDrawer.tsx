@@ -28,6 +28,11 @@ import { CreateRectificativaModal } from "./CreateRectificativaModal"
 import { InvoiceClientRiskBadge } from "./InvoiceClientRiskBadge"
 import { FiscalWarning, FISCAL_DISABLED_TOOLTIP } from "@/components/fiscal/FiscalWarning"
 import { calculateFiscalCompleteness } from "@/lib/clients/calculateFiscalCompleteness"
+import {
+  getVerifactuBadgeConfig,
+  isVerifactuTerminalStatus,
+  isVerifactuErrorStatus,
+} from "@/modules/invoicing/utils/verifactuStatusBadge"
 
 const ISSUED_EDIT_TOOLTIP = "Factura emitida — edición limitada por normativa fiscal"
 
@@ -94,10 +99,56 @@ export function InvoiceDrawer({
   const [emailTo, setEmailTo] = useState("")
   const [sendMessage, setSendMessage] = useState("")
   const [sending, setSending] = useState(false)
+  const [verifactuRetrying, setVerifactuRetrying] = useState(false)
+  const [verifactuLive, setVerifactuLive] = useState<{ estado: string; mensaje?: string } | null>(null)
 
   useEffect(() => {
     if (openRectificativaModal) setRectificativaModalOpen(true)
   }, [openRectificativaModal])
+
+  // Polling de estado Verifactu: consulta al abrir y refresca cada 30s
+  // mientras el estado sea no-terminal (Pendiente/Error). Para al llegar
+  // a un estado terminal (Correcta, Rechazada, Duplicado, Anulada...).
+  const invoiceId = invoice?.id ?? null
+  const verifactuUuid = invoice?.verifactuUuid ?? null
+  const verifactuStatus = invoice?.verifactuStatus ?? null
+  useEffect(() => {
+    setVerifactuLive(null)
+    if (!open || !invoiceId || !verifactuUuid) return
+    if (verifactuStatus === "Aceptado") return // terminal cacheado por el endpoint
+
+    let stopped = false
+    let timer: ReturnType<typeof setInterval> | null = null
+
+    const check = async () => {
+      try {
+        const res = await fetch(`${getBaseUrl()}/api/invoicing/${invoiceId}/verifactu-status`, {
+          credentials: "include",
+        })
+        if (!res.ok || stopped) return
+        const data = await res.json()
+        const estado: string | undefined = data.estado ?? data.status
+        if (!estado || stopped) return
+        setVerifactuLive({ estado, mensaje: data.mensaje_error ?? data.codigo_error ?? undefined })
+        if (isVerifactuTerminalStatus(estado)) {
+          if (timer) clearInterval(timer)
+          if (estado !== verifactuStatus) onRefresh()
+        }
+      } catch {
+        // Error de red: el siguiente tick reintenta
+      }
+    }
+
+    check()
+    if (!isVerifactuTerminalStatus(verifactuStatus)) {
+      timer = setInterval(check, 30_000)
+    }
+    return () => {
+      stopped = true
+      if (timer) clearInterval(timer)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, invoiceId, verifactuUuid, verifactuStatus])
 
   const runAction = useCallback(
     async (fn: () => Promise<Response>) => {
@@ -175,6 +226,23 @@ export function InvoiceDrawer({
       setSending(false)
     }
   }, [invoice, emailTo, sendMessage, onRefresh])
+
+  const handleVerifactuRetry = useCallback(async () => {
+    if (!invoice) return
+    setVerifactuRetrying(true)
+    try {
+      const res = await fetch(`${getBaseUrl()}/api/invoicing/${invoice.id}/verifactu-retry`, {
+        method: "POST", credentials: "include",
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? "Error al reenviar a Verifactu")
+      onRefresh()
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Error al reenviar a Verifactu")
+    } finally {
+      setVerifactuRetrying(false)
+    }
+  }, [invoice, onRefresh])
 
   const handleRegeneratePdf = useCallback(() => {
     if (!invoice) return
@@ -280,6 +348,29 @@ export function InvoiceDrawer({
             />
           </div>
         )}
+
+        {/* Estado Verifactu + mensaje de error de la AEAT */}
+        {!isDraft && (verifactuLive?.estado ?? invoice.verifactuStatus) && (() => {
+          const estado = verifactuLive?.estado ?? invoice.verifactuStatus!
+          const c = getVerifactuBadgeConfig(estado)
+          return (
+            <div className="px-5 pt-2.5 shrink-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className={cn("inline-flex items-center text-[10px] font-semibold px-2 py-0.5 rounded-full", c.bg, c.text)}>
+                  {c.label}
+                </span>
+                {!isVerifactuTerminalStatus(estado) && (
+                  <span className="text-[10px] text-slate-400">Consultando estado en la AEAT…</span>
+                )}
+              </div>
+              {isVerifactuErrorStatus(estado) && verifactuLive?.mensaje && (
+                <p className="mt-1.5 text-[11px] text-red-600 bg-red-50 border border-red-200 rounded-lg px-2.5 py-1.5">
+                  {verifactuLive.mensaje}
+                </p>
+              )}
+            </div>
+          )
+        })()}
 
         {/* ── Scrollable body ────────────────────────────────── */}
         <div className="flex-1 overflow-y-auto">
@@ -463,6 +554,18 @@ export function InvoiceDrawer({
                       variant="default"
                     />
                   </>
+                )}
+
+                {/* Reintentar Verifactu — solo SENT sin uuid */}
+                {isSent && !invoice.verifactuUuid && (
+                  <ActionBtn
+                    icon={verifactuRetrying ? <ArrowPathIcon className="h-4 w-4 animate-spin" /> : <ArrowPathIcon className="h-4 w-4" />}
+                    label={verifactuRetrying ? "Reintentando envío..." : "Reintentar envío a Verifactu"}
+                    sublabel="La factura no consta registrada en la AEAT"
+                    onClick={handleVerifactuRetry}
+                    disabled={actionLoading || verifactuRetrying}
+                    variant="warning"
+                  />
                 )}
 
                 {/* Rectificativa */}

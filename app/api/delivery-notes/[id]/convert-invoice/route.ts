@@ -3,20 +3,17 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { createVerifactuInvoice, formatDateForVerifactu } from "@/lib/verifactu"
+import * as invoiceService from "@/modules/invoicing/services/invoice.service"
 
-async function nextInvoiceNumber(userId: string): Promise<{ number: string; series: string }> {
-  const series = "F"
-  const year = new Date().getFullYear()
-  const last = await prisma.invoice.findFirst({
-    where: { userId, series, number: { startsWith: `F-${year}-` } },
-    orderBy: { createdAt: "desc" },
-    select: { number: true },
-  })
-  const seq = last ? parseInt(last.number.split("-")[2] ?? "0") + 1 : 1
-  return { number: `F-${year}-${String(seq).padStart(3, "0")}`, series }
-}
-
+/**
+ * POST /api/delivery-notes/[id]/convert-invoice
+ *
+ * Creates a DRAFT invoice from a delivery note using the canonical invoicing
+ * service (same path as quote→invoice and manual invoices):
+ * - Number stays "BORRADOR"; the real number (series "INV") is assigned at issue.
+ * - Verifactu signing happens ONLY at issue (invoiceService.issueInvoice).
+ * - Per-line tax uses the delivery-note line taxRate (fallback 21).
+ */
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -34,91 +31,64 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   })
   if (!note) return NextResponse.json({ error: "Not found" }, { status: 404 })
   if (note.convertedToInvoiceId) return NextResponse.json({ error: "Already converted" }, { status: 400 })
+  if (note.items.length === 0) return NextResponse.json({ error: "El albarán no tiene líneas" }, { status: 400 })
 
-  const { number, series } = await nextInvoiceNumber(session.user.id)
+  // Client snapshot (required for F1 emission via Verifactu at issue time)
+  const client = await prisma.client.findFirst({
+    where: { id: note.clientId, userId: session.user.id },
+    select: {
+      name: true, legalName: true, taxId: true, email: true,
+      address: true, city: true, postalCode: true, country: true,
+    },
+  })
+
   const issueDate = new Date()
   const dueDate = new Date(issueDate)
   dueDate.setDate(dueDate.getDate() + 30)
 
-  const totalAmount = note.items.reduce((sum, i) => {
-    const sub = i.quantity * i.unitPrice
-    return sum + sub + sub * 0.21
-  }, 0)
-  const subtotal = note.items.reduce((s, i) => s + i.quantity * i.unitPrice, 0)
-  const taxAmount = totalAmount - subtotal
-
-  const invoice = await prisma.invoice.create({
-    data: {
-      userId: session.user.id,
-      clientId: note.clientId,
-      number,
-      series,
-      issueDate,
-      dueDate,
-      currency: "EUR",
-      subtotal,
-      taxAmount,
-      total: totalAmount,
-      notes: note.notes,
-      status: "DRAFT",
-      type: "CUSTOMER",
-      lines: {
-        create: note.items.map((item) => {
-          const lineSub = item.quantity * item.unitPrice
-          const lineTax = lineSub * 0.21
-          return {
-            description: item.description,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-            taxPercent: 21,
-            subtotal: lineSub,
-            taxAmount: lineTax,
-            total: lineSub + lineTax,
-          }
-        }),
-      },
-    },
+  const created = await invoiceService.createInvoice({
+    userId: session.user.id,
+    clientId: note.clientId,
+    series: "INV",
+    issueDate,
+    dueDate,
+    currency: "EUR",
+    notes: note.notes ?? null,
+    invoiceDocType,
+    clientSnapshot: client
+      ? {
+          name: client.name ?? null,
+          legalName: client.legalName ?? null,
+          taxId: client.taxId ?? null,
+          email: client.email ?? null,
+          address: client.address ?? null,
+          city: client.city ?? null,
+          postalCode: client.postalCode ?? null,
+          country: client.country ?? null,
+        }
+      : null,
+    lines: note.items.map((item) => ({
+      description: item.description,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+      taxPercent: item.taxRate ?? 21,
+    })),
   })
 
-  await prisma.deliveryNote.update({
-    where: { id },
-    data: { status: "CONVERTED", convertedToInvoiceId: invoice.id },
-  })
-
-  const bizProfile = await prisma.businessProfile.findUnique({
-    where: { userId: session.user.id },
-    select: { verifactuEnabled: true, verifactuApiKey: true },
-  })
-
-  if (bizProfile?.verifactuEnabled && bizProfile.verifactuApiKey) {
-    createVerifactuInvoice(bizProfile.verifactuApiKey, {
-      serie: series || "CL",
-      numero: number,
-      fecha_expedicion: formatDateForVerifactu(issueDate),
-      tipo_factura: invoiceDocType,
-      descripcion: "Factura ClientLabs",
-      lineas: [{
-        base_imponible: subtotal.toFixed(2),
-        tipo_impositivo: "21.00",
-        cuota_repercutida: taxAmount.toFixed(2),
-      }],
-      importe_total: totalAmount.toFixed(2),
-    }).then(async (result) => {
-      await prisma.invoice.update({
-        where: { id: invoice.id },
-        data: {
-          verifactuUuid: result.uuid,
-          verifactuStatus: result.estado,
-          verifactuQr: result.qr || null,
-          verifactuHuella: result.huella || null,
-          verifactuUrl: result.url || null,
-          verifactuSentAt: new Date(),
-        },
-      })
-    }).catch((err) => {
-      console.error("[Verifactu] Error al enviar factura:", err instanceof Error ? err.message : err)
-    })
+  if (!created) {
+    return NextResponse.json({ error: "Error al crear la factura" }, { status: 500 })
   }
 
-  return NextResponse.json({ success: true, id: invoice.id, number, invoiceId: invoice.id, invoiceNumber: number })
+  await prisma.deliveryNote.update({
+    where: { id: note.id },
+    data: { status: "CONVERTED", convertedToInvoiceId: created.id },
+  })
+
+  return NextResponse.json({
+    success: true,
+    id: created.id,
+    number: created.number,
+    invoiceId: created.id,
+    invoiceNumber: created.number,
+  })
 }

@@ -35,6 +35,7 @@ export default async function LeadPage({
             temperature: true,
             additionalInfo: true,
             tags: true,
+            estimatedValue: true,
         },
     })
 
@@ -42,5 +43,11 @@ export default async function LeadPage({
         notFound()
     }
 
-    return <LeadPanel lead={lead} />
+    // Prisma Decimal no es serializable hacia client components — convertir a number
+    const serializedLead = {
+        ...lead,
+        estimatedValue: lead.estimatedValue != null ? Number(lead.estimatedValue) : null,
+    }
+
+    return <LeadPanel lead={serializedLead} />
 }

@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { AnimatedCard } from "../../analytics/components/AnimatedCard"
+import { AnimatedCard } from "./AnimatedCard"
 import { SparklesIcon } from "@heroicons/react/24/outline"
 
 export function ActionRecommendations() {

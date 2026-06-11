@@ -14,6 +14,10 @@ export interface VerifactuLine {
   base_imponible: string
   tipo_impositivo: string
   cuota_repercutida: string
+  /** Recargo de equivalencia (clave_regimen "18") — solo en facturas a minoristas en ese régimen */
+  clave_regimen?: string
+  tipo_recargo_equivalencia?: string
+  cuota_recargo_equivalencia?: string
 }
 
 export interface VerifactuCreateData {
@@ -76,15 +80,48 @@ export async function createVerifactuNif(nif: string, nombre: string): Promise<C
 // FACTURACIÓN (NIF key)
 // ══════════════════════════════════════
 
-export async function createVerifactuInvoice(nifApiKey: string, data: VerifactuCreateData): Promise<VerifactuResponse> {
+export async function createVerifactuInvoice(
+  nifApiKey: string,
+  data: VerifactuCreateData,
+  idempotencyKey?: string
+): Promise<VerifactuResponse> {
   const res = await fetch(`${VERIFACTI_API_URL}/verifactu/create`, {
     method: "POST",
-    headers: { "Authorization": `Bearer ${nifApiKey}`, "Content-Type": "application/json" },
+    headers: {
+      "Authorization": `Bearer ${nifApiKey}`,
+      "Content-Type": "application/json",
+      ...(idempotencyKey && { "Idempotency-Key": idempotencyKey }),
+    },
     body: JSON.stringify(data),
   })
   const json = await res.json()
   if (json.error) throw new Error(json.error)
   return json as VerifactuResponse
+}
+
+export interface VerifactuStatusByNumberResponse {
+  estado?: string
+  uuid?: string
+  url?: string
+  qr?: string
+  huella?: string
+  error?: string
+  mensaje_error?: string
+}
+
+/** Consulta el estado de una factura en Verifacti por serie/número/fecha (sin uuid). */
+export async function getVerifactuStatusByNumber(
+  nifApiKey: string,
+  serie: string,
+  numero: string,
+  fechaExpedicion: string // DD-MM-YYYY
+): Promise<VerifactuStatusByNumberResponse> {
+  const res = await fetch(`${VERIFACTI_API_URL}/verifactu/status`, {
+    method: "POST",
+    headers: { "Authorization": `Bearer ${nifApiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ serie, numero, fecha_expedicion: fechaExpedicion }),
+  })
+  return (await res.json()) as VerifactuStatusByNumberResponse
 }
 
 export async function getVerifactuStatus(nifApiKey: string, uuid: string): Promise<VerifactuStatusResponse> {

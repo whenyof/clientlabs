@@ -30,6 +30,7 @@ export interface LeadInfoCardLead {
   createdAt: Date
   tags?: string[]
   additionalInfo?: string | null
+  estimatedValue?: number | null
 }
 
 interface LeadInfoCardProps {
@@ -60,6 +61,7 @@ export function LeadInfoCard({ lead, onUpdate }: LeadInfoCardProps) {
     email: lead.email || "",
     phone: lead.phone || "",
     source: lead.source || "",
+    estimatedValue: lead.estimatedValue != null ? String(lead.estimatedValue) : "",
   })
   const [tags, setTags] = useState<string[]>(lead.tags ?? [])
   const [tagInput, setTagInput] = useState("")
@@ -76,6 +78,7 @@ export function LeadInfoCard({ lead, onUpdate }: LeadInfoCardProps) {
       email: lead.email || "",
       phone: lead.phone || "",
       source: lead.source || "",
+      estimatedValue: lead.estimatedValue != null ? String(lead.estimatedValue) : "",
     })
   }
 
@@ -134,6 +137,7 @@ export function LeadInfoCard({ lead, onUpdate }: LeadInfoCardProps) {
     { key: "email" as const, label: "Email", type: "email" },
     { key: "phone" as const, label: "Teléfono", type: "tel" },
     { key: "source" as const, label: "Fuente", type: "select" },
+    { key: "estimatedValue" as const, label: "Valor estimado (€)", type: "number" },
   ]
 
   return (
@@ -203,7 +207,11 @@ export function LeadInfoCard({ lead, onUpdate }: LeadInfoCardProps) {
               )
             ) : (
               <span className="text-[13px] text-slate-900">
-                {field.key === "source" ? formatSource(form[field.key]) : (form[field.key] || "—")}
+                {field.key === "source"
+                  ? formatSource(form[field.key])
+                  : field.key === "estimatedValue"
+                    ? (form.estimatedValue !== "" ? `${Number(form.estimatedValue).toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €` : "—")
+                    : (form[field.key] || "—")}
               </span>
             )}
           </div>

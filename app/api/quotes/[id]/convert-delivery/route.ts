@@ -44,6 +44,7 @@ export async function POST(_: NextRequest, { params }: { params: Promise<{ id: s
           description: item.description,
           quantity: item.quantity,
           unitPrice: item.unitPrice,
+          taxRate: item.taxRate ?? 21,
           delivered: true,
         })),
       },

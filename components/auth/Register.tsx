@@ -1,11 +1,18 @@
 "use client"
 
 import { useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { Eye, EyeOff, Check, Loader2 } from "lucide-react"
 import { signIn } from "next-auth/react"
 import { getBaseUrl } from "@/lib/api/baseUrl"
 
 type Props = { onSwitch: () => void }
+
+/** Only allow same-app relative paths (e.g. /invite/abc) to avoid open redirects. */
+function safeCallbackUrl(raw: string | null): string | null {
+  if (raw && raw.startsWith("/") && !raw.startsWith("//")) return raw
+  return null
+}
 
 function GoogleIcon() {
   return (
@@ -30,6 +37,9 @@ const STRENGTH_LABEL = ["", "Muy débil", "Débil", "Regular", "Fuerte", "Muy fu
 const STRENGTH_COLOR = ["", "#ef4444", "#f97316", "#eab308", "#84cc16", "#0F766E"]
 
 export default function Register({ onSwitch }: Props) {
+  const searchParams = useSearchParams()
+  // e.g. an invite link: /login?callbackUrl=/invite/<token> → keep it through verify
+  const callbackUrl = safeCallbackUrl(searchParams?.get("callbackUrl") ?? null)
   const [name, setName]         = useState("")
   const [email, setEmail]       = useState("")
   const [password, setPassword] = useState("")
@@ -77,7 +87,7 @@ export default function Register({ onSwitch }: Props) {
       // (never sent to any server — only used locally for signIn())
       sessionStorage.setItem("cl_verify_pw", password)
 
-      window.location.href = `/verify?email=${encodeURIComponent(email.toLowerCase().trim())}`
+      window.location.href = `/verify?email=${encodeURIComponent(email.toLowerCase().trim())}${callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : ""}`
     } catch {
       setError("Error de conexión. Comprueba tu internet e inténtalo de nuevo.")
       setLoading(false)
@@ -97,7 +107,7 @@ export default function Register({ onSwitch }: Props) {
       {/* Google */}
       <button
         type="button"
-        onClick={() => signIn("google", { callbackUrl: "/plan" })}
+        onClick={() => signIn("google", { callbackUrl: callbackUrl ?? "/plan" })}
         className="w-full flex items-center justify-center gap-3 rounded-xl py-3 text-[13.5px] font-medium text-slate-700 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all duration-150 shadow-sm"
       >
         <GoogleIcon />

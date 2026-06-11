@@ -147,6 +147,16 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/auth", req.url))
   }
 
+  // ── 2FA gate ──
+  // If 2FA is enabled but not yet verified for this session, force the
+  // verification step before any protected page. /auth/2fa-verify and every
+  // /auth + /api/auth route (incl. sign-out and verify-session) are already
+  // short-circuited as public above, so the redirect target stays reachable
+  // and there is no redirect loop.
+  if (token.twoFactorEnabled && !token.twoFactorVerified) {
+    return NextResponse.redirect(new URL("/auth/2fa-verify", req.url))
+  }
+
   // ── Admin routes ──
   if (pathname.startsWith("/admin") && token.role !== "ADMIN") {
     return NextResponse.redirect(new URL("/dashboard", req.url))

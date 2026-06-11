@@ -1,10 +1,9 @@
 "use client"
 
-import { useState, useId } from "react"
+import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import {
-  Plus, Filter, Zap, List, Calendar, BarChart2, LayoutGrid,
-  ArrowUpRight, ArrowDownRight, Minus, ExternalLink,
+  Plus, Filter, List, Calendar, BarChart2, LayoutGrid,
   Phone, Clock, Flag, RefreshCw, Settings,
 } from "lucide-react"
 import type { DashboardTask, TaskPriority, ViewMode } from "./types"
@@ -27,38 +26,9 @@ const C = {
 }
 const pRnd = (s: number) => { const x = Math.sin(s * 127.1 + 311.7) * 10000; return x - Math.floor(x) }
 
-// ─── Sparkline ─────────────────────────────────────────────────────────────
-function Sparkline({ data, color = C.ink }: { data: number[]; color?: string }) {
-  const uid = useId().replace(/:/g, "s")
-  const w = 96, h = 28
-  const min = Math.min(...data), max = Math.max(...data), rng = max - min || 1
-  const step = w / (data.length - 1)
-  const pts = data.map((v, i) => [i * step, h - 4 - ((v - min) / rng) * (h - 8)] as [number, number])
-  const lineD = "M" + pts.map(p => p.join(",")).join(" L")
-  const areaD = `M0,${h} L${pts.map(p => p.join(",")).join(" L")} L${w},${h} Z`
-  const last = pts[pts.length - 1]
-  return (
-    <svg viewBox={`0 0 ${w} ${h}`} width={w} height={h} style={{ display: "block" }}>
-      <defs>
-        <linearGradient id={uid} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity={0.18} />
-          <stop offset="100%" stopColor={color} stopOpacity={0} />
-        </linearGradient>
-      </defs>
-      <path d={areaD} fill={`url(#${uid})`} />
-      <path d={lineD} fill="none" stroke={color} strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx={last[0]} cy={last[1]} r={2} fill={color} />
-    </svg>
-  )
-}
-
-// ─── KPI Card ─────────────────────────────────────────────────────────────
-type Trend = "up" | "down" | "flat"
-function TaskKpiCard({ label, tag, value, unit, trend = "flat", delta, deltaLabel, spark, isLast }: {
-  label: string; tag: string; value: number; unit?: string; trend?: Trend
-  delta: number; deltaLabel: string; spark: number[]; isLast?: boolean
+function TaskKpiCard({ label, tag, value, unit, isLast }: {
+  label: string; tag: string; value: number; unit?: string; isLast?: boolean
 }) {
-  const dc = trend === "up" ? C.accentInk : trend === "down" ? C.red : C.ink3
   return (
     <div style={{ padding: "18px 22px", borderRight: isLast ? "none" : `1px solid ${C.line2}`, display: "flex", flexDirection: "column", gap: 4 }}>
       <div style={{ fontSize: 11.5, color: C.ink3, fontWeight: 500, display: "flex", alignItems: "center", gap: 6 }}>
@@ -68,14 +38,6 @@ function TaskKpiCard({ label, tag, value, unit, trend = "flat", delta, deltaLabe
       <div style={{ fontWeight: 600, letterSpacing: "-0.028em", fontSize: 28, lineHeight: 1.1, marginTop: 4, fontVariantNumeric: "tabular-nums", color: C.ink }}>
         {unit === "%" ? value.toFixed(1).replace(".", ",") : value}
         {unit && <span style={{ color: C.ink3, fontWeight: 500, fontSize: 18, marginLeft: 2 }}>{unit}</span>}
-      </div>
-      <div style={{ marginTop: 10, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontFamily: "ui-monospace,monospace", fontSize: 11.5, fontWeight: 500, color: dc }}>
-          {trend === "up" ? <ArrowUpRight size={11} strokeWidth={2.4} /> : trend === "down" ? <ArrowDownRight size={11} strokeWidth={2.4} /> : <Minus size={11} strokeWidth={2.4} />}
-          {delta > 0 ? "+" : ""}{delta.toFixed(1)}%
-          <span style={{ color: C.ink4, marginLeft: 4, fontWeight: 450 }}>{deltaLabel}</span>
-        </span>
-        <Sparkline data={spark} color={trend === "down" ? C.accentInk : C.ink} />
       </div>
     </div>
   )
@@ -105,9 +67,6 @@ function ProjectStrip({ tasks }: { tasks: DashboardTask[] }) {
           <h3 style={{ fontWeight: 600, letterSpacing: "-0.01em", fontSize: 14, margin: 0, color: C.ink }}>Proyectos activos</h3>
           <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, color: C.ink3 }}>{projects.length} en curso · ordenados por urgencia</span>
         </div>
-        <a style={{ fontSize: 11.5, color: C.ink3, fontWeight: 500, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4 }}>
-          Todos los proyectos <ExternalLink size={11} />
-        </a>
       </div>
       <div style={{ display: "flex", gap: 12, overflowX: "auto", paddingBottom: 4 }}>
         {projects.map((p, idx) => (
@@ -552,9 +511,6 @@ export function TasksView() {
           <button style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 6, background: C.bg, border: `1px solid ${C.line}`, color: C.ink2, fontWeight: 550, fontSize: 12.5, cursor: "pointer" }}>
             <Filter size={12} strokeWidth={2} />Filtrar
           </button>
-          <button style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 6, background: C.bg, border: `1px solid ${C.line}`, color: C.ink2, fontWeight: 550, fontSize: 12.5, cursor: "pointer" }}>
-            <Zap size={12} strokeWidth={2} />Automatizar
-          </button>
           <button onClick={handleNewTask} style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: C.ink, color: "white", fontWeight: 550, fontSize: 12.5, border: "none", cursor: "pointer" }}>
             <Plus size={12} strokeWidth={2.5} />Nueva tarea
           </button>
@@ -563,10 +519,10 @@ export function TasksView() {
 
       {/* ── KPI ROW ──────────────────────────────────────── */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", border: `1px solid ${C.line}`, borderRadius: 10, background: C.bg, marginBottom: 20, overflow: "hidden" }}>
-        <TaskKpiCard label="Tareas abiertas" tag="Total" value={kd.open} trend="flat" delta={2.4} deltaLabel="vs sem ant." spark={[82,84,85,86,85,86,87,86,87,87,86,kd.open]} />
-        <TaskKpiCard label="Vencen esta semana" tag="7d" value={kd.dueThisWeek} trend="up" delta={12.5} deltaLabel="vs sem ant." spark={[12,13,14,15,16,17,kd.dueThisWeek]} />
-        <TaskKpiCard label="Tareas vencidas" tag="Atraso" value={kd.overdue} trend="down" delta={-33.3} deltaLabel="vs sem ant." spark={[9,8,7,6,5,4,kd.overdue].reverse()} />
-        <TaskKpiCard label="Ratio cierre · 30d" tag="30d" value={Number(kd.closeRate.toFixed(1))} unit="%" trend="up" delta={4.2} deltaLabel="vs 30d ant." spark={[70,72,73,75,75,76,77,78,Number(kd.closeRate.toFixed(1))]} isLast />
+        <TaskKpiCard label="Tareas abiertas" tag="Total" value={kd.open} />
+        <TaskKpiCard label="Vencen esta semana" tag="7d" value={kd.dueThisWeek} />
+        <TaskKpiCard label="Tareas vencidas" tag="Atraso" value={kd.overdue} />
+        <TaskKpiCard label="Ratio cierre · 30d" tag="30d" value={Number(kd.closeRate.toFixed(1))} unit="%" isLast />
       </div>
 
       {/* ── PROJECTS STRIP ───────────────────────────────── */}
@@ -583,7 +539,6 @@ export function TasksView() {
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               <Card>
                 <CardHead title="Carga del equipo · esta semana" subtitle="Distribución de tareas por persona"
-                  actions={<a style={{ fontSize: 11.5, color: C.ink3, fontWeight: 500, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4 }}>Equipo <ExternalLink size={11} /></a>}
                 />
                 <WorkloadChart tasks={tasks} />
               </Card>
@@ -609,7 +564,6 @@ export function TasksView() {
               </Card>
               <Card>
                 <CardHead title={`Hoy · ${now.getDate()} ${now.toLocaleString("es-ES", { month: "long" })}`} subtitle={`${todayCount} tareas pendientes`}
-                  actions={<a style={{ fontSize: 11.5, color: C.ink3, fontWeight: 500, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4 }}>Agenda <ExternalLink size={11} /></a>}
                 />
                 <TodayAgenda tasks={tasks} />
               </Card>

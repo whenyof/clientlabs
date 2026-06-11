@@ -14,6 +14,7 @@ export { ClientProfitabilityCard } from "./ClientProfitabilityCard"
 export { ClientTimeline } from "./ClientTimeline"
 export { ClientQuickActions } from "./ClientQuickActions"
 export { ClientDocumentsList } from "./ClientDocumentsList"
+export { ClientTasksCard } from "./ClientTasksCard"
 
 
 

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
-import { useState, useMemo, useCallback, useEffect, useId } from "react"
+import { useState, useMemo, useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { ClientsTable } from "@domains/clients/components/ClientsTable"
 import type { ClientWithLead as TableClientWithLead } from "@domains/clients/components/ClientsTable"
@@ -10,7 +10,7 @@ import { ClientsKanbanView } from "./ClientsKanbanView"
 import { CreateClientButton } from "@/modules/clients/components/CreateClientButton"
 import { ImportClients } from "@/modules/clients/components/ImportClients"
 import { deriveClientStatus, isClientForgotten } from "@/lib/logic/client-status"
-import { List, LayoutGrid, Download, Plus, Zap, MoreVertical, ArrowUpRight, ArrowDownRight, Minus, ExternalLink, Mail, Phone } from "lucide-react"
+import { List, LayoutGrid, Download, Plus, Zap, MoreVertical, Mail, Phone } from "lucide-react"
 
 // ─── Design tokens ─────────────────────────────────────────────────────────
 const C = {
@@ -29,63 +29,6 @@ const fmtEur = (n: number) =>
   : n >= 1000 ? `${(n / 1000).toFixed(1).replace(".", ",")}k €`
   : `${fmtN(n)} €`
 
-const pRnd = (s: number) => { const x = Math.sin(s * 127.1 + 311.7) * 10000; return x - Math.floor(x) }
-
-// ─── Sparkline ─────────────────────────────────────────────────────────────
-function Sparkline({ data, color = C.ink }: { data: number[]; color?: string }) {
-  const uid = useId().replace(/:/g, "s")
-  const w = 96, h = 28
-  const min = Math.min(...data), max = Math.max(...data), rng = max - min || 1
-  const step = w / (data.length - 1)
-  const pts = data.map((v, i) => [i * step, h - 4 - ((v - min) / rng) * (h - 8)] as [number, number])
-  const lineD = "M" + pts.map(p => p.join(",")).join(" L")
-  const areaD = `M0,${h} L${pts.map(p => p.join(",")).join(" L")} L${w},${h} Z`
-  const last = pts[pts.length - 1]
-  return (
-    <svg viewBox={`0 0 ${w} ${h}`} width={w} height={h} style={{ display: "block" }}>
-      <defs>
-        <linearGradient id={uid} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity={0.18} />
-          <stop offset="100%" stopColor={color} stopOpacity={0} />
-        </linearGradient>
-      </defs>
-      <path d={areaD} fill={`url(#${uid})`} />
-      <path d={lineD} fill="none" stroke={color} strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx={last[0]} cy={last[1]} r={2} fill={color} />
-    </svg>
-  )
-}
-
-// ─── Donut chart SVG ────────────────────────────────────────────────────────
-function buildDonutPaths(segments: { label: string; value: number; color: string }[], total: number, r: number, cx: number, cy: number) {
-  const result: React.ReactNode[] = []
-  let a = -Math.PI / 2
-  for (const seg of segments) {
-    const slice = (seg.value / Math.max(total, 1)) * Math.PI * 2
-    const x1 = cx + Math.cos(a) * r, y1 = cy + Math.sin(a) * r
-    const a2 = a + slice
-    const x2 = cx + Math.cos(a2) * r, y2 = cy + Math.sin(a2) * r
-    const large = slice > Math.PI ? 1 : 0
-    const d = `M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${large} 1 ${x2},${y2} Z`
-    a = a2
-    result.push(<path key={seg.label} d={d} fill={seg.color} stroke="white" strokeWidth={1.5} />)
-  }
-  return result
-}
-
-function DonutChart({ segments, total }: { segments: { label: string; value: number; color: string }[]; total: number }) {
-  const size = 110, r = size / 2 - 8, cx = size / 2, cy = size / 2
-  const paths = buildDonutPaths(segments, total, r, cx, cy)
-  return (
-    <svg viewBox={`0 0 ${size} ${size}`} width={size} height={size}>
-      {paths}
-      <circle cx={cx} cy={cy} r={r * 0.55} fill="white" />
-      <text x={cx} y={cy - 2} textAnchor="middle" fontWeight={600} fontSize={22} letterSpacing={-0.025} fill={C.ink}>{total}</text>
-      <text x={cx} y={cy + 14} textAnchor="middle" fontFamily="ui-monospace,monospace" fontSize={9} fill={C.ink3} letterSpacing={0.06}>CLIENTES</text>
-    </svg>
-  )
-}
-
 // ─── Card ───────────────────────────────────────────────────────────────────
 function Card({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 10, overflow: "hidden", ...style }}>{children}</div>
@@ -100,9 +43,6 @@ function CardHead({ title, subtitle, actions }: { title: string; subtitle?: stri
       {actions && <div style={{ display: "flex", alignItems: "center", gap: 8 }}>{actions}</div>}
     </div>
   )
-}
-function CLink({ children }: { children: React.ReactNode }) {
-  return <a style={{ fontSize: 11.5, color: C.ink3, fontWeight: 500, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4 }}>{children} <ExternalLink size={11} /></a>
 }
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -225,12 +165,6 @@ export function ClientsView({ initialClients, allClientsBase, currentFilters, se
   ]
   const healthTotal = Math.max(champions + saludables + enRiesgo + churnAlto, 1)
 
-  // Sector segments (derived from client traits or deterministic from index)
-  const SECTOR_COLORS = [C.ink, C.accent, C.blue, C.warn, C.violet, C.cyan]
-  const SECTORS = ["Retail", "Hostelería", "Servicios prof.", "Arquitectura", "Industrial", "Salud"]
-  const sectorCounts = SECTORS.map((s, i) => ({ label: s, value: Math.max(1, Math.floor(totalClients * (0.12 + pRnd(i * 17 + 3) * 0.16))), color: SECTOR_COLORS[i] }))
-  const sectorTotal = sectorCounts.reduce((s, x) => s + x.value, 0)
-
   // Attention — clients at risk
   const attentionClients = useMemo(() =>
     clientsWithDerived.filter(c => c.effectiveStatus === "FOLLOW_UP" || c.effectiveStatus === "INACTIVE" || (c as any).isForgotten)
@@ -265,23 +199,24 @@ export function ClientsView({ initialClients, allClientsBase, currentFilters, se
     })
   }, [kpiClients, referenceDate])
 
-  // KPI sparklines (deterministic trend)
+  // KPI cards — real values only (no fabricated trends)
   const kpiCards = [
-    { label: "Clientes activos", tag: "Total", value: totalClients, unit: "", trend: "up" as const, delta: 6.4, vs: "+15 vs Abr", spark: Array.from({ length: 12 }, (_, i) => Math.max(1, Math.round(totalClients * (0.85 + i * 0.013 + pRnd(i * 3) * 0.02)))) },
-    { label: "Valor cartera · LTV", tag: "Total", value: kpis.totalRevenue, unit: "€", trend: "up" as const, delta: 12.8, vs: "vs Q1", spark: Array.from({ length: 12 }, (_, i) => Math.max(0, kpis.totalRevenue * (0.84 + i * 0.014 + pRnd(i * 5) * 0.02))) },
-    { label: "Tasa de retención", tag: "12M", value: healthTotal > 0 ? Math.round(((champions + saludables) / healthTotal) * 100 * 10) / 10 : 0, unit: "%", trend: "up" as const, delta: 1.8, vs: "vs 12m ant.", spark: Array.from({ length: 12 }, (_, i) => Math.max(0, 88 + i * 0.53 + pRnd(i * 7) * 0.5)) },
-    { label: "Churn estimado", tag: "12M", value: healthTotal > 0 ? Math.round((churnAlto / healthTotal) * 100 * 10) / 10 : 0, unit: "%", trend: "down" as const, delta: -1.8, vs: "vs 12m ant.", spark: Array.from({ length: 12 }, (_, i) => Math.max(0, 8 - i * 0.18 + pRnd(i * 11) * 0.3)) },
+    { label: "Clientes activos", tag: "Total", value: totalClients, unit: "" },
+    { label: "Valor cartera · LTV", tag: "Total", value: kpis.totalRevenue, unit: "€" },
+    { label: "Tasa de retención", tag: "Salud", value: healthTotal > 0 ? Math.round(((champions + saludables) / healthTotal) * 100 * 10) / 10 : 0, unit: "%" },
+    { label: "Churn estimado", tag: "Salud", value: healthTotal > 0 ? Math.round((churnAlto / healthTotal) * 100 * 10) / 10 : 0, unit: "%" },
   ]
 
-  // Segment chips
+  // Segment chips — counts computed from real client data
+  const ninetyDaysAgo = new Date(referenceDate.getTime() - 90 * 86_400_000)
   const segChips = [
     { id: "all", label: "Todos", count: totalClients },
     { id: "vip", label: "Champions", count: champions },
     { id: "healthy", label: "Saludables", count: saludables },
     { id: "risk", label: "En riesgo", count: enRiesgo },
     { id: "churn", label: "Churn alto", count: churnAlto },
-    { id: "mrr", label: "Con MRR", count: Math.floor(totalClients * 0.27) },
-    { id: "new", label: "Nuevos < 90d", count: Math.floor(totalClients * 0.09) },
+    { id: "mrr", label: "Con facturación", count: clientsWithDerived.filter(c => ((c as any).invoiceRevenue ?? c.totalSpent ?? 0) > 0).length },
+    { id: "new", label: "Nuevos < 90d", count: clientsWithDerived.filter(c => new Date(c.createdAt) >= ninetyDaysAgo).length },
   ]
 
   return (
@@ -310,9 +245,9 @@ export function ClientsView({ initialClients, allClientsBase, currentFilters, se
               </button>
             ))}
           </div>
-          <button style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: C.bg, border: `1px solid ${C.line}`, color: C.ink2, fontWeight: 550, fontSize: 12.5, cursor: "pointer" }}>
+          <a href="/api/settings/export/clients" download style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: C.bg, border: `1px solid ${C.line}`, color: C.ink2, fontWeight: 550, fontSize: 12.5, cursor: "pointer", textDecoration: "none" }}>
             <Download size={12} strokeWidth={2} />Exportar CSV
-          </button>
+          </a>
           <ImportClients />
           <CreateClientButton />
         </div>
@@ -320,44 +255,25 @@ export function ClientsView({ initialClients, allClientsBase, currentFilters, se
 
       {/* ── KPI ROW ──────────────────────────────────── */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", border: `1px solid ${C.line}`, borderRadius: 10, background: C.bg, marginBottom: 16, overflow: "hidden" }}>
-        {kpiCards.map((k, i) => {
-          const dc = k.trend === "up" ? C.accentInk : k.trend === "down" ? C.red : C.ink3
-          return (
-            <div key={k.label} style={{ padding: "18px 22px", borderRight: i < 3 ? `1px solid ${C.line2}` : "none", display: "flex", flexDirection: "column", gap: 4 }}>
-              <div style={{ fontSize: 11.5, color: C.ink3, fontWeight: 500, display: "flex", alignItems: "center", gap: 6 }}>
-                {k.label}
-                <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 9, padding: "1px 5px", borderRadius: 3, background: C.bg3, color: C.ink3, letterSpacing: "0.04em", textTransform: "uppercase" }}>{k.tag}</span>
-              </div>
-              <div style={{ fontWeight: 600, letterSpacing: "-0.028em", fontSize: 28, lineHeight: 1.1, marginTop: 4, fontVariantNumeric: "tabular-nums", color: C.ink }}>
-                {typeof k.value === "number" && k.unit === "€" ? fmtEur(k.value) : typeof k.value === "number" && k.unit === "%" ? k.value.toFixed(1).replace(".", ",") : fmtN(typeof k.value === "number" ? k.value : 0)}
-                {k.unit && k.unit !== "€" && <span style={{ color: C.ink3, fontWeight: 500, fontSize: 18, marginLeft: 2 }}>{k.unit}</span>}
-              </div>
-              <div style={{ marginTop: 10, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontFamily: "ui-monospace,monospace", fontSize: 11.5, fontWeight: 500, color: dc }}>
-                  {k.trend === "up" ? <ArrowUpRight size={11} strokeWidth={2.4} /> : k.trend === "down" ? <ArrowDownRight size={11} strokeWidth={2.4} /> : <Minus size={11} strokeWidth={2.4} />}
-                  {k.delta > 0 ? "+" : ""}{k.delta.toFixed(1)}%
-                  <span style={{ color: C.ink4, marginLeft: 4, fontWeight: 450 }}>{k.vs}</span>
-                </span>
-                <Sparkline data={k.spark} color={k.trend === "down" ? C.ink3 : C.ink} />
-              </div>
+        {kpiCards.map((k, i) => (
+          <div key={k.label} style={{ padding: "18px 22px", borderRight: i < 3 ? `1px solid ${C.line2}` : "none", display: "flex", flexDirection: "column", gap: 4 }}>
+            <div style={{ fontSize: 11.5, color: C.ink3, fontWeight: 500, display: "flex", alignItems: "center", gap: 6 }}>
+              {k.label}
+              <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 9, padding: "1px 5px", borderRadius: 3, background: C.bg3, color: C.ink3, letterSpacing: "0.04em", textTransform: "uppercase" }}>{k.tag}</span>
             </div>
-          )
-        })}
+            <div style={{ fontWeight: 600, letterSpacing: "-0.028em", fontSize: 28, lineHeight: 1.1, marginTop: 4, fontVariantNumeric: "tabular-nums", color: C.ink }}>
+              {typeof k.value === "number" && k.unit === "€" ? fmtEur(k.value) : typeof k.value === "number" && k.unit === "%" ? k.value.toFixed(1).replace(".", ",") : fmtN(typeof k.value === "number" ? k.value : 0)}
+              {k.unit && k.unit !== "€" && <span style={{ color: C.ink3, fontWeight: 500, fontSize: 18, marginLeft: 2 }}>{k.unit}</span>}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* ── ROW: HEALTH + SECTOR ─────────────────────── */}
       <div className="grid grid-cols-2 gap-4 mb-4">
         {/* Salud de cartera */}
         <Card>
-          <CardHead title="Salud de cartera" subtitle={`${healthTotal} clientes · actualizado hace 4 min`}
-            actions={
-              <div style={{ display: "inline-flex", background: C.bg2, border: `1px solid ${C.line}`, borderRadius: 7, padding: 2 }}>
-                {["30d", "90d", "YTD"].map((o, i) => (
-                  <button key={o} style={{ padding: "3px 8px", borderRadius: 5, fontFamily: "ui-monospace,monospace", fontSize: 11, color: i === 0 ? C.ink : C.ink3, fontWeight: 500, background: i === 0 ? "white" : "transparent", boxShadow: i === 0 ? `0 0 0 1px ${C.line} inset` : "none", border: "none", cursor: "pointer" }}>{o}</button>
-                ))}
-              </div>
-            }
-          />
+          <CardHead title="Salud de cartera" subtitle={`${healthTotal} clientes`} />
           <div style={{ padding: "10px 18px 0" }}>
             {/* Segmented bar */}
             <div style={{ display: "flex", gap: 3, height: 10, marginBottom: 16 }}>
@@ -389,21 +305,30 @@ export function ClientsView({ initialClients, allClientsBase, currentFilters, se
           </div>
         </Card>
 
-        {/* Sector donut */}
+        {/* Distribución por valor — real client revenue */}
         <Card>
-          <CardHead title="Sector" subtitle="Distribución de cartera" />
-          <div style={{ padding: 18, display: "flex", alignItems: "center", gap: 20 }}>
-            <DonutChart segments={sectorCounts} total={totalClients} />
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 7 }}>
-              {sectorCounts.map(s => (
-                <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ width: 10, height: 10, borderRadius: 2, background: s.color, display: "inline-block", flexShrink: 0 }} />
-                  <span style={{ flex: 1, fontSize: 12.5, color: C.ink2 }}>{s.label}</span>
-                  <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 11.5, color: C.ink, fontWeight: 600 }}>{s.value}</span>
-                  <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: C.ink4, minWidth: 32, textAlign: "right" }}>{sectorTotal > 0 ? `${((s.value / sectorTotal) * 100).toFixed(0)}%` : "0%"}</span>
+          <CardHead title="Distribución por valor" subtitle="Top clientes por facturación" />
+          <div style={{ padding: 18 }}>
+            {(() => {
+              const top = [...clientsWithDerived]
+                .map(c => ({ name: c.name ?? "—", v: (c as any).invoiceRevenue ?? c.totalSpent ?? 0 }))
+                .filter(c => c.v > 0)
+                .sort((a, b) => b.v - a.v)
+                .slice(0, 6)
+              if (top.length === 0) {
+                return <div style={{ textAlign: "center", color: C.ink3, fontSize: 12.5, padding: "24px 0" }}>Sin facturación registrada todavía</div>
+              }
+              const maxV = Math.max(...top.map(t => t.v), 1)
+              return top.map(t => (
+                <div key={t.name} style={{ display: "grid", gridTemplateColumns: "140px 1fr 80px", gap: 12, alignItems: "center", padding: "7px 0" }}>
+                  <span style={{ fontSize: 12.5, fontWeight: 500, color: C.ink2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{t.name}</span>
+                  <div style={{ height: 6, background: C.bg3, borderRadius: 99, overflow: "hidden" }}>
+                    <div style={{ width: `${(t.v / maxV) * 100}%`, height: "100%", background: C.accent, borderRadius: 99 }} />
+                  </div>
+                  <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 11.5, fontWeight: 600, color: C.ink, textAlign: "right" }}>{fmtEur(t.v)}</span>
                 </div>
-              ))}
-            </div>
+              ))
+            })()}
           </div>
         </Card>
       </div>
@@ -551,7 +476,6 @@ export function ClientsView({ initialClients, allClientsBase, currentFilters, se
           <CardHead
             title="Retención por cohorte"
             subtitle="% que sigue activo cada mes desde su alta · últimos 6 trimestres"
-            actions={<CLink>Detalle</CLink>}
           />
           <div style={{ padding: 18 }}>
             {cohortData.length === 0 ? (
@@ -633,7 +557,6 @@ export function ClientsView({ initialClients, allClientsBase, currentFilters, se
               <CardHead
                 title="Retención por cohorte"
                 subtitle="% que sigue activo cada mes desde su alta · últimos 6 trimestres"
-                actions={<CLink>Detalle</CLink>}
               />
               <div style={{ padding: 18 }}>
                 <div style={{ display: "grid", gridTemplateColumns: "72px repeat(12, 1fr)", gap: 3, marginBottom: 6 }}>

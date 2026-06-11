@@ -15,6 +15,7 @@ import { defaultNotesTemplate, defaultTermsTemplate } from "@domains/invoicing"
 import { replaceInvoiceVariables, formatDateForTemplate } from "@domains/invoicing"
 import { FiscalWarning } from "@/components/fiscal/FiscalWarning"
 import { calculateFiscalCompleteness } from "@/lib/clients/calculateFiscalCompleteness"
+import { ALLOWED_VAT_RATES, nearestAllowedVatRate, recargoRateForVat } from "@/modules/invoicing/utils/vatRates"
 
 /** Which field was last edited; we never overwrite it, only recalc the others. */
 export type LastEditedField = "qty" | "unit" | "vat" | "total"
@@ -145,6 +146,7 @@ export function CreateInvoiceDialog({
         postalCode: billingData.postalCode,
         country: billingData.country,
         email: billingData.email,
+        recargoEquivalencia: clientRecargoEdit,
       })
       if (res && 'error' in res && res.error) {
         toast.error(res.error)
@@ -172,6 +174,11 @@ export function CreateInvoiceDialog({
   })
   const [billingData, setBillingData] = useState<ClientSnapshot>(emptyBilling)
   const [billingLockedFromClient, setBillingLockedFromClient] = useState(false)
+  // Recargo de equivalencia del cliente seleccionado (editable junto a los datos fiscales)
+  const [clientRecargoEdit, setClientRecargoEdit] = useState(false)
+  useEffect(() => {
+    setClientRecargoEdit(clients.find((c) => c.id === clientId)?.recargoEquivalencia === true)
+  }, [clientId, clients])
 
   const reset = useCallback(() => {
     setClientId("")
@@ -190,7 +197,7 @@ export function CreateInvoiceDialog({
     setInvoiceLanguage(null)
     setCurrency("EUR")
     setInvoiceDocType(initialDocType ?? "F1")
-    setLines([{ id: nextLineId(), description: "", quantity: 0, unitPrice: 0, taxPercent: 0, lastEditedField: "unit" }])
+    setLines([{ id: nextLineId(), description: "", quantity: 0, unitPrice: 0, taxPercent: 21, lastEditedField: "unit" }])
     setBillingData(emptyBilling())
     setBillingLockedFromClient(false)
     setSavedClientData(null)
@@ -259,7 +266,8 @@ export function CreateInvoiceDialog({
         quantity: 1,
         unitPrice: subtotalLine,
         discountPercent: sale.discount ?? 0,
-        taxPercent: taxPct,
+        // El tipo derivado de importes puede salir con decimales (20.99) → snap al permitido más cercano
+        taxPercent: nearestAllowedVatRate(taxPct),
         lastEditedField: "unit",
       },
     ])
@@ -287,7 +295,7 @@ export function CreateInvoiceDialog({
       ...l,
       description: product.name,
       unitPrice: product.price,
-      taxPercent: product.taxRate,
+      taxPercent: nearestAllowedVatRate(product.taxRate),
       lastEditedField: "unit" as const,
     }))
     setProductAC({ lineId: "", query: "", open: false })
@@ -308,7 +316,7 @@ export function CreateInvoiceDialog({
       setLines(
         editInvoice.lines.length > 0
           ? editInvoice.lines.map((l) => ({ ...l, id: nextLineId(), lastEditedField: (l as LineRow).lastEditedField ?? "unit" }))
-          : [{ id: nextLineId(), description: "", quantity: 0, unitPrice: 0, taxPercent: 0, lastEditedField: "unit" }]
+          : [{ id: nextLineId(), description: "", quantity: 0, unitPrice: 0, taxPercent: 21, lastEditedField: "unit" }]
       )
       if (editInvoice.clientSnapshot) {
         setBillingData({
@@ -373,10 +381,20 @@ export function CreateInvoiceDialog({
     }, 0) * 100
   ) / 100
   const irpfAmount = Math.round(subtotal * (irpfRate / 100) * 100) / 100
-  const total = Math.round((subtotal + taxAmount - irpfAmount) * 100) / 100
+  // Recargo de equivalencia: automático según el cliente, tipo derivado del IVA (no editable)
+  const clientHasRecargo = clientRecargoEdit
+  const recargoTotal = clientHasRecargo
+    ? Math.round(
+        lines.reduce((sum, l) => {
+          const st = round2(l.quantity * l.unitPrice * (1 - (l.discountPercent ?? 0) / 100))
+          return sum + round2(st * (recargoRateForVat(l.taxPercent ?? 0) / 100))
+        }, 0) * 100
+      ) / 100
+    : 0
+  const total = Math.round((subtotal + taxAmount + recargoTotal - irpfAmount) * 100) / 100
 
   const addLine = () => {
-    setLines((prev) => [...prev, { id: nextLineId(), description: "", quantity: 0, unitPrice: 0, taxPercent: 0, lastEditedField: "unit" as const }])
+    setLines((prev) => [...prev, { id: nextLineId(), description: "", quantity: 0, unitPrice: 0, taxPercent: 21, lastEditedField: "unit" as const }])
   }
 
   const removeLine = (id: string) => {
@@ -745,6 +763,21 @@ export function CreateInvoiceDialog({
                     </div>
                   ))}
                 </div>
+                <label className={`flex items-start gap-2.5 pt-1 ${billingLockedFromClient || !editableInEditMode ? "cursor-default" : "cursor-pointer"}`}>
+                  <input
+                    type="checkbox"
+                    checked={clientRecargoEdit}
+                    onChange={(e) => setClientRecargoEdit(e.target.checked)}
+                    disabled={billingLockedFromClient || !editableInEditMode}
+                    className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#0F766E] focus:ring-[#0F766E]/30 disabled:opacity-60"
+                  />
+                  <span>
+                    <span className="block text-[12px] font-medium text-slate-700">Cliente en recargo de equivalencia</span>
+                    <span className="block text-[10px] text-slate-400 mt-0.5">
+                      Sus facturas añaden el recargo automáticamente (21%→5,2 · 10%→1,4 · 4%→0,5)
+                    </span>
+                  </span>
+                </label>
                 {!billingLockedFromClient && (
                   <div className="flex justify-end pt-2 border-t border-slate-200">
                     <button
@@ -849,15 +882,20 @@ export function CreateInvoiceDialog({
                           />
                         </td>
                         <td className="py-1.5 px-2 text-right">
-                          <input
-                            type="number"
-                            min={0}
-                            step={0.01}
-                            value={line.taxPercent ?? ""}
-                            onChange={(e) => handleVatChange(line, Number(e.target.value) || 0)}
+                          <select
+                            value={line.taxPercent ?? 21}
+                            onChange={(e) => handleVatChange(line, Number(e.target.value))}
                             disabled={!editableInEditMode}
                             className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-slate-800 text-sm text-right focus:border-[#0F766E] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
-                          />
+                          >
+                            {ALLOWED_VAT_RATES.map((r) => (
+                              <option key={r} value={r}>{r}%</option>
+                            ))}
+                            {/* Facturas antiguas con tipo fuera del set: opción visible pero no seleccionable de nuevo */}
+                            {line.taxPercent != null && !(ALLOWED_VAT_RATES as readonly number[]).includes(line.taxPercent) && (
+                              <option value={line.taxPercent} disabled>{line.taxPercent}% (no válido)</option>
+                            )}
+                          </select>
                         </td>
                         <td className="py-1.5 px-2 text-right tabular-nums text-slate-700">
                           <input
@@ -891,6 +929,9 @@ export function CreateInvoiceDialog({
             <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 flex flex-wrap gap-x-5 gap-y-1">
               <span><span className="text-slate-400">Subtotal </span><span className="tabular-nums font-medium">{formatCurrency(subtotal, currency)}</span></span>
               <span><span className="text-slate-400">IVA </span><span className="tabular-nums font-medium">{formatCurrency(taxAmount, currency)}</span></span>
+              {clientHasRecargo && (
+                <span><span className="text-slate-400">Recargo equiv. </span><span className="tabular-nums font-medium">{formatCurrency(recargoTotal, currency)}</span></span>
+              )}
               {irpfAmount > 0 && (
                 <span><span className="text-red-500">IRPF -{irpfRate}% </span><span className="tabular-nums font-medium text-red-500">-{formatCurrency(irpfAmount, currency)}</span></span>
               )}

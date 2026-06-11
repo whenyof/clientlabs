@@ -65,7 +65,8 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  // Check for existing pending invite
+  // Check for existing pending invite (expired ones are cleaned up so the
+  // owner can re-invite after expiry)
   const existingInvite = await safePrismaQuery(() =>
     prisma.workspaceInvite.findFirst({
       where: { workspaceId: workspace.id, email },
@@ -73,7 +74,13 @@ export async function POST(req: NextRequest) {
   )
 
   if (existingInvite) {
-    return NextResponse.json({ error: "Ya existe una invitación pendiente para este email" }, { status: 409 })
+    if (existingInvite.expiresAt < new Date()) {
+      await safePrismaQuery(() =>
+        prisma.workspaceInvite.delete({ where: { id: existingInvite.id } })
+      )
+    } else {
+      return NextResponse.json({ error: "Ya existe una invitación pendiente para este email" }, { status: 409 })
+    }
   }
 
   // Check if user is already a member

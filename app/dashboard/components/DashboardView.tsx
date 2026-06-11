@@ -143,47 +143,26 @@ function CardLink({ href, children }: { href: string; children: React.ReactNode 
 }
 
 // ─── Pipeline stage ────────────────────────────────────────────────────────
-type StageLead = { id: string; name: string | null; companyName: string | null }
-
-function PipelineStage({ num, stage, count, estimatedValue, barPct, isLast, isWon, leads, wonRevenue }: {
+function PipelineStage({ num, stage, count, estimatedValue, barPct, isLast, isWon, wonRevenue }: {
   num: string; stage: string; count: number; estimatedValue: number
   barPct: number; isLast?: boolean; isWon?: boolean
-  leads: StageLead[]
   wonRevenue?: number
 }) {
   const displayValue = isWon ? (wonRevenue ?? 0) : estimatedValue
   return (
     <div style={{ padding: "18px 20px", borderRight: isLast ? "none" : `1px solid ${C.line2}`, display: "flex", flexDirection: "column", gap: 4 }}>
       <div style={{ fontFamily: "ui-monospace, monospace", fontSize: 10, color: C.ink4, letterSpacing: "0.04em" }}>
-        {num} · {count} lead{count !== 1 ? "s" : ""}
+        {num}
       </div>
       <div style={{ fontWeight: 600, letterSpacing: "-0.012em", fontSize: 13.5, marginTop: 2, color: isWon ? C.accentInk : C.ink }}>{stage}</div>
+      {/* Count of leads in this stage (real figure, not names) */}
+      <div style={{ fontWeight: 600, letterSpacing: "-0.025em", fontSize: 26, fontVariantNumeric: "tabular-nums", marginTop: 6, lineHeight: 1, color: isWon ? C.accentInk : C.ink }}>
+        {fmtNum(count)}
+        <span style={{ color: C.ink3, fontSize: 12, fontWeight: 500 }}> lead{count !== 1 ? "s" : ""}</span>
+      </div>
       {displayValue > 0 && (
-        <div style={{ fontWeight: 600, letterSpacing: "-0.025em", fontSize: 20, fontVariantNumeric: "tabular-nums", marginTop: 4, lineHeight: 1, color: C.ink }}>
-          {fmtNum(displayValue)}
-          <span style={{ color: C.ink3, fontSize: 13, fontWeight: 500 }}> €</span>
-        </div>
-      )}
-      {/* Real leads for this stage */}
-      {leads.length > 0 && (
-        <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 4 }}>
-          {leads.map((lead) => (
-            <div key={lead.id} style={{ fontSize: 11.5, color: C.ink2, lineHeight: 1.3, overflow: "hidden" }}>
-              <span style={{ display: "block", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontWeight: 500 }}>
-                {lead.name || "Sin nombre"}
-              </span>
-              {lead.companyName && (
-                <span style={{ display: "block", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontSize: 10.5, color: C.ink4 }}>
-                  {lead.companyName}
-                </span>
-              )}
-            </div>
-          ))}
-          {count > leads.length && (
-            <div style={{ fontSize: 10.5, color: C.ink4, fontFamily: "ui-monospace, monospace", marginTop: 2 }}>
-              +{count - leads.length} más
-            </div>
-          )}
+        <div style={{ fontFamily: "ui-monospace, monospace", fontSize: 11.5, color: C.ink3, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>
+          {fmtNum(displayValue)} €
         </div>
       )}
       <div style={{ marginTop: 10, height: 3, background: C.bg3, borderRadius: 99, overflow: "hidden", position: "relative" }}>
@@ -326,7 +305,7 @@ export function DashboardView({ data }: Props) {
     return "Buenas noches"
   })()
 
-  const maxPV = Math.max(...pipeline.map((s) => s.estimatedValue), 1)
+  const maxPV = Math.max(...pipeline.map((s) => s.count), 1)
   const totalSrc = leadSources.reduce((s, x) => s + x.count, 0)
 
   type FeedItem = { html: React.ReactNode; time: string; isNew: boolean }
@@ -472,10 +451,9 @@ export function DashboardView({ data }: Props) {
                   stage={s.stage}
                   count={row.count}
                   estimatedValue={row.estimatedValue}
-                  barPct={maxPV > 0 ? (row.estimatedValue / maxPV) * 100 : 0}
+                  barPct={maxPV > 0 ? (row.count / maxPV) * 100 : 0}
                   isLast={i === 4}
                   isWon={s.isWon}
-                  leads={row.leads}
                   wonRevenue={row.wonRevenue}
                 />
               )

@@ -10,10 +10,18 @@ const SESSION_KEY    = "cl_verify_pw"
 const MAX_RESENDS    = 3
 const COOLDOWN_SECS  = 60
 
+/** Only allow same-app relative paths (e.g. /invite/abc) to avoid open redirects. */
+function safeCallbackUrl(raw: string | null): string | null {
+  if (raw && raw.startsWith("/") && !raw.startsWith("//")) return raw
+  return null
+}
+
 function VerifyForm() {
   const searchParams = useSearchParams()
   const router       = useRouter()
   const email        = searchParams?.get("email") ?? ""
+  // Preserved from an invite link (/login?callbackUrl=/invite/<token> → register → here)
+  const callbackUrl  = safeCallbackUrl(searchParams?.get("callbackUrl") ?? null)
 
   const [digits,   setDigits]   = useState(["", "", "", "", "", ""])
   const [error,    setError]    = useState("")
@@ -63,9 +71,9 @@ function VerifyForm() {
         sessionStorage.removeItem(SESSION_KEY)
         if (pw) {
           const result = await signIn("credentials", { email, password: pw, redirect: false })
-          if (result?.ok) { router.push("/plan"); return }
+          if (result?.ok) { router.push(callbackUrl ?? "/plan"); return }
         }
-        router.push("/auth?verified=true")
+        router.push(callbackUrl ? `/auth?verified=true&callbackUrl=${encodeURIComponent(callbackUrl)}` : "/auth?verified=true")
       } else {
         setError(data.error ?? "Código incorrecto")
         setDigits(["", "", "", "", "", ""])

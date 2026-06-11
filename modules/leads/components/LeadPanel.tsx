@@ -5,7 +5,6 @@ import Link from "next/link"
 import { LeadHeader } from "@domains/leads/components/LeadHeader"
 import { LeadTimeline } from "@domains/leads/components/LeadTimeline"
 import { LeadInfoCard } from "@domains/leads/components/LeadInfoCard"
-import { LeadAIRecommendations } from "@domains/leads/components/LeadAIRecommendations"
 import { LeadNextActionCard } from "@domains/leads/components/LeadNextActionCard"
 import { LeadNotesCard } from "@domains/leads/components/LeadNotesCard"
 import { LeadQuickTaskCard } from "@/modules/leads/components/LeadQuickTaskCard"
@@ -25,6 +24,7 @@ interface LeadPanelProps {
     temperature?: string | null
     additionalInfo?: string | null
     tags?: string[]
+    estimatedValue?: number | null
   }
 }
 
@@ -68,7 +68,6 @@ export function LeadPanel({ lead }: LeadPanelProps) {
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             <LeadInfoCard lead={lead} onUpdate={refresh} />
             <LeadQuickTaskCard leadId={lead.id} onTaskCreated={refresh} />
-            <LeadAIRecommendations score={lead.score} phone={lead.phone} leadStatus={lead.leadStatus} />
           </div>
         </div>
       </div>

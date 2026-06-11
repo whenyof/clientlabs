@@ -2,9 +2,16 @@
 
 import { signIn } from "next-auth/react"
 import { useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 
 type Props = { onSwitch: () => void }
+
+/** Only allow same-app relative paths (e.g. /invite/abc) to avoid open redirects. */
+function safeCallbackUrl(raw: string | null): string {
+  if (raw && raw.startsWith("/") && !raw.startsWith("//")) return raw
+  return "/dashboard"
+}
 
 function GoogleIcon() {
   return (
@@ -18,6 +25,8 @@ function GoogleIcon() {
 }
 
 export default function Login({ onSwitch }: Props) {
+  const searchParams = useSearchParams()
+  const callbackUrl = safeCallbackUrl(searchParams?.get("callbackUrl") ?? null)
   const [email, setEmail]       = useState("")
   const [password, setPassword] = useState("")
   const [show, setShow]         = useState(false)
@@ -35,9 +44,14 @@ export default function Login({ onSwitch }: Props) {
     })
     setLoading(false)
     if (res?.error) {
-      setError("Email o contraseña incorrectos. Revísalos e inténtalo de nuevo.")
+      // authorize() throws specific Spanish messages for unverified email and
+      // rate-limit; NextAuth surfaces them in res.error with redirect:false.
+      // Anything else (e.g. "CredentialsSignin") falls back to the generic copy.
+      const known =
+        res.error.includes("Verifica tu email") || res.error.includes("Demasiados intentos")
+      setError(known ? res.error : "Email o contraseña incorrectos. Revísalos e inténtalo de nuevo.")
     } else {
-      window.location.href = "/dashboard"
+      window.location.href = callbackUrl
     }
   }
 
@@ -52,7 +66,7 @@ export default function Login({ onSwitch }: Props) {
       {/* Google */}
       <button
         type="button"
-        onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+        onClick={() => signIn("google", { callbackUrl })}
         className="w-full flex items-center justify-center gap-3 rounded-xl py-3 text-[13.5px] font-medium text-slate-700 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all duration-150 shadow-sm"
       >
         <GoogleIcon />

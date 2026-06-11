@@ -10,6 +10,7 @@ import DashboardShell from "@/components/layout/DashboardShell"
  * Single source of truth for dashboard access (SERVER ONLY).
  * - No auth → /auth
  * - No DB user → /auth
+ * - Workspace member (invited seat) → always allowed in (seat paid by owner)
  * - No Stripe subscription + onboarding incomplete → /plan (pick a plan first)
  * - Has Stripe subscription + onboarding incomplete → /onboarding
  */
@@ -31,11 +32,22 @@ export default async function DashboardLayout({
   }
 
   if (!dbUser.onboardingCompleted) {
-    // No Stripe subscription yet → must pick a plan before onboarding
-    if (!dbUser.stripeSubscriptionId) {
-      redirect("/plan")
+    // Team members (workspace seat paid by the owner) never go through
+    // plan selection or owner onboarding — they enter the dashboard directly.
+    const { prisma, safePrismaQuery } = await import("@/lib/prisma")
+    const membership = await safePrismaQuery(() =>
+      prisma.workspaceMember.findFirst({
+        where: { userId: session.user.id, status: "ACTIVE" },
+        select: { id: true },
+      })
+    )
+    if (!membership) {
+      // No Stripe subscription yet → must pick a plan before onboarding
+      if (!dbUser.stripeSubscriptionId) {
+        redirect("/plan")
+      }
+      redirect("/onboarding")
     }
-    redirect("/onboarding")
   }
 
   return <DashboardShell>{children}</DashboardShell>

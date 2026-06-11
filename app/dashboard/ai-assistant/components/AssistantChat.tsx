@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { AnimatedCard } from "../../analytics/components/AnimatedCard"
+import { AnimatedCard } from "./AnimatedCard"
 import type { ChatMessage } from "../mock"
 import {
   PaperAirplaneIcon,

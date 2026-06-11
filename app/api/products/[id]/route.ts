@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { isAllowedVatRate, ALLOWED_VAT_RATES } from "@/modules/invoicing/utils/vatRates"
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions)
@@ -11,6 +12,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   try {
     const body = await req.json()
+    if (body.taxRate != null && !isAllowedVatRate(Number(body.taxRate))) {
+      return NextResponse.json(
+        { error: `Tipo de IVA no válido. Permitidos: ${ALLOWED_VAT_RATES.join(", ")}` },
+        { status: 400 }
+      )
+    }
     const product = await prisma.product.updateMany({
       where: { id, userId: session.user.id, deletedAt: null },
       data: {

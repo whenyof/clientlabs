@@ -35,6 +35,9 @@ export type InvoiceLineComputed = Omit<InvoiceLineInput, "lineTotal"> & {
   subtotal: number
   taxAmount: number
   total: number
+  /** Recargo de equivalencia — solo presentes cuando la factura lo aplica */
+  recargoRate?: number
+  recargoAmount?: number
 }
 
 /** Client billing snapshot for invoice (stored on invoice, not live reference). */

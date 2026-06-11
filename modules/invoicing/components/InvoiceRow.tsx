@@ -12,15 +12,11 @@ import {
 import type { InvoiceListItem } from "./types"
 import { INVOICE_STATUS } from "@/modules/invoicing/types"
 import { invoiceStatusLabel } from "@/modules/invoicing/utils/invoiceStatusLabel"
+import { getVerifactuBadgeConfig } from "@/modules/invoicing/utils/verifactuStatusBadge"
 
 function VerifactuBadge({ status }: { status: string | null | undefined }) {
   if (!status) return null
-  const config: Record<string, { bg: string; text: string; label: string }> = {
-    Pendiente: { bg: "bg-amber-50 border border-amber-200", text: "text-amber-700", label: "Pendiente AEAT" },
-    Aceptado:  { bg: "bg-emerald-50 border border-emerald-200", text: "text-emerald-700", label: "Verificada AEAT" },
-    Rechazado: { bg: "bg-red-50 border border-red-200", text: "text-red-700", label: "Rechazada AEAT" },
-  }
-  const c = config[status] ?? { bg: "bg-slate-50 border border-slate-200", text: "text-slate-500", label: status }
+  const c = getVerifactuBadgeConfig(status)
   return (
     <span className={`inline-flex items-center text-[10px] font-semibold px-2 py-0.5 rounded-full ${c.bg} ${c.text}`}>
       {c.label}

@@ -147,6 +147,8 @@ export type ClientOption = {
   email: string | null
 
   isFiscalComplete?: boolean | null
+  /** Cliente en régimen de recargo de equivalencia */
+  recargoEquivalencia?: boolean | null
 
   legalName?: string | null
   taxId?: string | null

@@ -2,6 +2,7 @@ export const maxDuration = 15
 import { NextResponse } from "next/server"
 import { prisma, safePrismaQuery } from "@/lib/prisma"
 import { z } from "zod"
+import { checkDistributedRateLimit } from "@/lib/security/distributedRateLimiter"
 
 const schema = z.object({
   email: z.string().email(),
@@ -21,6 +22,16 @@ export async function POST(request: Request) {
 
   const { email, code } = parsed
   const normalizedEmail = email.toLowerCase().trim()
+
+  // Dedicated brute-force limit for the 6-digit code: 5 attempts / 15 min.
+  // Fail-closed (denies if Redis is down) — desired for the auth perimeter.
+  const rl = await checkDistributedRateLimit(`auth:verifycode:${normalizedEmail}`, 5, 15 * 60)
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: "Demasiados intentos. Inténtalo de nuevo en unos minutos." },
+      { status: 429 },
+    )
+  }
 
   // Buscar código válido (no usado, no expirado)
   const verification = await safePrismaQuery(() =>

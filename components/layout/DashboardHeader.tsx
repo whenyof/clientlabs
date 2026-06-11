@@ -2,9 +2,11 @@
 
 import { useState } from "react"
 import { usePathname } from "next/navigation"
-import { Search, HelpCircle, Plus } from "lucide-react"
+import { Search } from "lucide-react"
 import { NotificationBell } from "@/components/dashboard/notification-bell"
 import { SearchModal } from "@/components/layout/SearchModal"
+import { HelpMenu } from "@/components/layout/HelpMenu"
+import { QuickCreateMenu } from "@/components/layout/QuickCreateMenu"
 import { useOS, getShortcutKeys } from "@/hooks/use-os"
 import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut"
 
@@ -31,6 +33,7 @@ const ROUTE_LABELS: Record<string, string> = {
   "/dashboard/reporting": "Informes",
   "/dashboard/ai-assistant": "Asistente IA",
   "/dashboard/integrations": "Integraciones",
+  "/dashboard/connect": "Integraciones",
   "/dashboard/settings": "Ajustes",
   "/dashboard/admin": "Admin",
 }
@@ -145,39 +148,13 @@ export function DashboardHeader() {
 
         {/* Actions */}
         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-          <button
-            style={{
-              width: 30, height: 30, borderRadius: 6,
-              display: "grid", placeItems: "center",
-              color: "#404040", background: "none", border: "none", cursor: "pointer",
-              transition: "background .12s ease",
-            }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#f5f5f5" }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "none" }}
-            aria-label="Centro de ayuda"
-          >
-            <HelpCircle size={15} strokeWidth={1.8} />
-          </button>
+          <HelpMenu />
 
           <NotificationBell />
 
           <div style={{ width: 1, height: 18, background: "#e8e8e8", margin: "0 4px" }} />
 
-          <button
-            style={{
-              display: "inline-flex", alignItems: "center", gap: 7,
-              padding: "7px 12px", borderRadius: 6,
-              fontWeight: 550, fontSize: 12.5, letterSpacing: "-0.005em",
-              background: "#0a0a0a", color: "white",
-              border: "none", cursor: "pointer",
-              transition: "background .12s ease",
-            }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#1f1f1f" }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "#0a0a0a" }}
-          >
-            <Plus size={12} strokeWidth={2.5} />
-            Nuevo
-          </button>
+          <QuickCreateMenu />
         </div>
       </header>
 

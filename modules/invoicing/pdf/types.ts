@@ -33,6 +33,9 @@ export type InvoicePdfData = {
   taxAmount: number
   irpfRate?: number | null
   irpfAmount?: number | null
+  /** Recargo de equivalencia (incluido en total) */
+  recargoEquivalencia?: boolean
+  recargoAmount?: number | null
   total: number
   lines: InvoiceLinePdf[]
   payments: { amount: number; method: string }[]

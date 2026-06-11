@@ -9,6 +9,7 @@ import type { CreateInvoiceInput } from "@domains/invoicing"
 import { gateLimit } from "@/lib/api-gate"
 import { getUserWorkspace } from "@/lib/get-workspace"
 import { checkPermission } from "@/lib/check-permission"
+import { isAllowedVatRate, ALLOWED_VAT_RATES } from "@/modules/invoicing/utils/vatRates"
 
 export const dynamic = "force-dynamic"
 
@@ -219,6 +220,14 @@ export async function POST(request: NextRequest) {
   })) as import("@domains/invoicing").InvoiceLineInput[]
   if (!clientId || lines.length === 0) {
     return NextResponse.json({ error: "clientId and at least one line required" }, { status: 400 })
+  }
+  // Tipos de IVA cerrados a los valores legales que acepta Verifacti
+  const invalidVat = lines.find((l) => !isAllowedVatRate(l.taxPercent))
+  if (invalidVat) {
+    return NextResponse.json(
+      { error: `Tipo de IVA no válido: ${invalidVat.taxPercent}%. Valores permitidos: ${ALLOWED_VAT_RATES.join(", ")}` },
+      { status: 400 }
+    )
   }
   const rawSnapshot = b.clientSnapshot
   const clientSnapshot: CreateInvoiceInput["clientSnapshot"] =

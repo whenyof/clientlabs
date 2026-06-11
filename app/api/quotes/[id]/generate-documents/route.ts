@@ -95,7 +95,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
           items: {
             create: quote.items.map(i => ({
               productId: i.productId ?? null, description: i.description,
-              quantity: i.quantity, unitPrice: i.unitPrice, delivered: true,
+              quantity: i.quantity, unitPrice: i.unitPrice, taxRate: i.taxRate ?? 21, delivered: true,
             })),
           },
         },

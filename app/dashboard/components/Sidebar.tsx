@@ -61,6 +61,7 @@ type NavItem = {
   badge?: string
   badgeHot?: boolean
   subs?: Sub[]
+  comingSoon?: boolean
 }
 
 type NavGroup = { title: string; items: NavItem[] }
@@ -91,17 +92,17 @@ const NAV: NavGroup[] = [
         label: "Facturación",
         icon: Receipt,
         subs: [
-          { label: "Resumen",                 href: "/dashboard/finance?tab=resumen" },
-          { label: "Facturas emitidas",       href: "/dashboard/finance?tab=facturas" },
-          { label: "Presupuestos",            href: "/dashboard/finance?tab=presupuestos" },
-          { label: "Albaranes",               href: "/dashboard/finance?tab=albaranes" },
-          { label: "Pedidos",                 href: "/dashboard/finance?tab=pedidos" },
+          { label: "Resumen",                 href: "/dashboard/finance" },
+          { label: "Facturas emitidas",       href: "/dashboard/finance/invoicing" },
+          { label: "Presupuestos",            href: "/dashboard/finance/presupuestos" },
+          { label: "Albaranes",               href: "/dashboard/finance/albaranes" },
+          { label: "Pedidos",                 href: "/dashboard/finance/pedidos" },
           { label: "Recurrentes",             href: "/dashboard/finance?tab=recurrentes" },
-          { label: "Gastos · Compras",        href: "/dashboard/finance?tab=gastos" },
-          { label: "Productos · Servicios",   href: "/dashboard/finance?tab=productos" },
-          { label: "Impuestos · IVA/IRPF",    href: "/dashboard/finance?tab=impuestos" },
-          { label: "Verifactu · AEAT",        href: "/dashboard/finance?tab=verifactu" },
-          { label: "Configuración",           href: "/dashboard/finance?tab=configuracion" },
+          { label: "Gastos · Compras",        href: "/dashboard/finance/gastos" },
+          { label: "Productos · Servicios",   href: "/dashboard/finance/productos" },
+          { label: "Impuestos · IVA/IRPF",    href: "/dashboard/finance/trimestral" },
+          { label: "Verifactu · AEAT",        href: "/dashboard/settings?section=verifactu" },
+          { label: "Configuración",           href: "/dashboard/finance/configuracion" },
         ],
       },
     ],
@@ -109,17 +110,17 @@ const NAV: NavGroup[] = [
   {
     title: "Inteligencia",
     items: [
-      { id: "marketing", label: "Email Marketing", icon: Megaphone, href: "/dashboard/marketing" },
-      { id: "auto", label: "Automatizaciones", icon: Zap, href: "/dashboard/automations" },
+      { id: "marketing", label: "Email Marketing", icon: Megaphone, href: "/dashboard/marketing", comingSoon: true },
+      { id: "auto", label: "Automatizaciones", icon: Zap, href: "/dashboard/automations", comingSoon: true },
       { id: "reports", label: "Informes", icon: BarChart3, href: "/dashboard/reporting" },
-      { id: "ai", label: "Asistente IA", icon: Sparkles, href: "/dashboard/ai-assistant" },
+      { id: "ai", label: "Asistente IA", icon: Sparkles, href: "/dashboard/ai-assistant", comingSoon: true },
     ],
   },
   {
     title: "Sistema",
     items: [
       { id: "team",     label: "Equipo",        icon: Users,     href: "/dashboard/team" },
-      { id: "integ",    label: "Integraciones",  icon: Plug2,     href: "/dashboard/integrations" },
+      { id: "integ",    label: "Integraciones",  icon: Plug2,     href: "/dashboard/connect" },
       { id: "settings", label: "Ajustes",        icon: Settings,  href: "/dashboard/settings" },
     ],
   },
@@ -295,6 +296,37 @@ function NavItemRow({
           </div>
         )}
       </>
+    )
+  }
+
+  // Coming soon (out of MVP): disabled row with "Próximamente" badge
+  if (item.comingSoon) {
+    return (
+      <div
+        aria-disabled="true"
+        title="Próximamente"
+        style={{
+          ...itemBase,
+          ...inactiveStyle,
+          cursor: "not-allowed",
+          opacity: 0.45,
+          userSelect: "none",
+        }}
+      >
+        <span style={{ width: 16, height: 16, display: "grid", placeItems: "center", color: C.ink3, flexShrink: 0 }}>
+          <Icon size={15} strokeWidth={1.7} />
+        </span>
+        {!isCollapsed && (
+          <>
+            <span style={{ flex: 1 }}>{item.label}</span>
+            <span style={{
+              fontFamily: "ui-monospace, monospace",
+              fontSize: 10, padding: "1px 5px",
+              borderRadius: 99, background: C.bg3, color: C.ink3, fontWeight: 500,
+            }}>Próximamente</span>
+          </>
+        )}
+      </div>
     )
   }
 

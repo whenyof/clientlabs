@@ -3,8 +3,7 @@
 import { useState, useId } from "react"
 import { useRouter } from "next/navigation"
 import {
-  RefreshCw, Plus, MoreVertical, ArrowUpRight, ArrowDownRight,
-  Minus, ExternalLink, Download, Link2,
+  RefreshCw, Plus, MoreVertical, Flame, Download, Link2,
 } from "lucide-react"
 import type { Lead } from "@prisma/client"
 import { CreateLeadManualDialog } from "@/modules/leads/components/CreateLeadManualDialog"
@@ -23,7 +22,6 @@ const C = {
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
 const fmtN = (n: number) => new Intl.NumberFormat("es-ES").format(Math.round(n))
-const pRnd = (s: number) => { const x = Math.sin(s * 127.1 + 311.7) * 10000; return x - Math.floor(x) }
 
 const STATUS_LABELS: Record<string, string> = {
   NEW: "Nuevo", CONTACTED: "Contactado", QUALIFIED: "Cualificado",
@@ -31,31 +29,6 @@ const STATUS_LABELS: Record<string, string> = {
 }
 const TEMP_LABELS: Record<string, string> = { HOT: "Caliente", WARM: "Tibio", COLD: "Frío" }
 const SOURCE_COLORS = ["#0a0a0a", "#16986e", "#404040", "#737373", "#a3a3a3", "#3756a4", "#c2410c"]
-
-// ─── Sparkline ─────────────────────────────────────────────────────────────
-function Sparkline({ data, color = C.ink }: { data: number[]; color?: string }) {
-  const uid = useId().replace(/:/g, "s")
-  const w = 96, h = 28
-  const min = Math.min(...data), max = Math.max(...data), rng = max - min || 1
-  const step = w / (data.length - 1)
-  const pts = data.map((v, i) => [i * step, h - 4 - ((v - min) / rng) * (h - 8)] as [number, number])
-  const lineD = "M" + pts.map(p => p.join(",")).join(" L")
-  const areaD = `M0,${h} L${pts.map(p => p.join(",")).join(" L")} L${w},${h} Z`
-  const last = pts[pts.length - 1]
-  return (
-    <svg viewBox={`0 0 ${w} ${h}`} width={w} height={h} style={{ display: "block" }}>
-      <defs>
-        <linearGradient id={uid} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity={0.18} />
-          <stop offset="100%" stopColor={color} stopOpacity={0} />
-        </linearGradient>
-      </defs>
-      <path d={areaD} fill={`url(#${uid})`} />
-      <path d={lineD} fill="none" stroke={color} strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx={last[0]} cy={last[1]} r={2} fill={color} />
-    </svg>
-  )
-}
 
 // ─── Daily chart (SVG) ─────────────────────────────────────────────────────
 function DailyChart({ data }: { data: { date: string; total: number }[] }) {
@@ -114,10 +87,6 @@ function CardHead({ title, subtitle, actions }: { title: string; subtitle?: stri
     </div>
   )
 }
-function CLink({ children }: { children: React.ReactNode }) {
-  return <a style={{ fontSize: 11.5, color: C.ink3, fontWeight: 500, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4 }}>{children} <ExternalLink size={11} /></a>
-}
-
 // ─── Props ─────────────────────────────────────────────────────────────────
 interface Props {
   totalLeads: number
@@ -162,20 +131,28 @@ export function LeadsPageView({ totalLeads, kpis, dailyData, initialLeads, initi
   const funnelStages = statusOrder.slice(0, 5).map(s => ({
     stage: STATUS_LABELS[s] ?? s,
     count: initialLeads.filter(l => l.leadStatus === s).length + (s === "NEW" ? kpis.converted : 0),
-    conv: s === "NEW" ? null : 0.68,
+    conv: null as number | null,
     won: s === "CONVERTED",
   }))
   funnelStages[0].count = totalLeads
+  // Real per-stage conversion derived from actual counts
+  for (let i = 1; i < funnelStages.length; i++) {
+    const prev = funnelStages[i - 1]
+    funnelStages[i].conv = prev.count > 0 ? funnelStages[i].count / prev.count : null
+  }
   const maxFunnel = Math.max(...funnelStages.map(s => s.count), 1)
 
-  // KPI sparks
-  type Trend = "up" | "down" | "flat"
-  const kpiData: { label: string; tag: string; value: number; unit: string; trend: Trend; delta: number; vs: string; spark: number[] }[] = [
-    { label: "Leads activos",       tag: "abiertos",  value: initialTotal,         unit: "",  trend: "up",   delta: 24.3, vs: "vs Abr",    spark: Array.from({ length: 12 }, (_, i) => Math.max(1, Math.round(initialTotal * (0.6 + i * 0.034 + pRnd(i * 3) * 0.1))) ) },
-    { label: "Leads calientes",     tag: "score 70+", value: kpis.hot,             unit: "",  trend: "up",   delta: 33.0, vs: "30d",       spark: Array.from({ length: 12 }, (_, i) => Math.max(0, Math.round(kpis.hot * (0.5 + i * 0.044 + pRnd(i * 5) * 0.1))) ) },
-    { label: "Tasa de conversión",  tag: "90d",       value: kpis.conversionRate,  unit: "%", trend: "up",   delta: 3.2,  vs: "vs trim.",  spark: Array.from({ length: 12 }, (_, i) => Math.max(0, kpis.conversionRate * (0.7 + i * 0.026 + pRnd(i * 7) * 0.04)) ) },
-    { label: "Nuevos esta semana",  tag: "7d",        value: kpis.newThisWeek,     unit: "",  trend: "flat", delta: 18.0, vs: "vs sem ant.",spark: Array.from({ length: 12 }, (_, i) => Math.max(0, Math.round(kpis.newThisWeek * (0.4 + i * 0.055 + pRnd(i * 11) * 0.15))) ) },
+  // KPI cards — real values only (no fabricated trends)
+  const kpiData: { label: string; tag: string; value: number; unit: string }[] = [
+    { label: "Leads activos",      tag: "abiertos",  value: initialTotal,        unit: "" },
+    { label: "Leads calientes",    tag: "score 70+", value: kpis.hot,            unit: "" },
+    { label: "Tasa de conversión", tag: "90d",       value: kpis.conversionRate, unit: "%" },
+    { label: "Nuevos esta semana", tag: "7d",        value: kpis.newThisWeek,    unit: "" },
   ]
+
+  // Honest daily-chart subtitle from real data
+  const dailyAvg = dailyData.length > 0 ? dailyData.reduce((s, d) => s + d.total, 0) / dailyData.length : 0
+  const dailySubtitle = `Diario · Ø ${new Intl.NumberFormat("es-ES", { maximumFractionDigits: 1 }).format(dailyAvg)}/día`
 
   return (
     <div style={{ fontFamily: "var(--font-geist-sans, ui-sans-serif, system-ui, sans-serif)", color: C.ink }}>
@@ -222,7 +199,7 @@ export function LeadsPageView({ totalLeads, kpis, dailyData, initialLeads, initi
       {/* ── AI BANNER ────────────────────────────────── */}
       {hotLeads.length > 0 && showBanner && (
         <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 18px", borderRadius: 10, border: `1px solid ${C.accentSoft}`, background: `linear-gradient(180deg, rgba(236,246,241,0.7) 0%, white 100%)`, marginBottom: 16 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 8, background: "white", border: `1px solid ${C.accentSoft}`, display: "grid", placeItems: "center", color: C.accentInk, flexShrink: 0, fontSize: 14 }}>✨</div>
+          <div style={{ width: 32, height: 32, borderRadius: 8, background: "white", border: `1px solid ${C.accentSoft}`, display: "grid", placeItems: "center", color: C.accentInk, flexShrink: 0 }}><Flame size={15} strokeWidth={1.8} /></div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <h4 style={{ margin: "0 0 3px", fontSize: 13.5, fontWeight: 600, color: C.ink, letterSpacing: "-0.01em" }}>
               {hotLeads.length} leads merecen tu atención ahora
@@ -240,46 +217,25 @@ export function LeadsPageView({ totalLeads, kpis, dailyData, initialLeads, initi
 
       {/* ── KPI ROW ──────────────────────────────────── */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", border: `1px solid ${C.line}`, borderRadius: 10, background: C.bg, marginBottom: 16, overflow: "hidden" }}>
-        {kpiData.map((k, i) => {
-          const dc = k.trend === "up" ? C.accentInk : k.trend === "down" ? C.red : C.ink3
-          return (
-            <div key={k.label} style={{ padding: "18px 22px", borderRight: i < 3 ? `1px solid ${C.line2}` : "none", display: "flex", flexDirection: "column", gap: 4 }}>
-              <div style={{ fontSize: 11.5, color: C.ink3, fontWeight: 500, display: "flex", alignItems: "center", gap: 6 }}>
-                {k.label}
-                <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 9, padding: "1px 5px", borderRadius: 3, background: C.bg3, color: C.ink3, letterSpacing: "0.04em", textTransform: "uppercase" }}>{k.tag}</span>
-              </div>
-              <div style={{ fontWeight: 600, letterSpacing: "-0.028em", fontSize: 28, lineHeight: 1.1, marginTop: 4, fontVariantNumeric: "tabular-nums", color: C.ink }}>
-                {typeof k.value === "number" ? fmtN(k.value) : k.value}
-                {k.unit && <span style={{ color: C.ink3, fontWeight: 500, fontSize: 18, marginLeft: 2 }}>{k.unit}</span>}
-              </div>
-              <div style={{ marginTop: 10, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontFamily: "ui-monospace,monospace", fontSize: 11.5, fontWeight: 500, color: dc }}>
-                  {k.trend === "up" && <ArrowUpRight size={11} strokeWidth={2.4} />}
-                  {k.trend === "down" && <ArrowDownRight size={11} strokeWidth={2.4} />}
-                  {k.trend === "flat" && <Minus size={11} strokeWidth={2.4} />}
-                  {k.delta > 0 ? "+" : ""}{k.delta.toFixed(1)}%
-                  <span style={{ color: C.ink4, marginLeft: 4, fontWeight: 450 }}>{k.vs}</span>
-                </span>
-                <Sparkline data={k.spark} color={k.trend === "down" ? C.ink3 : C.ink} />
-              </div>
+        {kpiData.map((k, i) => (
+          <div key={k.label} style={{ padding: "18px 22px", borderRight: i < 3 ? `1px solid ${C.line2}` : "none", display: "flex", flexDirection: "column", gap: 4 }}>
+            <div style={{ fontSize: 11.5, color: C.ink3, fontWeight: 500, display: "flex", alignItems: "center", gap: 6 }}>
+              {k.label}
+              <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 9, padding: "1px 5px", borderRadius: 3, background: C.bg3, color: C.ink3, letterSpacing: "0.04em", textTransform: "uppercase" }}>{k.tag}</span>
             </div>
-          )
-        })}
+            <div style={{ fontWeight: 600, letterSpacing: "-0.028em", fontSize: 28, lineHeight: 1.1, marginTop: 4, fontVariantNumeric: "tabular-nums", color: C.ink }}>
+              {typeof k.value === "number" ? fmtN(k.value) : k.value}
+              {k.unit && <span style={{ color: C.ink3, fontWeight: 500, fontSize: 18, marginLeft: 2 }}>{k.unit}</span>}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* ── ROW 1: DAILY + SOURCES ───────────────────── */}
       <div className="grid gap-4 mb-4" style={{ gridTemplateColumns: "5fr 4fr" }}>
         {/* Daily chart */}
         <Card>
-          <CardHead title="Leads nuevos · últimos 30 días" subtitle="Diario · Ø 4,8/día · +18% vs mes anterior"
-            actions={
-              <div style={{ display: "inline-flex", background: C.bg2, border: `1px solid ${C.line}`, borderRadius: 7, padding: 2 }}>
-                {["30d", "90d", "YTD"].map((o, i) => (
-                  <button key={o} style={{ padding: "3px 8px", borderRadius: 5, fontFamily: "ui-monospace,monospace", fontSize: 11, color: i === 0 ? C.ink : C.ink3, fontWeight: 500, background: i === 0 ? "white" : "transparent", boxShadow: i === 0 ? `0 0 0 1px ${C.line} inset` : "none", border: "none", cursor: "pointer" }}>{o}</button>
-                ))}
-              </div>
-            }
-          />
+          <CardHead title="Leads nuevos · últimos 30 días" subtitle={dailySubtitle} />
           <div style={{ padding: "8px 0 14px" }}>
             <DailyChart data={dailyData} />
           </div>
@@ -287,7 +243,7 @@ export function LeadsPageView({ totalLeads, kpis, dailyData, initialLeads, initi
 
         {/* Sources */}
         <Card>
-          <CardHead title="Fuentes de leads" subtitle="Últimos 90 días · ordenado por volumen" actions={<CLink>Atribución</CLink>} />
+          <CardHead title="Fuentes de leads" subtitle="Ordenado por volumen" />
           <div style={{ padding: 18 }}>
             {sources.length === 0 ? (
               <div style={{ textAlign: "center", color: C.ink3, fontSize: 12.5, padding: "24px 0" }}>Sin datos</div>
@@ -313,10 +269,7 @@ export function LeadsPageView({ totalLeads, kpis, dailyData, initialLeads, initi
       <div className="grid gap-4 mb-4" style={{ gridTemplateColumns: "4fr 8fr" }}>
         {/* Atención */}
         <Card>
-          <CardHead title="Requieren atención"
-            subtitle="auto-priorizados por IA"
-            actions={<CLink>Ver todos</CLink>}
-          />
+          <CardHead title="Requieren atención" subtitle="score ≥ 70 o temperatura caliente" />
           <div>
             {hotLeads.length === 0 ? (
               <div style={{ padding: "32px 18px", textAlign: "center", color: C.ink3, fontSize: 12.5 }}>Sin leads urgentes</div>
@@ -353,8 +306,7 @@ export function LeadsPageView({ totalLeads, kpis, dailyData, initialLeads, initi
         <Card>
           <CardHead
             title="Embudo de conversión"
-            subtitle={`Últimos 90 días · de Nuevo a Ganado: ${kpis.conversionRate}%`}
-            actions={<CLink>Detalle por etapa</CLink>}
+            subtitle={`De Nuevo a Ganado: ${kpis.conversionRate}%`}
           />
           <div style={{ padding: "18px 16px", display: "flex", alignItems: "stretch", gap: 4, overflowX: "auto" }}>
             {funnelStages.map((f, i) => {
@@ -409,7 +361,7 @@ export function LeadsPageView({ totalLeads, kpis, dailyData, initialLeads, initi
             <h3 style={{ fontWeight: 600, letterSpacing: "-0.012em", fontSize: 13.5, margin: 0, color: C.ink }}>Mis leads</h3>
             <div style={{ fontSize: 11.5, color: C.ink3, fontFamily: "ui-monospace,monospace", marginTop: 2 }}>{initialTotal} resultados</div>
           </div>
-          <a style={{ fontSize: 12, color: C.ink3, fontWeight: 500, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4 }}>
+          <a href="/api/settings/export/leads" download style={{ fontSize: 12, color: C.ink3, fontWeight: 500, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4, textDecoration: "none" }}>
             Exportar CSV <Download size={11} />
           </a>
         </div>

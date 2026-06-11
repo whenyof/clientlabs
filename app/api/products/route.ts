@@ -4,12 +4,15 @@ import { z } from "zod"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { isAllowedVatRate, ALLOWED_VAT_RATES } from "@/modules/invoicing/utils/vatRates"
 
 const createProductSchema = z.object({
   name: z.string().min(1, "Nombre requerido").max(200).trim(),
   description: z.string().max(2000).trim().nullish(),
   price: z.number({ error: "Precio requerido" }).min(0).max(999999),
-  taxRate: z.number().min(0).max(100).nullish().transform(v => v ?? 21),
+  taxRate: z.number().nullish().transform(v => v ?? 21).refine(isAllowedVatRate, {
+    message: `Tipo de IVA no válido. Permitidos: ${ALLOWED_VAT_RATES.join(", ")}`,
+  }),
   unit: z.string().max(50).nullish().transform(v => v ?? "ud"),
   category: z.string().max(100).nullish(),
   isService: z.boolean().nullish().transform(v => v ?? false),

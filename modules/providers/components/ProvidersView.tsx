@@ -3,8 +3,8 @@
 import { useState, useId } from "react"
 import { useRouter } from "next/navigation"
 import {
-  Plus, Upload, Download, Search, ChevronDown,
-  MoreVertical, ArrowUpRight, ArrowDownRight, Minus, ExternalLink,
+  Plus, Download, Search, ChevronDown,
+  MoreVertical, ArrowUpRight, ArrowDownRight, Minus,
   List, LayoutGrid,
 } from "lucide-react"
 import { CreateProviderDialog } from "./CreateProviderDialog"
@@ -43,7 +43,6 @@ const fmtNum = (n: number) => new Intl.NumberFormat("es-ES").format(Math.round(n
 const fmtEur = (n: number) => `${fmtNum(n)} €`
 
 // ─── Pseudo-random (deterministic) ───────────────────────────────────────
-const pRnd = (s: number) => { const x = Math.sin(s * 127.1 + 311.7) * 10000; return x - Math.floor(x) }
 
 // ─── Type config ──────────────────────────────────────────────────────────
 const TYPE_LABELS: Record<string, string> = {
@@ -106,13 +105,6 @@ function Sparkline({ data, color = C.ink }: { data: number[]; color?: string }) 
   )
 }
 
-function trendSpark(end: number, n = 12) {
-  const s = end * 0.7
-  return Array.from({ length: n }, (_, i) => {
-    const t = i / (n - 1)
-    return Math.max(0, s + (end - s) * t + Math.sin(i * 7.3 + 1.5) * 0.08 * end)
-  })
-}
 
 // ─── KPI Card ─────────────────────────────────────────────────────────────
 function KpiCard({ label, tag, value, unit, delta, deltaLabel, trend = "flat", spark, isLast }: {
@@ -161,9 +153,6 @@ function CardHead({ title, subtitle, actions }: { title: string; subtitle?: stri
       {actions && <div style={{ display: "flex", alignItems: "center", gap: 8 }}>{actions}</div>}
     </div>
   )
-}
-function CLink({ children }: { children: React.ReactNode }) {
-  return <a style={{ fontSize: 11.5, color: C.ink3, fontWeight: 500, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4 }}>{children} <ExternalLink size={11} /></a>
 }
 function FilterPill({ label, value }: { label: string; value: string }) {
   return (
@@ -231,18 +220,6 @@ export function ProvidersView({ initialProviders, initialKPIs }: { initialProvid
   const contracts = providers.filter(p => (p.monthlyCost || 0) > 0).slice(0, 8)
   const totalContracts = contracts.reduce((s, c) => s + (c.monthlyCost || 0), 0)
 
-  // Derived: aging simulation (grouped by status)
-  const aging = [
-    { label: "Por pagar",           sub: "0–15 d", tone: "green", v: providers.filter(p => p.status === "ACTIVE" || p.status === "OK").length * (kpis.totalMonthlyCost / Math.max(providers.length, 1)), n: providers.filter(p => p.status === "ACTIVE" || p.status === "OK").length },
-    { label: "Vencimiento próximo",  sub: "16–30 d", tone: "ink", v: kpis.totalMonthlyCost * 0.18, n: Math.ceil(providers.length * 0.15) },
-    { label: "Vencidas leves",       sub: "31–60 d", tone: "amber", v: kpis.providersWithIssues * (kpis.totalMonthlyCost / Math.max(providers.length, 1) * 0.4), n: Math.max(kpis.providersWithIssues - 1, 0) },
-    { label: "Críticas",             sub: "+60 d",   tone: "red",   v: kpis.criticalProviders * (kpis.totalMonthlyCost / Math.max(providers.length, 1) * 0.2), n: kpis.criticalProviders },
-  ].filter(a => a.n > 0 || a.v > 0)
-  const maxAging = Math.max(...aging.map(a => a.v), 1)
-  const totalAging = aging.reduce((s, a) => s + a.v, 0)
-
-  // IVA estimado (21% of quarterly spend)
-  const ivaQ = kpis.totalMonthlyCost * 3 * 0.21
 
   const monthName = new Date().toLocaleString("es-ES", { month: "long" })
   const monthCap = monthName.charAt(0).toUpperCase() + monthName.slice(1)
@@ -256,26 +233,13 @@ export function ProvidersView({ initialProviders, initialKPIs }: { initialProvid
           <div style={{ marginTop: 6, display: "flex", alignItems: "center", gap: 14, fontSize: 12.5, color: C.ink3, flexWrap: "wrap" }}>
             <span>{kpis.activeProviders} activos</span>
             <span style={{ color: C.ink5 }}>·</span>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-              <span style={{ width: 6, height: 6, borderRadius: 99, background: C.accent, boxShadow: `0 0 0 3px ${C.accentSoft}`, display: "inline-block" }} />
-              {fmtEur(Math.round(totalAging))} por pagar
-            </span>
-            <span style={{ color: C.ink5 }}>·</span>
             <span>{contracts.length} contratos recurrentes</span>
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-          <div style={{ display: "inline-flex", background: C.bg2, border: `1px solid ${C.line}`, borderRadius: 7, padding: 2 }}>
-            {["7d", "30d", "QTD", "YTD"].map((opt, i) => (
-              <button key={opt} style={{ padding: "4px 10px", borderRadius: 5, fontFamily: "ui-monospace,monospace", fontSize: 11.5, color: i === 1 ? C.ink : C.ink3, fontWeight: 500, background: i === 1 ? "white" : "transparent", boxShadow: i === 1 ? `0 0 0 1px ${C.line} inset, 0 1px 2px rgba(0,0,0,.03)` : "none", border: "none", cursor: "pointer" }}>{opt}</button>
-            ))}
-          </div>
-          <button style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: C.bg, border: `1px solid ${C.line}`, color: C.ink2, fontWeight: 550, fontSize: 12.5, cursor: "pointer" }}>
-            <Upload size={12} strokeWidth={2} />Importar gastos
-          </button>
-          <button style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: C.bg, border: `1px solid ${C.line}`, color: C.ink2, fontWeight: 550, fontSize: 12.5, cursor: "pointer" }}>
+          <a href="/api/settings/export/providers" download style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: C.bg, border: `1px solid ${C.line}`, color: C.ink2, fontWeight: 550, fontSize: 12.5, cursor: "pointer", textDecoration: "none" }}>
             <Download size={12} strokeWidth={2} />Exportar CSV
-          </button>
+          </a>
           <button
             onClick={() => setIsCreateOpen(true)}
             style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: C.ink, color: "white", fontWeight: 550, fontSize: 12.5, border: "none", cursor: "pointer" }}
@@ -287,10 +251,10 @@ export function ProvidersView({ initialProviders, initialKPIs }: { initialProvid
 
       {/* ── KPI ROW ──────────────────────────────────────── */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", border: `1px solid ${C.line}`, borderRadius: 10, background: C.bg, marginBottom: 16, overflow: "hidden" }}>
-        <KpiCard label={`Gasto · ${monthCap}`} tag="MTD" value={kpis.totalMonthlyCost} unit="€" delta={4.1} deltaLabel="vs mes ant." trend="flat" spark={trendSpark(kpis.totalMonthlyCost)} />
-        <KpiCard label="Proveedores activos" tag="Total" value={kpis.activeProviders} delta={8.6} deltaLabel={`+${kpis.totalProviders - kpis.activeProviders} pausados`} trend="up" spark={trendSpark(kpis.activeProviders)} />
-        <KpiCard label="Por pagar" tag="Open" value={Math.round(totalAging)} unit="€" delta={-12.4} deltaLabel="vs mes ant." trend="down" spark={trendSpark(totalAging).reverse()} />
-        <KpiCard label="IVA soportado · Q2" tag="Q2" value={Math.round(ivaQ)} unit="€" delta={5.6} deltaLabel="vs Q1" trend="up" spark={trendSpark(ivaQ)} isLast />
+        <KpiCard label={`Gasto mensual · ${monthCap}`} tag="Mes" value={kpis.totalMonthlyCost} unit="€" />
+        <KpiCard label="Proveedores activos" tag="Total" value={kpis.activeProviders} />
+        <KpiCard label="Contratos recurrentes" tag="Activos" value={contracts.length} />
+        <KpiCard label="Gasto recurrente" tag="Mes" value={Math.round(totalContracts)} unit="€" isLast />
       </div>
 
       {/* ── VIEW TOGGLE (list / kanban) ───────────────────── */}
@@ -313,7 +277,7 @@ export function ProvidersView({ initialProviders, initialKPIs }: { initialProvid
           <div className="grid gap-4 mb-4" style={{ gridTemplateColumns: "7fr 5fr" }}>
             {/* Category breakdown */}
             <Card>
-              <CardHead title={`Gasto por categoría · ${monthCap}`} subtitle={`Total ${fmtEur(Math.round(totalCat))} · ${cats.length} categorías`} actions={<CLink>Detalle</CLink>} />
+              <CardHead title={`Gasto por categoría · ${monthCap}`} subtitle={`Total ${fmtEur(Math.round(totalCat))} · ${cats.length} categorías`} />
               <div style={{ padding: "14px 0" }}>
                 {cats.length === 0 ? (
                   <div style={{ padding: "32px 18px", textAlign: "center", color: C.ink3, fontSize: 12.5 }}>Sin datos de coste</div>
@@ -333,49 +297,20 @@ export function ProvidersView({ initialProviders, initialKPIs }: { initialProvid
               </div>
             </Card>
 
-            {/* Payment aging */}
-            <Card>
-              <CardHead title="Vencimiento de pagos" subtitle={`${fmtEur(Math.round(totalAging))} pendiente · ${aging.reduce((s, a) => s + a.n, 0)} facturas`} actions={<CLink>Calendario</CLink>} />
-              <div style={{ padding: "14px 0" }}>
-                {aging.map((a) => (
-                  <div key={a.label} style={{ display: "grid", gridTemplateColumns: "110px 1fr 90px 60px", gap: 14, alignItems: "center", padding: "9px 18px" }}>
-                    <div>
-                      <div style={{ fontSize: 12, fontWeight: 500, color: C.ink2 }}>{a.label}</div>
-                      <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10, color: C.ink4, marginTop: 1 }}>{a.sub}</div>
-                    </div>
-                    <div style={{ height: 8, background: C.bg3, borderRadius: 99, overflow: "hidden", position: "relative" }}>
-                      <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, borderRadius: 99, width: `${(a.v / maxAging) * 100}%`, background: a.tone === "green" ? C.accent : a.tone === "amber" ? C.warn : a.tone === "red" ? C.red : C.ink }} />
-                    </div>
-                    <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 12, fontWeight: 600, color: C.ink, textAlign: "right" }}>{fmtEur(Math.round(a.v))}</span>
-                    <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: C.ink3, textAlign: "right" }}>{a.n} fact.</span>
-                  </div>
-                ))}
-                {totalAging > 0 && (
-                  <div style={{ padding: "12px 18px 4px", borderTop: `1px solid ${C.line2}`, marginTop: 6, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, color: C.ink3 }}>Próximo lote: 02 jun 2026</span>
-                    <button style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 10px", borderRadius: 6, background: C.accent, color: "white", fontSize: 11.5, fontWeight: 550, border: "none", cursor: "pointer" }}>
-                      Pagar todo ({fmtEur(Math.round(totalAging))})
-                    </button>
-                  </div>
-                )}
-              </div>
-            </Card>
           </div>
 
           {/* ── ROW 2: TOP + CONTRACTS ─────────────────────── */}
           <div className="grid gap-4 mb-4" style={{ gridTemplateColumns: "5fr 7fr" }}>
             {/* Top providers */}
             <Card>
-              <CardHead title="Top proveedores · este mes" subtitle="Por importe facturado" actions={<CLink>Todos</CLink>} />
+              <CardHead title="Top proveedores · este mes" subtitle="Por importe facturado" />
               <div>
                 {topProviders.length === 0 ? (
                   <div style={{ padding: "32px 18px", textAlign: "center", color: C.ink3, fontSize: 12.5 }}>Sin datos</div>
-                ) : topProviders.map((p, idx) => {
+                ) : topProviders.map((p) => {
                   const av = p.name.split(" ").map(w => w[0] ?? "").slice(0, 2).join("").toUpperCase()
-                  const delta = ((pRnd(idx * 13 + 7) - 0.5) * 30).toFixed(0)
-                  const dUp = Number(delta) > 0
                   return (
-                    <div key={p.id} onClick={() => router.push(`/dashboard/providers/${p.id}`)} style={{ display: "grid", gridTemplateColumns: "32px 1fr 80px 100px 80px", gap: 12, alignItems: "center", padding: "11px 18px", borderBottom: `1px solid ${C.line3}`, cursor: "pointer", transition: "background .1s ease" }}
+                    <div key={p.id} onClick={() => router.push(`/dashboard/providers/${p.id}`)} style={{ display: "grid", gridTemplateColumns: "32px 1fr 80px 100px", gap: 12, alignItems: "center", padding: "11px 18px", borderBottom: `1px solid ${C.line3}`, cursor: "pointer", transition: "background .1s ease" }}
                       onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = C.bg2 }}
                       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent" }}
                     >
@@ -386,7 +321,6 @@ export function ProvidersView({ initialProviders, initialKPIs }: { initialProvid
                       </div>
                       <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, color: C.ink2, textAlign: "right" }}>{p._count.payments} doc.</span>
                       <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 12.5, fontWeight: 600, color: C.ink, textAlign: "right" }}>{fmtEur(p.monthlyCost || 0)}</span>
-                      <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, textAlign: "right", color: dUp ? C.red : C.accentInk }}>{dUp ? "+" : ""}{delta}%</span>
                     </div>
                   )
                 })}
@@ -398,24 +332,16 @@ export function ProvidersView({ initialProviders, initialKPIs }: { initialProvid
               <CardHead
                 title="Contratos recurrentes"
                 subtitle={`${contracts.length} activos · ${fmtEur(Math.round(totalContracts))}/mes`}
-                actions={
-                  <button style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 9px", borderRadius: 6, background: C.bg, border: `1px solid ${C.line}`, color: C.ink2, fontSize: 11.5, fontWeight: 550, cursor: "pointer" }}>
-                    <Plus size={11} strokeWidth={2.5} />Nuevo contrato
-                  </button>
-                }
               />
               {/* Table header */}
-              <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 100px 100px 100px 90px 30px", gap: 14, padding: "10px 18px", background: C.bg2, borderBottom: `1px solid ${C.line2}`, fontFamily: "ui-monospace,monospace", fontSize: 10, fontWeight: 500, color: C.ink3, letterSpacing: "0.06em", textTransform: "uppercase" }}>
-                <span>Contrato</span><span>Proveedor</span><span>Frecuencia</span><span>Próxima</span><span style={{ textAlign: "right" }}>Importe</span><span>Estado</span><span />
+              <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 100px 100px 90px 30px", gap: 14, padding: "10px 18px", background: C.bg2, borderBottom: `1px solid ${C.line2}`, fontFamily: "ui-monospace,monospace", fontSize: 10, fontWeight: 500, color: C.ink3, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                <span>Contrato</span><span>Proveedor</span><span>Frecuencia</span><span style={{ textAlign: "right" }}>Importe</span><span>Estado</span><span />
               </div>
-              {contracts.map((p, idx) => {
+              {contracts.map((p) => {
                 const tone = p.status === "ACTIVE" || p.status === "OK" ? "green" : "amber"
-                const freq = p.type === "SOFTWARE" ? "Mensual" : p.type === "SERVICE" ? "Mensual" : "Mensual"
-                const days = 1 + Math.floor(pRnd(idx * 17 + 5) * 28)
-                const nextDate = new Date(); nextDate.setDate(nextDate.getDate() + days)
-                const nextStr = nextDate.toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" })
+                const freq = "Mensual"
                 return (
-                  <div key={p.id} onClick={() => router.push(`/dashboard/providers/${p.id}`)} style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 100px 100px 100px 90px 30px", gap: 14, alignItems: "center", padding: "12px 18px", borderBottom: `1px solid ${C.line3}`, cursor: "pointer", transition: "background .1s ease" }}
+                  <div key={p.id} onClick={() => router.push(`/dashboard/providers/${p.id}`)} style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 100px 100px 90px 30px", gap: 14, alignItems: "center", padding: "12px 18px", borderBottom: `1px solid ${C.line3}`, cursor: "pointer", transition: "background .1s ease" }}
                     onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = C.bg2 }}
                     onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent" }}
                   >
@@ -425,7 +351,6 @@ export function ProvidersView({ initialProviders, initialKPIs }: { initialProvid
                     </div>
                     <span style={{ fontSize: 12, color: C.ink2, fontWeight: 500 }}>{p.name.split(" ")[0]}</span>
                     <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, color: C.ink3 }}>{freq}</span>
-                    <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, color: C.ink2, fontWeight: 500 }}>{nextStr}</span>
                     <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 12.5, fontWeight: 600, color: C.ink, textAlign: "right" }}>{fmtNum(p.monthlyCost || 0)}<span style={{ color: C.ink3, fontWeight: 500, marginLeft: 2 }}>€</span></span>
                     <Pill tone={tone}>{tone === "green" ? "Activo" : "Pausado"}</Pill>
                     <button style={{ width: 26, height: 26, borderRadius: 5, display: "grid", placeItems: "center", color: C.ink3, background: "none", border: "none", cursor: "pointer" }} onClick={e => { e.stopPropagation() }}>

@@ -5,6 +5,8 @@
  */
 
 import type { InvoicePdfData, InvoiceLinePdf } from "./types"
+import { DRAFT_NUMBER_PLACEHOLDER } from "@/modules/invoicing/engine/invoice.engine"
+import { recargoRateForVat } from "@/modules/invoicing/utils/vatRates"
 
 export type InvoiceDocumentModel = {
   header: {
@@ -60,7 +62,11 @@ export type InvoiceDocumentModel = {
     taxBreakdown: Array<{ rate: number; base: string; taxAmount: string }>
     irpfRate?: number | null
     irpfAmount?: string | null
+    /** Recargo de equivalencia por tipo de IVA (incluido en total) */
+    recargoBreakdown: Array<{ rate: number; amount: string }>
     total: string
+    /** Total − retención IRPF (neto). Solo presente cuando hay retención. */
+    totalAPagar?: string | null
     currency: string
   }
   footer: {
@@ -134,7 +140,11 @@ export function buildInvoiceDocument(data: InvoicePdfData): InvoiceDocumentModel
       phone: recipient.phone ?? "",
     },
     invoiceInfo: {
-      number: data.number,
+      // El número visible debe ser exactamente serie+número registrados en la AEAT
+      number:
+        data.number && data.number !== DRAFT_NUMBER_PLACEHOLDER && data.series
+          ? `${data.series}-${data.number}`
+          : data.number,
       numberLabel: "Nº factura",
       issueDate: formatDate(issueDate),
       dueDate: formatDate(dueDate),
@@ -186,7 +196,28 @@ export function buildInvoiceDocument(data: InvoicePdfData): InvoiceDocumentModel
       })(),
       irpfRate: data.irpfRate ?? null,
       irpfAmount: data.irpfAmount && data.irpfAmount > 0 ? formatMoney(data.irpfAmount, currency) : null,
+      recargoBreakdown: data.recargoEquivalencia
+        ? (() => {
+            // Recargo por tipo de IVA, reconstruido como en el engine (round2 por línea)
+            const round2 = (n: number) => Math.round(n * 100) / 100
+            const byRate = new Map<number, number>()
+            for (const line of lines) {
+              const rec = round2(line.subtotal * (recargoRateForVat(line.taxPercent) / 100))
+              if (rec !== 0) byRate.set(line.taxPercent, round2((byRate.get(line.taxPercent) ?? 0) + rec))
+            }
+            return Array.from(byRate.entries())
+              .sort((a, b) => b[0] - a[0])
+              .map(([vatRate, amount]) => ({
+                rate: recargoRateForVat(vatRate),
+                amount: formatMoney(amount, currency),
+              }))
+          })()
+        : [],
       total: formatMoney(data.total, currency),
+      totalAPagar:
+        data.irpfAmount && data.irpfAmount > 0
+          ? formatMoney(data.total - data.irpfAmount, currency)
+          : null,
       currency,
     },
     footer: {

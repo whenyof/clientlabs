@@ -6,6 +6,7 @@ import * as repo from "../repositories/invoice.repository"
 import { recalculateClientTotalSpent } from "@/modules/sales/actions/sales.actions"
 import type { InvoiceLineInput, InvoiceLineComputed, InvoiceWithRelations, AddPaymentInput, InvoiceStatus, PriceMode } from "../types"
 import { INVOICE_STATUS } from "../types"
+import { recargoRateForVat } from "../utils/vatRates"
 
 /** Placeholder stored in DB for draft invoices. Number is assigned only when status becomes SENT (issued). */
 export const DRAFT_NUMBER_PLACEHOLDER = "BORRADOR"
@@ -19,30 +20,39 @@ const round2 = (n: number) => Math.round(n * 100) / 100
  */
 export function calculateTotals(
   lines: InvoiceLineInput[],
-  invoicePriceMode: PriceMode = "base"
+  invoicePriceMode: PriceMode = "base",
+  options?: { recargoEquivalencia?: boolean }
 ): InvoiceLineComputed[] {
+  const applyRecargo = options?.recargoEquivalencia === true
   return lines.map((line) => {
     const mode: PriceMode = line.priceMode ?? invoicePriceMode
     const taxPct = line.taxPercent
     const vatRate = taxPct / 100
     const qty = Math.max(0, line.quantity)
     const discountPct = line.discountPercent ?? 0
+    // Recargo de equivalencia: tipo derivado del IVA (21→5.2, 10→1.4, 4→0.5, 0→0)
+    const recargoRate = applyRecargo ? recargoRateForVat(taxPct) : 0
 
     let subtotal: number
     let taxAmount: number
     let total: number
     let unitPrice: number
+    let recargoAmount = 0
 
     if (mode === "total" && line.lineTotal != null && line.lineTotal >= 0) {
       total = round2(line.lineTotal)
-      subtotal = round2(total / (1 + vatRate))
-      taxAmount = round2(total - subtotal)
+      // Con recargo, el total incluye IVA + recargo → la base se despeja con ambos tipos
+      subtotal = round2(total / (1 + vatRate + recargoRate / 100))
+      taxAmount = round2(subtotal * vatRate)
+      recargoAmount = applyRecargo ? round2(subtotal * (recargoRate / 100)) : 0
+      if (!applyRecargo) taxAmount = round2(total - subtotal)
       unitPrice = qty > 0 ? round2(subtotal / qty) : 0
     } else {
       const unit = line.unitPrice
       subtotal = round2(qty * unit * (1 - discountPct / 100))
       taxAmount = round2(subtotal * vatRate)
-      total = round2(subtotal + taxAmount)
+      recargoAmount = applyRecargo ? round2(subtotal * (recargoRate / 100)) : 0
+      total = round2(subtotal + taxAmount + recargoAmount)
       unitPrice = unit
     }
 
@@ -56,23 +66,27 @@ export function calculateTotals(
       subtotal,
       taxAmount,
       total,
+      ...(applyRecargo && { recargoRate, recargoAmount }),
     }
   })
 }
 
-export function aggregateLineTotals(computed: InvoiceLineComputed[]): { subtotal: number; taxAmount: number; total: number } {
+export function aggregateLineTotals(computed: InvoiceLineComputed[]): { subtotal: number; taxAmount: number; total: number; recargoAmount: number } {
   let subtotal = 0
   let taxAmount = 0
   let total = 0
+  let recargoAmount = 0
   for (const line of computed) {
     subtotal += line.subtotal
     taxAmount += line.taxAmount
     total += line.total
+    recargoAmount += line.recargoAmount ?? 0
   }
   return {
     subtotal: Math.round(subtotal * 100) / 100,
     taxAmount: Math.round(taxAmount * 100) / 100,
     total: Math.round(total * 100) / 100,
+    recargoAmount: Math.round(recargoAmount * 100) / 100,
   }
 }
 

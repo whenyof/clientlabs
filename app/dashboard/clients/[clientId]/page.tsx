@@ -16,6 +16,7 @@ import {
   ClientTimeline,
   ClientTransactionsTabs,
   ClientProfileCard,
+  ClientTasksCard,
   ClientNotFound,
 } from "@/modules/client360/components"
 
@@ -104,6 +105,7 @@ export default async function Client360Page({ params: paramsPromise }: { params:
         {/* ── Right rail (340px) ──────────────────────────────────────── */}
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <ClientProfileCard client={client} />
+          <ClientTasksCard clientId={clientId} />
         </div>
       </div>
 

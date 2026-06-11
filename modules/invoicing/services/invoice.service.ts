@@ -14,6 +14,7 @@ import * as repo from "../repositories/invoice.repository"
 import * as engine from "../engine/invoice.engine"
 import type { CreateInvoiceInput, AddPaymentInput, InvoiceWithRelations, InvoiceStatus } from "../types"
 import { INVOICE_STATUS } from "../types"
+import { recargoRateForVat } from "../utils/vatRates"
 // Verifactu is imported dynamically inside issueInvoice to avoid top-level server-only constraints
 
 // --- Attach helpers: single source of truth for invoice ↔ sale / provider order / payment ---
@@ -155,8 +156,17 @@ async function resolveDefaultNotesAndTerms(userId: string): Promise<{ notes: str
 
 export async function createInvoice(input: CreateInvoiceInput): Promise<{ id: string; number: string } | null> {
   const priceMode = input.priceMode ?? "base"
-  const computed = engine.calculateTotals(input.lines, priceMode)
-  const { subtotal, taxAmount, total } = engine.aggregateLineTotals(computed)
+  // Recargo de equivalencia: se lee del cliente en BD (no del payload del navegador)
+  let recargoEquivalencia = false
+  if (input.clientId) {
+    const client = await prisma.client.findFirst({
+      where: { id: input.clientId, userId: input.userId },
+      select: { recargoEquivalencia: true },
+    })
+    recargoEquivalencia = client?.recargoEquivalencia === true
+  }
+  const computed = engine.calculateTotals(input.lines, priceMode, { recargoEquivalencia })
+  const { subtotal, taxAmount, total, recargoAmount } = engine.aggregateLineTotals(computed)
   const hasNotes = typeof input.notes === "string" && input.notes.trim().length > 0
   const hasTerms = typeof input.terms === "string" && input.terms.trim().length > 0
   const defaults = !hasNotes || !hasTerms ? await resolveDefaultNotesAndTerms(input.userId) : null
@@ -186,6 +196,8 @@ export async function createInvoice(input: CreateInvoiceInput): Promise<{ id: st
     paymentReference: input.paymentReference ?? null,
     issuedClientSnapshot: input.clientSnapshot ?? undefined,
     invoiceDocType: input.invoiceDocType ?? "F1",
+    recargoEquivalencia,
+    recargoAmount: recargoEquivalencia ? recargoAmount : 0,
     lines: computed,
   })
   await repo.addEvent(invoice.id, "CREATED", { at: new Date().toISOString() })
@@ -297,6 +309,149 @@ export type IssueInvoiceResult = { success: true } | { success: false; validatio
  * Idempotent: if already SENT or already has issued number, no-op.
  * Validates legal requirements (emitter + client) before issuing; returns validationErrors if invalid.
  */
+export interface VerifactuSendResult {
+  sent: boolean
+  skipped?: string
+  error?: string
+  uuid?: string
+  estado?: string
+}
+
+/**
+ * Envía una factura emitida a Verifactu y persiste uuid/estado/qr/huella.
+ * Extraído tal cual del bloque inline de issueInvoice — mismo payload, mismo
+ * orden, misma persistencia. Nunca lanza: los errores se devuelven en el
+ * resultado (la emisión no debe fallar por Verifactu).
+ * La cabecera Idempotency-Key (determinista por invoiceId) hace seguro el
+ * reintento: replica la respuesta original en vez de duplicar el registro.
+ */
+export async function sendInvoiceToVerifactu(invoiceId: string, userId: string): Promise<VerifactuSendResult> {
+  try {
+    const inv = await repo.findById(invoiceId, userId)
+    if (!inv) return { sent: false, error: "Factura no encontrada" }
+    if (inv.type !== "CUSTOMER") return { sent: false, skipped: "type" }
+    const existingUuid = (inv as { verifactuUuid?: string | null }).verifactuUuid
+    if (existingUuid) return { sent: false, skipped: "already-sent", uuid: existingUuid }
+    const number = inv.number
+    const issuedAt = (inv as { issuedAt?: Date | null }).issuedAt ?? inv.issueDate
+    const issuedClientSnapshot = (inv as { issuedClientSnapshot?: unknown }).issuedClientSnapshot
+
+    const { resolveVerifactuApiKey, createVerifactuInvoice: sendToVerifactu, formatDateForVerifactu } = await import("@/lib/verifactu")
+    const nifApiKey = await resolveVerifactuApiKey(userId)
+    if (!nifApiKey) {
+      console.log("[Verifactu] SKIP: no hay API key configurada (ni personal ni env VERIFACTI_ACCOUNT_KEY)")
+      return { sent: false, skipped: "no-api-key" }
+    }
+    const bizProfile2 = await prisma.businessProfile.findUnique({
+      where: { userId },
+      select: { verifactuEnabled: true },
+    })
+    if (!bizProfile2?.verifactuEnabled) {
+      console.log("[Verifactu] SKIP: verifactuEnabled=false en BusinessProfile del usuario", userId)
+      return { sent: false, skipped: "disabled" }
+    }
+    const clientSnap = issuedClientSnapshot as Record<string, unknown>
+    const clientTaxId = typeof clientSnap?.taxId === "string" ? clientSnap.taxId : undefined
+    const clientName = typeof clientSnap?.name === "string" ? clientSnap.name : undefined
+    const invoiceDocType = (inv as { invoiceDocType?: string | null }).invoiceDocType ?? "F1"
+    const rectificationMethod = (inv as { rectificationMethod?: string | null }).rectificationMethod ?? "S"
+    const isRectificative = ["R1", "R2", "R3", "R4", "R5"].includes(invoiceDocType)
+
+    // Group lines by tax rate for accurate reporting
+    // Recargo de equivalencia: clave_regimen "18" + tipo/cuota por línea (doc Verifacti).
+    // La cuota se reconstruye igual que en el engine: round2 por línea, sumado por grupo.
+    const hasRecargo = (inv as { recargoEquivalencia?: boolean }).recargoEquivalencia === true
+    const round2 = (n: number) => Math.round(n * 100) / 100
+    const taxGroups = new Map<number, { base: number; tax: number; recargo: number }>()
+    for (const line of inv.lines) {
+      const rate = line.taxPercent ?? 0
+      const existing = taxGroups.get(rate) ?? { base: 0, tax: 0, recargo: 0 }
+      existing.base += line.subtotal
+      existing.tax += line.taxAmount
+      if (hasRecargo) existing.recargo += round2(line.subtotal * (recargoRateForVat(rate) / 100))
+      taxGroups.set(rate, existing)
+    }
+    const lineas = taxGroups.size > 0
+      ? Array.from(taxGroups.entries()).map(([rate, { base, tax, recargo }]) => ({
+          base_imponible: base.toFixed(2),
+          tipo_impositivo: rate.toFixed(2),
+          cuota_repercutida: tax.toFixed(2),
+          ...(hasRecargo && {
+            clave_regimen: "18",
+            tipo_recargo_equivalencia: String(recargoRateForVat(rate)),
+            cuota_recargo_equivalencia: round2(recargo).toFixed(2),
+          }),
+        }))
+      : [{ base_imponible: inv.subtotal.toFixed(2), tipo_impositivo: "0.00", cuota_repercutida: "0.00" }]
+
+    // Build description from lines or notes
+    const firstLineDesc = inv.lines[0]?.description
+    // Verifacti exige descripcion de 1-500 caracteres
+    const descripcion = (firstLineDesc || inv.notes?.substring(0, 100) || `Factura ${inv.series}-${number}`).substring(0, 500)
+
+    const data: import("@/lib/verifactu").VerifactuCreateData = {
+      serie: inv.series || "CL",
+      numero: number,
+      fecha_expedicion: formatDateForVerifactu(issuedAt),
+      tipo_factura: invoiceDocType as import("@/lib/verifactu").AllInvoiceTypes,
+      descripcion,
+      ...(clientTaxId && invoiceDocType !== "F2" && invoiceDocType !== "R5" && { nif: clientTaxId }),
+      ...(clientName && invoiceDocType !== "F2" && invoiceDocType !== "R5" && { nombre: clientName }),
+      lineas,
+      importe_total: inv.total.toFixed(2),
+    }
+
+    // For rectifications, add mandatory fields
+    if (isRectificative) {
+      const method = rectificationMethod as import("@/lib/verifactu").RectificationMethod
+      data.tipo_rectificativa = method
+      const rectifiesId = (inv as { rectifiesInvoiceId?: string | null }).rectifiesInvoiceId
+      if (rectifiesId) {
+        const originalInv = await prisma.invoice.findUnique({
+          where: { id: rectifiesId },
+          select: { series: true, number: true, issueDate: true, total: true, subtotal: true, taxAmount: true },
+        })
+        if (originalInv) {
+          data.factura_rectificada_serie = originalInv.series || "CL"
+          data.factura_rectificada_numero = originalInv.number
+          data.factura_rectificada_fecha = formatDateForVerifactu(originalInv.issueDate)
+          // importe_rectificativa object required for "S" and "I"
+          if (method === "S") {
+            data.importe_rectificativa = {
+              base_rectificada: Math.abs(originalInv.subtotal.toNumber()).toFixed(2),
+              cuota_rectificada: Math.abs(originalInv.taxAmount.toNumber()).toFixed(2),
+            }
+          } else if (method === "I") {
+            data.importe_rectificativa = {
+              base_rectificada: Math.abs(Number(inv.subtotal)).toFixed(2),
+              cuota_rectificada: Math.abs(Number(inv.taxAmount)).toFixed(2),
+            }
+          }
+        }
+      }
+    }
+
+    console.log("[Verifactu] Enviando factura:", JSON.stringify(data))
+    const result = await sendToVerifactu(nifApiKey, data, `clientlabs-invoice-${inv.id}`)
+    await prisma.invoice.update({
+      where: { id: invoiceId },
+      data: {
+        verifactuUuid: result.uuid,
+        verifactuStatus: result.estado,
+        verifactuQr: result.qr || null,
+        verifactuHuella: result.huella || null,
+        verifactuUrl: result.url || null,
+        verifactuSentAt: new Date(),
+      },
+    })
+    console.log("[Verifactu] OK — UUID:", result.uuid, "Estado:", result.estado)
+    return { sent: true, uuid: result.uuid, estado: result.estado }
+  } catch (err) {
+    console.error("[Verifactu] Error al enviar factura:", err instanceof Error ? err.message : err)
+    return { sent: false, error: err instanceof Error ? err.message : String(err) }
+  }
+}
+
 export async function issueInvoice(invoiceId: string, userId: string): Promise<IssueInvoiceResult> {
   const inv = await repo.findById(invoiceId, userId)
   if (!inv) return { success: false, validationErrors: ["Factura no encontrada"] }
@@ -341,6 +496,26 @@ export async function issueInvoice(invoiceId: string, userId: string): Promise<I
   )
   if (!validation.valid) {
     return { success: false, validationErrors: validation.errors }
+  }
+  // F1 y rectificativas R1-R4 exigen NIF y nombre del destinatario (AEAT).
+  // Se comprueba ANTES de consumir número para no generar huecos en la serie.
+  if (inv.type === "CUSTOMER") {
+    const docType = (inv as { invoiceDocType?: string | null }).invoiceDocType ?? "F1"
+    if (["F1", "R1", "R2", "R3", "R4"].includes(docType)) {
+      const snap = (inv as { issuedClientSnapshot?: unknown }).issuedClientSnapshot as Record<string, unknown> | null
+      const snapTaxId = typeof snap?.taxId === "string" ? snap.taxId.trim() : ""
+      const snapName = typeof snap?.name === "string" ? snap.name.trim() : ""
+      const clientTaxId = snapTaxId || ((inv.Client as { taxId?: string | null } | undefined)?.taxId ?? "").trim()
+      const clientName = snapName || (inv.Client?.name ?? (inv.Client as { legalName?: string | null } | undefined)?.legalName ?? "").trim()
+      if (!clientTaxId || !clientName) {
+        return {
+          success: false,
+          validationErrors: [
+            "Una factura completa (F1) requiere NIF y nombre del cliente. Para facturar sin identificar al cliente, usa factura simplificada (F2).",
+          ],
+        }
+      }
+    }
   }
   const issuedAt = new Date()
   let number: string
@@ -399,6 +574,10 @@ export async function issueInvoice(invoiceId: string, userId: string): Promise<I
     taxAmount: inv.taxAmount,
     total: inv.total,
     currency: inv.currency,
+    irpfRate: (inv as { irpfRate?: number | null }).irpfRate ?? null,
+    irpfAmount: (inv as { irpfAmount?: number | null }).irpfAmount ?? null,
+    recargoEquivalencia: (inv as { recargoEquivalencia?: boolean }).recargoEquivalencia ?? false,
+    recargoAmount: (inv as { recargoAmount?: number | null }).recargoAmount ?? null,
   }
   await repo.updateNumberStatusAndSnapshots(invoiceId, userId, {
     number,
@@ -410,111 +589,8 @@ export async function issueInvoice(invoiceId: string, userId: string): Promise<I
     issuedTotalsSnapshot: issuedTotalsSnapshot as Prisma.InputJsonValue,
   })
 
-  // Envío a Verifactu — awaited con try/catch (errores nunca fallan la emisión)
-  if (inv.type === "CUSTOMER") {
-    try {
-      const { resolveVerifactuApiKey, createVerifactuInvoice: sendToVerifactu, formatDateForVerifactu } = await import("@/lib/verifactu")
-      const nifApiKey = await resolveVerifactuApiKey(userId)
-      if (!nifApiKey) {
-        console.log("[Verifactu] SKIP: no hay API key configurada (ni personal ni env VERIFACTI_ACCOUNT_KEY)")
-      } else {
-        const bizProfile2 = await prisma.businessProfile.findUnique({
-          where: { userId },
-          select: { verifactuEnabled: true },
-        })
-        if (!bizProfile2?.verifactuEnabled) {
-          console.log("[Verifactu] SKIP: verifactuEnabled=false en BusinessProfile del usuario", userId)
-        } else {
-          const clientSnap = issuedClientSnapshot as Record<string, unknown>
-          const clientTaxId = typeof clientSnap?.taxId === "string" ? clientSnap.taxId : undefined
-          const clientName = typeof clientSnap?.name === "string" ? clientSnap.name : undefined
-          const invoiceDocType = (inv as { invoiceDocType?: string | null }).invoiceDocType ?? "F1"
-          const rectificationMethod = (inv as { rectificationMethod?: string | null }).rectificationMethod ?? "S"
-          const isRectificative = ["R1", "R2", "R3", "R4", "R5"].includes(invoiceDocType)
-
-          // Group lines by tax rate for accurate reporting
-          const taxGroups = new Map<number, { base: number; tax: number }>()
-          for (const line of inv.lines) {
-            const rate = line.taxPercent ?? 0
-            const existing = taxGroups.get(rate) ?? { base: 0, tax: 0 }
-            existing.base += line.subtotal
-            existing.tax += line.taxAmount
-            taxGroups.set(rate, existing)
-          }
-          const lineas = taxGroups.size > 0
-            ? Array.from(taxGroups.entries()).map(([rate, { base, tax }]) => ({
-                base_imponible: base.toFixed(2),
-                tipo_impositivo: rate.toFixed(2),
-                cuota_repercutida: tax.toFixed(2),
-              }))
-            : [{ base_imponible: inv.subtotal.toFixed(2), tipo_impositivo: "0.00", cuota_repercutida: "0.00" }]
-
-          // Build description from lines or notes
-          const firstLineDesc = inv.lines[0]?.description
-          const descripcion = firstLineDesc || inv.notes?.substring(0, 100) || `Factura ${inv.series}-${number}`
-
-          const data: import("@/lib/verifactu").VerifactuCreateData = {
-            serie: inv.series || "CL",
-            numero: number,
-            fecha_expedicion: formatDateForVerifactu(issuedAt),
-            tipo_factura: invoiceDocType as import("@/lib/verifactu").AllInvoiceTypes,
-            descripcion,
-            ...(clientTaxId && invoiceDocType !== "F2" && invoiceDocType !== "R5" && { nif: clientTaxId }),
-            ...(clientName && invoiceDocType !== "F2" && invoiceDocType !== "R5" && { nombre: clientName }),
-            lineas,
-            importe_total: inv.total.toFixed(2),
-          }
-
-          // For rectifications, add mandatory fields
-          if (isRectificative) {
-            const method = rectificationMethod as import("@/lib/verifactu").RectificationMethod
-            data.tipo_rectificativa = method
-            const rectifiesId = (inv as { rectifiesInvoiceId?: string | null }).rectifiesInvoiceId
-            if (rectifiesId) {
-              const originalInv = await prisma.invoice.findUnique({
-                where: { id: rectifiesId },
-                select: { series: true, number: true, issueDate: true, total: true, subtotal: true, taxAmount: true },
-              })
-              if (originalInv) {
-                data.factura_rectificada_serie = originalInv.series || "CL"
-                data.factura_rectificada_numero = originalInv.number
-                data.factura_rectificada_fecha = formatDateForVerifactu(originalInv.issueDate)
-                // importe_rectificativa object required for "S" and "I"
-                if (method === "S") {
-                  data.importe_rectificativa = {
-                    base_rectificada: Math.abs(originalInv.subtotal.toNumber()).toFixed(2),
-                    cuota_rectificada: Math.abs(originalInv.taxAmount.toNumber()).toFixed(2),
-                  }
-                } else if (method === "I") {
-                  data.importe_rectificativa = {
-                    base_rectificada: Math.abs(Number(inv.subtotal)).toFixed(2),
-                    cuota_rectificada: Math.abs(Number(inv.taxAmount)).toFixed(2),
-                  }
-                }
-              }
-            }
-          }
-
-          console.log("[Verifactu] Enviando factura:", JSON.stringify(data))
-          const result = await sendToVerifactu(nifApiKey, data)
-          await prisma.invoice.update({
-            where: { id: invoiceId },
-            data: {
-              verifactuUuid: result.uuid,
-              verifactuStatus: result.estado,
-              verifactuQr: result.qr || null,
-              verifactuHuella: result.huella || null,
-              verifactuUrl: result.url || null,
-              verifactuSentAt: new Date(),
-            },
-          })
-          console.log("[Verifactu] OK — UUID:", result.uuid, "Estado:", result.estado)
-        }
-      }
-    } catch (err) {
-      console.error("[Verifactu] Error al enviar factura:", err instanceof Error ? err.message : err)
-    }
-  }
+  // Envío a Verifactu — el helper nunca lanza (errores nunca fallan la emisión)
+  await sendInvoiceToVerifactu(invoiceId, userId)
 
   await repo.addEvent(invoiceId, "SENT", {
     at: issuedAt.toISOString(),
@@ -567,8 +643,10 @@ export async function updateDraftInvoice(
   const inv = await repo.findById(invoiceId, userId)
   if (!inv || inv.status !== INVOICE_STATUS.DRAFT) return false
   const priceMode = payload.priceMode ?? "base"
-  const computed = engine.calculateTotals(payload.lines, priceMode)
-  const { subtotal, taxAmount, total } = engine.aggregateLineTotals(computed)
+  // Conservar el recargo de equivalencia con el que se creó el borrador
+  const recargoEquivalencia = (inv as { recargoEquivalencia?: boolean }).recargoEquivalencia === true
+  const computed = engine.calculateTotals(payload.lines, priceMode, { recargoEquivalencia })
+  const { subtotal, taxAmount, total, recargoAmount } = engine.aggregateLineTotals(computed)
   await repo.updateDraft(invoiceId, userId, {
     issueDate: payload.issueDate,
     dueDate: payload.dueDate,
@@ -584,6 +662,7 @@ export async function updateDraftInvoice(
     subtotal,
     taxAmount,
     total,
+    recargoAmount: recargoEquivalencia ? recargoAmount : 0,
     lines: computed,
   })
   await repo.addEvent(invoiceId, "EDITED", { at: new Date().toISOString() })
@@ -643,6 +722,10 @@ export async function createRectification(
   // Determine correct Verifactu type: if original was F2 → always R5, else use provided or default R1
   const originalDocType = orig.invoiceDocType ?? "F1"
   const rectDocType = originalDocType === "F2" ? "R5" : (params.invoiceDocType ?? "R1")
+  // Las rectificativas van en serie propia (correlativa e independiente de la original)
+  const rectSeries = `${original.series || "INV"}-R`
+  // Heredar el recargo de equivalencia de la original (sus líneas/totales lo incluyen)
+  const origHasRecargo = (original as { recargoEquivalencia?: boolean }).recargoEquivalencia === true
   const rectMethod = params.rectificationMethod ?? "S"
 
   const now = new Date()
@@ -652,20 +735,28 @@ export async function createRectification(
 
   // Helper: compute totals and map from custom lines
   const buildFromCustomLines = (customLines: CustomLine[]) => {
-    const linesOut = customLines.map((l) => ({
-      description: l.description, quantity: l.quantity, unitPrice: l.unitPrice,
-      discountPercent: null as number | null, taxPercent: l.taxPercent,
-      subtotal: l.subtotal, taxAmount: l.taxAmount, total: l.total,
-    }))
+    const r2 = (n: number) => Math.round(n * 100) / 100
+    let recargoSum = 0
+    const linesOut = customLines.map((l) => {
+      // El modal manda totales base+IVA; si la original llevaba recargo, se recalcula aquí
+      const recargo = origHasRecargo ? r2(l.subtotal * (recargoRateForVat(l.taxPercent) / 100)) : 0
+      recargoSum += recargo
+      return {
+        description: l.description, quantity: l.quantity, unitPrice: l.unitPrice,
+        discountPercent: null as number | null, taxPercent: l.taxPercent,
+        subtotal: l.subtotal, taxAmount: l.taxAmount,
+        total: origHasRecargo ? r2(l.subtotal + l.taxAmount + recargo) : l.total,
+      }
+    })
     const subtotal = customLines.reduce((s, l) => s + l.subtotal, 0)
     const taxAmount = customLines.reduce((s, l) => s + l.taxAmount, 0)
-    const total = customLines.reduce((s, l) => s + l.total, 0)
-    return { linesOut, subtotal, taxAmount, total }
+    const total = linesOut.reduce((s, l) => s + l.total, 0)
+    return { linesOut, subtotal, taxAmount, total, recargoAmount: r2(recargoSum) }
   }
 
   if (params.type === "TOTAL") {
     const neg = (n: number) => Math.round(-n * 100) / 100
-    const { linesOut, subtotal, taxAmount, total } = params.lines && params.lines.length > 0
+    const { linesOut, subtotal, taxAmount, total, recargoAmount } = params.lines && params.lines.length > 0
       ? buildFromCustomLines(params.lines)
       : (() => {
           const linesOut = original.lines.map((l) => ({
@@ -673,14 +764,18 @@ export async function createRectification(
             discountPercent: l.discountPercent ?? null, taxPercent: l.taxPercent,
             subtotal: neg(l.subtotal), taxAmount: neg(l.taxAmount), total: neg(l.total),
           }))
-          return { linesOut, subtotal: neg(original.subtotal), taxAmount: neg(original.taxAmount), total: neg(original.total) }
+          return {
+            linesOut, subtotal: neg(original.subtotal), taxAmount: neg(original.taxAmount), total: neg(original.total),
+            recargoAmount: neg((original as { recargoAmount?: number | null }).recargoAmount ?? 0),
+          }
         })()
     const created = await repo.create({
-      userId, number: engine.DRAFT_NUMBER_PLACEHOLDER, series: original.series,
+      userId, number: engine.DRAFT_NUMBER_PLACEHOLDER, series: rectSeries,
       type: "CUSTOMER", clientId: original.clientId, issueDate: now, dueDate: due,
       serviceDate: original.serviceDate, currency: original.currency,
       invoiceLanguage: original.invoiceLanguage ?? null,
       subtotal, taxAmount, total, status: INVOICE_STATUS.DRAFT,
+      recargoEquivalencia: origHasRecargo, recargoAmount: origHasRecargo ? recargoAmount : 0,
       notes: `Rectificativa total. Motivo: ${reason}`, terms: original.terms,
       paymentMethod: original.paymentMethod ?? null, iban: original.iban ?? null,
       bic: original.bic ?? null, paymentReference: original.paymentReference ?? null,
@@ -693,18 +788,19 @@ export async function createRectification(
     return { success: true, id: created.id }
   }
 
-  const { linesOut: partialLines, subtotal: partialSub, taxAmount: partialTax, total: partialTotal } =
+  const { linesOut: partialLines, subtotal: partialSub, taxAmount: partialTax, total: partialTotal, recargoAmount: partialRecargo } =
     params.lines && params.lines.length > 0
       ? buildFromCustomLines(params.lines)
       : {
           linesOut: [{ description: "Rectificación parcial — editar líneas e importes", quantity: 1, unitPrice: 0, discountPercent: null as number | null, taxPercent: 0, subtotal: 0, taxAmount: 0, total: 0 }],
-          subtotal: 0, taxAmount: 0, total: 0,
+          subtotal: 0, taxAmount: 0, total: 0, recargoAmount: 0,
         }
   const created = await repo.create({
-    userId, number: engine.DRAFT_NUMBER_PLACEHOLDER, series: original.series,
+    userId, number: engine.DRAFT_NUMBER_PLACEHOLDER, series: rectSeries,
     type: "CUSTOMER", clientId: original.clientId, issueDate: now, dueDate: due,
     serviceDate: null, currency: original.currency, invoiceLanguage: original.invoiceLanguage ?? null,
     subtotal: partialSub, taxAmount: partialTax, total: partialTotal,
+    recargoEquivalencia: origHasRecargo, recargoAmount: origHasRecargo ? partialRecargo : 0,
     status: INVOICE_STATUS.DRAFT,
     notes: `Rectificativa parcial. Motivo: ${reason}`, terms: null,
     paymentMethod: original.paymentMethod ?? null, iban: original.iban ?? null,

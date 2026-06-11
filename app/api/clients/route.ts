@@ -19,6 +19,7 @@ const createClientSchema = z.object({
   postalCode: z.string().max(20).trim().optional(),
   country: z.string().max(100).trim().optional(),
   notes: z.string().max(2000).trim().optional(),
+  recargoEquivalencia: z.boolean().optional(),
 })
 
 export const dynamic = "force-dynamic"
@@ -76,7 +77,7 @@ export async function POST(req: Request) {
         { status: 400 }
       )
     }
-    const { name, email, phone, totalSpent, taxId, legalName, companyName, address, city, postalCode, country, notes } = parsed.data
+    const { name, email, phone, totalSpent, taxId, legalName, companyName, address, city, postalCode, country, notes, recargoEquivalencia } = parsed.data
     const isFiscalComplete = !!(taxId && (legalName || companyName))
 
     const client = await withTimeout(
@@ -97,6 +98,7 @@ export async function POST(req: Request) {
           country: country || null,
           additionalInfo: notes || null,
           isFiscalComplete,
+          recargoEquivalencia: recargoEquivalencia === true,
         },
       }),
       12000

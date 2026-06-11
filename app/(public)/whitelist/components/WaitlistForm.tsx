@@ -15,18 +15,12 @@ interface Props {
 export function WaitlistForm({ source = "whitelist", dark = true }: Props) {
   const [email, setEmail] = useState("")
   const [status, setStatus] = useState<Status>("idle")
-  const [position, setPosition] = useState<number | null>(null)
   const successRef = useRef<HTMLDivElement>(null)
-  const posNumRef = useRef<HTMLSpanElement>(null)
 
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored) {
-        const { position: pos } = JSON.parse(stored)
-        setPosition(pos ?? null)
-        setStatus("success")
-      }
+      if (stored) setStatus("success")
     } catch {}
   }, [])
 
@@ -74,25 +68,6 @@ export function WaitlistForm({ source = "whitelist", dark = true }: Props) {
       )
     }
 
-    // Count-up on the position number
-    if (posNumRef.current && position) {
-      const obj = { val: 0 }
-      tl.to(
-        obj,
-        {
-          val: position,
-          duration: 0.7,
-          ease: "power2.out",
-          onUpdate: () => {
-            if (posNumRef.current) {
-              posNumRef.current.textContent = `#${Math.round(obj.val)}`
-            }
-          },
-        },
-        "-=0.3"
-      )
-    }
-
     // Subtitle
     if (sub) {
       tl.fromTo(
@@ -104,14 +79,15 @@ export function WaitlistForm({ source = "whitelist", dark = true }: Props) {
     }
 
     return () => { tl.kill() }
-  }, [status, position])
+  }, [status])
 
   const handleSubmit = async () => {
     if (!email || !email.includes("@")) return
     setStatus("loading")
 
     try {
-      const res = await fetch("/api/waitlist", {
+      // La cookie cl_ref (atribución de referido) viaja sola: same-origin
+      const res = await fetch("/api/waitlist/join", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, source }),
@@ -119,15 +95,16 @@ export function WaitlistForm({ source = "whitelist", dark = true }: Props) {
       const data = await res.json()
 
       if (res.ok) {
-        const pos = data.position ?? null
-        setPosition(pos)
+        if (data.already && !data.needsConfirmation) {
+          // Ya estaba dentro y confirmado
+          setStatus("duplicate")
+          return
+        }
         setStatus("success")
         try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify({ position: pos }))
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ joined: true }))
         } catch {}
         window.dispatchEvent(new CustomEvent("waitlist-joined"))
-      } else if (res.status === 409) {
-        setStatus("duplicate")
       } else {
         setStatus("error")
       }
@@ -143,17 +120,13 @@ export function WaitlistForm({ source = "whitelist", dark = true }: Props) {
           ✓
         </div>
         <h3 className={`success-title font-bold text-[18px] mb-2 ${dark ? "text-white" : "text-[#0B1F2A]"}`}>
-          ¡Ya estás dentro!
+          ¡Solo falta un paso!
         </h3>
-        {position && (
-          <p className={`success-badge text-[14px] mb-1 ${dark ? "text-white/60" : "text-slate-500"}`}>
-            Eres el{" "}
-            <span ref={posNumRef} className="text-[#0F766E] font-bold text-[16px]">#0</span>
-            {" "}en la lista
-          </p>
-        )}
+        <p className={`success-badge text-[14px] mb-1 ${dark ? "text-white/60" : "text-slate-500"}`}>
+          Te hemos enviado un email de confirmación
+        </p>
         <p className={`success-sub text-[12px] ${dark ? "text-white/40" : "text-slate-400"}`}>
-          Revisa tu email — te hemos enviado los detalles de tu acceso anticipado
+          Confirma tu email para reservar tu plaza y activar tu enlace de invitación
         </p>
       </div>
     )

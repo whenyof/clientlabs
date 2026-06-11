@@ -2870,11 +2870,22 @@ model BankConnection {
 // ─── Waitlist ─────────────────────────────────────────────────────────────────
 
 model WaitlistEntry {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  source    String   @default("whitelist")
-  createdAt DateTime @default(now())
+  id           String          @id @default(cuid())
+  email        String          @unique
+  name         String?
+  source       String          @default("whitelist")
+  /// Código corto público para el enlace ?ref= (nullable por filas legacy; toda alta nueva lo recibe)
+  referralCode String?         @unique
+  /// Token largo crypto-random: único mecanismo de acceso al panel /referidos
+  panelToken   String?         @unique
+  referredById String?
+  referredBy   WaitlistEntry?  @relation("Referrals", fields: [referredById], references: [id])
+  referrals    WaitlistEntry[] @relation("Referrals")
+  /// Doble opt-in: solo los confirmados cuentan como referidos
+  confirmedAt  DateTime?
+  createdAt    DateTime        @default(now())
 
+  @@index([referredById])
   @@map("waitlist_entries")
 }
 

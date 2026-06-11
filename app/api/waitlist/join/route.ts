@@ -3,30 +3,17 @@ export const maxDuration = 30
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { waitUntil } from "@vercel/functions"
-import { prisma } from "@/lib/prisma"
 import { joinWaitlist } from "@/lib/waitlist/service"
 import { sendConfirmationEmail } from "@/lib/waitlist/emails"
 import { checkWaitlistJoinLimit } from "@/lib/rate-limit"
 
-const BASE_COUNT = 17
-
-const waitlistSchema = z.object({
+const joinSchema = z.object({
   email: z.string().email("Email no válido").max(255),
   name: z.string().max(120).optional(),
   ref: z.string().max(32).optional(),
   source: z.string().max(100).optional(),
 })
 
-export async function GET() {
-  const real = await prisma.waitlistEntry.count()
-  return NextResponse.json({ count: real + BASE_COUNT })
-}
-
-/**
- * POST /api/waitlist — mismo flujo que /api/waitlist/join (delegan en joinWaitlist).
- * Se mantiene esta URL para no romper el formulario existente.
- * Doble opt-in: el alta envía email de confirmación; la bienvenida llega al confirmar.
- */
 export async function POST(req: NextRequest) {
   try {
     const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "anon"
@@ -36,7 +23,7 @@ export async function POST(req: NextRequest) {
     }
 
     const raw = await req.json().catch(() => null)
-    const result = waitlistSchema.safeParse(raw)
+    const result = joinSchema.safeParse(raw)
     if (!result.success) {
       return NextResponse.json(
         { error: result.error.issues[0]?.message ?? "Datos no válidos" },
@@ -44,7 +31,9 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // El ref puede venir en el body o en la cookie cl_ref puesta por la landing
     const ref = result.data.ref ?? req.cookies.get("cl_ref")?.value ?? null
+
     const outcome = await joinWaitlist({
       email: result.data.email,
       name: result.data.name ?? null,
@@ -52,19 +41,23 @@ export async function POST(req: NextRequest) {
       source: result.data.source ?? null,
     })
 
-    if (outcome.status === "created" || outcome.status === "already_unconfirmed") {
+    // Respuesta neutra: sin IDs internos ni tokens (el panelToken solo viaja por email)
+    if (outcome.status === "created") {
       waitUntil(sendConfirmationEmail(outcome.email, outcome.panelToken).catch((err) =>
         console.error("Waitlist confirm email error:", err)
       ))
+      return NextResponse.json({ success: true, needsConfirmation: true })
     }
-
-    return NextResponse.json({
-      success: true,
-      already: outcome.status !== "created",
-      needsConfirmation: outcome.status !== "already_confirmed",
-    })
+    if (outcome.status === "already_unconfirmed") {
+      // Idempotente: reenvía la confirmación, no crea duplicado
+      waitUntil(sendConfirmationEmail(outcome.email, outcome.panelToken).catch((err) =>
+        console.error("Waitlist confirm resend error:", err)
+      ))
+      return NextResponse.json({ success: true, already: true, needsConfirmation: true })
+    }
+    return NextResponse.json({ success: true, already: true, needsConfirmation: false })
   } catch (error) {
-    console.error("WAITLIST ERROR:", error)
+    console.error("WAITLIST JOIN ERROR:", error)
     return NextResponse.json({ error: "Error interno. Inténtalo de nuevo." }, { status: 500 })
   }
 }

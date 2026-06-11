@@ -1,6 +1,7 @@
 import { Inter, Inter_Tight, JetBrains_Mono } from "next/font/google"
 import Script from "next/script"
 import { CookieBanner } from "./components/CookieBanner"
+import { RefCapture } from "@/components/waitlist/RefCapture"
 
 const interTight = Inter_Tight({
   variable: "--font-display",
@@ -43,6 +44,7 @@ export default function PublicLayout({
           <Script src="/v1/loader.js" strategy="afterInteractive" />
         </>
       )}
+      <RefCapture />
       {children}
       <CookieBanner />
     </div>

@@ -111,7 +111,7 @@ export default async function ReferralPanelPage({
         <section className="bg-white border border-slate-200 rounded-xl p-5">
           <div className="flex items-center justify-between mb-3">
             <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-              Referidos confirmados
+              Invitados confirmados
             </p>
             <p className="text-[13px] font-semibold text-slate-700 tabular-nums">
               {confirmedCount} <span className="text-slate-400 font-normal">de {REFERRAL_GOAL}</span>
@@ -123,9 +123,14 @@ export default async function ReferralPanelPage({
               style={{ width: `${progressPct}%` }}
             />
           </div>
-          <p className="text-[11px] text-slate-400 mt-2.5">
-            Las recompensas por referidos se activarán tras el lanzamiento del 23 de junio.
-          </p>
+          <div className="mt-3 space-y-1">
+            <p className="text-[11px] text-slate-500">
+              Cada invitado que confirma su email suma <span className="font-medium text-slate-700">1 mes gratis</span> (se aplicará tras el lanzamiento).
+            </p>
+            <p className="text-[11px] text-slate-400">
+              ClientLabs BUSINESS de por vida se desbloquea cuando <span className="font-medium text-slate-600">25 de tus invitados contraten un plan de pago</span> después del lanzamiento — unirse a la lista no cuenta para ese premio. Las conversiones se contarán a partir del 23 de junio.
+            </p>
+          </div>
         </section>
 
         {/* Lista de referidos (emails enmascarados) */}

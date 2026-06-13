@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import * as invoiceService from "@/modules/invoicing/services/invoice.service"
+import { getF1ClientFiscalBlock } from "@/lib/clients/calculateFiscalCompleteness"
 
 async function nextPONumber(userId: string): Promise<string> {
   const year = new Date().getFullYear()
@@ -48,6 +49,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     include: { items: true },
   })
   if (!quote) return NextResponse.json({ error: "Presupuesto no encontrado o no está aceptado" }, { status: 404 })
+
+  // F1 (completa) exige datos fiscales del cliente; F2 no. Se comprueba ANTES de
+  // crear nada para no dejar pedido/albarán huérfanos si la factura no puede generarse.
+  if (generateInvoice && invoiceDocType !== "F2") {
+    const fiscalClient = await prisma.client.findUnique({
+      where: { id: quote.clientId },
+      select: { legalName: true, taxId: true, address: true, postalCode: true, city: true, country: true },
+    })
+    const block = getF1ClientFiscalBlock(fiscalClient)
+    if (block) return NextResponse.json({ error: block }, { status: 400 })
+  }
 
   const result: { order: DocRef; deliveryNote: DocRef; invoice: DocRef } = {
     order: null, deliveryNote: null, invoice: null,

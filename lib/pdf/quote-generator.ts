@@ -121,7 +121,10 @@ export async function generateQuotePDF(
     try {
       const { logoW, logoH } = calcLogoDimensions(logoDataUrl, 40, 20)
       pdf.addImage(logoDataUrl, imgFmt(logoDataUrl), M, y, logoW, logoH)
-      y += logoH + 4
+      // El nombre se pinta con pdf.text(), cuya 'y' es la línea base: el texto
+      // asciende ~5mm por encima. Dejar hueco suficiente (logo + gap + ascenso)
+      // para que el logo no solape el nombre/datos del emisor.
+      y += logoH + 9
     } catch { /* ignore bad logo */ }
   }
 

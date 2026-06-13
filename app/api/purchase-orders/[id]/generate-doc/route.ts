@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import * as invoiceService from "@/modules/invoicing/services/invoice.service"
+import { getF1ClientFiscalBlock } from "@/lib/clients/calculateFiscalCompleteness"
 
 async function nextQuoteNumber(userId: string): Promise<string> {
   const year = new Date().getFullYear()
@@ -99,6 +100,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (docType === "invoice") {
     const alreadyLinked = po.convertedToInvoiceId || po.quote?.convertedToInvoiceId
     if (alreadyLinked) return NextResponse.json({ error: "Ya existe una factura para este pedido" }, { status: 409 })
+    // F1 (completa) exige datos fiscales del cliente; F2 (simplificada) no.
+    if (invoiceDocType !== "F2") {
+      const block = getF1ClientFiscalBlock(po.client)
+      if (block) return NextResponse.json({ error: block }, { status: 400 })
+    }
     const issueDate = new Date()
     const dueDate = new Date(issueDate)
     dueDate.setDate(dueDate.getDate() + 30)

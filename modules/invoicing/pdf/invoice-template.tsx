@@ -100,6 +100,18 @@ function formatMoney(amount: number, currency: string): string {
   }).format(amount)
 }
 
+/**
+ * Replaces {{placeholders}} in notes/terms/footer text with real invoice values.
+ * Known keys are substituted; any UNKNOWN {{...}} is stripped so no literal
+ * placeholder ever reaches the rendered PDF (draft or issued).
+ */
+function interpolateTemplate(text: string | null | undefined, vars: Record<string, string>): string {
+  if (!text) return ""
+  return text.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (_m, key: string) =>
+    Object.prototype.hasOwnProperty.call(vars, key) ? vars[key] : ""
+  )
+}
+
 function buildInvoiceTypeTitle(data: InvoicePdfData): string {
   if (data.isRectification) {
     const dt = (data.invoiceDocType ?? "").toUpperCase()
@@ -119,6 +131,21 @@ export function buildInvoiceDocument(data: InvoicePdfData): InvoiceDocumentModel
   const issueDate = new Date(data.issueDate)
   const dueDate = new Date(data.dueDate)
   const serviceDate = data.serviceDate ? new Date(data.serviceDate) : null
+
+  // Real values for {{placeholders}} in notes/terms/footer. Draft (no real
+  // number yet) → {{invoiceNumber}} renders as "BORRADOR".
+  const visibleNumber =
+    data.number && data.number !== DRAFT_NUMBER_PLACEHOLDER && data.series
+      ? `${data.series}-${data.number}`
+      : (data.number || DRAFT_NUMBER_PLACEHOLDER)
+  const templateVars: Record<string, string> = {
+    invoiceNumber: visibleNumber,
+    dueDate: formatDate(dueDate),
+    issueDate: formatDate(issueDate),
+    clientName: recipient.name ?? "",
+    total: formatMoney(data.total, currency),
+    currency,
+  }
 
   return {
     header: {
@@ -221,14 +248,14 @@ export function buildInvoiceDocument(data: InvoicePdfData): InvoiceDocumentModel
       currency,
     },
     footer: {
-      legal: branding.legalFooter ?? "",
-      paymentConditions: branding.paymentConditions ?? "",
+      legal: interpolateTemplate(branding.legalFooter, templateVars),
+      paymentConditions: interpolateTemplate(branding.paymentConditions, templateVars),
       paymentMethod: data.paymentMethod ?? "",
       iban: data.iban ?? "",
       bic: data.bic ?? "",
       paymentReference: data.paymentReference ?? "",
-      notes: data.notes,
-      terms: data.terms,
+      notes: interpolateTemplate(data.notes, templateVars),
+      terms: interpolateTemplate(data.terms, templateVars),
       verifactuQr: data.verifactuQr ?? null,
       verifactuUrl: data.verifactuUrl ?? null,
     },

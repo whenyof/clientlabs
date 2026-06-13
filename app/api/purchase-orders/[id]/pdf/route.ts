@@ -20,7 +20,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="hoja-pedido-${id}.pdf"`,
+        "Content-Disposition": `inline; filename="hoja-pedido-${id}.pdf"`,
         "Cache-Control": "private, no-store",
       },
     })

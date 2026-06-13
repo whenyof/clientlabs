@@ -6,6 +6,7 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import * as invoiceService from "@/modules/invoicing/services/invoice.service"
 import { getNextDocumentNumber } from "@/lib/counters/document-counter"
+import { getF1ClientFiscalBlock } from "@/lib/clients/calculateFiscalCompleteness"
 
 const poLineSchema = z.object({
   productId: z.string().optional(),
@@ -107,6 +108,17 @@ export async function POST(req: NextRequest) {
       invoiceDocType,
       irpfRate,
     } = parsed.data
+
+    // F1 (completa) exige datos fiscales del cliente; F2 no. Se comprueba ANTES de
+    // crear nada para no dejar pedido/albarán huérfanos si la factura no puede generarse.
+    if (createInvoice && invoiceDocType !== "F2") {
+      const fiscalClient = await prisma.client.findUnique({
+        where: { id: clientId },
+        select: { legalName: true, taxId: true, address: true, postalCode: true, city: true, country: true },
+      })
+      const block = getF1ClientFiscalBlock(fiscalClient)
+      if (block) return NextResponse.json({ error: block }, { status: 400 })
+    }
 
     type ItemInput = { productId?: string; description: string; quantity: number; unitPrice: number; taxRate?: number }
     const lineItems: ItemInput[] = items

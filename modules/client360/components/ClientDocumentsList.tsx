@@ -58,9 +58,9 @@ function LinkedDocRow({ icon, label, doc, pdfHref }: {
       <span className={cn("inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium ml-1", STATUS_CLASS[doc.status] ?? "bg-slate-100 text-slate-600")}>
         {STATUS_LABEL[doc.status] ?? doc.status}
       </span>
-      {doc.total != null && (
-        <span className="ml-auto text-[11px] font-semibold tabular-nums text-[var(--text-primary)]">{fmt(doc.total)}</span>
-      )}
+      {/* Always carry ml-auto (even with no total) so the preview icon stays
+          right-aligned across all rows — e.g. albarán has no total. */}
+      <span className="ml-auto text-[11px] font-semibold tabular-nums text-[var(--text-primary)]">{doc.total != null ? fmt(doc.total) : ""}</span>
       <a href={pdfHref} target="_blank" rel="noopener noreferrer"
         className="p-1 rounded hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors shrink-0">
         <ExternalLink className="h-3 w-3" />

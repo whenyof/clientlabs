@@ -119,7 +119,11 @@ export function NewOrderModal({
       if (data.deliveryNote) names.push(data.deliveryNote.number)
       if (data.invoice) names.push(data.invoice.number)
       toast.success(`Pedido creado: ${names.join(", ")}`)
+      if (data.fiscalWarning) toast.warning(data.fiscalWarning)
       onClose()
+      // ClientDocumentsList fetches its own data client-side, so router.refresh()
+      // alone does not update it. Notify it to reload the orders/documents list.
+      window.dispatchEvent(new CustomEvent("client360:refresh-documents", { detail: { clientId } }))
       router.refresh()
     } catch {
       toast.error("Error inesperado")

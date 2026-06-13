@@ -1,14 +1,14 @@
 /**
  * Quote PDF generator — professional layout matching invoice quality.
- * Saves to public/uploads/quotes/{userId}/{id}.pdf and updates pdfUrl in DB.
+ * Renders the PDF in memory and returns the raw bytes. Does NOT write to disk
+ * (Vercel's filesystem is read-only); the API route streams the buffer inline.
  */
-import { mkdir, writeFile, readFile } from "fs/promises"
+import { readFile } from "fs/promises"
 import path from "path"
 import { prisma } from "@/lib/prisma"
 import { getBrandingForUser } from "@/modules/invoicing/pdf/branding"
 import { PDF_LAYOUT, getPdfColors } from "@/modules/invoicing/pdf/styles"
 
-const QUOTES_DIR = "public/uploads/quotes"
 const PAGE_H = 297
 const LEGAL_FOOTER_Y = PAGE_H - 10  // fixed position for legal disclaimer
 
@@ -97,17 +97,13 @@ export async function generateQuotePDF(
   quoteId: string,
   userId: string,
   options: { forceRegenerate?: boolean } = {}
-): Promise<{ url: string } | null> {
+): Promise<{ buffer: Buffer } | null> {
+  void options // always regenerated fresh in memory
   const quote = await prisma.quote.findFirst({
     where: { id: quoteId, userId },
     include: { client: true, items: true },
   })
   if (!quote) return null
-
-  if (!options.forceRegenerate && quote.pdfUrl) {
-    const abs = path.join(process.cwd(), quote.pdfUrl.startsWith("/") ? quote.pdfUrl.slice(1) : quote.pdfUrl)
-    try { await readFile(abs); return { url: quote.pdfUrl.startsWith("/") ? quote.pdfUrl : `/${quote.pdfUrl}` } } catch {}
-  }
 
   const branding = await getBrandingForUser(userId)
   const logoDataUrl = branding.logoUrl ? await fetchLogoAsDataUrl(branding.logoUrl).catch(() => null) : null
@@ -377,15 +373,6 @@ export async function generateQuotePDF(
   pdf.setTextColor(...hexToRgb(colors.textMuted))
   pdf.text("Este presupuesto no tiene validez fiscal.", M, LEGAL_FOOTER_Y)
 
-  // ── SAVE ──────────────────────────────────────────────────────────────────
-  const dir = path.join(process.cwd(), QUOTES_DIR, userId)
-  await mkdir(dir, { recursive: true })
-  const buffer = Buffer.from(pdf.output("arraybuffer"))
-  const filename = `${quoteId}.pdf`
-  const relativePath = path.join(QUOTES_DIR, userId, filename)
-  await writeFile(path.join(process.cwd(), relativePath), buffer)
-  const url = "/" + relativePath.split(path.sep).join("/")
-
-  await prisma.quote.update({ where: { id: quoteId }, data: { pdfUrl: url } })
-  return { url }
+  // ── OUTPUT (in memory) ──────────────────────────────────────────────────────
+  return { buffer: Buffer.from(pdf.output("arraybuffer")) }
 }

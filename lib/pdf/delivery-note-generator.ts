@@ -1,14 +1,13 @@
 /**
  * Delivery note PDF generator — professional layout matching invoice quality.
- * Saves to public/uploads/delivery-notes/{userId}/{id}.pdf and updates pdfUrl in DB.
+ * Renders the PDF in memory and returns the raw bytes. Does NOT write to disk
+ * (Vercel's filesystem is read-only); the API route streams the buffer inline.
  */
-import { mkdir, writeFile, readFile } from "fs/promises"
+import { readFile } from "fs/promises"
 import path from "path"
 import { prisma } from "@/lib/prisma"
 import { getBrandingForUser } from "@/modules/invoicing/pdf/branding"
 import { PDF_LAYOUT, getPdfColors } from "@/modules/invoicing/pdf/styles"
-
-const DN_DIR = "public/uploads/delivery-notes"
 
 const PAGE_H = 297
 const PAGE_BOTTOM_MARGIN = 20
@@ -48,17 +47,13 @@ export async function generateDeliveryNotePDF(
   noteId: string,
   userId: string,
   options: { forceRegenerate?: boolean } = {}
-): Promise<{ url: string } | null> {
+): Promise<{ buffer: Buffer } | null> {
+  void options // always regenerated fresh in memory
   const note = await prisma.deliveryNote.findFirst({
     where: { id: noteId, userId },
     include: { client: true, items: true, quote: { select: { number: true } } },
   })
   if (!note) return null
-
-  if (!options.forceRegenerate && note.pdfUrl) {
-    const abs = path.join(process.cwd(), note.pdfUrl.startsWith("/") ? note.pdfUrl.slice(1) : note.pdfUrl)
-    try { await readFile(abs); return { url: note.pdfUrl.startsWith("/") ? note.pdfUrl : `/${note.pdfUrl}` } } catch {}
-  }
 
   const branding = await getBrandingForUser(userId)
   const logoDataUrl = branding.logoUrl ? await fetchLogoAsDataUrl(branding.logoUrl).catch(() => null) : null
@@ -275,15 +270,6 @@ export async function generateDeliveryNotePDF(
   pdf.setFont("helvetica", "normal")
   pdf.text(contactParts.join("  ·  "), M + W, footerY, { align: "right" })
 
-  // ── SAVE ──────────────────────────────────────────────────────────────────
-  const dir = path.join(process.cwd(), DN_DIR, userId)
-  await mkdir(dir, { recursive: true })
-  const buffer = Buffer.from(pdf.output("arraybuffer"))
-  const filename = `${noteId}.pdf`
-  const relativePath = path.join(DN_DIR, userId, filename)
-  await writeFile(path.join(process.cwd(), relativePath), buffer)
-  const url = "/" + relativePath.split(path.sep).join("/")
-
-  await prisma.deliveryNote.update({ where: { id: noteId }, data: { pdfUrl: url } })
-  return { url }
+  // ── OUTPUT (in memory) ──────────────────────────────────────────────────────
+  return { buffer: Buffer.from(pdf.output("arraybuffer")) }
 }

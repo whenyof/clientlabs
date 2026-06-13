@@ -1,14 +1,13 @@
 /**
  * Purchase Order PDF generator — "HOJA DE PEDIDO"
- * Saves to public/uploads/purchase-orders/{userId}/{id}.pdf
+ * Renders the PDF in memory and returns the raw bytes. Does NOT write to disk
+ * (Vercel's filesystem is read-only); the API route streams the buffer inline.
  */
-import { mkdir, writeFile, readFile } from "fs/promises"
+import { readFile } from "fs/promises"
 import path from "path"
 import { prisma } from "@/lib/prisma"
 import { getBrandingForUser } from "@/modules/invoicing/pdf/branding"
 import { PDF_LAYOUT, getPdfColors } from "@/modules/invoicing/pdf/styles"
-
-const PO_DIR = "public/uploads/purchase-orders"
 
 function fmt(n: number): string {
   return new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", minimumFractionDigits: 2 }).format(n)
@@ -53,17 +52,13 @@ export async function generatePurchaseOrderPDF(
   orderId: string,
   userId: string,
   options: { forceRegenerate?: boolean } = {}
-): Promise<{ url: string } | null> {
+): Promise<{ buffer: Buffer } | null> {
+  void options // always regenerated fresh in memory
   const order = await prisma.purchaseOrder.findFirst({
     where: { id: orderId, userId },
     include: { client: true, items: true, quote: { select: { number: true } } },
   })
   if (!order) return null
-
-  if (!options.forceRegenerate && order.pdfUrl) {
-    const abs = path.join(process.cwd(), order.pdfUrl.startsWith("/") ? order.pdfUrl.slice(1) : order.pdfUrl)
-    try { await readFile(abs); return { url: order.pdfUrl.startsWith("/") ? order.pdfUrl : `/${order.pdfUrl}` } } catch {}
-  }
 
   const branding = await getBrandingForUser(userId)
   const logoDataUrl = branding.logoUrl ? await fetchLogoAsDataUrl(branding.logoUrl).catch(() => null) : null
@@ -185,15 +180,6 @@ export async function generatePurchaseOrderPDF(
   pdf.setTextColor(...hexToRgb(colors.textMuted))
   pdf.text("Firma y conformidad", M, y + 4)
 
-  // Save
-  const dir = path.join(process.cwd(), PO_DIR, userId)
-  await mkdir(dir, { recursive: true })
-  const buffer = Buffer.from(pdf.output("arraybuffer"))
-  const filename = `${orderId}.pdf`
-  const relativePath = path.join(PO_DIR, userId, filename)
-  await writeFile(path.join(process.cwd(), relativePath), buffer)
-  const url = "/" + relativePath.split(path.sep).join("/")
-
-  await prisma.purchaseOrder.update({ where: { id: orderId }, data: { pdfUrl: url } })
-  return { url }
+  // Output (in memory)
+  return { buffer: Buffer.from(pdf.output("arraybuffer")) }
 }

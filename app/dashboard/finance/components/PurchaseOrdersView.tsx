@@ -112,6 +112,26 @@ function GenerateDocModal({
         </div>
 
         <div className="p-5 space-y-2.5">
+          {/* Hoja de pedido (el propio pedido) — PDF en memoria */}
+          <div className="flex items-start gap-3 p-3.5 rounded-xl border border-[#9FE1CB] bg-[#F0FDF9]">
+            <CheckCircle className="h-4 w-4 text-[#0F766E] mt-0.5 shrink-0" />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <ClipboardList className="h-4 w-4 text-blue-500" />
+                <span className="text-[13px] font-medium text-slate-900">Hoja de pedido</span>
+                <span className="font-mono text-[11px] text-[#0F766E] font-semibold">{order.number}</span>
+              </div>
+              <p className="text-[11px] text-slate-400 mt-0.5">Documento del pedido. Descárgalo en PDF.</p>
+            </div>
+            <button
+              onClick={() => window.open(`/api/purchase-orders/${order.id}/pdf`, "_blank")}
+              className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#9FE1CB] text-[11px] font-medium text-[#0F6E56] hover:bg-[#E1F5EE] transition-colors"
+            >
+              <FileText className="h-3.5 w-3.5" />
+              Ver PDF
+            </button>
+          </div>
+
           {/* Albarán */}
           {order.deliveryNote ? (
             <div className="flex items-start gap-3 p-3.5 rounded-xl border border-[#9FE1CB] bg-[#F0FDF9]">

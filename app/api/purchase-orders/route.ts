@@ -235,12 +235,17 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const fiscalWarning = invoiceRef
+      ? await invoiceService.getDraftFiscalWarning(session.user.id, clientId)
+      : null
+
     return NextResponse.json({
       success: true,
       order,
       quote: quoteRef,
       deliveryNote: dnRef,
       invoice: invoiceRef,
+      fiscalWarning,
     }, { status: 201 })
   } catch (e) {
     console.error("POST /api/purchase-orders", e)

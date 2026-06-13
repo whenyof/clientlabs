@@ -2,8 +2,6 @@ export const maxDuration = 30
 export const runtime = "nodejs"
 
 import { NextRequest, NextResponse } from "next/server"
-import { readFile } from "fs/promises"
-import path from "path"
 import { prisma } from "@/lib/prisma"
 import { generateInvoicePDF } from "@/modules/invoicing/pdf/generator"
 import { generateQuotePDF } from "@/lib/pdf/quote-generator"
@@ -42,12 +40,7 @@ export async function GET(
     if (view.type === "QUOTE") {
       const result = await generateQuotePDF(view.documentId, view.userId)
       if (!result) return NextResponse.json({ error: "Not found" }, { status: 404 })
-      const filePath = path.join(
-        process.cwd(),
-        result.url.replace(/^\//, "").split("/").join(path.sep)
-      )
-      const buf = await readFile(filePath)
-      return new NextResponse(buf, {
+      return new NextResponse(new Uint8Array(result.buffer), {
         status: 200,
         headers: {
           "Content-Type": "application/pdf",

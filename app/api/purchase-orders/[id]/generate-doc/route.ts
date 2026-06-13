@@ -122,7 +122,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (po.quoteId) {
       await prisma.quote.update({ where: { id: po.quoteId }, data: { convertedToInvoiceId: created.id } })
     }
-    return NextResponse.json({ success: true, number: created.number })
+    const fiscalWarning = await invoiceService.getDraftFiscalWarning(session.user.id, po.clientId)
+    return NextResponse.json({ success: true, number: created.number, fiscalWarning })
   }
 
   return NextResponse.json({ error: "docType inválido" }, { status: 400 })

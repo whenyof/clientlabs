@@ -90,6 +90,7 @@ function GenerateDocRow({ orderId, docType, label, icon, onGenerated }: {
       const data = await res.json()
       if (!res.ok) { toast.error(data.error ?? "Error al generar"); return }
       toast.success(`${data.number} creado como borrador`)
+      if (data.fiscalWarning) toast.warning(data.fiscalWarning)
       onGenerated()
     } catch { toast.error("Error de conexión") }
     finally { setSaving(false) }
@@ -219,6 +220,16 @@ export function ClientDocumentsList({ clientId }: Props) {
   }, [clientId])
 
   useEffect(() => { load() }, [load])
+
+  // Reload when a sibling (e.g. NewOrderModal) creates a document for this client.
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ clientId?: string }>).detail
+      if (!detail?.clientId || detail.clientId === clientId) load()
+    }
+    window.addEventListener("client360:refresh-documents", handler)
+    return () => window.removeEventListener("client360:refresh-documents", handler)
+  }, [load, clientId])
 
   function toggle(id: string) {
     setExpanded(prev => {

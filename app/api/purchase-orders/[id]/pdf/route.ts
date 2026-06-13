@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { generatePurchaseOrderPDF } from "@/lib/pdf/purchase-order-generator"
-import { readFile } from "fs/promises"
-import path from "path"
 
 export const runtime = "nodejs"
 export const maxDuration = 30
@@ -18,14 +16,12 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const result = await generatePurchaseOrderPDF(id, session.user.id, { forceRegenerate: regenerate })
     if (!result) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
-    const filePath = path.join(process.cwd(), result.url.replace(/^\//, "").split("/").join(path.sep))
-    const buf = await readFile(filePath)
-
-    return new NextResponse(buf, {
+    return new NextResponse(new Uint8Array(result.buffer), {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="hoja-pedido-${id}.pdf"`,
+        "Cache-Control": "private, no-store",
       },
     })
   } catch (e) {

@@ -7,6 +7,8 @@ function getInstance(): Stripe {
     _instance = new Stripe(process.env.STRIPE_SECRET_KEY!, {
       apiVersion: "2026-02-25.clover",
       typescript: true,
+      timeout: 10_000, // nunca colgar checkout/webhooks hasta el maxDuration de la ruta
+      maxNetworkRetries: 1,
     })
   }
   return _instance

@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { ClipboardList, Package, Receipt, X, CheckCircle } from "lucide-react"
 import { toast } from "sonner"
+import { FiscalDataModal } from "@/components/finance/FiscalDataModal"
 
 type DocRef = { id: string; number: string } | null
 
@@ -20,6 +21,7 @@ export function GenerateDocumentsModal({ quoteId, quoteNumber, existing, onClose
   const [genInvoice, setGenInvoice] = useState(!existing.invoice)
   const [invoiceDocType, setInvoiceDocType] = useState<"F1" | "F2">("F1")
   const [loading, setLoading] = useState(false)
+  const [fiscalClientId, setFiscalClientId] = useState<string | null>(null)
 
   const newCount = [
     genOrder && !existing.order,
@@ -43,6 +45,8 @@ export function GenerateDocumentsModal({ quoteId, quoteNumber, existing, onClose
       })
       const data = await res.json()
       if (!res.ok || !data.success) {
+        // F1 sin datos fiscales del cliente → formulario para completarlos y reintentar.
+        if (data.needsClientFiscalData && data.clientId) { setFiscalClientId(data.clientId); return }
         toast.error(data.error ?? "Error al generar los documentos")
         return
       }
@@ -154,6 +158,13 @@ export function GenerateDocumentsModal({ quoteId, quoteNumber, existing, onClose
           </button>
         </div>
       </div>
+      {fiscalClientId && (
+        <FiscalDataModal
+          clientId={fiscalClientId}
+          onClose={() => setFiscalClientId(null)}
+          onSaved={() => { setFiscalClientId(null); handleGenerate() }}
+        />
+      )}
     </div>
   )
 }

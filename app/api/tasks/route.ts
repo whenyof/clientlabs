@@ -24,10 +24,8 @@ import { notifyTaskCreated } from "@/lib/notification-service"
  * Query: status, priority, from, to, assignedTo, entityType, entityId
  */
 export async function GET(request: NextRequest) {
- console.warn("[api/tasks] GET handler invoked")
  try {
  const userId = await getSessionUserId()
- console.warn("[api/tasks] userId:", userId ?? "NULL")
  if (!userId) {
  return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
  }
@@ -91,13 +89,11 @@ export type CreateTaskBody = {
  * Create a new task. Always scoped to session user.
  */
 export async function POST(request: NextRequest) {
- console.warn("[api/tasks] POST handler invoked")
  try {
  const limitGate = await gateLimit("maxTasks", (uid) => prisma.task.count({ where: { userId: uid } }))
  if (!limitGate.allowed) return limitGate.error!
 
  const userId = await getSessionUserId()
- console.warn("[api/tasks] POST userId:", userId ?? "NULL")
  if (!userId) {
  return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
  }

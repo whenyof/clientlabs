@@ -61,6 +61,7 @@ export async function GET() {
       const tokenRes = await fetch("https://api.tink.com/api/v1/oauth/token", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        signal: AbortSignal.timeout(10_000),
         body: new URLSearchParams({
           code: connection.authCode,
           client_id: TINK_CLIENT_ID,
@@ -108,9 +109,11 @@ export async function GET() {
     const [accountsRes, txRes] = await Promise.all([
       fetch("https://api.tink.com/data/v2/accounts", {
         headers: { Authorization: `Bearer ${userToken}` },
+        signal: AbortSignal.timeout(10_000),
       }),
       fetch("https://api.tink.com/data/v2/transactions?pageSize=100", {
         headers: { Authorization: `Bearer ${userToken}` },
+        signal: AbortSignal.timeout(10_000),
       }),
     ])
 
@@ -151,6 +154,12 @@ export async function GET() {
 
     return NextResponse.json({ balances, transactions: txMapped })
   } catch (err: unknown) {
+    if (err instanceof Error && (err.name === "TimeoutError" || err.name === "AbortError")) {
+      return NextResponse.json(
+        { error: "El banco no responde en este momento. Inténtalo de nuevo en unos minutos." },
+        { status: 504 }
+      )
+    }
     const message = err instanceof Error ? err.message : "Error"
     console.error("Tink transactions error:", err)
     return NextResponse.json({ error: message }, { status: 500 })

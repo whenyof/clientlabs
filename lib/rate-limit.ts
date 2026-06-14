@@ -37,3 +37,15 @@ export async function checkWaitlistConfirmLimit(identifier: string): Promise<boo
   const { success } = await waitlistConfirmRatelimit.limit(identifier)
   return success
 }
+
+const contactRatelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(3, "1 m"),
+  analytics: true,
+  prefix: "clientlabs:ratelimit:contact",
+})
+
+export async function checkContactLimit(identifier: string): Promise<boolean> {
+  const { success } = await contactRatelimit.limit(identifier)
+  return success
+}

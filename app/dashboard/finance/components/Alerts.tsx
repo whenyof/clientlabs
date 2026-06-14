@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { AlertTriangle, Info, CheckCircle2, X, Bell } from "lucide-react"
 import { getSeverityColor } from "../lib/formatters"
 import { useFinanceData } from "../context/FinanceDataContext"
@@ -35,6 +36,22 @@ function getAlertActionText(type: AlertType): string {
     case "GOAL_DEADLINE": return "Ver objetivos"
     case "RECURRING_PAYMENT": return "Programar pago"
     default: return "Ver detalles"
+  }
+}
+
+/** Destino real de cada tipo de alerta dentro de Finanzas. */
+function getAlertHref(type: AlertType): string {
+  switch (type) {
+    case "HIGH_EXPENSE":
+    case "BUDGET_EXCEEDED":
+      return "/dashboard/finance/gastos"
+    case "CASHFLOW_RISK":
+    case "UNUSUAL_PATTERN":
+      return "/dashboard/finance/informes"
+    case "RECURRING_PAYMENT":
+      return "/dashboard/finance/pagos"
+    default:
+      return "/dashboard/finance"
   }
 }
 
@@ -94,13 +111,13 @@ export function Alerts() {
                     )}
                   </div>
                 </div>
-                <button
+                <Link
+                  href={getAlertHref(alert.type)}
                   className="px-2.5 py-1 bg-[var(--bg-surface)] hover:bg-gray-100 text-[var(--text-secondary)] text-xs rounded-lg transition-colors shrink-0"
-                  onClick={() => {}}
                   aria-label={getAlertActionText(alert.type)}
                 >
                   {getAlertActionText(alert.type)}
-                </button>
+                </Link>
               </div>
             )
           })}

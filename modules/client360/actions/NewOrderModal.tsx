@@ -13,6 +13,7 @@ import {
   DialogBody,
   DialogFooter,
 } from "@/components/ui/dialog"
+import { FiscalDataModal } from "@/components/finance/FiscalDataModal"
 
 interface NewOrderModalProps {
   open: boolean
@@ -46,6 +47,7 @@ export function NewOrderModal({
   const [invoiceDocType, setInvoiceDocType] = useState<"F1" | "F2">("F1")
   const [irpfRate, setIrpfRate] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [fiscalClientId, setFiscalClientId] = useState<string | null>(null)
 
   const handleItemChange = (index: number, field: keyof OrderItem, value: string) => {
     setItems((prev) =>
@@ -78,8 +80,7 @@ export function NewOrderModal({
   const irpfAmount = subtotal * (irpfRate / 100)
   const total = subtotal + taxAmount - irpfAmount
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const submitOrder = async () => {
     if (isSubmitting) return
     setIsSubmitting(true)
 
@@ -109,6 +110,8 @@ export function NewOrderModal({
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
+        // F1 sin datos fiscales del cliente → formulario para completarlos y reintentar.
+        if (data.needsClientFiscalData && data.clientId) { setFiscalClientId(data.clientId); return }
         toast.error(data.error ?? "Error creando pedido")
         return
       }
@@ -132,9 +135,25 @@ export function NewOrderModal({
     }
   }
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    submitOrder()
+  }
+
   return (
-    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="w-full max-w-6xl">
+    // While the FiscalDataModal (portal a body) está abierto, el Dialog padre pasa a
+    // modal={false} para liberar el focus-trap y el bloqueo de pointer-events de Radix;
+    // si no, no se puede escribir en los campos del modal hijo.
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()} modal={!fiscalClientId}>
+      <DialogContent
+        className="w-full max-w-6xl"
+        // Con modal={false} Radix dejaría cerrar el Dialog padre al hacer pointer-down
+        // "fuera" de su contenido — y el FiscalDataModal hijo cuenta como fuera. Mientras
+        // el hijo está abierto se bloquea ese cierre para no desmontar ambos modales.
+        onPointerDownOutside={(e) => { if (fiscalClientId) e.preventDefault() }}
+        onInteractOutside={(e) => { if (fiscalClientId) e.preventDefault() }}
+        onEscapeKeyDown={(e) => { if (fiscalClientId) e.preventDefault() }}
+      >
         <DialogHeader>
           <DialogTitle>Nuevo pedido</DialogTitle>
           <p className="text-sm text-[var(--text-secondary)]">
@@ -374,6 +393,14 @@ export function NewOrderModal({
           </button>
         </DialogFooter>
       </DialogContent>
+
+      {fiscalClientId && (
+        <FiscalDataModal
+          clientId={fiscalClientId}
+          onClose={() => setFiscalClientId(null)}
+          onSaved={() => { setFiscalClientId(null); submitOrder() }}
+        />
+      )}
     </Dialog>
   )
 }

@@ -2022,6 +2022,10 @@ model Invoice {
   irpfRate               Float?        @default(0)
   /// IRPF retention amount (subtotal * irpfRate / 100)
   irpfAmount             Float?        @default(0)
+  /// Número consumido pero no registrado (rechazo de validación Verifacti con
+  /// contador ya avanzado): se reutiliza al re-emitir para no dejar huecos
+  verifactuReservedNumber String?
+  verifactuReservedSeries String?
   /// Factura con recargo de equivalencia (cliente minorista en ese régimen)
   recargoEquivalencia    Boolean       @default(false)
   /// Suma de cuotas de recargo de equivalencia (incluida en total)
@@ -2883,6 +2887,8 @@ model WaitlistEntry {
   referrals    WaitlistEntry[] @relation("Referrals")
   /// Doble opt-in: solo los confirmados cuentan como referidos
   confirmedAt  DateTime?
+  /// Idempotencia del email de anuncio: nunca enviar dos veces (se marca al enviar o al programar)
+  announcementSentAt DateTime?
   createdAt    DateTime        @default(now())
 
   @@index([referredById])

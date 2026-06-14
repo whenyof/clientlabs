@@ -8,6 +8,7 @@ import {
 import { cn } from "@/lib/utils"
 import { BannerLegal } from "@/components/finance/BannerLegal"
 import { ImportarDocumento } from "@/components/finance/ImportarDocumento"
+import { FiscalDataModal } from "@/components/finance/FiscalDataModal"
 import { toast } from "sonner"
 
 type POStatus = "DRAFT" | "CONFIRMED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED"
@@ -77,6 +78,7 @@ function GenerateDocModal({
   )
   const [invoiceDocType, setInvoiceDocType] = useState<"F1" | "F2">("F1")
   const [loading, setLoading] = useState(false)
+  const [fiscalClientId, setFiscalClientId] = useState<string | null>(null)
 
   async function generate() {
     if (!docType) return
@@ -88,7 +90,12 @@ function GenerateDocModal({
         body: JSON.stringify({ docType, invoiceDocType }),
       })
       const data = await res.json()
-      if (!res.ok) { toast.error(data.error ?? "Error al generar"); return }
+      if (!res.ok) {
+        // F1 sin datos fiscales del cliente → formulario para completarlos y reintentar.
+        if (data.needsClientFiscalData && data.clientId) { setFiscalClientId(data.clientId); return }
+        toast.error(data.error ?? "Error al generar")
+        return
+      }
       toast.success(`${data.number} creado como borrador`)
       onDone()
     } catch { toast.error("Error de conexión") }
@@ -239,6 +246,13 @@ function GenerateDocModal({
           </button>
         </div>
       </div>
+      {fiscalClientId && (
+        <FiscalDataModal
+          clientId={fiscalClientId}
+          onClose={() => setFiscalClientId(null)}
+          onSaved={() => { setFiscalClientId(null); generate() }}
+        />
+      )}
     </div>
   )
 }

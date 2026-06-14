@@ -35,7 +35,6 @@ export async function POST(_: NextRequest, { params }: { params: Promise<{ id: s
 
     // Create DocumentView for tracking — degradación elegante si falla
     let docUrl = `${appUrl}/dashboard/finance/presupuestos`
-    let pixelUrl = ""
     try {
       const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
       const docView = await prisma.documentView.create({
@@ -50,7 +49,6 @@ export async function POST(_: NextRequest, { params }: { params: Promise<{ id: s
         select: { token: true }
       })
       docUrl = `${appUrl}/doc/${docView.token}`
-      pixelUrl = `${appUrl}/api/doc/${docView.token}/pixel`
     } catch (e) {
       console.error("[quote/send] DocumentView creation failed:", e)
     }
@@ -61,7 +59,6 @@ export async function POST(_: NextRequest, { params }: { params: Promise<{ id: s
       total: typeof quote.total === "number" ? quote.total : Number(quote.total),
       businessName,
       docUrl,
-      pixelUrl,
       expiresAt: quote.validUntil,
       senderEmail: quote.user.email,
     })

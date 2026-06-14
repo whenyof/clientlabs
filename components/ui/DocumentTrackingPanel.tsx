@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Send, Mail, Eye, CheckCircle, XCircle, Clock, Copy, Bell } from "lucide-react"
+import { Send, Eye, CheckCircle, XCircle, Clock, Copy, Bell } from "lucide-react"
 
 interface TrackingView {
   id: string
@@ -93,13 +93,6 @@ export function DocumentTrackingPanel({ documentId, type }: Props) {
       color: "#0F766E"
     },
     {
-      done: !!view.emailOpenedAt,
-      icon: <Mail size={14} />,
-      label: "Email abierto",
-      time: fmtDateTime(view.emailOpenedAt),
-      color: "#0F766E"
-    },
-    {
       done: !!view.docOpenedAt,
       icon: <Eye size={14} />,
       label: view.docOpenedAt
@@ -178,7 +171,7 @@ export function DocumentTrackingPanel({ documentId, type }: Props) {
         ))}
       </div>
 
-      {!view.emailOpenedAt && (
+      {!view.docOpenedAt && (
         <p style={{ fontSize: 12, color: "#7C8B96", marginTop: 14, paddingTop: 14, borderTop: "1px solid #F0F2F4" }}>
           Sin actividad tras {Math.floor((Date.now() - new Date(view.sentAt).getTime()) / 86400000)} días del envío
         </p>

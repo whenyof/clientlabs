@@ -6,6 +6,7 @@ import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { BannerLegal } from "@/components/finance/BannerLegal"
 import { ImportarDocumento } from "@/components/finance/ImportarDocumento"
+import { FiscalDataModal } from "@/components/finance/FiscalDataModal"
 import { NewDeliveryNoteModal } from "./NewDeliveryNoteModal"
 import { toast } from "sonner"
 
@@ -36,6 +37,7 @@ function ConvertToInvoiceModal({
 }) {
   const [invoiceType, setInvoiceType] = useState<"F1" | "F2">("F1")
   const [loading, setLoading] = useState(false)
+  const [fiscalClientId, setFiscalClientId] = useState<string | null>(null)
 
   async function handleConvert() {
     setLoading(true)
@@ -46,7 +48,12 @@ function ConvertToInvoiceModal({
         body: JSON.stringify({ invoiceDocType: invoiceType }),
       })
       const data = await res.json()
-      if (!res.ok) { toast.error(data.error ?? "Error al crear la factura"); return }
+      if (!res.ok) {
+        // F1 sin datos fiscales del cliente → formulario para completarlos y reintentar.
+        if (data.needsClientFiscalData && data.clientId) { setFiscalClientId(data.clientId); return }
+        toast.error(data.error ?? "Error al crear la factura")
+        return
+      }
       toast.success(`Factura ${data.number} creada como borrador`)
       onCreated({ id: data.id, number: data.number })
       onClose()
@@ -91,6 +98,13 @@ function ConvertToInvoiceModal({
           </button>
         </div>
       </div>
+      {fiscalClientId && (
+        <FiscalDataModal
+          clientId={fiscalClientId}
+          onClose={() => setFiscalClientId(null)}
+          onSaved={() => { setFiscalClientId(null); handleConvert() }}
+        />
+      )}
     </div>
   )
 }

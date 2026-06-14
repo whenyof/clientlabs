@@ -24,17 +24,20 @@ export type InvoiceBranding = {
   defaultTermsTemplate?: string | null
 }
 
+// Defaults SIN datos inventados: un NIF/empresa placeholder acabaría impreso en
+// facturas y burlaría el validador legal de emisión. Vacío = la emisión se
+// bloquea hasta que el usuario complete sus datos fiscales en Ajustes.
 const DEFAULT_BRANDING: InvoiceBranding = {
   logoUrl: null,
-  companyName: process.env.INVOICE_COMPANY_NAME ?? "Mi Empresa",
-  taxId: process.env.INVOICE_TAX_ID ?? "B12345678",
-  address: process.env.INVOICE_ADDRESS ?? "Calle Ejemplo 1, 28001 Madrid",
-  email: process.env.INVOICE_EMAIL ?? "facturacion@empresa.com",
+  companyName: process.env.INVOICE_COMPANY_NAME ?? "",
+  taxId: process.env.INVOICE_TAX_ID ?? "",
+  address: process.env.INVOICE_ADDRESS ?? "",
+  email: process.env.INVOICE_EMAIL ?? "",
   phone: process.env.INVOICE_PHONE ?? "",
   primaryColor: process.env.INVOICE_PRIMARY_COLOR ?? "#1e3a5f",
-  legalFooter:
-    process.env.INVOICE_LEGAL_FOOTER ??
-    "Factura exenta de IVA según art. 20 de la Ley 37/1992. Emitida con carácter de documento sustitutivo de factura.",
+  // Default neutro: nunca afirmar exención de IVA por defecto (sería falso en
+  // facturas con IVA). El usuario define su nota legal en Ajustes.
+  legalFooter: process.env.INVOICE_LEGAL_FOOTER ?? "",
   paymentConditions:
     process.env.INVOICE_PAYMENT_CONDITIONS ?? "Pago a 30 días desde fecha de emisión. Transferencia bancaria.",
 }

@@ -221,8 +221,8 @@ export function QuotesView({ clientId, initialOpenId, onNavigateToInvoices, onNa
                     <tr
                       key={q.id}
                       className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors"
-                      onClick={() => window.open(`/api/quotes/${q.id}/pdf`, "_blank")}
-                      style={{ cursor: "pointer" }}
+                      onClick={() => q.status !== "DRAFT" && setTrackingOpenId(trackingOpenId === q.id ? null : q.id)}
+                      style={{ cursor: q.status !== "DRAFT" ? "pointer" : "default" }}
                     >
                       <td className="py-3.5 px-4 font-mono text-[12px] text-slate-700 font-medium">{q.number}</td>
                       <td className="py-3.5 px-4 text-[13px] text-slate-900">{q.client.name ?? q.client.email ?? "—"}</td>

@@ -1,9 +1,11 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { FileText, ExternalLink, ClipboardList, Package, Receipt, ChevronDown, ChevronRight, Link2, Plus, X } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { FileText, ExternalLink, ClipboardList, Package, Receipt, ChevronDown, ChevronRight, Link2, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { FiscalDataModal } from "@/components/finance/FiscalDataModal"
 
 type DocInfo = { id: string; number: string; status: string; issueDate: string; total?: number | null }
 
@@ -60,6 +62,14 @@ const STATUS_ENDPOINT_BASE: Record<Exclude<DocType, "invoice">, string> = {
   quote: "/api/quotes",
   deliveryNote: "/api/delivery-notes",
   purchaseOrder: "/api/purchase-orders",
+}
+
+/** Sección de gestión a la que navega el click en la fila de cada tipo de documento. */
+const NAV_ROUTE: Record<DocType, string> = {
+  quote: "/dashboard/finance/presupuestos",
+  deliveryNote: "/dashboard/finance/albaranes",
+  purchaseOrder: "/dashboard/finance/pedidos",
+  invoice: "/dashboard/finance/facturas",
 }
 
 /** Allowed manual status transitions per document type (maps to existing endpoints).
@@ -139,9 +149,12 @@ function LinkedDocRow({ icon, label, doc, pdfHref, docType, onChanged }: {
   icon: React.ReactNode; label: string; doc: DocInfo; pdfHref: string
   docType?: DocType; onChanged?: () => void
 }) {
+  const router = useRouter()
   return (
     <div
-      onClick={() => window.open(pdfHref, "_blank")}
+      // Click en la fila → navegar a la sección de gestión de ese documento.
+      // El botón ↗ (con stopPropagation) sigue abriendo el preview del PDF.
+      onClick={() => { if (docType) router.push(NAV_ROUTE[docType]); else window.open(pdfHref, "_blank") }}
       className="flex items-center gap-2 pl-5 py-1.5 border-l-2 border-[var(--border-subtle)] ml-4 cursor-pointer hover:bg-[var(--bg-card)] rounded-r transition-colors"
     >
       <span className="text-[var(--text-secondary)] shrink-0">{icon}</span>
@@ -157,84 +170,6 @@ function LinkedDocRow({ icon, label, doc, pdfHref, docType, onChanged }: {
         className="p-1 rounded hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors shrink-0">
         <ExternalLink className="h-3 w-3" />
       </a>
-    </div>
-  )
-}
-
-/** Modal to fill the client's missing fiscal data so an F1 invoice can be generated. */
-function FiscalDataModal({ clientId, onClose, onSaved }: {
-  clientId: string; onClose: () => void; onSaved: () => void
-}) {
-  const [form, setForm] = useState({ legalName: "", taxId: "", address: "", postalCode: "", city: "", country: "" })
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-
-  useEffect(() => {
-    fetch(`/api/clients/${clientId}`)
-      .then(r => r.json())
-      .then(c => setForm({
-        legalName: c.legalName ?? "", taxId: c.taxId ?? "", address: c.address ?? "",
-        postalCode: c.postalCode ?? "", city: c.city ?? "", country: c.country ?? "",
-      }))
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [clientId])
-
-  async function save() {
-    setSaving(true)
-    try {
-      const res = await fetch(`/api/clients/${clientId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      })
-      if (!res.ok) { const d = await res.json().catch(() => ({})); toast.error(d.error ?? "No se pudo guardar"); return }
-      onSaved()
-    } catch { toast.error("Error de conexión") }
-    finally { setSaving(false) }
-  }
-
-  const fields: { key: keyof typeof form; label: string }[] = [
-    { key: "legalName", label: "Razón social / Nombre fiscal" },
-    { key: "taxId", label: "NIF / CIF" },
-    { key: "address", label: "Dirección fiscal" },
-    { key: "postalCode", label: "Código postal" },
-    { key: "city", label: "Ciudad" },
-    { key: "country", label: "País" },
-  ]
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-          <div>
-            <h2 className="text-[15px] font-bold text-slate-900">Completar datos fiscales del cliente</h2>
-            <p className="text-[12px] text-slate-400 mt-0.5">Necesarios para una factura completa (F1).</p>
-          </div>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-slate-100"><X className="h-4 w-4 text-slate-400" /></button>
-        </div>
-        <div className="p-5 space-y-3 max-h-[60vh] overflow-y-auto">
-          {loading ? (
-            <p className="text-[13px] text-slate-400 animate-pulse py-4 text-center">Cargando...</p>
-          ) : fields.map(f => (
-            <div key={f.key}>
-              <label className="block text-[11px] font-medium text-slate-500 mb-1">{f.label}</label>
-              <input
-                value={form[f.key]}
-                onChange={e => setForm(prev => ({ ...prev, [f.key]: e.target.value }))}
-                className="w-full text-[13px] border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30"
-              />
-            </div>
-          ))}
-        </div>
-        <div className="px-5 pb-5 flex justify-end gap-2">
-          <button onClick={onClose} className="px-4 py-2 rounded-lg border border-slate-200 text-[13px] text-slate-600 hover:bg-slate-50">Cancelar</button>
-          <button onClick={save} disabled={saving || loading} className="px-5 py-2 rounded-lg bg-[#0F766E] text-white text-[13px] font-medium hover:bg-[#0E665F] disabled:opacity-50">
-            {saving ? "Guardando..." : "Guardar y continuar"}
-          </button>
-        </div>
-      </div>
     </div>
   )
 }
@@ -478,7 +413,7 @@ export function ClientDocumentsList({ clientId }: Props) {
                 }
                 {/* Factura */}
                 {g.invoice
-                  ? <LinkedDocRow icon={<Receipt className="h-3.5 w-3.5 text-[#0F766E]" />} label="Factura" doc={g.invoice} pdfHref={`/api/invoicing/${g.invoice.id}/pdf`} />
+                  ? <LinkedDocRow icon={<Receipt className="h-3.5 w-3.5 text-[#0F766E]" />} label="Factura" doc={g.invoice} pdfHref={`/api/invoicing/${g.invoice.id}/pdf`} docType="invoice" />
                   : <GenerateDocRow orderId={g.orderId} clientId={clientId} docType="invoice" label="Factura" icon={<Receipt className="h-3.5 w-3.5" />} onGenerated={load} />
                 }
               </div>

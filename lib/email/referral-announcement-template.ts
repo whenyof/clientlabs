@@ -347,6 +347,7 @@ export function buildReferralAnnouncementEmail(opts: {
               <p style="margin:0 0 12px 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; line-height:17px; color:#93a39c;">
                 Recibiste este email porque est&aacute;s en la lista de acceso anticipado de ClientLabs.
                 &nbsp;<a href="${unsubscribeUrl}" style="color:#7d958a; text-decoration:underline;">Darme de baja</a>
+                &nbsp;o responde a este email con la palabra BAJA.
               </p>
               <p style="margin:0 0 36px 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; line-height:17px; color:#a9b6b0;">
                 &copy; 2026 ClientLabs &middot; <a href="mailto:hola@clientlabs.io" style="color:#a9b6b0;">hola@clientlabs.io</a>

@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import * as invoiceService from "@/modules/invoicing/services/invoice.service"
+import { getF1ClientFiscalBlock } from "@/lib/clients/calculateFiscalCompleteness"
 
 /**
  * POST /api/delivery-notes/[id]/convert-invoice
@@ -41,6 +42,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       address: true, city: true, postalCode: true, country: true,
     },
   })
+
+  // F1 (completa) exige datos fiscales del cliente; F2 (simplificada) no. Se comprueba
+  // ANTES de crear nada para no dejar la factura borrador huérfana ni un F1 inválido.
+  if (invoiceDocType !== "F2") {
+    const block = getF1ClientFiscalBlock(client)
+    if (block) return NextResponse.json({ error: block, needsClientFiscalData: true, clientId: note.clientId }, { status: 400 })
+  }
 
   const issueDate = new Date()
   const dueDate = new Date(issueDate)

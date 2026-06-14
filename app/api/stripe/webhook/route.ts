@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { Redis } from "@upstash/redis"
 import { stripe, getPlanFromPriceId } from "@/lib/stripe"
 import { prisma, safePrismaQuery } from "@/lib/prisma"
 import { sendPaymentFailedEmail, sendSubscriptionActivatedEmail, sendSubscriptionCancelledEmail } from "@/lib/email-service"
@@ -6,6 +7,36 @@ import type Stripe from "stripe"
 
 export const maxDuration = 30
 export const runtime = "nodejs"
+
+const redis = Redis.fromEnv()
+const EVENT_DEDUPE_TTL_SECONDS = 24 * 60 * 60
+
+/**
+ * Idempotencia: Stripe reentrega eventos (timeouts, reintentos). SET NX marca
+ * el event.id ANTES de procesar; si ya existe → ya procesado (o en proceso).
+ * Crítico para efectos no idempotentes como extraSeats { increment }.
+ */
+async function claimEvent(eventId: string): Promise<boolean> {
+  try {
+    const result = await redis.set(`stripe:event:${eventId}`, "1", {
+      nx: true,
+      ex: EVENT_DEDUPE_TTL_SECONDS,
+    })
+    return result === "OK"
+  } catch (err) {
+    // Redis caído: mejor procesar (riesgo de duplicado puntual) que perder el evento
+    console.error("[Stripe webhook] Redis dedupe error:", err instanceof Error ? err.message : err)
+    return true
+  }
+}
+
+async function releaseEvent(eventId: string): Promise<void> {
+  try {
+    await redis.del(`stripe:event:${eventId}`)
+  } catch {
+    // si no se puede liberar, el TTL de 24h lo limpia; Stripe reintenta y verá la clave
+  }
+}
 
 // Stripe requires the raw body to verify the signature.
 export async function POST(req: NextRequest) {
@@ -24,6 +55,12 @@ export async function POST(req: NextRequest) {
     const msg = err instanceof Error ? err.message : String(err)
     console.error("[Stripe webhook] Signature verification failed:", msg)
     return NextResponse.json({ error: `Webhook signature verification failed: ${msg}` }, { status: 400 })
+  }
+
+  // Dedupe ANTES de cualquier efecto: evento repetido → 200 sin reprocesar
+  const isFirstDelivery = await claimEvent(event.id)
+  if (!isFirstDelivery) {
+    return NextResponse.json({ received: true, duplicate: true })
   }
 
   try {
@@ -265,6 +302,8 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     const errMsg = err instanceof Error ? err.stack ?? err.message : String(err)
     console.error("[Stripe webhook] Handler error:", errMsg)
+    // Liberar la clave: el 500 hará que Stripe reintente y debe poder reprocesarse
+    await releaseEvent(event.id)
     return NextResponse.json({ error: "Internal error" }, { status: 500 })
   }
 

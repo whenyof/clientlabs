@@ -351,6 +351,8 @@ export interface VerifactuSendResult {
   sent: boolean
   skipped?: string
   error?: string
+  /** "validation" = rechazo 400/422 (el usuario debe corregir); "transient" = red/5xx (reintentar) */
+  errorType?: "validation" | "transient"
   uuid?: string
   estado?: string
 }
@@ -486,7 +488,13 @@ export async function sendInvoiceToVerifactu(invoiceId: string, userId: string):
     return { sent: true, uuid: result.uuid, estado: result.estado }
   } catch (err) {
     console.error("[Verifactu] Error al enviar factura:", err instanceof Error ? err.message : err)
-    return { sent: false, error: err instanceof Error ? err.message : String(err) }
+    const { isVerifactuValidationError } = await import("@/lib/verifactu")
+    return {
+      sent: false,
+      error: err instanceof Error ? err.message : String(err),
+      // Solo bloquea la certeza de datos inválidos; ante la duda → transitorio
+      errorType: isVerifactuValidationError(err) ? "validation" : "transient",
+    }
   }
 }
 
@@ -558,13 +566,22 @@ export async function issueInvoice(invoiceId: string, userId: string): Promise<I
   const issuedAt = new Date()
   let number: string
   let sequenceUsed: number
-  try {
-    const result = await engine.getNextIssuedInvoiceNumber(userId, inv.series, issuedAt)
-    number = result.number
-    sequenceUsed = result.sequenceUsed
-  } catch (e) {
-    console.error("Invoice number generation failed:", e)
-    return { success: false, validationErrors: ["No se pudo asignar el número de factura. Intente de nuevo."] }
+  // Número reservado de un rechazo Verifacti anterior: se reutiliza (sin huecos)
+  const reservedNumber = (inv as { verifactuReservedNumber?: string | null }).verifactuReservedNumber
+  const reservedSeries = (inv as { verifactuReservedSeries?: string | null }).verifactuReservedSeries
+  const usingReservedNumber = Boolean(reservedNumber && reservedSeries === inv.series)
+  if (usingReservedNumber && reservedNumber) {
+    number = reservedNumber
+    sequenceUsed = Number(reservedNumber.split("-")[1] ?? 0)
+  } else {
+    try {
+      const result = await engine.getNextIssuedInvoiceNumber(userId, inv.series, issuedAt)
+      number = result.number
+      sequenceUsed = result.sequenceUsed
+    } catch (e) {
+      console.error("Invoice number generation failed:", e)
+      return { success: false, validationErrors: ["No se pudo asignar el número de factura. Intente de nuevo."] }
+    }
   }
   const issuedCompanySnapshot = {
     companyName: branding.companyName,
@@ -627,8 +644,50 @@ export async function issueInvoice(invoiceId: string, userId: string): Promise<I
     issuedTotalsSnapshot: issuedTotalsSnapshot as Prisma.InputJsonValue,
   })
 
-  // Envío a Verifactu — el helper nunca lanza (errores nunca fallan la emisión)
-  await sendInvoiceToVerifactu(invoiceId, userId)
+  // Envío a Verifactu — el helper nunca lanza. Un rechazo de VALIDACIÓN
+  // (400/422: datos inválidos) bloquea la emisión; lo transitorio no.
+  const verifactu = await sendInvoiceToVerifactu(invoiceId, userId)
+
+  if (verifactu.errorType === "validation") {
+    // Revertir la emisión SIN dejar huecos de numeración:
+    // 1) intentar devolver el número al contador (CAS — aplica si nadie consumió después)
+    // 2) si no aplica, reservar el número en la factura para reutilizarlo al re-emitir
+    let rolledBack = false
+    if (!usingReservedNumber) {
+      const seriesKey = `${inv.series}-${issuedAt.getFullYear()}`
+      rolledBack = await repo.rollbackConsumedNumber(userId, seriesKey, sequenceUsed)
+    }
+    await repo.revertIssue(invoiceId, userId, {
+      draftPlaceholder: engine.DRAFT_NUMBER_PLACEHOLDER,
+      reservedNumber: rolledBack ? null : number,
+      reservedSeries: rolledBack ? null : inv.series,
+    })
+    await repo.addEvent(invoiceId, "VERIFACTU_REJECTED", {
+      at: issuedAt.toISOString(),
+      message: verifactu.error ?? "Rechazo de validación",
+    })
+    return {
+      success: false,
+      validationErrors: [
+        `Verifacti rechazó la factura: ${verifactu.error ?? "datos inválidos"}. Corrige los datos y vuelve a emitir.`,
+      ],
+    }
+  }
+
+  if (verifactu.errorType === "transient") {
+    // Emitida pero sin registrar: estado "Error" → badge "Reintentando" + botón de reintento
+    await prisma.invoice.update({
+      where: { id: invoiceId },
+      data: { verifactuStatus: "Error" },
+    }).catch(() => {})
+  }
+
+  if (usingReservedNumber) {
+    await prisma.invoice.update({
+      where: { id: invoiceId },
+      data: { verifactuReservedNumber: null, verifactuReservedSeries: null },
+    }).catch(() => {})
+  }
 
   await repo.addEvent(invoiceId, "SENT", {
     at: issuedAt.toISOString(),
@@ -711,6 +770,18 @@ export async function updateDraftInvoice(
  * Delete a draft invoice. Only DRAFT can be deleted.
  */
 export async function deleteDraftInvoice(invoiceId: string, userId: string): Promise<boolean> {
+  // Un borrador con número reservado (rechazo Verifacti pendiente de corregir)
+  // no puede borrarse: dejaría un hueco permanente en la serie. Corregir y
+  // re-emitir, o intentar liberar el número al contador si nadie consumió después.
+  const inv = await repo.findById(invoiceId, userId)
+  const reserved = (inv as { verifactuReservedNumber?: string | null } | null)?.verifactuReservedNumber
+  const reservedSeries = (inv as { verifactuReservedSeries?: string | null } | null)?.verifactuReservedSeries
+  if (inv && reserved && reservedSeries) {
+    const seq = Number(reserved.split("-")[1] ?? 0)
+    const year = Number(reserved.split("-")[0] ?? new Date().getFullYear())
+    const released = await repo.rollbackConsumedNumber(userId, `${reservedSeries}-${year}`, seq)
+    if (!released) return false // no se puede liberar el número → no se puede borrar
+  }
   return repo.deleteDraft(invoiceId, userId)
 }
 
@@ -865,6 +936,31 @@ export async function registerPayment(
   if (result.ok && inv?.clientId) {
     const { recalculate } = await import("../behaviour/payment-behaviour.service")
     recalculate(inv.clientId).catch((e) => console.error("Payment profile recalc after payment:", e))
+  }
+  // Notificación "factura cobrada" al dueño cuando el pago la deja PAGADA.
+  // Best-effort: su fallo NUNCA rompe el registro del pago.
+  if (result.ok && result.newStatus === "PAID" && inv) {
+    const notify = (async () => {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { email: true, name: true },
+      })
+      if (!user?.email) return
+      const { sendInvoicePaidEmail } = await import("@/lib/email-service")
+      await sendInvoicePaidEmail(
+        user.email,
+        user.name ?? "Usuario",
+        inv.number,
+        inv.Client?.name ?? inv.Client?.email ?? "Cliente",
+        inv.total
+      )
+    })().catch((e) => console.error("Invoice paid email error:", e))
+    try {
+      const { waitUntil } = await import("@vercel/functions")
+      waitUntil(notify)
+    } catch {
+      // fuera del runtime de Vercel (tests/worker): la promesa flotante basta
+    }
   }
   return { ok: result.ok, newStatus: result.newStatus }
 }

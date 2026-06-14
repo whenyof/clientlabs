@@ -970,11 +970,10 @@ export function invoiceToClientEmail(params: {
   total: number
   businessName: string
   docUrl: string
-  pixelUrl: string
   dueDate?: string | null
   senderEmail?: string | null
 }): string {
-  const { clientName, invoiceNumber, total, businessName, docUrl, pixelUrl, dueDate, senderEmail } = params
+  const { clientName, invoiceNumber, total, businessName, docUrl, dueDate, senderEmail } = params
   const totalFmt = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(total)
   const content = `
     <p style="font-family:${FONT};font-size:16px;color:${C.grayText};line-height:1.6;margin:0 0 8px">Hola <strong>${clientName}</strong>,</p>
@@ -1004,7 +1003,6 @@ export function invoiceToClientEmail(params: {
     ${primaryBtn("Ver factura →", docUrl)}
     ${divider()}
     ${smallP(`También puedes descargar el PDF desde el enlace anterior.${senderEmail ? `<br>Si tienes alguna pregunta, contacta con <strong>${businessName}</strong> en <a href="mailto:${senderEmail}" target="_blank" rel="noopener noreferrer" style="color:${C.teal};text-decoration:none">${senderEmail}</a>.` : ""}`)}
-    <img src="${pixelUrl}" width="1" height="1" alt="" style="display:block;width:1px;height:1px;overflow:hidden;border:0;margin:0;padding:0">
   `
   return bizShell({ businessName, badgeText: "Factura", badgeBg: C.grayBg, badgeColor: C.grayLight, topAccent: C.green, content })
 }
@@ -1016,11 +1014,10 @@ export function quoteToClientEmail(params: {
   total: number
   businessName: string
   docUrl: string
-  pixelUrl: string
   expiresAt?: Date | string | null
   senderEmail?: string | null
 }): string {
-  const { clientName, quoteNumber, total, businessName, docUrl, pixelUrl, expiresAt, senderEmail } = params
+  const { clientName, quoteNumber, total, businessName, docUrl, expiresAt, senderEmail } = params
   const totalFmt = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(total)
   const expiresFmt = expiresAt
     ? new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "long", year: "numeric" }).format(new Date(expiresAt))
@@ -1053,7 +1050,6 @@ export function quoteToClientEmail(params: {
     ${primaryBtn("Ver y responder presupuesto →", docUrl)}
     ${divider()}
     ${smallP(`Puedes aceptar o rechazar el presupuesto directamente desde el enlace anterior.${senderEmail ? `<br>¿Tienes preguntas? Escribe a <a href="mailto:${senderEmail}" target="_blank" rel="noopener noreferrer" style="color:${C.teal};text-decoration:none">${senderEmail}</a>.` : ""}`)}
-    <img src="${pixelUrl}" width="1" height="1" alt="" style="display:block;width:1px;height:1px;overflow:hidden;border:0;margin:0;padding:0">
   `
   return bizShell({ businessName, badgeText: "Presupuesto", badgeBg: C.greenLight, badgeColor: C.teal, topAccent: C.green, content })
 }

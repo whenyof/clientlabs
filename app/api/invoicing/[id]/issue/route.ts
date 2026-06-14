@@ -17,7 +17,10 @@ export async function POST(
     const result = await invoiceService.issueInvoice(id, session.user.id)
     if (!result.success) {
       return NextResponse.json(
-        { error: "No se puede emitir: datos fiscales incompletos", validationErrors: result.validationErrors },
+        {
+          error: result.validationErrors?.[0] ?? "No se puede emitir la factura",
+          validationErrors: result.validationErrors,
+        },
         { status: 400 }
       )
     }

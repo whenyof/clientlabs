@@ -55,6 +55,8 @@ function eventTypeToLabel(
       return meta?.originalNumber != null ? `Rectifica factura Nº ${meta.originalNumber}` : "Rectifica factura"
     case "RECTIFICATION_ISSUED":
       return meta?.rectifyingNumber != null ? `Generada rectificativa Nº ${meta.rectifyingNumber}` : "Generada rectificativa"
+    case "VERIFACTU_REJECTED":
+      return "Emisión revertida — Verifacti rechazó los datos"
     default: return type
   }
 }

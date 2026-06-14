@@ -447,6 +447,49 @@ export async function consumeNextNumber(userId: string, seriesName: string): Pro
   })
 }
 
+/**
+ * Devuelve un número consumido al contador (CAS): solo aplica si NADIE consumió
+ * otro después (nextNumber sigue siendo sequenceUsed+1). Si aplica → no queda
+ * rastro ni hueco. Si no aplica → false y el caller debe reservar el número.
+ */
+export async function rollbackConsumedNumber(
+  userId: string,
+  seriesName: string,
+  sequenceUsed: number
+): Promise<boolean> {
+  const res = await prisma.invoiceSeries.updateMany({
+    where: { userId, name: seriesName, nextNumber: sequenceUsed + 1 },
+    data: { nextNumber: sequenceUsed },
+  })
+  return res.count > 0
+}
+
+/**
+ * Revierte una emisión rechazada por Verifacti (validación): la factura vuelve
+ * a DRAFT. NO toca issuedClientSnapshot (contiene los datos de facturación del
+ * borrador). Si reservedNumber != null, el número queda reservado en la factura
+ * para reutilizarse al re-emitir (evita huecos cuando el rollback CAS no aplicó).
+ */
+export async function revertIssue(
+  id: string,
+  userId: string,
+  opts: { draftPlaceholder: string; reservedNumber: string | null; reservedSeries: string | null }
+): Promise<void> {
+  await prisma.invoice.updateMany({
+    where: { id, userId },
+    data: {
+      number: opts.draftPlaceholder,
+      status: "DRAFT",
+      issuedAt: null,
+      issuedCompanySnapshot: Prisma.DbNull,
+      issuedItemsSnapshot: Prisma.DbNull,
+      issuedTotalsSnapshot: Prisma.DbNull,
+      verifactuReservedNumber: opts.reservedNumber,
+      verifactuReservedSeries: opts.reservedSeries,
+    },
+  })
+}
+
 export type UpdateLinkFieldsPayload = {
   clientId?: string | null
   saleId?: string | null

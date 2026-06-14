@@ -1,4 +1,7 @@
 import type { Metadata } from "next"
+import { Navbar } from "@/components/landing/navbar"
+import { Footer } from "@/components/landing/footer"
+import { ContactForm } from "./ContactForm"
 
 export const metadata: Metadata = {
   title: "Contacto — ClientLabs | Soporte para autónomos y pymes",
@@ -12,12 +15,27 @@ export const metadata: Metadata = {
 }
 
 export default function ContactPage() {
- return (
- <div className="min-h-screen flex items-center justify-center">
- <div className="text-center">
- <h1 className="text-2xl font-bold text-gray-900">Página de Contacto</h1>
- <p className="text-gray-600 mt-2">Próximamente...</p>
- </div>
- </div>
- )
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      <Navbar />
+      <main className="flex-1 px-4 py-16 sm:py-24">
+        <div className="max-w-xl mx-auto">
+          <header className="text-center mb-10">
+            <p className="text-[12px] font-semibold text-[#0F766E] uppercase tracking-widest mb-3">
+              Contacto
+            </p>
+            <h1 className="text-[28px] sm:text-[34px] font-bold text-slate-900 tracking-tight mb-3">
+              Hablemos de tu negocio
+            </h1>
+            <p className="text-[15px] text-slate-500 leading-relaxed">
+              ¿Dudas sobre planes, facturación con Verifactu o cómo migrar tus datos?
+              Escríbenos y te respondemos en menos de 24 horas laborables. En español, sin bots.
+            </p>
+          </header>
+          <ContactForm />
+        </div>
+      </main>
+      <Footer />
+    </div>
+  )
 }

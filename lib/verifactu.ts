@@ -1,5 +1,7 @@
 const VERIFACTI_API_URL = process.env.VERIFACTI_API_URL || "https://api.verifacti.com"
 const VERIFACTI_ACCOUNT_KEY = process.env.VERIFACTI_API_KEY
+/** Timeout de TODAS las llamadas a Verifacti: nunca colgar la emisión hasta el maxDuration */
+const VERIFACTI_TIMEOUT_MS = 15_000
 
 // ══════════════════════════════════════
 // TYPES
@@ -69,6 +71,7 @@ export async function createVerifactuNif(nif: string, nombre: string): Promise<C
   const res = await fetch(`${VERIFACTI_API_URL}/nifs`, {
     method: "POST",
     headers: { "Authorization": `Bearer ${VERIFACTI_ACCOUNT_KEY}`, "Content-Type": "application/json" },
+    signal: AbortSignal.timeout(VERIFACTI_TIMEOUT_MS),
     body: JSON.stringify({ nif, nombre }),
   })
   const json = await res.json()
@@ -80,23 +83,61 @@ export async function createVerifactuNif(nif: string, nombre: string): Promise<C
 // FACTURACIÓN (NIF key)
 // ══════════════════════════════════════
 
+/**
+ * Error de la API de Verifacti con el HTTP status, para distinguir rechazos
+ * de VALIDACIÓN (400/422: datos inválidos, NIF no censado — el usuario debe
+ * corregir) de errores TRANSITORIOS (red, 5xx, Verifacti caído — reintentar).
+ */
+export class VerifactuApiError extends Error {
+  readonly status: number
+  constructor(message: string, status: number) {
+    super(message)
+    this.name = "VerifactuApiError"
+    this.status = status
+  }
+  get isValidation(): boolean {
+    return this.status === 400 || this.status === 422
+  }
+}
+
+/** True solo si el error es un rechazo de validación confirmado (400/422). Ante la duda → transitorio. */
+export function isVerifactuValidationError(err: unknown): boolean {
+  return err instanceof VerifactuApiError && err.isValidation
+}
+
 export async function createVerifactuInvoice(
   nifApiKey: string,
   data: VerifactuCreateData,
   idempotencyKey?: string
 ): Promise<VerifactuResponse> {
-  const res = await fetch(`${VERIFACTI_API_URL}/verifactu/create`, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${nifApiKey}`,
-      "Content-Type": "application/json",
-      ...(idempotencyKey && { "Idempotency-Key": idempotencyKey }),
-    },
-    body: JSON.stringify(data),
-  })
-  const json = await res.json()
-  if (json.error) throw new Error(json.error)
-  return json as VerifactuResponse
+  let res: Response
+  try {
+    res = await fetch(`${VERIFACTI_API_URL}/verifactu/create`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${nifApiKey}`,
+        "Content-Type": "application/json",
+        ...(idempotencyKey && { "Idempotency-Key": idempotencyKey }),
+      },
+      signal: AbortSignal.timeout(VERIFACTI_TIMEOUT_MS),
+      body: JSON.stringify(data),
+    })
+  } catch (err) {
+    // Timeout/red: SIEMPRE transitorio (status 503 ≠ 400/422), nunca validación
+    if (err instanceof Error && (err.name === "TimeoutError" || err.name === "AbortError")) {
+      throw new VerifactuApiError(`Verifacti no responde (timeout de ${VERIFACTI_TIMEOUT_MS / 1000}s)`, 503)
+    }
+    throw new VerifactuApiError(
+      `No se pudo conectar con Verifacti: ${err instanceof Error ? err.message : String(err)}`,
+      503
+    )
+  }
+  const json = (await res.json().catch(() => null)) as (VerifactuResponse & { error?: string }) | null
+  if (!res.ok || json?.error) {
+    throw new VerifactuApiError(json?.error ?? `Verifacti HTTP ${res.status}`, res.status)
+  }
+  if (!json) throw new VerifactuApiError("Respuesta vacía de Verifacti", res.status)
+  return json
 }
 
 export interface VerifactuStatusByNumberResponse {
@@ -119,6 +160,7 @@ export async function getVerifactuStatusByNumber(
   const res = await fetch(`${VERIFACTI_API_URL}/verifactu/status`, {
     method: "POST",
     headers: { "Authorization": `Bearer ${nifApiKey}`, "Content-Type": "application/json" },
+    signal: AbortSignal.timeout(VERIFACTI_TIMEOUT_MS),
     body: JSON.stringify({ serie, numero, fecha_expedicion: fechaExpedicion }),
   })
   return (await res.json()) as VerifactuStatusByNumberResponse
@@ -127,6 +169,7 @@ export async function getVerifactuStatusByNumber(
 export async function getVerifactuStatus(nifApiKey: string, uuid: string): Promise<VerifactuStatusResponse> {
   const res = await fetch(`${VERIFACTI_API_URL}/verifactu/status?uuid=${uuid}`, {
     headers: { "Authorization": `Bearer ${nifApiKey}`, "Content-Type": "application/json" },
+    signal: AbortSignal.timeout(VERIFACTI_TIMEOUT_MS),
   })
   return await res.json()
 }
@@ -140,6 +183,7 @@ export async function cancelVerifactuInvoice(
   const res = await fetch(`${VERIFACTI_API_URL}/verifactu/cancel`, {
     method: "POST",
     headers: { "Authorization": `Bearer ${nifApiKey}`, "Content-Type": "application/json" },
+    signal: AbortSignal.timeout(VERIFACTI_TIMEOUT_MS),
     body: JSON.stringify({ serie, numero, fecha_expedicion: fecha }),
   })
   return await res.json()

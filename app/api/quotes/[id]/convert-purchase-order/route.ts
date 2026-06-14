@@ -3,16 +3,10 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { getNextDocumentNumber } from "@/lib/counters/document-counter"
 
-async function nextPONumber(userId: string): Promise<string> {
-  const year = new Date().getFullYear()
-  const last = await prisma.purchaseOrder.findFirst({
-    where: { userId, number: { startsWith: `PED-${year}-` } },
-    orderBy: { createdAt: "desc" },
-    select: { number: true },
-  })
-  const seq = last ? parseInt(last.number.split("-")[2] ?? "0") + 1 : 1
-  return `PED-${year}-${String(seq).padStart(3, "0")}`
+function nextPONumber(userId: string): Promise<string> {
+  return getNextDocumentNumber(userId, "PED")
 }
 
 export async function POST(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {

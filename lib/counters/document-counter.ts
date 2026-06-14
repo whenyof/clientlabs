@@ -9,7 +9,7 @@ import { prisma } from "@/lib/prisma"
 export type DocumentType = "ALB" | "P" | "PED"
 
 const DOCUMENT_CONFIG: Record<DocumentType, { prefix: string; seriesName: string }> = {
-  ALB: { prefix: "A",   seriesName: "ALBARAN" },
+  ALB: { prefix: "ALB", seriesName: "ALBARAN" },
   P:   { prefix: "P",   seriesName: "PRESUPUESTO" },
   PED: { prefix: "PED", seriesName: "PEDIDO" },
 }

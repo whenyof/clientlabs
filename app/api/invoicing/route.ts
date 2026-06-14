@@ -122,6 +122,19 @@ export async function GET(request: NextRequest) {
     })
     const sorted = sortByDuePriority(withDue)
 
+    // Nº de pedido asociado a cada factura de cliente (PurchaseOrder.convertedToInvoiceId).
+    const customerInvoiceIds = sorted.filter((i) => i.type === "CUSTOMER").map((i) => i.id)
+    const linkedOrders = customerInvoiceIds.length
+      ? await prisma.purchaseOrder.findMany({
+          where: { userId, convertedToInvoiceId: { in: customerInvoiceIds } },
+          select: { number: true, convertedToInvoiceId: true },
+        })
+      : []
+    const orderNumberByInvoice = Object.fromEntries(
+      linkedOrders.map((o) => [o.convertedToInvoiceId, o.number]),
+    )
+    const sortedWithOrder = sorted.map((i) => ({ ...i, orderNumber: orderNumberByInvoice[i.id] ?? null }))
+
     let amountOverdue = 0
     let amountDueToday = 0
     let amountDueSoon = 0
@@ -150,7 +163,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      invoices: sorted,
+      invoices: sortedWithOrder,
       dueSummary: {
         amountOverdue,
         amountDueToday,

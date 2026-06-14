@@ -54,13 +54,16 @@ export async function GET(req: NextRequest) {
     },
     include: {
       client: { select: { id: true, name: true, email: true } },
-      quote: { select: { id: true, number: true } },
+      quote: { select: { id: true, number: true, convertedToInvoiceId: true } },
       items: true,
     },
     orderBy: { createdAt: "desc" },
   })
 
-  const invoiceIds = notes.map(n => n.convertedToInvoiceId).filter(Boolean) as string[]
+  // Factura vinculada: directa (convertedToInvoiceId) o la del presupuesto del grupo.
+  const linkedInvoiceIdOf = (n: (typeof notes)[number]) =>
+    n.convertedToInvoiceId ?? n.quote?.convertedToInvoiceId ?? null
+  const invoiceIds = notes.map(linkedInvoiceIdOf).filter(Boolean) as string[]
   const linkedInvoices = invoiceIds.length > 0
     ? await prisma.invoice.findMany({
         where: { id: { in: invoiceIds }, userId: session.user.id },
@@ -69,10 +72,10 @@ export async function GET(req: NextRequest) {
     : []
   const invoiceMap = Object.fromEntries(linkedInvoices.map(i => [i.id, i]))
 
-  const notesWithLinks = notes.map(n => ({
-    ...n,
-    linkedInvoice: n.convertedToInvoiceId ? (invoiceMap[n.convertedToInvoiceId] ?? null) : null,
-  }))
+  const notesWithLinks = notes.map(n => {
+    const invId = linkedInvoiceIdOf(n)
+    return { ...n, linkedInvoice: invId ? (invoiceMap[invId] ?? null) : null }
+  })
 
   return NextResponse.json({ success: true, notes: notesWithLinks })
 }

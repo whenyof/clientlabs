@@ -108,7 +108,7 @@ function InvoiceRowComponent({ invoice, isSelected, actions }: InvoiceRowProps) 
   const handleRowClick = () => actions.onView()
 
   const iconButtonClass =
-    "h-8 w-8 p-0 text-slate-400 hover:text-slate-600 hover:bg-slate-100 shrink-0"
+    "qtip h-8 w-8 p-0 text-slate-400 hover:text-slate-600 hover:bg-slate-100 shrink-0"
 
   const handlePdf = (e: React.MouseEvent) => { e.stopPropagation(); actions.onDownloadPdf(invoice.id) }
   const handleDelete = (e: React.MouseEvent) => { e.stopPropagation(); actions.onDelete(invoice.id) }
@@ -162,6 +162,9 @@ function InvoiceRowComponent({ invoice, isSelected, actions }: InvoiceRowProps) 
       </td>
       <td className="py-3.5 px-4 font-mono text-[12px] text-slate-700 font-medium whitespace-nowrap">
         {isDraft ? invoiceStatusLabel("DRAFT") : invoice.number}
+      </td>
+      <td className="py-3.5 px-4 font-mono text-[11px] text-slate-400 whitespace-nowrap">
+        {invoice.orderNumber ?? "—"}
       </td>
       <td className="py-3.5 px-4 text-[13px] text-slate-900 max-w-[180px] truncate" title={contactName}>
         {contactName}
@@ -217,7 +220,7 @@ function InvoiceRowComponent({ invoice, isSelected, actions }: InvoiceRowProps) 
             variant="ghost"
             size="sm"
             className={iconButtonClass}
-            title="Ver factura verificada"
+            data-tip="Ver factura verificada"
             onClick={handlePreview}
           >
             <Eye className="h-4 w-4" />
@@ -226,7 +229,7 @@ function InvoiceRowComponent({ invoice, isSelected, actions }: InvoiceRowProps) 
             variant="ghost"
             size="sm"
             className={iconButtonClass}
-            title="Descargar PDF"
+            data-tip="Descargar PDF"
             onClick={handlePdf}
           >
             <ArrowDownToLine className="h-4 w-4" />
@@ -235,8 +238,8 @@ function InvoiceRowComponent({ invoice, isSelected, actions }: InvoiceRowProps) 
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 shrink-0"
-              title="Eliminar borrador"
+              className="qtip h-8 w-8 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 shrink-0"
+              data-tip="Eliminar borrador"
               onClick={handleDelete}
             >
               <Trash2 className="h-4 w-4" />

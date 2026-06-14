@@ -51,6 +51,9 @@ export type InvoiceListItem = {
   pdfUrl?: string | null
   pdfGeneratedAt?: string | null
 
+  /** Nº del pedido (PurchaseOrder) asociado, si la factura proviene de uno. */
+  orderNumber?: string | null
+
   createdAt: string
   updatedAt: string
 

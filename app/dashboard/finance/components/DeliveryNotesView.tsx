@@ -261,18 +261,23 @@ export function DeliveryNotesView({ clientId, onNavigateToInvoices }: Props) {
               </thead>
               <tbody>
                 {notes.map((n) => (
-                  <tr key={n.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                  <tr
+                    key={n.id}
+                    onClick={() => window.open(`/api/delivery-notes/${n.id}/pdf`, "_blank")}
+                    style={{ cursor: "pointer" }}
+                    className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors"
+                  >
                     <td className="py-3.5 px-4 font-mono text-[12px] text-slate-700 font-medium">{n.number}</td>
                     <td className="py-3.5 px-4 text-[13px] text-slate-900">{n.client.name ?? n.client.email ?? "—"}</td>
                     <td className="py-3.5 px-4 text-[12px] text-slate-500">{fmtDate(n.issueDate)}</td>
                     <td className="py-3.5 px-4 text-[12px] text-slate-500">{n.deliveryDate ? fmtDate(n.deliveryDate) : "—"}</td>
                     <td className="py-3.5 px-4 text-[12px] text-slate-400 font-mono">{n.quote?.number ?? "—"}</td>
-                    <td className="py-3.5 px-4">
+                    <td className="py-3.5 px-4" onClick={(e) => e.stopPropagation()}>
                       {n.linkedInvoice ? (
                         <Link
                           href={`/dashboard/finance/invoicing?id=${n.linkedInvoice.id}`}
-                          className="flex items-center gap-1 font-mono text-[11px] text-[#0F6E56] font-semibold hover:underline"
-                          title="Ver factura vinculada"
+                          className="qtip flex items-center gap-1 font-mono text-[11px] text-[#0F6E56] font-semibold hover:underline"
+                          data-tip="Ver factura vinculada"
                         >
                           <LinkIcon className="h-3 w-3" />
                           {n.linkedInvoice.number}
@@ -286,12 +291,12 @@ export function DeliveryNotesView({ clientId, onNavigateToInvoices }: Props) {
                         {STATUS_LABEL[n.status]}
                       </span>
                     </td>
-                    <td className="py-3.5 px-4">
+                    <td className="py-3.5 px-4" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center gap-0.5">
                         <button
                           onClick={() => window.open(`/api/delivery-notes/${n.id}/pdf`, "_blank")}
-                          className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
-                          title="Ver PDF"
+                          className="qtip p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+                          data-tip="Ver PDF"
                         >
                           <FileText className="h-3.5 w-3.5" />
                         </button>
@@ -299,8 +304,8 @@ export function DeliveryNotesView({ clientId, onNavigateToInvoices }: Props) {
                           <button
                             onClick={() => action(n.id, "deliver")}
                             disabled={actionLoading === n.id + "deliver"}
-                            className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-[#0F766E] transition-colors disabled:opacity-50"
-                            title={n.status === "DRAFT" ? "Marcar entregado" : "Marcar firmado"}
+                            className="qtip p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-[#0F766E] transition-colors disabled:opacity-50"
+                            data-tip={n.status === "DRAFT" ? "Marcar entregado" : "Marcar firmado"}
                           >
                             {n.status === "DRAFT" ? <Truck className="h-3.5 w-3.5" /> : <CheckCircle className="h-3.5 w-3.5" />}
                           </button>
@@ -309,8 +314,8 @@ export function DeliveryNotesView({ clientId, onNavigateToInvoices }: Props) {
                           <button
                             onClick={() => setConvertModal(n)}
                             disabled={actionLoading === n.id + "convert-invoice"}
-                            className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-blue-600 transition-colors disabled:opacity-50"
-                            title="Crear factura desde este albarán"
+                            className="qtip p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-blue-600 transition-colors disabled:opacity-50"
+                            data-tip="Crear factura desde este albarán"
                           >
                             <Receipt className="h-3.5 w-3.5" />
                           </button>
@@ -318,8 +323,8 @@ export function DeliveryNotesView({ clientId, onNavigateToInvoices }: Props) {
                         {n.status === "DRAFT" && (
                           <button
                             onClick={() => deleteNote(n.id)}
-                            className="p-1.5 rounded-md hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors"
-                            title="Eliminar"
+                            className="qtip p-1.5 rounded-md hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors"
+                            data-tip="Eliminar"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </button>

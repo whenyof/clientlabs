@@ -161,6 +161,7 @@ function InvoiceTableComponent({
             <tr className="border-b border-slate-100 bg-slate-50">
               <SortHeader label="Tipo"          field="type"      active={sortField === "type"}      dir={sortDir} onClick={handleSort} />
               <SortHeader label="Número"        field="number"    active={sortField === "number"}    dir={sortDir} onClick={handleSort} />
+              <th className="py-3 px-4 text-left text-[10px] font-medium text-slate-400 uppercase tracking-wider">Nº pedido</th>
               <SortHeader label="Contacto"      field="contact"   active={sortField === "contact"}   dir={sortDir} onClick={handleSort} />
               <SortHeader label="Fecha emisión" field="issueDate" active={sortField === "issueDate"} dir={sortDir} onClick={handleSort} />
               <SortHeader label="Vencimiento"   field="dueDate"   active={sortField === "dueDate"}   dir={sortDir} onClick={handleSort} />

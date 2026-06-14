@@ -309,3 +309,35 @@ input::-webkit-credentials-auto-fill-button {
   animation-iteration-count: 1 !important;
   transition-duration: 0.01ms !important;
 }
+
+/* ============================
+   Fast tooltip for quick-action icons (native `title` has a slow ~1s delay).
+   Usage: add class `qtip` and attribute `data-tip="Texto"` to the element.
+   ============================ */
+.qtip {
+  position: relative;
+}
+.qtip::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  background: #0f172a;
+  color: #fff;
+  font-size: 11px;
+  line-height: 1;
+  padding: 5px 8px;
+  border-radius: 6px;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 60;
+  transition: opacity 0.1s ease;
+  transition-delay: 0s;
+}
+.qtip:hover::after,
+.qtip:focus-visible::after {
+  opacity: 1;
+  transition-delay: 0.12s; /* aparece rápido, no ~1s como el title nativo */
+}

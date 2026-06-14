@@ -6,27 +6,14 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import * as invoiceService from "@/modules/invoicing/services/invoice.service"
 import { getF1ClientFiscalBlock } from "@/lib/clients/calculateFiscalCompleteness"
+import { getNextDocumentNumber } from "@/lib/counters/document-counter"
 
-async function nextPONumber(userId: string): Promise<string> {
-  const year = new Date().getFullYear()
-  const last = await prisma.purchaseOrder.findFirst({
-    where: { userId, number: { startsWith: `PED-${year}-` } },
-    orderBy: { createdAt: "desc" },
-    select: { number: true },
-  })
-  const seq = last ? parseInt(last.number.split("-")[2] ?? "0") + 1 : 1
-  return `PED-${year}-${String(seq).padStart(3, "0")}`
+function nextPONumber(userId: string): Promise<string> {
+  return getNextDocumentNumber(userId, "PED")
 }
 
-async function nextDNNumber(userId: string): Promise<string> {
-  const year = new Date().getFullYear()
-  const last = await prisma.deliveryNote.findFirst({
-    where: { userId, number: { startsWith: `ALB-${year}-` } },
-    orderBy: { createdAt: "desc" },
-    select: { number: true },
-  })
-  const seq = last ? parseInt(last.number.split("-")[2] ?? "0") + 1 : 1
-  return `ALB-${year}-${String(seq).padStart(3, "0")}`
+function nextDNNumber(userId: string): Promise<string> {
+  return getNextDocumentNumber(userId, "ALB")
 }
 
 type DocRef = { id: string; number: string } | null
@@ -58,7 +45,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       select: { legalName: true, taxId: true, address: true, postalCode: true, city: true, country: true },
     })
     const block = getF1ClientFiscalBlock(fiscalClient)
-    if (block) return NextResponse.json({ error: block }, { status: 400 })
+    if (block) return NextResponse.json({ error: block, needsClientFiscalData: true, clientId: quote.clientId }, { status: 400 })
   }
 
   const result: { order: DocRef; deliveryNote: DocRef; invoice: DocRef } = {

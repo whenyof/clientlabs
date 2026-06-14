@@ -6,27 +6,14 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import * as invoiceService from "@/modules/invoicing/services/invoice.service"
 import { getF1ClientFiscalBlock } from "@/lib/clients/calculateFiscalCompleteness"
+import { getNextDocumentNumber } from "@/lib/counters/document-counter"
 
-async function nextQuoteNumber(userId: string): Promise<string> {
-  const year = new Date().getFullYear()
-  const last = await prisma.quote.findFirst({
-    where: { userId, number: { startsWith: `P-${year}-` } },
-    orderBy: { createdAt: "desc" },
-    select: { number: true },
-  })
-  const seq = last ? parseInt(last.number.split("-")[2] ?? "0") + 1 : 1
-  return `P-${year}-${String(seq).padStart(3, "0")}`
+function nextQuoteNumber(userId: string): Promise<string> {
+  return getNextDocumentNumber(userId, "P")
 }
 
-async function nextDNNumber(userId: string): Promise<string> {
-  const year = new Date().getFullYear()
-  const last = await prisma.deliveryNote.findFirst({
-    where: { userId, number: { startsWith: `ALB-${year}-` } },
-    orderBy: { createdAt: "desc" },
-    select: { number: true },
-  })
-  const seq = last ? parseInt(last.number.split("-")[2] ?? "0") + 1 : 1
-  return `ALB-${year}-${String(seq).padStart(3, "0")}`
+function nextDNNumber(userId: string): Promise<string> {
+  return getNextDocumentNumber(userId, "ALB")
 }
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -103,7 +90,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     // F1 (completa) exige datos fiscales del cliente; F2 (simplificada) no.
     if (invoiceDocType !== "F2") {
       const block = getF1ClientFiscalBlock(po.client)
-      if (block) return NextResponse.json({ error: block }, { status: 400 })
+      if (block) return NextResponse.json({ error: block, needsClientFiscalData: true, clientId: po.clientId }, { status: 400 })
     }
     const issueDate = new Date()
     const dueDate = new Date(issueDate)

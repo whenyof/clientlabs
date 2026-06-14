@@ -17,6 +17,22 @@ function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
   ])
 }
 
+export async function GET(_req: NextRequest, { params }: { params: Params }) {
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.id) return NextResponse.json({ error: "No autorizado" }, { status: 401 })
+  const { id: clientId } = await params
+  const client = await prisma.client.findFirst({
+    where: { id: clientId, userId: session.user.id },
+    select: {
+      id: true, name: true, email: true, phone: true,
+      legalName: true, taxId: true, address: true, postalCode: true, city: true, country: true,
+      isFiscalComplete: true,
+    },
+  })
+  if (!client) return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 })
+  return NextResponse.json(client)
+}
+
 export async function PATCH(req: NextRequest, { params }: { params: Params }) {
   try {
     const session = await getServerSession(authOptions)

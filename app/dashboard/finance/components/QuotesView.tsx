@@ -221,8 +221,8 @@ export function QuotesView({ clientId, initialOpenId, onNavigateToInvoices, onNa
                     <tr
                       key={q.id}
                       className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors"
-                      onClick={() => q.status !== "DRAFT" && setTrackingOpenId(trackingOpenId === q.id ? null : q.id)}
-                      style={{ cursor: q.status !== "DRAFT" ? "pointer" : "default" }}
+                      onClick={() => window.open(`/api/quotes/${q.id}/pdf`, "_blank")}
+                      style={{ cursor: "pointer" }}
                     >
                       <td className="py-3.5 px-4 font-mono text-[12px] text-slate-700 font-medium">{q.number}</td>
                       <td className="py-3.5 px-4 text-[13px] text-slate-900">{q.client.name ?? q.client.email ?? "—"}</td>
@@ -234,45 +234,47 @@ export function QuotesView({ clientId, initialOpenId, onNavigateToInvoices, onNa
                           {STATUS_LABEL[q.status]}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4">
+                      <td className="py-3.5 px-4" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center gap-0.5">
                           <button
                             onClick={() => window.open(`/api/quotes/${q.id}/pdf`, "_blank")}
-                            className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
-                            title="Ver PDF"
+                            className="qtip p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+                            data-tip="Ver PDF"
                           >
                             <FileText className="h-3.5 w-3.5" />
                           </button>
                           {q.status === "DRAFT" && (
                             <>
                               <button
-                                onClick={() => action(q.id, "send")}
+                                onClick={() => {
+                                  if (window.confirm(`¿Enviar el presupuesto a ${q.client.email ?? "el cliente"}?`)) action(q.id, "send")
+                                }}
                                 disabled={actionLoading === q.id + "send"}
-                                className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors disabled:opacity-50"
-                                title="Enviar al cliente"
+                                className="qtip p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors disabled:opacity-50"
+                                data-tip="Enviar al cliente"
                               >
                                 <Send className="h-3.5 w-3.5" />
                               </button>
                               <button
                                 onClick={() => action(q.id, "accept")}
                                 disabled={actionLoading === q.id + "accept"}
-                                className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-[#0F766E] transition-colors disabled:opacity-50"
-                                title="Marcar como aceptado"
+                                className="qtip p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-[#0F766E] transition-colors disabled:opacity-50"
+                                data-tip="Marcar como aceptado"
                               >
                                 <CheckCircle className="h-3.5 w-3.5" />
                               </button>
                               <button
                                 onClick={() => action(q.id, "reject")}
                                 disabled={actionLoading === q.id + "reject"}
-                                className="p-1.5 rounded-md hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors disabled:opacity-50"
-                                title="Marcar como rechazado"
+                                className="qtip p-1.5 rounded-md hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors disabled:opacity-50"
+                                data-tip="Marcar como rechazado"
                               >
                                 <XCircle className="h-3.5 w-3.5" />
                               </button>
                               <button
                                 onClick={() => deleteQuote(q.id)}
-                                className="p-1.5 rounded-md hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors"
-                                title="Eliminar"
+                                className="qtip p-1.5 rounded-md hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors"
+                                data-tip="Eliminar"
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
                               </button>
@@ -283,36 +285,42 @@ export function QuotesView({ clientId, initialOpenId, onNavigateToInvoices, onNa
                               <button
                                 onClick={() => action(q.id, "accept")}
                                 disabled={actionLoading === q.id + "accept"}
-                                className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-[#0F766E] transition-colors disabled:opacity-50"
-                                title="Marcar como aceptado"
+                                className="qtip p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-[#0F766E] transition-colors disabled:opacity-50"
+                                data-tip="Marcar como aceptado"
                               >
                                 <CheckCircle className="h-3.5 w-3.5" />
                               </button>
                               <button
                                 onClick={() => action(q.id, "reject")}
                                 disabled={actionLoading === q.id + "reject"}
-                                className="p-1.5 rounded-md hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors disabled:opacity-50"
-                                title="Marcar como rechazado"
+                                className="qtip p-1.5 rounded-md hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors disabled:opacity-50"
+                                data-tip="Marcar como rechazado"
                               >
                                 <XCircle className="h-3.5 w-3.5" />
                               </button>
                               <button
                                 onClick={() => action(q.id, "expire")}
                                 disabled={actionLoading === q.id + "expire"}
-                                className="p-1.5 rounded-md hover:bg-amber-50 text-slate-400 hover:text-amber-500 transition-colors disabled:opacity-50"
-                                title="Marcar como expirado"
+                                className="qtip p-1.5 rounded-md hover:bg-amber-50 text-slate-400 hover:text-amber-500 transition-colors disabled:opacity-50"
+                                data-tip="Marcar como expirado"
                               >
                                 <Clock className="h-3.5 w-3.5" />
                               </button>
                             </>
                           )}
                           {q.status === "ACCEPTED" && (
-                            <button
-                              onClick={() => setGenerateModalQuote(q)}
-                              className="px-2 py-1 rounded-md text-[11px] font-medium transition-colors bg-[#E1F5EE] text-[#0F6E56] hover:bg-[#0F766E] hover:text-white"
-                            >
-                              Generar documentos
-                            </button>
+                            (q.purchaseOrder && q.deliveryNote && q.invoice) ? (
+                              <span className="px-2 py-1 rounded-md text-[11px] font-medium bg-slate-100 text-slate-500">
+                                Documentos generados
+                              </span>
+                            ) : (
+                              <button
+                                onClick={() => setGenerateModalQuote(q)}
+                                className="px-2 py-1 rounded-md text-[11px] font-medium transition-colors bg-[#E1F5EE] text-[#0F6E56] hover:bg-[#0F766E] hover:text-white"
+                              >
+                                Generar documentos
+                              </button>
+                            )
                           )}
                         </div>
                       </td>
@@ -320,8 +328,8 @@ export function QuotesView({ clientId, initialOpenId, onNavigateToInvoices, onNa
                         <td className="py-3.5 px-2 text-right" onClick={(e) => e.stopPropagation()}>
                           <button
                             onClick={() => setTrackingOpenId(trackingOpenId === q.id ? null : q.id)}
-                            className="p-1 rounded text-slate-400 hover:text-slate-600 transition-colors"
-                            title="Ver seguimiento"
+                            className="qtip p-1 rounded text-slate-400 hover:text-slate-600 transition-colors"
+                            data-tip="Ver seguimiento"
                           >
                             <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", trackingOpenId === q.id && "rotate-180")} />
                           </button>

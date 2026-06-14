@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import {
   FileText, ClipboardList, Package, Receipt, Trash2,
-  Search, ChevronRight, Upload, X, Plus, CheckCircle,
+  Search, Upload, X, Plus, CheckCircle, Check,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { BannerLegal } from "@/components/finance/BannerLegal"
@@ -359,7 +359,12 @@ export function PurchaseOrdersView({ clientId, onNavigateToInvoices: _ni, onNavi
               </thead>
               <tbody>
                 {orders.map((o) => (
-                  <tr key={o.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                  <tr
+                    key={o.id}
+                    onClick={() => window.open(`/api/purchase-orders/${o.id}/pdf`, "_blank")}
+                    style={{ cursor: "pointer" }}
+                    className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors"
+                  >
                     <td className="py-3.5 px-4 font-mono text-[12px] text-slate-700 font-medium">{o.number}</td>
                     <td className="py-3.5 px-4 text-[13px] text-slate-900">{o.client.name ?? o.client.email ?? "—"}</td>
                     <td className="py-3.5 px-4 text-[12px] text-slate-500">{fmtDate(o.issueDate)}</td>
@@ -382,12 +387,12 @@ export function PurchaseOrdersView({ clientId, onNavigateToInvoices: _ni, onNavi
                         {STATUS_LABEL[o.status]}
                       </span>
                     </td>
-                    <td className="py-3.5 px-4">
+                    <td className="py-3.5 px-4" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center gap-0.5">
                         <button
                           onClick={() => window.open(`/api/purchase-orders/${o.id}/pdf`, "_blank")}
-                          className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
-                          title="Ver PDF"
+                          className="qtip p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+                          data-tip="Ver PDF"
                         >
                           <FileText className="h-3.5 w-3.5" />
                         </button>
@@ -395,10 +400,10 @@ export function PurchaseOrdersView({ clientId, onNavigateToInvoices: _ni, onNavi
                           <button
                             onClick={() => advance(o.id)}
                             disabled={actionLoading === o.id + "confirm"}
-                            className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-[#0F766E] transition-colors disabled:opacity-50"
-                            title={STATUS_NEXT_LABEL[o.status]}
+                            className="qtip p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-[#0F766E] transition-colors disabled:opacity-50"
+                            data-tip={STATUS_NEXT_LABEL[o.status]}
                           >
-                            <ChevronRight className="h-3.5 w-3.5" />
+                            <Check className="h-3.5 w-3.5" />
                           </button>
                         )}
                         {(!o.deliveryNote || !o.invoice) && (
@@ -412,8 +417,8 @@ export function PurchaseOrdersView({ clientId, onNavigateToInvoices: _ni, onNavi
                         {o.status === "DRAFT" && (
                           <button
                             onClick={() => deleteOrder(o.id)}
-                            className="p-1.5 rounded-md hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors"
-                            title="Eliminar"
+                            className="qtip p-1.5 rounded-md hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors"
+                            data-tip="Eliminar"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </button>

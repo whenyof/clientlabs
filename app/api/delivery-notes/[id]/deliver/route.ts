@@ -13,6 +13,11 @@ export async function POST(_: NextRequest, { params }: { params: Promise<{ id: s
   if (!note) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
   const newStatus = note.status === "DRAFT" ? "DELIVERED" : note.status === "DELIVERED" ? "SIGNED" : note.status
-  const updated = await prisma.deliveryNote.update({ where: { id }, data: { status: newStatus } })
+  // Al pasar a entregado, fijar la fecha de entrega si aún no la tenía (columna ENTREGA).
+  const setDeliveryDate = newStatus === "DELIVERED" && !note.deliveryDate
+  const updated = await prisma.deliveryNote.update({
+    where: { id },
+    data: { status: newStatus, ...(setDeliveryDate ? { deliveryDate: new Date() } : {}) },
+  })
   return NextResponse.json({ success: true, note: updated })
 }

@@ -67,14 +67,17 @@ export async function GET(req: NextRequest) {
       id: true, number: true, status: true, issueDate: true, total: true, notes: true,
       convertedToDeliveryNoteId: true, convertedToInvoiceId: true,
       client: { select: { id: true, name: true, email: true } },
-      quote: { select: { id: true, number: true } },
+      quote: { select: { id: true, number: true, convertedToDeliveryNoteId: true, convertedToInvoiceId: true } },
     },
     orderBy: { createdAt: "desc" },
   })
 
-  // Enrich with linked delivery note and invoice numbers
-  const dnIds = orders.map(o => o.convertedToDeliveryNoteId).filter(Boolean) as string[]
-  const invIds = orders.map(o => o.convertedToInvoiceId).filter(Boolean) as string[]
+  // Albarán/factura vinculados: directos del pedido o los generados desde su presupuesto
+  // (para que el modal "Generar documentos" no ofrezca duplicados ya creados).
+  const dnIdOf = (o: (typeof orders)[number]) => o.convertedToDeliveryNoteId ?? o.quote?.convertedToDeliveryNoteId ?? null
+  const invIdOf = (o: (typeof orders)[number]) => o.convertedToInvoiceId ?? o.quote?.convertedToInvoiceId ?? null
+  const dnIds = orders.map(dnIdOf).filter(Boolean) as string[]
+  const invIds = orders.map(invIdOf).filter(Boolean) as string[]
   const [dns, invs] = await Promise.all([
     dnIds.length ? prisma.deliveryNote.findMany({ where: { id: { in: dnIds } }, select: { id: true, number: true, status: true } }) : [],
     invIds.length ? prisma.invoice.findMany({ where: { id: { in: invIds } }, select: { id: true, number: true, status: true } }) : [],
@@ -82,11 +85,15 @@ export async function GET(req: NextRequest) {
   const dnMap = new Map(dns.map(d => [d.id, d]))
   const invMap = new Map(invs.map(i => [i.id, i]))
 
-  const enriched = orders.map(o => ({
-    ...o,
-    deliveryNote: o.convertedToDeliveryNoteId ? (dnMap.get(o.convertedToDeliveryNoteId) ?? null) : null,
-    invoice: o.convertedToInvoiceId ? (invMap.get(o.convertedToInvoiceId) ?? null) : null,
-  }))
+  const enriched = orders.map(o => {
+    const dnId = dnIdOf(o)
+    const invId = invIdOf(o)
+    return {
+      ...o,
+      deliveryNote: dnId ? (dnMap.get(dnId) ?? null) : null,
+      invoice: invId ? (invMap.get(invId) ?? null) : null,
+    }
+  })
 
   return NextResponse.json({ success: true, orders: enriched })
 }
@@ -117,7 +124,7 @@ export async function POST(req: NextRequest) {
         select: { legalName: true, taxId: true, address: true, postalCode: true, city: true, country: true },
       })
       const block = getF1ClientFiscalBlock(fiscalClient)
-      if (block) return NextResponse.json({ error: block }, { status: 400 })
+      if (block) return NextResponse.json({ error: block, needsClientFiscalData: true, clientId }, { status: 400 })
     }
 
     type ItemInput = { productId?: string; description: string; quantity: number; unitPrice: number; taxRate?: number }

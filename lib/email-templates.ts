@@ -26,7 +26,7 @@ const C = {
 
 const FONT     = "'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif"
 const LOGO_URL = "https://cdn.jsdelivr.net/gh/whenyof/clientlabs@main/public/logo-trimmed.png"
-const APP_URL  = "https://app.clientlabs.io"
+const APP_URL  = process.env.NEXT_PUBLIC_APP_URL ?? "https://clientlabs.io"
 
 // ── Primitive helpers ──────────────────────────────────────────────────────────
 
@@ -1293,4 +1293,30 @@ export function onboardingDay14Email(name: string): { subject: string; html: str
       </p>
     `, "Hoy termina — puedo darte 7 dias mas si todavia no lo viste bien"),
   }
+}
+
+/**
+ * Aviso al DUEÑO: una factura recurrente generó un BORRADOR listo para emitir.
+ * `invoiceUrl` debe ser absoluta (la calcula el cron desde NEXT_PUBLIC_APP_URL),
+ * no se usa el APP_URL hardcodeado de este módulo.
+ */
+export function recurringDraftReadyEmail(params: {
+  clientName: string
+  totalFmt: string
+  invoiceUrl: string
+  businessName?: string | null
+}): string {
+  const { clientName, totalFmt, invoiceUrl, businessName } = params
+  const content = `
+    ${h1El("Borrador listo para emitir")}
+    ${bodyP("Se ha generado automáticamente una factura en <strong>borrador</strong> desde tu plantilla recurrente. Revísala y emítela cuando quieras: todavía no se ha emitido ni registrado en Verifactu.")}
+    ${infoBox(
+      infoRow("Cliente", clientName) +
+      infoRow("Importe", totalFmt) +
+      infoRow("Estado", "Borrador (sin emitir)", true),
+    )}
+    ${primaryBtn("Revisar y emitir →", invoiceUrl)}
+    ${smallP("La emisión la haces tú desde Facturas → pestaña Borradores. La factura no se registra en Verifactu hasta que la emites.")}
+  `
+  return bizShell({ businessName: businessName || "ClientLabs", badgeText: "Recurrente", badgeBg: C.greenLight, badgeColor: C.teal, topAccent: C.green, content })
 }

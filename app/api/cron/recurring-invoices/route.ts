@@ -3,6 +3,7 @@ export const maxDuration = 60
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { sendEmail } from "@/lib/email"
+import { recurringDraftReadyEmail } from "@/lib/email-templates"
 import { generateDraftFromRecurring, type GenerateDraftResult } from "@/modules/invoicing/services/recurring.service"
 
 /**
@@ -24,21 +25,13 @@ import { generateDraftFromRecurring, type GenerateDraftResult } from "@/modules/
 async function notifyOwner(userId: string, res: Extract<GenerateDraftResult, { ok: true }>): Promise<void> {
   const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true, name: true } })
   if (!user?.email) return
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.clientlabs.io"
-  const link = `${appUrl}/dashboard/finance/invoicing/${res.invoiceId}`
-  const total = res.total.toLocaleString("es-ES", { style: "currency", currency: "EUR" })
-  const html = `
-    <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:520px;margin:0 auto;color:#0f172a">
-      <h2 style="font-size:18px;margin:0 0 4px">Factura recurrente en borrador</h2>
-      <p style="font-size:14px;color:#475569;margin:0 0 16px">Se ha generado automáticamente un borrador desde tu plantilla recurrente. Revísalo y emítelo cuando quieras.</p>
-      <table style="font-size:14px;border-collapse:collapse;margin:0 0 18px">
-        <tr><td style="padding:4px 16px 4px 0;color:#64748b">Cliente</td><td style="padding:4px 0;font-weight:600">${res.clientName}</td></tr>
-        <tr><td style="padding:4px 16px 4px 0;color:#64748b">Importe</td><td style="padding:4px 0;font-weight:600">${total}</td></tr>
-        <tr><td style="padding:4px 16px 4px 0;color:#64748b">Estado</td><td style="padding:4px 0;font-weight:600">Borrador (sin emitir)</td></tr>
-      </table>
-      <a href="${link}" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#0F766E;color:#fff;text-decoration:none;font-size:14px;font-weight:600;padding:10px 18px;border-radius:8px">Revisar y emitir →</a>
-      <p style="font-size:12px;color:#94a3b8;margin:18px 0 0">La factura NO se ha emitido ni registrado en Verifactu: solo se creó el borrador. La emisión la haces tú.</p>
-    </div>`
+  // Base URL desde env (el cron no tiene request). Fallback al dominio real de prod
+  // (clientlabs.io), NUNCA localhost. Confirmar NEXT_PUBLIC_APP_URL en Vercel.
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://clientlabs.io"
+  // Deep-link: abre ese borrador en el drawer (InvoiceView lee ?invoice=<id>).
+  const link = `${appUrl}/dashboard/finance/invoicing?invoice=${res.invoiceId}`
+  const totalFmt = res.total.toLocaleString("es-ES", { style: "currency", currency: "EUR" })
+  const html = recurringDraftReadyEmail({ clientName: res.clientName, totalFmt, invoiceUrl: link, businessName: user.name })
   await sendEmail(user.email, "Factura recurrente en borrador lista para emitir", html)
 }
 

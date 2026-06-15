@@ -3,6 +3,7 @@ import { getBaseUrl } from "@/lib/api/baseUrl"
 
 
 import { useState, useCallback, useEffect, useRef, useMemo } from "react"
+import { useSearchParams } from "next/navigation"
 import { useQueryClient } from "@tanstack/react-query"
 import { Plus, ChevronDown, X, Shield } from "lucide-react"
 import { BannerLegal } from "@/components/finance/BannerLegal"
@@ -99,6 +100,7 @@ function computeHeaderTotals(invoices: InvoiceListItem[]) {
 
 export function InvoiceView() {
   const queryClient = useQueryClient()
+  const searchParams = useSearchParams()
   const [invoices, setInvoices] = useState<InvoiceListItem[]>([])
   const [clients, setClients] = useState<ClientOption[]>([])
   const [filters, setFilters] = useState<InvoiceFiltersState>(defaultFilters)
@@ -106,6 +108,14 @@ export function InvoiceView() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [detail, setDetail] = useState<InvoiceDetail | null>(null)
   const [detailLoading, setDetailLoading] = useState(false)
+
+  // Deep-link entrante (p. ej. CTA del email de recurrentes): ?invoice=<id> abre ese
+  // borrador en el drawer listo para revisar/emitir. Solo al montar (no reabrir tras cerrar).
+  useEffect(() => {
+    const inv = searchParams.get("invoice")
+    if (inv) setSelectedId(inv)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const [createOpen, setCreateOpen] = useState(false)
   const [editInvoiceId, setEditInvoiceId] = useState<string | null>(null)
   const [editInvoiceStatus, setEditInvoiceStatus] = useState<string | null>(null)

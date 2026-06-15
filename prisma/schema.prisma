@@ -3343,31 +3343,53 @@ model TaskAssignee {
 }
 
 enum RecurringFrequency {
-  WEEKLY
   MONTHLY
   QUARTERLY
-  YEARLY
+  ANNUAL
+  CUSTOM
 }
 
+enum RecurringStatus {
+  ACTIVE
+  PAUSED
+  ENDED
+}
+
+/// Plantilla de facturación recurrente. NO es una factura fiscal: sin número,
+/// sin Verifactu, sin QR. Cada generación crea una factura REAL (borrador) que
+/// pasa por el flujo normal de creación + emisión.
 model RecurringInvoice {
-  id        String                 @id @default(cuid())
-  userId    String
-  user      User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  clientId  String
-  frequency RecurringFrequency     @default(MONTHLY)
-  nextRunAt DateTime
-  lastRunAt DateTime?
-  active    Boolean                @default(true)
-  notes     String?
-  terms     String?
-  currency  String                 @default("EUR")
-  irpfRate  Float                  @default(0)
-  createdAt DateTime               @default(now())
-  updatedAt DateTime               @updatedAt
-  items     RecurringInvoiceItem[]
+  id                   String                 @id @default(cuid())
+  userId               String
+  user                 User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clientId             String
+  /// Verifactu document type a usar al generar: "F1" (completa) | "F2" (simplificada)
+  type                 String                 @default("F1")
+  frequency            RecurringFrequency     @default(MONTHLY)
+  /// Solo para frequency CUSTOM: cada cuántos meses se repite.
+  intervalMonths       Int?
+  /// Día del mes en que se genera (1–31). Si el mes no lo tiene, se ajusta al último día.
+  dayOfMonth           Int?
+  startDate            DateTime               @default(now())
+  /// null = indefinido
+  endDate              DateTime?
+  /// Próxima fecha de generación (preparado para el cron futuro).
+  nextRunDate          DateTime
+  status               RecurringStatus        @default(ACTIVE)
+  irpfRate             Float                  @default(0)
+  currency             String                 @default("EUR")
+  notes                String?
+  generatedCount       Int                    @default(0)
+  lastGeneratedAt      DateTime?
+  /// Si se creó convirtiendo una factura existente.
+  createdFromInvoiceId String?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  items                RecurringInvoiceItem[]
 
   @@index([userId])
-  @@index([nextRunAt])
+  @@index([nextRunDate])
+  @@index([status])
   @@map("recurring_invoices")
 }
 

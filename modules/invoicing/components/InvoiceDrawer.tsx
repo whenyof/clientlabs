@@ -25,6 +25,7 @@ import { isInvoiceEditable } from "@/modules/invoicing/utils/isInvoiceEditable"
 import { invoiceStatusLabel } from "@/modules/invoicing/utils/invoiceStatusLabel"
 import { IssueInvoiceDialog } from "./IssueInvoiceDialog"
 import { CreateRectificativaModal } from "./CreateRectificativaModal"
+import { ConvertToRecurringModal } from "./ConvertToRecurringModal"
 import { InvoiceClientRiskBadge } from "./InvoiceClientRiskBadge"
 import { FiscalWarning, FISCAL_DISABLED_TOOLTIP } from "@/components/fiscal/FiscalWarning"
 import { calculateFiscalCompleteness } from "@/lib/clients/calculateFiscalCompleteness"
@@ -97,6 +98,7 @@ export function InvoiceDrawer({
   const [issueDialogOpen, setIssueDialogOpen] = useState(false)
   const [rectificativaModalOpen, setRectificativaModalOpen] = useState(false)
   const showRectificativaModal = rectificativaModalOpen || openRectificativaModal
+  const [convertRecurringOpen, setConvertRecurringOpen] = useState(false)
   const [sendModalOpen, setSendModalOpen] = useState(false)
   const [emailTo, setEmailTo] = useState("")
   const [sendMessage, setSendMessage] = useState("")
@@ -504,6 +506,17 @@ export function InvoiceDrawer({
                   title={fiscalBlock ? FISCAL_DISABLED_TOOLTIP : undefined}
                   variant="primary"
                 />
+                {/* Convertir en recurrente */}
+                {invoice.type !== "VENDOR" && (
+                  <ActionBtn
+                    icon={<ArrowPathIcon className="h-4 w-4" />}
+                    label="Convertir en recurrente"
+                    sublabel="Crea una plantilla con sus datos"
+                    onClick={() => setConvertRecurringOpen(true)}
+                    disabled={actionLoading}
+                    variant="default"
+                  />
+                )}
                 {/* Eliminar */}
                 <ActionBtn
                   icon={<TrashIcon className="h-4 w-4" />}
@@ -579,6 +592,18 @@ export function InvoiceDrawer({
                     onClick={() => setRectificativaModalOpen(true)}
                     disabled={actionLoading}
                     variant="warning"
+                  />
+                )}
+
+                {/* Convertir en recurrente */}
+                {invoice.type !== "VENDOR" && (
+                  <ActionBtn
+                    icon={<ArrowPathIcon className="h-4 w-4" />}
+                    label="Convertir en recurrente"
+                    sublabel="Crea una plantilla con sus datos"
+                    onClick={() => setConvertRecurringOpen(true)}
+                    disabled={actionLoading}
+                    variant="default"
                   />
                 )}
 
@@ -774,6 +799,13 @@ export function InvoiceDrawer({
         currency={invoice.currency}
         onSuccess={(newId) => { onRefresh(); onRectificationCreated?.(newId) }}
       />
+      {convertRecurringOpen && (
+        <ConvertToRecurringModal
+          invoiceId={invoice.id}
+          invoiceNumber={invoice.number === DRAFT_NUMBER_PLACEHOLDER ? null : invoice.number}
+          onClose={() => setConvertRecurringOpen(false)}
+        />
+      )}
 
       {/* ── Send email modal ─────────────────────────────────── */}
       {sendModalOpen && (

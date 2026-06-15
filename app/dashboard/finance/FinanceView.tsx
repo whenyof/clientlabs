@@ -9,6 +9,7 @@ import {
   Plus, FileText, ArrowUpRight, ArrowDownRight, Minus,
 } from "lucide-react"
 import type { FinancePageData } from "./lib/server-data"
+import { RecurringInvoicesView } from "@/modules/invoicing/components/RecurringInvoicesView"
 
 // ─── Design tokens ─────────────────────────────────────────────────────────
 const C = {
@@ -256,6 +257,7 @@ export function FinanceView({ initialData, period }: Props) {
   const router = useRouter()
   const activeTab = searchParams.get("tab") ?? "resumen"
   const legacyRoute = TAB_ROUTES[activeTab]
+  const isRecurrentes = activeTab === "recurrentes"
 
   // Legacy ?tab= deep links → real functional pages
   useEffect(() => {
@@ -266,7 +268,6 @@ export function FinanceView({ initialData, period }: Props) {
   const trends = initialData.analytics.trends
   const trend = initialData.analytics.monthlyTrend ?? []
   const clientRevenue = initialData.analytics.clientRevenue ?? []
-  const fixedExpenses = initialData.analytics.fixedExpenses ?? []
 
   // ── Real invoices (summary cards on resumen) ─────────────────────────────
   const { data: invoices = [], isLoading: invoicesLoading } = useQuery<any[]>({
@@ -365,9 +366,11 @@ export function FinanceView({ initialData, period }: Props) {
           <a href={`/api/finance/export?period=${period}`} download style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: C.bg, border: `1px solid ${C.line}`, color: C.ink2, fontWeight: 550, fontSize: 12.5, cursor: "pointer", textDecoration: "none" }}>
             <FileText size={12} strokeWidth={2} />Exportar libro
           </a>
-          <button onClick={() => router.push("/dashboard/finance/invoicing")} style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: C.ink, color: "white", fontWeight: 550, fontSize: 12.5, border: "none", cursor: "pointer" }}>
-            <Plus size={12} strokeWidth={2.5} />Nueva factura
-          </button>
+          {!isRecurrentes && (
+            <button onClick={() => router.push("/dashboard/finance/invoicing")} style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: C.ink, color: "white", fontWeight: 550, fontSize: 12.5, border: "none", cursor: "pointer" }}>
+              <Plus size={12} strokeWidth={2.5} />Nueva factura
+            </button>
+          )}
         </div>
       </div>
 
@@ -543,47 +546,8 @@ export function FinanceView({ initialData, period }: Props) {
           </div>
         )}
 
-        {/* ══════════ RECURRENTES (real fixed expenses) ══════════ */}
-        {activeTab === "recurrentes" && (
-          fixedExpenses.length === 0 ? (
-            <Card>
-              <div style={{ padding: "48px 24px", textAlign: "center", color: C.ink3, fontSize: 13 }}>
-                No hay gastos o ingresos recurrentes configurados todavía
-              </div>
-            </Card>
-          ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 14 }}>
-              {fixedExpenses.map((r) => {
-                const freqLabel = r.frequency === "monthly" ? "Mensual" : r.frequency === "yearly" ? "Anual" : r.frequency === "quarterly" ? "Trimestral" : r.frequency
-                return (
-                  <Card key={r.id}>
-                    <div style={{ padding: "16px 18px" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
-                        <div style={{ minWidth: 0 }}>
-                          <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 9.5, letterSpacing: "0.1em", textTransform: "uppercase", color: C.ink3, marginBottom: 6 }}>{freqLabel}</div>
-                          <h3 style={{ fontWeight: 600, fontSize: 15, letterSpacing: "-0.012em", margin: "0 0 4px", color: C.ink }}>{r.name}</h3>
-                        </div>
-                        <Pill tone={r.active ? "green" : "amber"}>{r.active ? "Activa" : "Pausada"}</Pill>
-                      </div>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginTop: 18, paddingTop: 14, borderTop: `1px solid ${C.line2}` }}>
-                        <div>
-                          <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10, color: C.ink3, textTransform: "uppercase", letterSpacing: "0.05em" }}>Próxima</div>
-                          <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 13, fontWeight: 600, marginTop: 2, color: C.ink }}>
-                            {r.nextPayment ? new Date(r.nextPayment).toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" }) : "—"}
-                          </div>
-                        </div>
-                        <div style={{ textAlign: "right" }}>
-                          <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10, color: C.ink3, textTransform: "uppercase", letterSpacing: "0.05em" }}>Importe</div>
-                          <div style={{ fontSize: 18, fontWeight: 600, fontFamily: "ui-monospace,monospace", marginTop: 2, color: C.ink }}>{fmtEur(r.amount)}</div>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                )
-              })}
-            </div>
-          )
-        )}
+        {/* ══════════ RECURRENTES (facturas recurrentes — modelo RecurringInvoice) ══════════ */}
+        {activeTab === "recurrentes" && <RecurringInvoicesView />}
 
       </div>
     </div>

@@ -49,6 +49,8 @@ export async function GET(request: NextRequest) {
         taxAmount: true,
         total: true,
         notes: true,
+        pdfUrl: true,
+        providerName: true,
         Provider: { select: { id: true, name: true } },
       },
       orderBy: { issueDate: "desc" },
@@ -78,13 +80,14 @@ export async function GET(request: NextRequest) {
     const rows = gastos.map((g) => ({
       id: g.id,
       numero: g.number,
-      proveedor: g.Provider?.name ?? "Sin proveedor",
+      proveedor: g.Provider?.name ?? g.providerName ?? "Sin proveedor",
       concepto: g.notes ?? "—",
       fecha: g.issueDate,
       base: Number(g.subtotal),
       iva: Number(g.taxAmount),
       total: Number(g.total),
       estado: g.status,
+      documentUrl: g.pdfUrl ?? null,
     }))
 
     return NextResponse.json({
@@ -114,10 +117,20 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    const { proveedor, concepto, fecha, base, ivaRate, categoria, documentUrl } = body
+    const { proveedor, concepto, fecha, base, ivaRate, categoria, documentUrl, providerId } = body
 
     if (!proveedor || !fecha || base === undefined) {
       return NextResponse.json({ error: "Faltan campos requeridos" }, { status: 400 })
+    }
+
+    // Si el usuario asocio el gasto a un proveedor existente, validar propiedad
+    let linkedProviderId: string | null = null
+    if (providerId) {
+      const provider = await prisma.provider.findFirst({
+        where: { id: providerId, userId: session.user.id },
+        select: { id: true },
+      })
+      linkedProviderId = provider?.id ?? null
     }
 
     const baseNum = parseFloat(base)
@@ -150,6 +163,10 @@ export async function POST(request: NextRequest) {
         total,
         notes: [concepto, categoria ? `Categoría: ${categoria}` : null].filter(Boolean).join(" | "),
         pdfUrl: documentUrl ?? null,
+        // Nombre del proveedor siempre como texto (se ve en la lista aunque no haya FK);
+        // providerId solo si el usuario confirmo asociarlo a un proveedor existente.
+        providerName: String(proveedor),
+        ...(linkedProviderId ? { providerId: linkedProviderId } : {}),
       },
     })
 

@@ -15,6 +15,7 @@ import {
   FileUp,
   Loader2,
   Sparkles,
+  ExternalLink,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
@@ -38,6 +39,35 @@ type Gasto = {
   iva: number
   total: number
   estado: string
+  documentUrl?: string | null
+}
+
+type Provider = { id: string; name: string }
+
+// Normaliza para comparar: minúsculas, sin acentos, sin sufijos societarios (S.L./S.A./...)
+function normalizeProviderName(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[.,]/g, " ")
+    .replace(/\b(s\s*l\s*u|s\s*l\s*n\s*e|s\s*coop|s\s*l\s*l|s\s*l|s\s*a|s\s*c\s*p|s\s*c|c\s*b|sociedad limitada|sociedad anonima|limitada|anonima)\b/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+}
+
+function findProviderMatch(name: string, providers: Provider[]): Provider | null {
+  const target = normalizeProviderName(name)
+  if (target.length < 2) return null
+  // 1) coincidencia exacta normalizada
+  const exact = providers.find((p) => normalizeProviderName(p.name) === target)
+  if (exact) return exact
+  // 2) muy parecido: uno contiene al otro
+  const close = providers.find((p) => {
+    const pn = normalizeProviderName(p.name)
+    return pn.length >= 2 && (pn.includes(target) || target.includes(pn))
+  })
+  return close ?? null
 }
 
 type Kpis = {
@@ -132,6 +162,28 @@ function NuevoGastoModal({
   const [documentUrl, setDocumentUrl] = useState<string | null>(null)
   const [documentName, setDocumentName] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+
+  // Emparejar proveedor con uno existente
+  const [providers, setProviders] = useState<Provider[]>([])
+  const [providerMatch, setProviderMatch] = useState<Provider | null>(null)
+  const [linkedProvider, setLinkedProvider] = useState<Provider | null>(null)
+  const [matchDismissed, setMatchDismissed] = useState(false)
+
+  useEffect(() => {
+    fetch("/api/providers", { credentials: "include" })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((list) => {
+        if (Array.isArray(list)) setProviders(list)
+      })
+      .catch(() => {})
+  }, [])
+
+  // Cuando cambia el nombre del proveedor (extraccion o a mano), recalcular sugerencia
+  useEffect(() => {
+    setProviderMatch(findProviderMatch(form.proveedor, providers))
+    setLinkedProvider(null)
+    setMatchDismissed(false)
+  }, [form.proveedor, providers])
 
   const baseNum = parseFloat(form.base || "0")
   const ivaNum = parseFloat(form.ivaRate || "21")
@@ -306,6 +358,7 @@ function NuevoGastoModal({
           ivaRate: form.ivaRate,
           categoria: form.categoria || undefined,
           documentUrl: documentUrl ?? undefined,
+          providerId: linkedProvider?.id ?? undefined,
         }),
       })
       if (!res.ok) throw new Error("Error al guardar")
@@ -466,6 +519,51 @@ function NuevoGastoModal({
               required
               className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E]/20"
             />
+
+            {/* Sugerencia de asociar a un proveedor existente */}
+            {linkedProvider ? (
+              <div className="mt-2 flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200">
+                <span className="flex items-center gap-2 text-[12px] text-emerald-700">
+                  <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+                  Asociado al proveedor <strong>{linkedProvider.name}</strong>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setLinkedProvider(null)}
+                  className="text-[11px] text-slate-400 hover:text-red-500 transition-colors"
+                >
+                  Quitar
+                </button>
+              </div>
+            ) : (
+              providerMatch &&
+              !matchDismissed && (
+                <div className="mt-2 px-3 py-2.5 rounded-lg bg-amber-50 border border-amber-200">
+                  <p className="text-[12px] text-amber-800 mb-2">
+                    ¿Asociar este gasto al proveedor <strong>{providerMatch.name}</strong>?
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setLinkedProvider(providerMatch)
+                        setMatchDismissed(false)
+                      }}
+                      className="px-3 py-1.5 text-[11px] font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
+                    >
+                      Sí, asociar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMatchDismissed(true)}
+                      className="px-3 py-1.5 text-[11px] font-medium rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors"
+                    >
+                      No, dejar como texto
+                    </button>
+                  </div>
+                </div>
+              )
+            )}
           </div>
 
           {/* Concepto */}
@@ -824,9 +922,24 @@ export default function GastosPage() {
             <table className="w-full min-w-[900px]">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50">
-                  {["Fecha", "Proveedor", "Concepto", "Base", "IVA", "Total", "Estado"].map((h) => (
-                    <th key={h} className="py-3 px-4 text-left text-[10px] font-medium text-slate-400 uppercase tracking-wider">
-                      {h}
+                  {[
+                    { label: "Fecha", align: "text-left" },
+                    { label: "Proveedor", align: "text-left" },
+                    { label: "Concepto", align: "text-left" },
+                    { label: "Base", align: "text-right" },
+                    { label: "IVA", align: "text-right" },
+                    { label: "Total", align: "text-right" },
+                    { label: "Estado", align: "text-left" },
+                    { label: "Factura", align: "text-right" },
+                  ].map((h) => (
+                    <th
+                      key={h.label}
+                      className={cn(
+                        "py-3 px-4 text-[10px] font-medium text-slate-400 uppercase tracking-wider",
+                        h.align
+                      )}
+                    >
+                      {h.label}
                     </th>
                   ))}
                 </tr>
@@ -844,6 +957,19 @@ export default function GastosPage() {
                       <span className={cn("inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold", STATUS_BADGE[g.estado] ?? "bg-slate-100 text-slate-600")}>
                         {STATUS_LABEL[g.estado] ?? g.estado}
                       </span>
+                    </td>
+                    <td className="py-3.5 px-4 text-right">
+                      {g.documentUrl ? (
+                        <a
+                          href={g.documentUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Ver factura"
+                          className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-slate-400 hover:text-[#0F766E] hover:bg-slate-100 transition-colors"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" />
+                        </a>
+                      ) : null}
                     </td>
                   </tr>
                 ))}

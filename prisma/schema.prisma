@@ -1996,6 +1996,7 @@ model Invoice {
   updatedAt              DateTime      @updatedAt
   type                   InvoiceType   @default(CUSTOMER)
   providerId             String?
+  providerName           String?
   providerOrderId        String?       @unique
   providerPaymentId      String?       @unique
   linkedInvoicePaymentId String?       @unique

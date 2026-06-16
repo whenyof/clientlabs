@@ -140,6 +140,7 @@ type Props = { clientId?: string; onNavigateToInvoices?: () => void }
 export function DeliveryNotesView({ clientId, onNavigateToInvoices }: Props) {
   const [notes, setNotes] = useState<DeliveryNote[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [activeFilter, setActiveFilter] = useState("")
   const [search, setSearch] = useState("")
   const [createOpen, setCreateOpen] = useState(false)
@@ -149,14 +150,23 @@ export function DeliveryNotesView({ clientId, onNavigateToInvoices }: Props) {
 
   const fetchNotes = useCallback(async () => {
     setLoading(true)
-    try {
+    setLoadError(false)
+    const attempt = async () => {
       const params = new URLSearchParams()
       if (clientId) params.set("clientId", clientId)
       if (activeFilter) params.set("status", activeFilter)
       if (search) params.set("search", search)
       const res = await fetch(`/api/delivery-notes?${params}`)
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data = await res.json()
-      if (data.success) setNotes(data.notes)
+      if (!data.success || !Array.isArray(data.notes)) throw new Error("Respuesta inválida")
+      return data.notes
+    }
+    try {
+      try { setNotes(await attempt()) }
+      catch { await new Promise((r) => setTimeout(r, 800)); setNotes(await attempt()) }
+    } catch {
+      setLoadError(true) // NO vaciamos la lista en silencio
     } finally {
       setLoading(false)
     }
@@ -239,6 +249,12 @@ export function DeliveryNotesView({ clientId, onNavigateToInvoices }: Props) {
       <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
         {loading ? (
           <div className="py-12 text-center text-[13px] text-slate-400 animate-pulse">Cargando...</div>
+        ) : loadError && notes.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <p className="text-[14px] font-medium text-amber-800 mb-1">No se pudieron cargar los albaranes</p>
+            <p className="text-[12px] text-amber-700/80 mb-4">Problema de conexión. Tus albaranes siguen ahí; reinténtalo.</p>
+            <button onClick={() => fetchNotes()} className="inline-flex items-center gap-2 px-4 py-2 bg-[#0F766E] text-white rounded-lg text-[12px] font-medium hover:bg-[#0E665F] transition-colors">Reintentar</button>
+          </div>
         ) : notes.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center mb-4">

@@ -105,6 +105,7 @@ export function InvoiceView() {
   const [clients, setClients] = useState<ClientOption[]>([])
   const [filters, setFilters] = useState<InvoiceFiltersState>(defaultFilters)
   const [loading, setLoading] = useState(true)
+  const [listError, setListError] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [detail, setDetail] = useState<InvoiceDetail | null>(null)
   const [detailLoading, setDetailLoading] = useState(false)
@@ -202,20 +203,28 @@ export function InvoiceView() {
 
   const fetchList = useCallback(async () => {
     setLoading(true)
-    try {
+    setListError(false)
+    // Una lectura. Lanza si la respuesta no es OK o el payload no es válido.
+    const attempt = async (): Promise<InvoiceListItem[]> => {
       const res = await fetch(buildListUrl(filters), { credentials: "include" })
-      if (!res.ok) return
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data = await res.json()
-      if (data.success && Array.isArray(data.invoices)) {
-        if (process.env.NODE_ENV === "development") {
-          const customers = data.invoices.filter((i: { type?: string }) => i.type === "CUSTOMER").length
-          const vendors = data.invoices.filter((i: { type?: string }) => i.type === "VENDOR").length
-          console.log("INVOICE LIST LOADED")
-          console.log("customers count", customers)
-          console.log("vendors count", vendors)
-        }
-        setInvoices(data.invoices)
+      if (!data.success || !Array.isArray(data.invoices)) throw new Error("Respuesta inválida")
+      return data.invoices as InvoiceListItem[]
+    }
+    try {
+      let result: InvoiceListItem[]
+      try {
+        result = await attempt()
+      } catch {
+        // Reintento único: cubre cortes transitorios de conexión (Neon idle).
+        await new Promise((r) => setTimeout(r, 800))
+        result = await attempt()
       }
+      setInvoices(result)
+    } catch {
+      // NO vaciamos la lista en silencio: marcamos error para mostrar "Reintentar".
+      setListError(true)
     } finally {
       setLoading(false)
     }
@@ -733,15 +742,31 @@ export function InvoiceView() {
         )
       })()}
 
-      <InvoiceTable
-        invoices={filteredInvoices}
-        selectedId={selectedId}
-        onSelectInvoice={handleSelectInvoice}
-        onDownloadPdf={handleDownloadPdf}
-        onDeleteInvoice={handleDeleteRequested}
-        onCreateClick={handleOpenNewInvoice}
-        loading={loading}
-      />
+      {listError && !loading && invoices.length === 0 ? (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 overflow-hidden">
+          <div className="flex flex-col items-center justify-center py-16 text-center px-6">
+            <p className="text-[14px] font-medium text-amber-800 mb-1">No se pudieron cargar las facturas</p>
+            <p className="text-[12px] text-amber-700/80 mb-4">Ha habido un problema de conexión. Tus facturas siguen ahí; vuelve a intentarlo.</p>
+            <button
+              type="button"
+              onClick={() => fetchList()}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#0F766E] text-white rounded-lg text-[12px] font-medium hover:bg-[#0E665F] transition-colors"
+            >
+              Reintentar
+            </button>
+          </div>
+        </div>
+      ) : (
+        <InvoiceTable
+          invoices={filteredInvoices}
+          selectedId={selectedId}
+          onSelectInvoice={handleSelectInvoice}
+          onDownloadPdf={handleDownloadPdf}
+          onDeleteInvoice={handleDeleteRequested}
+          onCreateClick={handleOpenNewInvoice}
+          loading={loading}
+        />
+      )}
 
       <DeleteConfirmDialog
         open={deleteDialogOpen}

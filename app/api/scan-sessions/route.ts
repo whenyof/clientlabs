@@ -8,7 +8,7 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
 const createScanSessionSchema = z.object({
-  entityType: z.enum(["PROVIDER", "ORDER", "PAYMENT"]),
+  entityType: z.enum(["PROVIDER", "ORDER", "PAYMENT", "EXPENSE"]),
   entityId: z.string().min(1),
   category: z.enum(["INVOICE", "ORDER", "ORDER_SHEET", "OTHER", "CONTRACT"]),
   documentName: z.string().min(1).max(255),

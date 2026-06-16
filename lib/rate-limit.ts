@@ -49,3 +49,29 @@ export async function checkContactLimit(identifier: string): Promise<boolean> {
   const { success } = await contactRatelimit.limit(identifier)
   return success
 }
+
+// Extracción de gastos por PDF: cada llamada cuesta tokens de Claude.
+// Límite por usuario: ráfaga horaria + tope diario. Evita martillear el endpoint.
+const gastosExtractHourlyRatelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(15, "1 h"),
+  analytics: true,
+  prefix: "clientlabs:ratelimit:gastos-extract:h",
+})
+
+const gastosExtractDailyRatelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(60, "1 d"),
+  analytics: true,
+  prefix: "clientlabs:ratelimit:gastos-extract:d",
+})
+
+export async function checkGastosExtractLimit(
+  identifier: string
+): Promise<{ success: boolean; reset: number }> {
+  const hourly = await gastosExtractHourlyRatelimit.limit(identifier)
+  if (!hourly.success) return { success: false, reset: hourly.reset }
+  const daily = await gastosExtractDailyRatelimit.limit(identifier)
+  if (!daily.success) return { success: false, reset: daily.reset }
+  return { success: true, reset: 0 }
+}

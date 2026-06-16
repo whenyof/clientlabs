@@ -12,6 +12,9 @@ import {
   Camera,
   Upload,
   CheckCircle2,
+  FileUp,
+  Loader2,
+  Sparkles,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
@@ -23,6 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { ScanWithMobileDialog } from "@/modules/providers/components/ScanWithMobileDialog"
 
 type Gasto = {
   id: string
@@ -110,6 +114,7 @@ function NuevoGastoModal({
   onCreated: () => void
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const pdfInputRef = useRef<HTMLInputElement>(null)
   const [form, setForm] = useState<FormState>({
     proveedor: "",
     concepto: "",
@@ -121,6 +126,9 @@ function NuevoGastoModal({
     deduciblePct: null,
   })
   const [uploading, setUploading] = useState(false)
+  const [importing, setImporting] = useState(false)
+  const [autofilled, setAutofilled] = useState(false)
+  const [scanOpen, setScanOpen] = useState(false)
   const [documentUrl, setDocumentUrl] = useState<string | null>(null)
   const [documentName, setDocumentName] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -136,6 +144,122 @@ function NuevoGastoModal({
     fecha: form.fecha ? new Date(form.fecha) : new Date(),
     proveedor: form.proveedor || undefined,
   })
+
+  // IVA permitido — el valor extraido se mapea al mas cercano
+  function nearestIva(v: number): string {
+    return String(
+      [21, 10, 4, 0].reduce((a, b) => (Math.abs(b - v) < Math.abs(a - v) ? b : a))
+    )
+  }
+
+  // Aplica al formulario lo que devuelve /extract. Usado por importar y por escanear.
+  type ExtractResponse = {
+    url?: string | null
+    name?: string | null
+    data?: {
+      proveedor?: string | null
+      concepto?: string | null
+      fecha?: string | null
+      baseImponible?: number | null
+      ivaPorcentaje?: number | null
+      total?: number | null
+    } | null
+  }
+  function applyExtraction(json: ExtractResponse, fallbackName: string) {
+    // El PDF queda adjunto aunque la extraccion falle
+    if (json.url) {
+      setDocumentUrl(json.url)
+      setDocumentName(json.name ?? fallbackName)
+    }
+
+    const data = json.data
+    if (!data) {
+      toast("PDF adjuntado, pero no se pudieron leer los datos. Rellenalos a mano.")
+      return
+    }
+
+    setForm((f) => {
+      const base =
+        data.baseImponible != null
+          ? String(data.baseImponible)
+          : data.total != null && data.ivaPorcentaje != null
+          ? (Number(data.total) / (1 + Number(data.ivaPorcentaje) / 100)).toFixed(2)
+          : f.base
+      return {
+        ...f,
+        proveedor: data.proveedor ? String(data.proveedor) : f.proveedor,
+        concepto: data.concepto ? String(data.concepto) : f.concepto,
+        fecha:
+          typeof data.fecha === "string" && /^\d{4}-\d{2}-\d{2}$/.test(data.fecha)
+            ? data.fecha
+            : f.fecha,
+        base,
+        ivaRate:
+          data.ivaPorcentaje != null
+            ? nearestIva(Number(data.ivaPorcentaje))
+            : f.ivaRate,
+      }
+    })
+    setAutofilled(true)
+    toast.success("Datos importados del PDF. Revisalos antes de guardar.")
+  }
+
+  // Importar: multipart con un PDF
+  async function handlePdfImport(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Solo PDF: rechaza imagenes y cualquier otro formato
+    const isPdf =
+      file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")
+    if (!isPdf) {
+      toast.error("Solo se admiten archivos PDF")
+      if (pdfInputRef.current) pdfInputRef.current.value = ""
+      return
+    }
+
+    setImporting(true)
+    try {
+      const fd = new FormData()
+      fd.append("file", file)
+      const res = await fetch("/api/finance/gastos/extract", {
+        method: "POST",
+        body: fd,
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err?.error || "No se pudo procesar el PDF")
+      }
+      applyExtraction(await res.json(), file.name)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "No se pudo procesar el PDF")
+    } finally {
+      setImporting(false)
+      if (pdfInputRef.current) pdfInputRef.current.value = ""
+    }
+  }
+
+  // Escanear: el flujo de escaneo sube el PDF a Cloudinary y nos da su URL
+  async function handleScanCompleted({ fileUrl }: { fileUrl: string }) {
+    setScanOpen(false)
+    setImporting(true)
+    try {
+      const res = await fetch("/api/finance/gastos/extract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileUrl }),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err?.error || "No se pudo procesar el escaneo")
+      }
+      applyExtraction(await res.json(), "Escaneo")
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "No se pudo procesar el escaneo")
+    } finally {
+      setImporting(false)
+    }
+  }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -202,7 +326,7 @@ function NuevoGastoModal({
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="relative bg-white rounded-xl border border-slate-200 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-lg">
+      <div className="relative bg-white rounded-xl border border-slate-200 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-lg">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
           <h2 className="text-[15px] font-semibold text-slate-900">Nuevo gasto</h2>
@@ -216,6 +340,60 @@ function NuevoGastoModal({
         </div>
 
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
+          {/* Importar o escanear factura */}
+          <div>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => pdfInputRef.current?.click()}
+                disabled={importing}
+                className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[#0F766E]/30 bg-[#0F766E]/5 text-[13px] font-semibold text-[#0F766E] hover:bg-[#0F766E]/10 transition-colors disabled:opacity-60"
+              >
+                {importing ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Leyendo...
+                  </>
+                ) : (
+                  <>
+                    <FileUp className="h-4 w-4" />
+                    Importar PDF
+                  </>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => setScanOpen(true)}
+                disabled={importing}
+                className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[#0F766E]/30 bg-[#0F766E]/5 text-[13px] font-semibold text-[#0F766E] hover:bg-[#0F766E]/10 transition-colors disabled:opacity-60"
+              >
+                <Camera className="h-4 w-4" />
+                Escanear
+              </button>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-1.5 text-center">
+              Importa o escanea una factura PDF y rellenamos el formulario. Solo PDF.
+            </p>
+            <input
+              ref={pdfInputRef}
+              type="file"
+              accept="application/pdf"
+              className="hidden"
+              onChange={handlePdfImport}
+            />
+          </div>
+
+          {/* Aviso de datos auto-rellenados */}
+          {autofilled && (
+            <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-amber-50 border border-amber-200">
+              <Sparkles className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+              <p className="text-[12px] text-amber-700 leading-relaxed">
+                Datos rellenados automaticamente desde el PDF. Son una estimacion —
+                <strong> revisalos</strong> antes de guardar.
+              </p>
+            </div>
+          )}
+
           {/* Anomalia banner */}
           {anomalia.esAnomalo && (
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
@@ -478,6 +656,17 @@ function NuevoGastoModal({
           </div>
         </form>
       </div>
+
+      {/* Escanear con el movil: produce un PDF en Cloudinary que va al mismo /extract */}
+      <ScanWithMobileDialog
+        open={scanOpen}
+        onOpenChange={setScanOpen}
+        entityType="EXPENSE"
+        entityId="expense"
+        category="INVOICE"
+        documentName="Gasto"
+        onCompleted={handleScanCompleted}
+      />
     </div>
   )
 }

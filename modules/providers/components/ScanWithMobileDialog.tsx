@@ -20,7 +20,7 @@ type ScanSessionResponse = {
 export type ScanWithMobileDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  entityType: "PROVIDER" | "ORDER" | "PAYMENT"
+  entityType: "PROVIDER" | "ORDER" | "PAYMENT" | "EXPENSE"
   entityId: string
   category: "INVOICE" | "ORDER" | "ORDER_SHEET" | "OTHER" | "CONTRACT"
   documentName: string

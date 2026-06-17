@@ -102,6 +102,13 @@ const PERIOD_OPTS = [
   { key: "year", label: "Este año" },
 ]
 
+// Texto del periodo para el recuadro de IVA deducible
+const PERIOD_NOTE: Record<string, string> = {
+  month: "este mes",
+  quarter: "este trimestre",
+  year: "este año",
+}
+
 const CATEGORIAS = [
   { value: "SOFTWARE", label: "Software y suscripciones", pct: 100, ejemplos: "Vercel, Adobe, Office..." },
   { value: "MATERIAL", label: "Material de oficina", pct: 100, ejemplos: "Papel, toner, hardware..." },
@@ -168,6 +175,9 @@ function NuevoGastoModal({
   const [providerMatch, setProviderMatch] = useState<Provider | null>(null)
   const [linkedProvider, setLinkedProvider] = useState<Provider | null>(null)
   const [matchDismissed, setMatchDismissed] = useState(false)
+  // Nombre que rellenamos nosotros al asociar: marca el cambio como programatico
+  // para que el efecto de abajo no recalcule la sugerencia ni provoque un bucle.
+  const programmaticProveedor = useRef<string | null>(null)
 
   useEffect(() => {
     fetch("/api/providers", { credentials: "include" })
@@ -180,6 +190,11 @@ function NuevoGastoModal({
 
   // Cuando cambia el nombre del proveedor (extraccion o a mano), recalcular sugerencia
   useEffect(() => {
+    // Si el nombre lo rellenamos al asociar, no recalcular ni reabrir la sugerencia
+    if (programmaticProveedor.current === form.proveedor) {
+      programmaticProveedor.current = null
+      return
+    }
     setProviderMatch(findProviderMatch(form.proveedor, providers))
     setLinkedProvider(null)
     setMatchDismissed(false)
@@ -529,7 +544,12 @@ function NuevoGastoModal({
                 </span>
                 <button
                   type="button"
-                  onClick={() => setLinkedProvider(null)}
+                  onClick={() => {
+                    // Desvincula (providerId null al guardar). El texto se mantiene
+                    // como nombre escrito y no reabrimos la sugerencia.
+                    setLinkedProvider(null)
+                    setMatchDismissed(true)
+                  }}
                   className="text-[11px] text-slate-400 hover:text-red-500 transition-colors"
                 >
                   Quitar
@@ -546,8 +566,12 @@ function NuevoGastoModal({
                     <button
                       type="button"
                       onClick={() => {
+                        // Rellena el campo con el nombre completo del proveedor asociado.
+                        // El ref evita que el efecto reabra la sugerencia o entre en bucle.
+                        programmaticProveedor.current = providerMatch.name
                         setLinkedProvider(providerMatch)
                         setMatchDismissed(false)
+                        setForm((f) => ({ ...f, proveedor: providerMatch.name }))
                       }}
                       className="px-3 py-1.5 text-[11px] font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
                     >
@@ -797,6 +821,10 @@ export default function GastosPage() {
 
   useEffect(() => { fetchData() }, [fetchData])
 
+  // IVA soportado del periodo seleccionado: la lista ya viene acotada al rango
+  // que la API calcula segun `period`, asi que sumamos su IVA sin duplicar fechas.
+  const ivaDeduciblePeriodo = gastos.reduce((sum, g) => sum + g.iva, 0)
+
   const filtered = gastos.filter((g) => {
     if (!search.trim()) return true
     const q = search.toLowerCase()
@@ -986,7 +1014,7 @@ export default function GastosPage() {
           <p className="text-[12px] font-medium text-slate-700 mb-0.5">IVA deducible</p>
           <p className="text-[12px] text-slate-500">
             El IVA soportado en facturas de proveedor puede deducirse en tu declaracion trimestral.
-            Total acumulado este año: <span className="font-semibold text-[#0F766E]">{fmt(kpis.ivaDeducibleAcumulado)}</span>
+            Total {PERIOD_NOTE[period] ?? "este año"}: <span className="font-semibold text-[#0F766E]">{fmt(ivaDeduciblePeriodo)}</span>
           </p>
         </div>
       </div>

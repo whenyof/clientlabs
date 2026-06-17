@@ -137,6 +137,130 @@ function mapRow(raw: unknown, headerMap: Map<string, (typeof KNOWN_KEYS)[number]
   return out
 }
 
+// ── Validación + escritura (compartido por preview/commit/legacy) ───────────
+
+type ValidRow = z.infer<typeof importRowSchema>
+
+// Normalización SOLO para detectar duplicados por nombre (no toca el parseo).
+function normName(s: string): string {
+  return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/\s+/g, " ").trim()
+}
+
+const createPayload = (userId: string, d: ValidRow) => ({
+  userId,
+  name: d.nombre,
+  description: d.descripcion || null,
+  price: d.precio_unitario,
+  taxRate: d.tipo_iva,
+  unit: d.unidad || "ud",
+  category: d.categoria || null,
+  isService: d.tipo === "SERVICIO",
+  active: true,
+})
+
+const updatePayload = (d: ValidRow) => ({
+  description: d.descripcion || null,
+  price: d.precio_unitario,
+  taxRate: d.tipo_iva,
+  unit: d.unidad || "ud",
+  category: d.categoria || null,
+  isService: d.tipo === "SERVICIO",
+})
+
+// Valida filas ya mapeadas a claves canónicas con el Zod de fila.
+function validateMappedRows(mappedRows: Record<string, string>[]): {
+  validRows: { idx: number; data: ValidRow }[]
+  errors: { row: number; message: string }[]
+} {
+  const validRows: { idx: number; data: ValidRow }[] = []
+  const errors: { row: number; message: string }[] = []
+  for (let i = 0; i < mappedRows.length; i++) {
+    const parsed = importRowSchema.safeParse(sanitizeRow(mappedRows[i]))
+    if (!parsed.success) {
+      errors.push({ row: i + 2, message: parsed.error.issues[0]?.message ?? "Datos inválidos" })
+    } else {
+      validRows.push({ idx: i, data: parsed.data })
+    }
+  }
+  return { validRows, errors }
+}
+
+// ── Modo COMMIT: body JSON { rows: [{ ...campos, action }] } ya revisado ─────
+type CommitRow = {
+  nombre?: unknown
+  descripcion?: unknown
+  precioUnitario?: unknown
+  tipoIva?: unknown
+  unidad?: unknown
+  isService?: unknown
+  categoria?: unknown
+  action?: unknown
+}
+
+async function runCommit(req: NextRequest, userId: string) {
+  const body = (await req.json().catch(() => null)) as { rows?: unknown } | null
+  const rowsInput = body?.rows
+  if (!Array.isArray(rowsInput)) {
+    return NextResponse.json({ error: "Falta el array 'rows'" }, { status: 400 })
+  }
+  if (rowsInput.length > MAX_ROWS) {
+    return NextResponse.json({ error: `Demasiadas filas (máx. ${MAX_ROWS}).` }, { status: 400 })
+  }
+
+  let skipped = 0
+  const errors: { row: number; motivo: string }[] = []
+  const validated: { action: "create" | "overwrite"; data: ValidRow }[] = []
+
+  for (let i = 0; i < rowsInput.length; i++) {
+    const r = (rowsInput[i] ?? {}) as CommitRow
+    const action = String(r.action ?? "create")
+    if (action === "skip") { skipped++; continue }
+
+    // Reutiliza el mismo Zod de fila; isService → tipo PRODUCTO/SERVICIO
+    const parsed = importRowSchema.safeParse(sanitizeRow({
+      nombre: r.nombre,
+      descripcion: r.descripcion,
+      precio_unitario: r.precioUnitario,
+      tipo_iva: r.tipoIva,
+      unidad: r.unidad,
+      tipo: r.isService ? "SERVICIO" : "PRODUCTO",
+      categoria: r.categoria,
+    }))
+    if (!parsed.success) {
+      errors.push({ row: i + 1, motivo: parsed.error.issues[0]?.message ?? "Datos inválidos" })
+      continue
+    }
+    validated.push({ action: action === "overwrite" ? "overwrite" : "create", data: parsed.data })
+  }
+
+  // Resuelve los "overwrite" contra el catálogo del usuario por nombre normalizado
+  // (no confiamos en ids del cliente → garantiza pertenencia).
+  const existing = await prisma.product.findMany({
+    where: { userId, deletedAt: null },
+    select: { id: true, name: true },
+  })
+  const byNorm = new Map(existing.map((p) => [normName(p.name), p.id]))
+
+  const toCreate: ValidRow[] = []
+  const toUpdate: { id: string; data: ValidRow }[] = []
+  for (const { action, data } of validated) {
+    const id = action === "overwrite" ? byNorm.get(normName(data.nombre)) : undefined
+    if (id) toUpdate.push({ id, data })
+    else toCreate.push(data) // create, o overwrite cuyo destino ya no existe
+  }
+
+  if (toCreate.length || toUpdate.length) {
+    await prisma.$transaction([
+      ...(toCreate.length
+        ? [prisma.product.createMany({ data: toCreate.map((d) => createPayload(userId, d)) })]
+        : []),
+      ...toUpdate.map(({ id, data }) => prisma.product.update({ where: { id }, data: updatePayload(data) })),
+    ])
+  }
+
+  return NextResponse.json({ imported: toCreate.length, updated: toUpdate.length, skipped, errors })
+}
+
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
@@ -144,6 +268,11 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    // Modo COMMIT: body JSON { rows: [...] } ya revisado en el preview
+    if ((req.headers.get("content-type") || "").includes("application/json")) {
+      return await runCommit(req, session.user.id)
+    }
+
     const formData = await req.formData()
     const file = formData.get("file") as File | null
 
@@ -211,20 +340,52 @@ export async function POST(req: NextRequest) {
     const mappedRows = rawRows.map((r) => mapRow(r, headerMap))
 
     // Fix 1 + 3: sanitize then validate every row with Zod
-    type ValidRow = z.infer<typeof importRowSchema>
-    const validRows: { idx: number; data: ValidRow }[] = []
-    const errors: { row: number; message: string }[] = []
+    const { validRows, errors } = validateMappedRows(mappedRows)
 
-    for (let i = 0; i < mappedRows.length; i++) {
-      const clean = sanitizeRow(mappedRows[i])
-      const parsed = importRowSchema.safeParse(clean)
-      if (!parsed.success) {
-        errors.push({ row: i + 2, message: parsed.error.issues[0]?.message ?? "Datos inválidos" })
-      } else {
-        validRows.push({ idx: i, data: parsed.data })
+    const dryRun = formData.get("dryRun") === "true"
+
+    // ── Modo PREVIEW: NO escribe. Devuelve filas + resumen + duplicados ──────
+    if (dryRun) {
+      const existing = await prisma.product.findMany({
+        where: { userId: session.user.id, deletedAt: null },
+        select: { id: true, name: true },
+      })
+      const existingByNorm = new Map(existing.map((p) => [normName(p.name), p.id]))
+
+      const rows = validRows.map(({ idx, data }) => {
+        const existingId = existingByNorm.get(normName(data.nombre)) ?? null
+        return {
+          rowIndex: idx,
+          nombre: data.nombre,
+          descripcion: data.descripcion,
+          precioUnitario: data.precio_unitario,
+          tipoIva: data.tipo_iva,
+          unidad: data.unidad,
+          isService: data.tipo === "SERVICIO",
+          categoria: data.categoria,
+          isDuplicate: existingId !== null,
+          existingId,
+        }
+      })
+
+      const duplicados = rows.filter((r) => r.isDuplicate).length
+      const servicios = rows.filter((r) => r.isService).length
+      const summary = {
+        total: rows.length,
+        nuevos: rows.length - duplicados,
+        duplicados,
+        productos: rows.length - servicios,
+        servicios,
+        errores: errors.length,
       }
+      return NextResponse.json({
+        rows,
+        summary,
+        errors: errors.map((e) => ({ row: e.row, motivo: e.message })),
+      })
     }
 
+    // ── Modo LEGACY: subir fichero escribe directo (comportamiento existente) ─
     if (validRows.length === 0) {
       return NextResponse.json({ imported: 0, updated: 0, errors })
     }

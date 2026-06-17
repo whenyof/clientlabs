@@ -42,6 +42,101 @@ function sanitizeRow(raw: unknown): Record<string, string> {
   return clean
 }
 
+// ── Capa de mapeo flexible de cabeceras + parseo tolerante ──────────────────
+// Se aplica ANTES del Zod: cada usuario exporta su catálogo con nombres de
+// columna distintos, así que normalizamos y mapeamos a los campos canónicos.
+
+// minúsculas, sin acentos, sin no-alfanuméricos (% / _ …), espacios colapsados
+function norm(s: unknown): string {
+  return String(s ?? "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+}
+
+// Alias por campo canónico (las claves del Zod son: nombre, descripcion,
+// precio_unitario, tipo_iva, unidad, tipo, categoria).
+const HEADER_ALIASES: Record<(typeof KNOWN_KEYS)[number], string[]> = {
+  nombre: ["nombre", "name", "concepto", "producto", "articulo", "item", "titulo"],
+  descripcion: ["descripcion", "description", "detalle", "observaciones", "desc"],
+  precio_unitario: ["precio", "precio_unitario", "precio unitario", "precio ud", "precio/ud", "pvp", "importe", "importe unitario", "tarifa", "coste", "valor", "price"],
+  tipo_iva: ["iva", "%iva", "tipo iva", "porcentaje iva", "impuesto", "vat", "tax", "taxrate"],
+  unidad: ["unidad", "unidad de medida", "ud", "medida", "unit"],
+  tipo: ["tipo", "producto servicio", "clase", "servicio"],
+  categoria: ["categoria", "category", "familia", "grupo", "seccion"],
+}
+
+// normalized alias → campo canónico (primer canónico que reclame el alias gana)
+const ALIAS_TO_CANON = new Map<string, (typeof KNOWN_KEYS)[number]>()
+for (const key of KNOWN_KEYS) {
+  for (const alias of HEADER_ALIASES[key]) {
+    const n = norm(alias)
+    if (!ALIAS_TO_CANON.has(n)) ALIAS_TO_CANON.set(n, key)
+  }
+}
+
+// Construye { cabeceraOriginal → campo canónico } a partir de las claves de una fila
+function buildHeaderMap(sampleRow: unknown): Map<string, (typeof KNOWN_KEYS)[number]> {
+  const map = new Map<string, (typeof KNOWN_KEYS)[number]>()
+  const assigned = new Set<string>()
+  for (const origKey of Object.keys((sampleRow ?? {}) as Record<string, unknown>)) {
+    const canon = ALIAS_TO_CANON.get(norm(origKey))
+    if (canon && !assigned.has(canon)) {
+      map.set(origKey, canon)
+      assigned.add(canon)
+    }
+  }
+  return map
+}
+
+// "12,90 €" / "12.90€" / "1.234,56" → "1234.56" (string apto para el parseFloat del Zod)
+function cleanNumber(s: string): string {
+  let t = s.replace(/[^\d.,-]/g, "")
+  if (t.includes(",") && t.includes(".")) {
+    t = t.replace(/\./g, "").replace(",", ".") // punto = miles, coma = decimal
+  } else if (t.includes(",")) {
+    t = t.replace(",", ".")
+  }
+  return t
+}
+
+// "21%" → "21"; "0,21"/"0.21" → "21"; "" → "" (deja el default del Zod)
+function cleanIva(s: string): string {
+  const t = s.replace(/[^\d.,-]/g, "").replace(",", ".")
+  if (t === "") return ""
+  const n = parseFloat(t)
+  if (isNaN(n)) return ""
+  return String(n <= 1 ? Math.round(n * 100) : n)
+}
+
+const SERVICE_UNITS = new Set(["h", "hora", "horas", "mes", "meses", "sesion", "sesiones"])
+
+// Devuelve "SERVICIO" | "PRODUCTO" (lo que el Zod espera). Si no hay columna tipo,
+// heurística de respaldo por unidad/categoría.
+function resolveTipo(rawTipo: string, unidad: string, categoria: string): "SERVICIO" | "PRODUCTO" {
+  const t = norm(rawTipo)
+  if (t) return t === "servicio" ? "SERVICIO" : "PRODUCTO"
+  if (SERVICE_UNITS.has(norm(unidad)) || norm(categoria).includes("servic")) return "SERVICIO"
+  return "PRODUCTO"
+}
+
+// Reescribe una fila cruda a las claves canónicas, con parseo tolerante de valores.
+function mapRow(raw: unknown, headerMap: Map<string, (typeof KNOWN_KEYS)[number]>): Record<string, string> {
+  const r = raw as Record<string, unknown>
+  const out = Object.create(null) as Record<string, string>
+  for (const key of KNOWN_KEYS) out[key] = ""
+  for (const [origKey, canon] of headerMap) {
+    out[canon] = String(r[origKey] ?? "").trim()
+  }
+  out.precio_unitario = cleanNumber(out.precio_unitario)
+  out.tipo_iva = cleanIva(out.tipo_iva)
+  out.tipo = resolveTipo(out.tipo, out.unidad, out.categoria)
+  return out
+}
+
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
@@ -93,13 +188,35 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Mapeo flexible de cabeceras → campos canónicos (antes del Zod)
+    const headerMap = buildHeaderMap(rawRows[0])
+    const mappedCanon = new Set(headerMap.values())
+
+    // Columnas obligatorias: si tras el mapeo faltan, error claro indicando cuál
+    // y qué nombres se aceptan (en vez de "precio_unitario inválido" a secas).
+    if (rawRows.length > 0) {
+      const required: (typeof KNOWN_KEYS)[number][] = ["nombre", "precio_unitario"]
+      const missing = required.filter((k) => !mappedCanon.has(k))
+      if (missing.length > 0) {
+        const detail = missing
+          .map((k) => `"${k}" (acepta: ${HEADER_ALIASES[k].join(", ")})`)
+          .join("; ")
+        return NextResponse.json(
+          { error: `Falta(n) columna(s) obligatoria(s): ${detail}` },
+          { status: 400 }
+        )
+      }
+    }
+
+    const mappedRows = rawRows.map((r) => mapRow(r, headerMap))
+
     // Fix 1 + 3: sanitize then validate every row with Zod
     type ValidRow = z.infer<typeof importRowSchema>
     const validRows: { idx: number; data: ValidRow }[] = []
     const errors: { row: number; message: string }[] = []
 
-    for (let i = 0; i < rawRows.length; i++) {
-      const clean = sanitizeRow(rawRows[i])
+    for (let i = 0; i < mappedRows.length; i++) {
+      const clean = sanitizeRow(mappedRows[i])
       const parsed = importRowSchema.safeParse(clean)
       if (!parsed.success) {
         errors.push({ row: i + 2, message: parsed.error.issues[0]?.message ?? "Datos inválidos" })

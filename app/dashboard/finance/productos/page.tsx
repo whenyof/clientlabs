@@ -3,7 +3,8 @@
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { Plus, Package, Pencil, Trash2, Search, Tag, Layers } from "lucide-react"
+import { Plus, Package, Pencil, Trash2, Search, Tag, Layers, Upload } from "lucide-react"
+import { ProductImportModal } from "@/app/dashboard/settings/components/ProductImportModal"
 import {
   Select,
   SelectContent,
@@ -189,6 +190,7 @@ export default function ProductosPage() {
   const qc = useQueryClient()
   const [search, setSearch] = useState("")
   const [modal, setModal] = useState<{ open: boolean; product: Product | null }>({ open: false, product: null })
+  const [showImport, setShowImport] = useState(false)
 
   const { data, isLoading } = useQuery<{ products: Product[] }>({
     queryKey: ["products"],
@@ -269,17 +271,32 @@ export default function ProductosPage() {
             Catálogo reutilizable al crear presupuestos y facturas
           </p>
         </div>
-        <button
-          onClick={() => setModal({ open: true, product: null })}
-          style={{
-            display: "flex", alignItems: "center", gap: 6,
-            padding: "9px 16px", borderRadius: 8, border: "none",
-            background: "#0F766E", color: "white", fontSize: 13, fontWeight: 600, cursor: "pointer",
-          }}
-        >
-          <Plus style={{ width: 14, height: 14 }} />
-          Nuevo
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <button
+            onClick={() => setShowImport(true)}
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "9px 16px", borderRadius: 8,
+              border: "1px solid var(--border-subtle)",
+              background: "var(--bg-card)", color: "var(--text-primary)",
+              fontSize: 13, fontWeight: 600, cursor: "pointer",
+            }}
+          >
+            <Upload style={{ width: 14, height: 14 }} />
+            Importar
+          </button>
+          <button
+            onClick={() => setModal({ open: true, product: null })}
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "9px 16px", borderRadius: 8, border: "none",
+              background: "#0F766E", color: "white", fontSize: 13, fontWeight: 600, cursor: "pointer",
+            }}
+          >
+            <Plus style={{ width: 14, height: 14 }} />
+            Nuevo
+          </button>
+        </div>
       </div>
 
       {/* Search */}
@@ -330,6 +347,16 @@ export default function ProductosPage() {
           product={modal.product}
           onClose={() => setModal({ open: false, product: null })}
           onSave={handleSave}
+        />
+      )}
+
+      {showImport && (
+        <ProductImportModal
+          onClose={() => setShowImport(false)}
+          onDone={() => {
+            setShowImport(false)
+            qc.invalidateQueries({ queryKey: ["products"] })
+          }}
         />
       )}
     </div>

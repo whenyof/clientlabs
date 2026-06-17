@@ -258,7 +258,7 @@ export default function ProductosPage() {
   const goods = filtered.filter((p) => !p.isService)
 
   return (
-    <div style={{ padding: "24px 28px", maxWidth: 900 }}>
+    <div className="w-full">
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
         <div>

@@ -14,6 +14,8 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { FiscalDataModal } from "@/components/finance/FiscalDataModal"
+import { ProductPicker } from "@/components/finance/ProductPicker"
+import { useProductCatalog, type CatalogProduct } from "@/hooks/use-product-catalog"
 
 interface NewOrderModalProps {
   open: boolean
@@ -23,6 +25,7 @@ interface NewOrderModalProps {
 }
 
 type OrderItem = {
+  productId: string | null
   product: string
   quantity: string
   price: string
@@ -38,8 +41,9 @@ export function NewOrderModal({
   const router = useRouter()
 
   const [items, setItems] = useState<OrderItem[]>([
-    { product: "", quantity: "", price: "", taxRate: 21 },
+    { productId: null, product: "", quantity: "", price: "", taxRate: 21 },
   ])
+  const { products, createProduct } = useProductCatalog()
   const [notes, setNotes] = useState("")
   const [createQuote, setCreateQuote] = useState(false)
   const [createDeliveryNote, setCreateDeliveryNote] = useState(false)
@@ -58,7 +62,23 @@ export function NewOrderModal({
   }
 
   const addLine = () => {
-    setItems((prev) => [...prev, { product: "", quantity: "", price: "", taxRate: 21 }])
+    setItems((prev) => [...prev, { productId: null, product: "", quantity: "", price: "", taxRate: 21 }])
+  }
+
+  // Texto libre: actualiza el nombre y rompe el vínculo al catálogo de esa línea.
+  const setProductText = (index: number, text: string) => {
+    setItems((prev) => prev.map((item, i) => (i === index ? { ...item, product: text, productId: null } : item)))
+  }
+
+  // Producto del catálogo: autorellena nombre, precio e IVA y guarda el vínculo.
+  const selectProduct = (index: number, product: CatalogProduct) => {
+    setItems((prev) => prev.map((item, i) => (i === index ? {
+      ...item,
+      productId: product.id,
+      product: product.name,
+      price: String(product.price),
+      taxRate: product.taxRate,
+    } : item)))
   }
 
   const removeItem = (index: number) => {
@@ -95,6 +115,7 @@ export function NewOrderModal({
         invoiceDocType,
         irpfRate,
         items: items.map((item) => ({
+          productId: item.productId,
           description: item.product,
           quantity: Number(item.quantity) || 1,
           unitPrice: Number(item.price) || 0,
@@ -202,11 +223,16 @@ export function NewOrderModal({
                       return (
                         <tr key={index} className="border-b border-neutral-100">
                           <td className="py-3 pr-4 align-middle">
-                            <input
+                            <ProductPicker
+                              className="min-w-0"
+                              products={products}
                               value={item.product}
-                              onChange={(e) => handleItemChange(index, "product", e.target.value)}
+                              unitPrice={Number(item.price) || 0}
+                              taxRate={item.taxRate}
                               placeholder="Producto o servicio"
-                              className="h-10 w-full rounded-md border border-neutral-200 px-3 text-sm bg-white"
+                              onChange={(text) => setProductText(index, text)}
+                              onSelect={(p) => selectProduct(index, p)}
+                              onCreateProduct={createProduct}
                             />
                           </td>
                           <td className="py-3 pr-4 align-middle">

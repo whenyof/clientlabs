@@ -11,12 +11,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { ProductPicker } from "@/components/finance/ProductPicker"
+import { useProductCatalog, type CatalogProduct } from "@/hooks/use-product-catalog"
 
 type Client = { id: string; name: string | null; email?: string | null }
 type Quote = { id: string; number: string; client: { id: string; name: string | null } }
 
 type LineItem = {
   _key: string
+  productId: string | null
   description: string
   quantity: number
   unit: string
@@ -40,6 +43,7 @@ function newKey() { return String(++keySeq) }
 
 const DEFAULT_ITEM = (): LineItem => ({
   _key: newKey(),
+  productId: null,
   description: "",
   quantity: 0,
   unit: "uds.",
@@ -62,6 +66,7 @@ export function NewDeliveryNoteModal({ open, onClose, onSuccess, defaultClientId
   const [loadingQuote, setLoadingQuote] = useState(false)
   const [enableLots, setEnableLots] = useState(false)
   const [enableExpiry, setEnableExpiry] = useState(false)
+  const { products, createProduct } = useProductCatalog()
 
   useEffect(() => {
     if (!open) return
@@ -99,8 +104,9 @@ export function NewDeliveryNoteModal({ open, onClose, onSuccess, defaultClientId
       if (data.quote?.items?.length) {
         // Arrastrar precio e IVA reales de cada línea del presupuesto —
         // así la conversión albarán → factura respeta el taxRate original (ej. 10%)
-        setItems(data.quote.items.map((i: { description: string; quantity: number; unitPrice?: number; taxRate?: number }) => ({
+        setItems(data.quote.items.map((i: { productId?: string | null; description: string; quantity: number; unitPrice?: number; taxRate?: number }) => ({
           _key: newKey(),
+          productId: typeof i.productId === "string" ? i.productId : null,
           description: i.description,
           quantity: i.quantity,
           unit: "uds.",
@@ -251,11 +257,22 @@ export function NewDeliveryNoteModal({ open, onClose, onSuccess, defaultClientId
                 {items.map((item) => (
                   <div key={item._key} className="bg-white px-3 py-2">
                     <div className="grid grid-cols-[1fr_64px_64px_84px_72px_64px_32px] gap-px items-center">
-                      <input
+                      <ProductPicker
+                        className="min-w-0 mr-2"
+                        products={products}
                         value={item.description}
-                        onChange={e => updateItem(item._key, { description: e.target.value })}
+                        unitPrice={item.unitPrice}
+                        taxRate={item.taxRate}
+                        unit={item.unit}
                         placeholder="Descripción del artículo"
-                        className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#0F766E]/30 focus:border-[#0F766E] mr-2"
+                        onChange={(text) => updateItem(item._key, { description: text, productId: null })}
+                        onSelect={(p: CatalogProduct) => updateItem(item._key, {
+                          description: p.name,
+                          unitPrice: p.price,
+                          taxRate: p.taxRate,
+                          productId: p.id,
+                        })}
+                        onCreateProduct={createProduct}
                       />
                       <input
                         type="number"

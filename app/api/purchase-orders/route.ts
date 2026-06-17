@@ -9,7 +9,7 @@ import { getNextDocumentNumber } from "@/lib/counters/document-counter"
 import { getF1ClientFiscalBlock } from "@/lib/clients/calculateFiscalCompleteness"
 
 const poLineSchema = z.object({
-  productId: z.string().optional(),
+  productId: z.string().optional().nullable(),
   description: z.string().min(1).max(500),
   quantity: z.number().positive().max(99999),
   unitPrice: z.number().min(0).max(9999999),
@@ -127,8 +127,20 @@ export async function POST(req: NextRequest) {
       if (block) return NextResponse.json({ error: block, needsClientFiscalData: true, clientId }, { status: 400 })
     }
 
-    type ItemInput = { productId?: string; description: string; quantity: number; unitPrice: number; taxRate?: number }
+    type ItemInput = { productId?: string | null; description: string; quantity: number; unitPrice: number; taxRate?: number }
     const lineItems: ItemInput[] = items
+
+    // Solo enlazar productos que pertenezcan al usuario; el resto queda como texto libre.
+    const requestedProductIds = [...new Set(
+      lineItems.map((i) => i.productId).filter((id): id is string => !!id)
+    )]
+    const ownedProductIds = requestedProductIds.length
+      ? new Set((await prisma.product.findMany({
+          where: { id: { in: requestedProductIds }, userId: session.user.id },
+          select: { id: true },
+        })).map((p) => p.id))
+      : new Set<string>()
+
     let subtotal = 0
     let taxTotal = 0
     const computed = lineItems.map((item: ItemInput) => {
@@ -138,7 +150,8 @@ export async function POST(req: NextRequest) {
       const lineSub = qty * price
       subtotal += lineSub
       taxTotal += lineSub * (taxRate / 100)
-      return { ...item, quantity: qty, unitPrice: price, taxRate, subtotal: lineSub }
+      const productId = item.productId && ownedProductIds.has(item.productId) ? item.productId : null
+      return { ...item, productId, quantity: qty, unitPrice: price, taxRate, subtotal: lineSub }
     })
     const irpfAmount = subtotal * (irpfRate / 100)
     const total = subtotal + taxTotal - irpfAmount

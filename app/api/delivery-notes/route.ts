@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma"
 import { getNextDocumentNumber } from "@/lib/counters/document-counter"
 
 const itemSchema = z.object({
-  productId: z.string().optional(),
+  productId: z.string().optional().nullable(),
   description: z.string().min(1).max(500),
   quantity: z.number().positive().max(99999),
   unitPrice: z.number().min(0).max(9999999).optional(),
@@ -90,8 +90,19 @@ export async function POST(req: NextRequest) {
     if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Datos inválidos" }, { status: 400 })
     const { clientId, quoteId, deliveryDate, notes, items } = parsed.data
 
-    type NoteItem = { productId?: string; description: string; quantity: number; unitPrice?: number; taxRate?: number; delivered?: boolean; productRef?: string | null; lotNumber?: string | null; expiryDate?: string | null }
+    type NoteItem = { productId?: string | null; description: string; quantity: number; unitPrice?: number; taxRate?: number; delivered?: boolean; productRef?: string | null; lotNumber?: string | null; expiryDate?: string | null }
     const number = await nextNumber(session.user.id)
+
+    // Solo enlazar productos que pertenezcan al usuario; el resto queda como texto libre.
+    const requestedProductIds = [...new Set(
+      (items as NoteItem[]).map((i) => i.productId).filter((id): id is string => !!id)
+    )]
+    const ownedProductIds = requestedProductIds.length
+      ? new Set((await prisma.product.findMany({
+          where: { id: { in: requestedProductIds }, userId: session.user.id },
+          select: { id: true },
+        })).map((p) => p.id))
+      : new Set<string>()
 
     const note = await prisma.deliveryNote.create({
       data: {
@@ -103,7 +114,7 @@ export async function POST(req: NextRequest) {
         notes: notes ?? null,
         items: {
           create: (items as NoteItem[]).map((i) => ({
-            productId: i.productId ?? null,
+            productId: i.productId && ownedProductIds.has(i.productId) ? i.productId : null,
             description: i.description,
             quantity: Number(i.quantity) || 1,
             unitPrice: Number(i.unitPrice) || 0,

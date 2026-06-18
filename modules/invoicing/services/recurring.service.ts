@@ -44,7 +44,7 @@ export async function generateDraftFromRecurring(
 
   const client = await prisma.client.findFirst({
     where: { id: tpl.clientId, userId },
-    select: { name: true, legalName: true, taxId: true, email: true, address: true, city: true, postalCode: true, country: true },
+    select: { name: true, legalName: true, taxId: true, email: true, address: true, city: true, postalCode: true, province: true, country: true },
   })
 
   // Próxima fecha: un paso. Con advanceAfter, salta hasta la primera ocurrencia

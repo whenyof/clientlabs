@@ -38,6 +38,7 @@ export async function GET() {
       address: profile.address ?? null,
       city: profile.city ?? null,
       postalCode: profile.postalCode ?? null,
+      province: profile.province ?? null,
       country: profile.country ?? null,
       phone: profile.phone ?? null,
       email: profile.email ?? null,
@@ -70,7 +71,7 @@ export async function PATCH(request: NextRequest) {
   const data: Record<string, unknown> = {}
   const allowed = [
     "name", "logoUrl", "companyName", "legalName", "taxId", "address",
-    "city", "postalCode", "country", "phone", "email", "website",
+    "city", "postalCode", "province", "country", "phone", "email", "website",
     "iban", "bic", "invoiceLanguage", "defaultNotesTemplate", "defaultTermsTemplate", "sector",
   ]
   for (const key of allowed) {
@@ -95,6 +96,7 @@ export async function PATCH(request: NextRequest) {
       address: data.address as string | undefined,
       city: data.city as string | undefined,
       postalCode: data.postalCode as string | undefined,
+      province: data.province as string | undefined,
       country: data.country as string | undefined,
       phone: data.phone as string | undefined,
       email: data.email as string | undefined,

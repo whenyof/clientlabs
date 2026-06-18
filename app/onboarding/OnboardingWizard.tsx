@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Logo } from "@/components/Logo"
+import { AddressFields } from "@/components/forms/AddressFields"
 import { AnimatePresence, motion } from "framer-motion"
 import {
   Check, ChevronLeft, ArrowRight,
@@ -23,6 +24,8 @@ type FormData = {
   address: string
   postalCode: string
   city: string
+  province: string
+  country: string
   inviteEmails: string[]
 }
 
@@ -41,7 +44,7 @@ export default function OnboardingWizard() {
   const [saving, setSaving] = useState(false)
   const [form, setForm]     = useState<FormData>({
     businessName: "", sector: "", taxId: "",
-    address: "", postalCode: "", city: "",
+    address: "", postalCode: "", city: "", province: "", country: "España",
     inviteEmails: [""],
   })
 
@@ -76,6 +79,8 @@ export default function OnboardingWizard() {
           address: form.address,
           postalCode: form.postalCode,
           city: form.city,
+          province: form.province,
+          country: form.country,
         }),
       })
     } catch { /* ignore */ }
@@ -187,35 +192,10 @@ export default function OnboardingWizard() {
           onChange={e => setField("taxId", e.target.value)}
         />
       </div>
-      <div>
-        <label className={labelCls}>Dirección</label>
-        <input
-          className={inputCls}
-          placeholder="Calle Mayor 1, Local 2"
-          value={form.address}
-          onChange={e => setField("address", e.target.value)}
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className={labelCls}>Código postal</label>
-          <input
-            className={inputCls}
-            placeholder="28001"
-            value={form.postalCode}
-            onChange={e => setField("postalCode", e.target.value)}
-          />
-        </div>
-        <div>
-          <label className={labelCls}>Ciudad</label>
-          <input
-            className={inputCls}
-            placeholder="Madrid"
-            value={form.city}
-            onChange={e => setField("city", e.target.value)}
-          />
-        </div>
-      </div>
+      <AddressFields
+        values={form}
+        onChange={(field, value) => setField(field, value)}
+      />
     </div>,
 
     // PASO 3 — Tu equipo

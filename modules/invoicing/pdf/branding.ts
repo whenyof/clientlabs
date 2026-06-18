@@ -1,6 +1,8 @@
 /**
- * Invoice PDF branding — single source of truth from BusinessProfile (Settings).
- * Fallback: User, env, defaults.
+ * Invoice PDF branding — single source of truth: BusinessProfile (Settings).
+ * Identidad fiscal (companyName/taxId/address): SOLO del perfil del usuario
+ * (sin env). Campos no fiscales (email/phone/color/footer/condiciones): perfil
+ * → env → default.
  */
 
 import { prisma } from "@/lib/prisma"
@@ -11,6 +13,7 @@ export type InvoiceBranding = {
   legalName?: string | null
   taxId: string
   address: string
+  province?: string | null
   email: string
   phone: string
   primaryColor: string
@@ -24,14 +27,15 @@ export type InvoiceBranding = {
   defaultTermsTemplate?: string | null
 }
 
-// Defaults SIN datos inventados: un NIF/empresa placeholder acabaría impreso en
-// facturas y burlaría el validador legal de emisión. Vacío = la emisión se
-// bloquea hasta que el usuario complete sus datos fiscales en Ajustes.
+// Identidad fiscal (nombre/NIF/dirección): SIEMPRE del perfil del usuario,
+// NUNCA de una env global — un valor global acabaría impreso como emisor en las
+// facturas de cualquier usuario. Vacío = la emisión se bloquea (validador legal)
+// hasta que el usuario complete sus datos fiscales en Ajustes.
 const DEFAULT_BRANDING: InvoiceBranding = {
   logoUrl: null,
-  companyName: process.env.INVOICE_COMPANY_NAME ?? "",
-  taxId: process.env.INVOICE_TAX_ID ?? "",
-  address: process.env.INVOICE_ADDRESS ?? "",
+  companyName: "",
+  taxId: "",
+  address: "",
   email: process.env.INVOICE_EMAIL ?? "",
   phone: process.env.INVOICE_PHONE ?? "",
   primaryColor: process.env.INVOICE_PRIMARY_COLOR ?? "#1e3a5f",
@@ -58,7 +62,7 @@ export async function getBrandingForUser(userId: string): Promise<InvoiceBrandin
 
     if (profile) {
       const addressLine =
-        [profile.address, profile.postalCode, profile.city, profile.country].filter(Boolean).join(", ") ||
+        [profile.address, profile.postalCode, profile.city, profile.province, profile.country].filter(Boolean).join(", ") ||
         DEFAULT_BRANDING.address
       return {
         ...DEFAULT_BRANDING,
@@ -67,6 +71,7 @@ export async function getBrandingForUser(userId: string): Promise<InvoiceBrandin
         legalName: profile.legalName ?? null,
         taxId: profile.taxId ?? DEFAULT_BRANDING.taxId,
         address: addressLine,
+        province: profile.province ?? null,
         email: profile.email ?? user?.email ?? DEFAULT_BRANDING.email,
         phone: profile.phone ?? DEFAULT_BRANDING.phone,
         iban: profile.iban ?? null,

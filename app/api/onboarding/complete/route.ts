@@ -14,6 +14,7 @@ const schema = z.object({
   postalCode: z.string().max(10).optional(),
   city: z.string().max(100).optional(),
   province: z.string().max(100).optional(),
+  country: z.string().max(100).optional(),
   accentColor: z.string().max(10).optional(),
   actionType: z.enum(["lead", "client"]).nullable().optional(),
   actionName: z.string().max(200).optional(),
@@ -35,15 +36,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Datos no válidos" }, { status: 400 })
     }
 
-    const { businessName, sector, taxId, address, postalCode, city, province,
+    const { businessName, sector, taxId, address, postalCode, city, province, country,
             actionType, actionName, actionEmail, actionPhone } = parsed.data
 
     const userId = session.user.id
 
-    // Full address with province
-    const fullAddress = [address, province].filter(Boolean).join(", ")
-
-    // Update BusinessProfile (upsert)
+    // Update BusinessProfile (upsert) — province/country en sus columnas propias
     await prisma.businessProfile.upsert({
       where: { userId },
       create: {
@@ -51,17 +49,21 @@ export async function POST(req: NextRequest) {
         sector: sector ?? "otro",
         companyName: businessName,
         taxId,
-        address: fullAddress || undefined,
+        address: address || undefined,
         postalCode,
         city,
+        province: province || undefined,
+        country: country || undefined,
       },
       update: {
         ...(sector ? { sector } : {}),
         ...(businessName ? { companyName: businessName } : {}),
         ...(taxId ? { taxId } : {}),
-        ...(fullAddress ? { address: fullAddress } : {}),
+        ...(address ? { address } : {}),
         ...(postalCode ? { postalCode } : {}),
         ...(city ? { city } : {}),
+        ...(province ? { province } : {}),
+        ...(country ? { country } : {}),
       },
     })
 

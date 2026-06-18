@@ -588,6 +588,7 @@ export async function issueInvoice(invoiceId: string, userId: string): Promise<I
     legalName: branding.legalName ?? null,
     taxId: branding.taxId,
     address: branding.address,
+    province: branding.province ?? null,
     email: branding.email,
     phone: branding.phone,
     legalFooter: branding.legalFooter,
@@ -611,6 +612,7 @@ export async function issueInvoice(invoiceId: string, userId: string): Promise<I
           legalName: (inv.Client as { legalName?: string | null } | undefined)?.legalName ?? undefined,
           city: (inv.Client as { city?: string | null } | undefined)?.city ?? undefined,
           postalCode: (inv.Client as { postalCode?: string | null } | undefined)?.postalCode ?? undefined,
+          province: (inv.Client as { province?: string | null } | undefined)?.province ?? undefined,
           country: (inv.Client as { country?: string | null } | undefined)?.country ?? undefined,
         }
   // 3. Load invoice items

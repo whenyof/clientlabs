@@ -191,6 +191,7 @@ model BusinessProfile {
   logoUrl                      String?
   phone                        String?
   postalCode                   String?
+  province                     String?
   taxId                        String?
   updatedAt                    DateTime  @updatedAt
   website                      String?
@@ -389,6 +390,7 @@ model Client {
   address             String?
   postalCode          String?
   city                String?
+  province            String?
   country             String?
   companyName         String?
   legalName           String?

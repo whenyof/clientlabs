@@ -3,16 +3,17 @@
 import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useQueryClient } from "@tanstack/react-query"
-import { Plus, X, User, Building2, Mail, Phone, MapPin, FileText, ChevronDown, ChevronUp } from "lucide-react"
+import { Plus, X, User, Building2, Mail, Phone, FileText, ChevronDown, ChevronUp } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+import { AddressFields } from "@/components/forms/AddressFields"
 
 const EMPTY_FORM = {
   name: "", email: "", phone: "",
   taxId: "",
   companyName: "", legalName: "",
   address: "", city: "",
-  postalCode: "", country: "España",
+  postalCode: "", province: "", country: "España",
   notes: "",
   recargoEquivalencia: false,
 }
@@ -57,6 +58,7 @@ export function CreateClientButton() {
           address: form.address || undefined,
           city: form.city || undefined,
           postalCode: form.postalCode || undefined,
+          province: form.province || undefined,
           country: form.country || undefined,
           notes: form.notes || undefined,
           recargoEquivalencia: form.recargoEquivalencia || undefined,
@@ -195,59 +197,10 @@ export function CreateClientButton() {
                       />
                     </div>
                   </div>
-                  <div>
-                    <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">Dirección</label>
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300" />
-                      <input
-                        value={form.address}
-                        onChange={e => set("address", e.target.value)}
-                        placeholder="Calle y número"
-                        className={cn(inputClass, "pl-9 pr-4")}
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">Ciudad</label>
-                      <input
-                        value={form.city}
-                        onChange={e => set("city", e.target.value)}
-                        placeholder="Madrid"
-                        className={cn(inputClass, "px-4")}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">Código Postal</label>
-                      <input
-                        value={form.postalCode}
-                        onChange={e => set("postalCode", e.target.value)}
-                        placeholder="28001"
-                        className={cn(inputClass, "px-4")}
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">País</label>
-                    <select
-                      value={form.country}
-                      onChange={e => set("country", e.target.value)}
-                      className={cn(inputClass, "px-4 bg-white cursor-pointer")}
-                    >
-                      <option value="España">España</option>
-                      <option value="Portugal">Portugal</option>
-                      <option value="Francia">Francia</option>
-                      <option value="Alemania">Alemania</option>
-                      <option value="Italia">Italia</option>
-                      <option value="Reino Unido">Reino Unido</option>
-                      <option value="Estados Unidos">Estados Unidos</option>
-                      <option value="México">México</option>
-                      <option value="Colombia">Colombia</option>
-                      <option value="Argentina">Argentina</option>
-                      <option value="Chile">Chile</option>
-                      <option value="Otro">Otro</option>
-                    </select>
-                  </div>
+                  <AddressFields
+                    values={form}
+                    onChange={(field, value) => set(field, value)}
+                  />
                   <label className="flex items-start gap-2.5 cursor-pointer pt-1">
                     <input
                       type="checkbox"

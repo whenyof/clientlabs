@@ -1,8 +1,29 @@
 export const maxDuration = 10
 import { NextRequest, NextResponse } from "next/server"
+import { z } from "zod"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { isValidSpanishTaxId } from "@/lib/invoicing/legalValidator"
+
+const perfilSchema = z
+  .object({
+    taxId: z.string().trim().optional(),
+    legalName: z.string().trim().optional(),
+    companyName: z.string().trim().optional(),
+    address: z.string().trim().optional(),
+    city: z.string().trim().optional(),
+    postalCode: z.string().trim().optional(),
+    province: z.string().trim().optional(),
+    country: z.string().trim().optional(),
+    phone: z.string().trim().optional(),
+    ivaRegime: z.string().optional(),
+    epigrafIAE: z.string().trim().optional(),
+  })
+  .refine((d) => !d.taxId || isValidSpanishTaxId(d.taxId), {
+    message: "NIF/CIF no válido (dígito de control incorrecto)",
+    path: ["taxId"],
+  })
 
 export async function GET() {
   const session = await getServerSession(authOptions)
@@ -19,6 +40,8 @@ export async function GET() {
         address: true,
         city: true,
         postalCode: true,
+        province: true,
+        country: true,
         phone: true,
         ivaRegime: true,
         epigrafIAE: true,
@@ -42,17 +65,20 @@ export async function PATCH(request: NextRequest) {
   } catch {
     return NextResponse.json({ error: "JSON inválido" }, { status: 400 })
   }
-  const b = body as Record<string, unknown>
+  const parsed = perfilSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.issues[0]?.message ?? "Datos inválidos" },
+      { status: 400 }
+    )
+  }
+
+  // Solo escribir los campos presentes en el body (undefined = no tocar)
+  const p = parsed.data
   const data: Record<string, unknown> = {}
-  if (typeof b.taxId === "string") data.taxId = b.taxId.trim()
-  if (typeof b.legalName === "string") data.legalName = b.legalName.trim()
-  if (typeof b.companyName === "string") data.companyName = b.companyName.trim()
-  if (typeof b.address === "string") data.address = b.address.trim()
-  if (typeof b.city === "string") data.city = b.city.trim()
-  if (typeof b.postalCode === "string") data.postalCode = b.postalCode.trim()
-  if (typeof b.phone === "string") data.phone = b.phone.trim()
-  if (typeof b.ivaRegime === "string") data.ivaRegime = b.ivaRegime
-  if (typeof b.epigrafIAE === "string") data.epigrafIAE = b.epigrafIAE.trim()
+  for (const key of ["taxId", "legalName", "companyName", "address", "city", "postalCode", "province", "country", "phone", "ivaRegime", "epigrafIAE"] as const) {
+    if (p[key] !== undefined) data[key] = p[key]
+  }
 
   try {
     await prisma.businessProfile.upsert({

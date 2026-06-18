@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { AddressFields } from "@/components/forms/AddressFields"
 
 const defaultData = {
   name: "",
@@ -28,6 +29,7 @@ const defaultData = {
   address: "",
   postalCode: "",
   city: "",
+  province: "",
   country: "España",
   phone: "",
   website: "",
@@ -75,6 +77,7 @@ export function CompanySettings() {
         address: p.address ?? "",
         postalCode: p.postalCode ?? "",
         city: p.city ?? "",
+        province: p.province ?? "",
         country: p.country ?? "España",
         phone: p.phone ?? "",
         website: p.website ?? "",
@@ -98,6 +101,7 @@ export function CompanySettings() {
         address: companyData.address || null,
         city: companyData.city || null,
         postalCode: companyData.postalCode || null,
+        province: companyData.province || null,
         country: companyData.country || null,
         phone: companyData.phone || null,
         email: null,
@@ -121,6 +125,7 @@ export function CompanySettings() {
           address: p.address ?? "",
           postalCode: p.postalCode ?? "",
           city: p.city ?? "",
+          province: p.province ?? "",
           country: p.country ?? "España",
           phone: p.phone ?? "",
           website: p.website ?? "",
@@ -166,6 +171,7 @@ export function CompanySettings() {
           address: companyData.address || null,
           city: companyData.city || null,
           postalCode: companyData.postalCode || null,
+          province: companyData.province || null,
           country: companyData.country || null,
           phone: companyData.phone || null,
           email: null,
@@ -190,6 +196,7 @@ export function CompanySettings() {
               address: p.address ?? "",
               postalCode: p.postalCode ?? "",
               city: p.city ?? "",
+              province: p.province ?? "",
               country: p.country ?? "España",
               phone: p.phone ?? "",
               website: p.website ?? "",
@@ -311,57 +318,12 @@ export function CompanySettings() {
             />
           </div>
 
-          <div className="md:col-span-2 space-y-1.5">
-            <label className="text-sm font-medium text-slate-700">Dirección</label>
-            <input
-              type="text"
-              value={companyData.address}
-              onChange={(e) => setCompanyData({ ...companyData, address: e.target.value })}
+          <div className="md:col-span-2">
+            <AddressFields
+              values={companyData}
+              onChange={(field, value) => setCompanyData((prev) => ({ ...prev, [field]: value }))}
               disabled={!isEditing}
-              className={inputClasses}
             />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-slate-700">Código Postal</label>
-            <input
-              type="text"
-              value={companyData.postalCode}
-              onChange={(e) => setCompanyData({ ...companyData, postalCode: e.target.value })}
-              disabled={!isEditing}
-              className={inputClasses}
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-slate-700">Ciudad</label>
-            <input
-              type="text"
-              value={companyData.city}
-              onChange={(e) => setCompanyData({ ...companyData, city: e.target.value })}
-              disabled={!isEditing}
-              className={inputClasses}
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-slate-700">País</label>
-            <Select
-              value={companyData.country}
-              onValueChange={(v) => setCompanyData({ ...companyData, country: v })}
-              disabled={!isEditing}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Seleccionar..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="España">España</SelectItem>
-                <SelectItem value="México">México</SelectItem>
-                <SelectItem value="Argentina">Argentina</SelectItem>
-                <SelectItem value="Colombia">Colombia</SelectItem>
-                <SelectItem value="Chile">Chile</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
           <div className="space-y-1.5">

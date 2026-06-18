@@ -13,6 +13,7 @@ const ALLOWED_KEYS = [
   "address",
   "city",
   "postalCode",
+  "province",
   "country",
   "phone",
   "email",
@@ -49,6 +50,7 @@ function serializeProfile(profile: {
   address: string | null
   city: string | null
   postalCode: string | null
+  province: string | null
   country: string | null
   phone: string | null
   email: string | null
@@ -72,6 +74,7 @@ function serializeProfile(profile: {
     address: profile.address ?? null,
     city: profile.city ?? null,
     postalCode: profile.postalCode ?? null,
+    province: profile.province ?? null,
     country: profile.country ?? null,
     phone: profile.phone ?? null,
     email: profile.email ?? null,

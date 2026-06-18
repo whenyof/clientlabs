@@ -21,6 +21,7 @@ const clientSelect = {
   address: true,
   postalCode: true,
   city: true,
+  province: true,
   country: true,
   legalType: true
 } as const

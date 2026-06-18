@@ -5,6 +5,7 @@ import { createPortal } from "react-dom"
 import { X } from "lucide-react"
 import { toast } from "sonner"
 import { isValidSpanishTaxId } from "@/lib/invoicing/legalValidator"
+import { AddressFields } from "@/components/forms/AddressFields"
 
 /**
  * Modal to fill a client's missing fiscal data so a COMPLETE (F1) invoice can be
@@ -18,7 +19,7 @@ export function FiscalDataModal({ clientId, onClose, onSaved }: {
   onSaved: () => void
 }) {
   const [mounted, setMounted] = useState(false)
-  const [form, setForm] = useState({ legalName: "", taxId: "", address: "", postalCode: "", city: "", country: "" })
+  const [form, setForm] = useState({ legalName: "", taxId: "", address: "", postalCode: "", city: "", province: "", country: "" })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
@@ -29,7 +30,7 @@ export function FiscalDataModal({ clientId, onClose, onSaved }: {
       .then(r => r.json())
       .then(c => setForm({
         legalName: c.legalName ?? "", taxId: c.taxId ?? "", address: c.address ?? "",
-        postalCode: c.postalCode ?? "", city: c.city ?? "", country: c.country ?? "",
+        postalCode: c.postalCode ?? "", city: c.city ?? "", province: c.province ?? "", country: c.country ?? "",
       }))
       .catch(() => {})
       .finally(() => setLoading(false))
@@ -57,10 +58,6 @@ export function FiscalDataModal({ clientId, onClose, onSaved }: {
   const fields: { key: keyof typeof form; label: string }[] = [
     { key: "legalName", label: "Razón social / Nombre fiscal" },
     { key: "taxId", label: "NIF / CIF" },
-    { key: "address", label: "Dirección fiscal" },
-    { key: "postalCode", label: "Código postal" },
-    { key: "city", label: "Ciudad" },
-    { key: "country", label: "País" },
   ]
 
   if (!mounted) return null
@@ -82,30 +79,38 @@ export function FiscalDataModal({ clientId, onClose, onSaved }: {
         <div className="p-5 space-y-3 max-h-[60vh] overflow-y-auto">
           {loading ? (
             <p className="text-[13px] text-slate-400 animate-pulse py-4 text-center">Cargando...</p>
-          ) : fields.map((f, i) => {
-            const showTaxIdError = f.key === "taxId" && taxIdInvalid
-            return (
-              <div key={f.key}>
-                <label className="block text-[11px] font-medium text-slate-500 mb-1">{f.label}</label>
-                <input
-                  autoFocus={i === 0}
-                  value={form[f.key]}
-                  onChange={e => setForm(prev => ({ ...prev, [f.key]: e.target.value }))}
-                  aria-invalid={showTaxIdError || undefined}
-                  className={`w-full text-[13px] border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${
-                    showTaxIdError
-                      ? "border-red-400 focus:ring-red-300"
-                      : "border-slate-200 focus:ring-[#0F766E]/30"
-                  }`}
-                />
-                {showTaxIdError && (
-                  <p className="mt-1 text-[11px] text-red-500">
-                    NIF/CIF no válido: revisa el formato y el dígito de control.
-                  </p>
-                )}
-              </div>
-            )
-          })}
+          ) : (
+            <>
+              {fields.map((f, i) => {
+                const showTaxIdError = f.key === "taxId" && taxIdInvalid
+                return (
+                  <div key={f.key}>
+                    <label className="block text-[11px] font-medium text-slate-500 mb-1">{f.label}</label>
+                    <input
+                      autoFocus={i === 0}
+                      value={form[f.key]}
+                      onChange={e => setForm(prev => ({ ...prev, [f.key]: e.target.value }))}
+                      aria-invalid={showTaxIdError || undefined}
+                      className={`w-full text-[13px] border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${
+                        showTaxIdError
+                          ? "border-red-400 focus:ring-red-300"
+                          : "border-slate-200 focus:ring-[#0F766E]/30"
+                      }`}
+                    />
+                    {showTaxIdError && (
+                      <p className="mt-1 text-[11px] text-red-500">
+                        NIF/CIF no válido: revisa el formato y el dígito de control.
+                      </p>
+                    )}
+                  </div>
+                )
+              })}
+              <AddressFields
+                values={form}
+                onChange={(field, value) => setForm(prev => ({ ...prev, [field]: value }))}
+              />
+            </>
+          )}
         </div>
         <div className="px-5 pb-5 flex justify-end gap-2">
           <button onClick={onClose} className="px-4 py-2 rounded-lg border border-slate-200 text-[13px] text-slate-600 hover:bg-slate-50">Cancelar</button>

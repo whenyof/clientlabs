@@ -9,6 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { isValidSpanishTaxId } from "@/lib/invoicing/legalValidator"
+import { AddressFields } from "@/components/forms/AddressFields"
 
 const IVA_REGIMES = [
   { value: "GENERAL", label: "Régimen general" },
@@ -24,6 +26,8 @@ type Perfil = {
   address?: string
   city?: string
   postalCode?: string
+  province?: string
+  country?: string
   phone?: string
   ivaRegime?: string
   epigrafIAE?: string
@@ -52,12 +56,19 @@ export default function ConfiguracionFiscalPage() {
   const setField = (key: keyof Perfil) => (value: string) =>
     setPerfil((p) => ({ ...p, [key]: value }))
 
+  // NIF inválido = hay texto pero no pasa el dígito de control
+  const taxIdInvalid = (perfil.taxId?.trim().length ?? 0) > 0 && !isValidSpanishTaxId(perfil.taxId)
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
     setSaved(false)
     if (!perfil.taxId?.trim()) {
       setError("El NIF/DNI es obligatorio para generar los modelos de la AEAT.")
+      return
+    }
+    if (taxIdInvalid) {
+      setError("El NIF/CIF no es válido (dígito de control incorrecto). Revísalo antes de guardar.")
       return
     }
     setSaving(true)
@@ -125,8 +136,16 @@ export default function ConfiguracionFiscalPage() {
                 onChange={set("taxId")}
                 placeholder="12345678A"
                 maxLength={9}
-                className="w-full h-9 rounded-lg border border-slate-200 px-3 text-[13px] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#0F766E]/40 focus:border-[#0F766E]"
+                aria-invalid={taxIdInvalid || undefined}
+                className={`w-full h-9 rounded-lg border px-3 text-[13px] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 ${
+                  taxIdInvalid
+                    ? "border-red-300 focus:ring-red-200 focus:border-red-400"
+                    : "border-slate-200 focus:ring-[#0F766E]/40 focus:border-[#0F766E]"
+                }`}
               />
+              {taxIdInvalid && (
+                <p className="mt-1 text-[11px] text-red-600">Dígito de control incorrecto. Revisa el NIF/CIF.</p>
+              )}
             </div>
             <div>
               <label className="block text-[12px] font-medium text-slate-700 mb-1.5">Nombre completo / Razón social</label>
@@ -144,39 +163,10 @@ export default function ConfiguracionFiscalPage() {
         {/* Dirección fiscal */}
         <div className="p-5 space-y-4">
           <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Dirección fiscal</p>
-          <div>
-            <label className="block text-[12px] font-medium text-slate-700 mb-1.5">Calle y número</label>
-            <input
-              type="text"
-              value={perfil.address ?? ""}
-              onChange={set("address")}
-              placeholder="Calle Mayor 1, 2.º A"
-              className="w-full h-9 rounded-lg border border-slate-200 px-3 text-[13px] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#0F766E]/40 focus:border-[#0F766E]"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[12px] font-medium text-slate-700 mb-1.5">Municipio</label>
-              <input
-                type="text"
-                value={perfil.city ?? ""}
-                onChange={set("city")}
-                placeholder="Madrid"
-                className="w-full h-9 rounded-lg border border-slate-200 px-3 text-[13px] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#0F766E]/40 focus:border-[#0F766E]"
-              />
-            </div>
-            <div>
-              <label className="block text-[12px] font-medium text-slate-700 mb-1.5">Código postal</label>
-              <input
-                type="text"
-                value={perfil.postalCode ?? ""}
-                onChange={set("postalCode")}
-                placeholder="28001"
-                maxLength={5}
-                className="w-full h-9 rounded-lg border border-slate-200 px-3 text-[13px] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#0F766E]/40 focus:border-[#0F766E]"
-              />
-            </div>
-          </div>
+          <AddressFields
+            values={perfil}
+            onChange={(field, value) => setPerfil((p) => ({ ...p, [field]: value }))}
+          />
           <div>
             <label className="block text-[12px] font-medium text-slate-700 mb-1.5">Teléfono</label>
             <input
@@ -224,7 +214,7 @@ export default function ConfiguracionFiscalPage() {
         <div className="p-5">
           <button
             type="submit"
-            disabled={saving}
+            disabled={saving || taxIdInvalid}
             className="inline-flex items-center gap-2 h-9 px-5 rounded-lg bg-[#0F766E] hover:bg-[#0E665F] text-white text-[13px] font-semibold transition-colors disabled:opacity-60"
           >
             {saving ? (

@@ -15,13 +15,14 @@ type Quarter = {
   deadlineMonth: number
   deadlineDay: number
   nextYear?: boolean
+  window: string
 }
 
 const QUARTERS: Quarter[] = [
-  { id: "q1", label: "1T", period: "1.er Trimestre", months: "Ene–Mar", startMonth: 0, endMonth: 2, deadlineMonth: 3, deadlineDay: 20 },
-  { id: "q2", label: "2T", period: "2.º Trimestre", months: "Abr–Jun", startMonth: 3, endMonth: 5, deadlineMonth: 6, deadlineDay: 20 },
-  { id: "q3", label: "3T", period: "3.er Trimestre", months: "Jul–Sep", startMonth: 6, endMonth: 8, deadlineMonth: 9, deadlineDay: 20 },
-  { id: "q4", label: "4T", period: "4.º Trimestre", months: "Oct–Dic", startMonth: 9, endMonth: 11, deadlineMonth: 0, deadlineDay: 30, nextYear: true },
+  { id: "q1", label: "1T", period: "1.er Trimestre", months: "Ene–Mar", startMonth: 0, endMonth: 2, deadlineMonth: 3, deadlineDay: 20, window: "del 1 al 20 de abril" },
+  { id: "q2", label: "2T", period: "2.º Trimestre", months: "Abr–Jun", startMonth: 3, endMonth: 5, deadlineMonth: 6, deadlineDay: 20, window: "del 1 al 20 de julio" },
+  { id: "q3", label: "3T", period: "3.er Trimestre", months: "Jul–Sep", startMonth: 6, endMonth: 8, deadlineMonth: 9, deadlineDay: 20, window: "del 1 al 20 de octubre" },
+  { id: "q4", label: "4T", period: "4.º Trimestre", months: "Oct–Dic", startMonth: 9, endMonth: 11, deadlineMonth: 0, deadlineDay: 30, nextYear: true, window: "del 1 al 30 de enero" },
 ]
 
 type QuarterStatus = "closed" | "active" | "pending" | "deadline-soon" | "overdue"
@@ -338,15 +339,13 @@ export function TrimestralOverview({ userId: _userId }: Props) {
 
       {/* 4) Quarter cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {quarterData.map(({ quarter, status, deadline, daysLeft, ivaResult, irpfResult, loading }) => {
-          const isDisabled = status === "pending"
+        {quarterData.map(({ quarter, status, daysLeft, ivaResult, irpfResult, loading }) => {
           const cardClass = cn(
-            "rounded-xl border bg-white p-5 flex flex-col gap-4 transition-shadow",
+            "rounded-xl border bg-white p-5 flex flex-col gap-4 transition-shadow hover:shadow-md",
             status === "active" && "border-[#0F766E]/30 shadow-[0_0_0_1px_#0F766E20]",
             status === "deadline-soon" && "border-amber-200",
             status === "closed" && "border-slate-100 bg-slate-50/50",
-            status === "pending" && "border-slate-100 bg-slate-50/30 opacity-60",
-            !isDisabled && "hover:shadow-md"
+            status === "pending" && "border-slate-100 bg-slate-50/40"
           )
 
           return (
@@ -393,29 +392,25 @@ export function TrimestralOverview({ userId: _userId }: Props) {
                 </div>
               </div>
 
-              {/* Deadline */}
-              {status !== "pending" && (
-                <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
-                  <Calendar className="h-3 w-3 shrink-0" aria-hidden />
-                  <span>Plazo: {fmtDate(deadline)}</span>
-                </div>
-              )}
+              {/* Ventana de presentación (rango completo) */}
+              <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
+                <Calendar className="h-3 w-3 shrink-0" aria-hidden />
+                <span>Presentación: {quarter.window}</span>
+              </div>
 
-              {/* CTA */}
-              {!isDisabled && (
-                <Link
-                  href={`/dashboard/finance/trimestral/${quarter.id}`}
-                  className={cn(
-                    "mt-auto flex items-center justify-center gap-1.5 text-[12px] font-semibold h-8 rounded-lg transition-colors",
-                    status === "active" || status === "deadline-soon"
-                      ? "bg-[#0F766E] hover:bg-[#0E665F] text-white"
-                      : "border border-slate-200 text-slate-600 hover:bg-slate-50"
-                  )}
-                >
-                  {status === "closed" ? "Ver detalle" : "Preparar declaracion"}
-                  <ChevronRight className="h-3.5 w-3.5" />
-                </Link>
-              )}
+              {/* CTA — solo navega al detalle */}
+              <Link
+                href={`/dashboard/finance/trimestral/${quarter.id}`}
+                className={cn(
+                  "mt-auto flex items-center justify-center gap-1.5 text-[12px] font-semibold h-8 rounded-lg transition-colors",
+                  status === "active" || status === "deadline-soon"
+                    ? "bg-[#0F766E] hover:bg-[#0E665F] text-white"
+                    : "border border-slate-200 text-slate-600 hover:bg-slate-50"
+                )}
+              >
+                Ver declaración
+                <ChevronRight className="h-3.5 w-3.5" />
+              </Link>
             </div>
           )
         })}

@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   Download,
   ExternalLink,
+  ShieldCheck,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { QuarterModelo303 } from "./QuarterModelo303"
@@ -162,6 +163,19 @@ export function QuarterDetail({ quarter }: Props) {
         <ArrowLeft className="h-3.5 w-3.5" />
         Liquidaciones trimestrales
       </Link>
+
+      {/* Disclaimer profesional — orientativo */}
+      <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 flex items-start gap-3">
+        <div className="w-8 h-8 rounded-lg bg-[#0F766E]/10 flex items-center justify-center shrink-0">
+          <ShieldCheck className="h-4 w-4 text-[#0F766E]" aria-hidden />
+        </div>
+        <p className="text-[12px] text-slate-600 leading-relaxed">
+          <span className="font-semibold text-slate-800">Información orientativa.</span>{" "}
+          Los importes son una estimación a partir de tus datos en ClientLabs. ClientLabs no presenta
+          este modelo ante la AEAT ni sustituye el asesoramiento fiscal. Revisa las cifras con tu asesor
+          antes de presentar.
+        </p>
+      </div>
 
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -342,7 +356,7 @@ function StatusChip({ status, daysLeft }: { status: string; daysLeft: number }) 
   }
   return (
     <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-50 text-slate-400 uppercase tracking-wide">
-      Pendiente
+      Aún no iniciado
     </span>
   )
 }

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { MARKETING_NAV, PREVIEW_URL } from "@/lib/site-config"
+import { MARKETING_NAV, LOGIN_HREF, START_HREF } from "@/lib/site-config"
 import { Menu } from "./icons"
 
 function BrandMark() {
@@ -48,10 +48,10 @@ export default function Navbar() {
         </nav>
 
         <div className="nav-right">
-          <a href={PREVIEW_URL} className="signin">
+          <a href={LOGIN_HREF} className="signin">
             Iniciar sesión
           </a>
-          <a href={PREVIEW_URL} className="btn btn-primary">
+          <a href={START_HREF} className="btn btn-primary">
             Empieza gratis
           </a>
           <button
@@ -74,10 +74,10 @@ export default function Navbar() {
               {l.label}
             </Link>
           ))}
-          <a href={PREVIEW_URL} className="mm-link" onClick={() => setOpen(false)}>
+          <a href={LOGIN_HREF} className="mm-link" onClick={() => setOpen(false)}>
             Iniciar sesión
           </a>
-          <a href={PREVIEW_URL} className="btn btn-primary btn-lg" onClick={() => setOpen(false)}>
+          <a href={START_HREF} className="btn btn-primary btn-lg" onClick={() => setOpen(false)}>
             Empieza gratis
           </a>
         </div>

@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { useState } from "react"
+import { PLANS as MKT_PLANS, formatEUR } from "@/lib/pricing"
 
 type UserData = {
   id: string
@@ -29,31 +30,24 @@ type PlanChangeDialogProps = {
   onConfirm: (userId: string, newPlan: "STARTER" | "PRO" | "BUSINESS") => Promise<void>
 }
 
-const PLANS = [
-  {
-    value: "STARTER",
-    label: "Básico",
-    description: "Para autónomos que empiezan — 14,99€/mes",
-    color: "bg-sky-500/20 text-sky-400 border-sky-500/30",
-  },
-  {
-    value: "PRO",
-    label: "Pro",
-    description: "Para pymes — 24,99€/mes",
-    color: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-  },
-  {
-    value: "BUSINESS",
-    label: "Negocio",
-    description: "Para empresas en crecimiento — 39,99€/mes",
-    color: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-  },
-] as const
+type PlanValue = "STARTER" | "PRO"
 
-type PlanValue = typeof PLANS[number]["value"]
+const PLAN_COLORS: Record<PlanValue, string> = {
+  STARTER: "bg-sky-500/20 text-sky-400 border-sky-500/30",
+  PRO: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+}
+
+const PLANS = MKT_PLANS.map((p) => ({
+  value: p.stripePlan as PlanValue,
+  label: p.name,
+  description: `${p.tagline} — ${formatEUR(p.monthlyEUR)}/mes`,
+  color: PLAN_COLORS[p.stripePlan as PlanValue],
+}))
 
 export function PlanChangeDialog({ open, onOpenChange, user, onConfirm }: PlanChangeDialogProps) {
-  const normalizedCurrent: PlanValue = (user.plan === "FREE" || user.plan === "TRIAL") ? "STARTER" : user.plan as PlanValue
+  // FREE/TRIAL → Autónomo; legacy BUSINESS → Pro.
+  const normalizedCurrent: PlanValue =
+    user.plan === "PRO" || user.plan === "BUSINESS" ? "PRO" : "STARTER"
   const [loading, setLoading] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState<PlanValue>(normalizedCurrent)
 

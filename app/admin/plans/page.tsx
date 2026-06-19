@@ -3,62 +3,32 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Shield, Users, TrendingUp } from "lucide-react"
 import Link from "next/link"
+import { PLANS as MKT_PLANS, formatEUR } from "@/lib/pricing"
 
 async function getPlanStats() {
   try {
-    const [starterCount, proCount, businessCount, totalUsers] = await Promise.all([
+    // Autónomo = STARTER (+ FREE/TRIAL); Pro = PRO (+ legacy BUSINESS).
+    const [autonomoCount, proCount, totalUsers] = await Promise.all([
       prisma.user.count({ where: { plan: { in: ["FREE", "TRIAL", "STARTER"] } } }),
-      prisma.user.count({ where: { plan: "PRO" } }),
-      prisma.user.count({ where: { plan: "BUSINESS" } }),
+      prisma.user.count({ where: { plan: { in: ["PRO", "BUSINESS"] } } }),
       prisma.user.count(),
     ])
+    const counts: Record<string, number> = { STARTER: autonomoCount, PRO: proCount }
+    const colors: Record<string, string> = {
+      STARTER: "bg-sky-500/20 text-sky-400 border-sky-500/30",
+      PRO: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+    }
 
     return {
-      plans: [
-        {
-          name: "STARTER",
-          label: "Básico",
-          description: "Para autónomos que empiezan — 14,99€/mes",
-          userCount: starterCount,
-          color: "bg-sky-500/20 text-sky-400 border-sky-500/30",
-          features: [
-            "1 usuario · 100 leads · 50 clientes",
-            "20 facturas al mes",
-            "Verifactu incluido",
-            "3 automatizaciones activas",
-            "Soporte por email",
-          ]
-        },
-        {
-          name: "PRO",
-          label: "Pro",
-          description: "Para pymes — 24,99€/mes",
-          userCount: proCount,
-          color: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-          features: [
-            "3 usuarios · 500 leads · 200 clientes",
-            "100 facturas al mes",
-            "Proyectos",
-            "15 automatizaciones activas",
-            "Soporte prioritario",
-          ]
-        },
-        {
-          name: "BUSINESS",
-          label: "Negocio",
-          description: "Para empresas en crecimiento — 39,99€/mes",
-          userCount: businessCount,
-          color: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-          features: [
-            "5 usuarios · Todo ilimitado",
-            "Proyectos",
-            "Automatizaciones ilimitadas",
-            "Email marketing",
-            "Soporte WhatsApp directo",
-          ]
-        }
-      ],
-      totalUsers
+      plans: MKT_PLANS.map((p) => ({
+        name: p.stripePlan,
+        label: p.name,
+        description: `${p.tagline} — ${formatEUR(p.monthlyEUR)}/mes`,
+        userCount: counts[p.stripePlan] ?? 0,
+        color: colors[p.stripePlan] ?? "bg-white/10 text-white border-white/20",
+        features: p.features,
+      })),
+      totalUsers,
     }
   } catch (error) {
     console.error("Error fetching plan stats:", error)
@@ -80,7 +50,7 @@ export default async function AdminPlansPage() {
       </div>
 
       {/* Plan Distribution Overview */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2">
         {plans.map((plan) => (
           <Card key={plan.name} className="bg-white/5 border-white/10">
             <CardHeader>
@@ -146,39 +116,33 @@ export default async function AdminPlansPage() {
               </thead>
               <tbody>
                 <tr className="border-b border-white/10">
-                  <td className="py-3 px-4 text-white/60">Dashboard Access</td>
-                  <td className="text-center py-3 px-4 text-green-400">✓</td>
-                  <td className="text-center py-3 px-4 text-green-400">✓</td>
-                  <td className="text-center py-3 px-4 text-green-400">✓</td>
-                </tr>
-                <tr className="border-b border-white/10">
-                  <td className="py-3 px-4 text-white/60">Lead Tracking</td>
-                  <td className="text-center py-3 px-4 text-white/40">Limited</td>
+                  <td className="py-3 px-4 text-white/60">CRM, facturación, impuestos, tareas</td>
                   <td className="text-center py-3 px-4 text-green-400">✓</td>
                   <td className="text-center py-3 px-4 text-green-400">✓</td>
                 </tr>
                 <tr className="border-b border-white/10">
-                  <td className="py-3 px-4 text-white/60">AI Insights</td>
+                  <td className="py-3 px-4 text-white/60">Email marketing</td>
                   <td className="text-center py-3 px-4 text-red-400">✗</td>
                   <td className="text-center py-3 px-4 text-green-400">✓</td>
+                </tr>
+                <tr className="border-b border-white/10">
+                  <td className="py-3 px-4 text-white/60">Automatizaciones</td>
+                  <td className="text-center py-3 px-4 text-red-400">✗</td>
                   <td className="text-center py-3 px-4 text-green-400">✓</td>
                 </tr>
                 <tr className="border-b border-white/10">
-                  <td className="py-3 px-4 text-white/60">Priority Support</td>
+                  <td className="py-3 px-4 text-white/60">Asistente de IA</td>
                   <td className="text-center py-3 px-4 text-red-400">✗</td>
-                  <td className="text-center py-3 px-4 text-green-400">✓</td>
                   <td className="text-center py-3 px-4 text-green-400">✓</td>
                 </tr>
                 <tr className="border-b border-white/10">
-                  <td className="py-3 px-4 text-white/60">Custom Integrations</td>
-                  <td className="text-center py-3 px-4 text-red-400">✗</td>
+                  <td className="py-3 px-4 text-white/60">Soporte prioritario</td>
                   <td className="text-center py-3 px-4 text-red-400">✗</td>
                   <td className="text-center py-3 px-4 text-green-400">✓</td>
                 </tr>
                 <tr>
-                  <td className="py-3 px-4 text-white/60">User Seats</td>
+                  <td className="py-3 px-4 text-white/60">Usuarios</td>
                   <td className="text-center py-3 px-4 text-white/40">1</td>
-                  <td className="text-center py-3 px-4 text-white/40">3</td>
                   <td className="text-center py-3 px-4 text-white/40">5</td>
                 </tr>
               </tbody>

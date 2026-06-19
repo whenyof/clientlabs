@@ -16,41 +16,43 @@ export const PLAN_LIMITS = {
     storageGB: 1,
   },
   TRIAL: {
-    // 14 días con acceso nivel Pro
-    maxLeadsTotal: 500,
-    maxClients: 200,
-    maxProviders: 50,
-    maxInvoicesPerMonth: 100,
+    // Trial se resuelve a Autónomo (STARTER) en effectivePlan — sin acceso Pro gratis.
+    maxLeadsTotal: -1,
+    maxClients: -1,
+    maxProviders: -1,
+    maxInvoicesPerMonth: -1,
     maxTasks: -1,
-    maxTemplates: 5,
-    maxActiveAutomations: 15,
-    maxUsers: 3,
-    maxForms: -1,
-    storageGB: 10,
-  },
-  STARTER: {
-    maxLeadsTotal: 100,
-    maxClients: 50,
-    maxProviders: 10,
-    maxInvoicesPerMonth: 20,
-    maxTasks: 50,
-    maxTemplates: 1,
-    maxActiveAutomations: 3,
+    maxTemplates: -1,
+    maxActiveAutomations: -1,
     maxUsers: 1,
     maxForms: -1,
-    storageGB: 1,
+    storageGB: -1,
+  },
+  STARTER: {
+    // Autónomo — todo abierto salvo el nº de usuarios (lo demás no se capa entre planes).
+    maxLeadsTotal: -1,
+    maxClients: -1,
+    maxProviders: -1,
+    maxInvoicesPerMonth: -1,
+    maxTasks: -1,
+    maxTemplates: -1,
+    maxActiveAutomations: -1,
+    maxUsers: 1,
+    maxForms: -1,
+    storageGB: -1,
   },
   PRO: {
-    maxLeadsTotal: 500,
-    maxClients: 200,
-    maxProviders: 50,
-    maxInvoicesPerMonth: 100,
+    // Pro — todo abierto, hasta 5 usuarios.
+    maxLeadsTotal: -1,
+    maxClients: -1,
+    maxProviders: -1,
+    maxInvoicesPerMonth: -1,
     maxTasks: -1,
-    maxTemplates: 5,
-    maxActiveAutomations: 15,
-    maxUsers: 3,
+    maxTemplates: -1,
+    maxActiveAutomations: -1,
+    maxUsers: 5,
     maxForms: -1,
-    storageGB: 10,
+    storageGB: -1,
   },
   BUSINESS: {
     maxLeadsTotal: -1,
@@ -100,7 +102,8 @@ export const PLAN_FEATURES = {
     emailMarketing: false,
   },
   TRIAL: {
-    // 14 días con acceso nivel Pro
+    // Trial se resuelve a Autónomo (STARTER) en effectivePlan; esta fila queda
+    // como respaldo equivalente a Autónomo (sin las 3 funciones Pro).
     leads: true,
     clients: true,
     providers: true,
@@ -110,10 +113,10 @@ export const PLAN_FEATURES = {
     dashboard: true,
     csvExport: true,
     tasks: true,
-    ai: true,
-    aiScoring: true,
+    ai: false,
+    aiScoring: false,
     aiPredictions: false,
-    automations: true,
+    automations: false,
     projects: true,
     customDashboards: true,
     calendarSync: true,
@@ -127,11 +130,13 @@ export const PLAN_FEATURES = {
     exportPdf: true,
     exportExcel: false,
     activityFull: true,
-    prioritySupport: true,
+    prioritySupport: false,
     dedicatedSupport: false,
-    emailMarketing: true,
+    emailMarketing: false,
   },
   STARTER: {
+    // Autónomo — todo el producto operativo abierto; las 3 funciones Pro (ai,
+    // automations, emailMarketing) quedan en false. Solo se capan esas + nº usuarios.
     leads: true,
     clients: true,
     providers: true,
@@ -144,7 +149,7 @@ export const PLAN_FEATURES = {
     ai: false,
     aiScoring: false,
     aiPredictions: false,
-    automations: true,
+    automations: false,
     projects: false,
     customDashboards: false,
     calendarSync: false,
@@ -191,7 +196,7 @@ export const PLAN_FEATURES = {
     activityFull: true,
     prioritySupport: true,
     dedicatedSupport: false,
-    emailMarketing: false,
+    emailMarketing: true,
   },
   BUSINESS: {
     leads: true,
@@ -259,13 +264,22 @@ export function planAtLeast(userPlan: PlanType, requiredPlan: PlanType): boolean
 
 export function planDisplayName(plan: PlanType | string): string {
   const names: Record<string, string> = {
-    FREE: "Básico",
-    STARTER: "Básico",
-    TRIAL: "Prueba (Pro)",
+    FREE: "Autónomo",
+    STARTER: "Autónomo",
+    TRIAL: "Prueba",
     PRO: "Pro",
     BUSINESS: "Negocio",
   }
   return names[plan] ?? plan
+}
+
+/**
+ * Single-source reparto check: does `plan` include `feature`?
+ * Server enforcement and UI both go through this (alias of hasFeature) so the
+ * plan/feature split lives in exactly one place (PLAN_FEATURES above).
+ */
+export function planIncludes(plan: PlanType, feature: FeatureKey): boolean {
+  return hasFeature(plan, feature)
 }
 
 export function upgradeMessage(feature: FeatureKey): string {
@@ -274,7 +288,7 @@ export function upgradeMessage(feature: FeatureKey): string {
     ai: "La inteligencia artificial está disponible desde el plan Pro.",
     aiScoring: "El scoring de leads con IA está disponible desde el plan Pro.",
     aiPredictions: "Las predicciones de IA están disponibles en el plan Negocio.",
-    automations: "Las automatizaciones están disponibles desde el plan Básico.",
+    automations: "Las automatizaciones están disponibles en el plan Pro.",
     projects: "Los proyectos están disponibles desde el plan Pro.",
     customDashboards: "Los dashboards personalizables están disponibles desde el plan Pro.",
     calendarSync: "La sincronización con calendario está disponible desde el plan Pro.",
@@ -283,7 +297,7 @@ export function upgradeMessage(feature: FeatureKey): string {
     teamRoles: "Los roles de equipo están disponibles en el plan Negocio.",
     advancedReports: "Los informes avanzados están disponibles en el plan Negocio.",
     advancedSegmentation: "La segmentación avanzada está disponible en el plan Negocio.",
-    emailMarketing: "El email marketing está disponible en el plan Negocio.",
+    emailMarketing: "El email marketing está disponible en el plan Pro.",
     exportPdf: "La exportación en PDF está disponible desde el plan Pro.",
     exportExcel: "La exportación en Excel está disponible en el plan Negocio.",
   }

@@ -14,6 +14,8 @@ import { AutomationsPanel } from "./components/AutomationsPanel"
 import { AssistantSettings } from "./components/AssistantSettings"
 import { AssistantTimeline } from "./components/AssistantTimeline"
 import { ChatWindow } from "./components/ChatWindow"
+import { usePlan } from "@/hooks/use-plan"
+import { UpgradeWall } from "@/components/ui/upgrade-wall"
 import {
   LightBulbIcon,
   UserGroupIcon,
@@ -32,6 +34,7 @@ import {
 } from "@heroicons/react/24/outline"
 
 export default function AiAssistantPage() {
+  const { can } = usePlan()
   const { labels } = useSectorConfig()
   const t = labels.aiAssistant.tabs
   const [activeTab, setActiveTab] = useState<'overview' | 'insights' | 'leads' | 'predictions' | 'recommendations' | 'automations' | 'settings' | 'timeline' | 'chat'>('overview')
@@ -80,6 +83,14 @@ export default function AiAssistantPage() {
       default:
         return <AssistantKPIs />
     }
+  }
+
+  if (!can("ai")) {
+    return (
+      <DashboardContainer>
+        <UpgradeWall feature="El Asistente de IA" requiredPlan="Pro" />
+      </DashboardContainer>
+    )
   }
 
   return (

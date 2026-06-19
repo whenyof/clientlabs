@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { gateFeature } from "@/lib/api-gate"
 
 async function getUserId() {
   const session = await getServerSession(authOptions)
@@ -36,6 +37,8 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const __planGate = await gateFeature("emailMarketing")
+  if (!__planGate.allowed) return __planGate.error!
   try {
     const userId = await getUserId()
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })

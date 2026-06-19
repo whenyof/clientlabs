@@ -10,6 +10,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 import { gateLimit } from '@/lib/api-gate'
+import { gateFeature } from "@/lib/api-gate"
 
 /* ── GET /api/automations ───────────────────────────── */
 export async function GET() {
@@ -58,6 +59,8 @@ export async function GET() {
 
 /* ── POST /api/automations ──────────────────────────── */
 export async function POST(request: NextRequest) {
+  const __planGate = await gateFeature("automations")
+  if (!__planGate.allowed) return __planGate.error!
     try {
         const limitGate = await gateLimit("maxActiveAutomations", (uid) =>
             prisma.automation.count({ where: { userId: uid, active: true } })

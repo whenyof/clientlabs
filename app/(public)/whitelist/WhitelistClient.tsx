@@ -159,7 +159,7 @@ const OFERTA_ITEMS = [
   {
     icon: Gift,
     title: "1 mes gratis",
-    desc: "Acceso completo el primer mes.\nSin tarjeta. Sin compromiso.",
+    desc: "Acceso completo el primer mes.\nSin compromiso. Cancela cuando quieras.",
   },
   {
     icon: Lock,
@@ -423,7 +423,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "¿Cuánto cuesta ClientLabs?",
-    a: "ClientLabs tiene planes desde 24,99€/mes con IVA incluido. Los early adopters que se apunten antes del lanzamiento consiguen un 50% de descuento de por vida. Habrá una prueba gratuita de 14 días con acceso completo sin necesidad de tarjeta de crédito.",
+    a: "ClientLabs tiene planes desde 17,99€/mes con IVA incluido. Los early adopters que se apunten antes del lanzamiento consiguen un 50% de descuento de por vida. Habrá una prueba gratuita de 14 días con acceso completo.",
   },
   {
     q: "¿ClientLabs cumple con Verifactu y la normativa fiscal española?",

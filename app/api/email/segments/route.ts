@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
+import { gateFeature } from "@/lib/api-gate"
 
 const ConditionSchema = z.object({
   field: z.enum(["all", "leadStatus", "converted", "source", "subscribedBefore", "subscribedAfter", "openedCampaign"]),
@@ -31,6 +32,8 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const __planGate = await gateFeature("emailMarketing")
+  if (!__planGate.allowed) return __planGate.error!
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) return NextResponse.json({ error: "No autorizado" }, { status: 401 })
 

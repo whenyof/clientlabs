@@ -7,6 +7,7 @@ import "./globals.css"
 import { WebVitals } from "./components/WebVitals"
 import Providers from "./providers"
 import QueryProvider from "@/providers/QueryProvider"
+import { PLANS, PRICE_RANGE, schemaPrice } from "@/lib/pricing"
 
 import { ToastProvider } from "@/components/ui/toast"
 import { ThemeProvider } from "@/components/ThemeProvider"
@@ -152,10 +153,10 @@ const softwareApplicationSchema = {
   description: "Plataforma de gestión todo en uno para autónomos y pymes en España. Centraliza leads, clientes, proveedores, facturas, presupuestos, albaranes, tareas, proyectos y automatizaciones en un solo lugar. Pensada para los 3,4 millones de autónomos en España.",
   offers: {
     "@type": "AggregateOffer",
-    lowPrice: "24.99",
-    highPrice: "79.99",
+    lowPrice: schemaPrice(PRICE_RANGE.low),
+    highPrice: schemaPrice(PRICE_RANGE.high),
     priceCurrency: "EUR",
-    offerCount: "3",
+    offerCount: String(PLANS.length),
   },
   featureList: [
     "Gestión de leads y pipeline de ventas",

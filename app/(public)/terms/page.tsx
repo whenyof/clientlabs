@@ -68,7 +68,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-[18px] font-semibold text-white mb-3">5. Periodo de prueba</h2>
             <p>
-              ClientLabs ofrece 14 días de prueba gratuita sin necesidad de tarjeta de crédito.
+              ClientLabs ofrece 14 días de prueba gratuita.
               Al finalizar el periodo de prueba deberás elegir un plan para continuar usando el servicio.
             </p>
           </section>

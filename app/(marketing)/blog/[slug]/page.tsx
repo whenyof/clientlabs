@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, ArrowRight } from "lucide-react"
-import { PREVIEW_URL, SITE_URL } from "@/lib/site-config"
+import { START_HREF, SITE_URL } from "@/lib/site-config"
 import { ARTICLES } from "@/app/blog/data"
 import { ARTICLE_CONTENT } from "@/app/blog/content"
 
@@ -103,7 +103,7 @@ export default async function BlogArticlePage({ params: paramsPromise }: Props) 
         <div className="mt-16 p-6 bg-[#E1F5EE] rounded-xl border border-[#0F766E]/20">
           <p className="text-[14px] font-semibold text-[#0B1F2A] mb-1">Gestiona todo esto desde un solo panel</p>
           <p className="text-[13px] text-slate-600 mb-4">ClientLabs centraliza leads, clientes y facturación para autónomos españoles.</p>
-          <a href={PREVIEW_URL} className="inline-block px-5 py-2 bg-[#0F766E] text-white text-[13px] font-semibold rounded-lg hover:bg-[#0E665F] transition-colors">
+          <a href={START_HREF} className="inline-block px-5 py-2 bg-[#0F766E] text-white text-[13px] font-semibold rounded-lg hover:bg-[#0E665F] transition-colors">
             Empezar gratis
           </a>
         </div>

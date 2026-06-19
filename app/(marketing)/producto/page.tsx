@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { PREVIEW_URL, SITE_URL } from "@/lib/site-config"
+import { START_HREF, SITE_URL } from "@/lib/site-config"
 import { ArrowRight, Check, CheckBold, Globe, Lock, Shield } from "@/components/marketing/icons"
 import ProductIndex from "@/components/marketing/ProductIndex"
 
@@ -39,7 +39,7 @@ export default function ProductoPage() {
             que usarás desde el primer día.
           </p>
           <div className="hero-ctas reveal">
-            <a href={PREVIEW_URL} className="btn btn-primary btn-lg">
+            <a href={START_HREF} className="btn btn-primary btn-lg">
               Empieza gratis
               <ArrowRight className="arr" />
             </a>
@@ -399,7 +399,7 @@ export default function ProductoPage() {
             <div className="step reveal">
               <div className="s-n">01</div>
               <h3>Crea tu cuenta</h3>
-              <p>Te registras gratis, sin tarjeta. En un minuto estás dentro y con todo listo para configurar.</p>
+              <p>Te registras gratis en un minuto y tienes todo listo para empezar a configurar.</p>
             </div>
             <div className="step reveal">
               <div className="s-n">02</div>
@@ -427,7 +427,7 @@ export default function ProductoPage() {
           <h2 className="reveal">¿Lo vemos en tu negocio?</h2>
           <p className="reveal">Crea tu cuenta gratis o pídeme una demo y te lo enseño en directo.</p>
           <div className="hero-ctas reveal">
-            <a href={PREVIEW_URL} className="btn btn-primary btn-lg">
+            <a href={START_HREF} className="btn btn-primary btn-lg">
               Empieza gratis
               <ArrowRight className="arr" />
             </a>

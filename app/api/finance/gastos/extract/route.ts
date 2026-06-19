@@ -7,6 +7,7 @@ import type { UploadApiResponse } from "cloudinary"
 import cloudinary from "@/lib/cloudinary"
 import Anthropic from "@anthropic-ai/sdk"
 import { checkGastosExtractLimit } from "@/lib/rate-limit"
+import { gateFeature } from "@/lib/api-gate"
 
 const MAX_SIZE = 10 * 1024 * 1024 // 10MB
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
@@ -70,6 +71,8 @@ function uploadToCloudinary(buffer: Buffer, filename: string): Promise<UploadApi
  * Nunca guarda el gasto: solo devuelve datos para pre-rellenar el formulario.
  */
 export async function POST(req: NextRequest) {
+  const __planGate = await gateFeature("ai")
+  if (!__planGate.allowed) return __planGate.error!
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 })

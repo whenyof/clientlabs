@@ -118,7 +118,7 @@ function buildCouponEmail(): string {
         </table>
 
         <p style="margin:0;font-size:12px;color:#9aa5b1;line-height:1.5;text-align:center;">
-          14 dias gratis &nbsp;·&nbsp; Sin tarjeta al empezar &nbsp;·&nbsp; Cancela cuando quieras
+          14 dias gratis &nbsp;·&nbsp; Cancela cuando quieras
         </p>
 
       </td></tr>

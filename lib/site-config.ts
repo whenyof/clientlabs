@@ -1,14 +1,23 @@
 /**
- * Central config for the public marketing site.
+ * Central config for the public marketing site CTAs.
  *
- * PREVIEW_URL is the single source of truth for every CTA that enters the app
- * (Empieza gratis / Empezar / Iniciar sesión …). The app is gated behind a
- * preview key during pre-launch — when the gate is removed, change this one
- * constant (e.g. to "/auth" or "https://app.clientlabs.io") and every CTA
- * across the marketing site updates.
+ * The funnel is internal now that Stripe is live:
+ *  - LOGIN_HREF  → sign in.
+ *  - START_HREF  → generic "Empieza gratis" → the pricing page to pick a plan.
+ *  - checkoutHref(plan) → the plan chooser deep-linked to ONE plan, which
+ *    auto-starts that plan's Stripe checkout (logging in first if needed).
+ * (Previously these pointed to an external clientlabs.io/preview URL that served
+ * the old landing — that's the bug this replaces.)
  */
-export const PREVIEW_URL =
-  "https://clientlabs.io/preview?key=clientlabs-preview-2026"
+export const LOGIN_HREF = "/auth"
+export const START_HREF = "/precios"
+
+export function checkoutHref(
+  stripePlan: "STARTER" | "PRO",
+  period: "monthly" | "yearly" = "monthly"
+): string {
+  return `/plan?plan=${stripePlan}&period=${period}`
+}
 
 export const SITE_URL = "https://clientlabs.io"
 export const CONTACT_EMAIL = "hola@clientlabs.io"

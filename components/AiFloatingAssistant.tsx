@@ -12,6 +12,7 @@ import {
 } from "@heroicons/react/24/outline"
 import { useRouter, usePathname } from "next/navigation"
 import { useAssistant } from "@/context/AssistantContext"
+import { usePlan } from "@/hooks/use-plan"
 import { cn } from "@/lib/utils"
 
 export function AiFloatingAssistant() {
@@ -20,6 +21,7 @@ export function AiFloatingAssistant() {
  const router = useRouter()
  const pathname = usePathname()
  const { suggestions } = useAssistant()
+ const { can } = usePlan()
  const [position, setPosition] = useState({ x: 0, y: 0 })
 
  useEffect(() => {
@@ -67,6 +69,8 @@ export function AiFloatingAssistant() {
  }
 
  if (!isDashboard) return null
+ // Asistente de IA es función Pro — oculto para Autónomo (el upsell vive en /dashboard/ai-assistant)
+ if (!can("ai")) return null
 
  return (
  <>

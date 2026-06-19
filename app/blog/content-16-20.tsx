@@ -151,7 +151,7 @@ export const ARTICLES_16_20: Record<string, React.ReactNode> = {
       <p>Si llevas años facturando con Excel y "no ha pasado nada", tienes razón: hasta ahora, el riesgo era principalmente de errores y sanciones por imprecisiones fiscales. Pero Verifactu cambia el escenario completamente.</p>
       <p>El Reglamento de Facturación exige que a partir de 2025 (para grandes empresas) y 2026-2027 (para autónomos y pymes, según el calendario definitivo de la AEAT) todo software de facturación cumpla los requisitos técnicos de la factura verificada. Excel no puede cumplirlos. Punto.</p>
       <p>Esperar al último momento significa migrar con prisas, sin tiempo para aprender la herramienta, y con el riesgo de emitir facturas no conformes durante el período de transición. Los autónomos que cambien ahora tienen tiempo de familiarizarse con el sistema, importar sus datos con calma y empezar 2027 completamente preparados.</p>
-      <p>Si todavía usas Excel para facturar y quieres hacer el cambio sin complicaciones, <Link href="/register">empieza gratis en ClientLabs</Link>. En menos de una hora tendrás tu primera factura legal emitida. Sin tarjeta de crédito, sin compromiso.</p>
+      <p>Si todavía usas Excel para facturar y quieres hacer el cambio sin complicaciones, <Link href="/register">empieza gratis en ClientLabs</Link>. En menos de una hora tendrás tu primera factura legal emitida. Sin compromiso: cancela cuando quieras.</p>
       <p>Consulta los <Link href="/precios">planes disponibles</Link> para encontrar el que mejor se adapta a tu volumen de facturación.</p>
     </div>
   ),
@@ -272,7 +272,7 @@ export const ARTICLES_16_20: Record<string, React.ReactNode> = {
       <p>Una vez emitida y enviada una factura, no se puede editar directamente. Esto es intencional: modificar una factura ya emitida sin dejar rastro es una irregularidad fiscal. La solución correcta es una <strong>factura rectificativa</strong>.</p>
       <p>En ClientLabs, accede a la factura que quieres corregir y haz clic en <strong>Crear rectificativa</strong>. El sistema generará automáticamente una factura rectificativa que referencia a la original, con los datos corregidos. La factura original queda en el historial y la rectificativa queda vinculada a ella, manteniendo la trazabilidad completa.</p>
       <p>Las rectificativas también tienen numeración correlativa propia (generalmente con un prefijo "R" o en una serie separada). ClientLabs lo gestiona automáticamente.</p>
-      <p>Si aún no tienes tu cuenta, <Link href="/register">empieza gratis en ClientLabs</Link> y emite tu primera factura legal en menos de 10 minutos. Sin tarjeta de crédito. Consulta los <Link href="/precios">planes disponibles</Link> si quieres ver qué incluye cada opción.</p>
+      <p>Si aún no tienes tu cuenta, <Link href="/register">empieza gratis en ClientLabs</Link> y emite tu primera factura legal en menos de 10 minutos. Consulta los <Link href="/precios">planes disponibles</Link> si quieres ver qué incluye cada opción.</p>
     </div>
   ),
 
@@ -524,7 +524,7 @@ export const ARTICLES_16_20: Record<string, React.ReactNode> = {
   "migrar-excel-clientlabs": (
     <div>
       <p>Si llevas tiempo facturando con Excel y has decidido dar el paso a un software profesional, la buena noticia es que la migración es mucho más sencilla de lo que parece. Este tutorial te guía por el proceso completo, paso a paso, con tiempos reales y soluciones a los problemas más comunes.</p>
-      <p>No necesitas conocimientos técnicos. No necesitas tarjeta de crédito. Y en la mayoría de los casos, en menos de una hora tendrás tu cuenta configurada y estarás listo para emitir tu primera factura legal en ClientLabs.</p>
+      <p>No necesitas conocimientos técnicos. Y en la mayoría de los casos, en menos de una hora tendrás tu cuenta configurada y estarás listo para emitir tu primera factura legal en ClientLabs.</p>
 
       <h2>Por qué migrar ahora (y no en 2027)</h2>
       <p>Hay dos razones de peso para no esperar:</p>
@@ -553,8 +553,8 @@ export const ARTICLES_16_20: Record<string, React.ReactNode> = {
       <p>Abre el CSV generado con un editor de texto (Bloc de notas o TextEdit) y comprueba que los datos se ven correctamente, sin caracteres extraños ni columnas mezcladas. Si la codificación de caracteres es incorrecta (ves símbolos raros en lugar de tildes o eñes), guarda el archivo en codificación UTF-8.</p>
       <p>En Google Sheets, el proceso es aún más sencillo: <strong>Archivo &gt; Descargar &gt; Valores separados por comas (.csv)</strong>.</p>
 
-      <h2>Paso 2: Crea tu cuenta en ClientLabs (gratis, sin tarjeta)</h2>
-      <p>Accede a <Link href="/register">clientlabs.io/register</Link> e introduce tu email y una contraseña. El proceso completo tarda menos de 2 minutos. No necesitas tarjeta de crédito: los primeros 14 días son completamente gratis con acceso al plan Pro completo.</p>
+      <h2>Paso 2: Crea tu cuenta en ClientLabs (gratis)</h2>
+      <p>Accede a <Link href="/register">clientlabs.io/register</Link> e introduce tu email y una contraseña. El proceso completo tarda menos de 2 minutos. Los primeros 14 días son completamente gratis con acceso al plan Pro completo.</p>
       <p>Una vez creada la cuenta, recibirás un email de verificación. Haz clic en el enlace del email para confirmar tu dirección. Si no recibes el email en 2 minutos, revisa la carpeta de spam.</p>
       <p>Tras la verificación, accede al panel principal de ClientLabs. El asistente de configuración inicial te guiará por los primeros pasos.</p>
 

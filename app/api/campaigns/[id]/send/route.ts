@@ -7,6 +7,7 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { renderTemplate } from "@/lib/automations/engine"
 import { sendEmail } from "@/lib/email"
+import { gateFeature } from "@/lib/api-gate"
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -91,6 +92,8 @@ async function resolveRecipients(
 }
 
 export async function POST(_req: NextRequest, { params }: Params) {
+  const __planGate = await gateFeature("emailMarketing")
+  if (!__planGate.allowed) return __planGate.error!
   try {
     const { id } = await params
     const userId = await getUserId()

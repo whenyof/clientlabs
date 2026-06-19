@@ -177,7 +177,7 @@ export function WaitlistForm({ source = "whitelist", dark = true }: Props) {
       )}
 
       <p className={`text-[12px] mt-3 text-center ${dark ? "text-white/40" : "text-slate-400"}`}>
-        Sin tarjeta · Cancela cuando quieras · 1 mes gratis garantizado
+        Cancela cuando quieras · 1 mes gratis garantizado
       </p>
     </div>
   )

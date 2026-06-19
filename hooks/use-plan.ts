@@ -7,14 +7,16 @@ import type { PlanType } from "@prisma/client"
 
 export function usePlan() {
   const { data: session } = useSession()
-  const plan = (session?.user?.plan ?? "STARTER") as PlanType
+  const rawPlan = (session?.user?.plan ?? "STARTER") as PlanType
+  // Trial = Autónomo (no free Pro access) — mirrors effectivePlan() on the server.
+  const plan: PlanType = rawPlan === "TRIAL" ? "STARTER" : rawPlan
 
   return {
     plan,
     isPro: planAtLeast(plan, "PRO"),
     isBusiness: planAtLeast(plan, "BUSINESS"),
     isStarter: plan === "STARTER" || plan === "FREE",
-    isTrial: plan === "TRIAL",
+    isTrial: rawPlan === "TRIAL",
     can: (feature: FeatureKey) => hasFeature(plan, feature),
     limit: (key: LimitKey) => getLimit(plan, key),
     requiredPlan: (feature: FeatureKey) => requiredPlanFor(feature),

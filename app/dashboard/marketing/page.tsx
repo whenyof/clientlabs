@@ -1919,7 +1919,7 @@ export default function MarketingPage() {
     creadaEn: string
   }>>([])
 
-  if (!can("emailMarketing")) return <UpgradeWall feature="Email Marketing" requiredPlan="Negocio" />
+  if (!can("emailMarketing")) return <UpgradeWall feature="Email Marketing" requiredPlan="Pro" />
 
   function handleNuevaCampana() {
     setActiveTab("campanas")

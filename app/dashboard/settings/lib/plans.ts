@@ -1,5 +1,12 @@
-// Plan configuration — fuente de verdad para precios y features en settings
-// Precios en céntimos (17,99€ = 1799). Solo display UI — no tocar Stripe priceIds.
+// Plan configuration for the settings UI. Two plans (Autónomo/Pro). Prices and
+// features are derived from lib/pricing.ts (the single marketing source) so they
+// never drift. Display only — Stripe price IDs come from env, mapped by plan.
+import {
+  PLANS as MKT_PLANS,
+  annualEUR,
+  effectiveMonthlyEUR,
+  ANNUAL_SAVINGS_PCT,
+} from "@/lib/pricing"
 
 export interface Plan {
   id: string
@@ -23,101 +30,43 @@ export interface Plan {
   popular?: boolean
 }
 
-export const PLANS: Plan[] = [
-  {
-    id: 'starter',
-    name: 'Básico',
-    price: 1799, // 17,99€/mes
-    priceYearly: 1499, // 14,99€/mes en anual
-    yearlyTotal: 17988, // 179,88€/año
-    savings: '17%',
-    currency: 'EUR',
-    interval: 'month',
-    stripePriceId: process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || '',
-    stripePriceIdYearly: process.env.STRIPE_STARTER_YEARLY_PRICE_ID || '',
-    features: [
-      '1 usuario incluido',
-      '100 leads',
-      '50 clientes activos',
-      '20 facturas al mes',
-      'Verifactu incluido (F1, F2, rectificativas)',
-      'Presupuestos ilimitados',
-      '3 automatizaciones activas',
-      'Soporte por email',
-    ],
-    limits: {
-      clients: 50,
-      automations: 3,
-      integrations: 0,
-      aiRequests: 0,
-    },
-    badge: 'Básico',
+const PRICE_ENV: Record<"STARTER" | "PRO", { monthly: string; yearly: string }> = {
+  STARTER: {
+    monthly: process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || '',
+    yearly: process.env.STRIPE_STARTER_YEARLY_PRICE_ID || '',
   },
-  {
-    id: 'pro',
-    name: 'Pro',
-    price: 2999, // 29,99€/mes
-    priceYearly: 2499, // 24,99€/mes en anual
-    yearlyTotal: 29988, // 299,88€/año
-    savings: '17%',
-    currency: 'EUR',
-    interval: 'month',
-    stripePriceId: process.env.STRIPE_PRO_MONTHLY_PRICE_ID || '',
-    stripePriceIdYearly: process.env.STRIPE_PRO_YEARLY_PRICE_ID || '',
-    features: [
-      '3 usuarios incluidos',
-      '500 leads',
-      '200 clientes activos',
-      '100 facturas al mes',
-      'Proyectos',
-      '15 automatizaciones activas',
-      'Exportar CSV + PDF',
-      'Soporte prioritario',
-    ],
-    limits: {
-      clients: 200,
-      automations: 15,
-      integrations: -1,
-      aiRequests: 0,
-    },
-    badge: 'Más popular',
-    popular: true,
+  PRO: {
+    monthly: process.env.STRIPE_PRO_MONTHLY_PRICE_ID || '',
+    yearly: process.env.STRIPE_PRO_YEARLY_PRICE_ID || '',
   },
-  {
-    id: 'business',
-    name: 'Negocio',
-    price: 4999, // 49,99€/mes
-    priceYearly: 4166, // 41,66€/mes en anual
-    yearlyTotal: 49992, // 499,92€/año
-    savings: '17%',
-    currency: 'EUR',
-    interval: 'month',
-    stripePriceId: process.env.STRIPE_BUSINESS_MONTHLY_PRICE_ID || '',
-    stripePriceIdYearly: process.env.STRIPE_BUSINESS_YEARLY_PRICE_ID || '',
-    features: [
-      '5 usuarios incluidos',
-      'Leads ilimitados',
-      'Clientes ilimitados',
-      'Facturas ilimitadas',
-      'Proyectos',
-      'Automatizaciones ilimitadas',
-      'Email marketing',
-      'Soporte WhatsApp directo',
-    ],
-    limits: {
-      clients: -1,
-      automations: -1,
-      integrations: -1,
-      aiRequests: -1,
-    },
-    badge: 'Negocio',
+}
+
+export const PLANS: Plan[] = MKT_PLANS.map((p) => ({
+  id: p.stripePlan === 'STARTER' ? 'starter' : 'pro',
+  name: p.name,
+  price: Math.round(p.monthlyEUR * 100),
+  priceYearly: Math.round(effectiveMonthlyEUR(p) * 100),
+  yearlyTotal: Math.round(annualEUR(p) * 100),
+  savings: `${ANNUAL_SAVINGS_PCT}%`,
+  currency: 'EUR',
+  interval: 'month',
+  stripePriceId: PRICE_ENV[p.stripePlan].monthly,
+  stripePriceIdYearly: PRICE_ENV[p.stripePlan].yearly,
+  features: p.features,
+  limits: {
+    clients: -1,
+    automations: p.stripePlan === 'PRO' ? -1 : 0,
+    integrations: -1,
+    aiRequests: p.stripePlan === 'PRO' ? -1 : 0,
   },
-]
+  badge: p.recommended ? 'Más popular' : p.name,
+  popular: p.recommended,
+}))
 
 export const PLAN_NAMES = {
-  starter: 'Básico',
+  starter: 'Autónomo',
   pro: 'Pro',
-  business: 'Negocio',
+  business: 'Negocio', // legacy — usuarios antiguos
   trial: 'Prueba gratuita',
 }
 

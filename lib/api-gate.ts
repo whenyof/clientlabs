@@ -20,8 +20,8 @@ export function effectivePlan(raw: PlanType, planExpiresAt: Date | null): { plan
   if (raw === "TRIAL") {
     const now = new Date()
     if (planExpiresAt && planExpiresAt > now) {
-      // Trial activo → nivel Pro
-      return { plan: "PRO", readOnly: false }
+      // Trial activo → nivel Autónomo (sin acceso Pro gratis; para Pro hay que elegir plan)
+      return { plan: "STARTER", readOnly: false }
     }
     // Trial expirado — comprobar gracia
     const graceEnd = planExpiresAt ? new Date(planExpiresAt.getTime() + GRACE_MS) : null

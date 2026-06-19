@@ -7,14 +7,9 @@ import { getUserWorkspace } from "@/lib/get-workspace"
 import { TeamRole } from "@prisma/client"
 import { z } from "zod"
 import { sendTeamInviteEmail } from "@/lib/email-service"
-
-const TEAM_LIMITS: Record<string, number> = {
-  FREE: 1,
-  TRIAL: 5,
-  STARTER: 1,
-  PRO: 5,
-  BUSINESS: Infinity,
-}
+import { effectivePlan } from "@/lib/api-gate"
+import { getLimit, planDisplayName } from "@/lib/plan-gates"
+import type { PlanType } from "@prisma/client"
 
 const inviteSchema = z.object({
   email: z.string().email("Email inválido").toLowerCase(),
@@ -38,12 +33,15 @@ export async function POST(req: NextRequest) {
   const user = await safePrismaQuery(() =>
     prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { plan: true },
+      select: { plan: true, planExpiresAt: true },
     })
   )
 
-  const plan = user?.plan ?? "STARTER"
-  const limit = TEAM_LIMITS[plan] ?? 1
+  // Single source of truth for the seat limit (lib/plan-gates maxUsers),
+  // respecting effectivePlan (trial → Autónomo). -1 = unlimited.
+  const { plan } = effectivePlan((user?.plan ?? "STARTER") as PlanType, user?.planExpiresAt ?? null)
+  const maxUsers = getLimit(plan, "maxUsers")
+  const limit = maxUsers === -1 ? Infinity : maxUsers
 
   const result = await getUserWorkspace(session.user.id)
   if (!result) {
@@ -60,7 +58,7 @@ export async function POST(req: NextRequest) {
 
   if (currentCount >= limit) {
     return NextResponse.json(
-      { error: `Tu plan ${plan} permite un máximo de ${limit} miembro(s) de equipo. Actualiza tu plan para añadir más.` },
+      { error: `Tu plan ${planDisplayName(plan)} permite un máximo de ${limit} miembro(s) de equipo. Actualiza a Pro para añadir más.` },
       { status: 403 }
     )
   }

@@ -60,6 +60,24 @@ const nextConfig: NextConfig = {
       // Alias en español para ajustes
       { source: "/dashboard/ajustes", destination: "/dashboard/settings", permanent: true },
       { source: "/dashboard/ajustes/:path*", destination: "/dashboard/settings/:path*", permanent: true },
+      // Blog: slugs reescritos -> nuevos (301)
+      { source: "/blog/verifactu-guia-completa", destination: "/blog/verifactu-2026", statusCode: 301 },
+      { source: "/blog/facturacion-electronica-obligatoria-espana", destination: "/blog/factura-electronica-obligatoria", statusCode: 301 },
+      { source: "/blog/errores-facturacion-autonomos", destination: "/blog/errores-factura-autonomo", statusCode: 301 },
+      { source: "/blog/modelo-303-iva-trimestral-guia", destination: "/blog/modelo-303", statusCode: 301 },
+      { source: "/blog/como-gestionar-leads-autonomo", destination: "/blog/sistema-de-leads-simple", statusCode: 301 },
+      { source: "/blog/organizar-clientes-proveedores", destination: "/blog/clientes-y-proveedores-centralizados", statusCode: 301 },
+      { source: "/blog/que-es-crm-autonomos", destination: "/blog/que-es-un-crm", statusCode: 301 },
+      { source: "/blog/captar-clientes-internet-autonomo", destination: "/blog/conseguir-clientes-por-internet", statusCode: 301 },
+      { source: "/blog/obligaciones-fiscales-autonomo-2026", destination: "/blog/calendario-fiscal-autonomo-2026", statusCode: 301 },
+      { source: "/blog/mejores-software-facturacion-autonomos", destination: "/blog/mejores-programas-facturacion-autonomos-2026", statusCode: 301 },
+      { source: "/blog/mejor-crm-gratis-autonomos", destination: "/blog/mejores-crm-gratis-autonomos", statusCode: 301 },
+      { source: "/blog/facturar-excel-vs-software", destination: "/blog/facturar-en-excel-2026", statusCode: 301 },
+      { source: "/blog/crear-primera-factura-clientlabs", destination: "/blog/primera-factura-clientlabs", statusCode: 301 },
+      { source: "/blog/gestionar-leads-clientlabs", destination: "/blog/pipeline-de-clientlabs", statusCode: 301 },
+      { source: "/blog/clientlabs-verifactu-facturacion-legal", destination: "/blog/verifactu-en-clientlabs", statusCode: 301 },
+      { source: "/blog/migrar-excel-clientlabs", destination: "/blog/migrar-de-excel-a-clientlabs", statusCode: 301 },
+      { source: "/blog/clientlabs-vs-quipu", destination: "/blog/mejores-programas-facturacion-autonomos-2026", statusCode: 301 },
     ]
   },
 

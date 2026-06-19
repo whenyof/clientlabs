@@ -68,7 +68,9 @@ export async function getBrandingForUser(userId: string): Promise<InvoiceBrandin
         ...DEFAULT_BRANDING,
         logoUrl: profile.logoUrl ?? user?.image ?? null,
         companyName: profile.companyName ?? profile.name ?? user?.name ?? DEFAULT_BRANDING.companyName,
-        legalName: profile.legalName ?? null,
+        // Nombre fiscal (emisor legal): legalName con fallback seguro a companyName → name
+        // || (no ??) para que un "" también caiga al siguiente y el emisor nunca quede vacío
+        legalName: profile.legalName || profile.companyName || profile.name || user?.name || null,
         taxId: profile.taxId ?? DEFAULT_BRANDING.taxId,
         address: addressLine,
         province: profile.province ?? null,
@@ -86,6 +88,7 @@ export async function getBrandingForUser(userId: string): Promise<InvoiceBrandin
     return {
       ...DEFAULT_BRANDING,
       companyName: user?.name ?? DEFAULT_BRANDING.companyName,
+      legalName: user?.name || null,
       email: user?.email ?? DEFAULT_BRANDING.email,
       logoUrl: user?.image ?? null,
     }

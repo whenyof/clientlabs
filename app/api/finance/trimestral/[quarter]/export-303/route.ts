@@ -38,7 +38,7 @@ export async function GET(
     }
 
     const nif = perfil.taxId.trim()
-    const nombre = (perfil.legalName ?? perfil.companyName ?? "").trim()
+    const nombre = (perfil.legalName || perfil.companyName || "").trim()
 
     // Mismo cálculo que el panel — imposible que diverjan
     const { iva } = await computeQuarterFiscals(userId, rawQuarter, year)

@@ -77,7 +77,8 @@ export async function PATCH(request: NextRequest) {
   const p = parsed.data
   const data: Record<string, unknown> = {}
   for (const key of ["taxId", "legalName", "companyName", "address", "city", "postalCode", "province", "country", "phone", "ivaRegime", "epigrafIAE"] as const) {
-    if (p[key] !== undefined) data[key] = p[key]
+    // Campo vaciado ("") → null, para que no quede "" en BD (rompe los fallbacks legales)
+    if (p[key] !== undefined) data[key] = p[key] === "" ? null : p[key]
   }
 
   try {

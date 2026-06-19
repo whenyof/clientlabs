@@ -148,6 +148,7 @@ export async function PUT(request: NextRequest) {
         address: (data.address as string) ?? null,
         city: (data.city as string) ?? null,
         postalCode: (data.postalCode as string) ?? null,
+        province: (data.province as string) ?? null,
         country: (data.country as string) ?? null,
         phone: (data.phone as string) ?? null,
         email: (data.email as string) ?? null,

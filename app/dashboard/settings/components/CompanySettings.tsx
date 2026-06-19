@@ -25,6 +25,7 @@ import { AddressFields } from "@/components/forms/AddressFields"
 const defaultData = {
   name: "",
   companyName: "",
+  legalName: "",
   taxId: "",
   address: "",
   postalCode: "",
@@ -73,6 +74,7 @@ export function CompanySettings() {
       setCompanyData({
         name: p.name ?? p.companyName ?? "",
         companyName: p.companyName ?? p.name ?? "",
+        legalName: p.legalName ?? "",
         taxId: p.taxId ?? "",
         address: p.address ?? "",
         postalCode: p.postalCode ?? "",
@@ -97,6 +99,7 @@ export function CompanySettings() {
       const payload = {
         name: companyData.name || companyData.companyName || null,
         companyName: companyData.companyName || companyData.name || null,
+        legalName: companyData.legalName || null,
         taxId: companyData.taxId || null,
         address: companyData.address || null,
         city: companyData.city || null,
@@ -104,7 +107,6 @@ export function CompanySettings() {
         province: companyData.province || null,
         country: companyData.country || null,
         phone: companyData.phone || null,
-        email: null,
         website: companyData.website || null,
         sector: companyData.sector || "servicios",
         logoUrl: companyData.logoUrl || null,
@@ -121,6 +123,7 @@ export function CompanySettings() {
         setCompanyData({
           name: p.name ?? p.companyName ?? "",
           companyName: p.companyName ?? p.name ?? "",
+          legalName: p.legalName ?? "",
           taxId: p.taxId ?? "",
           address: p.address ?? "",
           postalCode: p.postalCode ?? "",
@@ -167,6 +170,7 @@ export function CompanySettings() {
         const payload = {
           name: companyData.name || companyData.companyName || null,
           companyName: companyData.companyName || companyData.name || null,
+          legalName: companyData.legalName || null,
           taxId: companyData.taxId || null,
           address: companyData.address || null,
           city: companyData.city || null,
@@ -174,7 +178,6 @@ export function CompanySettings() {
           province: companyData.province || null,
           country: companyData.country || null,
           phone: companyData.phone || null,
-          email: null,
           website: companyData.website || null,
           sector: companyData.sector || "servicios",
           logoUrl: url,
@@ -192,6 +195,7 @@ export function CompanySettings() {
             setCompanyData({
               name: p.name ?? p.companyName ?? "",
               companyName: p.companyName ?? p.name ?? "",
+              legalName: p.legalName ?? "",
               taxId: p.taxId ?? "",
               address: p.address ?? "",
               postalCode: p.postalCode ?? "",
@@ -280,7 +284,7 @@ export function CompanySettings() {
             )}
           </button>
           <div>
-            <p className="text-base font-semibold text-[#0B1F2A]">{companyData.companyName || companyData.name || "Sin nombre"}</p>
+            <p className="text-base font-semibold text-[#0B1F2A]">{companyData.legalName || companyData.companyName || companyData.name || "Sin nombre"}</p>
             <p className="text-xs text-slate-500 mt-0.5">Perfil de facturación principal.</p>
             {isEditing && (
               <p className="text-xs text-[var(--accent)] font-medium mt-1.5">
@@ -300,8 +304,8 @@ export function CompanySettings() {
             <label className="text-sm font-medium text-slate-700">Razón Social</label>
             <input
               type="text"
-              value={companyData.companyName || companyData.name}
-              onChange={(e) => setCompanyData({ ...companyData, companyName: e.target.value, name: e.target.value })}
+              value={companyData.legalName || companyData.companyName || companyData.name}
+              onChange={(e) => setCompanyData({ ...companyData, legalName: e.target.value })}
               disabled={!isEditing}
               className={inputClasses}
             />

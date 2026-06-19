@@ -213,7 +213,8 @@ export async function renderInvoiceToBuffer(
   pdf.setFontSize(13)
   pdf.setFont("helvetica", "bold")
   pdf.setTextColor(...hexToRgb(colors.primary))
-  pdf.text(doc.header.companyName, M, y + 5)
+  // Emisor: nombre fiscal (razón social) con fallback al comercial
+  pdf.text(doc.header.legalName || doc.header.companyName, M, y + 5)
   y += 9
 
   pdf.setFontSize(8.5)

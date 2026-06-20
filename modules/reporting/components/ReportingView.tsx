@@ -22,6 +22,16 @@ const PERIODS: Array<{ id: ReportsPeriod; label: string }> = [
   { id: "YTD", label: "YTD" },
 ]
 
+// Periodos del selector de EXPORTACIÓN (independiente del periodo en pantalla)
+type ExportPeriod = "1m" | "3m" | "6m" | "12m" | "custom"
+const EXPORT_PERIODS: Array<{ id: ExportPeriod; label: string }> = [
+  { id: "1m", label: "Último mes" },
+  { id: "3m", label: "Trimestre" },
+  { id: "6m", label: "Semestre" },
+  { id: "12m", label: "Año" },
+  { id: "custom", label: "Personalizado" },
+]
+
 const fmtEur = (n: number) =>
   n.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
 
@@ -110,6 +120,11 @@ export function ReportingView() {
   const [loading, setLoading] = useState(true)
   const [period, setPeriod] = useState<ReportsPeriod>("MTD")
   const [exporting, setExporting] = useState<"xlsx" | "pdf" | null>(null)
+  // Modal de exportación: formato elegido (abre el modal) + periodo a exportar
+  const [exportFmt, setExportFmt] = useState<"xlsx" | "pdf" | null>(null)
+  const [expPeriod, setExpPeriod] = useState<ExportPeriod>("1m")
+  const [expFrom, setExpFrom] = useState("")
+  const [expTo, setExpTo] = useState("")
 
   useEffect(() => {
     let cancelled = false
@@ -121,24 +136,35 @@ export function ReportingView() {
     return () => { cancelled = true }
   }, [period])
 
-  // Reutiliza la infraestructura de exportación existente del dashboard
-  const handleExport = useCallback(async (fmt: "xlsx" | "pdf") => {
+  // Exporta el periodo elegido en el modal (preset relativo o rango personalizado).
+  const runExport = useCallback(async () => {
+    if (!exportFmt) return
+    if (expPeriod === "custom" && (!expFrom || !expTo || expFrom > expTo)) {
+      toast.error("Elige un rango de fechas válido (desde ≤ hasta)")
+      return
+    }
+    const fmt = exportFmt
     setExporting(fmt)
     try {
-      const res = await fetch(`/api/dashboard/export?format=${fmt}&period=${encodeURIComponent(period)}`)
+      const qs = new URLSearchParams({ format: fmt })
+      if (expPeriod === "custom") { qs.set("from", expFrom); qs.set("to", expTo) }
+      else qs.set("period", expPeriod)
+      const res = await fetch(`/api/dashboard/export?${qs.toString()}`)
       if (!res.ok) throw new Error("export failed")
       const blob = await res.blob()
       const a = document.createElement("a")
       a.href = URL.createObjectURL(blob)
-      a.download = `informe-${period}-${new Date().toISOString().split("T")[0]}.${fmt}`
+      const tag = expPeriod === "custom" ? `${expFrom}_${expTo}` : expPeriod
+      a.download = `informe-${tag}-${new Date().toISOString().split("T")[0]}.${fmt}`
       a.click()
       URL.revokeObjectURL(a.href)
+      setExportFmt(null)
     } catch {
       toast.error("No se pudo generar la exportación")
     } finally {
       setExporting(null)
     }
-  }, [period])
+  }, [exportFmt, expPeriod, expFrom, expTo])
 
   const revDelta = data ? calcDelta(data.revenue.current, data.revenue.previous) : null
   const leadsDelta = data ? calcDelta(data.leads.created, data.leads.prevCreated) : null
@@ -172,11 +198,11 @@ export function ReportingView() {
               )
             })}
           </div>
-          <button onClick={() => handleExport("xlsx")} disabled={exporting !== null} style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: C.bg, border: `1px solid ${C.line}`, color: C.ink2, fontWeight: 550, fontSize: 12.5, cursor: exporting ? "wait" : "pointer", opacity: exporting && exporting !== "xlsx" ? 0.6 : 1 }}>
+          <button onClick={() => setExportFmt("xlsx")} disabled={exporting !== null} style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: C.bg, border: `1px solid ${C.line}`, color: C.ink2, fontWeight: 550, fontSize: 12.5, cursor: exporting ? "wait" : "pointer", opacity: exporting && exporting !== "xlsx" ? 0.6 : 1 }}>
             {exporting === "xlsx" ? <Loader2 size={12} className="animate-spin" /> : <FileSpreadsheet size={12} strokeWidth={2} />}
             Exportar Excel
           </button>
-          <button onClick={() => handleExport("pdf")} disabled={exporting !== null} style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: C.ink, color: "white", fontWeight: 550, fontSize: 12.5, border: "none", cursor: exporting ? "wait" : "pointer", opacity: exporting && exporting !== "pdf" ? 0.6 : 1 }}>
+          <button onClick={() => setExportFmt("pdf")} disabled={exporting !== null} style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: C.ink, color: "white", fontWeight: 550, fontSize: 12.5, border: "none", cursor: exporting ? "wait" : "pointer", opacity: exporting && exporting !== "pdf" ? 0.6 : 1 }}>
             {exporting === "pdf" ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} strokeWidth={2} />}
             Exportar PDF
           </button>
@@ -321,6 +347,68 @@ export function ReportingView() {
                 ))}
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL: elegir periodo a exportar ──────────────────────────────── */}
+      {exportFmt && (
+        <div
+          onClick={() => { if (!exporting) setExportFmt(null) }}
+          style={{ position: "fixed", inset: 0, background: "rgba(10,10,10,0.45)", display: "grid", placeItems: "center", zIndex: 1000, padding: 16 }}
+        >
+          <div onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" style={{ background: C.bg, borderRadius: 12, border: `1px solid ${C.line}`, width: "100%", maxWidth: 430, padding: 22, boxShadow: "0 20px 50px -20px rgba(0,0,0,.35)" }}>
+            <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600, color: C.ink, letterSpacing: "-0.01em" }}>
+              Exportar {exportFmt === "xlsx" ? "Excel" : "PDF"}
+            </h3>
+            <p style={{ margin: "6px 0 16px", fontSize: 12.5, color: C.ink3 }}>¿Qué periodo quieres exportar?</p>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+              {EXPORT_PERIODS.map((o) => {
+                const active = expPeriod === o.id
+                return (
+                  <button
+                    key={o.id}
+                    onClick={() => setExpPeriod(o.id)}
+                    style={{
+                      padding: "10px 12px", borderRadius: 8, fontSize: 13, fontWeight: 550, textAlign: "left",
+                      border: `1px solid ${active ? C.accent : C.line}`,
+                      background: active ? C.accentSoft : C.bg, color: active ? C.accentInk : C.ink2,
+                      cursor: "pointer", gridColumn: o.id === "custom" ? "1 / -1" : "auto",
+                    }}
+                  >
+                    {o.label}
+                  </button>
+                )
+              })}
+            </div>
+
+            {expPeriod === "custom" && (
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 12 }}>
+                <label style={{ fontSize: 11.5, color: C.ink3 }}>
+                  Desde
+                  <input type="date" value={expFrom} max={expTo || undefined} onChange={(e) => setExpFrom(e.target.value)}
+                    style={{ width: "100%", marginTop: 4, padding: "8px 10px", borderRadius: 7, border: `1px solid ${C.line}`, fontSize: 13, color: C.ink }} />
+                </label>
+                <label style={{ fontSize: 11.5, color: C.ink3 }}>
+                  Hasta
+                  <input type="date" value={expTo} min={expFrom || undefined} onChange={(e) => setExpTo(e.target.value)}
+                    style={{ width: "100%", marginTop: 4, padding: "8px 10px", borderRadius: 7, border: `1px solid ${C.line}`, fontSize: 13, color: C.ink }} />
+                </label>
+              </div>
+            )}
+
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 20 }}>
+              <button onClick={() => setExportFmt(null)} disabled={exporting !== null}
+                style={{ padding: "8px 14px", borderRadius: 7, border: `1px solid ${C.line}`, background: C.bg, color: C.ink2, fontSize: 12.5, fontWeight: 550, cursor: exporting ? "wait" : "pointer" }}>
+                Cancelar
+              </button>
+              <button onClick={runExport} disabled={exporting !== null}
+                style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "8px 16px", borderRadius: 7, border: "none", background: C.ink, color: "white", fontSize: 12.5, fontWeight: 600, cursor: exporting ? "wait" : "pointer" }}>
+                {exporting ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} strokeWidth={2} />}
+                Exportar
+              </button>
+            </div>
           </div>
         </div>
       )}

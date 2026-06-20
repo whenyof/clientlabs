@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { MARKETING_NAV, LOGIN_HREF, START_HREF } from "@/lib/site-config"
 import { Menu } from "./icons"
 
@@ -18,6 +19,10 @@ function BrandMark() {
 
 export default function Navbar() {
   const pathname = usePathname()
+  const { status } = useSession()
+  // status: "loading" (sin resolver) | "authenticated" | "unauthenticated"
+  const ready = status !== "loading"
+  const authed = status === "authenticated"
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
 
@@ -48,12 +53,22 @@ export default function Navbar() {
         </nav>
 
         <div className="nav-right">
-          <a href={LOGIN_HREF} className="signin">
-            Iniciar sesión
-          </a>
-          <a href={START_HREF} className="btn btn-primary">
-            Empieza gratis
-          </a>
+          {ready && !authed && (
+            <a href={LOGIN_HREF} className="signin">
+              Iniciar sesión
+            </a>
+          )}
+          {!ready ? (
+            <span className="nav-cta-skeleton" aria-hidden="true" />
+          ) : authed ? (
+            <a href="/dashboard" className="btn btn-primary">
+              Dashboard
+            </a>
+          ) : (
+            <a href={START_HREF} className="btn btn-primary">
+              Empieza gratis
+            </a>
+          )}
           <button
             type="button"
             className="nav-toggle"
@@ -74,12 +89,22 @@ export default function Navbar() {
               {l.label}
             </Link>
           ))}
-          <a href={LOGIN_HREF} className="mm-link" onClick={() => setOpen(false)}>
-            Iniciar sesión
-          </a>
-          <a href={START_HREF} className="btn btn-primary btn-lg" onClick={() => setOpen(false)}>
-            Empieza gratis
-          </a>
+          {ready && !authed && (
+            <a href={LOGIN_HREF} className="mm-link" onClick={() => setOpen(false)}>
+              Iniciar sesión
+            </a>
+          )}
+          {!ready ? (
+            <span className="nav-cta-skeleton-lg" aria-hidden="true" />
+          ) : authed ? (
+            <a href="/dashboard" className="btn btn-primary btn-lg" onClick={() => setOpen(false)}>
+              Dashboard
+            </a>
+          ) : (
+            <a href={START_HREF} className="btn btn-primary btn-lg" onClick={() => setOpen(false)}>
+              Empieza gratis
+            </a>
+          )}
         </div>
       </div>
     </header>

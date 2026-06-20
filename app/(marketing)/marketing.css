@@ -388,3 +388,7 @@
 /* Annual savings badge on the price toggle */
 .mkt .price-toggle button .toggle-badge { margin-left: 6px; font-size: 10.5px; font-weight: 700; padding: 1px 5px; border-radius: 99px; background: var(--bg-tint); color: var(--teal-ink); }
 .mkt .price-toggle button.on .toggle-badge { background: rgba(255,255,255,0.22); color: #fff; }
+
+/* CTA del navbar en estado de carga de sesión (neutro, sin parpadeo) */
+.mkt .nav-cta-skeleton { display: inline-block; width: 124px; height: 38px; border-radius: 9px; background: var(--bg-soft); border: 1px solid var(--line); }
+.mkt .nav-cta-skeleton-lg { display: block; height: 48px; border-radius: 9px; background: var(--bg-soft); border: 1px solid var(--line); margin-top: 14px; }

@@ -34,9 +34,10 @@ interface MonthViewProps {
   tasks: DashboardTask[]
   onDayClick: (date: Date) => void
   onTaskClick: (task: DashboardTask) => void
+  rightSlot?: React.ReactNode
 }
 
-export function MonthView({ tasks, onDayClick, onTaskClick }: MonthViewProps) {
+export function MonthView({ tasks, onDayClick, onTaskClick, rightSlot }: MonthViewProps) {
   const qc = useQueryClient()
   const today = new Date()
   const [year, setYear] = useState(today.getFullYear())
@@ -107,6 +108,7 @@ export function MonthView({ tasks, onDayClick, onTaskClick }: MonthViewProps) {
         <button type="button" onClick={() => { setYear(today.getFullYear()); setMonth(today.getMonth()) }} style={{ background: "none", border: "0.5px solid var(--border-subtle)", borderRadius: 6, padding: "4px 10px", cursor: "pointer", fontSize: 12, color: "var(--text-secondary)" }}>
           Hoy
         </button>
+        {rightSlot}
       </div>
 
       {/* Calendar grid — horizontally scrollable on mobile */}

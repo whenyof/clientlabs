@@ -1,18 +1,30 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
 import {
-  Plus, Filter, List, Calendar, BarChart2, LayoutGrid,
-  Phone, Clock, Flag, RefreshCw, Settings,
+  Plus, Filter, List, Calendar, LayoutGrid,
+  Phone, Clock, Flag, RefreshCw, Settings, ChevronDown, FolderKanban,
 } from "lucide-react"
-import type { DashboardTask, TaskPriority, ViewMode } from "./types"
+import type { DashboardTask, TaskPriority } from "./types"
 import { TasksTopbar } from "./TasksTopbar"
 import { PriorityView } from "./PriorityView"
 import { WeekView } from "./WeekView"
+import { DayView } from "./DayView"
 import { MonthView } from "./MonthView"
 import { TasksSidebarRight } from "./TasksSidebarRight"
 import { NewTaskModal } from "./NewTaskModal"
+import { ProjectModal } from "./ProjectModal"
+
+// Proyecto real (de /api/projects) con avance calculado en el backend
+interface ApiProject {
+  id: string; name: string; description: string | null; color: string
+  status: string; endDate: string | null; clientId: string | null
+  totalTasks: number; completedTasks: number; progress: number
+}
+type MainView = "list" | "board" | "calendar"
+type BoardGroup = "status" | "priority"
 
 // ─── Design tokens ─────────────────────────────────────────────────────────
 const C = {
@@ -43,48 +55,58 @@ function TaskKpiCard({ label, tag, value, unit, isLast }: {
   )
 }
 
-// ─── Project strip ─────────────────────────────────────────────────────────
-function ProjectStrip({ tasks }: { tasks: DashboardTask[] }) {
-  const projectMap: Record<string, { nm: string; color: string; open: number; total: number; tag: string; pct: number }> = {}
-  const PROJ_COLORS = [C.accent, C.blue, C.ink, C.warn, C.violet]
-  tasks.forEach(t => {
-    const key = t.project?.id ?? "sin-proyecto"
-    const nm = t.project?.name ?? "Sin proyecto"
-    if (!projectMap[key]) {
-      const idx = Object.keys(projectMap).length % PROJ_COLORS.length
-      const col = t.project?.color || PROJ_COLORS[idx]
-      projectMap[key] = { nm, color: col, open: 0, total: 0, tag: nm.slice(0, 3).toUpperCase(), pct: 0 }
-    }
-    projectMap[key].total++
-    if (t.status !== "DONE" && t.status !== "CANCELLED") projectMap[key].open++
-  })
-  const projects = Object.values(projectMap).slice(0, 5).map(p => ({ ...p, pct: p.total > 0 ? Math.round(((p.total - p.open) / p.total) * 100) : 0 }))
-  if (projects.length === 0) return null
+// ─── Project strip (proyectos REALES de /api/projects) ──────────────────────
+const PROJECT_STATUS_LABEL: Record<string, string> = {
+  ACTIVE: "Activo", PAUSED: "Pausado", COMPLETED: "Completado", ARCHIVED: "Archivado",
+}
+function ProjectStrip({ projects, tasks, onOpen, onNewProject }: {
+  projects: ApiProject[]; tasks: DashboardTask[]; onOpen: (id: string) => void; onNewProject: () => void
+}) {
+  const visible = projects.filter(p => p.status !== "ARCHIVED")
+  const sinProyecto = tasks.filter(t => !t.projectId && t.status !== "DONE" && t.status !== "CANCELLED").length
   return (
     <div style={{ marginBottom: 20 }}>
       <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 12 }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-          <h3 style={{ fontWeight: 600, letterSpacing: "-0.01em", fontSize: 14, margin: 0, color: C.ink }}>Proyectos activos</h3>
-          <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, color: C.ink3 }}>{projects.length} en curso · ordenados por urgencia</span>
+          <h3 style={{ fontWeight: 600, letterSpacing: "-0.01em", fontSize: 14, margin: 0, color: C.ink }}>Proyectos</h3>
+          <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, color: C.ink3 }}>{visible.length} {visible.length === 1 ? "proyecto" : "proyectos"}</span>
         </div>
+        <button onClick={onNewProject} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 10px", borderRadius: 6, background: C.bg, border: `1px solid ${C.line}`, color: C.ink2, fontSize: 11.5, fontWeight: 550, cursor: "pointer" }}>
+          <Plus size={11} strokeWidth={2.5} />Nuevo proyecto
+        </button>
       </div>
       <div style={{ display: "flex", gap: 12, overflowX: "auto", paddingBottom: 4 }}>
-        {projects.map((p, idx) => (
-          <div key={p.tag} style={{ flexShrink: 0, width: 220, background: C.bg, border: `1px solid ${idx === 0 ? p.color : C.line}`, borderRadius: 10, padding: "14px 16px", cursor: "pointer" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-              <span style={{ width: 8, height: 8, borderRadius: 99, background: p.color, display: "inline-block", flexShrink: 0 }} />
-              <h4 style={{ margin: 0, fontSize: 13, fontWeight: 600, color: C.ink, letterSpacing: "-0.005em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.nm}</h4>
-              <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 9.5, color: C.ink4, letterSpacing: "0.04em", marginLeft: "auto", flexShrink: 0 }}>{p.tag}</span>
+        {visible.map((p) => {
+          const due = p.endDate ? new Date(p.endDate) : null
+          const overdue = due ? due < new Date() && p.status !== "COMPLETED" : false
+          return (
+            <div key={p.id} onClick={() => onOpen(p.id)} style={{ flexShrink: 0, width: 234, background: C.bg, border: `1px solid ${C.line}`, borderRadius: 10, padding: "14px 16px", cursor: "pointer" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = p.color }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = C.line }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                <span style={{ width: 8, height: 8, borderRadius: 99, background: p.color, flexShrink: 0 }} />
+                <h4 style={{ margin: 0, fontSize: 13, fontWeight: 600, color: C.ink, letterSpacing: "-0.005em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.name}</h4>
+                <span style={{ fontSize: 9.5, padding: "1px 6px", borderRadius: 99, marginLeft: "auto", flexShrink: 0, background: C.bg3, color: C.ink3, fontWeight: 600 }}>{PROJECT_STATUS_LABEL[p.status] ?? p.status}</span>
+              </div>
+              <div style={{ fontSize: 11, color: C.ink3, marginBottom: 10, height: 28, overflow: "hidden", lineHeight: 1.3 }}>{p.description || "Sin objetivo definido"}</div>
+              <div style={{ height: 4, background: C.bg3, borderRadius: 99, overflow: "hidden", marginBottom: 8 }}>
+                <div style={{ height: "100%", width: `${p.progress}%`, background: p.color, borderRadius: 99 }} />
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: overdue ? C.red : C.ink3 }}>
+                  {due ? due.toLocaleDateString("es-ES", { day: "numeric", month: "short" }) : "Sin fecha"}
+                </span>
+                <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: C.ink3, fontWeight: 600 }}>{p.completedTasks}/{p.totalTasks} · {p.progress}%</span>
+              </div>
             </div>
-            <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: C.ink3, marginBottom: 10 }}>{p.open}/{p.total} tareas</div>
-            <div style={{ height: 4, background: C.bg3, borderRadius: 99, overflow: "hidden", marginBottom: 8 }}>
-              <div style={{ height: "100%", width: `${p.pct}%`, background: p.color, borderRadius: 99 }} />
-            </div>
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
-              <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: C.ink3, fontWeight: 600 }}>{p.pct}%</span>
-            </div>
-          </div>
-        ))}
+          )
+        })}
+        {/* Cajón de tareas sueltas */}
+        <div style={{ flexShrink: 0, width: 160, background: C.bg2, border: `1px dashed ${C.line}`, borderRadius: 10, padding: "14px 16px", display: "flex", flexDirection: "column", justifyContent: "center", gap: 4 }}>
+          <div style={{ fontSize: 12.5, fontWeight: 600, color: C.ink2 }}>Sin proyecto</div>
+          <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: C.ink3 }}>{sinProyecto} tareas sueltas</div>
+        </div>
       </div>
     </div>
   )
@@ -92,7 +114,7 @@ function ProjectStrip({ tasks }: { tasks: DashboardTask[] }) {
 
 // ─── Kanban board ──────────────────────────────────────────────────────────
 const KANBAN_COLS = [
-  { id: "PENDING_FUTURE", nm: "Backlog",   sw: "#a3a3a3" },
+  { id: "PENDING_FUTURE", nm: "Pendiente", sw: "#a3a3a3" },
   { id: "PENDING_TODAY",  nm: "Hoy",       sw: C.warn },
   { id: "IN_PROGRESS",    nm: "En curso",  sw: C.blue },
   { id: "PENDING_LATE",   nm: "Revisión",  sw: C.violet },
@@ -102,6 +124,9 @@ const KANBAN_COLS = [
 const PRIO_COLORS: Record<string, string> = {
   URGENT: C.red, HIGH: C.warn, MEDIUM: C.blue, LOW: C.ink4,
 }
+const PRIO_LABELS: Record<string, string> = {
+  URGENT: "Urgente", HIGH: "Alta", MEDIUM: "Media", LOW: "Baja",
+}
 const LABEL_COLORS: Record<string, { bg: string; color: string }> = {
   URGENT: { bg: C.redSoft,    color: C.red   },
   HIGH:   { bg: C.warnSoft,   color: C.warn  },
@@ -109,30 +134,40 @@ const LABEL_COLORS: Record<string, { bg: string; color: string }> = {
   LOW:    { bg: C.bg3,        color: C.ink3  },
 }
 
-function KanbanBoard({ tasks, onNewTask }: { tasks: DashboardTask[]; onNewTask: () => void }) {
+const PRIORITY_COLS = [
+  { id: "URGENT", nm: "Urgente", sw: C.red },
+  { id: "HIGH",   nm: "Alta",    sw: C.warn },
+  { id: "MEDIUM", nm: "Media",   sw: C.blue },
+  { id: "LOW",    nm: "Baja",    sw: C.ink4 },
+]
+
+function KanbanBoard({ tasks, onNewTask, groupBy }: { tasks: DashboardTask[]; onNewTask: () => void; groupBy: BoardGroup }) {
   const now = new Date()
   const todayStr = now.toISOString().slice(0, 10)
-  const grouped: Record<string, DashboardTask[]> = { PENDING_FUTURE: [], PENDING_TODAY: [], IN_PROGRESS: [], PENDING_LATE: [], DONE: [] }
-  tasks.forEach(t => {
-    if (t.status === "DONE" || t.status === "CANCELLED") {
-      grouped.DONE.push(t)
-    } else if (t.status === "IN_PROGRESS") {
-      grouped.IN_PROGRESS.push(t)
-    } else {
-      if (!t.dueDate) { grouped.PENDING_FUTURE.push(t); return }
-      const due = t.dueDate.slice(0, 10)
-      if (due < todayStr) grouped.PENDING_LATE.push(t)
-      else if (due === todayStr) grouped.PENDING_TODAY.push(t)
-      else grouped.PENDING_FUTURE.push(t)
-    }
-  })
+  const cols = groupBy === "priority" ? PRIORITY_COLS : KANBAN_COLS
+  const grouped: Record<string, DashboardTask[]> = Object.fromEntries(cols.map(c => [c.id, [] as DashboardTask[]]))
+  if (groupBy === "priority") {
+    tasks.forEach(t => { (grouped[t.priority] ?? grouped.LOW).push(t) })
+  } else {
+    tasks.forEach(t => {
+      if (t.status === "DONE" || t.status === "CANCELLED") grouped.DONE.push(t)
+      else if (t.status === "IN_PROGRESS") grouped.IN_PROGRESS.push(t)
+      else {
+        if (!t.dueDate) { grouped.PENDING_FUTURE.push(t); return }
+        const due = t.dueDate.slice(0, 10)
+        if (due < todayStr) grouped.PENDING_LATE.push(t)
+        else if (due === todayStr) grouped.PENDING_TODAY.push(t)
+        else grouped.PENDING_FUTURE.push(t)
+      }
+    })
+  }
 
   return (
     <div style={{ background: "transparent", marginBottom: 16 }}>
       <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 10 }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
           <h3 style={{ fontWeight: 600, letterSpacing: "-0.01em", fontSize: 14, margin: 0, color: C.ink }}>Tablero de tareas</h3>
-          <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, color: C.ink3 }}>arrastra entre columnas · ⌘+N para nueva</span>
+          <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, color: C.ink3 }}>agrupado por {groupBy === "priority" ? "prioridad" : "estado"}</span>
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <button style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 10px", borderRadius: 6, background: C.bg, border: `1px solid ${C.line}`, color: C.ink2, fontSize: 11.5, fontWeight: 550, cursor: "pointer" }}>
@@ -140,8 +175,8 @@ function KanbanBoard({ tasks, onNewTask }: { tasks: DashboardTask[]; onNewTask: 
           </button>
         </div>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: `repeat(${KANBAN_COLS.length}, 1fr)`, gap: 10, overflowX: "auto" }}>
-        {KANBAN_COLS.map(col => {
+      <div style={{ display: "grid", gridTemplateColumns: `repeat(${cols.length}, 1fr)`, gap: 10, overflowX: "auto" }}>
+        {cols.map(col => {
           const colTasks = grouped[col.id] ?? []
           return (
             <div key={col.id} style={{ minWidth: 200, background: C.bg2, borderRadius: 10, overflow: "hidden" }}>
@@ -176,7 +211,7 @@ function KanbanBoard({ tasks, onNewTask }: { tasks: DashboardTask[]; onNewTask: 
                       <div style={{ fontWeight: 550, fontSize: 12.5, color: C.ink, letterSpacing: "-0.005em", marginBottom: 3, lineHeight: 1.35 }}>{t.title}</div>
                       {t.Client && <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: C.ink3, marginBottom: 6 }}>{t.Client.name}</div>}
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                        <span style={{ fontSize: 11, fontWeight: 500, padding: "1px 6px", borderRadius: 4, background: lblCfg.bg, color: lblCfg.color }}>{t.priority}</span>
+                        <span style={{ fontSize: 11, fontWeight: 500, padding: "1px 6px", borderRadius: 4, background: lblCfg.bg, color: lblCfg.color }}>{PRIO_LABELS[t.priority] ?? t.priority}</span>
                         {dueStr && <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: isToday || isLate ? C.warn : C.ink3 }}>{dueStr}</span>}
                       </div>
                     </div>
@@ -425,12 +460,34 @@ function deriveTaskKPIs(tasks: DashboardTask[]) {
   return { open, dueThisWeek, overdue, closeRate }
 }
 
+// ─── Segmented control ───────────────────────────────────────────────────────
+function Segmented<T extends string>({ value, onChange, options }: {
+  value: T; onChange: (v: T) => void; options: { id: T; label: string; icon?: React.ReactNode }[]
+}) {
+  return (
+    <div style={{ display: "inline-flex", background: C.bg2, border: `1px solid ${C.line}`, borderRadius: 7, padding: 2 }}>
+      {options.map(o => {
+        const active = value === o.id
+        return (
+          <button key={o.id} onClick={() => onChange(o.id)} style={{ display: "flex", alignItems: "center", gap: 5, padding: "4px 10px", borderRadius: 5, fontFamily: "ui-monospace,monospace", fontSize: 11.5, color: active ? C.ink : C.ink3, fontWeight: 500, background: active ? "white" : "transparent", boxShadow: active ? `0 0 0 1px ${C.line} inset, 0 1px 2px rgba(0,0,0,.03)` : "none", border: "none", cursor: "pointer" }}>
+            {o.icon}{o.label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 // ─── Main TasksView ──────────────────────────────────────────────────────────
 export function TasksView() {
-  const [view, setView] = useState<ViewMode>("priority")
-  const [showKanban, setShowKanban] = useState(true)
+  const router = useRouter()
+  const [mainView, setMainView] = useState<MainView>("board")
+  const [calMode, setCalMode] = useState<"day" | "week" | "month">("week")
+  const [boardGroup, setBoardGroup] = useState<BoardGroup>("status")
   const [search, setSearch] = useState("")
   const [modalOpen, setModalOpen] = useState(false)
+  const [projectModalOpen, setProjectModalOpen] = useState(false)
+  const [newMenuOpen, setNewMenuOpen] = useState(false)
   const [defaultPriority, setDefaultPriority] = useState<TaskPriority>("MEDIUM")
   const [defaultDueDate, setDefaultDueDate] = useState<string | undefined>(undefined)
   const [defaultDueTime, setDefaultDueTime] = useState<string | undefined>(undefined)
@@ -446,12 +503,22 @@ export function TasksView() {
     staleTime: 120_000,
     refetchInterval: 300_000,
   })
+  const { data: projects = [] } = useQuery<ApiProject[]>({
+    queryKey: ["projects"],
+    queryFn: async () => {
+      const res = await fetch("/api/projects")
+      if (!res.ok) throw new Error("Failed to fetch projects")
+      return res.json()
+    },
+    staleTime: 120_000,
+    refetchInterval: 300_000,
+  })
 
   const handleAddTask = (priority: TaskPriority) => {
-    setDefaultPriority(priority); setDefaultDueDate(undefined); setDefaultDueTime(undefined); setModalOpen(true)
+    setDefaultPriority(priority); setDefaultDueDate(undefined); setDefaultDueTime(undefined); setEditTask(undefined); setModalOpen(true)
   }
   const handleNewTask = () => {
-    setDefaultPriority("MEDIUM"); setDefaultDueDate(undefined); setDefaultDueTime(undefined); setModalOpen(true)
+    setDefaultPriority("MEDIUM"); setDefaultDueDate(undefined); setDefaultDueTime(undefined); setEditTask(undefined); setModalOpen(true)
   }
   const handleTaskClick = (task: DashboardTask) => { setEditTask(task); setModalOpen(true) }
   const handleDayClick = (date: Date) => {
@@ -459,8 +526,9 @@ export function TasksView() {
     setDefaultPriority("MEDIUM")
     setDefaultDueDate(`${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`)
     setDefaultDueTime(date.getHours() > 0 ? `${pad(date.getHours())}:00` : undefined)
-    setModalOpen(true)
+    setEditTask(undefined); setModalOpen(true)
   }
+  const openProject = (id: string) => router.push(`/dashboard/tasks/projects/${id}`)
 
   const kd = deriveTaskKPIs(tasks)
   const now = new Date()
@@ -487,33 +555,48 @@ export function TasksView() {
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-          {/* View toggle */}
-          <div style={{ display: "inline-flex", background: C.bg2, border: `1px solid ${C.line}`, borderRadius: 7, padding: 2 }}>
-            {[
-              { id: "kanban", label: "Kanban", icon: <LayoutGrid size={11} /> },
-              { id: "list",   label: "Lista",  icon: <List size={11} /> },
-              { id: "cal",    label: "Calendario", icon: <Calendar size={11} /> },
-              { id: "gantt",  label: "Gantt",  icon: <BarChart2 size={11} /> },
-            ].map(m => {
-              const isActive = m.id === "kanban" ? showKanban : (!showKanban && (m.id === "list" ? view === "priority" : m.id === "cal" ? view === "week" || view === "month" : false))
-              return (
-                <button key={m.id} onClick={() => {
-                  if (m.id === "kanban") { setShowKanban(true) }
-                  else if (m.id === "list") { setShowKanban(false); setView("priority") }
-                  else if (m.id === "cal") { setShowKanban(false); setView("week") }
-                  else { setShowKanban(false); setView("priority") }
-                }} style={{ display: "flex", alignItems: "center", gap: 5, padding: "4px 10px", borderRadius: 5, fontFamily: "ui-monospace,monospace", fontSize: 11.5, color: isActive ? C.ink : C.ink3, fontWeight: 500, background: isActive ? "white" : "transparent", boxShadow: isActive ? `0 0 0 1px ${C.line} inset, 0 1px 2px rgba(0,0,0,.03)` : "none", border: "none", cursor: "pointer" }}>
-                  {m.icon}{m.label}
-                </button>
-              )
-            })}
-          </div>
+          {/* Selector único de vista: Tablero · Lista · Calendario */}
+          <Segmented<MainView>
+            value={mainView}
+            onChange={setMainView}
+            options={[
+              { id: "board",    label: "Tablero",    icon: <LayoutGrid size={11} /> },
+              { id: "list",     label: "Lista",      icon: <List size={11} /> },
+              { id: "calendar", label: "Calendario", icon: <Calendar size={11} /> },
+            ]}
+          />
+          {/* Sub-opción del Tablero: agrupar por estado/prioridad */}
+          {mainView === "board" && (
+            <Segmented<BoardGroup>
+              value={boardGroup}
+              onChange={setBoardGroup}
+              options={[{ id: "status", label: "Estado" }, { id: "priority", label: "Prioridad" }]}
+            />
+          )}
+          {/* El sub-selector Día · Semana · Mes ya no vive aquí: se renderiza dentro
+              de la fila de navegación del propio calendario (ver calSelector). */}
           <button style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 6, background: C.bg, border: `1px solid ${C.line}`, color: C.ink2, fontWeight: 550, fontSize: 12.5, cursor: "pointer" }}>
             <Filter size={12} strokeWidth={2} />Filtrar
           </button>
-          <button onClick={handleNewTask} style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px", borderRadius: 6, background: C.ink, color: "white", fontWeight: 550, fontSize: 12.5, border: "none", cursor: "pointer" }}>
-            <Plus size={12} strokeWidth={2.5} />Nueva tarea
-          </button>
+          {/* Botón único de crear: + Nuevo ▾ (Tarea / Proyecto) */}
+          <div style={{ position: "relative" }}>
+            <button onClick={() => setNewMenuOpen(v => !v)} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 6, background: C.ink, color: "white", fontWeight: 550, fontSize: 12.5, border: "none", cursor: "pointer" }}>
+              <Plus size={12} strokeWidth={2.5} />Nuevo<ChevronDown size={12} strokeWidth={2.5} />
+            </button>
+            {newMenuOpen && (
+              <>
+                <div onClick={() => setNewMenuOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 40 }} />
+                <div style={{ position: "absolute", right: 0, top: "calc(100% + 6px)", zIndex: 41, background: C.bg, border: `1px solid ${C.line}`, borderRadius: 8, boxShadow: "0 10px 30px -12px rgba(0,0,0,.3)", padding: 4, minWidth: 168 }}>
+                  <button onClick={() => { setNewMenuOpen(false); handleNewTask() }} style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "8px 10px", borderRadius: 6, background: "none", border: "none", cursor: "pointer", fontSize: 12.5, color: C.ink2, fontWeight: 500 }}>
+                    <Plus size={13} strokeWidth={2} />Nueva tarea
+                  </button>
+                  <button onClick={() => { setNewMenuOpen(false); setProjectModalOpen(true) }} style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "8px 10px", borderRadius: 6, background: "none", border: "none", cursor: "pointer", fontSize: 12.5, color: C.ink2, fontWeight: 500 }}>
+                    <FolderKanban size={13} strokeWidth={2} />Nuevo proyecto
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
@@ -525,21 +608,16 @@ export function TasksView() {
         <TaskKpiCard label="Ratio cierre · 30d" tag="30d" value={Number(kd.closeRate.toFixed(1))} unit="%" isLast />
       </div>
 
-      {/* ── PROJECTS STRIP ───────────────────────────────── */}
-      <ProjectStrip tasks={tasks} />
+      {/* ── PROJECTS STRIP (proyectos reales) ────────────── */}
+      <ProjectStrip projects={projects} tasks={tasks} onOpen={openProject} onNewProject={() => setProjectModalOpen(true)} />
 
-      {showKanban ? (
+      {mainView === "board" && (
         <>
-          {/* ── KANBAN BOARD ─────────────────────────────── */}
-          <KanbanBoard tasks={tasks} onNewTask={handleNewTask} />
-
-          {/* ── BOTTOM: workload + burndown + calendar + agenda ─ */}
+          <KanbanBoard tasks={tasks} onNewTask={handleNewTask} groupBy={boardGroup} />
           <div className="grid grid-cols-2 gap-4">
-            {/* LEFT: workload + velocity */}
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               <Card>
-                <CardHead title="Carga del equipo · esta semana" subtitle="Distribución de tareas por persona"
-                />
+                <CardHead title="Carga del equipo · esta semana" subtitle="Distribución de tareas por persona" />
                 <WorkloadChart tasks={tasks} />
               </Card>
               <Card>
@@ -547,38 +625,26 @@ export function TasksView() {
                 <VelocityChart tasks={tasks} />
               </Card>
             </div>
-
-            {/* RIGHT: calendar + agenda */}
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               <Card>
-                <CardHead title={monthCap} subtitle="Eventos del mes"
-                  actions={
-                    <div style={{ display: "flex", gap: 4 }}>
-                      {["‹", "›"].map(b => (
-                        <button key={b} style={{ width: 26, height: 26, borderRadius: 5, display: "grid", placeItems: "center", background: C.bg2, border: `1px solid ${C.line}`, cursor: "pointer", color: C.ink2, fontSize: 14 }}>{b}</button>
-                      ))}
-                    </div>
-                  }
-                />
+                <CardHead title={monthCap} subtitle="Eventos del mes" />
                 <MiniCalendar tasks={tasks} />
               </Card>
               <Card>
-                <CardHead title={`Hoy · ${now.getDate()} ${now.toLocaleString("es-ES", { month: "long" })}`} subtitle={`${todayCount} tareas pendientes`}
-                />
+                <CardHead title={`Hoy · ${now.getDate()} ${now.toLocaleString("es-ES", { month: "long" })}`} subtitle={`${todayCount} tareas pendientes`} />
                 <TodayAgenda tasks={tasks} />
               </Card>
             </div>
           </div>
         </>
-      ) : (
+      )}
+
+      {mainView === "list" && (
         <>
-          {/* ── LIST/CALENDAR VIEWS ───────────────────────── */}
-          <TasksTopbar view={view} onViewChange={setView} search={search} onSearchChange={setSearch} onNewTask={handleNewTask} />
-          <div className="flex gap-4 items-start" style={{ marginTop: 16 }}>
+          <TasksTopbar search={search} onSearchChange={setSearch} />
+          <div className="flex gap-4 items-start">
             <div className="flex-1 min-w-0 overflow-x-auto">
-              {view === "priority" && <PriorityView tasks={tasks} search={search} onAddTask={handleAddTask} />}
-              {view === "week" && <WeekView tasks={tasks} onTaskClick={handleTaskClick} onCellClick={handleDayClick} />}
-              {view === "month" && <MonthView tasks={tasks} onDayClick={handleDayClick} onTaskClick={handleTaskClick} />}
+              <PriorityView tasks={tasks} search={search} onAddTask={handleAddTask} />
             </div>
             <div className="hidden lg:block" style={{ width: 260, flexShrink: 0, background: C.bg, border: `1px solid ${C.line}`, borderRadius: 10, overflow: "hidden", position: "sticky", top: 24 }}>
               <TasksSidebarRight tasks={tasks} />
@@ -586,6 +652,24 @@ export function TasksView() {
           </div>
         </>
       )}
+
+      {mainView === "calendar" && (() => {
+        // Sub-selector Día · Semana · Mes — se inyecta en la fila de navegación de cada vista
+        const calSelector = (
+          <Segmented<"day" | "week" | "month">
+            value={calMode}
+            onChange={setCalMode}
+            options={[{ id: "day", label: "Día" }, { id: "week", label: "Semana" }, { id: "month", label: "Mes" }]}
+          />
+        )
+        return (
+          <div className="overflow-x-auto" style={{ marginTop: 4 }}>
+            {calMode === "day" && <DayView tasks={tasks} onTaskClick={handleTaskClick} onCellClick={handleDayClick} rightSlot={calSelector} />}
+            {calMode === "week" && <WeekView tasks={tasks} onTaskClick={handleTaskClick} onCellClick={handleDayClick} rightSlot={calSelector} />}
+            {calMode === "month" && <MonthView tasks={tasks} onDayClick={handleDayClick} onTaskClick={handleTaskClick} rightSlot={calSelector} />}
+          </div>
+        )
+      })()}
 
       <NewTaskModal
         open={modalOpen}
@@ -595,6 +679,7 @@ export function TasksView() {
         defaultDueTime={defaultDueTime}
         editTask={editTask}
       />
+      <ProjectModal open={projectModalOpen} onClose={() => setProjectModalOpen(false)} onSaved={(id) => id && openProject(id)} />
     </div>
   )
 }

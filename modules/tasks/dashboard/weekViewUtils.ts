@@ -1,7 +1,8 @@
 import type { DashboardTask } from "./types"
 
 export const CELL_H = 48
-export const GRID_START_H = 7
+// Rejilla horaria de 24h: 00:00 → 23:00 (las tareas de madrugada/noche también caben)
+export const GRID_START_H = 0
 export const GRID_START_MINS = GRID_START_H * 60
 
 export function getTaskStartMins(task: DashboardTask): number {

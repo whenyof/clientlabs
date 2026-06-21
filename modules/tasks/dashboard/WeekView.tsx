@@ -8,7 +8,7 @@ import { PRIORITY_CONFIG } from "./types"
 import { CELL_H, GRID_START_H, GRID_START_MINS, getTaskTop, getTaskHeight, layoutTasks } from "./weekViewUtils"
 
 const DAY_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
-const HOURS = Array.from({ length: 14 }, (_, i) => i + GRID_START_H)
+const HOURS = Array.from({ length: 24 }, (_, i) => i + GRID_START_H)
 
 function getMonday(d: Date): Date {
   const m = new Date(d); const day = d.getDay()
@@ -21,9 +21,10 @@ interface WeekViewProps {
   tasks: DashboardTask[]
   onTaskClick: (task: DashboardTask) => void
   onCellClick: (date: Date) => void
+  rightSlot?: React.ReactNode
 }
 
-export function WeekView({ tasks, onTaskClick, onCellClick }: WeekViewProps) {
+export function WeekView({ tasks, onTaskClick, onCellClick, rightSlot }: WeekViewProps) {
   const qc = useQueryClient()
   const [weekStart, setWeekStart] = useState(() => getMonday(new Date()))
   const today = new Date()
@@ -35,6 +36,18 @@ export function WeekView({ tasks, onTaskClick, onCellClick }: WeekViewProps) {
     return () => clearInterval(interval)
   }, [])
   const dayColRefs = useRef<(HTMLDivElement | null)[]>([])
+
+  // Auto-scroll al cargar: hora actual si la semana visible incluye hoy, si no ~8:00,
+  // para no empezar mirando la madrugada vacía.
+  const gridScrollRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    const el = gridScrollRef.current
+    if (!el) return
+    const containsToday = days.some(d => isSameDay(d, today))
+    const targetHour = containsToday ? new Date().getHours() : 8
+    el.scrollTop = Math.max(0, (targetHour - 0.5) * CELL_H)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Drag to move
   const dragTaskId = useRef<string | null>(null)
@@ -132,6 +145,7 @@ export function WeekView({ tasks, onTaskClick, onCellClick }: WeekViewProps) {
         <span style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)", flex: 1, textAlign: "center" }}>{weekLabel}</span>
         <button type="button" onClick={() => setWeekStart(w => addDays(w, 7))} style={btn}><ChevronRight style={{ width: 14, height: 14 }} /></button>
         <button type="button" onClick={() => setWeekStart(getMonday(new Date()))} style={{ ...btn, padding: "4px 10px", fontSize: 12 }}>Hoy</button>
+        {rightSlot}
       </div>
 
       {/* Calendar grid — horizontally scrollable on mobile */}
@@ -167,7 +181,7 @@ export function WeekView({ tasks, onTaskClick, onCellClick }: WeekViewProps) {
       </div>
 
       {/* Time grid */}
-      <div style={{ overflowY: "auto", maxHeight: "calc(100vh - 220px)" }}>
+      <div ref={gridScrollRef} style={{ overflowY: "auto", maxHeight: "calc(100vh - 220px)" }}>
         <div style={{ display: "grid", gridTemplateColumns: "52px repeat(7,1fr)" }}>
           {/* Hour labels */}
           <div style={{ position: "relative", height: HOURS.length * CELL_H }}>

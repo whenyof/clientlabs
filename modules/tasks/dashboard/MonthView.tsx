@@ -1,10 +1,11 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useMemo } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import type { DashboardTask } from "./types"
 import { PRIORITY_CONFIG } from "./types"
+import { useCalendarTasks, calendarTasksKey } from "./useCalendarTasks"
 
 const DAY_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
 const MONTHS_ES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
@@ -31,19 +32,28 @@ function getCalendarDays(year: number, month: number): Date[] {
 }
 
 interface MonthViewProps {
-  tasks: DashboardTask[]
   onDayClick: (date: Date) => void
   onTaskClick: (task: DashboardTask) => void
   rightSlot?: React.ReactNode
 }
 
-export function MonthView({ tasks, onDayClick, onTaskClick, rightSlot }: MonthViewProps) {
+export function MonthView({ onDayClick, onTaskClick, rightSlot }: MonthViewProps) {
   const qc = useQueryClient()
   const today = new Date()
   const [year, setYear] = useState(today.getFullYear())
   const [month, setMonth] = useState(today.getMonth())
   const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null)
   const dragTaskId = useRef<string | null>(null)
+
+  // Solo las tareas del grid visible (incluye días de meses adyacentes).
+  const { fromISO, toISO } = useMemo(() => {
+    const cells = getCalendarDays(year, month)
+    const start = new Date(cells[0]); start.setHours(0, 0, 0, 0)
+    const end = new Date(cells[cells.length - 1]); end.setHours(23, 59, 59, 999)
+    return { fromISO: start.toISOString(), toISO: end.toISOString() }
+  }, [year, month])
+  const { data: tasks = [] } = useCalendarTasks("month", fromISO, toISO)
+  const calKey = calendarTasksKey("month", fromISO, toISO)
 
   const prevMonth = () => { if (month === 0) { setYear(y => y - 1); setMonth(11) } else setMonth(m => m - 1) }
   const nextMonth = () => { if (month === 11) { setYear(y => y + 1); setMonth(0) } else setMonth(m => m + 1) }
@@ -57,13 +67,13 @@ export function MonthView({ tasks, onDayClick, onTaskClick, rightSlot }: MonthVi
       }).then(r => { if (!r.ok) throw new Error("Failed") }),
     onMutate: async ({ taskId, newDate }) => {
       await qc.cancelQueries({ queryKey: ["tasks"] })
-      const prev = qc.getQueryData<DashboardTask[]>(["tasks"])
-      qc.setQueryData<DashboardTask[]>(["tasks"], old =>
+      const prev = qc.getQueryData<DashboardTask[]>(calKey)
+      qc.setQueryData<DashboardTask[]>(calKey, old =>
         old?.map(t => t.id === taskId ? { ...t, dueDate: new Date(newDate + "T12:00:00").toISOString() } : t)
       )
       return { prev }
     },
-    onError: (_e, _v, ctx) => ctx?.prev && qc.setQueryData(["tasks"], ctx.prev),
+    onError: (_e, _v, ctx) => ctx?.prev && qc.setQueryData(calKey, ctx.prev),
     onSettled: () => qc.invalidateQueries({ queryKey: ["tasks"] }),
   })
 

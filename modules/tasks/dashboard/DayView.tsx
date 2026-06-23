@@ -1,27 +1,34 @@
 "use client"
 
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef, useMemo } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import type { DashboardTask } from "./types"
 import { PRIORITY_CONFIG } from "./types"
 import { CELL_H, GRID_START_H, GRID_START_MINS, getTaskTop, getTaskHeight, layoutTasks } from "./weekViewUtils"
+import { useCalendarTasks } from "./useCalendarTasks"
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i + GRID_START_H)
 function addDays(d: Date, n: number): Date { const r = new Date(d); r.setDate(r.getDate() + n); return r }
 function isSameDay(a: Date, b: Date) { return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate() }
 
 interface DayViewProps {
-  tasks: DashboardTask[]
   onTaskClick: (task: DashboardTask) => void
   onCellClick: (date: Date) => void
   rightSlot?: React.ReactNode
 }
 
-export function DayView({ tasks, onTaskClick, onCellClick, rightSlot }: DayViewProps) {
+export function DayView({ onTaskClick, onCellClick, rightSlot }: DayViewProps) {
   const [day, setDay] = useState(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d })
   const [currentTime, setCurrentTime] = useState(new Date())
   const today = new Date()
   const isToday = isSameDay(day, today)
+
+  // Solo las tareas del día visible.
+  const { fromISO, toISO } = useMemo(() => {
+    const end = new Date(day); end.setHours(23, 59, 59, 999)
+    return { fromISO: day.toISOString(), toISO: end.toISOString() }
+  }, [day])
+  const { data: tasks = [] } = useCalendarTasks("day", fromISO, toISO)
 
   useEffect(() => {
     const interval = setInterval(() => setCurrentTime(new Date()), 60_000)

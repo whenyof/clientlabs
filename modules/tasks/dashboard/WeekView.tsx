@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import type { DashboardTask } from "./types"
 import { PRIORITY_CONFIG } from "./types"
 import { CELL_H, GRID_START_H, GRID_START_MINS, getTaskTop, getTaskHeight, layoutTasks } from "./weekViewUtils"
+import { useCalendarTasks, calendarTasksKey } from "./useCalendarTasks"
 
 const DAY_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
 const HOURS = Array.from({ length: 24 }, (_, i) => i + GRID_START_H)
@@ -18,18 +19,25 @@ function addDays(d: Date, n: number): Date { const r = new Date(d); r.setDate(r.
 function isSameDay(a: Date, b: Date) { return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate() }
 
 interface WeekViewProps {
-  tasks: DashboardTask[]
   onTaskClick: (task: DashboardTask) => void
   onCellClick: (date: Date) => void
   rightSlot?: React.ReactNode
 }
 
-export function WeekView({ tasks, onTaskClick, onCellClick, rightSlot }: WeekViewProps) {
+export function WeekView({ onTaskClick, onCellClick, rightSlot }: WeekViewProps) {
   const qc = useQueryClient()
   const [weekStart, setWeekStart] = useState(() => getMonday(new Date()))
   const today = new Date()
   const [currentTime, setCurrentTime] = useState(new Date())
   const days = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), [weekStart])
+
+  // Solo las tareas de la semana visible.
+  const { fromISO, toISO } = useMemo(() => {
+    const end = addDays(weekStart, 6); end.setHours(23, 59, 59, 999)
+    return { fromISO: weekStart.toISOString(), toISO: end.toISOString() }
+  }, [weekStart])
+  const { data: tasks = [] } = useCalendarTasks("week", fromISO, toISO)
+  const calKey = calendarTasksKey("week", fromISO, toISO)
 
   useEffect(() => {
     const interval = setInterval(() => setCurrentTime(new Date()), 60_000)
@@ -89,11 +97,11 @@ export function WeekView({ tasks, onTaskClick, onCellClick, rightSlot }: WeekVie
       patchTask(taskId, { startAt: newStart.toISOString(), endAt: new Date(newStart.getTime() + dragDurMs.current).toISOString(), dueDate: newStart.toISOString() }),
     onMutate: async ({ taskId, newStart }) => {
       await qc.cancelQueries({ queryKey: ["tasks"] })
-      const prev = qc.getQueryData<DashboardTask[]>(["tasks"])
-      qc.setQueryData<DashboardTask[]>(["tasks"], old => old?.map(t => t.id === taskId ? { ...t, startAt: newStart.toISOString(), dueDate: newStart.toISOString() } : t))
+      const prev = qc.getQueryData<DashboardTask[]>(calKey)
+      qc.setQueryData<DashboardTask[]>(calKey, old => old?.map(t => t.id === taskId ? { ...t, startAt: newStart.toISOString(), dueDate: newStart.toISOString() } : t))
       return { prev }
     },
-    onError: (_e, _v, ctx) => ctx?.prev && qc.setQueryData(["tasks"], ctx.prev),
+    onError: (_e, _v, ctx) => ctx?.prev && qc.setQueryData(calKey, ctx.prev),
     onSettled: () => qc.invalidateQueries({ queryKey: ["tasks"] }),
   })
 

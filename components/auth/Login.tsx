@@ -2,7 +2,7 @@
 
 import { signIn } from "next-auth/react"
 import { useState } from "react"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 
 type Props = { onSwitch: () => void }
@@ -26,12 +26,17 @@ function GoogleIcon() {
 
 export default function Login({ onSwitch }: Props) {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const callbackUrl = safeCallbackUrl(searchParams?.get("callbackUrl") ?? null)
   const [email, setEmail]       = useState("")
   const [password, setPassword] = useState("")
   const [show, setShow]         = useState(false)
   const [loading, setLoading]   = useState(false)
   const [error, setError]       = useState("")
+  // Set when login fails because the email isn't verified — enables the
+  // "resend verification" action below the error.
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null)
+  const [resending, setResending] = useState(false)
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -47,11 +52,35 @@ export default function Login({ onSwitch }: Props) {
       // authorize() throws specific Spanish messages for unverified email and
       // rate-limit; NextAuth surfaces them in res.error with redirect:false.
       // Anything else (e.g. "CredentialsSignin") falls back to the generic copy.
-      const known =
-        res.error.includes("Verifica tu email") || res.error.includes("Demasiados intentos")
+      const isUnverified = res.error.includes("Verifica tu email")
+      const known = isUnverified || res.error.includes("Demasiados intentos")
+      setUnverifiedEmail(isUnverified ? email : null)
       setError(known ? res.error : "Email o contraseña incorrectos. Revísalos e inténtalo de nuevo.")
     } else {
+      setUnverifiedEmail(null)
       window.location.href = callbackUrl
+    }
+  }
+
+  async function resendVerification() {
+    if (!unverifiedEmail || resending) return
+    setResending(true)
+    try {
+      const res = await fetch("/api/auth/send-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: unverifiedEmail }),
+      })
+      if (res.ok) {
+        router.push(`/verify?email=${encodeURIComponent(unverifiedEmail.toLowerCase().trim())}`)
+      } else {
+        const data = await res.json().catch(() => ({}))
+        setError(data.error ?? "No pudimos reenviar el email. Inténtalo en unos minutos.")
+      }
+    } catch {
+      setError("Error de conexión al reenviar. Inténtalo de nuevo.")
+    } finally {
+      setResending(false)
     }
   }
 
@@ -85,9 +114,22 @@ export default function Login({ onSwitch }: Props) {
 
         {/* Error */}
         {error && (
-          <div className="flex items-start gap-2.5 rounded-xl px-4 py-3 text-[12.5px] text-red-700 bg-red-50 border border-red-100">
-            <svg className="w-4 h-4 mt-0.5 shrink-0 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            {error}
+          <div className="space-y-2">
+            <div className="flex items-start gap-2.5 rounded-xl px-4 py-3 text-[12.5px] text-red-700 bg-red-50 border border-red-100">
+              <svg className="w-4 h-4 mt-0.5 shrink-0 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {error}
+            </div>
+            {unverifiedEmail && (
+              <button
+                type="button"
+                onClick={resendVerification}
+                disabled={resending}
+                className="w-full flex items-center justify-center gap-2 rounded-xl py-2.5 text-[12.5px] font-semibold transition-colors disabled:opacity-60"
+                style={{ color: "#0F766E", background: "rgba(15,118,110,0.08)", border: "1px solid rgba(15,118,110,0.25)" }}
+              >
+                {resending ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Enviando...</> : "Reenviar email de verificación"}
+              </button>
+            )}
           </div>
         )}
 

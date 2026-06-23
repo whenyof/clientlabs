@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { aggKey, getCachedData, setCachedData, AGG_TTL } from '@/lib/cache/aggregates'
 
 /**
  * GET /api/dashboard/current-month
@@ -16,6 +17,10 @@ export async function GET() {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
         const userId = session.user.id
+
+        const cacheKey = aggKey(userId, "dash-current-month")
+        const cached = await getCachedData(cacheKey)
+        if (cached) return NextResponse.json(cached)
 
         const now = new Date()
         const year = now.getFullYear()
@@ -51,6 +56,7 @@ export async function GET() {
             result.push({ day: d, revenue: cumulative })
         }
 
+        await setCachedData(cacheKey, result, AGG_TTL)
         return NextResponse.json(result)
     } catch (error) {
         console.error('[current-month]', error)

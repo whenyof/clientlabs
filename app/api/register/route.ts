@@ -5,6 +5,7 @@ import { z } from "zod"
 import { prisma, safePrismaQuery } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 import { sendWelcomeEmail } from "@/lib/email-service"
+import { checkDistributedRateLimit } from "@/lib/security/distributedRateLimiter"
 
 const registerSchema = z.object({
   name: z.string().min(1).max(200).trim().optional(),
@@ -16,30 +17,17 @@ const registerSchema = z.object({
 })
 
 export async function POST(req: NextRequest) {
-  // Rate limit — solo si Upstash está configurado (evita timeout en local sin Redis)
-  if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
-    const ip =
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      req.headers.get("x-real-ip") ||
-      "anonymous"
-    try {
-      const { Ratelimit } = await import("@upstash/ratelimit")
-      const { Redis } = await import("@upstash/redis")
-      const rl = new Ratelimit({
-        redis: Redis.fromEnv(),
-        limiter: Ratelimit.slidingWindow(5, "1 m"),
-        prefix: "clientlabs:register",
-      })
-      const { success } = await rl.limit(ip)
-      if (!success) {
-        return NextResponse.json(
-          { error: "Demasiados intentos. Espera un momento antes de intentarlo de nuevo." },
-          { status: 429 }
-        )
-      }
-    } catch {
-      // Fail-open si Redis cae
-    }
+  // Rate limit fail-closed (consistente con login/forgot): 5 intentos / min por IP
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    req.headers.get("x-real-ip") ||
+    "anonymous"
+  const rl = await checkDistributedRateLimit(`auth:register:${ip}`, 5, 60)
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: "Demasiados intentos. Espera un momento antes de intentarlo de nuevo." },
+      { status: 429 }
+    )
   }
 
   // Validar y sanitizar inputs
@@ -72,7 +60,7 @@ export async function POST(req: NextRequest) {
     // Misma respuesta tanto si existe como si no (previene user enumeration)
     if (exists) return NextResponse.json({ success: true })
 
-    const hashed = await bcrypt.hash(password, 10)
+    const hashed = await bcrypt.hash(password, 12)
 
     const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
 

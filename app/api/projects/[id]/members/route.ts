@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { getUserWorkspace } from "@/lib/get-workspace"
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -29,7 +30,19 @@ export async function POST(request: NextRequest, { params }: Params) {
     if (!project) return NextResponse.json({ error: "Not found or insufficient permissions" }, { status: 404 })
 
     const { memberId, role } = await request.json()
-    if (!memberId) return NextResponse.json({ error: "memberId required" }, { status: 400 })
+    if (!memberId || typeof memberId !== "string") {
+      return NextResponse.json({ error: "memberId required" }, { status: 400 })
+    }
+
+    // El miembro a añadir debe pertenecer al workspace del propietario del proyecto
+    const ownerWorkspace = await getUserWorkspace(project.userId)
+    const workspaceUserIds = new Set<string>([
+      project.userId,
+      ...(ownerWorkspace ? [ownerWorkspace.workspace.ownerId, ...ownerWorkspace.workspace.members.map((m) => m.userId)] : []),
+    ])
+    if (!workspaceUserIds.has(memberId)) {
+      return NextResponse.json({ error: "El usuario no pertenece al workspace" }, { status: 403 })
+    }
 
     const member = await prisma.projectMember.upsert({
       where: { projectId_userId: { projectId: id, userId: memberId } },

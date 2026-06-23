@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { generateInvoiceFromSale } from "@/modules/billing/services/invoice-generator.service"
 import { createInvoiceFromSale } from "@/modules/invoicing/services/invoice.service"
+import { invalidateUserAggregates } from "@/lib/cache/aggregates"
 
 /**
  * GET /api/sales - List sales for current user. Optional ?clientId= to filter by client (e.g. for invoice creation).
@@ -141,14 +142,15 @@ export async function POST(request: NextRequest) {
     })
     try {
       void generateInvoiceFromSale(sale.id).catch((err) => {
-        console.error('Auto invoice from sale failed', sale.id, err)
+        console.error('[invoice-drop] BillingInvoice generation failed for sale', sale.id, err)
       })
       void createInvoiceFromSale(sale.id, session.user.id).catch((err) => {
-        console.error('Invoicing draft from sale failed', sale.id, err)
+        console.error('[invoice-drop] Invoice draft creation failed for sale', sale.id, err)
       })
-    } catch (_) {
-      // non-blocking
+    } catch (err) {
+      console.error('[invoice-drop] Failed to dispatch invoice creation for sale', sale.id, err)
     }
+    await invalidateUserAggregates(session.user.id)
     revalidatePath('/dashboard')
     revalidatePath('/dashboard/sales')
     return NextResponse.json({ sale })

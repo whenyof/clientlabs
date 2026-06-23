@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { invalidateUserAggregates } from "@/lib/cache/aggregates"
 
 export async function POST(request: NextRequest) {
   try {
@@ -44,6 +45,7 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    await invalidateUserAggregates(session.user.id)
     return NextResponse.json({ success: true, transaction })
   } catch (error) {
     console.error("Error creating transaction:", error)

@@ -6,6 +6,9 @@ import { authOptions } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
 import { ensureUserExists } from "@/lib/ensure-user"
 import { recalculateClientTotalSpent } from "@/modules/sales/actions/sales.actions"
+import { generateInvoiceFromSale } from "@/modules/billing/services/invoice-generator.service"
+import { createInvoiceFromSale } from "@/modules/invoicing/services/invoice.service"
+import { invalidateUserAggregates } from "@/lib/cache/aggregates"
 
 /* ==================== CLIENT ACTIONS ==================== */
 
@@ -210,7 +213,7 @@ export async function addClientPurchase(
     if (!client) return { success: false, error: "Client not found" }
 
     // Create sale (summary + single line item)
-    await prisma.sale.create({
+    const sale = await prisma.sale.create({
         data: {
             id: `sale_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             userId: session.user.id,
@@ -240,6 +243,22 @@ export async function addClientPurchase(
             },
         },
     })
+
+    // Auto-generar factura desde la venta (idempotente por saleId, no bloqueante).
+    // Un fallo aquí significa una venta sin factura: se loguea como [invoice-drop]
+    // para que el drop sea visible y rastreable en logs (no se traga el error).
+    try {
+        void generateInvoiceFromSale(sale.id).catch((err) => {
+            console.error("[invoice-drop] BillingInvoice generation failed for sale", sale.id, err)
+        })
+        void createInvoiceFromSale(sale.id, session.user.id).catch((err) => {
+            console.error("[invoice-drop] Invoice draft creation failed for sale", sale.id, err)
+        })
+    } catch (err) {
+        console.error("[invoice-drop] Failed to dispatch invoice creation for sale", sale.id, err)
+    }
+
+    await invalidateUserAggregates(session.user.id)
 
     // Recalculate totalSpent from aggregate (safe against concurrent calls)
     await recalculateClientTotalSpent(clientId)
@@ -669,6 +688,22 @@ export async function createClientSale(
             },
         },
     })
+
+    // Auto-generar factura desde la venta (idempotente por saleId, no bloqueante).
+    // Un fallo aquí significa una venta sin factura: se loguea como [invoice-drop]
+    // para que el drop sea visible y rastreable en logs (no se traga el error).
+    try {
+        void generateInvoiceFromSale(sale.id).catch((err) => {
+            console.error("[invoice-drop] BillingInvoice generation failed for sale", sale.id, err)
+        })
+        void createInvoiceFromSale(sale.id, session.user.id).catch((err) => {
+            console.error("[invoice-drop] Invoice draft creation failed for sale", sale.id, err)
+        })
+    } catch (err) {
+        console.error("[invoice-drop] Failed to dispatch invoice creation for sale", sale.id, err)
+    }
+
+    await invalidateUserAggregates(session.user.id)
 
     // Recalculate total spent
     await recalculateClientTotalSpent(clientId)

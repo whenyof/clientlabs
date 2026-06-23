@@ -3,6 +3,7 @@ import { NextResponse } from "next/server"
 import { prisma, safePrismaQuery } from "@/lib/prisma"
 import { z } from "zod"
 import { sendEmail } from "@/lib/email"
+import { checkDistributedRateLimit } from "@/lib/security/distributedRateLimiter"
 
 const schema = z.object({ email: z.string().email() })
 
@@ -75,6 +76,17 @@ export async function POST(request: Request) {
 
   const { email } = parsed
   const normalizedEmail = email.toLowerCase().trim()
+
+  // Rate limit distribuido (Upstash) como guarda principal del perímetro.
+  // Fail-closed. 6/15 min por email — por encima del límite de BD (3/10 min),
+  // que sigue dando el mensaje amable de espera.
+  const rl = await checkDistributedRateLimit(`auth:sendverification:${normalizedEmail}`, 6, 15 * 60)
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: "Demasiados intentos. Espera unos minutos antes de solicitar otro email." },
+      { status: 429 },
+    )
+  }
 
   // Rate limit: máximo 3 códigos por email cada 10 minutos
   const recentCount = await safePrismaQuery(() =>

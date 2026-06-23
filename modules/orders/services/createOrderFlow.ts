@@ -4,6 +4,7 @@ import { prismaDirect as prisma } from "@/lib/prisma-direct"
 import { Prisma } from "@prisma/client"
 import { v4 as uuid } from "uuid"
 import { recalculateClientTotalSpent } from "@/modules/sales/actions/sales.actions"
+import { invalidateUserAggregates } from "@/lib/cache/aggregates"
 
 export type CreateOrderFlowItem = {
   product: string
@@ -278,5 +279,6 @@ export async function createOrderFlow(
     await recalculateClientTotalSpent(clientId)
   }
 
+  await invalidateUserAggregates(userId)
   return result
 }

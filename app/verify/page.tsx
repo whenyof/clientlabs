@@ -151,7 +151,7 @@ function VerifyForm() {
     if (resending)        return "Enviando..."
     if (cooldown > 0)     return `Reenviar en ${cooldown}s`
     if (resendsLeft <= 0) return "Límite alcanzado"
-    return "Reenviar"
+    return "Reenviar email de verificación"
   }
 
   /* ── Render ───────────────────────────────────────────────────────── */
@@ -177,10 +177,11 @@ function VerifyForm() {
               Client<span style={{ color: "#0F766E" }}>Labs</span>
             </span>
           </Link>
-          <h1 className="text-[24px] font-bold tracking-tight text-slate-900">Verifica tu email</h1>
+          <h1 className="text-[24px] font-bold tracking-tight text-slate-900">Verifica tu cuenta</h1>
           <p className="text-[14px] text-slate-500 mt-2 leading-relaxed">
-            Hemos enviado un código de 6 dígitos a<br />
-            <strong className="text-slate-700 font-semibold">{email || "tu email"}</strong>
+            Te hemos enviado un email con un código de 6 dígitos a<br />
+            <strong className="text-slate-700 font-semibold">{email || "tu email"}</strong>.<br />
+            Revisa tu bandeja de entrada y, si no lo ves, mira la carpeta de spam.
           </p>
         </div>
 
@@ -233,7 +234,7 @@ function VerifyForm() {
           {/* Resend section */}
           <div className="text-center border-t border-slate-100 pt-4 space-y-1">
             <p className="text-[13px] text-slate-500">
-              ¿No recibiste el código?{" "}
+              ¿No te ha llegado el email?{" "}
               <button
                 type="button"
                 onClick={resendCode}

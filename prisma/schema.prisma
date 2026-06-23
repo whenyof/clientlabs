@@ -357,6 +357,8 @@ model CalendarEvent {
   @@index([status])
   @@index([type])
   @@index([userId])
+  @@index([userId, start])
+  @@index([userId, status])
 }
 
 model Client {
@@ -838,6 +840,8 @@ model Sale {
   @@index([stripeCustomerId])
   @@index([stripePaymentId])
   @@index([userId])
+  @@index([userId, saleDate(sort: Desc)])
+  @@index([userId, clientId])
 }
 
 model SaleItem {
@@ -1139,6 +1143,7 @@ model Reminder {
   @@index([start])
   @@index([status])
   @@index([leadId])
+  @@index([userId, start])
 }
 
 model MonthlyGoal {
@@ -1238,6 +1243,7 @@ model Transaction {
   @@index([status])
   @@index([type])
   @@index([userId])
+  @@index([userId, date])
 }
 
 model FixedExpense {
@@ -1439,6 +1445,7 @@ model Activity {
   @@index([leadId])
   @@index([createdAt])
   @@index([type])
+  @@index([userId, createdAt])
 }
 
 model LeadScore {
@@ -1641,6 +1648,8 @@ model Task {
   @@index([startAt])
   @@index([endAt])
   @@index([projectId])
+  @@index([userId, status, dueDate])
+  @@index([userId, dueDate])
 }
 
 model TaskCalendarSync {
@@ -2075,6 +2084,8 @@ model Invoice {
   @@index([issueDate])
   @@index([dueDate])
   @@index([rectifiesInvoiceId])
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([userId, status])
 }
 
 model InvoiceReminderLog {
@@ -2254,6 +2265,8 @@ model BillingInvoice {
   @@index([issuedAt])
   @@index([dueAt])
   @@index([isRectificativa])
+  @@index([userId, status])
+  @@index([userId, issuedAt(sort: Desc)])
 }
 
 model BillingReminderLog {

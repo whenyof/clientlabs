@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { aggKey, getCachedData, setCachedData, AGG_TTL } from '@/lib/cache/aggregates'
 
 /**
  * GET /api/dashboard/stats
@@ -15,6 +16,10 @@ export async function GET() {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
         const userId = session.user.id
+
+        const cacheKey = aggKey(userId, "dash-stats")
+        const cached = await getCachedData(cacheKey)
+        if (cached) return NextResponse.json(cached)
 
         const now = new Date()
         const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1))
@@ -103,7 +108,7 @@ export async function GET() {
             revenueByMonth.push({ month: monthNames[d.getUTCMonth()], revenue: Math.round(sum) })
         }
 
-        return NextResponse.json({
+        const payload = {
             income: incomeCur,
             incomeChange,
             salesCount: salesCountThisMonth,
@@ -114,7 +119,9 @@ export async function GET() {
             botsCount: automationsActive,
             revenueByMonth,
             monthlyRevenueTarget: userSettings?.monthlyRevenueTarget ?? 0,
-        })
+        }
+        await setCachedData(cacheKey, payload, AGG_TTL)
+        return NextResponse.json(payload)
     } catch (error) {
         console.error('Dashboard stats error:', error)
         return NextResponse.json(

@@ -1,16 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
-import { useState, useMemo, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { ClientsTable } from "@domains/clients/components/ClientsTable"
-import type { ClientWithLead as TableClientWithLead } from "@domains/clients/components/ClientsTable"
 import { ClientsFilters } from "./ClientsFilters"
-import { ClientsKanbanView } from "./ClientsKanbanView"
 import { CreateClientButton } from "@/modules/clients/components/CreateClientButton"
 import { ImportClients } from "@/modules/clients/components/ImportClients"
-import { deriveClientStatus, isClientForgotten } from "@/lib/logic/client-status"
-import { List, LayoutGrid, Download, Plus, Zap, MoreVertical, Mail, Phone } from "lucide-react"
+import { Download, MoreVertical, Mail, Phone, Zap } from "lucide-react"
 
 // ─── Design tokens ─────────────────────────────────────────────────────────
 const C = {
@@ -46,18 +43,25 @@ function CardHead({ title, subtitle, actions }: { title: string; subtitle?: stri
 }
 
 // ─── Types ──────────────────────────────────────────────────────────────────
-type ClientWithLead = TableClientWithLead & {
-  Task?: { id: string; status?: string }[]
-  notes?: string | null
-  Sale?: { id: string }[]
+// Las filas y agregados se calculan en server (getClientsView). Tipamos laxo
+// (any) para no acoplar el cliente al módulo server-only.
+type ClientRow = any
+
+type ClientsAggregates = {
+  kpis: { total: number; active: number; vip: number; followup: number; inactive: number; totalRevenue: number }
+  segCounts: { all: number; vip: number; healthy: number; risk: number; churn: number; mrr: number; new: number }
+  distributionTop6: { name: string; value: number }[]
+  attention: { id: string; name: string | null; effectiveStatus: string; isForgotten: boolean; updatedAt: string | Date }[]
+  cohort: { co: string; start: number; ret: (number | null)[] }[]
 }
 
 type ClientsViewProps = {
-  initialClients: ClientWithLead[]
-  allClientsBase: {
-    id: string; totalSpent: number | null; updatedAt: Date; createdAt: Date
-    status: string; notes: string | null; Task: { id: string }[]; Sale?: { id: string }[]
-  }[]
+  initialData: {
+    items: ClientRow[]
+    total: number
+    hasMore: boolean
+    aggregates: ClientsAggregates
+  }
   currentFilters: { status: string; search: string; sortBy: string; sortOrder: string }
   serverNow?: string
 }
@@ -70,7 +74,7 @@ function cohortLevel(p: number | null) {
 }
 
 // ─── Main Component ──────────────────────────────────────────────────────────
-export function ClientsView({ initialClients, allClientsBase, currentFilters, serverNow }: ClientsViewProps) {
+export function ClientsView({ initialData, currentFilters, serverNow }: ClientsViewProps) {
   const router = useRouter()
   const [referenceDate] = useState(() => serverNow ? new Date(serverNow) : new Date())
   const [searchTerm, setSearchTerm] = useState(currentFilters.search)
@@ -79,77 +83,87 @@ export function ClientsView({ initialClients, allClientsBase, currentFilters, se
   const [sortBy, setSortBy] = useState(currentFilters.sortBy || "createdAt")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">((currentFilters.sortOrder as "asc" | "desc") || "desc")
   const [statusFilter, setStatusFilter] = useState(currentFilters.status || "all")
-  const [clients, setClients] = useState<ClientWithLead[]>(initialClients)
-  const [kpiClients, setKpiClients] = useState(allClientsBase)
 
-  useEffect(() => { setClients(initialClients) }, [initialClients])
-  useEffect(() => { setKpiClients(allClientsBase) }, [allClientsBase])
-  useEffect(() => { setSearchTerm(currentFilters.search) }, [currentFilters.search])
+  // Filas paginadas + agregados, calculados EN SERVER (getClientsView).
+  const [items, setItems] = useState<ClientRow[]>(initialData.items)
+  const [aggregates, setAggregates] = useState<ClientsAggregates>(initialData.aggregates)
+  const [total, setTotal] = useState(initialData.total)
+  const [hasMore, setHasMore] = useState(initialData.hasMore)
+  const [loading, setLoading] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
 
-  const handleClientUpdate = useCallback((clientId: string, data: Partial<ClientWithLead>) => {
-    const updateFn = (c: any) => {
-      if (c.id !== clientId) return c
-      return { ...c, ...data, Sale: data.Sale !== undefined ? data.Sale : c.Sale, Task: data.Task !== undefined ? data.Task : c.Task, updatedAt: data.updatedAt || new Date() }
-    }
-    setClients(prev => prev.map(updateFn))
-    setKpiClients(prev => prev.map(updateFn))
-  }, [])
+  const PAGE_SIZE = 50
 
-  const derivedLogic = useCallback((c: any) => {
-    const derivedStatus = deriveClientStatus(c, referenceDate)
-    const forgotten = isClientForgotten(c, referenceDate)
-    return { ...c, status: derivedStatus, isForgotten: forgotten, effectiveStatus: derivedStatus }
-  }, [referenceDate])
+  const buildUrl = useCallback((offset: number) => {
+    const p = new URLSearchParams()
+    if (statusFilter && statusFilter !== "all") p.set("status", statusFilter)
+    if (searchTerm.trim()) p.set("search", searchTerm.trim())
+    if (activeSegment && activeSegment !== "all") p.set("segment", activeSegment)
+    p.set("sortBy", sortBy)
+    p.set("sortOrder", sortOrder)
+    p.set("offset", String(offset))
+    p.set("pageSize", String(PAGE_SIZE))
+    return `/api/clients/list?${p.toString()}`
+  }, [statusFilter, searchTerm, activeSegment, sortBy, sortOrder])
 
-  const clientsWithDerived = useMemo(() => clients.map(derivedLogic), [clients, derivedLogic])
+  // Refetch (página 1 + agregados) al cambiar filtros/búsqueda/segmento/orden.
+  // Debounce para la búsqueda; salta el primer render (ya viene de SSR).
+  const isFirst = useRef(true)
+  useEffect(() => {
+    if (isFirst.current) { isFirst.current = false; return }
+    let cancelled = false
+    setLoading(true)
+    const t = setTimeout(async () => {
+      try {
+        const res = await fetch(buildUrl(0), { credentials: "include" })
+        const data = await res.json()
+        if (cancelled || !data.success) return
+        setItems(data.items)
+        setAggregates(data.aggregates)
+        setTotal(data.total)
+        setHasMore(data.hasMore)
+      } catch { /* fail-soft: se mantiene la página actual */ }
+      finally { if (!cancelled) setLoading(false) }
+    }, 250)
+    return () => { cancelled = true; clearTimeout(t) }
+  }, [buildUrl])
 
-  const kpis = useMemo(() => {
-    const derived = kpiClients.map(derivedLogic)
-    return {
-      total: derived.length,
-      active: derived.filter(c => c.effectiveStatus === "ACTIVE" && !c.isForgotten).length,
-      vip: derived.filter(c => c.effectiveStatus === "VIP").length,
-      followup: derived.filter(c => c.effectiveStatus === "FOLLOW_UP").length,
-      inactive: derived.filter(c => c.effectiveStatus === "INACTIVE" || c.isForgotten).length,
-      totalRevenue: derived.reduce((sum, c) => sum + ((c as any).invoiceRevenue ?? c.totalSpent ?? 0), 0),
-    }
-  }, [kpiClients, derivedLogic])
+  const refetch = useCallback(async () => {
+    try {
+      const res = await fetch(buildUrl(0), { credentials: "include" })
+      const data = await res.json()
+      if (data.success) {
+        setItems(data.items); setAggregates(data.aggregates); setTotal(data.total); setHasMore(data.hasMore)
+      }
+    } catch { /* ignore */ }
+  }, [buildUrl])
 
-  const clientesProcesados = useMemo(() => {
-    let result = [...clientsWithDerived]
-    if (statusFilter && statusFilter !== "all") result = result.filter(c => c.effectiveStatus === statusFilter)
-    if (searchTerm.trim()) {
-      const term = searchTerm.toLowerCase()
-      result = result.filter(c => c.name?.toLowerCase().includes(term) || c.email?.toLowerCase().includes(term) || (c as any).companyName?.toLowerCase().includes(term))
-    }
-    // Segment chip filter
-    if (activeSegment === "vip") result = result.filter(c => c.effectiveStatus === "VIP")
-    else if (activeSegment === "healthy") result = result.filter(c => c.effectiveStatus === "ACTIVE")
-    else if (activeSegment === "risk") result = result.filter(c => c.effectiveStatus === "FOLLOW_UP")
-    else if (activeSegment === "churn") result = result.filter(c => c.effectiveStatus === "INACTIVE" || (c as any).isForgotten)
-    else if (activeSegment === "mrr") result = result.filter(c => ((c as any).invoiceRevenue ?? c.totalSpent ?? 0) > 0)
-    else if (activeSegment === "new") {
-      const ninety = new Date(referenceDate.getTime() - 90 * 86_400_000)
-      result = result.filter(c => new Date(c.createdAt) >= ninety)
-    }
-    result.sort((a, b) => {
-      let valA: any, valB: any
-      if (sortBy === "name") { valA = a.name?.toLowerCase() || ""; valB = b.name?.toLowerCase() || "" }
-      else if (sortBy === "totalSpent") { valA = (a as any).invoiceRevenue ?? a.totalSpent ?? 0; valB = (b as any).invoiceRevenue ?? b.totalSpent ?? 0 }
-      else { valA = new Date(a.createdAt).getTime(); valB = new Date(b.createdAt).getTime() }
-      if (valA < valB) return sortOrder === "asc" ? -1 : 1
-      if (valA > valB) return sortOrder === "asc" ? 1 : -1
-      return 0
-    })
-    return result
-  }, [clientsWithDerived, statusFilter, searchTerm, activeSegment, sortBy, sortOrder, referenceDate])
+  const loadMore = useCallback(async () => {
+    if (loadingMore || !hasMore) return
+    setLoadingMore(true)
+    try {
+      const res = await fetch(buildUrl(items.length), { credentials: "include" })
+      const data = await res.json()
+      if (data.success) { setItems(prev => [...prev, ...data.items]); setHasMore(data.hasMore) }
+    } catch { /* ignore */ }
+    finally { setLoadingMore(false) }
+  }, [buildUrl, items.length, loadingMore, hasMore])
+
+  const handleClientUpdate = useCallback((clientId: string, data: Partial<ClientRow>) => {
+    // Optimista en la fila visible; los agregados los recalcula el server.
+    setItems(prev => prev.map((c: any) => c.id === clientId ? { ...c, ...data } : c))
+    refetch()
+  }, [refetch])
 
   const handleSortChange = useCallback((value: string) => {
     const [field, order] = value.split("-")
     setSortBy(field); setSortOrder(order as "asc" | "desc")
   }, [])
 
-  // ── Derived data for design sections ──
+  // Tabla: las filas ya vienen filtradas/ordenadas/paginadas del server.
+  const clientesProcesados = items
+
+  const kpis = aggregates.kpis
   const totalClients = kpis.total
   const champions = kpis.vip
   const saludables = kpis.active
@@ -165,39 +179,9 @@ export function ClientsView({ initialClients, allClientsBase, currentFilters, se
   ]
   const healthTotal = Math.max(champions + saludables + enRiesgo + churnAlto, 1)
 
-  // Attention — clients at risk
-  const attentionClients = useMemo(() =>
-    clientsWithDerived.filter(c => c.effectiveStatus === "FOLLOW_UP" || c.effectiveStatus === "INACTIVE" || (c as any).isForgotten)
-      .slice(0, 3),
-    [clientsWithDerived])
-
-  // Cohort table — group by quarter of creation
-  const cohortData = useMemo(() => {
-    const now = referenceDate
-    const quarters: { label: string; start: number; clients: Date[] }[] = []
-    for (let q = 5; q >= 0; q--) {
-      const qDate = new Date(now.getFullYear(), now.getMonth() - (q * 3), 1)
-      const qEnd = new Date(qDate.getFullYear(), qDate.getMonth() + 3, 0)
-      const qLabel = `${qDate.getFullYear()}-Q${Math.ceil((qDate.getMonth() + 1) / 3)}`
-      const inQuarter = kpiClients.filter(c => {
-        const d = new Date(c.createdAt)
-        return d >= qDate && d <= qEnd
-      }).map(c => new Date(c.updatedAt))
-      if (inQuarter.length > 0) {
-        quarters.push({ label: qLabel, start: inQuarter.length, clients: inQuarter })
-      }
-    }
-    return quarters.slice(-6).map(q => {
-      const ret = Array.from({ length: 12 }, (_, m) => {
-        if (m === 0) return 100
-        const cutoff = new Date(now.getFullYear(), now.getMonth() - (11 - m), 1)
-        if (cutoff > now) return null
-        const active = q.clients.filter(d => d >= cutoff).length
-        return q.start > 0 ? Math.round((active / q.start) * 100) : null
-      })
-      return { co: q.label, start: q.start, ret }
-    })
-  }, [kpiClients, referenceDate])
+  // Atención y cohorte vienen calculadas del server (sobre todo el set).
+  const attentionClients = aggregates.attention
+  const cohortData = aggregates.cohort
 
   // KPI cards — real values only (no fabricated trends)
   const kpiCards = [
@@ -207,16 +191,15 @@ export function ClientsView({ initialClients, allClientsBase, currentFilters, se
     { label: "Churn estimado", tag: "Salud", value: healthTotal > 0 ? Math.round((churnAlto / healthTotal) * 100 * 10) / 10 : 0, unit: "%" },
   ]
 
-  // Segment chips — counts computed from real client data
-  const ninetyDaysAgo = new Date(referenceDate.getTime() - 90 * 86_400_000)
+  // Segment chips — counts sobre TODO el set (server). mrr/new ya no se capan a 100.
   const segChips = [
     { id: "all", label: "Todos", count: totalClients },
     { id: "vip", label: "Champions", count: champions },
     { id: "healthy", label: "Saludables", count: saludables },
     { id: "risk", label: "En riesgo", count: enRiesgo },
     { id: "churn", label: "Churn alto", count: churnAlto },
-    { id: "mrr", label: "Con facturación", count: clientsWithDerived.filter(c => ((c as any).invoiceRevenue ?? c.totalSpent ?? 0) > 0).length },
-    { id: "new", label: "Nuevos < 90d", count: clientsWithDerived.filter(c => new Date(c.createdAt) >= ninetyDaysAgo).length },
+    { id: "mrr", label: "Con facturación", count: aggregates.segCounts.mrr },
+    { id: "new", label: "Nuevos < 90d", count: aggregates.segCounts.new },
   ]
 
   return (
@@ -310,11 +293,7 @@ export function ClientsView({ initialClients, allClientsBase, currentFilters, se
           <CardHead title="Distribución por valor" subtitle="Top clientes por facturación" />
           <div style={{ padding: 18 }}>
             {(() => {
-              const top = [...clientsWithDerived]
-                .map(c => ({ name: c.name ?? "—", v: (c as any).invoiceRevenue ?? c.totalSpent ?? 0 }))
-                .filter(c => c.v > 0)
-                .sort((a, b) => b.v - a.v)
-                .slice(0, 6)
+              const top = aggregates.distributionTop6.map(d => ({ name: d.name, v: d.value }))
               if (top.length === 0) {
                 return <div style={{ textAlign: "center", color: C.ink3, fontSize: 12.5, padding: "24px 0" }}>Sin facturación registrada todavía</div>
               }
@@ -525,7 +504,7 @@ export function ClientsView({ initialClients, allClientsBase, currentFilters, se
             <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `1px solid ${C.line2}`, gap: 12, flexWrap: "wrap" }}>
               <div>
                 <h3 style={{ fontWeight: 600, letterSpacing: "-0.012em", fontSize: 13.5, margin: 0, color: C.ink }}>Mis clientes</h3>
-                <div style={{ fontSize: 11.5, color: C.ink3, fontFamily: "ui-monospace,monospace", marginTop: 2 }}>{clientesProcesados.length} resultados · ordenados por LTV</div>
+                <div style={{ fontSize: 11.5, color: C.ink3, fontFamily: "ui-monospace,monospace", marginTop: 2 }}>{total} {total === 1 ? "resultado" : "resultados"}{loading ? " · cargando…" : ""}</div>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
                 {[["Sector", "Todos"], ["Owner", "Equipo"], ["Plan", "Cualquiera"], ["Estado", "Activo"]].map(([label, val]) => (
@@ -549,6 +528,18 @@ export function ClientsView({ initialClients, allClientsBase, currentFilters, se
               />
             </div>
             <ClientsTable clients={clientesProcesados} onClientUpdate={handleClientUpdate} />
+            {hasMore && (
+              <div style={{ display: "flex", justifyContent: "center", padding: "14px 18px", borderTop: `1px solid ${C.line2}` }}>
+                <button
+                  type="button"
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  style={{ padding: "8px 16px", borderRadius: 6, border: `1px solid ${C.line}`, background: C.bg, color: C.ink2, fontSize: 12.5, fontWeight: 550, cursor: loadingMore ? "default" : "pointer", opacity: loadingMore ? 0.6 : 1 }}
+                >
+                  {loadingMore ? "Cargando…" : `Cargar más (${items.length} de ${total})`}
+                </button>
+              </div>
+            )}
           </Card>
 
           {/* Cohort heatmap at bottom */}

@@ -8,6 +8,17 @@ import { prisma } from "@/lib/prisma"
 import { writeFile, mkdir } from "fs/promises"
 import path from "path"
 
+const MAX_SIZE = 10 * 1024 * 1024 // 10MB
+// MIME allowlist → extensión propia. Nunca se confía en file.name.
+const ALLOWED_TYPES: Record<string, string> = {
+  "application/pdf": ".pdf",
+  "image/jpeg": ".jpg",
+  "image/jpg": ".jpg",
+  "image/png": ".png",
+  "image/webp": ".webp",
+  "image/heic": ".heic",
+}
+
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) return NextResponse.json({ error: "No autorizado" }, { status: 401 })
@@ -18,8 +29,25 @@ export async function POST(req: NextRequest) {
     const purchaseId = formData.get("purchaseId") as string | null
     const docType = formData.get("docType") as "invoice" | "delivery" | null
 
-    if (!file || !purchaseId || !docType) {
+    if (!file || !(file instanceof File) || !purchaseId || !docType) {
       return NextResponse.json({ error: "Faltan parámetros" }, { status: 400 })
+    }
+    if (docType !== "invoice" && docType !== "delivery") {
+      return NextResponse.json({ error: "Tipo de documento no válido" }, { status: 400 })
+    }
+
+    if (file.size > MAX_SIZE) {
+      return NextResponse.json({ error: "El archivo supera el límite de 10MB" }, { status: 413 })
+    }
+
+    // Validar MIME contra allowlist y derivar la extensión de ahí (no de file.name)
+    const mimeType = file.type.toLowerCase()
+    const ext = ALLOWED_TYPES[mimeType]
+    if (!ext) {
+      return NextResponse.json(
+        { error: `Tipo de archivo no permitido: ${file.type}. Solo PDF e imágenes.` },
+        { status: 415 }
+      )
     }
 
     // Verify ownership
@@ -28,11 +56,10 @@ export async function POST(req: NextRequest) {
     })
     if (!purchase) return NextResponse.json({ error: "Compra no encontrada" }, { status: 404 })
 
-    // Save file
+    // Save file — nombre generado, sin componentes derivados del cliente
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
-    const ext = path.extname(file.name) || ".pdf"
-    const fileName = `${docType}-${purchaseId}${ext}`
+    const fileName = `${docType}_${purchaseId}_${Date.now()}${ext}`
     const uploadDir = path.join(process.cwd(), "public", "uploads", "purchases")
     await mkdir(uploadDir, { recursive: true })
     const filePath = path.join(uploadDir, fileName)

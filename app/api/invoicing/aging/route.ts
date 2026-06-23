@@ -15,6 +15,7 @@ import {
  getAgingReport,
  getAgingReportWithDrillDown,
 } from "@/modules/invoicing/services/aging.service"
+import { aggKey, getCachedData, setCachedData, AGG_TTL } from "@/lib/cache/aggregates"
 
 export async function GET(request: NextRequest) {
  const session = await getServerSession(authOptions)
@@ -23,13 +24,19 @@ export async function GET(request: NextRequest) {
  }
 
  const drilldown = request.nextUrl.searchParams.get("drilldown") === "true"
+ const cacheKey = aggKey(session.user.id, "inv-aging", [drilldown ? "1" : "0"])
 
  try {
+ const cached = await getCachedData(cacheKey)
+ if (cached) return NextResponse.json(cached)
+
  const report = drilldown
  ? await getAgingReportWithDrillDown(session.user.id)
  : await getAgingReport(session.user.id)
 
- return NextResponse.json({ success: true, ...report })
+ const payload = { success: true, ...report }
+ await setCachedData(cacheKey, payload, AGG_TTL)
+ return NextResponse.json(payload)
  } catch (e) {
  console.error("Aging report error:", e)
  return NextResponse.json(

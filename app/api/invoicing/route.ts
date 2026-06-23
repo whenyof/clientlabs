@@ -84,24 +84,10 @@ export async function GET(request: NextRequest) {
     const saleId = searchParams.get("saleId") ?? undefined
     const providerOrderId = searchParams.get("providerOrderId") ?? undefined
 
-    const raw = await prisma.invoice.findMany({
-      where: { userId },
-      select: { id: true },
-    })
-    if (raw.length === 0 && !clientId && !providerId && !saleId && !providerOrderId) {
-      const sales = await prisma.sale.findMany({
-        where: { userId, clientId: { not: null } },
-        select: { id: true },
-      })
-      for (const sale of sales) {
-        try {
-          await invoiceService.createInvoiceFromSale(sale.id, userId)
-        } catch (e) {
-          console.error("Backfill createInvoiceFromSale failed", sale.id, e)
-        }
-      }
-    }
-
+    // GET de solo lectura: la factura se crea en el origen al crear la venta
+    // (sales API, sales.actions, addClientPurchase, createClientSale y
+    // createOrderFlow con generateInvoice). Para datos legacy existe el script
+    // manual invoiceService.backfillInvoicesFromSales(userId).
     const list = await invoiceService.listInvoices(userId, {
       limit: 500,
       ...(clientId && { clientId }),

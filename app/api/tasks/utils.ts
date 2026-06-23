@@ -34,13 +34,14 @@ export function buildTaskWhere(
  where.priority = params.priority as TaskPriorityParam
  }
  if (params.from || params.to) {
- where.dueDate = {}
- if (params.from) where.dueDate.gte = new Date(params.from)
- if (params.to) {
- const to = new Date(params.to)
- to.setHours(23, 59, 59, 999)
- where.dueDate.lte = to
- }
+ // El calendario posiciona por startAt (grid semanal/diario) y por dueDate
+ // (mes / all-day). El rango debe cubrir AMBOS o el grid perdería tareas con
+ // startAt en rango pero dueDate fuera. `to` se toma como instante exacto
+ // (las vistas envían ISO precisos de inicio/fin de rango).
+ const range: Prisma.DateTimeFilter = {}
+ if (params.from) range.gte = new Date(params.from)
+ if (params.to) range.lte = new Date(params.to)
+ where.OR = [{ dueDate: range }, { startAt: range }]
  }
  if (params.assignedTo != null && params.assignedTo !== "") {
  where.assignedTo = params.assignedTo

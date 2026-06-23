@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { getFinanceSummary, getFinanceMonthlyTrend } from "@domains/finance"
 import { getSalesComparisons } from "@/modules/sales/services/salesAnalytics"
 import { predictMonthlyRevenue, predictMonthlyExpenses, predictCashFlow } from "../lib/predictors"
-import { getCached, setCached } from "@/lib/cache"
+import { aggKey, getCachedData, setCachedData, AGG_TTL } from "@/lib/cache/aggregates"
 
 function growthRate(current: number, previous: number): number {
   if (previous === 0) return 0
@@ -95,8 +95,8 @@ export async function GET(request: NextRequest) {
   const startDate = searchParams.get("startDate")
   const endDate = searchParams.get("endDate")
 
-  const cacheKey = `finance-analytics-${userId}-${period}-${startDate ?? ""}-${endDate ?? ""}`
-  const cached = getCached(cacheKey)
+  const cacheKey = aggKey(userId, "fin-analytics", [period, startDate, endDate])
+  const cached = await getCachedData(cacheKey)
   if (cached) return NextResponse.json(cached, { headers: { "X-Cache": "HIT" } })
 
   const { from, to } = getDateRange(period, startDate, endDate)
@@ -255,7 +255,7 @@ export async function GET(request: NextRequest) {
       alerts,
       transactionCount: transactions.length,
     }
-    setCached(cacheKey, analyticsResult, 120)
+    await setCachedData(cacheKey, analyticsResult, AGG_TTL)
     return NextResponse.json(analyticsResult)
   } catch (error) {
     console.error("Error getting analytics:", error)

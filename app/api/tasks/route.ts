@@ -4,7 +4,8 @@ export const dynamic = "force-dynamic"
 export const maxDuration = 30
 import { prisma } from "@/lib/prisma"
 import { gateLimit } from "@/lib/api-gate"
-import { invalidateCache } from "@/lib/cache"
+import { invalidateUserAggregates } from "@/lib/cache/aggregates"
+import { invalidateCachedData } from "@/lib/redis-cache"
 import {
  getSessionUserId,
  buildTaskWhere,
@@ -196,8 +197,11 @@ export async function POST(request: NextRequest) {
    endAt: task.endAt?.toISOString() ?? null,
  }).catch((err) => console.error("[google-calendar] sync create:", err))
 
- invalidateCache(`tasks-kpis-${userId}`)
- invalidateCache(`dashboard-summary-${userId}`)
+ // Invalida los agregados de tareas en Upstash (counters, board-meta, KPIs,
+ // dashboard) — antes era un invalidateCache in-memory que en serverless no
+ // tocaba nada. Cierra el staleness de los contadores tras crear una tarea.
+ await invalidateUserAggregates(userId)
+ await invalidateCachedData(`tasks-kpis-${userId}`)
  notifyTaskCreated(userId, task.title, task.id).catch(() => {})
  return NextResponse.json(task, { status: 201 })
  } catch (error) {

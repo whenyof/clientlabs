@@ -10,6 +10,7 @@ import "server-only"
 
 import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
+import { invalidateUserAggregates } from "@/lib/cache/aggregates"
 import * as repo from "../repositories/invoice.repository"
 import * as engine from "../engine/invoice.engine"
 import type { CreateInvoiceInput, AddPaymentInput, InvoiceWithRelations, InvoiceStatus } from "../types"
@@ -202,6 +203,7 @@ export async function createInvoice(input: CreateInvoiceInput): Promise<{ id: st
   })
   await repo.addEvent(invoice.id, "CREATED", { at: new Date().toISOString() })
 
+  await invalidateUserAggregates(input.userId)
   return { id: invoice.id, number: invoice.number }
 }
 
@@ -714,6 +716,7 @@ export async function issueInvoice(invoiceId: string, userId: string): Promise<I
     const { recalculate } = await import("../behaviour/payment-behaviour.service")
     recalculate(inv.clientId).catch((e) => console.error("Payment profile recalc after issue:", e))
   }
+  await invalidateUserAggregates(userId)
   return { success: true }
 }
 
@@ -765,6 +768,7 @@ export async function updateDraftInvoice(
     lines: computed,
   })
   await repo.addEvent(invoiceId, "EDITED", { at: new Date().toISOString() })
+  await invalidateUserAggregates(userId)
   return true
 }
 
@@ -784,7 +788,9 @@ export async function deleteDraftInvoice(invoiceId: string, userId: string): Pro
     const released = await repo.rollbackConsumedNumber(userId, `${reservedSeries}-${year}`, seq)
     if (!released) return false // no se puede liberar el número → no se puede borrar
   }
-  return repo.deleteDraft(invoiceId, userId)
+  const deleted = await repo.deleteDraft(invoiceId, userId)
+  if (deleted) await invalidateUserAggregates(userId)
+  return deleted
 }
 
 /**
@@ -797,6 +803,7 @@ export async function cancelInvoice(invoiceId: string, userId: string): Promise<
   if (!allowed.includes(inv.status as InvoiceStatus)) return false
   await repo.updateStatus(invoiceId, userId, INVOICE_STATUS.CANCELED)
   await repo.addEvent(invoiceId, "CANCELED", { at: new Date().toISOString() })
+  await invalidateUserAggregates(userId)
   return true
 }
 
@@ -896,6 +903,7 @@ export async function createRectification(
       lines: linesOut,
     })
     await repo.addEvent(created.id, "RECTIFIES", { originalNumber: original.number, at: now.toISOString() })
+    await invalidateUserAggregates(userId)
     return { success: true, id: created.id }
   }
 
@@ -922,6 +930,7 @@ export async function createRectification(
     lines: partialLines,
   })
   await repo.addEvent(created.id, "RECTIFIES", { originalNumber: original.number, at: now.toISOString() })
+  await invalidateUserAggregates(userId)
   return { success: true, id: created.id }
 }
 
@@ -964,6 +973,7 @@ export async function registerPayment(
       // fuera del runtime de Vercel (tests/worker): la promesa flotante basta
     }
   }
+  if (result.ok) await invalidateUserAggregates(userId)
   return { ok: result.ok, newStatus: result.newStatus }
 }
 

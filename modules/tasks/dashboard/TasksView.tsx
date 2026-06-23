@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
 import {
@@ -59,11 +59,10 @@ function TaskKpiCard({ label, tag, value, unit, isLast }: {
 const PROJECT_STATUS_LABEL: Record<string, string> = {
   ACTIVE: "Activo", PAUSED: "Pausado", COMPLETED: "Completado", ARCHIVED: "Archivado",
 }
-function ProjectStrip({ projects, tasks, onOpen, onNewProject }: {
-  projects: ApiProject[]; tasks: DashboardTask[]; onOpen: (id: string) => void; onNewProject: () => void
+function ProjectStrip({ projects, sinProyecto, onOpen, onNewProject }: {
+  projects: ApiProject[]; sinProyecto: number; onOpen: (id: string) => void; onNewProject: () => void
 }) {
   const visible = projects.filter(p => p.status !== "ARCHIVED")
-  const sinProyecto = tasks.filter(t => !t.projectId && t.status !== "DONE" && t.status !== "CANCELLED").length
   return (
     <div style={{ marginBottom: 20 }}>
       <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 12 }}>
@@ -141,26 +140,8 @@ const PRIORITY_COLS = [
   { id: "LOW",    nm: "Baja",    sw: C.ink4 },
 ]
 
-function KanbanBoard({ tasks, onNewTask, groupBy }: { tasks: DashboardTask[]; onNewTask: () => void; groupBy: BoardGroup }) {
-  const now = new Date()
-  const todayStr = now.toISOString().slice(0, 10)
+function KanbanBoard({ columns, onNewTask, groupBy }: { columns: Record<string, { tasks: DashboardTask[]; total: number }>; onNewTask: () => void; groupBy: BoardGroup }) {
   const cols = groupBy === "priority" ? PRIORITY_COLS : KANBAN_COLS
-  const grouped: Record<string, DashboardTask[]> = Object.fromEntries(cols.map(c => [c.id, [] as DashboardTask[]]))
-  if (groupBy === "priority") {
-    tasks.forEach(t => { (grouped[t.priority] ?? grouped.LOW).push(t) })
-  } else {
-    tasks.forEach(t => {
-      if (t.status === "DONE" || t.status === "CANCELLED") grouped.DONE.push(t)
-      else if (t.status === "IN_PROGRESS") grouped.IN_PROGRESS.push(t)
-      else {
-        if (!t.dueDate) { grouped.PENDING_FUTURE.push(t); return }
-        const due = t.dueDate.slice(0, 10)
-        if (due < todayStr) grouped.PENDING_LATE.push(t)
-        else if (due === todayStr) grouped.PENDING_TODAY.push(t)
-        else grouped.PENDING_FUTURE.push(t)
-      }
-    })
-  }
 
   return (
     <div style={{ background: "transparent", marginBottom: 16 }}>
@@ -177,14 +158,15 @@ function KanbanBoard({ tasks, onNewTask, groupBy }: { tasks: DashboardTask[]; on
       </div>
       <div style={{ display: "grid", gridTemplateColumns: `repeat(${cols.length}, 1fr)`, gap: 10, overflowX: "auto" }}>
         {cols.map(col => {
-          const colTasks = grouped[col.id] ?? []
+          const colTasks = columns[col.id]?.tasks ?? []
+          const colTotal = columns[col.id]?.total ?? 0
           return (
             <div key={col.id} style={{ minWidth: 200, background: C.bg2, borderRadius: 10, overflow: "hidden" }}>
               {/* Column header */}
               <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", background: C.bg3, borderBottom: `1px solid ${C.line2}` }}>
                 <span style={{ width: 8, height: 8, borderRadius: 99, background: col.sw, display: "inline-block", flexShrink: 0 }} />
                 <h4 style={{ margin: 0, fontSize: 12.5, fontWeight: 600, color: C.ink, flex: 1 }}>{col.nm}</h4>
-                <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, color: C.ink3, background: C.bg, border: `1px solid ${C.line}`, padding: "1px 6px", borderRadius: 99 }}>{colTasks.length}</span>
+                <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, color: C.ink3, background: C.bg, border: `1px solid ${C.line}`, padding: "1px 6px", borderRadius: 99 }}>{colTotal}</span>
                 <button onClick={onNewTask} style={{ width: 18, height: 18, display: "grid", placeItems: "center", background: "none", border: "none", cursor: "pointer", color: C.ink3 }}>
                   <Plus size={12} strokeWidth={2} />
                 </button>
@@ -217,11 +199,11 @@ function KanbanBoard({ tasks, onNewTask, groupBy }: { tasks: DashboardTask[]; on
                     </div>
                   )
                 })}
-                {colTasks.length === 0 && (
+                {colTotal === 0 && (
                   <div style={{ padding: "16px 4px", textAlign: "center", color: C.ink4, fontSize: 11, fontFamily: "ui-monospace,monospace" }}>Sin tareas</div>
                 )}
-                {colTasks.length > 5 && (
-                  <div style={{ padding: "4px 4px", fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: C.ink4, textAlign: "center" }}>+{colTasks.length - 5} más</div>
+                {colTotal > 5 && (
+                  <div style={{ padding: "4px 4px", fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: C.ink4, textAlign: "center" }}>+{colTotal - 5} más</div>
                 )}
                 <div onClick={onNewTask} style={{ padding: "6px 4px", fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: C.ink4, cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
                   <Plus size={10} strokeWidth={2} />Añadir tarea…
@@ -236,25 +218,19 @@ function KanbanBoard({ tasks, onNewTask, groupBy }: { tasks: DashboardTask[]; on
 }
 
 // ─── Mini calendar ─────────────────────────────────────────────────────────
-function MiniCalendar({ tasks }: { tasks: DashboardTask[] }) {
+const CAT_COLOR: Record<string, string> = { done: C.accent, overdue: C.red, upcoming: C.warn }
+function MiniCalendar({ monthTaskDays }: { monthTaskDays: Record<number, ("done" | "overdue" | "upcoming")[]> }) {
   const now = new Date()
   const year = now.getFullYear(), month = now.getMonth()
   const firstDay = new Date(year, month, 1).getDay()
   const daysInMonth = new Date(year, month + 1, 0).getDate()
   const offset = (firstDay + 6) % 7 // Monday first
   const today = now.getDate()
-  // Tasks by day
+  // Días con tareas calculados en server (categorías → color).
   const taskDays: Record<number, string[]> = {}
-  tasks.forEach(t => {
-    if (!t.dueDate) return
-    const d = new Date(t.dueDate)
-    if (d.getFullYear() === year && d.getMonth() === month) {
-      const day = d.getDate()
-      if (!taskDays[day]) taskDays[day] = []
-      const color = t.status === "DONE" ? C.accent : (new Date(t.dueDate!) < now) ? C.red : C.warn
-      taskDays[day].push(color)
-    }
-  })
+  for (const [day, cats] of Object.entries(monthTaskDays)) {
+    taskDays[Number(day)] = cats.map(c => CAT_COLOR[c] ?? C.warn)
+  }
 
   const DAYS = ["L", "M", "X", "J", "V", "S", "D"]
   return (
@@ -286,16 +262,8 @@ function MiniCalendar({ tasks }: { tasks: DashboardTask[] }) {
 }
 
 // ─── Today agenda ──────────────────────────────────────────────────────────
-function TodayAgenda({ tasks }: { tasks: DashboardTask[] }) {
-  const today = new Date().toISOString().slice(0, 10)
-  const todayTasks = tasks.filter(t => t.dueDate?.slice(0, 10) === today && t.status !== "DONE").slice(0, 5)
-
-  const EVT_ICONS: Record<string, React.ReactNode> = {
-    call:    <Phone size={12} strokeWidth={1.8} />,
-    meet:    <Clock size={12} strokeWidth={1.8} />,
-    renewal: <RefreshCw size={12} strokeWidth={1.8} />,
-    default: <Flag size={12} strokeWidth={1.8} />,
-  }
+type AgendaItem = { id: string; title: string; priority: string; endAt: string | null; clientName: string | null; assigneeInitials: string | null }
+function TodayAgenda({ agenda }: { agenda: AgendaItem[] }) {
   const EVT_COLORS: Record<string, { bg: string; color: string }> = {
     URGENT: { bg: C.redSoft, color: C.red },
     HIGH:   { bg: C.warnSoft, color: C.warn },
@@ -305,25 +273,25 @@ function TodayAgenda({ tasks }: { tasks: DashboardTask[] }) {
 
   return (
     <div>
-      {todayTasks.length === 0 ? (
+      {agenda.length === 0 ? (
         <div style={{ padding: "32px 18px", textAlign: "center", color: C.ink3, fontSize: 12.5 }}>Sin tareas para hoy</div>
-      ) : todayTasks.map(t => {
+      ) : agenda.map(t => {
         const evtColor = EVT_COLORS[t.priority] ?? EVT_COLORS.LOW
-        const timeStr = t.dueDate && t.endAt ? new Date(t.endAt).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) : "—"
+        const timeStr = t.endAt ? new Date(t.endAt).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) : "—"
         return (
           <div key={t.id} style={{ display: "grid", gridTemplateColumns: "48px 26px 1fr 24px", gap: 10, alignItems: "center", padding: "9px 14px", borderBottom: `1px solid ${C.line3}` }}>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
               <span style={{ fontSize: 12, fontWeight: 600, color: C.ink, fontFeatureSettings: "\"tnum\"" }}>{timeStr}</span>
             </div>
             <div style={{ width: 26, height: 26, borderRadius: 6, display: "grid", placeItems: "center", background: evtColor.bg, color: evtColor.color }}>
-              {EVT_ICONS.default}
+              <Flag size={12} strokeWidth={1.8} />
             </div>
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: 12.5, color: C.ink, fontWeight: 600, letterSpacing: "-0.005em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{t.title}</div>
-              {t.Client && <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: C.ink3, marginTop: 1 }}>{t.Client.name}</div>}
+              {t.clientName && <div style={{ fontFamily: "ui-monospace,monospace", fontSize: 10.5, color: C.ink3, marginTop: 1 }}>{t.clientName}</div>}
             </div>
             <div style={{ width: 24, height: 24, borderRadius: 4, background: C.bg3, display: "grid", placeItems: "center", fontFamily: "ui-monospace,monospace", fontSize: 9, fontWeight: 600, color: C.ink }}>
-              {t.assignees?.[0]?.user?.name?.slice(0, 2).toUpperCase() ?? "—"}
+              {t.assigneeInitials ?? "—"}
             </div>
           </div>
         )
@@ -333,30 +301,9 @@ function TodayAgenda({ tasks }: { tasks: DashboardTask[] }) {
 }
 
 // ─── Workload chart ─────────────────────────────────────────────────────────
-function WorkloadChart({ tasks }: { tasks: DashboardTask[] }) {
-  // Group by assignee
-  const groups: Record<string, { nm: string; done: number; doing: number; todo: number }> = {}
-  tasks.forEach(t => {
-    const user = t.assignees?.[0]?.user
-    if (!user) return
-    const key = user.id
-    const initials = (user.name || "??").split(" ").map(w => w[0] ?? "").slice(0, 2).join("").toUpperCase()
-    if (!groups[key]) groups[key] = { nm: user.name || initials, done: 0, doing: 0, todo: 0 }
-    if (t.status === "DONE") groups[key].done++
-    else if (t.status === "IN_PROGRESS") groups[key].doing++
-    else groups[key].todo++
-  })
-
-  // Fallback simulated workload if no assignee data
-  const rows = Object.values(groups).slice(0, 4)
-  if (rows.length === 0) {
-    // Generate simulated from tasks count
-    const total = tasks.length
-    const done = tasks.filter(t => t.status === "DONE").length
-    const doing = tasks.filter(t => t.status === "IN_PROGRESS").length
-    const todo = total - done - doing
-    rows.push({ nm: "Equipo", done, doing, todo })
-  }
+function WorkloadChart({ workload }: { workload: { done: number; doing: number; todo: number } }) {
+  // Totales de equipo calculados en server (done/doing/todo por COUNT SQL).
+  const rows = [{ nm: "Equipo", done: workload.done, doing: workload.doing, todo: workload.todo }]
 
   return (
     <div style={{ padding: "12px 0" }}>
@@ -393,8 +340,7 @@ function WorkloadChart({ tasks }: { tasks: DashboardTask[] }) {
 }
 
 // ─── Velocity burndown chart ─────────────────────────────────────────────────
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function VelocityChart({ tasks: _t }: { tasks: DashboardTask[] }) {
+function VelocityChart() {
   const DAYS_LABELS = ["L", "M", "X", "J", "V", "S", "D", "L", "M", "X", "J", "V", "S", "D"]
   // Simulate done/open for 14 days
   const done = DAYS_LABELS.map((_, i) => Math.max(0, Math.round(6 + pRnd(i * 13 + 7) * 8)))
@@ -448,17 +394,6 @@ function CardHead({ title, subtitle, actions }: { title: string; subtitle?: stri
 }
 
 // ─── KPI derivation ─────────────────────────────────────────────────────────
-function deriveTaskKPIs(tasks: DashboardTask[]) {
-  const now = new Date()
-  const weekEnd = new Date(now); weekEnd.setDate(now.getDate() + 7)
-  const open = tasks.filter(t => t.status !== "DONE" && t.status !== "CANCELLED").length
-  const dueThisWeek = tasks.filter(t => { if (!t.dueDate) return false; const d = new Date(t.dueDate); return d >= now && d <= weekEnd }).length
-  const overdue = tasks.filter(t => { if (!t.dueDate) return false; return new Date(t.dueDate) < now && t.status !== "DONE" && t.status !== "CANCELLED" }).length
-  const done30 = tasks.filter(t => { if (t.status !== "DONE" || !t.dueDate) return t.status === "DONE"; const d = new Date(t.dueDate); const thirty = new Date(now); thirty.setDate(now.getDate() - 30); return d >= thirty }).length
-  const total30 = tasks.filter(t => { if (!t.dueDate) return false; const d = new Date(t.dueDate); const thirty = new Date(now); thirty.setDate(now.getDate() - 30); return d >= thirty }).length
-  const closeRate = total30 > 0 ? (done30 / total30) * 100 : 0
-  return { open, dueThisWeek, overdue, closeRate }
-}
 
 // ─── Segmented control ───────────────────────────────────────────────────────
 function Segmented<T extends string>({ value, onChange, options }: {
@@ -493,16 +428,6 @@ export function TasksView() {
   const [defaultDueTime, setDefaultDueTime] = useState<string | undefined>(undefined)
   const [editTask, setEditTask] = useState<DashboardTask | undefined>(undefined)
 
-  const { data: tasks = [] } = useQuery<DashboardTask[]>({
-    queryKey: ["tasks"],
-    queryFn: async () => {
-      const res = await fetch("/api/tasks")
-      if (!res.ok) throw new Error("Failed to fetch tasks")
-      return res.json()
-    },
-    staleTime: 120_000,
-    refetchInterval: 300_000,
-  })
   const { data: projects = [] } = useQuery<ApiProject[]>({
     queryKey: ["projects"],
     queryFn: async () => {
@@ -510,6 +435,74 @@ export function TasksView() {
       if (!res.ok) throw new Error("Failed to fetch projects")
       return res.json()
     },
+    staleTime: 120_000,
+    refetchInterval: 300_000,
+  })
+
+  // Contadores de cabecera + sidebar por COUNT SQL (no derivar del array).
+  const { data: counters } = useQuery({
+    queryKey: ["tasks", "counters"],
+    queryFn: async () => {
+      const res = await fetch("/api/tasks/counters")
+      if (!res.ok) throw new Error("Failed to fetch counters")
+      return res.json() as Promise<{
+        header: { open: number; overdue: number; today: number; dueThisWeek: number; done30: number; total30: number; sinProyecto: number }
+        sidebar: { todayTasks: { id: string; title: string; status: string; startAt: string | null }[]; weekTotal: number; weekDone: number }
+      }>
+    },
+    staleTime: 120_000,
+    refetchInterval: 300_000,
+  })
+
+  // Búsqueda con debounce para no disparar una petición por tecla (ahora va a BD).
+  const [debouncedSearch, setDebouncedSearch] = useState("")
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search.trim()), 250)
+    return () => clearTimeout(t)
+  }, [search])
+
+  // Vista Lista: bandas de prioridad acotadas (activas + completadas + totales),
+  // búsqueda contra BD. Solo se pide cuando la Lista está activa.
+  const { data: bandsData } = useQuery({
+    queryKey: ["tasks", "bands", debouncedSearch],
+    queryFn: async () => {
+      const params = new URLSearchParams()
+      if (debouncedSearch) params.set("search", debouncedSearch)
+      const res = await fetch(`/api/tasks/bands?${params}`)
+      if (!res.ok) throw new Error("Failed to fetch bands")
+      return res.json() as Promise<{ success: boolean; bands: Record<string, import("./PriorityView").BandData> }>
+    },
+    enabled: mainView === "list",
+    staleTime: 120_000,
+  })
+
+  // Vista Tablero: columnas acotadas (tope por columna + total) según agrupación.
+  const { data: boardData } = useQuery({
+    queryKey: ["tasks", "board", boardGroup],
+    queryFn: async () => {
+      const res = await fetch(`/api/tasks/board?groupBy=${boardGroup}`)
+      if (!res.ok) throw new Error("Failed to fetch board")
+      return res.json() as Promise<{ success: boolean; groupBy: string; columns: Record<string, { tasks: DashboardTask[]; total: number }> }>
+    },
+    enabled: mainView === "board",
+    staleTime: 120_000,
+    refetchInterval: 300_000,
+  })
+
+  // Vista Tablero: agregados de widgets (ProjectStrip, calendario, agenda, carga).
+  const { data: boardMeta } = useQuery({
+    queryKey: ["tasks", "board-meta"],
+    queryFn: async () => {
+      const res = await fetch("/api/tasks/board-meta")
+      if (!res.ok) throw new Error("Failed to fetch board meta")
+      return res.json() as Promise<{
+        sinProyecto: number
+        workload: { done: number; doing: number; todo: number }
+        todayAgenda: { id: string; title: string; priority: string; endAt: string | null; clientName: string | null; assigneeInitials: string | null }[]
+        monthTaskDays: Record<number, ("done" | "overdue" | "upcoming")[]>
+      }>
+    },
+    enabled: mainView === "board",
     staleTime: 120_000,
     refetchInterval: 300_000,
   })
@@ -530,11 +523,16 @@ export function TasksView() {
   }
   const openProject = (id: string) => router.push(`/dashboard/tasks/projects/${id}`)
 
-  const kd = deriveTaskKPIs(tasks)
+  const open = counters?.header.open ?? 0
+  const overdue = counters?.header.overdue ?? 0
+  const todayCount = counters?.header.today ?? 0
+  const dueThisWeek = counters?.header.dueThisWeek ?? 0
+  const done30 = counters?.header.done30 ?? 0
+  const total30 = counters?.header.total30 ?? 0
+  const closeRate = total30 > 0 ? (done30 / total30) * 100 : 0
   const now = new Date()
   const monthName = now.toLocaleString("es-ES", { month: "long", year: "numeric" })
   const monthCap = monthName.charAt(0).toUpperCase() + monthName.slice(1)
-  const todayCount = tasks.filter(t => t.dueDate?.slice(0, 10) === now.toISOString().slice(0, 10) && t.status !== "DONE").length
 
   return (
     <div style={{ fontFamily: "var(--font-geist-sans, ui-sans-serif, system-ui, sans-serif)" }}>
@@ -544,14 +542,14 @@ export function TasksView() {
         <div>
           <h1 style={{ fontWeight: 600, letterSpacing: "-0.022em", fontSize: 26, lineHeight: 1.1, margin: 0, color: C.ink }}>Tareas y Proyectos</h1>
           <div style={{ marginTop: 6, display: "flex", alignItems: "center", gap: 14, fontSize: 12.5, color: C.ink3 }}>
-            <span>{kd.open} abiertas</span>
+            <span>{open} abiertas</span>
             <span style={{ color: C.ink5 }}>·</span>
             <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
               <span style={{ width: 6, height: 6, borderRadius: 99, background: C.accent, boxShadow: `0 0 0 3px ${C.accentSoft}`, display: "inline-block" }} />
               {todayCount} tareas hoy
             </span>
             <span style={{ color: C.ink5 }}>·</span>
-            <span style={{ color: kd.overdue > 0 ? C.red : C.ink3 }}>{kd.overdue} vencidas</span>
+            <span style={{ color: overdue > 0 ? C.red : C.ink3 }}>{overdue} vencidas</span>
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
@@ -602,37 +600,37 @@ export function TasksView() {
 
       {/* ── KPI ROW ──────────────────────────────────────── */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", border: `1px solid ${C.line}`, borderRadius: 10, background: C.bg, marginBottom: 20, overflow: "hidden" }}>
-        <TaskKpiCard label="Tareas abiertas" tag="Total" value={kd.open} />
-        <TaskKpiCard label="Vencen esta semana" tag="7d" value={kd.dueThisWeek} />
-        <TaskKpiCard label="Tareas vencidas" tag="Atraso" value={kd.overdue} />
-        <TaskKpiCard label="Ratio cierre · 30d" tag="30d" value={Number(kd.closeRate.toFixed(1))} unit="%" isLast />
+        <TaskKpiCard label="Tareas abiertas" tag="Total" value={open} />
+        <TaskKpiCard label="Vencen esta semana" tag="7d" value={dueThisWeek} />
+        <TaskKpiCard label="Tareas vencidas" tag="Atraso" value={overdue} />
+        <TaskKpiCard label="Ratio cierre · 30d" tag="30d" value={Number(closeRate.toFixed(1))} unit="%" isLast />
       </div>
 
       {/* ── PROJECTS STRIP (proyectos reales) ────────────── */}
-      <ProjectStrip projects={projects} tasks={tasks} onOpen={openProject} onNewProject={() => setProjectModalOpen(true)} />
+      <ProjectStrip projects={projects} sinProyecto={counters?.header.sinProyecto ?? 0} onOpen={openProject} onNewProject={() => setProjectModalOpen(true)} />
 
       {mainView === "board" && (
         <>
-          <KanbanBoard tasks={tasks} onNewTask={handleNewTask} groupBy={boardGroup} />
+          <KanbanBoard columns={boardData?.columns ?? {}} onNewTask={handleNewTask} groupBy={boardGroup} />
           <div className="grid grid-cols-2 gap-4">
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               <Card>
                 <CardHead title="Carga del equipo · esta semana" subtitle="Distribución de tareas por persona" />
-                <WorkloadChart tasks={tasks} />
+                <WorkloadChart workload={boardMeta?.workload ?? { done: 0, doing: 0, todo: 0 }} />
               </Card>
               <Card>
                 <CardHead title="Velocidad · últimos 14 días" subtitle="Tareas cerradas vs abiertas por día" />
-                <VelocityChart tasks={tasks} />
+                <VelocityChart />
               </Card>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               <Card>
                 <CardHead title={monthCap} subtitle="Eventos del mes" />
-                <MiniCalendar tasks={tasks} />
+                <MiniCalendar monthTaskDays={boardMeta?.monthTaskDays ?? {}} />
               </Card>
               <Card>
                 <CardHead title={`Hoy · ${now.getDate()} ${now.toLocaleString("es-ES", { month: "long" })}`} subtitle={`${todayCount} tareas pendientes`} />
-                <TodayAgenda tasks={tasks} />
+                <TodayAgenda agenda={boardMeta?.todayAgenda ?? []} />
               </Card>
             </div>
           </div>
@@ -644,10 +642,10 @@ export function TasksView() {
           <TasksTopbar search={search} onSearchChange={setSearch} />
           <div className="flex gap-4 items-start">
             <div className="flex-1 min-w-0 overflow-x-auto">
-              <PriorityView tasks={tasks} search={search} onAddTask={handleAddTask} />
+              <PriorityView bands={bandsData?.bands} onAddTask={handleAddTask} />
             </div>
             <div className="hidden lg:block" style={{ width: 260, flexShrink: 0, background: C.bg, border: `1px solid ${C.line}`, borderRadius: 10, overflow: "hidden", position: "sticky", top: 24 }}>
-              <TasksSidebarRight tasks={tasks} />
+              <TasksSidebarRight sidebar={counters?.sidebar} />
             </div>
           </div>
         </>
@@ -664,9 +662,9 @@ export function TasksView() {
         )
         return (
           <div className="overflow-x-auto" style={{ marginTop: 4 }}>
-            {calMode === "day" && <DayView tasks={tasks} onTaskClick={handleTaskClick} onCellClick={handleDayClick} rightSlot={calSelector} />}
-            {calMode === "week" && <WeekView tasks={tasks} onTaskClick={handleTaskClick} onCellClick={handleDayClick} rightSlot={calSelector} />}
-            {calMode === "month" && <MonthView tasks={tasks} onDayClick={handleDayClick} onTaskClick={handleTaskClick} rightSlot={calSelector} />}
+            {calMode === "day" && <DayView onTaskClick={handleTaskClick} onCellClick={handleDayClick} rightSlot={calSelector} />}
+            {calMode === "week" && <WeekView onTaskClick={handleTaskClick} onCellClick={handleDayClick} rightSlot={calSelector} />}
+            {calMode === "month" && <MonthView onDayClick={handleDayClick} onTaskClick={handleTaskClick} rightSlot={calSelector} />}
           </div>
         )
       })()}

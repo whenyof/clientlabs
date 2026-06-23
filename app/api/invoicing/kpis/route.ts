@@ -16,6 +16,7 @@ import { authOptions } from "@/lib/auth"
 import { getExecutiveKPIs, type KPIPeriod, type KPITimeFilter } from "@/modules/invoicing/services/kpi.service"
 import { getUserWorkspace } from "@/lib/get-workspace"
 import { checkPermission } from "@/lib/check-permission"
+import { aggKey, getCachedData, setCachedData, AGG_TTL } from "@/lib/cache/aggregates"
 
 const VALID_PERIODS = new Set<KPIPeriod>(["month", "quarter", "year", "custom"])
 
@@ -50,9 +51,14 @@ export async function GET(request: NextRequest) {
     )
   }
 
+  const cacheKey = aggKey(session.user.id, "inv-kpis", [period, filter.from, filter.to])
+
   try {
+    const cached = await getCachedData(cacheKey)
+    if (cached) return NextResponse.json(cached)
+
     const kpis = await getExecutiveKPIs(session.user.id, filter)
-    return NextResponse.json({
+    const payload = {
       success: true,
       kpis,
       period,
@@ -60,7 +66,9 @@ export async function GET(request: NextRequest) {
         from: filter.from ?? null,
         to: filter.to ?? null,
       },
-    })
+    }
+    await setCachedData(cacheKey, payload, AGG_TTL)
+    return NextResponse.json(payload)
   } catch (e) {
     console.error("Invoicing KPIs error:", e)
     return NextResponse.json({ error: "Failed to load KPIs" }, { status: 500 })

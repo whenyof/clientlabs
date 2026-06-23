@@ -1,0 +1,27 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "..",
+    "paths": {
+      "server-only": ["./scripts/shims/server-only.ts"],
+      "@/*": ["./src/*"],
+      "@src/*": ["./src/*"],
+      "@/modules/*": ["./modules/*"],
+      "@/components/*": ["./components/*"],
+      "@/app/*": ["./app/*"],
+      "@/lib/*": ["./lib/*"],
+      "@/hooks/*": ["./hooks/*"],
+      "@/config/*": ["./config/*"],
+      "@/core/*": ["./core/*"],
+      "@/context/*": ["./context/*"],
+      "@domains/*": ["src/domains/*"],
+      "@analytics/*": ["src/analytics/*"],
+      "@sdk/*": ["src/sdk/*"],
+      "@infra/*": ["src/infrastructure/*"],
+      "@shared/*": ["src/shared/*"],
+      "@platform/*": ["src/platform/*"],
+      "@automation/*": ["src/automation/*"],
+      "@integrations/*": ["src/integrations/*"]
+    }
+  }
+}

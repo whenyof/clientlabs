@@ -8,19 +8,23 @@ import { TaskRow } from "./TaskRow"
 
 interface PriorityBandProps {
   priority: TaskPriority
-  tasks: DashboardTask[]
+  active: DashboardTask[]
+  activeTotal: number
+  done: DashboardTask[]
+  doneTotal: number
   onAddTask: (priority: TaskPriority) => void
 }
 
-export function PriorityBand({ priority, tasks, onAddTask }: PriorityBandProps) {
+export function PriorityBand({ priority, active, activeTotal, done, doneTotal, onAddTask }: PriorityBandProps) {
   const [collapsed, setCollapsed] = useState(false)
   const cfg = PRIORITY_CONFIG[priority]
 
-  const activeTasks = tasks.filter((t) => t.status !== "DONE")
-  const doneTasks = tasks.filter((t) => t.status === "DONE")
   const [showDone, setShowDone] = useState(false)
 
-  const allVisible = collapsed ? [] : [...activeTasks, ...(showDone ? doneTasks : [])]
+  const allVisible = collapsed ? [] : [...active, ...(showDone ? done : [])]
+  // Cuántas quedan fuera del tope cargado (nunca se cortan en silencio).
+  const activeHidden = Math.max(0, activeTotal - active.length)
+  const doneHidden = Math.max(0, doneTotal - done.length)
 
   return (
     <div style={{
@@ -51,7 +55,7 @@ export function PriorityBand({ priority, tasks, onAddTask }: PriorityBandProps) 
           fontSize: 11, fontWeight: 600, padding: "1px 7px", borderRadius: 20,
           background: `${cfg.color}18`, color: cfg.color,
         }}>
-          {activeTasks.length}
+          {activeTotal}
         </span>
         <div style={{ flex: 1 }} />
         {collapsed
@@ -63,7 +67,7 @@ export function PriorityBand({ priority, tasks, onAddTask }: PriorityBandProps) 
       {/* Task rows */}
       {!collapsed && (
         <div style={{ padding: "4px 0" }}>
-          {activeTasks.length === 0 && doneTasks.length === 0 && (
+          {activeTotal === 0 && doneTotal === 0 && (
             <p style={{ fontSize: 12, color: "var(--text-secondary)", padding: "12px 16px", margin: 0, fontStyle: "italic" }}>
               Sin tareas en esta prioridad
             </p>
@@ -73,8 +77,15 @@ export function PriorityBand({ priority, tasks, onAddTask }: PriorityBandProps) 
             <TaskRow key={task.id} task={task} />
           ))}
 
+          {/* Activas que superan el tope cargado */}
+          {!collapsed && activeHidden > 0 && (
+            <p style={{ fontSize: 11, color: "var(--text-secondary)", padding: "4px 16px 8px", margin: 0 }}>
+              +{activeHidden} más
+            </p>
+          )}
+
           {/* Show done toggle */}
-          {doneTasks.length > 0 && (
+          {doneTotal > 0 && (
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); setShowDone((s) => !s) }}
@@ -85,8 +96,13 @@ export function PriorityBand({ priority, tasks, onAddTask }: PriorityBandProps) 
               }}
             >
               <ChevronDown style={{ width: 12, height: 12, transform: showDone ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
-              {showDone ? "Ocultar" : `Ver ${doneTasks.length} completada${doneTasks.length > 1 ? "s" : ""}`}
+              {showDone ? "Ocultar" : `Ver ${doneTotal} completada${doneTotal > 1 ? "s" : ""}`}
             </button>
+          )}
+          {!collapsed && showDone && doneHidden > 0 && (
+            <p style={{ fontSize: 11, color: "var(--text-secondary)", padding: "0 16px 8px", margin: 0 }}>
+              +{doneHidden} completadas más
+            </p>
           )}
 
           {/* Add task button */}

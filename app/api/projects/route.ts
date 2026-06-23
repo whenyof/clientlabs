@@ -35,19 +35,25 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
     })
 
-    const result = await Promise.all(
-      projects.map(async (p) => {
-        const completedCount = await prisma.task.count({
-          where: { projectId: p.id, status: "DONE" },
-        })
-        return {
-          ...p,
-          totalTasks: p._count.tasks,
-          completedTasks: completedCount,
-          progress: p._count.tasks > 0 ? Math.round((completedCount / p._count.tasks) * 100) : 0,
-        }
-      })
+    // Conteo de tareas DONE por proyecto en una sola query (evita N+1)
+    const completedGroups = await prisma.task.groupBy({
+      by: ["projectId"],
+      where: { projectId: { in: projects.map((p) => p.id) }, status: "DONE" },
+      _count: { _all: true },
+    })
+    const completedMap = new Map(
+      completedGroups.map((g) => [g.projectId, g._count._all]),
     )
+
+    const result = projects.map((p) => {
+      const completedCount = completedMap.get(p.id) ?? 0
+      return {
+        ...p,
+        totalTasks: p._count.tasks,
+        completedTasks: completedCount,
+        progress: p._count.tasks > 0 ? Math.round((completedCount / p._count.tasks) * 100) : 0,
+      }
+    })
 
     return NextResponse.json(result)
   } catch (error) {

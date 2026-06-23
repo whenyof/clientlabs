@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { invalidateUserAggregates } from "@/lib/cache/aggregates"
 
 /**
  * GET /api/finance/gastos
@@ -18,6 +19,9 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = request.nextUrl
   const period = searchParams.get("period") ?? "month"
+  const search = searchParams.get("search")?.trim() ?? ""
+  const cursor = searchParams.get("cursor") // formato: "<issueDate ISO>|<id>"
+  const limit = Math.min(Math.max(Number(searchParams.get("limit") ?? 50), 1), 100)
 
   const now = new Date()
   let fromDateMes: Date
@@ -32,14 +36,39 @@ export async function GET(request: NextRequest) {
     fromDateMes = fromDateAnio
   }
 
+  // Keyset estable (issueDate desc, id desc de desempate). El cursor evita
+  // OFFSET y no salta/duplica filas si cambian los datos entre páginas.
+  const and: import("@prisma/client").Prisma.InvoiceWhereInput[] = [
+    { issueDate: { gte: fromDateMes } },
+  ]
+  if (cursor) {
+    const sep = cursor.lastIndexOf("|")
+    const cd = new Date(cursor.slice(0, sep))
+    const cid = cursor.slice(sep + 1)
+    if (!isNaN(cd.getTime()) && cid) {
+      and.push({ OR: [{ issueDate: { lt: cd } }, { issueDate: cd, id: { lt: cid } }] })
+    }
+  }
+  const listWhere: import("@prisma/client").Prisma.InvoiceWhereInput = {
+    userId: session.user.id,
+    type: "VENDOR",
+    status: { not: "CANCELED" },
+    ...(search
+      ? {
+          OR: [
+            { number: { contains: search, mode: "insensitive" } },
+            { notes: { contains: search, mode: "insensitive" } },
+            { providerName: { contains: search, mode: "insensitive" } },
+            { Provider: { name: { contains: search, mode: "insensitive" } } },
+          ],
+        }
+      : {}),
+    AND: and,
+  }
+
   try {
-    const gastos = await prisma.invoice.findMany({
-      where: {
-        userId: session.user.id,
-        type: "VENDOR",
-        issueDate: { gte: fromDateMes },
-        status: { not: "CANCELED" },
-      },
+    const rowsRaw = await prisma.invoice.findMany({
+      where: listWhere,
       select: {
         id: true,
         number: true,
@@ -53,9 +82,16 @@ export async function GET(request: NextRequest) {
         providerName: true,
         Provider: { select: { id: true, name: true } },
       },
-      orderBy: { issueDate: "desc" },
+      orderBy: [{ issueDate: "desc" }, { id: "desc" }],
+      take: limit + 1, // +1 para detectar si hay más sin COUNT
     })
+    const hasMore = rowsRaw.length > limit
+    const gastos = hasMore ? rowsRaw.slice(0, limit) : rowsRaw
+    const last = gastos[gastos.length - 1]
+    const nextCursor = hasMore && last ? `${new Date(last.issueDate).toISOString()}|${last.id}` : null
 
+    // KPIs por agregación SQL pura sobre columnas reales (period/año), sin
+    // depender de las filas cargadas ni del término de búsqueda.
     const [aggMes, aggAnio] = await Promise.all([
       prisma.invoice.aggregate({
         where: {
@@ -93,10 +129,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       gastos: rows,
+      nextCursor,
+      hasMore,
       kpis: {
         totalGastadoMes: Number(aggMes._sum.total ?? 0),
         totalGastadoAnio: Number(aggAnio._sum.total ?? 0),
         ivaDeducibleAcumulado: Number(aggAnio._sum.taxAmount ?? 0),
+        // IVA del periodo seleccionado por SUM SQL (antes se sumaba la lista en
+        // cliente; ahora exacto e independiente de la paginación).
+        ivaDeduciblePeriodo: Number(aggMes._sum.taxAmount ?? 0),
       },
     })
   } catch (error) {
@@ -170,6 +211,7 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    await invalidateUserAggregates(session.user.id)
     return NextResponse.json({ success: true, id: invoice.id, number: invoice.number })
   } catch (error) {
     console.error("Error creando gasto:", error)

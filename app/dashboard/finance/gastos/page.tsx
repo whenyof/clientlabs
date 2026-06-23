@@ -74,6 +74,7 @@ type Kpis = {
   totalGastadoMes: number
   totalGastadoAnio: number
   ivaDeducibleAcumulado: number
+  ivaDeduciblePeriodo: number
 }
 
 const STATUS_LABEL: Record<string, string> = {
@@ -797,43 +798,66 @@ function NuevoGastoModal({
 
 export default function GastosPage() {
   const [gastos, setGastos] = useState<Gasto[]>([])
-  const [kpis, setKpis] = useState<Kpis>({ totalGastadoMes: 0, totalGastadoAnio: 0, ivaDeducibleAcumulado: 0 })
+  const [kpis, setKpis] = useState<Kpis>({ totalGastadoMes: 0, totalGastadoAnio: 0, ivaDeducibleAcumulado: 0, ivaDeduciblePeriodo: 0 })
   const [loading, setLoading] = useState(true)
   const [period, setPeriod] = useState("month")
   const [search, setSearch] = useState("")
   const [showModal, setShowModal] = useState(false)
+  const [nextCursor, setNextCursor] = useState<string | null>(null)
+  const [hasMore, setHasMore] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
+
+  const PAGE_SIZE = 50
 
   const fetchData = useCallback(async () => {
     setLoading(true)
     try {
-      const params = new URLSearchParams({ period })
+      const params = new URLSearchParams({ period, limit: String(PAGE_SIZE) })
+      if (search.trim()) params.set("search", search.trim())
       const res = await fetch(`/api/finance/gastos?${params}`, { credentials: "include" })
       if (!res.ok) return
       const data = await res.json()
       if (data.success) {
         setGastos(data.gastos)
         setKpis(data.kpis)
+        setNextCursor(data.nextCursor ?? null)
+        setHasMore(!!data.hasMore)
       }
     } finally {
       setLoading(false)
     }
-  }, [period])
+  }, [period, search])
 
-  useEffect(() => { fetchData() }, [fetchData])
+  const loadMore = useCallback(async () => {
+    if (loadingMore || !hasMore || !nextCursor) return
+    setLoadingMore(true)
+    try {
+      const params = new URLSearchParams({ period, limit: String(PAGE_SIZE), cursor: nextCursor })
+      if (search.trim()) params.set("search", search.trim())
+      const res = await fetch(`/api/finance/gastos?${params}`, { credentials: "include" })
+      if (!res.ok) return
+      const data = await res.json()
+      if (data.success) {
+        setGastos((prev) => [...prev, ...data.gastos])
+        setNextCursor(data.nextCursor ?? null)
+        setHasMore(!!data.hasMore)
+      }
+    } finally {
+      setLoadingMore(false)
+    }
+  }, [period, search, nextCursor, hasMore, loadingMore])
 
-  // IVA soportado del periodo seleccionado: la lista ya viene acotada al rango
-  // que la API calcula segun `period`, asi que sumamos su IVA sin duplicar fechas.
-  const ivaDeduciblePeriodo = gastos.reduce((sum, g) => sum + g.iva, 0)
+  // Debounce: agrupa cambios de periodo/búsqueda en una sola petición.
+  useEffect(() => {
+    const t = setTimeout(() => { fetchData() }, 250)
+    return () => clearTimeout(t)
+  }, [fetchData])
 
-  const filtered = gastos.filter((g) => {
-    if (!search.trim()) return true
-    const q = search.toLowerCase()
-    return (
-      g.proveedor.toLowerCase().includes(q) ||
-      g.concepto.toLowerCase().includes(q) ||
-      g.numero.toLowerCase().includes(q)
-    )
-  })
+  // IVA del periodo: SUM SQL del server (exacto, no depende de la página cargada).
+  const ivaDeduciblePeriodo = kpis.ivaDeduciblePeriodo
+
+  // La búsqueda ahora es server-side; la lista ya viene filtrada + paginada.
+  const filtered = gastos
 
   const kpiCards = [
     {
@@ -1003,6 +1027,18 @@ export default function GastosPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+        {hasMore && (
+          <div className="flex justify-center p-4 border-t border-slate-100">
+            <button
+              type="button"
+              onClick={loadMore}
+              disabled={loadingMore}
+              className="px-4 py-2 rounded-lg border border-slate-200 bg-white text-[12.5px] font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-60"
+            >
+              {loadingMore ? "Cargando…" : `Cargar más (${gastos.length})`}
+            </button>
           </div>
         )}
       </div>

@@ -36,12 +36,14 @@ export async function POST(req: NextRequest) {
     })
 
     if (user) {
+      // El token plano solo viaja por email; en BD guardamos su hash sha256.
       const token = crypto.randomBytes(32).toString("hex")
+      const tokenHash = crypto.createHash("sha256").update(token).digest("hex")
       const expiresAt = new Date(Date.now() + 60 * 60 * 1000)
 
       await prisma.passwordResetToken.deleteMany({ where: { userId: user.id } })
       await prisma.passwordResetToken.create({
-        data: { userId: user.id, token, expiresAt },
+        data: { userId: user.id, token: tokenHash, expiresAt },
       })
 
       const resetUrl = `${process.env.NEXTAUTH_URL}/auth/reset-password?token=${token}`

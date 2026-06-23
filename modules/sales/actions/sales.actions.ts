@@ -8,6 +8,7 @@ import { ensureUserExists } from "@/lib/ensure-user"
 
 import { generateInvoiceFromSale } from "@/modules/billing/services/invoice-generator.service"
 import { createInvoiceFromSale } from "@/modules/invoicing/services/invoice.service"
+import { invalidateUserAggregates } from "@/lib/cache/aggregates"
 import type { SaleCreateInput, SaleUpdateInput } from "../types"
 
 async function checkAuth() {
@@ -107,17 +108,18 @@ export async function createSale(data: SaleCreateInput) {
   console.log("CALLING createInvoiceFromSale")
   try {
     void generateInvoiceFromSale(sale.id).catch((err) => {
-      console.error("Auto invoice from sale failed", sale.id, err)
+      console.error("[invoice-drop] BillingInvoice generation failed for sale", sale.id, err)
     })
     void createInvoiceFromSale(sale.id, session.user.id).then((r) => {
       if (r) revalidatePath("/dashboard/finance")
     }).catch((err) => {
-      console.error("Invoicing draft from sale failed", sale.id, err)
+      console.error("[invoice-drop] Invoice draft creation failed for sale", sale.id, err)
     })
-  } catch (_) {
-    // non-blocking
+  } catch (err) {
+    console.error("[invoice-drop] Failed to dispatch invoice creation for sale", sale.id, err)
   }
 
+  await invalidateUserAggregates(session.user.id)
   revalidatePath("/dashboard/other/sales")
   revalidatePath("/dashboard/other")
   revalidatePath("/dashboard/other/finance")
@@ -190,17 +192,18 @@ export async function updateSale(id: string, data: SaleUpdateInput) {
   console.log("CALLING createInvoiceFromSale")
   try {
     void generateInvoiceFromSale(id).catch((err) => {
-      console.error("Auto invoice from sale failed", id, err)
+      console.error("[invoice-drop] BillingInvoice generation failed for sale", id, err)
     })
     void createInvoiceFromSale(id, session.user.id).then((r) => {
       if (r) revalidatePath("/dashboard/finance")
     }).catch((err) => {
-      console.error("Invoicing draft from sale failed", id, err)
+      console.error("[invoice-drop] Invoice draft creation failed for sale", id, err)
     })
-  } catch (_) {
-    // non-blocking
+  } catch (err) {
+    console.error("[invoice-drop] Failed to dispatch invoice creation for sale", id, err)
   }
 
+  await invalidateUserAggregates(session.user.id)
   revalidatePath("/dashboard/other/sales")
   revalidatePath("/dashboard/other")
   revalidatePath("/dashboard/other/finance")

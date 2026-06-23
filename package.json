@@ -10,6 +10,7 @@
     "create-key": "npx tsx scripts/create-api-key.ts",
     "test-ingest": "npx tsx scripts/test-ingest.ts",
     "repair-invoice-duplicates": "tsx scripts/repair-invoice-duplicates.ts",
+    "backfill-invoices": "tsx --tsconfig scripts/tsconfig.json scripts/backfill-invoices.ts",
     "worker:events": "tsx workers/eventQueueWorker.ts",
     "test": "vitest run",
     "test:watch": "vitest",

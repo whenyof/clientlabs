@@ -3,14 +3,12 @@
 import { useState } from "react"
 import { CalendarDays } from "lucide-react"
 import { ConnectCalendarModal } from "./ConnectCalendarModal"
-import type { DashboardTask } from "./types"
+
+/** Tarea ligera del sidebar (server: /api/tasks/counters → sidebar.todayTasks). */
+type SidebarTask = { id: string; title: string; status: string; startAt: string | null }
 
 interface TasksSidebarRightProps {
-  tasks: DashboardTask[]
-}
-
-function isSameDay(a: Date, b: Date) {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
+  sidebar?: { todayTasks: SidebarTask[]; weekTotal: number; weekDone: number }
 }
 
 function formatTime(iso: string): string {
@@ -18,31 +16,12 @@ function formatTime(iso: string): string {
   return d.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })
 }
 
-function getWeekRange(): { start: Date; end: Date } {
-  const today = new Date()
-  const day = today.getDay()
-  const diff = today.getDate() - day + (day === 0 ? -6 : 1)
-  const start = new Date(today); start.setDate(diff); start.setHours(0, 0, 0, 0)
-  const end = new Date(start); end.setDate(start.getDate() + 6); end.setHours(23, 59, 59, 999)
-  return { start, end }
-}
-
-export function TasksSidebarRight({ tasks }: TasksSidebarRightProps) {
+export function TasksSidebarRight({ sidebar }: TasksSidebarRightProps) {
   const [showCalendarModal, setShowCalendarModal] = useState(false)
-  const today = new Date()
-  const { start: weekStart, end: weekEnd } = getWeekRange()
 
-  const todayTasks = tasks
-    .filter((t) => t.dueDate && isSameDay(new Date(t.dueDate), today))
-    .sort((a, b) => (a.startAt && b.startAt ? new Date(a.startAt).getTime() - new Date(b.startAt).getTime() : 0))
-
-  const weekTasks = tasks.filter((t) => {
-    if (!t.dueDate) return false
-    const d = new Date(t.dueDate)
-    return d >= weekStart && d <= weekEnd
-  })
-  const weekDone = weekTasks.filter((t) => t.status === "DONE").length
-  const weekTotal = weekTasks.length
+  const todayTasks = sidebar?.todayTasks ?? []
+  const weekDone = sidebar?.weekDone ?? 0
+  const weekTotal = sidebar?.weekTotal ?? 0
   const weekPct = weekTotal > 0 ? Math.round((weekDone / weekTotal) * 100) : 0
 
   const barColor = weekPct < 50 ? "#0F766E" : weekPct < 80 ? "#D9A441" : "#EF4444"

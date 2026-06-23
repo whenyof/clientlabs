@@ -32,9 +32,14 @@ export function ProjectDetailClient({ projectId }: { projectId: string }) {
   const [editTask, setEditTask] = useState<DashboardTask | undefined>(undefined)
   const [archiving, setArchiving] = useState(false)
 
-  const { data: allTasks = [] } = useQuery<DashboardTask[]>({
-    queryKey: ["tasks"],
-    queryFn: async () => { const r = await fetch("/api/tasks"); if (!r.ok) throw new Error(); return r.json() },
+  // Tareas del proyecto en bandas acotadas (server), no todo el conjunto.
+  const { data: bandsData } = useQuery({
+    queryKey: ["tasks", "bands", "project", projectId],
+    queryFn: async () => {
+      const r = await fetch(`/api/tasks/bands?projectId=${encodeURIComponent(projectId)}`)
+      if (!r.ok) throw new Error()
+      return r.json() as Promise<{ success: boolean; bands: Record<string, import("@/modules/tasks/dashboard/PriorityView").BandData> }>
+    },
     staleTime: 120_000,
   })
   const { data: projects = [] } = useQuery<ApiProject[]>({
@@ -44,9 +49,10 @@ export function ProjectDetailClient({ projectId }: { projectId: string }) {
   })
 
   const project = projects.find(p => p.id === projectId)
-  const tasks = useMemo(() => allTasks.filter(t => t.projectId === projectId), [allTasks, projectId])
-  const total = tasks.length
-  const completed = tasks.filter(t => t.status === "DONE").length
+  // total/completed del proyecto desde los totales por banda (excluye CANCELLED).
+  const bandList = useMemo(() => Object.values(bandsData?.bands ?? {}), [bandsData])
+  const completed = bandList.reduce((s, b) => s + b.doneTotal, 0)
+  const total = bandList.reduce((s, b) => s + b.activeTotal + b.doneTotal, 0)
   const pct = total > 0 ? Math.round((completed / total) * 100) : 0
   const color = project?.color || C.accent
   const due = project?.endDate ? new Date(project.endDate) : null
@@ -132,7 +138,7 @@ export function ProjectDetailClient({ projectId }: { projectId: string }) {
           </button>
         </div>
       ) : (
-        <PriorityView tasks={tasks} search="" onAddTask={handleAddTask} />
+        <PriorityView bands={bandsData?.bands} onAddTask={handleAddTask} />
       )}
 
       <NewTaskModal

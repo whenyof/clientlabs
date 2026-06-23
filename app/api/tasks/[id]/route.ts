@@ -7,6 +7,14 @@ import type { TaskType } from "@prisma/client"
 import { recalculateClientStatus } from "@/modules/clients/actions"
 import { enqueueTaskCalendarSync, enqueueTaskSyncForAllProviders } from "@/lib/calendar-sync"
 import { syncTaskToGoogle, deleteTaskFromGoogle } from "@/lib/google-calendar"
+import { invalidateUserAggregates } from "@/lib/cache/aggregates"
+import { invalidateCachedData } from "@/lib/redis-cache"
+
+/** Invalida los agregados de tareas (counters/board-meta/KPIs) tras una mutación. */
+async function invalidateTaskAggregates(userId: string) {
+  await invalidateUserAggregates(userId)
+  await invalidateCachedData(`tasks-kpis-${userId}`)
+}
 
 /**
  * GET /api/tasks/[id]
@@ -181,6 +189,7 @@ export async function PATCH(
    endAt: task.endAt?.toISOString() ?? null,
  }).catch((err) => console.error("[google-calendar] sync update:", err))
 
+ await invalidateTaskAggregates(userId)
  return NextResponse.json(task)
  } catch (error) {
  console.error("[PATCH /api/tasks/[id]]:", error)
@@ -231,6 +240,7 @@ export async function DELETE(
  await recalculateClientStatus(existing.clientId)
  }
 
+ await invalidateTaskAggregates(userId)
  return new NextResponse(null, { status: 204 })
  } catch (error) {
  console.error("[DELETE /api/tasks/[id]]:", error)

@@ -147,9 +147,12 @@ export async function GET(request: NextRequest) {
     }
 
     // ── Build ORDER BY ──
-    const orderBy: Prisma.LeadOrderByWithRelationInput = {
-      [safeSortBy]: sortOrder,
-    }
+    // Keyset estable: desempate por id para que el cursor no salte ni duplique
+    // filas cuando el campo de orden tenga valores repetidos (createdAt, etc.).
+    const orderBy: Prisma.LeadOrderByWithRelationInput[] =
+      safeSortBy === 'id'
+        ? [{ id: sortOrder }]
+        : [{ [safeSortBy]: sortOrder }, { id: sortOrder }]
 
     // ── Execute query ──
     const useCursor = !!cursor
@@ -191,7 +194,10 @@ export async function GET(request: NextRequest) {
           metadata: true,
         },
       }),
-      prisma.lead.count({ where }),
+      // El COUNT solo en la primera página (sin cursor): el frontend solo usa
+      // el total de la página 1. Evitarlo en cada scroll infinito ahorra cómputo
+      // Neon en las páginas siguientes.
+      useCursor ? Promise.resolve<number | null>(null) : prisma.lead.count({ where }),
     ])
 
     // ── Determine if there are more results ──
@@ -208,8 +214,8 @@ export async function GET(request: NextRequest) {
         // Offset-based (legacy compatibility)
         page: useCursor ? undefined : page,
         limit,
-        total,
-        pages: Math.ceil(total / limit),
+        total: total ?? undefined,
+        pages: total != null ? Math.ceil(total / limit) : undefined,
       },
       filters: {
         status: statusFilter ?? 'all',

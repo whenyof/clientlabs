@@ -17,7 +17,7 @@ export interface GetLeadsParams {
 
 export async function getLeads(params: GetLeadsParams = {}): Promise<{ 
   leads: Lead[], 
-  pagination: { nextCursor: string | null, hasNext: boolean, total: number } 
+  pagination: { nextCursor: string | null, hasNext: boolean, total?: number }
 }> {
   const query = new URLSearchParams()
   if (params.status && params.status !== 'all') query.set('status', params.status)
@@ -37,6 +37,6 @@ export async function getLeads(params: GetLeadsParams = {}): Promise<{
   
   return apiFetch<{ 
     leads: Lead[], 
-    pagination: { nextCursor: string | null, hasNext: boolean, total: number } 
+    pagination: { nextCursor: string | null, hasNext: boolean, total?: number }
   }>(url)
 }

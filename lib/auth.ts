@@ -65,8 +65,12 @@ export const authOptions: NextAuthOptions = {
  if (!valid) return null
 
  // Block login until the email is verified (A-03 / M-01).
+ // Surface an actionable message (instead of the generic failure) so users
+ // who never received the verification email aren't stranded — the login UI
+ // detects this and offers "resend verification". We accept the minor
+ // user-enumeration tradeoff here on purpose (B2B). (Reverts M3.)
  if (!user.emailVerified) {
- throw new Error("Verifica tu email antes de iniciar sesión")
+ throw new Error("Verifica tu email para entrar. Revisa tu bandeja de entrada y la carpeta de spam.")
  }
 
  return {

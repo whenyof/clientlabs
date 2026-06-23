@@ -118,8 +118,16 @@ export async function notifyDocumentOpened(view: NotifyView) {
 export async function onDocumentAccepted(view: DecisionView, signatureName: string) {
   const user = await prisma.user.findUnique({
     where: { id: view.userId },
-    select: { email: true, name: true }
+    select: {
+      email: true,
+      name: true,
+      BusinessProfile: { select: { companyName: true, name: true, legalName: true, logoUrl: true } },
+    }
   })
+  const profile = user?.BusinessProfile
+  const businessName =
+    profile?.companyName ?? profile?.name ?? user?.name ?? profile?.legalName ?? "Tu negocio"
+  const businessLogo = profile?.logoUrl
 
   if (view.type === "QUOTE") {
     const quote = await prisma.quote.findUnique({
@@ -250,12 +258,13 @@ export async function onDocumentAccepted(view: DecisionView, signatureName: stri
     }).format(view.decidedAt ?? new Date())
     const html = quoteAcceptedToRecipientEmail({
       recipientName: view.recipientName,
-      senderName,
+      senderName: businessName,
       senderEmail,
       number: docNumber,
       total: docTotal,
       decidedAt: decidedFmt,
       docUrl,
+      logoUrl: businessLogo,
     })
     await sendEmail(view.recipientEmail, `Confirmado — trabajamos juntos`, html).catch(() => {})
   }
@@ -309,14 +318,25 @@ export async function onDocumentRejected(view: DecisionView, reason?: string) {
   // Email al cliente confirmando que se recibió el rechazo
   if (view.type === "QUOTE") {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.clientlabs.io"
-    const user2 = await prisma.user.findUnique({ where: { id: view.userId }, select: { name: true, email: true } })
+    const user2 = await prisma.user.findUnique({
+      where: { id: view.userId },
+      select: {
+        name: true,
+        email: true,
+        BusinessProfile: { select: { companyName: true, name: true, legalName: true, logoUrl: true } },
+      },
+    })
+    const profile2 = user2?.BusinessProfile
+    const businessName2 =
+      profile2?.companyName ?? profile2?.name ?? user2?.name ?? profile2?.legalName ?? "Tu negocio"
     const q = await prisma.quote.findUnique({ where: { id: view.documentId }, select: { number: true } })
     const html = quoteRejectedToRecipientEmail({
       recipientName: view.recipientName,
-      senderName: user2?.name ?? "Tu proveedor",
+      senderName: businessName2,
       senderEmail: user2?.email ?? "",
       number: q?.number ?? "",
       docUrl: `${appUrl}/doc/${view.token}`,
+      logoUrl: profile2?.logoUrl,
     })
     await sendEmail(view.recipientEmail, `Recibimos tu respuesta — ${q?.number ?? ""}`, html).catch(() => {})
   }
@@ -331,6 +351,7 @@ export async function notifyInvoiceReceivedByClient(params: {
   total: number
   dueDate?: string
   docUrl: string
+  logoUrl?: string | null
 }): Promise<void> {
   const html = invoiceReceivedByClientEmail(params)
   await sendEmail(

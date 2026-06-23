@@ -55,21 +55,30 @@ export async function GET(_req: NextRequest, { params }: Params) {
         // Email de recepción al cliente — solo facturas, primera apertura
         if (view.type === "INVOICE") {
           const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.clientlabs.io"
-          getDocumentData("INVOICE", view.documentId).then(async (invData) => {
+          Promise.all([
+            getDocumentData("INVOICE", view.documentId),
+            prisma.businessProfile.findUnique({
+              where: { userId: view.userId },
+              select: { companyName: true, name: true, legalName: true, logoUrl: true },
+            }),
+          ]).then(async ([invData, profile]) => {
             const inv = invData as Record<string, unknown> | null
             if (!inv) return
             const dueDate = inv.dueDate
               ? new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "long", year: "numeric" }).format(new Date(inv.dueDate as string))
               : undefined
+            const senderName =
+              profile?.companyName ?? profile?.name ?? view.user.name ?? profile?.legalName ?? "Tu negocio"
             await notifyInvoiceReceivedByClient({
               recipientEmail: view.recipientEmail,
               recipientName: view.recipientName,
-              senderName: view.user.name ?? "Tu proveedor",
+              senderName,
               senderEmail: view.user.email ?? "",
               number: (inv.number as string) ?? "",
               total: Number(inv.total ?? 0),
               dueDate,
               docUrl: `${appUrl}/doc/${token}`,
+              logoUrl: profile?.logoUrl,
             })
           }).catch(() => {})
         }

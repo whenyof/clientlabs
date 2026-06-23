@@ -42,9 +42,9 @@ export async function POST(
 
   const profile = await prisma.businessProfile.findUnique({
     where: { userId },
-    select: { companyName: true, name: true },
+    select: { companyName: true, name: true, legalName: true, logoUrl: true },
   })
-  const businessName = profile?.companyName ?? profile?.name ?? "ClientLabs"
+  const businessName = profile?.companyName ?? profile?.name ?? profile?.legalName ?? "Tu negocio"
 
   let pdfBuffer: Buffer | null = null
   try {
@@ -91,6 +91,7 @@ export async function POST(
     businessName,
     docUrl,
     dueDate: dueDateFmt,
+    logoUrl: profile?.logoUrl,
   })
 
   await sendEmail(

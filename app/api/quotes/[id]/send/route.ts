@@ -29,7 +29,12 @@ export async function POST(_: NextRequest, { params }: { params: Promise<{ id: s
   const updated = await prisma.quote.update({ where: { id }, data: { status: "SENT" } })
 
   if (quote.client.email) {
-    const businessName = quote.user.name || "ClientLabs"
+    const profile = await prisma.businessProfile.findUnique({
+      where: { userId: session.user.id },
+      select: { companyName: true, name: true, legalName: true, logoUrl: true },
+    })
+    const businessName =
+      profile?.companyName ?? profile?.name ?? quote.user.name ?? profile?.legalName ?? "Tu negocio"
     const clientName = quote.client.name || "Cliente"
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.clientlabs.io"
 
@@ -61,6 +66,7 @@ export async function POST(_: NextRequest, { params }: { params: Promise<{ id: s
       docUrl,
       expiresAt: quote.validUntil,
       senderEmail: quote.user.email,
+      logoUrl: profile?.logoUrl,
     })
 
     sendEmail(

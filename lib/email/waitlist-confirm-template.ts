@@ -2,9 +2,21 @@
  * Email de confirmación (doble opt-in) de la waitlist. Corto y directo:
  * un botón → /api/waitlist/confirm/[panelToken].
  */
-export function buildWaitlistConfirmEmail(confirmUrl: string): string {
-  const cell = 'cellspacing="0" cellpadding="0" border="0"'
-  const tableW = `role="presentation" ${cell} width="100%"`
+import { cMarketing } from "./archetypes"
 
-  return `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Confirma tu email</title></head><body style="margin:0;padding:0;background:#E2E8F0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif"><div style="display:none;max-height:0;overflow:hidden;font-size:1px">Un clic y estás dentro de la lista de acceso anticipado de ClientLabs.</div><table ${tableW} style="background:#E2E8F0;padding:32px 16px"><tr><td align="center"><table role="presentation" ${cell} width="560" style="max-width:560px;width:100%"><tr><td style="background:#0B1F2A;border-radius:16px 16px 0 0;padding:32px;text-align:center"><table ${tableW}><tr><td align="center"><table ${cell}><tr><td style="vertical-align:middle;padding-right:8px"><img src="https://clientlabs.io/logo.PNG" width="28" height="28" alt="CL" style="display:block;border:0;border-radius:6px"></td><td style="vertical-align:middle"><span style="font-size:17px;font-weight:700;color:#fff;letter-spacing:-0.02em">Client<span style="color:#0F766E">Labs</span></span></td></tr></table></td></tr></table></td></tr><tr><td style="background:#fff;padding:36px 32px;text-align:center"><h1 style="font-size:22px;font-weight:700;color:#0F172A;margin:0 0 10px;letter-spacing:-0.02em">Confirma tu email</h1><p style="font-size:14px;color:#475569;line-height:1.7;margin:0 0 28px">Solo falta un clic para reservar tu plaza en el acceso anticipado de ClientLabs y activar tu enlace de invitación.</p><table role="presentation" ${cell} align="center" style="margin:0 auto 28px"><tr><td style="background:#0F766E;border-radius:8px"><a href="${confirmUrl}" target="_blank" style="display:inline-block;padding:13px 36px;font-size:14px;font-weight:600;color:#ffffff;text-decoration:none">Confirmar y entrar</a></td></tr></table><p style="font-size:11px;color:#94A3B8;line-height:1.6;margin:0">Si el botón no funciona, copia este enlace en tu navegador:<br><a href="${confirmUrl}" style="color:#0F766E;word-break:break-all">${confirmUrl}</a></p></td></tr><tr><td style="background:#F8FAFB;border-top:1px solid #E2E8F0;border-radius:0 0 16px 16px;padding:20px 24px;text-align:center"><p style="font-size:10px;color:#CBD5E1;line-height:1.6;margin:0">Si no te apuntaste a la lista de ClientLabs, ignora este email.<br>© 2026 ClientLabs · hola@clientlabs.io</p></td></tr></table></td></tr></table></body></html>`
+export function buildWaitlistConfirmEmail(confirmUrl: string): string {
+  return cMarketing({
+    title: "Confirma tu email",
+    preheader:
+      "Un clic y estás dentro de la lista de acceso anticipado de ClientLabs.",
+    label: "Acceso anticipado",
+    heading: "Confirma tu email",
+    intro:
+      "Solo falta un clic para reservar tu plaza en el acceso anticipado de ClientLabs y activar tu enlace de invitación.",
+    button: { href: confirmUrl, label: "Confirmar y entrar" },
+    note: "Si el botón no funciona, copia este enlace en tu navegador: " + confirmUrl,
+    unsubscribeUrl: "mailto:hola@clientlabs.io?subject=Baja%20de%20la%20lista",
+    reason:
+      "Recibes este correo porque te apuntaste a la lista de acceso anticipado de ClientLabs.",
+  })
 }

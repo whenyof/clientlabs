@@ -5,6 +5,8 @@
  * Requires: SENDPULSE_CLIENT_ID, SENDPULSE_CLIENT_SECRET
  */
 
+import { bReminder } from "@/lib/email/archetypes"
+
 if (typeof window !== "undefined") {
   throw new Error("[sendpulse] This module is server-only. Do not import in client components.")
 }
@@ -341,19 +343,26 @@ export async function sendInvoiceReminder(options: SendInvoiceReminderOptions): 
     ? `Recordatorio: factura ${invoiceNumber} vencida hace ${daysLate} día(s)`
     : `Recordatorio: factura ${invoiceNumber} próximamente a vencer`
 
-  const html = isAfterDue
-    ? `
-    <p>Hola ${escapeHtml(name)},</p>
-    <p>Te recordamos que la factura <strong>${escapeHtml(invoiceNumber)}</strong> (${amountStr}) venció el ${escapeHtml(dueStr)} y lleva <strong>${daysLate} día(s)</strong> de retraso.</p>
-    <p>Por favor, regulariza el pago lo antes posible. Si ya lo has realizado, puedes ignorar este mensaje.</p>
-    <p>Gracias,<br/>Equipo ClientLabs</p>
-  `
-    : `
-    <p>Hola ${escapeHtml(name)},</p>
-    <p>Te recordamos amablemente que la factura <strong>${escapeHtml(invoiceNumber)}</strong> (${amountStr}) vence el <strong>${escapeHtml(dueStr)}</strong>.</p>
-    <p>Si tienes alguna duda, no dudes en contactarnos.</p>
-    <p>Gracias,<br/>Equipo ClientLabs</p>
-  `
+  const intro = isAfterDue
+    ? `Hola ${name}, te recordamos que la factura ${invoiceNumber} venció el ${dueStr} y lleva ${daysLate} día(s) de retraso. Por favor, regulariza el pago lo antes posible. Si ya lo has realizado, puedes ignorar este mensaje.`
+    : `Hola ${name}, te recordamos amablemente que la factura ${invoiceNumber} vence el ${dueStr}. Si tienes alguna duda, no dudes en contactarnos.`
+
+  const dueText = isAfterDue
+    ? `Vencida hace ${daysLate} día(s)`
+    : `Vence el ${dueStr}`
+
+  const html = bReminder({
+    title: subject,
+    preheader: `Factura ${invoiceNumber} · ${amountStr}`,
+    business: { name: "Departamento de facturación" },
+    overdue: isAfterDue,
+    heading: isAfterDue ? "Factura pendiente de pago" : "Tu factura está próxima a vencer",
+    intro,
+    amount: amountStr,
+    dueText,
+    button: { href: "https://clientlabs.io", label: "Ver factura" },
+    legalHtml: `Recordatorio relativo a la factura ${escapeHtml(invoiceNumber)}.`,
+  })
 
   return sendEmail({
     to: clientEmail,

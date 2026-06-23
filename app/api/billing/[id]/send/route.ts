@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { sendEmail } from "@/lib/sendpulse"
+import { bDocument } from "@/lib/email/archetypes"
 
 export async function POST(
   request: NextRequest,
@@ -75,88 +76,50 @@ export async function POST(
     const issueDate = new Date(invoice.issueDate).toLocaleDateString("es-ES")
     const dueDate = new Date(invoice.dueDate).toLocaleDateString("es-ES")
 
-    const irpfRow =
-      irpfRate > 0
-        ? `<tr>
-            <td style="padding:6px 0;color:#64748b;font-size:13px;">
-              Retención IRPF (${irpfRate}%)
-            </td>
-            <td style="padding:6px 0;text-align:right;color:#dc2626;font-size:13px;">
-              -${fmt(irpfAmount)}
-            </td>
-          </tr>`
-        : ""
+    const esc = (s: string) =>
+      s
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
 
-    const messageBlock = message?.trim()
-      ? `<div style="background:#f8fafc;border-left:3px solid #0F766E;border-radius:4px;padding:16px;margin-bottom:24px;">
-          <p style="margin:0;color:#475569;font-size:13px;font-style:italic;">"${message.trim()}"</p>
-        </div>`
-      : ""
+    const meta: { label: string; value: string }[] = [
+      { label: "Fecha emisión", value: issueDate },
+      { label: "Vencimiento", value: dueDate },
+      { label: "Base imponible", value: fmt(subtotal) },
+      { label: "IVA", value: fmt(taxAmount) },
+    ]
+    if (irpfRate > 0) {
+      meta.push({ label: `Retención IRPF (${irpfRate}%)`, value: `-${fmt(irpfAmount)}` })
+    }
 
-    const ibanBlock = invoice.iban
-      ? `<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:16px;margin-bottom:24px;">
-          <p style="margin:0 0 4px;font-size:11px;font-weight:600;color:#92400e;text-transform:uppercase;letter-spacing:0.5px;">Datos de pago</p>
-          <p style="margin:0;font-family:monospace;font-size:13px;color:#78350f;">${invoice.iban}</p>
-        </div>`
-      : ""
+    const introText = message?.trim()
+      ? `${emisorNombre} te ha enviado la factura ${invoice.number} por un importe de ${fmt(
+          total
+        )}. «${message.trim()}»`
+      : `${emisorNombre} te ha enviado la factura ${invoice.number} por un importe de ${fmt(
+          total
+        )}.`
 
-    const html = `<!DOCTYPE html>
-<html lang="es">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"><title>Factura ${invoice.number}</title></head>
-<body style="margin:0;padding:0;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-  <div style="max-width:600px;margin:40px auto;background:#ffffff;border-radius:16px;border:1px solid #e2e8f0;overflow:hidden;">
-    <div style="background:#0B1F2A;padding:32px 40px;">
-      <div style="color:#0F766E;font-size:24px;font-weight:700;letter-spacing:-0.5px;">ClientLabs</div>
-    </div>
-    <div style="padding:40px;">
-      <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#0f172a;">Tienes una nueva factura</h1>
-      <p style="margin:0 0 24px;color:#64748b;font-size:14px;line-height:1.6;">
-        ${emisorNombre} te ha enviado la factura <strong>${invoice.number}</strong>
-        por un importe de <strong style="color:#0f172a;">${fmt(total)}</strong>.
-      </p>
-      ${messageBlock}
-      <div style="background:#f8fafc;border-radius:12px;padding:20px;margin-bottom:28px;">
-        <table style="width:100%;border-collapse:collapse;">
-          <tr>
-            <td style="padding:6px 0;color:#64748b;font-size:13px;">Nº Factura</td>
-            <td style="padding:6px 0;text-align:right;font-weight:600;color:#0f172a;font-size:13px;">${invoice.number}</td>
-          </tr>
-          <tr>
-            <td style="padding:6px 0;color:#64748b;font-size:13px;">Fecha emisión</td>
-            <td style="padding:6px 0;text-align:right;color:#0f172a;font-size:13px;">${issueDate}</td>
-          </tr>
-          <tr>
-            <td style="padding:6px 0;color:#64748b;font-size:13px;">Vencimiento</td>
-            <td style="padding:6px 0;text-align:right;color:#0f172a;font-size:13px;">${dueDate}</td>
-          </tr>
-          <tr>
-            <td style="padding:6px 0;color:#64748b;font-size:13px;">Base imponible</td>
-            <td style="padding:6px 0;text-align:right;color:#0f172a;font-size:13px;">${fmt(subtotal)}</td>
-          </tr>
-          <tr>
-            <td style="padding:6px 0;color:#64748b;font-size:13px;">IVA</td>
-            <td style="padding:6px 0;text-align:right;color:#0f172a;font-size:13px;">${fmt(taxAmount)}</td>
-          </tr>
-          ${irpfRow}
-          <tr style="border-top:2px solid #e2e8f0;">
-            <td style="padding:12px 0 6px;font-weight:700;color:#0f172a;font-size:15px;">Total a pagar</td>
-            <td style="padding:12px 0 6px;text-align:right;font-weight:700;color:#0F766E;font-size:15px;">${fmt(total)}</td>
-          </tr>
-        </table>
-      </div>
-      <div style="text-align:center;margin-bottom:28px;">
-        <a href="${pdfUrl}" style="display:inline-block;background:#0F766E;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:12px;font-weight:600;font-size:14px;">
-          Descargar factura PDF
-        </a>
-      </div>
-      ${ibanBlock}
-      <p style="color:#94a3b8;font-size:12px;margin:0;">
-        Este email ha sido enviado por ${emisorNombre} a través de ClientLabs.
-      </p>
-    </div>
-  </div>
-</body>
-</html>`
+    const legalParts: string[] = []
+    if (invoice.iban) {
+      legalParts.push(`Datos de pago — IBAN: ${esc(invoice.iban)}`)
+    }
+    legalParts.push(`Este email ha sido enviado por ${esc(emisorNombre)} a través de ClientLabs.`)
+    const legalHtml = legalParts.join("<br/>")
+
+    const html = bDocument({
+      title: `Factura ${invoice.number}`,
+      preheader: `${emisorNombre} te ha enviado la factura ${invoice.number} (${fmt(total)}).`,
+      business: { name: emisorNombre },
+      docTypeLabel: "Factura",
+      amountLabel: "Total a pagar",
+      amount: fmt(total),
+      intro: introText,
+      meta,
+      buttons: [{ href: pdfUrl, label: "Descargar factura PDF", variant: "dark" }],
+      legalHtml,
+    })
 
     await sendEmail({
       to: destinatario,

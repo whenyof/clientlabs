@@ -13,6 +13,7 @@
     "backfill-invoices": "tsx --tsconfig scripts/tsconfig.json scripts/backfill-invoices.ts",
     "email:test": "tsx scripts/send-test-emails-redesign.ts",
     "email:test:all": "tsx scripts/send-test-emails-inventory.ts",
+    "email:waitlist-delay": "tsx scripts/send-waitlist-launch-delay.ts",
     "worker:events": "tsx workers/eventQueueWorker.ts",
     "test": "vitest run",
     "test:watch": "vitest",

@@ -53,7 +53,10 @@ export default function Login({ onSwitch }: Props) {
       // rate-limit; NextAuth surfaces them in res.error with redirect:false.
       // Anything else (e.g. "CredentialsSignin") falls back to the generic copy.
       const isUnverified = res.error.includes("Verifica tu email")
-      const known = isUnverified || res.error.includes("Demasiados intentos")
+      const known =
+        isUnverified ||
+        res.error.includes("Demasiados intentos") ||
+        res.error.includes("Abrimos el 1 de julio")
       setUnverifiedEmail(isUnverified ? email : null)
       setError(known ? res.error : "Email o contraseña incorrectos. Revísalos e inténtalo de nuevo.")
     } else {

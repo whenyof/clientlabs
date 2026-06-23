@@ -41,6 +41,12 @@
 .mkt .nav-right .signin { font-size: 14.5px; font-weight: 500; color: var(--ink-2); }
 .mkt .nav-right .signin:hover { color: var(--ink); }
 .mkt .nav-toggle { display: none; background: none; border: 0; cursor: pointer; color: var(--ink); padding: 6px; }
+/* Aviso de cierre de pre-lanzamiento (CTA de auth) — pill fijo bajo el navbar. */
+.mkt .nav-lock-toast { position: fixed; top: 72px; left: 50%; transform: translateX(-50%); z-index: 60; display: inline-flex; align-items: center; gap: 9px; max-width: calc(100vw - 32px); padding: 11px 16px; background: #fff; border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 2px 4px rgba(11,31,42,.04), 0 16px 40px -20px rgba(11,31,42,.28); font-size: 14px; font-weight: 500; line-height: 1.4; color: var(--ink); animation: navLockIn .22s ease; }
+.mkt .nav-lock-toast .nav-lock-dot { width: 8px; height: 8px; border-radius: 99px; background: var(--teal); flex: none; }
+@keyframes navLockIn { from { opacity: 0; transform: translate(-50%, -6px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@media (max-width: 860px) { .mkt .nav-lock-toast { top: 64px; } }
+@media (prefers-reduced-motion: reduce) { .mkt .nav-lock-toast { animation: none; } }
 .mkt .hero { padding: 84px 0 0; text-align: center; }
 .mkt .hero h1 { font-size: clamp(38px, 5.6vw, 64px); line-height: 1.04; letter-spacing: -0.028em; max-width: 17ch; margin: 0 auto; }
 .mkt .hero .sub { margin: 26px auto 0; font-size: clamp(17px, 2vw, 20px); line-height: 1.55; color: var(--ink-2); max-width: 56ch; font-weight: 400; }

@@ -6,6 +6,7 @@ import { prisma, safePrismaQuery } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 import { sendWelcomeEmail } from "@/lib/email-service"
 import { checkDistributedRateLimit } from "@/lib/security/distributedRateLimiter"
+import { isLaunchLocked, isLaunchAllowed } from "@/lib/launch-lock"
 
 const registerSchema = z.object({
   name: z.string().min(1).max(200).trim().optional(),
@@ -48,6 +49,14 @@ export async function POST(req: NextRequest) {
 
   const { name, email, password } = parsed
   const normalizedEmail = email.toLowerCase().trim()
+
+  // Cierre de pre-lanzamiento: registro cerrado al público hasta el 1 de julio.
+  if (isLaunchLocked() && !isLaunchAllowed(normalizedEmail)) {
+    return NextResponse.json(
+      { error: "Registro cerrado. Abrimos el 1 de julio." },
+      { status: 403 }
+    )
+  }
 
   try {
     // safePrismaQuery reintenta en P1001 (Neon cold start)

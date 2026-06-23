@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 import { recordSession } from "@/lib/auth/session-tracking"
 import { checkDistributedRateLimit } from "@/lib/security/distributedRateLimiter"
+import { isLaunchLocked, isLaunchAllowed, LAUNCH_LOCKED_MESSAGE } from "@/lib/launch-lock"
 
 export const authOptions: NextAuthOptions = {
  adapter: PrismaAdapter(prisma),
@@ -42,6 +43,11 @@ export const authOptions: NextAuthOptions = {
  if (!credentials?.email || !credentials.password) return null
 
  const normalizedEmail = credentials.email.toLowerCase().trim()
+
+ // Cierre de pre-lanzamiento: solo la allowlist puede entrar hasta el 1 de julio.
+ if (isLaunchLocked() && !isLaunchAllowed(normalizedEmail)) {
+ throw new Error(LAUNCH_LOCKED_MESSAGE)
+ }
 
  // Dedicated per-account brute-force limit: 5 attempts / 15 min.
  // checkDistributedRateLimit is fail-CLOSED (denies if Redis is down),
@@ -97,6 +103,9 @@ export const authOptions: NextAuthOptions = {
  // ─────────────────────────────────────────────
  async signIn({ user }) {
  if (!user?.email) return false
+ // Cierre de pre-lanzamiento: backstop para Google (Credentials ya se bloquea en
+ // authorize). Solo la allowlist entra hasta el 1 de julio.
+ if (isLaunchLocked() && !isLaunchAllowed(user.email)) return false
  // Track last login timestamp (IP/UA captured in JWT callback via headers)
  await prisma.user.update({
    where: { id: user.id },

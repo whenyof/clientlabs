@@ -4,7 +4,7 @@ import { useState, useRef } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Logo } from "@/components/Logo"
-import { LayoutDashboard, Sparkles, ShieldCheck, CheckCircle } from "lucide-react"
+import { LayoutDashboard, Sparkles, ShieldCheck, CheckCircle, CalendarClock } from "lucide-react"
 // Note: ?registered=true param is no longer generated — registration redirects to /verify
 import Login from "./Login"
 import Register from "./Register"
@@ -24,6 +24,9 @@ const STATS = [
 export default function AuthShell({ defaultRegister = false }: { defaultRegister?: boolean }) {
   const searchParams = useSearchParams()
   const justVerified = searchParams?.get("verified") === "true"
+  // NextAuth manda ?error=AccessDenied cuando el callback signIn bloquea (Google
+  // durante el cierre de pre-lanzamiento). Mostramos el aviso en vez del genérico.
+  const launchBlocked = searchParams?.get("error") === "AccessDenied"
 
   const [isRegister, setIsRegister] = useState(defaultRegister)
   const [animating, setAnimating] = useState(false)
@@ -135,6 +138,14 @@ export default function AuthShell({ defaultRegister = false }: { defaultRegister
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
           Volver al inicio
         </Link>
+
+        {/* Cierre de pre-lanzamiento: aviso cuando Google se bloquea (?error=AccessDenied) */}
+        {launchBlocked && (
+          <div className="w-full max-w-[420px] mb-4 flex items-center gap-3 rounded-xl px-4 py-3 text-[13px] font-medium" style={{ background: "rgba(15,118,110,0.08)", border: "1px solid rgba(15,118,110,0.25)", color: "#0F766E" }}>
+            <CalendarClock size={16} className="shrink-0" />
+            Abrimos el 1 de julio — te avisaremos por email.
+          </div>
+        )}
 
         {/* Email verified success banner (fallback when auto-login failed after /verify) */}
         {justVerified && !isRegister && (

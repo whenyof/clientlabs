@@ -51,6 +51,16 @@ export const FONTS = {
   mono: "'IBM Plex Mono','Courier New',monospace",
 } as const
 
+/**
+ * CSS para cifras parejas en NÚMEROS GRANDES (importes, KPIs). El problema en
+ * Gmail: la serif web no carga y cae en Georgia, que usa cifras oldstyle (de
+ * altura desigual → "bailan"). La solución real es renderizar estos números en
+ * la stack SANS (Hanken/Helvetica/Arial, todas con cifras lining por defecto);
+ * estas props son un refuerzo por si la fuente web sí carga en otros clientes.
+ */
+export const NUM_FEATURES =
+  'font-variant-numeric:lining-nums tabular-nums; font-feature-settings:"lnum" 1,"tnum" 1;'
+
 /** <link> a las fuentes de Google (con fallback de sistema vía FONTS). */
 export const FONTS_LINK =
   '<link rel="preconnect" href="https://fonts.googleapis.com"/>' +

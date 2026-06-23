@@ -5,7 +5,7 @@
  * aquí solo se construye el HTML email-safe fiel al diseño.
  */
 import { emailShell, row, divider, esc } from "./layout"
-import { COLORS, FONTS } from "./theme"
+import { COLORS, FONTS, NUM_FEATURES } from "./theme"
 import {
   clHeader,
   bizHeader,
@@ -53,21 +53,22 @@ export function kpiCard(opts: { pill?: { text: string; tone?: PillTone }; value:
   return (
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${COLORS.paper2}; border:1px solid ${COLORS.line}; border-radius:12px;">` +
     badge +
-    `<tr><td style="padding:16px 26px 4px 26px;"><p style="margin:0; font-family:${FONTS.serif}; font-weight:600; font-size:44px; line-height:1; letter-spacing:-0.02em; color:${opts.valueColor ?? COLORS.teal};">${esc(opts.value)}</p></td></tr>` +
+    `<tr><td style="padding:16px 26px 4px 26px;"><p style="margin:0; height:44px; line-height:44px; font-family:${FONTS.sans}; font-weight:700; font-size:44px; letter-spacing:-0.02em; ${NUM_FEATURES} color:${opts.valueColor ?? COLORS.teal};">${esc(opts.value)}</p></td></tr>` +
     meta +
     `</table>`
   )
 }
 
-/** Fila de KPIs (A4): hasta 3 celdas en caja suave. */
+/** Fila de KPIs (A4): hasta 3 celdas en caja suave. Etiqueta y cifra con
+ *  altura y line-height fijos + valign top → las 3 columnas alinean su base. */
 export function kpiRow(cells: { label: string; value: string; valueColor?: string }[]): string {
   const w = `${(100 / Math.max(cells.length, 1)).toFixed(2)}%`
   const tds = cells
     .map(
       (c, i) =>
         `<td class="kpi-cell" width="${w}" valign="top" style="padding:20px 22px;${i < cells.length - 1 ? ` border-right:1px solid #E9E4D9;` : ""}">` +
-        `<p style="margin:0; font-family:${FONTS.sans}; font-size:12px; color:${COLORS.ink3};">${esc(c.label)}</p>` +
-        `<p style="margin:6px 0 0 0; font-family:${FONTS.serif}; font-weight:600; font-size:26px; letter-spacing:-0.01em; color:${c.valueColor ?? COLORS.ink};">${esc(c.value)}</p></td>`,
+        `<p style="margin:0; height:16px; line-height:16px; font-family:${FONTS.sans}; font-size:12px; color:${COLORS.ink3}; white-space:nowrap; overflow:hidden;">${esc(c.label)}</p>` +
+        `<p style="margin:8px 0 0 0; height:32px; line-height:32px; font-family:${FONTS.sans}; font-weight:700; font-size:26px; letter-spacing:-0.01em; ${NUM_FEATURES} color:${c.valueColor ?? COLORS.ink};">${esc(c.value)}</p></td>`,
     )
     .join("")
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${COLORS.paper2}; border:1px solid ${COLORS.line}; border-radius:12px;"><tr>${tds}</tr></table>`
@@ -184,7 +185,7 @@ export function bDocument(opts: {
   const darkHead = row(
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${COLORS.bizInk}; border-radius:12px;"><tr>` +
       `<td style="padding:24px 26px;"><p style="margin:0; font-family:${FONTS.sans}; font-size:13px; color:#A8A496;">${esc(opts.amountLabel)}</p>` +
-      `<p style="margin:6px 0 0 0; font-family:${FONTS.serif}; font-weight:600; font-size:38px; line-height:1; letter-spacing:-0.02em; color:#ffffff;">${esc(opts.amount)}</p></td>` +
+      `<p style="margin:6px 0 0 0; font-family:${FONTS.sans}; font-weight:700; font-size:38px; line-height:1; letter-spacing:-0.02em; ${NUM_FEATURES} color:#ffffff;">${esc(opts.amount)}</p></td>` +
       status +
       `</tr></table>`,
     "0 40px",
@@ -234,7 +235,7 @@ export function bReminder(opts: {
   const card = row(
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${COLORS.paper2}; border:1px solid ${COLORS.line}; border-radius:12px;"><tr>` +
       `<td style="padding:22px 26px;"><p style="margin:0 0 8px 0;">${pill(opts.dueText, tone)}</p>` +
-      `<p style="margin:0; font-family:${FONTS.serif}; font-weight:600; font-size:34px; line-height:1; letter-spacing:-0.02em; color:${COLORS.bizInk};">${esc(opts.amount)}</p></td></tr></table>`,
+      `<p style="margin:0; font-family:${FONTS.sans}; font-weight:700; font-size:34px; line-height:1; letter-spacing:-0.02em; ${NUM_FEATURES} color:${COLORS.bizInk};">${esc(opts.amount)}</p></td></tr></table>`,
     "22px 40px 0 40px",
   )
   return emailShell({

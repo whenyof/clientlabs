@@ -12,6 +12,7 @@
     "repair-invoice-duplicates": "tsx scripts/repair-invoice-duplicates.ts",
     "backfill-invoices": "tsx --tsconfig scripts/tsconfig.json scripts/backfill-invoices.ts",
     "email:test": "tsx scripts/send-test-emails-redesign.ts",
+    "email:test:all": "tsx scripts/send-test-emails-inventory.ts",
     "worker:events": "tsx workers/eventQueueWorker.ts",
     "test": "vitest run",
     "test:watch": "vitest",

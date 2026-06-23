@@ -3,7 +3,7 @@
  * "Sistema de Emails — ClientLabs". Todos devuelven HTML como string.
  */
 import { COLORS, FONTS } from "./theme"
-import { LOGO_URL, BRAND } from "./brand"
+import { LOGO_URL, BRAND, SUPPORT_EMAIL, DIRECCION_POSTAL } from "./brand"
 import { esc, divider, row } from "./layout"
 
 /* ── Tipografía ─────────────────────────────────────────────────────────── */
@@ -130,7 +130,7 @@ export function bizHeader(opts: {
 
 /* ── Pies ───────────────────────────────────────────────────────────────── */
 
-/** Pie familia A (ClientLabs → usuario). */
+/** Pie familia A (ClientLabs → usuario). Envío no-reply → redirige a soporte. */
 export function clFooter(opts: { preferencesUrl?: string } = {}): string {
   const prefs = opts.preferencesUrl
     ? ` &nbsp;·&nbsp; <a href="${opts.preferencesUrl}" style="color:${COLORS.ink3}; text-decoration:underline;">Ajustar mis correos</a>`
@@ -138,7 +138,10 @@ export function clFooter(opts: { preferencesUrl?: string } = {}): string {
   return row(
     divider() +
       `<p style="margin:20px 0 0 0; font-family:${FONTS.sans}; font-size:12px; line-height:1.7; color:${COLORS.footerInk};">` +
-      `${BRAND.name} · ${BRAND.address}<br/>` +
+      `Este correo se envía desde una dirección sin atención. Si necesitas ayuda, escríbenos a ` +
+      `<a href="mailto:${SUPPORT_EMAIL}" style="color:${COLORS.ink3}; font-weight:600;">${SUPPORT_EMAIL}</a>.</p>` +
+      `<p style="margin:12px 0 0 0; font-family:${FONTS.sans}; font-size:12px; line-height:1.7; color:${COLORS.footerInk};">` +
+      `${BRAND.name}<br/>` +
       `<a href="${BRAND.url}" style="color:${COLORS.ink3}; font-weight:600;">${BRAND.urlLabel}</a>${prefs}</p>`,
     "30px 40px 32px 40px",
   )
@@ -166,17 +169,24 @@ export function bizFooter(opts: { legalHtml: string }): string {
   return legal + discreet
 }
 
-/** Pie familia C (marketing): dirección + baja obligatoria. */
+/** Pie familia C (marketing): dirección postal + baja obligatoria. Envío
+ *  no-reply → redirige a soporte. */
 export function marketingFooter(opts: { unsubscribeUrl: string; preferencesUrl?: string; reason?: string }): string {
   const reason = opts.reason ?? "Recibes este correo porque estás suscrito a las novedades de ClientLabs."
   const prefs = opts.preferencesUrl
     ? ` &nbsp;·&nbsp; <a href="${opts.preferencesUrl}" style="color:${COLORS.footerInk}; text-decoration:underline;">Preferencias de correo</a>`
     : ""
+  // Requisito legal de marketing: dirección postal real. Hasta rellenar
+  // DIRECCION_POSTAL en brand.ts, se muestra un marcador claro (no inventado).
+  const postal = DIRECCION_POSTAL || "[Dirección postal — pendiente]"
   const sep = row(divider(), "34px 40px 0 40px")
   const body = row(
     `<p style="margin:0 0 12px 0; font-family:${FONTS.sans}; font-size:12px; line-height:1.7; color:${COLORS.footerInk};">` +
-      `${BRAND.name} · ${BRAND.address}<br/>` +
+      `${BRAND.name} · ${esc(postal)}<br/>` +
       `<a href="${BRAND.url}" style="color:${COLORS.ink3}; font-weight:600;">${BRAND.urlLabel}</a></p>` +
+      `<p style="margin:0 0 12px 0; font-family:${FONTS.sans}; font-size:11.5px; line-height:1.6; color:${COLORS.footerInk2};">` +
+      `Este correo se envía desde una dirección sin atención. Si necesitas ayuda, escríbenos a ` +
+      `<a href="mailto:${SUPPORT_EMAIL}" style="color:${COLORS.footerInk}; text-decoration:underline;">${SUPPORT_EMAIL}</a>.</p>` +
       `<p style="margin:0; font-family:${FONTS.sans}; font-size:11.5px; line-height:1.6; color:${COLORS.footerInk2};">` +
       `${esc(reason)}<br/>` +
       `<a href="${opts.unsubscribeUrl}" style="color:${COLORS.footerInk}; text-decoration:underline;">Darme de baja</a>${prefs}</p>`,

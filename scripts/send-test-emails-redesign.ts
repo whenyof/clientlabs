@@ -12,7 +12,10 @@
  *   RESEND_API_KEY=re_xxx npm run email:test
  *   RESEND_API_KEY=re_xxx npm run email:test -- otra@dir.com   (destino opcional)
  */
-import "dotenv/config"
+import { config as loadEnv } from "dotenv"
+// Carga .env.local (prioridad, como Next) y .env. dotenv no sobreescribe vars ya definidas.
+loadEnv({ path: ".env.local" })
+loadEnv()
 import { Resend } from "resend"
 import {
   a1Code,

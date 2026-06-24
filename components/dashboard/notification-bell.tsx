@@ -109,16 +109,24 @@ export function NotificationBell() {
                 <button
                   key={n.id}
                   onClick={() => handleClick(n)}
-                  className={`w-full text-left px-4 py-3 hover:bg-[var(--bg-surface)] transition-colors ${!n.read ? "bg-[var(--accent-soft)]" : ""}`}
+                  className="w-full text-left px-4 py-3 hover:bg-[var(--bg-surface)] transition-colors"
+                  style={!n.read ? { background: "rgba(15,118,110,0.04)" } : undefined}
                 >
-                  <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-start gap-2.5">
+                    {/* Unread indicator — teal dot (espacio reservado también cuando está leída) */}
+                    <span
+                      className={`mt-1.5 shrink-0 block w-1.5 h-1.5 rounded-full ${!n.read ? "bg-[var(--accent)]" : "bg-transparent"}`}
+                      aria-hidden="true"
+                    />
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm truncate ${n.read ? "text-[var(--text-secondary)]" : "text-[var(--text-primary)] font-medium"}`}>{n.title}</p>
+                      <div className="flex items-start justify-between gap-2">
+                        <p className={`text-sm truncate ${n.read ? "text-[var(--text-secondary)]" : "text-[var(--text-primary)] font-medium"}`}>{n.title}</p>
+                        {n.actionUrl && <ExternalLink size={11} className="text-[var(--text-secondary)] shrink-0 mt-1" />}
+                      </div>
                       <p className="text-xs text-[var(--text-secondary)] mt-0.5 line-clamp-2">{n.message}</p>
+                      <p className="text-[10px] text-[var(--text-secondary)] mt-1">{timeAgo(n.createdAt)}</p>
                     </div>
-                    {n.actionUrl && <ExternalLink size={11} className="text-[var(--text-secondary)] shrink-0 mt-1" />}
                   </div>
-                  <p className="text-[10px] text-[var(--text-secondary)] mt-1">{timeAgo(n.createdAt)}</p>
                 </button>
               ))
             )}

@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Phone, Mail, Video, MessageCircle, StickyNote, Loader2, X } from "lucide-react"
-import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog"
+import { Phone, Mail, Video, MessageCircle, StickyNote, Loader2 } from "lucide-react"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
 
 interface LeadInteractionModalProps {
   open: boolean
@@ -92,15 +92,6 @@ export function LeadInteractionModal({ open, onClose, leadId, onSuccess }: LeadI
               </p>
             </div>
           </div>
-          <DialogClose style={{
-            width: 28, height: 28, borderRadius: 6,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            background: "none", border: "none", cursor: "pointer",
-            color: "var(--text-secondary)",
-          }}>
-            <X style={{ width: 14, height: 14 }} />
-            <span className="sr-only">Cerrar</span>
-          </DialogClose>
         </div>
 
         {/* Body */}

@@ -114,7 +114,7 @@ export function LeadHeader({ lead, onRefresh }: { lead: LeadHeaderLead; onRefres
   }
 
   function openNote() {
-    const ta = document.querySelector<HTMLTextAreaElement>(".lead-notes-ta")
+    const ta = document.getElementById("lead-notes-textarea") as HTMLTextAreaElement | null
     if (ta) { ta.focus(); ta.scrollIntoView({ behavior: "smooth", block: "center" }) }
   }
 

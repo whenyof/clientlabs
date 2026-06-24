@@ -61,12 +61,12 @@ export function QuickCreateMenu() {
             display: "inline-flex", alignItems: "center", gap: 7,
             padding: "7px 12px", borderRadius: 6,
             fontWeight: 550, fontSize: 12.5, letterSpacing: "-0.005em",
-            background: "#0a0a0a", color: "white",
+            background: "var(--accent)", color: "white",
             border: "none", cursor: "pointer",
             transition: "background .12s ease",
           }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#1f1f1f" }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "#0a0a0a" }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--accent-hover)" }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--accent)" }}
           aria-label="Creación rápida"
         >
           <Plus size={12} strokeWidth={2.5} />

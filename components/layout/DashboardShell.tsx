@@ -23,6 +23,11 @@ export default function DashboardShell({
     const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
     const pathname = usePathname()
 
+    // En Ajustes el sidebar muestra la navegación de ajustes (texto, sin iconos),
+    // así que se fuerza expandido para que no se recorte en la columna de 56px.
+    const isSettings = pathname?.startsWith("/dashboard/settings") ?? false
+    const effectiveCollapsed = isSettings ? false : isCollapsed
+
     // Close mobile sidebar on route change
     useEffect(() => {
         setMobileSidebarOpen(false)
@@ -47,10 +52,10 @@ export default function DashboardShell({
                 {/* ── Desktop Sidebar Column (hidden on mobile) ───────────── */}
                 <div
                     className="hidden lg:flex flex-shrink-0 transition-all duration-300 z-20 h-full overflow-hidden pointer-events-auto"
-                    style={{ width: isCollapsed ? 56 : 248 }}
+                    style={{ width: effectiveCollapsed ? 56 : 248 }}
                 >
                     <Sidebar
-                        isCollapsed={isCollapsed}
+                        isCollapsed={effectiveCollapsed}
                         onToggleCollapsed={() => setIsCollapsed(!isCollapsed)}
                     />
                 </div>

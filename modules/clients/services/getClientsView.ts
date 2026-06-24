@@ -25,6 +25,12 @@ export type ClientsViewParams = {
   sortOrder?: "asc" | "desc"
   offset?: number
   pageSize?: number
+  /**
+   * Path de tecleo/paginación: devuelve SOLO la tabla (items/total/hasMore), sin
+   * recalcular agregados, y empuja la búsqueda a SQL para traer únicamente las
+   * coincidencias. El cliente conserva los KPIs del SSR (invariantes a filtros).
+   */
+  tableOnly?: boolean
 }
 
 const PAGE_SIZE_DEFAULT = 50
@@ -42,10 +48,28 @@ export async function getClientsView(
   const search = (params.search ?? "").trim().toLowerCase()
   const sortBy = params.sortBy ?? "createdAt"
   const sortOrder: "asc" | "desc" = params.sortOrder === "asc" ? "asc" : "desc"
+  const tableOnly = params.tableOnly ?? false
 
-  // 1. Set completo, columnas mínimas (derivación + filtros + orden + agregados).
+  // Búsqueda en SQL solo en el path tableOnly (tecleo/paginación): trae únicamente
+  // las coincidencias en vez de todo el set, así el coste por tecla escala con los
+  // resultados y no con el total de clientes. En ese path NO se recalculan agregados
+  // (el cliente conserva los del SSR). SSR y refetch tras mutación siguen cargando
+  // el set completo para que KPIs/contadores sean exactos.
+  const useSqlSearch = tableOnly && search.length > 0
+  const rowWhere = useSqlSearch
+    ? {
+        userId,
+        OR: [
+          { name:        { contains: search, mode: "insensitive" as const } },
+          { email:       { contains: search, mode: "insensitive" as const } },
+          { companyName: { contains: search, mode: "insensitive" as const } },
+        ],
+      }
+    : { userId }
+
+  // 1. Set (completo, o solo coincidencias si useSqlSearch), columnas mínimas.
   const all = await prisma.client.findMany({
-    where: { userId },
+    where: rowWhere,
     select: {
       id: true,
       name: true,
@@ -81,40 +105,52 @@ export async function getClientsView(
   })
 
   // 4. Agregados sobre TODO el set (idénticos a hoy salvo el fix de mrr/new >100).
+  //    Solo SSR/refetch — en el path tableOnly no se calculan (el cliente conserva
+  //    los del SSR, invariantes a los filtros).
   const ninetyDaysAgo = new Date(referenceNow.getTime() - 90 * 86_400_000)
-  const kpis = {
-    total: derived.length,
-    active: derived.filter((c) => c.effectiveStatus === "ACTIVE" && !c.isForgotten).length,
-    vip: derived.filter((c) => c.effectiveStatus === "VIP").length,
-    followup: derived.filter((c) => c.effectiveStatus === "FOLLOW_UP").length,
-    inactive: derived.filter((c) => c.effectiveStatus === "INACTIVE" || c.isForgotten).length,
-    totalRevenue: derived.reduce((sum, c) => sum + (c.invoiceRevenue ?? 0), 0),
+  let aggregates: {
+    kpis: { total: number; active: number; vip: number; followup: number; inactive: number; totalRevenue: number }
+    segCounts: { all: number; vip: number; healthy: number; risk: number; churn: number; mrr: number; new: number }
+    distributionTop6: { name: string; value: number }[]
+    attention: { id: string; name: string | null; effectiveStatus: string; isForgotten: boolean; updatedAt: Date }[]
+    cohort: ReturnType<typeof buildCohort>
+  } | null = null
+  if (!tableOnly) {
+    const kpis = {
+      total: derived.length,
+      active: derived.filter((c) => c.effectiveStatus === "ACTIVE" && !c.isForgotten).length,
+      vip: derived.filter((c) => c.effectiveStatus === "VIP").length,
+      followup: derived.filter((c) => c.effectiveStatus === "FOLLOW_UP").length,
+      inactive: derived.filter((c) => c.effectiveStatus === "INACTIVE" || c.isForgotten).length,
+      totalRevenue: derived.reduce((sum, c) => sum + (c.invoiceRevenue ?? 0), 0),
+    }
+    const segCounts = {
+      all: kpis.total,
+      vip: kpis.vip,
+      healthy: kpis.active,
+      risk: kpis.followup,
+      churn: kpis.inactive,
+      mrr: derived.filter((c) => (c.invoiceRevenue ?? 0) > 0).length,
+      new: derived.filter((c) => new Date(c.createdAt) >= ninetyDaysAgo).length,
+    }
+    const distributionTop6 = derived
+      .map((c) => ({ name: c.name ?? "—", value: c.invoiceRevenue ?? 0 }))
+      .filter((c) => c.value > 0)
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 6)
+    const attention = derived
+      .filter((c) => c.effectiveStatus === "FOLLOW_UP" || c.effectiveStatus === "INACTIVE" || c.isForgotten)
+      .slice(0, 3)
+      .map((c) => ({
+        id: c.id,
+        name: c.name,
+        effectiveStatus: c.effectiveStatus,
+        isForgotten: c.isForgotten,
+        updatedAt: c.updatedAt,
+      }))
+    const cohort = buildCohort(derived, referenceNow)
+    aggregates = { kpis, segCounts, distributionTop6, attention, cohort }
   }
-  const segCounts = {
-    all: kpis.total,
-    vip: kpis.vip,
-    healthy: kpis.active,
-    risk: kpis.followup,
-    churn: kpis.inactive,
-    mrr: derived.filter((c) => (c.invoiceRevenue ?? 0) > 0).length,
-    new: derived.filter((c) => new Date(c.createdAt) >= ninetyDaysAgo).length,
-  }
-  const distributionTop6 = derived
-    .map((c) => ({ name: c.name ?? "—", value: c.invoiceRevenue ?? 0 }))
-    .filter((c) => c.value > 0)
-    .sort((a, b) => b.value - a.value)
-    .slice(0, 6)
-  const attention = derived
-    .filter((c) => c.effectiveStatus === "FOLLOW_UP" || c.effectiveStatus === "INACTIVE" || c.isForgotten)
-    .slice(0, 3)
-    .map((c) => ({
-      id: c.id,
-      name: c.name,
-      effectiveStatus: c.effectiveStatus,
-      isForgotten: c.isForgotten,
-      updatedAt: c.updatedAt,
-    }))
-  const cohort = buildCohort(derived, referenceNow)
 
   // 5. Tabla: filtros + segmento + orden + página sobre el set completo derivado.
   let rows = derived
@@ -188,7 +224,7 @@ export async function getClientsView(
     items,
     total,
     hasMore,
-    aggregates: { kpis, segCounts, distributionTop6, attention, cohort },
+    aggregates, // null en el path tableOnly; el cliente conserva los del SSR
   }
 }
 

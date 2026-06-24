@@ -94,7 +94,8 @@ export function ClientsView({ initialData, currentFilters, serverNow }: ClientsV
 
   const PAGE_SIZE = 50
 
-  const buildUrl = useCallback((offset: number) => {
+  // tableOnly: solo trae la tabla (búsqueda en SQL, sin recalcular agregados).
+  const buildUrl = useCallback((offset: number, tableOnly = false) => {
     const p = new URLSearchParams()
     if (statusFilter && statusFilter !== "all") p.set("status", statusFilter)
     if (searchTerm.trim()) p.set("search", searchTerm.trim())
@@ -103,10 +104,12 @@ export function ClientsView({ initialData, currentFilters, serverNow }: ClientsV
     p.set("sortOrder", sortOrder)
     p.set("offset", String(offset))
     p.set("pageSize", String(PAGE_SIZE))
+    if (tableOnly) p.set("tableOnly", "1")
     return `/api/clients/list?${p.toString()}`
   }, [statusFilter, searchTerm, activeSegment, sortBy, sortOrder])
 
-  // Refetch (página 1 + agregados) al cambiar filtros/búsqueda/segmento/orden.
+  // Refetch SOLO de la tabla al cambiar filtros/búsqueda/segmento/orden. Los KPIs
+  // no se recalculan por tecla (se conservan los del SSR, invariantes a filtros).
   // Debounce para la búsqueda; salta el primer render (ya viene de SSR).
   const isFirst = useRef(true)
   useEffect(() => {
@@ -115,11 +118,10 @@ export function ClientsView({ initialData, currentFilters, serverNow }: ClientsV
     setLoading(true)
     const t = setTimeout(async () => {
       try {
-        const res = await fetch(buildUrl(0), { credentials: "include" })
+        const res = await fetch(buildUrl(0, true), { credentials: "include" })
         const data = await res.json()
         if (cancelled || !data.success) return
         setItems(data.items)
-        setAggregates(data.aggregates)
         setTotal(data.total)
         setHasMore(data.hasMore)
       } catch { /* fail-soft: se mantiene la página actual */ }
@@ -128,12 +130,14 @@ export function ClientsView({ initialData, currentFilters, serverNow }: ClientsV
     return () => { cancelled = true; clearTimeout(t) }
   }, [buildUrl])
 
+  // refetch completo (incluye agregados) tras una mutación de datos.
   const refetch = useCallback(async () => {
     try {
       const res = await fetch(buildUrl(0), { credentials: "include" })
       const data = await res.json()
       if (data.success) {
-        setItems(data.items); setAggregates(data.aggregates); setTotal(data.total); setHasMore(data.hasMore)
+        setItems(data.items); setTotal(data.total); setHasMore(data.hasMore)
+        if (data.aggregates) setAggregates(data.aggregates)
       }
     } catch { /* ignore */ }
   }, [buildUrl])
@@ -142,7 +146,7 @@ export function ClientsView({ initialData, currentFilters, serverNow }: ClientsV
     if (loadingMore || !hasMore) return
     setLoadingMore(true)
     try {
-      const res = await fetch(buildUrl(items.length), { credentials: "include" })
+      const res = await fetch(buildUrl(items.length, true), { credentials: "include" })
       const data = await res.json()
       if (data.success) { setItems(prev => [...prev, ...data.items]); setHasMore(data.hasMore) }
     } catch { /* ignore */ }
@@ -504,7 +508,16 @@ export function ClientsView({ initialData, currentFilters, serverNow }: ClientsV
             <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `1px solid ${C.line2}`, gap: 12, flexWrap: "wrap" }}>
               <div>
                 <h3 style={{ fontWeight: 600, letterSpacing: "-0.012em", fontSize: 13.5, margin: 0, color: C.ink }}>Mis clientes</h3>
-                <div style={{ fontSize: 11.5, color: C.ink3, fontFamily: "ui-monospace,monospace", marginTop: 2 }}>{total} {total === 1 ? "resultado" : "resultados"}{loading ? " · cargando…" : ""}</div>
+                <div style={{ fontSize: 11.5, color: C.ink3, fontFamily: "ui-monospace,monospace", marginTop: 2, display: "flex", alignItems: "center", gap: 7 }}>
+                  <span>{total} {total === 1 ? "resultado" : "resultados"}</span>
+                  {loading && (
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, color: C.accent }}>
+                      <span style={{ width: 10, height: 10, borderRadius: "50%", border: `1.5px solid ${C.accentSoft}`, borderTopColor: C.accent, display: "inline-block", animation: "cl-spin .7s linear infinite" }} />
+                      Buscando…
+                    </span>
+                  )}
+                  <style>{`@keyframes cl-spin{to{transform:rotate(360deg)}}`}</style>
+                </div>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
                 {[["Sector", "Todos"], ["Owner", "Equipo"], ["Plan", "Cualquiera"], ["Estado", "Activo"]].map(([label, val]) => (
@@ -527,7 +540,10 @@ export function ClientsView({ initialData, currentFilters, serverNow }: ClientsV
                 onSortChange={handleSortChange}
               />
             </div>
-            <ClientsTable clients={clientesProcesados} onClientUpdate={handleClientUpdate} />
+            {/* Las filas se conservan mientras carga; se atenúan para indicar la búsqueda. */}
+            <div style={{ opacity: loading ? 0.55 : 1, transition: "opacity .15s ease", pointerEvents: loading ? "none" : "auto" }}>
+              <ClientsTable clients={clientesProcesados} onClientUpdate={handleClientUpdate} />
+            </div>
             {hasMore && (
               <div style={{ display: "flex", justifyContent: "center", padding: "14px 18px", borderTop: `1px solid ${C.line2}` }}>
                 <button

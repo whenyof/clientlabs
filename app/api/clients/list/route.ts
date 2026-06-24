@@ -27,6 +27,7 @@ export async function GET(request: NextRequest) {
       sortOrder: (sp.get("sortOrder") as "asc" | "desc") ?? undefined,
       offset: sp.get("offset") ? Number(sp.get("offset")) : undefined,
       pageSize: sp.get("pageSize") ? Number(sp.get("pageSize")) : undefined,
+      tableOnly: sp.get("tableOnly") === "1",
     })
     return NextResponse.json({ success: true, ...data })
   } catch (e) {

@@ -3,7 +3,6 @@ import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { LeadsKpisClient } from "./components/LeadsKpisClient"
-import { LeadsFilters } from "@domains/leads/components/LeadsFilters"
 import { LeadsClientShell } from "./components/LeadsClientShell"
 import { LeadsPageView } from "./components/LeadsPageView"
 import { format, subDays, eachDayOfInterval } from "date-fns"
@@ -166,9 +165,8 @@ export default async function LeadsPage({
     <LeadsKpisClient
       initialLeads={initialLeadsData as Lead[]}
       initialTotal={initialLeadsCount}
-    >
-      <LeadsFilters sources={sources} />
-    </LeadsKpisClient>
+      sources={sources}
+    />
   )
 
   return (

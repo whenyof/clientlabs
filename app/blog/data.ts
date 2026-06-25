@@ -9,6 +9,8 @@ export type ArticleMeta = {
   description: string
   tags: string[]
   relatedSlugs: string[]
+  /** Ruta de la miniatura, p.ej. "/blog/verifactu-2026.png" (ponla en public/blog/). Si se omite, se muestra el placeholder. */
+  coverImage?: string
 }
 
 export const ARTICLES: ArticleMeta[] = [

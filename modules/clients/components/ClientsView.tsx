@@ -4,10 +4,10 @@
 import { useState, useCallback, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { ClientsTable } from "@domains/clients/components/ClientsTable"
-import { ClientsFilters } from "./ClientsFilters"
 import { CreateClientButton } from "@/modules/clients/components/CreateClientButton"
 import { ImportClients } from "@/modules/clients/components/ImportClients"
 import { Download, MoreVertical, Mail, Phone, Zap } from "lucide-react"
+import { ListHeader } from "@/components/list/ListHeader"
 
 // ─── Design tokens ─────────────────────────────────────────────────────────
 const C = {
@@ -505,10 +505,10 @@ export function ClientsView({ initialData, currentFilters, serverNow }: ClientsV
         <>
           {/* Table */}
           <Card style={{ marginBottom: 16 }}>
-            <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `1px solid ${C.line2}`, gap: 12, flexWrap: "wrap" }}>
-              <div>
-                <h3 style={{ fontWeight: 600, letterSpacing: "-0.012em", fontSize: 13.5, margin: 0, color: C.ink }}>Mis clientes</h3>
-                <div style={{ fontSize: 11.5, color: C.ink3, fontFamily: "ui-monospace,monospace", marginTop: 2, display: "flex", alignItems: "center", gap: 7 }}>
+            <ListHeader
+              title="Mis clientes"
+              subtitle={
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 7 }}>
                   <span>{total} {total === 1 ? "resultado" : "resultados"}</span>
                   {loading && (
                     <span style={{ display: "inline-flex", alignItems: "center", gap: 5, color: C.accent }}>
@@ -517,29 +517,40 @@ export function ClientsView({ initialData, currentFilters, serverNow }: ClientsV
                     </span>
                   )}
                   <style>{`@keyframes cl-spin{to{transform:rotate(360deg)}}`}</style>
-                </div>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                {[["Sector", "Todos"], ["Owner", "Equipo"], ["Plan", "Cualquiera"], ["Estado", "Activo"]].map(([label, val]) => (
-                  <div key={label} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 10px", border: `1px solid ${C.line}`, borderRadius: 6, background: C.bg, fontSize: 11.5, color: C.ink3, cursor: "pointer" }}>
-                    <span>{label}</span><span style={{ color: C.ink, fontWeight: 550 }}>{val}</span>
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6" /></svg>
-                  </div>
-                ))}
-              </div>
-            </div>
-            {/* Filters */}
-            <div style={{ padding: "12px 18px", borderBottom: `1px solid ${C.line2}`, background: C.bg2 }}>
-              <ClientsFilters
-                currentFilters={currentFilters}
-                searchValue={searchTerm}
-                onSearchChange={setSearchTerm}
-                statusValue={statusFilter}
-                onStatusChange={setStatusFilter}
-                sortValue={`${sortBy}-${sortOrder}`}
-                onSortChange={handleSortChange}
-              />
-            </div>
+                </span>
+              }
+              searchPlaceholder="Buscar clientes…"
+              searchValue={searchTerm}
+              onSearchChange={setSearchTerm}
+              filters={[
+                { label: "Sector", value: "Todos" },
+                { label: "Owner", value: "Equipo" },
+                { label: "Plan", value: "Cualquiera" },
+                {
+                  label: "Estado",
+                  value: statusFilter || "all",
+                  onChange: setStatusFilter,
+                  options: [
+                    { value: "all", label: "Todos" },
+                    { value: "ACTIVE", label: "Activos" },
+                    { value: "INACTIVE", label: "Inactivos" },
+                  ],
+                },
+              ]}
+              sort={{
+                label: "Orden",
+                value: `${sortBy}-${sortOrder}`,
+                onChange: handleSortChange,
+                options: [
+                  { value: "createdAt-desc", label: "Más recientes" },
+                  { value: "createdAt-asc", label: "Más antiguos" },
+                  { value: "totalSpent-desc", label: "Mayor valor" },
+                  { value: "totalSpent-asc", label: "Menor valor" },
+                  { value: "name-asc", label: "Nombre A-Z" },
+                  { value: "name-desc", label: "Nombre Z-A" },
+                ],
+              }}
+            />
             {/* Las filas se conservan mientras carga; se atenúan para indicar la búsqueda. */}
             <div style={{ opacity: loading ? 0.55 : 1, transition: "opacity .15s ease", pointerEvents: loading ? "none" : "auto" }}>
               <ClientsTable clients={clientesProcesados} onClientUpdate={handleClientUpdate} />

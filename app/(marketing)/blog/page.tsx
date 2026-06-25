@@ -45,6 +45,9 @@ export default function BlogPage() {
               style={{ textDecoration: "none", color: "inherit" }}
             >
               <div className="thumb">
+                {featured.coverImage && (
+                  <img src={featured.coverImage} alt={featured.title} loading="lazy" />
+                )}
                 <span className="tag">
                   <span
                     className="post-cat"
@@ -69,7 +72,9 @@ export default function BlogPage() {
           <div className="bgrid">
             {rest.map((a) => (
               <Link key={a.slug} href={`/blog/${a.slug}`} className="bpost reveal">
-                <div className="thumb" />
+                <div className="thumb">
+                  {a.coverImage && <img src={a.coverImage} alt={a.title} loading="lazy" />}
+                </div>
                 <span className="post-cat">{a.category}</span>
                 <h3>{a.title}</h3>
                 <p>{a.description}</p>

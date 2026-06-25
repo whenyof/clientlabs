@@ -3,7 +3,7 @@
 import { useState, useId } from "react"
 import { useRouter } from "next/navigation"
 import {
-  RefreshCw, Plus, MoreVertical, Flame, Download, Link2,
+  RefreshCw, Plus, MoreVertical, Flame, Link2,
 } from "lucide-react"
 import type { Lead } from "@prisma/client"
 import { CreateLeadManualDialog } from "@/modules/leads/components/CreateLeadManualDialog"
@@ -355,19 +355,8 @@ export function LeadsPageView({ totalLeads, kpis, dailyData, initialLeads, initi
       </div>
 
       {/* ── LEADS TABLE ──────────────────────────────── */}
-      <Card>
-        <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `1px solid ${C.line2}`, gap: 12 }}>
-          <div>
-            <h3 style={{ fontWeight: 600, letterSpacing: "-0.012em", fontSize: 13.5, margin: 0, color: C.ink }}>Mis leads</h3>
-            <div style={{ fontSize: 11.5, color: C.ink3, fontFamily: "ui-monospace,monospace", marginTop: 2 }}>{initialTotal} resultados</div>
-          </div>
-          <a href="/api/settings/export/leads" download style={{ fontSize: 12, color: C.ink3, fontWeight: 500, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4, textDecoration: "none" }}>
-            Exportar CSV <Download size={11} />
-          </a>
-        </div>
-        {/* Table content — existing functional component */}
-        <div>{tableNode}</div>
-      </Card>
+      {/* Cabecera unificada (ListHeader) + filtros + tabla viven dentro de tableNode (LeadsKpisClient) */}
+      <Card>{tableNode}</Card>
 
       {/* ── CREATE LEAD DIALOG ─────────────────────────── */}
       <CreateLeadManualDialog

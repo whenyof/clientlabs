@@ -19,6 +19,7 @@ import {
   ClientTasksCard,
   ClientNotFound,
 } from "@/modules/client360/components"
+import { BackToClientsLink } from "./BackToClientsLink"
 
 type Params = Promise<{ clientId: string }>
 
@@ -49,15 +50,7 @@ export default async function Client360Page({ params: paramsPromise }: { params:
 
       {/* ── Back link ──────────────────────────────────────────────────── */}
       <div style={{ marginBottom: 16 }}>
-        <a
-          href="/dashboard/clients"
-          className="ld-back"
-        >
-          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" strokeWidth={2.4} stroke="currentColor" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 18l-6-6 6-6" />
-          </svg>
-          Volver a clientes
-        </a>
+        <BackToClientsLink />
         <style>{`.ld-back{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#737373;font-family:ui-monospace,monospace;padding:4px 8px;margin-left:-8px;border-radius:5px;text-decoration:none;transition:color .12s ease,background .12s ease}.ld-back:hover{color:#0a0a0a;background:#fafafa}`}</style>
       </div>
 

@@ -3,12 +3,13 @@
 import { useState, useId } from "react"
 import { useRouter } from "next/navigation"
 import {
-  Plus, Download, Search, ChevronDown,
+  Plus, Download,
   MoreVertical, ArrowUpRight, ArrowDownRight, Minus,
   List, LayoutGrid,
 } from "lucide-react"
 import { CreateProviderDialog } from "./CreateProviderDialog"
 import { ProvidersKanbanView } from "./ProvidersKanbanView"
+import { ListHeader } from "@/components/list/ListHeader"
 
 // ─── Design tokens ────────────────────────────────────────────────────────
 const C = {
@@ -154,16 +155,6 @@ function CardHead({ title, subtitle, actions }: { title: string; subtitle?: stri
     </div>
   )
 }
-function FilterPill({ label, value }: { label: string; value: string }) {
-  return (
-    <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 10px", border: `1px solid ${C.line}`, borderRadius: 6, background: C.bg, fontSize: 11.5, color: C.ink3, cursor: "pointer", whiteSpace: "nowrap" }}>
-      <span>{label}</span>
-      <span style={{ color: C.ink, fontWeight: 550 }}>{value}</span>
-      <ChevronDown size={10} color={C.ink4} />
-    </div>
-  )
-}
-
 // ─── Recalc KPIs ─────────────────────────────────────────────────────────
 function recalc(list: Provider[]): KPIs {
   const totalMonthlyCost = list.reduce((s, p) => s + (p.monthlyCost || 0), 0)
@@ -367,28 +358,19 @@ export function ProvidersView({ initialProviders, initialKPIs }: { initialProvid
 
           {/* ── DIRECTORY TABLE ─────────────────────────────── */}
           <Card>
-            <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `1px solid ${C.line2}`, gap: 12, flexWrap: "wrap" }}>
-              <div>
-                <h3 style={{ fontWeight: 600, letterSpacing: "-0.012em", fontSize: 13.5, margin: 0, color: C.ink }}>Directorio de proveedores</h3>
-                <div style={{ fontSize: 11.5, color: C.ink3, fontFamily: "ui-monospace,monospace", marginTop: 2 }}>{filtered.length} registros · ordenados por gasto YTD</div>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                {/* Search */}
-                <div style={{ position: "relative" }}>
-                  <Search size={12} style={{ position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)", color: C.ink4 }} />
-                  <input
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                    placeholder="Buscar proveedor…"
-                    style={{ padding: "5px 10px 5px 28px", border: `1px solid ${C.line}`, borderRadius: 6, background: C.bg, fontSize: 12.5, color: C.ink, outline: "none", width: 200 }}
-                  />
-                </div>
-                <FilterPill label="Categoría" value="Todas" />
-                <FilterPill label="País" value="Todos" />
-                <FilterPill label="Estado" value="Activos" />
-                <FilterPill label="Pendiente" value="Cualquiera" />
-              </div>
-            </div>
+            <ListHeader
+              title="Directorio de proveedores"
+              subtitle={`${filtered.length} registros · ordenados por gasto YTD`}
+              searchPlaceholder="Buscar proveedor…"
+              searchValue={search}
+              onSearchChange={setSearch}
+              filters={[
+                { label: "Categoría", value: "Todas" },
+                { label: "País", value: "Todos" },
+                { label: "Estado", value: "Activos" },
+                { label: "Pendiente", value: "Cualquiera" },
+              ]}
+            />
 
             <div style={{ overflowX: "auto" }}>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5, minWidth: 1100 }}>

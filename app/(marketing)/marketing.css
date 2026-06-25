@@ -250,7 +250,8 @@
 .mkt .bpost { border-top: 1px solid var(--line); padding-top: 22px; display: block; transition: transform .18s ease; }
 .mkt .bpost:hover { transform: translateY(-2px); }
 .mkt .bpost:hover h3 { color: var(--teal-ink); }
-.mkt .bpost .thumb { border-radius: 12px; border: 1px solid var(--line); aspect-ratio: 16/10; margin-bottom: 18px; background: repeating-linear-gradient(135deg, var(--bg-soft) 0 12px, #EEF3F1 12px 24px); }
+.mkt .bpost .thumb { border-radius: 12px; border: 1px solid var(--line); aspect-ratio: 16/10; margin-bottom: 18px; background: repeating-linear-gradient(135deg, var(--bg-soft) 0 12px, #EEF3F1 12px 24px); position: relative; overflow: hidden; }
+.mkt .thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 .mkt .bpost h3 { margin-top: 10px; font-size: 19px; line-height: 1.22; letter-spacing: -0.015em; font-weight: 600; transition: color .15s ease; }
 .mkt .bpost p { margin-top: 8px; font-size: 14px; color: var(--ink-2); line-height: 1.55; }
 @media (max-width: 900px) {

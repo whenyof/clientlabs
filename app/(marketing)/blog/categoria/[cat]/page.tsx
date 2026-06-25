@@ -78,7 +78,9 @@ export default async function CategoryPage({ params: paramsPromise }: Props) {
             <div className="bgrid">
               {articles.map((post) => (
                 <Link key={post.slug} href={`/blog/${post.slug}`} className="bpost reveal">
-                  <div className="thumb" />
+                  <div className="thumb">
+                    {post.coverImage && <img src={post.coverImage} alt={post.title} loading="lazy" />}
+                  </div>
                   <span className="post-cat">{post.category}</span>
                   <h3>{post.title}</h3>
                   <p>{post.description}</p>

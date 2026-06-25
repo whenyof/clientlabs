@@ -1,7 +1,7 @@
 "use client"
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { X, Download, ExternalLink, FileText, Image as ImageIcon } from "lucide-react"
+import { Download, ExternalLink, FileText, Image as ImageIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 type FilePreviewModalProps = {
@@ -45,14 +45,6 @@ export function FilePreviewModal({ file, open, onOpenChange }: FilePreviewModalP
                                 <Download className="h-4 w-4 mr-2" />
                                 Descargar
                             </a>
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => onOpenChange(false)}
-                            className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                        >
-                            <X className="h-5 w-5" />
                         </Button>
                     </div>
                 </DialogHeader>

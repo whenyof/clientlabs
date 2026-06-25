@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useCallback } from "react"
-import { Upload, X, Download, FileSpreadsheet, AlertCircle, CheckCircle2 } from "lucide-react"
+import { Upload, X, Download, FileSpreadsheet, AlertCircle, CheckCircle2, ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -283,9 +283,12 @@ export function ProductImportModal({ onClose, onDone }: Props) {
                             className={cn(inputCls, "text-right")} />
                         </td>
                         <td className="px-2 py-1.5">
-                          <select value={r.tipoIva} onChange={(e) => updateRow(r.rowIndex, { tipoIva: Number(e.target.value) })} className={cn(inputCls, "bg-white cursor-pointer")}>
-                            {IVA_OPTIONS.map((v) => <option key={v} value={v}>{v}%</option>)}
-                          </select>
+                          <div className="relative">
+                            <select value={r.tipoIva} onChange={(e) => updateRow(r.rowIndex, { tipoIva: Number(e.target.value) })} className={cn(inputCls, "bg-white cursor-pointer appearance-none pr-8")}>
+                              {IVA_OPTIONS.map((v) => <option key={v} value={v}>{v}%</option>)}
+                            </select>
+                            <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                          </div>
                         </td>
                         <td className="px-2 py-1.5"><input value={r.unidad} onChange={(e) => updateRow(r.rowIndex, { unidad: e.target.value })} className={inputCls} /></td>
                         <td className="px-2 py-1.5">

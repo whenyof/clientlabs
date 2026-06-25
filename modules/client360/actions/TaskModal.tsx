@@ -2,11 +2,10 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { CheckSquare, Loader2, X } from "lucide-react"
+import { CheckSquare, Loader2 } from "lucide-react"
 import {
   Dialog,
   DialogContent,
-  DialogClose,
 } from "@/components/ui/dialog"
 import { createTask } from "@/app/dashboard/tasks/actions"
 
@@ -73,10 +72,6 @@ export function TaskModal({ open, onClose, clientId }: TaskModalProps) {
               <p className="text-[12px] text-[var(--text-secondary)] mt-0.5">Se vinculará a este cliente</p>
             </div>
           </div>
-          <DialogClose className="w-7 h-7 rounded-md flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-colors">
-            <X className="w-4 h-4" />
-            <span className="sr-only">Cerrar</span>
-          </DialogClose>
         </div>
 
         {/* Body */}

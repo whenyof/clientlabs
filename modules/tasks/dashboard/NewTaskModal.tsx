@@ -1,12 +1,12 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef } from "react"
-import { X, Loader2, CheckSquare, ChevronDown, Trash2, RotateCcw, User, Users, Video, ChevronRight } from "lucide-react"
+import { Loader2, CheckSquare, ChevronDown, Trash2, RotateCcw, User, Users, Video, ChevronRight } from "lucide-react"
 import { DatePickerField } from "./DatePickerField"
 import { TimePickerField } from "./TimePickerField"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { Dialog, DialogContent, DialogClose, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import type { TaskPriority, TaskStatus, DashboardTask } from "./types"
 import { PRIORITY_CONFIG } from "./types"
 
@@ -331,9 +331,6 @@ export function NewTaskModal({ open, onClose, onSuccess, defaultPriority = "MEDI
               {editTask ? "Modifica los datos de la tarea" : "Añade una tarea a tu lista"}
             </p>
           </div>
-          <DialogClose style={{ background: "none", border: "1px solid var(--border-subtle)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", width: 30, height: 30, borderRadius: 8, color: "var(--text-secondary)" }}>
-            <X style={{ width: 14, height: 14 }} />
-          </DialogClose>
         </div>
 
         {/* Body */}

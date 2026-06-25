@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { X, Save, Loader2, Eye } from "lucide-react"
+import { X, Save, Loader2, Eye, ChevronDown } from "lucide-react"
 import { toast } from "sonner"
 
 interface NuevaPlantillaModalProps {
@@ -89,15 +89,18 @@ export function NuevaPlantillaModal({ open, onClose, onSaved, initialHtml = "", 
                   <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
                     Categoría
                   </label>
-                  <select
-                    value={category}
-                    onChange={e => setCategory(e.target.value)}
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-[#0F766E] bg-white"
-                  >
-                    {CATEGORIES.map(c => (
-                      <option key={c.value} value={c.value}>{c.label}</option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={category}
+                      onChange={e => setCategory(e.target.value)}
+                      className="w-full px-3 py-2.5 pr-8 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-[#0F766E] bg-white appearance-none"
+                    >
+                      {CATEGORIES.map(c => (
+                        <option key={c.value} value={c.value}>{c.label}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  </div>
                 </div>
                 <div>
                   <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">

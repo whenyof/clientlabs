@@ -110,6 +110,7 @@ export function SaleSidePanel({ sale, open, onClose, onSaleUpdate }: Props) {
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
       <SheetContent
         side="right"
+        showCloseButton={false}
         className="w-full sm:max-w-2xl bg-zinc-950 border-l border-white/10 p-0 flex flex-col focus:outline-none"
       >
         <SheetHeader className="z-10 bg-zinc-950 border-b border-white/10 p-6">

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { toast } from "sonner"
-import { X } from "lucide-react"
+import { X, ChevronDown } from "lucide-react"
 
 const FREQS = [
   { v: "MONTHLY", l: "Mensual" },
@@ -66,9 +66,12 @@ export function ConvertToRecurringModal({ invoiceId, invoiceNumber, onClose, onD
           <div style={{ display: "grid", gridTemplateColumns: frequency === "CUSTOM" ? "1fr 120px" : "1fr", gap: 12 }}>
             <div>
               <label style={labelStyle}>Frecuencia</label>
-              <select style={inputStyle} value={frequency} onChange={(e) => setFrequency(e.target.value)}>
-                {FREQS.map((f) => <option key={f.v} value={f.v}>{f.l}</option>)}
-              </select>
+              <div style={{ position: "relative" }}>
+                <select style={{ ...inputStyle, appearance: "none", WebkitAppearance: "none", MozAppearance: "none", cursor: "pointer", paddingRight: 32 }} value={frequency} onChange={(e) => setFrequency(e.target.value)}>
+                  {FREQS.map((f) => <option key={f.v} value={f.v}>{f.l}</option>)}
+                </select>
+                <ChevronDown size={14} style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", color: "#a3a3a3", pointerEvents: "none" }} />
+              </div>
             </div>
             {frequency === "CUSTOM" && (
               <div>

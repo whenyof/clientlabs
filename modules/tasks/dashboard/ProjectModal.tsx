@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { X, FolderKanban, Loader2 } from "lucide-react"
-import { Dialog, DialogContent, DialogClose, DialogTitle } from "@/components/ui/dialog"
+import { FolderKanban, Loader2, ChevronDown } from "lucide-react"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { toast } from "sonner"
 import { useQueryClient } from "@tanstack/react-query"
 
@@ -110,9 +110,6 @@ export function ProjectModal({ open, onClose, project, onSaved }: ProjectModalPr
               </DialogTitle>
               <p style={{ fontSize: 12, color: "var(--text-secondary)", margin: "2px 0 0" }}>Organiza tus tareas por proyecto</p>
             </div>
-            <DialogClose style={{ background: "none", border: "1px solid var(--border-subtle)", cursor: "pointer", display: "grid", placeItems: "center", width: 30, height: 30, borderRadius: 8, color: "var(--text-secondary)" }}>
-              <X style={{ width: 14, height: 14 }} />
-            </DialogClose>
           </div>
 
           <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 18, maxHeight: "60vh", overflowY: "auto" }}>
@@ -134,17 +131,23 @@ export function ProjectModal({ open, onClose, project, onSaved }: ProjectModalPr
               </div>
               <div>
                 <Label>Estado</Label>
-                <select value={status} onChange={e => setStatus(e.target.value)} style={inputStyle}>
-                  {STATUS_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-                </select>
+                <div style={{ position: "relative" }}>
+                  <select value={status} onChange={e => setStatus(e.target.value)} style={{ ...inputStyle, appearance: "none", WebkitAppearance: "none", MozAppearance: "none", cursor: "pointer", paddingRight: 32 }}>
+                    {STATUS_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                  </select>
+                  <ChevronDown size={14} style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", color: "#a3a3a3", pointerEvents: "none" }} />
+                </div>
               </div>
             </div>
             <div>
               <Label>Cliente (opcional)</Label>
-              <select value={clientId} onChange={e => setClientId(e.target.value)} style={inputStyle}>
-                <option value="">Sin cliente</option>
-                {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
+              <div style={{ position: "relative" }}>
+                <select value={clientId} onChange={e => setClientId(e.target.value)} style={{ ...inputStyle, appearance: "none", WebkitAppearance: "none", MozAppearance: "none", cursor: "pointer", paddingRight: 32 }}>
+                  <option value="">Sin cliente</option>
+                  {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+                <ChevronDown size={14} style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", color: "#a3a3a3", pointerEvents: "none" }} />
+              </div>
             </div>
             <div>
               <Label>Color</Label>

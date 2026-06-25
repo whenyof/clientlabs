@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
+import { ChevronDown } from "lucide-react"
 import { createClientSale, updateClientSale } from "../actions"
 
 type Sale = {
@@ -155,10 +156,11 @@ export function SaleDialog({ clientId, sale, isOpen, onClose, onSuccess }: SaleD
  {/* Status */}
  <div>
  <Label className="text-[var(--text-primary)]">Estado</Label>
+ <div className="relative mt-1">
  <select
  value={status}
  onChange={(e) => setStatus(e.target.value)}
- className="w-full mt-1 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card)] p-2 text-[var(--text-primary)]"
+ className="w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card)] p-2 pr-8 text-[var(--text-primary)] appearance-none"
  >
  {STATUS_OPTIONS.map((opt) => (
  <option key={opt.value} value={opt.value}>
@@ -166,6 +168,8 @@ export function SaleDialog({ clientId, sale, isOpen, onClose, onSuccess }: SaleD
  </option>
  ))}
  </select>
+ <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+ </div>
  </div>
 
  {/* Notes */}

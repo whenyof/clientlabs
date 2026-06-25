@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { X, Plus, Trash2 } from "lucide-react"
+import { X, Plus, Trash2, ChevronDown } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import {
@@ -298,15 +298,18 @@ export function NewDeliveryNoteModal({ open, onClose, onSuccess, defaultClientId
                         onChange={e => updateItem(item._key, { unitPrice: Math.max(0, Number(e.target.value)) })}
                         className="w-full text-[12px] border border-slate-200 rounded-md px-2 py-1.5 text-slate-900 placeholder-slate-300 text-right focus:outline-none focus:ring-1 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
                       />
-                      <select
-                        value={item.taxRate}
-                        onChange={e => updateItem(item._key, { taxRate: Number(e.target.value) })}
-                        className="w-full text-[12px] border border-slate-200 rounded-md px-1.5 py-1.5 text-slate-900 bg-white cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
-                      >
-                        {TAX_RATES.map(r => (
-                          <option key={r} value={r}>{r}%</option>
-                        ))}
-                      </select>
+                      <div className="relative">
+                        <select
+                          value={item.taxRate}
+                          onChange={e => updateItem(item._key, { taxRate: Number(e.target.value) })}
+                          className="w-full text-[12px] border border-slate-200 rounded-md px-1.5 py-1.5 pr-6 text-slate-900 bg-white cursor-pointer appearance-none focus:outline-none focus:ring-1 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
+                        >
+                          {TAX_RATES.map(r => (
+                            <option key={r} value={r}>{r}%</option>
+                          ))}
+                        </select>
+                        <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                      </div>
                       <div className="flex justify-center">
                         <input
                           type="checkbox"

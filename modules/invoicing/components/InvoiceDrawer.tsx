@@ -16,6 +16,7 @@ import {
   DocumentDuplicateIcon,
   EyeIcon,
 } from "@heroicons/react/24/outline"
+import { ChevronDown } from "lucide-react"
 import { formatCurrency, formatDate, formatDateTime } from "@/app/dashboard/finance/lib/formatters"
 import { cn } from "@/lib/utils"
 import type { InvoiceDetail } from "./types"
@@ -666,16 +667,19 @@ export function InvoiceDrawer({
                 onChange={(e) => setPaymentAmount(e.target.value)}
                 className="w-full h-9 rounded-lg border border-slate-200 bg-white px-3 text-[13px] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
               />
-              <select
-                value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-                className="w-full h-9 rounded-lg border border-slate-200 bg-white px-3 text-[13px] text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
-              >
-                <option value="BANK">Transferencia bancaria</option>
-                <option value="CARD">Tarjeta</option>
-                <option value="CASH">Efectivo</option>
-                <option value="OTHER">Otro</option>
-              </select>
+              <div className="relative">
+                <select
+                  value={paymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="w-full h-9 rounded-lg border border-slate-200 bg-white px-3 pr-8 text-[13px] text-slate-700 appearance-none focus:outline-none focus:ring-2 focus:ring-[#0F766E]/30 focus:border-[#0F766E]"
+                >
+                  <option value="BANK">Transferencia bancaria</option>
+                  <option value="CARD">Tarjeta</option>
+                  <option value="CASH">Efectivo</option>
+                  <option value="OTHER">Otro</option>
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              </div>
               <input
                 type="text"
                 placeholder="Notas (opcional)"

@@ -309,6 +309,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate }: Provide
             <Sheet open={open} onOpenChange={onClose}>
                 <SheetContent
                     side="right"
+                    showCloseButton={false}
                     className="w-full sm:max-w-2xl bg-[var(--bg-surface)] border-l border-[var(--border-subtle)] p-0 flex flex-col focus:outline-none"
                 >
                     {/* Header */}

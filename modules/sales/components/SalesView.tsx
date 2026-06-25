@@ -4,7 +4,7 @@ import { getBaseUrl } from "@/lib/api/baseUrl"
 
 import { useState, useCallback, useEffect, useMemo, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { Search, Plus, FileDown } from "lucide-react"
+import { Search, Plus, FileDown, ChevronDown } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useSectorConfig } from "@/hooks/useSectorConfig"
@@ -758,15 +758,18 @@ function CreateTaskFromInsightDialog({
           </div>
           <div>
             <label className="text-xs text-white/60 block mb-1">Duración</label>
-            <select
-              value={durationMinutes}
-              onChange={(e) => setDurationMinutes(Number(e.target.value))}
-              className="w-full rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-sm text-white"
-            >
-              {[15, 30, 45, 60].map((m) => (
-                <option key={m} value={m}>{m} min</option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                value={durationMinutes}
+                onChange={(e) => setDurationMinutes(Number(e.target.value))}
+                className="w-full rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 pr-8 text-sm text-white appearance-none"
+              >
+                {[15, 30, 45, 60].map((m) => (
+                  <option key={m} value={m}>{m} min</option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            </div>
           </div>
         </div>
         <div className="flex gap-2 mt-4">

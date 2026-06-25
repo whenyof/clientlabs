@@ -1276,7 +1276,7 @@ export function ProviderSidePanel({ provider, open, onClose, onUpdate, initialTa
                 </div>
             ) : (
                 <Sheet open={open} onOpenChange={onClose}>
-                    <SheetContent side="right" className="w-full sm:max-w-2xl bg-zinc-950 border-l border-white/10 p-0 flex flex-col focus:outline-none">
+                    <SheetContent side="right" showCloseButton={false} className="w-full sm:max-w-2xl bg-zinc-950 border-l border-white/10 p-0 flex flex-col focus:outline-none">
                         {innerContent}
                     </SheetContent>
                 </Sheet>

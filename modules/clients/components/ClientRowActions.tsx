@@ -21,7 +21,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { MoreVertical, Edit, MessageSquare, Phone, Mail, Users, Star } from "lucide-react"
+import { MoreVertical, Edit, MessageSquare, Phone, Mail, Users, Star, ChevronDown } from "lucide-react"
 import { updateClientInfo, addClientNote, registerClientInteraction } from "../actions"
 import { useSectorConfig } from "@/hooks/useSectorConfig"
 import { toast } from "sonner"
@@ -279,8 +279,9 @@ export function ClientRowActions({ client }: { client: Client }) {
  <div className="space-y-4">
  <div>
  <Label>Tipo</Label>
+ <div className="relative">
  <select
- className="w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card)] p-2 text-[var(--text-primary)]"
+ className="w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card)] p-2 pr-8 text-[var(--text-primary)] appearance-none"
  value={interactionType}
  onChange={(e) => setInteractionType(e.target.value as "CALL" | "MEETING" | "EMAIL")}
  >
@@ -288,6 +289,8 @@ export function ClientRowActions({ client }: { client: Client }) {
  <option value="MEETING">Reunión</option>
  <option value="EMAIL">Email</option>
  </select>
+ <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+ </div>
  </div>
  <div>
  <Label>Notas</Label>

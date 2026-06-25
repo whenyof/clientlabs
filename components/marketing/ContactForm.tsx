@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { ChevronDown } from "lucide-react"
 import { ArrowRight, CircleCheck } from "./icons"
 
 const MOTIVOS = [
@@ -84,11 +85,19 @@ export default function ContactForm() {
       </div>
       <div className="field">
         <label htmlFor="motivo">¿Sobre qué nos escribes?</label>
-        <select id="motivo" name="motivo" defaultValue={MOTIVOS[0]}>
-          {MOTIVOS.map((m) => (
-            <option key={m}>{m}</option>
-          ))}
-        </select>
+        <div style={{ position: "relative" }}>
+          <select
+            id="motivo"
+            name="motivo"
+            defaultValue={MOTIVOS[0]}
+            style={{ appearance: "none", WebkitAppearance: "none", MozAppearance: "none", cursor: "pointer", paddingRight: 32 }}
+          >
+            {MOTIVOS.map((m) => (
+              <option key={m}>{m}</option>
+            ))}
+          </select>
+          <ChevronDown size={14} style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", color: "#a3a3a3", pointerEvents: "none" }} />
+        </div>
       </div>
       <div className="field">
         <label htmlFor="mensaje">Mensaje</label>

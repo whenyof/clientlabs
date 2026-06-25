@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { X, FolderKanban, Loader2 } from "lucide-react"
-import { Dialog, DialogContent, DialogClose, DialogTitle } from "@/components/ui/dialog"
+import { FolderKanban, Loader2 } from "lucide-react"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import {
   Select,
   SelectContent,
@@ -129,9 +129,6 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
                 Organiza tareas y equipo en un proyecto
               </p>
             </div>
-            <DialogClose style={{ background: "none", border: "1px solid var(--border-subtle)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", width: 30, height: 30, borderRadius: 8, color: "var(--text-secondary)" }}>
-              <X style={{ width: 14, height: 14 }} />
-            </DialogClose>
           </div>
 
           {/* Body */}

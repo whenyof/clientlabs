@@ -2,11 +2,10 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { StickyNote, Loader2, X } from "lucide-react"
+import { StickyNote, Loader2 } from "lucide-react"
 import {
   Dialog,
   DialogContent,
-  DialogClose,
 } from "@/components/ui/dialog"
 import { addClientNote } from "@/modules/clients/actions"
 
@@ -57,10 +56,6 @@ export function NoteModal({ open, onClose, clientId }: NoteModalProps) {
               <p className="text-[12px] text-[var(--text-secondary)] mt-0.5">Nota interna visible solo para ti</p>
             </div>
           </div>
-          <DialogClose className="w-7 h-7 rounded-md flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-colors">
-            <X className="w-4 h-4" />
-            <span className="sr-only">Cerrar</span>
-          </DialogClose>
         </div>
 
         {/* Body */}

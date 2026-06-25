@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { X, Search, Star, User, Save, Loader2, Trash2 } from "lucide-react"
+import { X, Search, Star, User, Save, Loader2, Trash2, ChevronDown } from "lucide-react"
 import { toast } from "sonner"
 
 interface Template {
@@ -261,15 +261,18 @@ export function SaveTemplateModal({ open, onClose, subject, htmlContent }: SaveT
           </div>
           <div>
             <label className="text-xs font-medium text-slate-600 block mb-1">Categoría</label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[var(--accent)] bg-white"
-            >
-              {Object.entries(CATEGORY_LABELS).map(([k, v]) => (
-                <option key={k} value={k}>{v}</option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full px-3 py-2 pr-8 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[var(--accent)] bg-white appearance-none"
+              >
+                {Object.entries(CATEGORY_LABELS).map(([k, v]) => (
+                  <option key={k} value={k}>{v}</option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            </div>
           </div>
         </div>
 

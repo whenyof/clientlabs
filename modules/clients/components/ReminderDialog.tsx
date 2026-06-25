@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
+import { ChevronDown } from "lucide-react"
 import { createClientReminder } from "../actions"
 
 type ReminderDialogProps = {
@@ -104,10 +105,11 @@ export function ReminderDialog({ clientId, isOpen, onClose, onSuccess }: Reminde
  {/* Type Selector */}
  <div>
  <Label className="text-[var(--text-primary)]">Tipo</Label>
+ <div className="relative mt-1">
  <select
  value={type}
  onChange={(e) => setType(e.target.value)}
- className="w-full mt-1 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card)] p-2 text-[var(--text-primary)]"
+ className="w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card)] p-2 pr-8 text-[var(--text-primary)] appearance-none"
  >
  {REMINDER_TYPES.map((t) => (
  <option key={t.value} value={t.value}>
@@ -115,6 +117,8 @@ export function ReminderDialog({ clientId, isOpen, onClose, onSuccess }: Reminde
  </option>
  ))}
  </select>
+ <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+ </div>
  </div>
 
  {/* Date Picker - Native Input */}

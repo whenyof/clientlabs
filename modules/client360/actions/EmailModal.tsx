@@ -2,11 +2,10 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Mail, Loader2, X } from "lucide-react"
+import { Mail, Loader2 } from "lucide-react"
 import {
   Dialog,
   DialogContent,
-  DialogClose,
 } from "@/components/ui/dialog"
 import { logClientEmailSent } from "@/modules/clients/actions"
 
@@ -64,10 +63,6 @@ export function EmailModal({ open, onClose, clientId, defaultTo }: EmailModalPro
               <p className="text-[12px] text-[var(--text-secondary)] mt-0.5">Se guarda en el historial — no se envía</p>
             </div>
           </div>
-          <DialogClose className="w-7 h-7 rounded-md flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-colors">
-            <X className="w-4 h-4" />
-            <span className="sr-only">Cerrar</span>
-          </DialogClose>
         </div>
 
         {/* Body */}

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { Settings, Plus, Sliders, X, Check } from "lucide-react"
+import { Settings, Plus, Sliders, X, Check, ChevronDown } from "lucide-react"
 import { toast } from "sonner"
 
 interface CustomField {
@@ -152,16 +152,19 @@ export function LeadCustomFieldsCard({ leadId }: Props) {
                   {isEditing ? (
                     <>
                       {field.type === "select" ? (
-                        <select
-                          autoFocus
-                          value={editValue}
-                          onChange={(e) => setEditValue(e.target.value)}
-                          onBlur={() => commitEdit(field.id)}
-                          className={inputCls}
-                        >
-                          <option value="">Seleccionar...</option>
-                          {(field.options ?? []).map((opt) => <option key={opt} value={opt}>{opt}</option>)}
-                        </select>
+                        <div className="relative flex-1">
+                          <select
+                            autoFocus
+                            value={editValue}
+                            onChange={(e) => setEditValue(e.target.value)}
+                            onBlur={() => commitEdit(field.id)}
+                            className={`${inputCls} appearance-none pr-8`}
+                          >
+                            <option value="">Seleccionar...</option>
+                            {(field.options ?? []).map((opt) => <option key={opt} value={opt}>{opt}</option>)}
+                          </select>
+                          <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                        </div>
                       ) : (
                         <input
                           autoFocus
@@ -203,12 +206,15 @@ export function LeadCustomFieldsCard({ leadId }: Props) {
             onChange={(e) => setNewName(e.target.value)}
             className={inputCls}
           />
-          <select value={newType} onChange={(e) => setNewType(e.target.value as CustomField["type"])} className={inputCls}>
-            <option value="text">Texto</option>
-            <option value="number">Número</option>
-            <option value="date">Fecha</option>
-            <option value="select">Selección</option>
-          </select>
+          <div className="relative">
+            <select value={newType} onChange={(e) => setNewType(e.target.value as CustomField["type"])} className={`${inputCls} appearance-none pr-8`}>
+              <option value="text">Texto</option>
+              <option value="number">Número</option>
+              <option value="date">Fecha</option>
+              <option value="select">Selección</option>
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          </div>
           {newType === "select" && (
             <input
               type="text"

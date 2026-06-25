@@ -177,6 +177,7 @@ export function ProvidersView({ initialProviders, initialKPIs }: { initialProvid
   const [filterType] = useState("all")
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [viewMode, setViewMode] = useState<"list" | "kanban">("list")
+  const [showAllCats, setShowAllCats] = useState(false)
 
   const handleUpdate = (id: string, data: Partial<Provider>) => {
     const next = providers.map(p => p.id === id ? { ...p, ...data } : p)
@@ -203,6 +204,12 @@ export function ProvidersView({ initialProviders, initialKPIs }: { initialProvid
     .sort((a, b) => b.value - a.value)
   const maxCat = Math.max(...cats.map(c => c.value), 1)
   const totalCat = cats.reduce((s, c) => s + c.value, 0)
+  // Vista plegada: solo categorías con gasto > 0, tope de 5 (mayor gasto primero,
+  // ya ordenadas). El botón "Ver todas" despliega las 16 (incluidas las de 0€).
+  // Mostrar/ocultar en cliente — los datos ya están cargados, sin llamadas al server.
+  const COLLAPSED_CATS = 5
+  const collapsedCats = cats.filter(c => c.value > 0).slice(0, COLLAPSED_CATS)
+  const visibleCats = showAllCats ? cats : collapsedCats
 
   // Derived: top providers by monthly cost
   const topProviders = [...providers].sort((a, b) => (b.monthlyCost || 0) - (a.monthlyCost || 0)).slice(0, 8)
@@ -274,7 +281,7 @@ export function ProvidersView({ initialProviders, initialKPIs }: { initialProvid
               <div style={{ padding: "14px 0" }}>
                 {cats.length === 0 ? (
                   <div style={{ padding: "32px 18px", textAlign: "center", color: C.ink3, fontSize: 12.5 }}>Sin datos de coste</div>
-                ) : cats.map((cat) => (
+                ) : visibleCats.map((cat) => (
                   <div key={cat.label} style={{ display: "grid", gridTemplateColumns: "130px 1fr 90px 60px", gap: 14, alignItems: "center", padding: "4px 18px" }}>
                     <span style={{ fontSize: 12.5, fontWeight: 500, color: C.ink2, display: "flex", alignItems: "center", gap: 8 }}>
                       <span style={{ width: 8, height: 8, borderRadius: 2, background: cat.color, display: "inline-block", flexShrink: 0 }} />
@@ -288,6 +295,17 @@ export function ProvidersView({ initialProviders, initialKPIs }: { initialProvid
                   </div>
                 ))}
               </div>
+              {cats.length > collapsedCats.length && (
+                <div style={{ padding: "10px 18px", borderTop: `1px solid ${C.line2}` }}>
+                  <button
+                    type="button"
+                    onClick={() => setShowAllCats(v => !v)}
+                    style={{ background: "none", border: "none", cursor: "pointer", color: C.ink2, fontSize: 12, fontWeight: 550, fontFamily: "ui-monospace,monospace", padding: 0 }}
+                  >
+                    {showAllCats ? "Ver menos" : `Ver todas (${cats.length})`}
+                  </button>
+                </div>
+              )}
             </Card>
 
           </div>

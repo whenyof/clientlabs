@@ -264,8 +264,10 @@ export function ProvidersView({ initialProviders, initialKPIs }: { initialProvid
         <ProvidersKanbanView providers={providers} onProviderUpdate={handleUpdate} />
       ) : (
         <>
-          {/* ── ROW 1: CATEGORIES + AGING ─────────────────── */}
-          <div className="grid gap-4 mb-4" style={{ gridTemplateColumns: "7fr 5fr" }}>
+          {/* ── ROW 1: GASTO POR CATEGORÍA (ancho completo) ── */}
+          {/* El panel "Vencimiento de pagos" se retiró (datos simulados). Follow-up
+              post-launch: reconstruirlo con payments[] reales. */}
+          <div className="mb-4">
             {/* Category breakdown */}
             <Card>
               <CardHead title={`Gasto por categoría · ${monthCap}`} subtitle={`Total ${fmtEur(Math.round(totalCat))} · ${cats.length} categorías`} />

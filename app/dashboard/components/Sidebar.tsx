@@ -545,8 +545,9 @@ export default function Sidebar({
       lineHeight: 1.5,
     }}>
       {/* ── Brand header ────────────────────────────────── */}
+      {/* height 52 = misma altura que DashboardHeader → la línea inferior queda continua con la del navbar */}
       <div style={{
-        height: 60,
+        height: 52,
         display: "flex",
         alignItems: "center",
         gap: 10,

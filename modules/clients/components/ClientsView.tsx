@@ -523,9 +523,6 @@ export function ClientsView({ initialData, currentFilters, serverNow }: ClientsV
               searchValue={searchTerm}
               onSearchChange={setSearchTerm}
               filters={[
-                { label: "Sector", value: "Todos" },
-                { label: "Owner", value: "Equipo" },
-                { label: "Plan", value: "Cualquiera" },
                 {
                   label: "Estado",
                   value: statusFilter || "all",

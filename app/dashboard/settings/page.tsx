@@ -1,6 +1,6 @@
 "use client"
 
-import { useSearchParams, useRouter } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import { Suspense } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ProfileForm } from "./components/ProfileForm"
@@ -56,71 +56,10 @@ const sections: Record<string, React.ComponentType> = {
   usage:            UsageLimits,
 }
 
-// ─── Left nav structure ─────────────────────────────────────────────────────
-const NAV_GROUPS = [
-  {
-    title: "Workspace",
-    items: [
-      { id: "company",      label: "General" },
-      { id: "team",         label: "Equipo y permisos" },
-      { id: "subscription", label: "Plan y facturación" },
-    ],
-  },
-  {
-    title: "Facturación",
-    items: [
-      { id: "invoicing",  label: "Configuración de facturación" },
-      { id: "templates",  label: "Plantillas de factura" },
-      { id: "verifactu",  label: "Verifactu" },
-    ],
-  },
-  {
-    title: "Apariencia",
-    items: [
-      { id: "appearance", label: "Marca y apariencia" },
-    ],
-  },
-  {
-    title: "Productos y datos",
-    items: [
-      { id: "catalog",        label: "Mis productos y servicios" },
-      { id: "import-export",  label: "Importar / Exportar" },
-      { id: "limits",         label: "Backups" },
-    ],
-  },
-  {
-    title: "Notificaciones",
-    items: [
-      { id: "notifications", label: "Avisos del producto" },
-    ],
-  },
-  {
-    title: "Seguridad",
-    items: [
-      { id: "security",    label: "Doble factor (2FA)", warn: true },
-      { id: "activity",    label: "Auditoría · registro" },
-    ],
-  },
-  {
-    title: "Cuenta",
-    items: [
-      { id: "account", label: "Mi perfil" },
-      { id: "danger",  label: "Zona de peligro", danger: true },
-    ],
-  },
-]
-
 function SettingsContent() {
   const searchParams = useSearchParams()
-  const router = useRouter()
   const activeSection = searchParams.get("section") || "account"
   const ActiveComponent = sections[activeSection] ?? ProfileForm
-
-  const setSection = (id: string) => {
-    const params = new URLSearchParams(searchParams.toString())
-    params.set("section", id)
-    router.push(`/dashboard/settings?${params.toString()}`)
-  }
 
   return (
     <div style={{ fontFamily: "var(--font-geist-sans, ui-sans-serif, system-ui, sans-serif)" }}>
@@ -139,62 +78,19 @@ function SettingsContent() {
         <span style={{ fontSize: 12, color: C.ink3 }}>Los cambios se guardan automáticamente</span>
       </div>
 
-      {/* ── LAYOUT: LEFT NAV + CONTENT ────────────────────────── */}
-      <div style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: 24, alignItems: "start" }}>
-        {/* Left nav */}
-        <nav style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 10, overflow: "hidden", position: "sticky", top: 16 }}>
-          {NAV_GROUPS.map((group, gi) => (
-            <div key={group.title} style={{ borderBottom: gi < NAV_GROUPS.length - 1 ? `1px solid ${C.line2}` : "none" }}>
-              <div style={{ padding: "10px 14px 6px", fontFamily: "ui-monospace,monospace", fontSize: 9.5, fontWeight: 500, color: C.ink4, letterSpacing: "0.12em", textTransform: "uppercase" }}>
-                {group.title}
-              </div>
-              {group.items.map(item => {
-                const isActive = activeSection === item.id
-                const itemColor = (item as { danger?: boolean }).danger ? C.red : (item as { warn?: boolean }).warn ? C.warn : C.ink2
-                return (
-                  <button
-                    key={`${group.title}-${item.id}`}
-                    onClick={() => setSection(item.id)}
-                    style={{
-                      width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
-                      padding: "7px 14px",
-                      fontSize: 13, fontWeight: isActive ? 550 : 450,
-                      color: isActive ? C.ink : itemColor,
-                      background: isActive ? C.bg3 : "transparent",
-                      border: "none", cursor: "pointer", textAlign: "left",
-                      transition: "background .1s ease, color .1s ease",
-                    }}
-                    onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.background = C.bg2 }}
-                    onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.background = "transparent" }}
-                  >
-                    <span>{item.label}</span>
-                    {(item as { warn?: boolean }).warn && (
-                      <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 9, padding: "1px 5px", borderRadius: 99, background: C.warnSoft, color: C.warn, fontWeight: 600, letterSpacing: "0.04em" }}>PDTE.</span>
-                    )}
-                    {(item as { soon?: boolean }).soon && (
-                      <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 9, padding: "1px 5px", borderRadius: 99, background: C.bg3, color: C.ink4, fontWeight: 600, letterSpacing: "0.04em" }}>PRONTO</span>
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-          ))}
-        </nav>
-
-        {/* Section content */}
-        <div style={{ minWidth: 0 }}>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeSection}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-            >
-              <ActiveComponent />
-            </motion.div>
-          </AnimatePresence>
-        </div>
+      {/* ── CONTENT (la navegación de ajustes vive ahora en el sidebar) ──── */}
+      <div style={{ minWidth: 0 }}>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeSection}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <ActiveComponent />
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   )

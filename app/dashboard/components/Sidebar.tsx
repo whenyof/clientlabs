@@ -1,9 +1,10 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useSearchParams } from "next/navigation"
 import { useSession, signOut } from "next-auth/react"
-import { useState } from "react"
+import { Suspense, useState } from "react"
+import { SETTINGS_NAV_GROUPS } from "@/app/dashboard/settings/nav"
 import {
   LayoutDashboard,
   Target,
@@ -19,6 +20,7 @@ import {
   Settings,
   ChevronRight,
   ChevronLeft,
+  ArrowLeft,
   LogOut,
   ChevronsUpDown,
   Check,
@@ -374,6 +376,114 @@ function NavItemRow({
   )
 }
 
+// ─── Settings nav (reemplaza la nav principal dentro de /dashboard/settings) ──
+
+const SETTINGS_C = {
+  warn: "#c2410c",
+  warnSoft: "#fef3eb",
+  red: "#b91c1c",
+}
+
+function SettingsNavList({
+  onNavItemClick,
+}: {
+  onNavItemClick?: () => void
+}) {
+  const searchParams = useSearchParams()
+  const activeSection = searchParams.get("section") || "account"
+  return (
+    <>
+      {/* ← Volver al dashboard */}
+      <Link
+        href="/dashboard"
+        onClick={onNavItemClick}
+        style={{
+          display: "flex", alignItems: "center", gap: 8,
+          padding: "6px 10px", marginBottom: 6,
+          borderRadius: 6, fontSize: 12.5, fontWeight: 500,
+          color: C.ink3, textDecoration: "none",
+          transition: "background .1s ease, color .1s ease",
+        }}
+        onMouseEnter={(e) => {
+          const el = e.currentTarget as HTMLElement
+          el.style.background = C.bg3
+          el.style.color = C.ink
+        }}
+        onMouseLeave={(e) => {
+          const el = e.currentTarget as HTMLElement
+          el.style.background = "transparent"
+          el.style.color = C.ink3
+        }}
+      >
+        <ArrowLeft size={14} strokeWidth={2} />
+        <span>Volver</span>
+      </Link>
+
+      {/* Título de sección */}
+      <div style={{
+        fontWeight: 600, fontSize: 14, letterSpacing: "-0.01em",
+        color: C.ink, padding: "2px 10px 4px",
+      }}>
+        Ajustes
+      </div>
+
+      {SETTINGS_NAV_GROUPS.map((group) => (
+        <div key={group.title} style={{ marginTop: 12 }}>
+          <div style={{
+            fontFamily: "ui-monospace, monospace",
+            fontSize: 9.5, letterSpacing: "0.12em",
+            textTransform: "uppercase", color: C.ink4,
+            padding: "0 10px 6px", fontWeight: 500,
+          }}>
+            {group.title}
+          </div>
+          {group.items.map((item) => {
+            const isActive = activeSection === item.id
+            const itemColor = item.danger ? SETTINGS_C.red : item.warn ? SETTINGS_C.warn : C.ink2
+            return (
+              <Link
+                key={`${group.title}-${item.id}`}
+                href={`/dashboard/settings?section=${item.id}`}
+                onClick={onNavItemClick}
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  padding: "6px 10px", borderRadius: 6,
+                  fontSize: 13, fontWeight: isActive ? 550 : 450,
+                  color: isActive ? C.ink : itemColor,
+                  background: isActive ? C.bg : "transparent",
+                  boxShadow: isActive ? `0 0 0 1px ${C.line} inset, 0 1px 2px rgba(0,0,0,0.02)` : "none",
+                  textDecoration: "none",
+                  transition: "background .1s ease, color .1s ease",
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) {
+                    const el = e.currentTarget as HTMLElement
+                    el.style.background = C.bg3
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) {
+                    const el = e.currentTarget as HTMLElement
+                    el.style.background = "transparent"
+                  }
+                }}
+              >
+                <span>{item.label}</span>
+                {item.warn && (
+                  <span style={{ fontFamily: "ui-monospace, monospace", fontSize: 9, padding: "1px 5px", borderRadius: 99, background: SETTINGS_C.warnSoft, color: SETTINGS_C.warn, fontWeight: 600, letterSpacing: "0.04em" }}>PDTE.</span>
+                )}
+                {item.soon && (
+                  <span style={{ fontFamily: "ui-monospace, monospace", fontSize: 9, padding: "1px 5px", borderRadius: 99, background: C.bg3, color: C.ink4, fontWeight: 600, letterSpacing: "0.04em" }}>PRONTO</span>
+                )}
+              </Link>
+            )
+          })}
+        </div>
+      ))}
+    </>
+  )
+}
+
 // ─── Main Sidebar component ──────────────────────────────────────────────────
 
 export default function Sidebar({
@@ -382,6 +492,7 @@ export default function Sidebar({
   onNavItemClick,
 }: SidebarProps) {
   const pathname = usePathname()
+  const isSettings = pathname.startsWith("/dashboard/settings")
   const { data: session, status } = useSession()
   const [wsOpen, setWsOpen] = useState(false)
 
@@ -619,34 +730,40 @@ export default function Sidebar({
           scrollbarColor: `${C.line} transparent`,
         }}
       >
-        {NAV.map((group) => (
-          <div key={group.title} style={{ marginTop: 14 }}>
-            {/* Group title */}
-            {isCollapsed ? (
-              <div style={{ height: 8, position: "relative", marginBottom: 2 }}>
-                <div style={{ position: "absolute", left: 4, right: 4, top: 4, height: 1, background: C.line2 }} />
-              </div>
-            ) : (
-              <div style={{
-                fontFamily: "ui-monospace, monospace",
-                fontSize: 9.5, letterSpacing: "0.12em",
-                textTransform: "uppercase", color: C.ink4,
-                padding: "0 10px 6px", fontWeight: 500,
-              }}>
-                {group.title}
-              </div>
-            )}
-            {group.items.map((item) => (
-              <NavItemRow
-                key={item.id}
-                item={item}
-                pathname={pathname}
-                isCollapsed={isCollapsed}
-                onNavItemClick={onNavItemClick}
-              />
-            ))}
-          </div>
-        ))}
+        {isSettings ? (
+          <Suspense fallback={null}>
+            <SettingsNavList onNavItemClick={onNavItemClick} />
+          </Suspense>
+        ) : (
+          NAV.map((group) => (
+            <div key={group.title} style={{ marginTop: 14 }}>
+              {/* Group title */}
+              {isCollapsed ? (
+                <div style={{ height: 8, position: "relative", marginBottom: 2 }}>
+                  <div style={{ position: "absolute", left: 4, right: 4, top: 4, height: 1, background: C.line2 }} />
+                </div>
+              ) : (
+                <div style={{
+                  fontFamily: "ui-monospace, monospace",
+                  fontSize: 9.5, letterSpacing: "0.12em",
+                  textTransform: "uppercase", color: C.ink4,
+                  padding: "0 10px 6px", fontWeight: 500,
+                }}>
+                  {group.title}
+                </div>
+              )}
+              {group.items.map((item) => (
+                <NavItemRow
+                  key={item.id}
+                  item={item}
+                  pathname={pathname}
+                  isCollapsed={isCollapsed}
+                  onNavItemClick={onNavItemClick}
+                />
+              ))}
+            </div>
+          ))
+        )}
       </nav>
 
       {/* ── User footer ─────────────────────────────────── */}

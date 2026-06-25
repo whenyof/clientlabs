@@ -5,9 +5,11 @@ import { useLeads } from "@/hooks/useLeads"
 import { LeadsTable } from "@domains/leads/components/LeadsTable"
 import { LeadsSearchProvider, useLeadsSearch } from "./LeadsSearchContext"
 import type { Lead } from "@prisma/client"
-import { X, List, LayoutGrid } from "lucide-react"
+import { List, LayoutGrid, Download } from "lucide-react"
 import { LeadsKanbanView } from "@/modules/leads/components/LeadsKanbanView"
 import type { KpisData } from "@domains/leads/components/LeadsKPIs"
+import { ListHeader } from "@/components/list/ListHeader"
+import { useSectorConfig } from "@shared/hooks/useSectorConfig"
 
 const TEMP_ORDER: Record<string, number> = { HOT: 2, WARM: 1, COLD: 0 }
 
@@ -15,7 +17,7 @@ interface LeadsKpisClientProps {
   initial?: KpisData
   initialLeads: Lead[]
   initialTotal: number
-  children?: React.ReactNode
+  sources: string[]
 }
 
 export function LeadsKpisClient(props: LeadsKpisClientProps) {
@@ -37,11 +39,17 @@ const viewBtnStyle = (active: boolean): React.CSSProperties => ({
   transition: "all 150ms",
 })
 
-function LeadsKpisClientInner({ initialLeads, initialTotal, children }: LeadsKpisClientProps) {
+function LeadsKpisClientInner({ initialLeads, initialTotal, sources }: LeadsKpisClientProps) {
+  const { labels } = useSectorConfig()
+  const ui = labels.leads.ui
+
   const {
-    searchTerm,
-    sortBy, sortOrder,
-    filterStatus, filterSource, filterTemperature,
+    searchTerm, setSearchTerm,
+    sortBy, setSortBy,
+    sortOrder, setSortOrder,
+    filterStatus, setFilterStatus,
+    filterSource, setFilterSource,
+    filterTemperature, setFilterTemperature,
   } = useLeadsSearch()
 
   const [viewMode, setViewMode] = useState<"list" | "kanban">("list")
@@ -130,24 +138,95 @@ function LeadsKpisClientInner({ initialLeads, initialTotal, children }: LeadsKpi
     searchTerm.trim()
   )
 
+  // ── Filtros funcionales para ListHeader (etiqueta delante) ──
+  const filters = [
+    {
+      label: "Estado",
+      value: filterStatus,
+      onChange: setFilterStatus,
+      options: [
+        { value: "all", label: ui.filterAll },
+        { value: "NEW", label: labels.leads.status.NEW },
+        { value: "CONTACTED", label: labels.leads.status.CONTACTED },
+        { value: "INTERESTED", label: labels.leads.status.INTERESTED },
+        { value: "QUALIFIED", label: labels.leads.status.QUALIFIED },
+        { value: "STALLED", label: "Estancado" },
+        { value: "LOST", label: "Perdido" },
+      ],
+    },
+    {
+      label: "Fuente",
+      value: filterSource,
+      onChange: setFilterSource,
+      options: [
+        { value: "all", label: ui.filterSourceAll ?? "Todas" },
+        ...sources.map((s) => ({ value: s, label: s })),
+      ],
+    },
+    {
+      label: "Temperatura",
+      value: filterTemperature,
+      onChange: setFilterTemperature,
+      options: [
+        { value: "all", label: ui.filterAllTemps },
+        { value: "HOT", label: labels.leads.temperatures.HOT },
+        { value: "WARM", label: labels.leads.temperatures.WARM },
+        { value: "COLD", label: labels.leads.temperatures.COLD },
+      ],
+    },
+  ]
+
+  const sortControl = {
+    label: "Orden",
+    value: `${sortBy}-${sortOrder}`,
+    onChange: (v: string) => {
+      const lastDash = v.lastIndexOf("-")
+      setSortBy(v.substring(0, lastDash))
+      setSortOrder(v.substring(lastDash + 1) as "asc" | "desc")
+    },
+    options: [
+      { value: "score-desc", label: ui.sortScoreDesc },
+      { value: "score-asc", label: ui.sortScoreAsc },
+      { value: "lastActionAt-desc", label: ui.sortLastActionDesc },
+      { value: "lastActionAt-asc", label: ui.sortLastActionAsc },
+      { value: "createdAt-desc", label: ui.sortCreatedDesc },
+      { value: "createdAt-asc", label: ui.sortCreatedAsc },
+      { value: "temperature-asc", label: ui.sortTempHotFirst },
+    ],
+  }
+
   return (
     <>
-      {/* Unified toolbar: filters + view toggle */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 18px", borderBottom: "1px solid #eeeeee" }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          {children}
-        </div>
-        <div style={{ display: "flex", background: "#f5f5f5", border: "0.5px solid #e8e8e8", borderRadius: 8, padding: 3, gap: 2, flexShrink: 0 }}>
-          <button type="button" onClick={() => setViewMode("list")} style={viewBtnStyle(viewMode === "list")}>
-            <List size={13} />
-            Lista
-          </button>
-          <button type="button" onClick={() => setViewMode("kanban")} style={viewBtnStyle(viewMode === "kanban")}>
-            <LayoutGrid size={13} />
-            Pipeline
-          </button>
-        </div>
-      </div>
+      <ListHeader
+        title="Mis leads"
+        subtitle={`${initialTotal} resultados`}
+        searchPlaceholder="Buscar por nombre, email o teléfono…"
+        searchValue={searchTerm}
+        onSearchChange={setSearchTerm}
+        filters={filters}
+        sort={sortControl}
+        actions={
+          <>
+            <a
+              href="/api/settings/export/leads"
+              download
+              style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 10px", borderRadius: 6, border: "0.5px solid #e8e8e8", background: "#ffffff", color: "#404040", fontSize: 12, fontWeight: 500, textDecoration: "none", whiteSpace: "nowrap", cursor: "pointer" }}
+            >
+              <Download size={11} />Exportar CSV
+            </a>
+            <div style={{ display: "flex", background: "#f5f5f5", border: "0.5px solid #e8e8e8", borderRadius: 8, padding: 3, gap: 2, flexShrink: 0 }}>
+              <button type="button" onClick={() => setViewMode("list")} style={viewBtnStyle(viewMode === "list")}>
+                <List size={13} />
+                Lista
+              </button>
+              <button type="button" onClick={() => setViewMode("kanban")} style={viewBtnStyle(viewMode === "kanban")}>
+                <LayoutGrid size={13} />
+                Pipeline
+              </button>
+            </div>
+          </>
+        }
+      />
 
       {viewMode === "kanban" ? (
         <LeadsKanbanView />

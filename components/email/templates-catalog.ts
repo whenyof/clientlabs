@@ -193,7 +193,7 @@ const onboarding8 = shell(
 </tr>
 ${[["5 facturas/mes","Facturas ilimitadas"],["1 usuario","Hasta 5 usuarios"],["Sin tracking","Tracking completo"],["Sin email marketing","Email marketing incluido"]].map(([f, p]) => `<tr><td style="padding:10px 16px;font-size:14px;color:#64748b;border-top:1px solid #e2e8f0;font-family:system-ui,sans-serif;">${f}</td><td style="padding:10px 16px;font-size:14px;color:#0f766e;font-weight:600;border-top:1px solid #e2e8f0;font-family:system-ui,sans-serif;">✓ ${p}</td></tr>`).join("")}
 </table>
-${cta("Actualizar a Pro — 29,99€/mes", TEAL)}
+${cta("Actualizar a Pro — 44,99€/mes", TEAL)}
 <p style="font-size:13px;color:#64748b;text-align:center;">30 días de garantía de devolución. Sin permanencia.</p>`
 )
 

@@ -192,7 +192,7 @@ export async function POST(request: NextRequest) {
   }
   const b = body as Record<string, unknown>
   const clientId = typeof b.clientId === "string" ? b.clientId : undefined
-  const saleId = typeof b.saleId === "string" && b.saleId.length > 0 ? b.saleId : null
+  let saleId = typeof b.saleId === "string" && b.saleId.length > 0 ? b.saleId : null
   const series = (typeof b.series === "string" ? b.series : "INV") || "INV"
   const issueDate = b.issueDate ? new Date(b.issueDate as string) : new Date()
   const dueDate = b.dueDate ? new Date(b.dueDate as string) : (() => { const d = new Date(); d.setDate(d.getDate() + 30); return d })()
@@ -227,6 +227,21 @@ export async function POST(request: NextRequest) {
       { error: `Tipo de IVA no válido: ${invalidVat.taxPercent}%. Valores permitidos: ${ALLOWED_VAT_RATES.join(", ")}` },
       { status: 400 }
     )
+  }
+  // Salvaguarda tolerante: el saleId debe referenciar un Sale real del usuario
+  // (la FK Invoice_saleId_fkey apunta a Sale). El modal "crear nuevo pedido" puede
+  // mandar un id que no es de Sale (p. ej. de PurchaseOrder) o el literal "new";
+  // en ese caso lo anulamos para crear la factura SIN vincular en vez de reventar
+  // con un P2003 críptico. El vínculo venta↔factura se rehará bien post-launch.
+  if (saleId) {
+    const saleExists = await prisma.sale.findFirst({
+      where: { id: saleId, userId: session.user.id },
+      select: { id: true },
+    })
+    if (!saleExists) {
+      console.error("Invoicing: saleId inválido o ajeno, se crea sin vincular:", saleId)
+      saleId = null
+    }
   }
   const rawSnapshot = b.clientSnapshot
   const clientSnapshot: CreateInvoiceInput["clientSnapshot"] =

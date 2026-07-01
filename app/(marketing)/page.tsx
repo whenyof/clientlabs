@@ -58,7 +58,7 @@ const faqSchema = {
       name: "¿Cuánto cuesta ClientLabs?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: `ClientLabs tiene dos planes con IVA incluido: ${plansSummary()}. Con facturación anual te llevas 2 meses gratis. Puedes probarlo 14 días y cancelar cuando quieras.`,
+        text: `ClientLabs tiene dos planes (precios sin IVA): ${plansSummary()}. Con facturación anual te llevas 2 meses gratis. Puedes probarlo 14 días y cancelar cuando quieras.`,
       },
     },
     {

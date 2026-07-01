@@ -10,6 +10,7 @@ import {
   annualEUR,
   effectiveMonthlyEUR,
   formatEUR,
+  withIVA,
 } from "@/lib/pricing"
 import { Check } from "./icons"
 
@@ -54,13 +55,18 @@ export default function PlanCards() {
             <div className="plan-price">
               {cycle === "monthly" ? (
                 <>
-                  <b>{formatEUR(plan.monthlyEUR)}</b> <span className="per">/mes · IVA incl.</span>
+                  <b>{formatEUR(plan.monthlyEUR)}</b> <span className="per">/mes</span>
                 </>
               ) : (
                 <>
-                  <b>{formatEUR(annualEUR(plan))}</b> <span className="per">/año · IVA incl.</span>
+                  <b>{formatEUR(annualEUR(plan))}</b> <span className="per">/año</span>
                 </>
               )}
+            </div>
+            <div className="plan-iva">
+              {cycle === "monthly"
+                ? `${formatEUR(withIVA(plan.monthlyEUR))} con IVA incluido`
+                : `${formatEUR(withIVA(annualEUR(plan)))} con IVA incluido`}
             </div>
             {cycle === "annual" && (
               <div className="plan-sub">

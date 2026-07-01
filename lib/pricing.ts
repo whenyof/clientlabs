@@ -2,7 +2,8 @@
  * SINGLE SOURCE OF TRUTH for the prices + plan feature lists SHOWN on the public
  * marketing site (pricing page, landing teaser, comparison table, JSON-LD, FAQ).
  *
- * Two plans. All amounts are €/month, IVA included. Annual billing applies a
+ * Two plans. `monthlyEUR` is the BASE price (€/month, sin IVA); the IVA-included
+ * amount is derived on demand with `withIVA()`. Annual billing applies a
  * "2 months free" discount → annual = monthly × 10 (effective monthly = annual / 12).
  *
  * DISPLAY ONLY. This is not wired to billing/Stripe or the dashboard, and it is
@@ -16,7 +17,7 @@ export interface MarketingPlan {
   key: "autonomo" | "pro"
   name: string
   tagline: string
-  /** €/month, IVA included */
+  /** €/month, BASE price (sin IVA). Use withIVA() for the IVA-included amount. */
   monthlyEUR: number
   /** Stripe/gating plan id this maps to (Autónomo→STARTER, Pro→PRO). */
   stripePlan: "STARTER" | "PRO"
@@ -39,7 +40,7 @@ export const PLANS: MarketingPlan[] = [
     key: "autonomo",
     name: "Autónomo",
     tagline: "Todo lo que necesitas para gestionar tu negocio y facturar en regla.",
-    monthlyEUR: 19.99,
+    monthlyEUR: 24.99,
     stripePlan: "STARTER",
     ctaType: "preview",
     ctaLabel: "Empezar gratis",
@@ -57,7 +58,7 @@ export const PLANS: MarketingPlan[] = [
     key: "pro",
     name: "Pro",
     tagline: "Para crecer: comunicación, automatización y trabajo en equipo.",
-    monthlyEUR: 39.99,
+    monthlyEUR: 44.99,
     stripePlan: "PRO",
     recommended: true,
     ctaType: "preview",
@@ -73,6 +74,12 @@ export const PLANS: MarketingPlan[] = [
   },
 ]
 
+/** Spanish general VAT rate applied to display prices. */
+export const IVA_RATE = 0.21
+
+/** Any base amount → IVA-included amount, rounded to cents. */
+export const withIVA = (n: number): number => Math.round(n * (1 + IVA_RATE) * 100) / 100
+
 /** Total charged per year on annual billing (monthly × 10). */
 export const annualEUR = (plan: MarketingPlan): number =>
   Math.round(plan.monthlyEUR * ANNUAL_MONTHS_CHARGED * 100) / 100
@@ -81,11 +88,11 @@ export const annualEUR = (plan: MarketingPlan): number =>
 export const effectiveMonthlyEUR = (plan: MarketingPlan): number =>
   Math.round((annualEUR(plan) / 12) * 100) / 100
 
-/** "19,99 €" — es-ES formatting with 2 decimals. */
+/** "24,99 €" — es-ES formatting with 2 decimals. */
 export const formatEUR = (n: number): string =>
   `${n.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`
 
-/** Plain number string for JSON-LD (e.g. "19.99"). */
+/** Plain number string for JSON-LD (e.g. "24.99"). */
 export const schemaPrice = (n: number): string => n.toFixed(2)
 
 export const PRICE_RANGE = {

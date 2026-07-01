@@ -8,7 +8,7 @@ import PlanCards from "@/components/marketing/PlanCards"
 
 export const metadata: Metadata = {
   title: "Precios — ClientLabs",
-  description: `Planes de ClientLabs para autónomos y pequeñas empresas: ${plansSummary()}, IVA incluido. Paga al año y llévate ${ANNUAL_FREE_MONTHS} meses gratis. Empieza con 14 días de prueba.`,
+  description: `Planes de ClientLabs para autónomos y pequeñas empresas: ${plansSummary()} (sin IVA). Paga al año y llévate ${ANNUAL_FREE_MONTHS} meses gratis. Empieza con 14 días de prueba.`,
   keywords: [
     "precios crm autónomos",
     "software facturación precio",
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: "Precios — ClientLabs",
-    description: `${plansSummary()} (IVA incl.). Plan anual con ${ANNUAL_FREE_MONTHS} meses gratis. Sin permanencia.`,
+    description: `${plansSummary()} (sin IVA). Plan anual con ${ANNUAL_FREE_MONTHS} meses gratis. Sin permanencia.`,
     type: "website",
     url: `${SITE_URL}/precios`,
     siteName: "ClientLabs",
@@ -35,7 +35,7 @@ const FAQ = [
   },
   {
     q: "¿Los precios incluyen IVA?",
-    a: `Sí. Los importes mostrados (${plansSummary()}) ya incluyen el IVA. Sin costes ocultos ni letra pequeña.`,
+    a: `Los importes destacados (${plansSummary()}) son sin IVA. Debajo de cada precio mostramos también el importe con el 21 % de IVA incluido, para que lo tengas claro. Sin costes ocultos ni letra pequeña.`,
   },
   {
     q: "¿Hay descuento por pago anual?",
@@ -142,7 +142,7 @@ export default function PreciosPage() {
         <div className="wrap">
           <PlanCards />
           <p className="pricing-foot reveal">
-            Todos los precios incluyen IVA · sin permanencia · cancela cuando quieras ·{" "}
+            Precios sin IVA (IVA incluido mostrado debajo) · sin permanencia · cancela cuando quieras ·{" "}
             <Link href="/contacto" style={{ color: "var(--teal-ink)", fontWeight: 600 }}>
               ¿dudas? escríbenos →
             </Link>

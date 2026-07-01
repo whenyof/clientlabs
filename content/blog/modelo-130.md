@@ -1,81 +1,89 @@
 ---
 title: "Modelo 130 de IRPF: qué es, quién lo presenta y cómo se calcula"
-slug: modelo-130
-meta_description: "Modelo 130 de IRPF: qué es, quién está obligado, cómo se calcula el pago fraccionado del 20 % y cuándo estás exento. Con ejemplo y plazos 2026."
-category: Normativa
-primary_keyword: modelo 130
+slug: "modelo-130"
+category: "normativa"
+description: "Modelo 130 de IRPF: qué es, quién está obligado, cómo se calcula el pago fraccionado del 20 % y cuándo estás exento. Con ejemplo y plazos de 2026."
+tags: ["modelo 130", "autónomos"]
+publishedAt: "2026-04-19"
+readingTime: "6 min"
 ---
 
 # Modelo 130 de IRPF: qué es, quién lo presenta y cómo se calcula
 
-El modelo 130 es el pago fraccionado del IRPF: cada trimestre adelantas a Hacienda el **20 % del beneficio** acumulado de tu actividad. Lo presentan los autónomos en estimación directa que **no** retienen IRPF en la mayoría de sus facturas. Si la mayor parte de tu facturación ya lleva retención, normalmente estás exento.
+El modelo 130 es el pago fraccionado del IRPF: cada trimestre adelantas a Hacienda el **20 % del beneficio** acumulado de tu actividad. Lo presentan los autónomos en estimación directa que **no** retienen IRPF en la mayoría de sus facturas. Si la mayor parte de lo que facturas ya lleva retención, lo más probable es que estés exento. Aquí tienes quién lo presenta, cómo se calcula y cómo no pagar de más.
 
 ## Qué es exactamente
 
-Es la forma de ir pagando tu IRPF a lo largo del año en vez de todo de golpe en la renta. Declaras tus ingresos y gastos del trimestre y abonas el 20 % de la diferencia. Luego, en la declaración de la renta, se regulariza.
+Es la forma de ir pagando tu IRPF a lo largo del año en lugar de soltarlo todo de golpe en la declaración de la renta. Cada trimestre declaras tus ingresos y gastos acumulados y abonas el 20 % de la diferencia. Después, en la Renta, se regulariza todo: lo que adelantaste con los 130 se descuenta de lo que te toca pagar.
 
 ## Quién está obligado (y quién no)
 
-- **Obligado:** autónomo en **estimación directa** cuya actividad **no** practica retención, o que retuvo en **menos del 70 %** de sus ingresos del **año anterior**. En **módulos** (estimación objetiva) se usa el **modelo 131**, no el 130.
-- **Exento:** si **el 70 % o más** de tus ingresos del año anterior ya llevaron retención de IRPF en factura. En ese caso, Hacienda ya va cobrando vía retenciones y no presentas el 130.
+La clave está en si tu actividad **retiene IRPF en factura** o no:
 
-Por eso muchos profesionales (que sí retienen) no presentan el 130, mientras que comerciantes y actividades empresariales (que no retienen) sí.
+- **Obligado:** autónomo en **estimación directa** cuya actividad **no** practica retención, o que retuvo en **menos del 70 %** de sus ingresos del año anterior. Esto incluye a la mayoría de **actividades empresariales** (comercio, hostelería, producción), que no retienen en factura.
+- **Exento:** si el **70 % o más** de tus ingresos del año anterior ya llevaron retención de IRPF en factura. En ese caso, Hacienda ya va cobrando vía retenciones y no presentas el 130. Es lo habitual en muchos **profesionales** (consultores, diseñadores, abogados) que facturan a empresas con retención.
+
+Un caso especial: si tributas en **módulos** (estimación objetiva), no usas el 130, sino el **modelo 131**.
 
 ## Cómo se calcula
 
-Fórmula básica del trimestre:
+La fórmula del trimestre es:
 
-**(Ingresos acumulados − Gastos acumulados) × 20 % − pagos de trimestres anteriores − retenciones**
+**(Ingresos acumulados − Gastos acumulados) × 20 % − pagos de trimestres anteriores − retenciones soportadas**
+
+Lo importante es que el cálculo es **acumulado**: en cada trimestre sumas todo el año hasta esa fecha y restas lo que ya pagaste en los trimestres previos. No se calcula trimestre suelto.
 
 ### Ejemplo
+
 Primer trimestre, actividad sin retención:
 
-- Ingresos: 9.000 €
-- Gastos deducibles: 3.000 €
+- Ingresos acumulados: 9.000 €
+- Gastos deducibles acumulados: 3.000 €
 - Beneficio: 6.000 €
-- Pago fraccionado: 6.000 × 20 % = **1.200 €**
+- **Pago fraccionado: 6.000 × 20 % = 1.200 €**
 
-El cálculo es **acumulado**: en el segundo trimestre sumas todo el año hasta ahí y restas lo ya pagado.
+En el segundo trimestre sumarías los ingresos y gastos de enero a junio, calcularías el 20 % del beneficio total y le restarías los 1.200 € ya pagados en el primero.
 
 ## Plazos de presentación en 2026
 
 | Trimestre | Periodo | Plazo |
 |---|---|---|
-| 1T | enero–marzo | 1–20 de abril |
-| 2T | abril–junio | 1–20 de julio |
-| 3T | julio–septiembre | 1–20 de octubre |
-| 4T | octubre–diciembre | 1–30 de enero (2027) |
+| 1T | enero – marzo | 1 – 20 de abril |
+| 2T | abril – junio | 1 – 20 de julio |
+| 3T | julio – septiembre | 1 – 20 de octubre |
+| 4T | octubre – diciembre | 1 – 30 de enero de 2027 |
 
-Con **domiciliación bancaria**, el cargo se adelanta unos **5 días** respecto al fin de cada plazo.
+Con **domiciliación bancaria**, el cargo se adelanta unos 5 días respecto al fin de cada plazo.
 
-## Errores que cuestan dinero
+## Los errores que te hacen pagar de más
 
-- **Olvidar gastos deducibles:** cada gasto que no incluyes hace que pagues 20 % de más. Revisa la [lista de gastos deducibles](/blog/gastos-deducibles-autonomo-2026).
-- **No acumular bien:** el 130 es acumulativo; no se calcula trimestre suelto.
-- **Presentar fuera de plazo:** genera recargos.
+- **Olvidar gastos deducibles.** Cada gasto que no incluyes hace que pagues un 20 % de más sobre ese importe. Es el error más caro y el más frecuente. Repasa la [lista de gastos deducibles](/blog/gastos-deducibles-autonomo-2026).
+- **No acumular bien.** El 130 es acumulativo; calcular cada trimestre por separado descuadra el total del año.
+- **Presentar fuera de plazo.** Genera recargo automático.
 
 ## Preguntas frecuentes
 
 **¿Quién presenta el modelo 130?**
-Autónomos en estimación directa cuya actividad no retiene IRPF (o retiene en menos del 70 % de sus ingresos).
+Autónomos en estimación directa cuya actividad no retiene IRPF, o que retuvieron en menos del 70 % de sus ingresos del año anterior. En módulos se usa el 131.
 
 **¿Cuándo estoy exento del 130?**
-Cuando el 70 % o más de tus ingresos del año anterior ya llevaron retención de IRPF en factura.
+Cuando el 70 % o más de tus ingresos del año anterior ya llevaron retención de IRPF en factura. Entonces no lo presentas, porque Hacienda ya cobra por la vía de las retenciones.
 
-**¿Cuánto se paga?**
-El 20 % del beneficio acumulado (ingresos − gastos), menos lo ya pagado y las retenciones soportadas.
+**¿Cuánto se paga con el 130?**
+El 20 % del beneficio acumulado (ingresos − gastos), menos lo ya pagado en trimestres anteriores y las retenciones que te hayan practicado.
 
 **¿El 130 es lo mismo que el 303?**
-No. El [303](/blog/modelo-303) es el IVA; el 130 es el adelanto del IRPF.
+No. El [303](/blog/modelo-303) es el IVA; el 130 es el adelanto del IRPF. Se presentan en los mismos plazos pero son impuestos distintos.
 
-**¿Si presento el 130 también hago la declaración de la renta?**
-Sí. El 130 son adelantos; en la renta se regulariza todo.
+**Si presento el 130, ¿también hago la declaración de la renta?**
+Sí. El 130 son adelantos a cuenta; en la Renta se regulariza todo y se ajusta lo que falte o sobre.
+
+**¿Puede salir negativo el 130?**
+Sí. Si un trimestre tienes pérdidas o el beneficio acumulado baja, el resultado puede ser cero o negativo. En ese caso presentas igualmente, pero no ingresas.
 
 ## En resumen
 
-El 130 es tu IRPF a plazos: 20 % del beneficio cada trimestre, salvo que ya retengas en la mayoría de tus facturas. Llevar ingresos y gastos en un único sitio hace que el cálculo de cada trimestre esté hecho. ClientLabs te muestra el resultado del periodo listo para presentar.
-
-> Información general, no asesoramiento personalizado.
+El 130 es tu IRPF a plazos: un 20 % del beneficio cada trimestre, salvo que ya retengas en la mayoría de tus facturas. La diferencia entre pagar lo justo y pagar de más está en una sola cosa: registrar todos tus gastos deducibles. ClientLabs lleva tus ingresos y gastos al día y te muestra el resultado del periodo listo para presentar, sin que tengas que acumular cifras a mano.
 
 **Enlaces internos sugeridos:**
 - [Modelo 303: cómo calcular tu IVA sin equivocarte de casilla](/blog/modelo-303)

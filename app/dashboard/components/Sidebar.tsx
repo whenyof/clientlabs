@@ -4,7 +4,9 @@ import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
 import { useSession, signOut } from "next-auth/react"
 import { Suspense, useState } from "react"
+import { toast } from "sonner"
 import { SETTINGS_NAV_GROUPS } from "@/app/dashboard/settings/nav"
+import { FACTURACION_DISPONIBLE, FACTURACION_AVISO } from "@/lib/feature-flags"
 import {
   LayoutDashboard,
   Target,
@@ -64,6 +66,10 @@ type NavItem = {
   badgeHot?: boolean
   subs?: Sub[]
   comingSoon?: boolean
+  /** Si está presente, el item se ve normal (habilitado) pero al clicar NO navega
+   *  ni despliega: solo muestra este aviso en un toast. Usado para bloquear
+   *  Facturación hasta su fecha de disponibilidad sin pintarlo como "Próximamente". */
+  lockedNotice?: string
 }
 
 type NavGroup = { title: string; items: NavItem[] }
@@ -93,6 +99,8 @@ const NAV: NavGroup[] = [
         id: "finance",
         label: "Facturación",
         icon: Receipt,
+        // Bloqueada hasta el 5 de julio: se ve normal pero no entra (ver lib/feature-flags).
+        lockedNotice: FACTURACION_DISPONIBLE ? undefined : FACTURACION_AVISO,
         subs: [
           { label: "Resumen",                 href: "/dashboard/finance" },
           { label: "Facturas emitidas",       href: "/dashboard/finance/invoicing" },
@@ -184,6 +192,41 @@ function NavItemRow({
     background: "transparent",
     color: C.ink2,
     fontWeight: 450,
+  }
+
+  // Bloqueado con aviso: se ve igual que un item habilitado (sin opacidad ni badge
+  // "Próximamente"), pero al clicar no navega ni despliega — solo muestra el toast.
+  if (item.lockedNotice) {
+    return (
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={() => toast(item.lockedNotice!)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault()
+            toast(item.lockedNotice!)
+          }
+        }}
+        title={item.lockedNotice}
+        style={{ ...itemBase, ...inactiveStyle }}
+        onMouseEnter={(e) => {
+          const el = e.currentTarget as HTMLElement
+          el.style.background = C.bg3
+          el.style.color = C.ink
+        }}
+        onMouseLeave={(e) => {
+          const el = e.currentTarget as HTMLElement
+          el.style.background = "transparent"
+          el.style.color = C.ink2
+        }}
+      >
+        <span style={{ width: 16, height: 16, display: "grid", placeItems: "center", color: C.ink3, flexShrink: 0 }}>
+          <Icon size={15} strokeWidth={1.7} />
+        </span>
+        {!isCollapsed && <span style={{ flex: 1 }}>{item.label}</span>}
+      </div>
+    )
   }
 
   if (hasSubs) {

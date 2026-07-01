@@ -5,7 +5,7 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { stripe } from "@/lib/stripe"
 
-export const ADD_SEAT_PRICE_EUR = 2.99
+export const ADD_SEAT_PRICE_EUR = 3.99
 
 export async function POST() {
   const session = await getServerSession(authOptions)

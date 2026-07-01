@@ -229,12 +229,15 @@ export function InvoiceTemplateGallery() {
                   {isActivating ? "Activando…" : isActive ? "Activa" : "Usar esta"}
                 </button>
               ) : (
-                <button
-                  onClick={() => purchase(t.slug)}
-                  className="w-full rounded-lg py-1.5 text-xs font-medium bg-amber-500 text-white hover:bg-amber-600 transition-colors"
-                >
-                  Comprar — 0,99€
-                </button>
+                <>
+                  <button
+                    onClick={() => purchase(t.slug)}
+                    className="w-full rounded-lg py-1.5 text-xs font-medium bg-amber-500 text-white hover:bg-amber-600 transition-colors"
+                  >
+                    Comprar — 0,99€
+                  </button>
+                  <p className="text-[10px] text-slate-400 text-center mt-1">1,20 € IVA incl.</p>
+                </>
               )}
             </div>
           )
@@ -262,6 +265,7 @@ export function InvoiceTemplateGallery() {
                 <strong>{PREMIUM_PACK_PRICE.toFixed(2).replace(".", ",")}€</strong>
                 {" "}(ahorra un 75%)
               </p>
+              <p className="text-[10px] text-amber-600/80 mt-0.5">9,67 € IVA incl.</p>
             </div>
           </div>
           <button

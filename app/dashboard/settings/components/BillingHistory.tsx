@@ -15,13 +15,15 @@ import { useStripeCheckout } from "@/hooks/use-stripe"
 
 interface Invoice {
   id: string
-  amount: number
+  number: string
+  concept: string
+  base: number
+  iva: number
+  total: number
   currency: string
-  status: "succeeded" | "pending" | "failed"
-  invoiceUrl?: string | null
-  pdfUrl?: string | null
-  createdAt: string
-  description: string
+  status: string
+  date: string
+  pdfPath: string
 }
 
 export function BillingHistory() {
@@ -32,7 +34,7 @@ export function BillingHistory() {
   const { openPortal, loading } = useStripeCheckout()
 
   useEffect(() => {
-    fetch("/api/stripe/invoices")
+    fetch("/api/billing/subscription-invoices")
       .then(async (r) => {
         const d = await r.json().catch(() => ({ invoices: [] }))
         setInvoices(d.invoices ?? [])
@@ -47,21 +49,22 @@ export function BillingHistory() {
   }, [])
 
   const getStatusText = (status: string) => {
-    if (status === "succeeded") return "Pagado"
-    if (status === "pending") return "Pendiente"
-    return "Fallido"
+    if (status === "paid") return "Pagada"
+    if (status === "pending" || status === "sent") return "Pendiente"
+    if (status === "canceled") return "Anulada"
+    return status
   }
 
   const formatCurrency = (amount: number, currency: string) =>
     new Intl.NumberFormat("es-ES", {
       style: "currency",
-      currency,
-      minimumFractionDigits: 0,
-    }).format(amount / 100)
+      currency: currency || "EUR",
+      minimumFractionDigits: 2,
+    }).format(amount)
 
   const totalPaid = invoices
-    .filter((p) => p.status === "succeeded")
-    .reduce((sum, p) => sum + p.amount, 0)
+    .filter((p) => p.status === "paid")
+    .reduce((sum, p) => sum + p.total, 0)
 
   const nextBillingDate = planExpiresAt
     ? new Date(planExpiresAt).toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" })
@@ -83,9 +86,9 @@ export function BillingHistory() {
         </div>
         <div className="bg-white rounded-xl border border-slate-200 p-4 text-center">
           <div className="text-lg font-bold text-[var(--accent)]">
-            {invoices.filter((p) => p.status === "succeeded").length}
+            {invoices.filter((p) => p.status === "paid").length}
           </div>
-          <div className="text-xs text-slate-500 mt-0.5">Pagos exitosos</div>
+          <div className="text-xs text-slate-500 mt-0.5">Facturas pagadas</div>
         </div>
         <div className="bg-white rounded-xl border border-slate-200 p-4 text-center">
           <div className="text-lg font-bold text-[#0B1F2A]">
@@ -129,7 +132,9 @@ export function BillingHistory() {
               <th className="px-6 py-3">Concepto</th>
               <th className="px-6 py-3">Fecha</th>
               <th className="px-6 py-3">Estado</th>
-              <th className="px-6 py-3 text-right">Importe</th>
+              <th className="px-6 py-3 text-right">Base</th>
+              <th className="px-6 py-3 text-right">IVA</th>
+              <th className="px-6 py-3 text-right">Total</th>
               <th className="px-6 py-3"></th>
             </tr>
           </thead>
@@ -137,51 +142,56 @@ export function BillingHistory() {
             {invoices.map((invoice) => (
               <tr key={invoice.id} className="group hover:bg-slate-50 transition-colors">
                 <td className="px-6 py-4">
-                  <div className="text-sm font-semibold text-[#0B1F2A]">{invoice.description}</div>
-                  <div className="text-xs text-slate-400 font-mono mt-0.5">{invoice.id.slice(0, 18)}…</div>
+                  <div className="text-sm font-semibold text-[#0B1F2A]">{invoice.concept}</div>
+                  <div className="text-xs text-slate-400 font-mono mt-0.5">{invoice.number}</div>
                 </td>
                 <td className="px-6 py-4">
                   <span className="text-sm text-slate-600">
-                    {new Date(invoice.createdAt).toLocaleDateString("es-ES")}
+                    {new Date(invoice.date).toLocaleDateString("es-ES")}
                   </span>
                 </td>
                 <td className="px-6 py-4">
                   <span
                     className={cn(
                       "inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase px-2 py-0.5 rounded",
-                      invoice.status === "succeeded"
+                      invoice.status === "paid"
                         ? "bg-emerald-50 text-emerald-600"
-                        : invoice.status === "pending"
-                          ? "bg-amber-50 text-amber-600"
-                          : "bg-red-50 text-red-600"
+                        : invoice.status === "canceled"
+                          ? "bg-red-50 text-red-600"
+                          : "bg-amber-50 text-amber-600"
                     )}
                   >
-                    {invoice.status === "succeeded" ? (
+                    {invoice.status === "paid" ? (
                       <CheckCircleIcon className="w-3 h-3" />
-                    ) : invoice.status === "pending" ? (
-                      <ClockIcon className="w-3 h-3" />
-                    ) : (
+                    ) : invoice.status === "canceled" ? (
                       <XCircleIcon className="w-3 h-3" />
+                    ) : (
+                      <ClockIcon className="w-3 h-3" />
                     )}
                     {getStatusText(invoice.status)}
                   </span>
                 </td>
+                <td className="px-6 py-4 text-right text-sm text-slate-600">
+                  {formatCurrency(invoice.base, invoice.currency)}
+                </td>
+                <td className="px-6 py-4 text-right text-sm text-slate-600">
+                  {formatCurrency(invoice.iva, invoice.currency)}
+                </td>
                 <td className="px-6 py-4 text-right">
                   <span className="text-sm font-semibold text-[#0B1F2A]">
-                    {formatCurrency(invoice.amount, invoice.currency)}
+                    {formatCurrency(invoice.total, invoice.currency)}
                   </span>
                 </td>
                 <td className="px-6 py-4 text-right">
-                  {(invoice.invoiceUrl || invoice.pdfUrl) && (
-                    <a
-                      href={invoice.pdfUrl ?? invoice.invoiceUrl ?? "#"}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2 text-slate-400 hover:text-[var(--accent)] border border-slate-200 rounded-lg transition-colors bg-white opacity-0 group-hover:opacity-100 inline-flex"
-                    >
-                      <ArrowTopRightOnSquareIcon className="w-4 h-4" />
-                    </a>
-                  )}
+                  <a
+                    href={invoice.pdfPath}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 text-slate-400 hover:text-[var(--accent)] border border-slate-200 rounded-lg transition-colors bg-white opacity-0 group-hover:opacity-100 inline-flex"
+                    title="Descargar PDF"
+                  >
+                    <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                  </a>
                 </td>
               </tr>
             ))}

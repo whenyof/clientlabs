@@ -214,8 +214,9 @@ export function TeamMembers() {
               {atLimit
                 ? `Tu plan incluye ${limit} usuario${limit !== 1 ? "s" : ""}. Añade más por `
                 : "Añade más usuarios a tu equipo por "}
-              <strong>2,99€/mes</strong> cada uno.
+              <strong>3,99€/mes</strong> cada uno.
             </p>
+            <p className="text-[11px] text-slate-400 mt-0.5">4,83 € IVA incl.</p>
           </div>
           <button
             onClick={async () => {
@@ -226,7 +227,7 @@ export function TeamMembers() {
             }}
             className={`flex-shrink-0 rounded-lg font-medium px-4 py-2 text-sm transition-colors text-white ${atLimit ? "bg-amber-500 hover:bg-amber-600" : "bg-[var(--accent)] hover:opacity-90"}`}
           >
-            + Añadir usuario — 2,99€/mes
+            + Añadir usuario — 3,99€/mes
           </button>
         </div>
       )}

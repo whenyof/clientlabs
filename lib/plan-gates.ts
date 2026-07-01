@@ -314,5 +314,5 @@ export const TRIAL_CONFIG = {
 
 // Add-ons
 export const ADDONS = {
-  EXTRA_SEAT: { price: 2.99, name: "Usuario adicional" },
+  EXTRA_SEAT: { price: 3.99, name: "Usuario adicional" },
 } as const

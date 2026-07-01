@@ -3,7 +3,16 @@ import { Redis } from "@upstash/redis"
 import { stripe, getPlanFromPriceId } from "@/lib/stripe"
 import { prisma, safePrismaQuery } from "@/lib/prisma"
 import { sendPaymentFailedEmail, sendSubscriptionActivatedEmail, sendSubscriptionCancelledEmail } from "@/lib/email-service"
+import { createSubscriptionInvoice } from "@/modules/invoicing/services/subscription-invoice.service"
 import type Stripe from "stripe"
+
+/** Etiqueta de plan para el concepto de la factura (mantiene los nombres de marketing). */
+function planLabelFor(plan: "STARTER" | "PRO" | "BUSINESS" | null): string {
+  if (plan === "STARTER") return "Autónomo"
+  if (plan === "PRO") return "Pro"
+  if (plan === "BUSINESS") return "Business"
+  return "Suscripción"
+}
 
 export const maxDuration = 30
 export const runtime = "nodejs"
@@ -83,6 +92,7 @@ export async function POST(req: NextRequest) {
                 create: { userId, templateId },
               })
             )
+            await emitOneTimeInvoice(sess, userId, "Plantilla premium ClientLabs")
           }
           break
         }
@@ -104,6 +114,7 @@ export async function POST(req: NextRequest) {
                 })
               )
             }
+            await emitOneTimeInvoice(sess, userId, "Pack de plantillas premium ClientLabs")
           }
           break
         }
@@ -264,6 +275,36 @@ export async function POST(req: NextRequest) {
             },
           })
         )
+
+        // ── Facturación automática: emite factura ClientLabs por este cobro ──
+        // Solo cobros reales (los trials facturan 0 €). Idempotente por invoice.id.
+        const amountPaid = invoice.amount_paid ?? 0
+        if (amountPaid > 0) {
+          const plan = getPlanFromPriceId(item?.price?.id ?? "")
+          const interval = item?.price?.recurring?.interval // "month" | "year"
+          const paidAtUnix =
+            (invoice as unknown as { status_transitions?: { paid_at?: number | null } })
+              ?.status_transitions?.paid_at ?? invoice.created
+          const paidAt = new Date((paidAtUnix ?? Math.floor(Date.now() / 1000)) * 1000)
+          const periodLabel = paidAt.toLocaleDateString("es-ES", { month: "long", year: "numeric" })
+          const concept =
+            interval === "year"
+              ? `Plan ${planLabelFor(plan)} (anual) — ${paidAt.getFullYear()}`
+              : `Plan ${planLabelFor(plan)} — ${periodLabel}`
+
+          const res = await createSubscriptionInvoice({
+            stripeInvoiceId: invoice.id,
+            billedUserId: userId,
+            amountPaidCents: amountPaid,
+            concept,
+            paidAt,
+            currency: invoice.currency?.toUpperCase() ?? "EUR",
+            kind: "subscription",
+          })
+          if (!res.ok) {
+            console.error("[Stripe webhook] subscription invoice failed:", res.reason, invoice.id)
+          }
+        }
         break
       }
 
@@ -308,6 +349,22 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json({ received: true })
+}
+
+// ── Helper: emite factura ClientLabs para una compra de pago único ───────────
+async function emitOneTimeInvoice(sess: Stripe.Checkout.Session, userId: string, concept: string) {
+  const amount = sess.amount_total ?? 0
+  if (amount <= 0) return
+  const res = await createSubscriptionInvoice({
+    stripeInvoiceId: sess.id,
+    billedUserId: userId,
+    amountPaidCents: amount,
+    concept,
+    paidAt: new Date(),
+    currency: sess.currency?.toUpperCase() ?? "EUR",
+    kind: "purchase",
+  })
+  if (!res.ok) console.error("[Stripe webhook] one-time invoice failed:", res.reason, sess.id)
 }
 
 // ── Helper: marca el referido como suscrito y recalcula nivel del referrer ───

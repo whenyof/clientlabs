@@ -93,11 +93,20 @@ export function aggregateLineTotals(computed: InvoiceLineComputed[]): { subtotal
 const ISSUED_NUMBER_PAD_LENGTH = 4
 
 /**
- * Format issued invoice number: YYYY-XXXX (e.g. 2026-0001).
+ * Series whose issued number carries the series prefix: "<PREFIX>-YYYY-XXXX".
+ * Used by the automatic subscription-billing series (F). All other series keep
+ * the historical "YYYY-XXXX" format untouched.
+ */
+export const PREFIXED_ISSUED_SERIES = new Set<string>(["F"])
+
+/**
+ * Format issued invoice number. Default: YYYY-XXXX (e.g. 2026-0001).
+ * For prefixed series (see PREFIXED_ISSUED_SERIES): PREFIX-YYYY-XXXX (e.g. F-2026-0001).
  * YYYY = year of issue, XXXX = incremental per user per year. No duplicates, no reuse, no gaps.
  */
-export function formatIssuedInvoiceNumber(_series: string, year: number, sequence: number): string {
-  return `${year}-${String(sequence).padStart(ISSUED_NUMBER_PAD_LENGTH, "0")}`
+export function formatIssuedInvoiceNumber(series: string, year: number, sequence: number): string {
+  const seq = String(sequence).padStart(ISSUED_NUMBER_PAD_LENGTH, "0")
+  return PREFIXED_ISSUED_SERIES.has(series) ? `${series}-${year}-${seq}` : `${year}-${seq}`
 }
 
 /**

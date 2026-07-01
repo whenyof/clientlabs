@@ -42,6 +42,11 @@ function formatAnnualTotal(plan: Plan): string {
   return centsToString(plan.priceYearly * 12)
 }
 
+/** IVA-included (21%) label for a cents amount, e.g. "30,24€ IVA incl." */
+function formatWithIVA(cents: number): string {
+  return `${centsToString(Math.round(cents * 1.21))} IVA incl.`
+}
+
 export function PlansSection() {
   const [currentPlan, setCurrentPlan] = useState("starter")
   const [planExpiresAt, setPlanExpiresAt] = useState<string | null>(null)
@@ -194,6 +199,11 @@ export function PlansSection() {
                   </span>
                   <span className="text-[12px] text-slate-400">/mes</span>
                 </div>
+                {plan.price > 0 && (
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    {formatWithIVA(billingCycle === "yearly" ? plan.priceYearly : plan.price)}
+                  </p>
+                )}
                 {billingCycle === "yearly" && (
                   <p className="text-[11px] text-[#F59E0B] font-medium mt-1">
                     {formatAnnualTotal(plan)} facturado anualmente

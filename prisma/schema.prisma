@@ -2058,6 +2058,12 @@ model Invoice {
   invoiceDocType      String? // F1, F2, F3, R1-R5 (null = legacy)
   rectificationMethod String? // S (sustitución) o I (diferencias)
 
+  // Facturación automática de suscripción (ClientLabs → cliente SaaS).
+  // La factura la emite la cuenta plataforma (userId), pero el destinatario
+  // es este usuario cliente, que la ve en su propio panel de facturación.
+  billedUserId    String? // userId del cliente SaaS facturado (null = factura normal de negocio)
+  stripeInvoiceId String? // id de la invoice/checkout de Stripe que la originó (idempotencia)
+
   Client               Client?              @relation(fields: [clientId], references: [id], onDelete: Restrict)
   LinkedInvoicePayment InvoicePayment?      @relation("LinkedFromPayment", fields: [linkedInvoicePaymentId], references: [id])
   Provider             Provider?            @relation(fields: [providerId], references: [id], onDelete: Restrict)
@@ -2086,6 +2092,8 @@ model Invoice {
   @@index([rectifiesInvoiceId])
   @@index([userId, createdAt(sort: Desc)])
   @@index([userId, status])
+  @@index([billedUserId])
+  @@unique([stripeInvoiceId])
 }
 
 model InvoiceReminderLog {

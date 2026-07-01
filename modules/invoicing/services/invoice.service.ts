@@ -505,8 +505,11 @@ export async function issueInvoice(invoiceId: string, userId: string): Promise<I
   if (!inv) return { success: false, validationErrors: ["Factura no encontrada"] }
   if (inv.status !== INVOICE_STATUS.DRAFT) return { success: true }
 
-  // 0. Enforce fiscal completeness (backend safety)
-  if (inv.clientId) {
+  // 0. Enforce fiscal completeness (backend safety).
+  // F2 (simplificada) no exige NIF/dirección del destinatario, así que solo se
+  // aplica el bloqueo a facturas completas (F1). Ver calculateFiscalCompleteness.
+  const issueDocType = (inv as { invoiceDocType?: string | null }).invoiceDocType
+  if (inv.clientId && issueDocType !== "F2") {
     const { calculateFiscalCompleteness } = await import("@/lib/clients/calculateFiscalCompleteness")
     if (!calculateFiscalCompleteness(inv.Client)) {
       return { success: false, validationErrors: ["Faltan datos fiscales del cliente (Nombre, NIF, Dirección, etc)."] }
